@@ -9,3 +9,4 @@ DO NOT IMPLEMENT: when you start the app the default view should be to add new e
 DO NOT IMPLEMENT: adding multiple same category items of todays date do not sort them properly
 
 [x] add option to add an expense in the past
+[x] 1 .add option to delete entries.style the date picker to be the same style as the rest of the app.

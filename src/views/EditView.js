@@ -27,6 +27,32 @@ export const EditView = ({ id }) => {
         }
     });
 
+    const deleteBtn = Button({
+        text: 'Delete Transaction',
+        variant: 'danger',
+        onClick: () => {
+            if (window.confirm('Are you sure you want to delete this transaction?')) {
+                StorageService.remove(id);
+                Router.navigate('dashboard');
+            }
+        }
+    });
+
+    deleteBtn.style.backgroundColor = 'transparent';
+    deleteBtn.style.color = '#ef4444';
+    deleteBtn.style.border = '1px solid #ef4444';
+    deleteBtn.style.width = '100%';
+    deleteBtn.style.marginTop = 'var(--spacing-xl)';
+
+    deleteBtn.addEventListener('mouseenter', () => {
+        deleteBtn.style.backgroundColor = '#ef4444';
+        deleteBtn.style.color = 'white';
+    });
+    deleteBtn.addEventListener('mouseleave', () => {
+        deleteBtn.style.backgroundColor = 'transparent';
+        deleteBtn.style.color = '#ef4444';
+    });
+
     const backLink = document.createElement('a');
     backLink.textContent = 'Cancel';
     backLink.href = '#dashboard';
@@ -36,6 +62,7 @@ export const EditView = ({ id }) => {
 
     container.appendChild(title);
     container.appendChild(form);
+    container.appendChild(deleteBtn);
     container.appendChild(backLink);
 
     return container;
