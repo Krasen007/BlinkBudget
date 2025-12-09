@@ -9,7 +9,10 @@ export const DashboardView = () => {
     container.style.maxWidth = '600px';
 
     // 1. Balance Card
-    const transactions = StorageService.getAll();
+    const rawTransactions = StorageService.getAll();
+    // Sort transactions by date (Newest first)
+    const transactions = rawTransactions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
     const totalExpense = transactions.reduce((sum, t) => {
         if (t.type === 'expense') return sum + t.amount;
         if (t.type === 'refund') return sum - t.amount;
@@ -59,13 +62,17 @@ export const DashboardView = () => {
         const list = document.createElement('ul');
         list.style.listStyle = 'none';
         list.style.padding = 0;
+        // Scrollable styles
+        list.style.maxHeight = '400px';
+        list.style.overflowY = 'auto';
+        list.style.borderTop = '1px solid var(--color-surface-hover)';
 
-        transactions.slice(0, 5).forEach(t => {
+        transactions.forEach(t => {
             const item = document.createElement('li');
             item.className = 'transaction-item';
             item.style.display = 'flex';
             item.style.justifyContent = 'space-between';
-            item.style.padding = 'var(--spacing-md) 0';
+            item.style.padding = 'var(--spacing-md) var(--spacing-md)'; // Added horizontal padding
             item.style.borderBottom = '1px solid var(--color-surface-hover)';
             item.style.cursor = 'pointer'; // Indicate clickable
 
@@ -75,6 +82,12 @@ export const DashboardView = () => {
             });
 
             const info = document.createElement('div');
+            info.style.display = 'flex';
+            info.style.flexDirection = 'column';
+            info.style.alignItems = 'flex-start'; // Ensure left alignment
+            info.style.gap = '2px'; // Tighter control over spacing
+            info.style.textAlign = 'left';
+
             const cat = document.createElement('div');
             cat.textContent = t.category;
             cat.style.fontWeight = '500';

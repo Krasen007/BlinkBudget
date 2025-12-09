@@ -47,9 +47,27 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     expenseBtn.updateState();
     refundBtn.updateState();
 
-    typeGroup.appendChild(expenseBtn);
     typeGroup.appendChild(refundBtn);
     form.appendChild(typeGroup);
+
+    // Date Input
+    const dateGroup = document.createElement('div');
+    const dateLabel = document.createElement('label');
+    dateLabel.textContent = 'Date';
+    dateLabel.style.display = 'block';
+    dateLabel.style.marginBottom = 'var(--spacing-sm)';
+    dateLabel.style.color = 'var(--color-text-muted)';
+
+    const dateInput = document.createElement('input');
+    dateInput.type = 'date';
+    dateInput.style.width = '100%';
+    // Default to initial value or Today
+    const defaultDate = initialValues.timestamp ? initialValues.timestamp.split('T')[0] : new Date().toISOString().split('T')[0];
+    dateInput.value = defaultDate;
+
+    dateGroup.appendChild(dateLabel);
+    dateGroup.appendChild(dateInput);
+    form.appendChild(dateGroup);
 
     // Amount Input
     const amountGroup = document.createElement('div');
@@ -132,7 +150,8 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
             onSubmit({
                 amount: amountVal,
                 category: selectedCategory,
-                type: currentType
+                type: currentType,
+                timestamp: new Date(dateInput.value).toISOString() // Use selected date
             });
         });
         chipContainer.appendChild(chip);

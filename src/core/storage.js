@@ -34,6 +34,12 @@ export const StorageService = {
         return null;
     },
 
+    remove(id) {
+        let transactions = this.getAll();
+        transactions = transactions.filter(t => t.id !== id);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+    },
+
     clear() {
         localStorage.removeItem(STORAGE_KEY);
     },

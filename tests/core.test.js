@@ -44,6 +44,15 @@ describe('StorageService', () => {
         const fresh = StorageService.get(saved.id);
         expect(fresh.amount).toBe(50);
     });
+
+    it('should remove a transaction', () => {
+        const item = { amount: 10, category: 'Food' };
+        const saved = StorageService.add(item);
+
+        StorageService.remove(saved.id);
+        const fresh = StorageService.get(saved.id);
+        expect(fresh).toBeUndefined();
+    });
 });
 
 describe('Router', () => {
