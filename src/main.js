@@ -1,19 +1,26 @@
-// Main entry point
+import { Router } from './core/router.js';
+import { DashboardView } from './views/DashboardView.js';
+import { AddView } from './views/AddView.js';
+
 const initApp = () => {
     const app = document.querySelector('#app');
-    if (app) {
-        console.log('BlinkBudget initialized. Core foundation loaded.');
 
-        // Simple interactivity verification
-        const startBtn = document.querySelector('.btn-primary');
-        if (startBtn) {
-            startBtn.addEventListener('click', () => {
-                console.log('Start button clicked');
-            });
-        }
-    } else {
-        console.error('Failed to find #app element');
-    }
+    // Clear initial content
+    app.innerHTML = '';
+
+    // Route Handlers
+    Router.on('dashboard', () => {
+        app.innerHTML = '';
+        app.appendChild(DashboardView());
+    });
+
+    Router.on('add-expense', () => {
+        app.innerHTML = '';
+        app.appendChild(AddView());
+    });
+
+    // Start
+    Router.init();
 };
 
 initApp();
