@@ -1,16 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BlinkBudget</title>
-    <link rel="stylesheet" href="/src/style.css" />
-  </head>
-  <body>
-    <div id="app">
-      <h1>BlinkBudget</h1>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Track your expenses in 3 clicks with BlinkBudget." />
+  <meta name="theme-color" content="#0a0a0c" />
+  <title>BlinkBudget - Fast Expense Tracking</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+
+<body>
+  <header class="visually-hidden">
+    <h1>BlinkBudget</h1>
+  </header>
+  <main id="app">
+    <!-- Content injected by main.js -->
+    <section class="hero-placeholder">
+      <h2>BlinkBudget</h2>
       <p>Track your expenses in 3 clicks.</p>
-    </div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+      <div style="margin-top: 2rem;">
+        <button class="btn btn-primary">Get Started</button>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="/src/main.js"></script>
+</body>
+
 </html>
