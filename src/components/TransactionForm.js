@@ -1,6 +1,6 @@
 import { Button } from './Button.js';
 
-export const TransactionForm = ({ onSubmit }) => {
+export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     const form = document.createElement('form');
     form.className = 'transaction-form';
     form.style.display = 'flex';
@@ -10,7 +10,7 @@ export const TransactionForm = ({ onSubmit }) => {
     form.style.maxWidth = '400px';
 
     // Type Toggle
-    let currentType = 'expense';
+    let currentType = initialValues.type || 'expense';
     const typeGroup = document.createElement('div');
     typeGroup.style.display = 'flex';
     typeGroup.style.gap = 'var(--spacing-md)';
@@ -61,6 +61,7 @@ export const TransactionForm = ({ onSubmit }) => {
 
     const amountInput = document.createElement('input');
     amountInput.type = 'number';
+    amountInput.value = initialValues.amount || '';
     amountInput.step = '0.01';
     amountInput.required = true;
     amountInput.placeholder = '0.00';
@@ -90,60 +91,63 @@ export const TransactionForm = ({ onSubmit }) => {
     chipContainer.style.flexWrap = 'wrap';
     chipContainer.style.gap = 'var(--spacing-sm)';
 
-    let selectedCategory = null;
+    let selectedCategory = initialValues.category || null;
 
     categories.forEach(cat => {
         const chip = document.createElement('button');
+        const updateChipState = () => {
+            const isSelected = selectedCategory === cat;
+            chip.style.background = isSelected ? 'var(--color-primary-light)' : 'transparent';
+            chip.style.color = isSelected ? 'var(--color-background)' : 'var(--color-text-muted)';
+            chip.style.borderColor = isSelected ? 'var(--color-primary)' : 'var(--color-border)';
+        };
+
         chip.type = 'button';
         chip.textContent = cat;
         chip.className = 'btn';
         chip.style.border = '1px solid var(--color-border)';
-        chip.style.background = 'transparent';
-        chip.style.color = 'var(--color-text-muted)';
+        updateChipState(); // Initial Render
 
         chip.addEventListener('click', () => {
-            // Deselect all
+            // Validate Amount first
+            const amountVal = parseFloat(amountInput.value);
+            if (isNaN(amountVal) || amountVal === 0) {
+                amountInput.focus();
+                amountInput.style.borderColor = '#ef4444'; // Red border for error
+                setTimeout(() => amountInput.style.borderColor = 'var(--color-border)', 2000);
+                return;
+            }
+
+            // Visual feedback
             Array.from(chipContainer.children).forEach(c => {
                 c.style.background = 'transparent';
                 c.style.color = 'var(--color-text-muted)';
                 c.style.borderColor = 'var(--color-border)';
             });
-            // Select this
-            chip.style.background = 'var(--color-primary-light)'; // Using light as distinct selection
-            chip.style.color = 'var(--color-background)';
-            chip.style.borderColor = 'var(--color-primary)';
+
             selectedCategory = cat;
+            updateChipState();
+
+            // Auto-submit
+            onSubmit({
+                amount: amountVal,
+                category: selectedCategory,
+                type: currentType
+            });
         });
         chipContainer.appendChild(chip);
     });
     categoryGroup.appendChild(chipContainer);
 
-    // Submit
-    const submitBtn = Button({
-        text: 'Save Expense',
-        type: 'submit',
-        variant: 'primary',
-        className: 'mt-xl'
-    });
-    submitBtn.style.marginTop = 'var(--spacing-xl)';
-    submitBtn.style.width = '100%';
+    // Remove separate submit button as per "Auto-save" requirement
+    // form.appendChild(submitBtn); 
 
     form.appendChild(amountGroup);
     form.appendChild(categoryGroup);
-    form.appendChild(submitBtn);
+    // form.appendChild(submitBtn);
 
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        if (!selectedCategory) {
-            alert('Please select a category');
-            return;
-        }
-        onSubmit({
-            amount: parseFloat(amountInput.value),
-            category: selectedCategory,
-            type: currentType
-        });
-    });
+    // No submit handler needed on form itself, but keep preventDefault just in case
+    form.addEventListener('submit', (e) => e.preventDefault());
 
     // Focus amount on load
     setTimeout(() => amountInput.focus(), 100);

@@ -62,10 +62,17 @@ export const DashboardView = () => {
 
         transactions.slice(0, 5).forEach(t => {
             const item = document.createElement('li');
+            item.className = 'transaction-item';
             item.style.display = 'flex';
             item.style.justifyContent = 'space-between';
             item.style.padding = 'var(--spacing-md) 0';
             item.style.borderBottom = '1px solid var(--color-surface-hover)';
+            item.style.cursor = 'pointer'; // Indicate clickable
+
+            // Navigate to edit on click
+            item.addEventListener('click', () => {
+                Router.navigate('edit-expense', { id: t.id });
+            });
 
             const info = document.createElement('div');
             const cat = document.createElement('div');

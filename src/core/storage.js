@@ -18,6 +18,22 @@ export const StorageService = {
         return newTransaction;
     },
 
+    get(id) {
+        const transactions = this.getAll();
+        return transactions.find(t => t.id === id);
+    },
+
+    update(id, updates) {
+        const transactions = this.getAll();
+        const index = transactions.findIndex(t => t.id === id);
+        if (index !== -1) {
+            transactions[index] = { ...transactions[index], ...updates };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+            return transactions[index];
+        }
+        return null;
+    },
+
     clear() {
         localStorage.removeItem(STORAGE_KEY);
     },

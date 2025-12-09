@@ -158,3 +158,11 @@ p {
   white-space: nowrap;
   border-width: 0;
 }
+
+.transaction-item {
+  transition: background-color var(--transition-fast);
+}
+
+.transaction-item:hover {
+  background-color: var(--color-surface-hover);
+}

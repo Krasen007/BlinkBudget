@@ -33,6 +33,17 @@ describe('StorageService', () => {
         const all = StorageService.getAll();
         expect(all[0].type).toBe('refund');
     });
+
+    it('should update a transaction', () => {
+        const item = { amount: 10, category: 'Food' };
+        const saved = StorageService.add(item);
+
+        const updated = StorageService.update(saved.id, { amount: 50 });
+        expect(updated.amount).toBe(50);
+
+        const fresh = StorageService.get(saved.id);
+        expect(fresh.amount).toBe(50);
+    });
 });
 
 describe('Router', () => {

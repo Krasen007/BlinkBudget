@@ -13,20 +13,34 @@ export const Router = {
     },
 
     // Navigate to a new route
-    navigate(route) {
-        window.location.hash = route;
+    navigate(route, params = {}) {
+        const urlParams = new URLSearchParams(params).toString();
+        const hash = urlParams ? `${route}?${urlParams}` : route;
+        window.location.hash = hash;
     },
 
     // Internal: Handle the current hash
     handleRoute() {
-        const hash = window.location.hash.slice(1) || 'dashboard'; // Default to dashboard
-        const handler = this.routes[hash];
+        const rawHash = window.location.hash.slice(1) || 'dashboard'; // Default to dashboard
+
+        // Split route and params (e.g. edit-expense?id=123)
+        const [route, paramString] = rawHash.split('?');
+        const params = {};
+
+        if (paramString) {
+            const searchParams = new URLSearchParams(paramString);
+            for (const [key, value] of searchParams) {
+                params[key] = value;
+            }
+        }
+
+        const handler = this.routes[route];
         if (handler) {
-            handler();
+            handler(params);
         } else {
-            console.warn(`No handler for route: ${hash}`);
+            console.warn(`No handler for route: ${route}`);
             // Redirect to default if unknown
-            if (hash !== 'dashboard') {
+            if (route !== 'dashboard') {
                 this.navigate('dashboard');
             }
         }
