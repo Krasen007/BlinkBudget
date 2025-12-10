@@ -8,44 +8,74 @@ export const DashboardView = () => {
     container.style.width = '100%';
     container.style.maxWidth = '600px';
 
-    // 1. Balance Card
+    // 1. Data Processing
     const rawTransactions = StorageService.getAll();
-    // Sort transactions by date (Newest first)
     const transactions = rawTransactions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-    const totalExpense = transactions.reduce((sum, t) => {
-        if (t.type === 'expense') return sum + t.amount;
-        if (t.type === 'refund') return sum - t.amount;
+    const totalIncome = transactions.reduce((sum, t) => {
+        if (t.type === 'income') return sum + t.amount;
+        if (t.type === 'refund') return sum + t.amount; // Treating refund as money back -> positive
         return sum;
     }, 0);
 
-    const balanceCard = document.createElement('div');
-    balanceCard.className = 'card';
-    balanceCard.style.textAlign = 'left';
-    balanceCard.style.marginBottom = 'var(--spacing-xl)';
+    const totalExpense = transactions.reduce((sum, t) => {
+        if (t.type === 'expense') return sum + t.amount;
+        return sum;
+    }, 0);
 
-    const label = document.createElement('p');
-    label.textContent = 'Total Expenses (This Month)';
-    label.style.fontSize = '0.875rem';
-    label.style.marginBottom = 'var(--spacing-xs)';
+    const availableBalance = totalIncome - totalExpense;
 
-    const amount = document.createElement('h1');
-    amount.textContent = `$${Math.max(0, totalExpense).toFixed(2)}`; // Prevent negative total display
-    amount.style.color = 'var(--color-primary-light)';
+    // 2. Statistics Cards
+    const statsContainer = document.createElement('div');
+    statsContainer.style.display = 'grid';
+    statsContainer.style.gap = 'var(--spacing-md)';
+    statsContainer.style.marginBottom = 'var(--spacing-xl)';
 
-    balanceCard.appendChild(label);
-    balanceCard.appendChild(amount);
+    // Card Helper
+    const createCard = (label, value, color) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.textAlign = 'left';
+        card.style.padding = 'var(--spacing-lg)';
 
-    // 2. Action Button
+        const lbl = document.createElement('p');
+        lbl.textContent = label;
+        lbl.style.fontSize = '0.875rem';
+        lbl.style.marginBottom = 'var(--spacing-xs)';
+        lbl.style.color = 'var(--color-text-muted)';
+
+        const val = document.createElement('h2');
+        val.textContent = `$${value.toFixed(2)}`;
+        val.style.color = color;
+        val.style.margin = 0;
+        val.style.fontSize = '1.75rem';
+
+        card.appendChild(lbl);
+        card.appendChild(val);
+        return card;
+    };
+
+    // Available Balance Card (Green/Primary)
+    const balanceCard = createCard('Total Available', availableBalance, 'var(--color-primary-light)');
+    // Total Spent Card (Red/Warning) - or neutral
+    const spentCard = createCard('Total Spent', totalExpense, '#ef4444'); // Red for spent
+
+    statsContainer.appendChild(balanceCard);
+    statsContainer.appendChild(spentCard);
+
+    container.appendChild(statsContainer);
+
+    // 3. Action Button
     const addBtn = Button({
-        text: '+ Add Expense',
+        text: '+ Add Transaction', // Renamed from Add Expense
         onClick: () => Router.navigate('add-expense'),
         variant: 'primary'
     });
     addBtn.style.width = '100%';
     addBtn.style.marginBottom = 'var(--spacing-xl)';
+    container.appendChild(addBtn);
 
-    // 3. Recent Questions
+    // 4. Recent Transactions
     const listContainer = document.createElement('div');
     const listTitle = document.createElement('h3');
     listTitle.textContent = 'Recent Transactions';
@@ -57,12 +87,12 @@ export const DashboardView = () => {
     if (transactions.length === 0) {
         const emptyState = document.createElement('p');
         emptyState.textContent = 'No transactions yet.';
+        emptyState.style.color = 'var(--color-text-muted)';
         listContainer.appendChild(emptyState);
     } else {
         const list = document.createElement('ul');
         list.style.listStyle = 'none';
         list.style.padding = 0;
-        // Scrollable styles
         list.style.maxHeight = '400px';
         list.style.overflowY = 'auto';
         list.style.borderTop = '1px solid var(--color-surface-hover)';
@@ -72,11 +102,10 @@ export const DashboardView = () => {
             item.className = 'transaction-item';
             item.style.display = 'flex';
             item.style.justifyContent = 'space-between';
-            item.style.padding = 'var(--spacing-md) var(--spacing-md)'; // Added horizontal padding
+            item.style.padding = 'var(--spacing-md)';
             item.style.borderBottom = '1px solid var(--color-surface-hover)';
-            item.style.cursor = 'pointer'; // Indicate clickable
+            item.style.cursor = 'pointer';
 
-            // Navigate to edit on click
             item.addEventListener('click', () => {
                 Router.navigate('edit-expense', { id: t.id });
             });
@@ -84,8 +113,8 @@ export const DashboardView = () => {
             const info = document.createElement('div');
             info.style.display = 'flex';
             info.style.flexDirection = 'column';
-            info.style.alignItems = 'flex-start'; // Ensure left alignment
-            info.style.gap = '2px'; // Tighter control over spacing
+            info.style.alignItems = 'flex-start';
+            info.style.gap = '2px';
             info.style.textAlign = 'left';
 
             const cat = document.createElement('div');
@@ -100,12 +129,11 @@ export const DashboardView = () => {
             info.appendChild(cat);
             info.appendChild(date);
 
-            const isRefund = t.type === 'refund';
+            const isIncome = t.type === 'income' || t.type === 'refund';
             const val = document.createElement('div');
-            // Fix double negative display using Math.abs
-            val.textContent = `${isRefund ? '+' : '-'}$${Math.abs(t.amount).toFixed(2)}`;
+            val.textContent = `${isIncome ? '+' : '-'}$${Math.abs(t.amount).toFixed(2)}`;
             val.style.fontWeight = '600';
-            val.style.color = isRefund ? '#10b981' : 'inherit';
+            val.style.color = isIncome ? '#10b981' : 'inherit'; // Green for income
 
             item.appendChild(info);
             item.appendChild(val);
@@ -114,8 +142,6 @@ export const DashboardView = () => {
         listContainer.appendChild(list);
     }
 
-    container.appendChild(balanceCard);
-    container.appendChild(addBtn);
     container.appendChild(listContainer);
 
     return container;

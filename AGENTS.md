@@ -1,6 +1,3 @@
-Here's the comprehensive `AGENTS.md` file for the BlinkBudget project, designed as a "Universal Brain" for AI coding agents.
-
-```markdown
 # AGENTS.md: BlinkBudget - Universal Brain for AI Coding Agents
 
 This document serves as the single source of truth for all AI coding agents working on the BlinkBudget project. It provides essential context, technical specifications, and behavioral guidelines to ensure consistent, high-quality, and aligned development.
