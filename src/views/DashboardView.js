@@ -8,9 +8,36 @@ export const DashboardView = () => {
     container.style.width = '100%';
     container.style.maxWidth = '600px';
 
+    // 0. Header (Settings)
+    const header = document.createElement('div');
+    header.style.display = 'flex';
+    header.style.justifyContent = 'flex-end';
+    header.style.marginBottom = 'var(--spacing-md)';
+
+    const settingsBtn = document.createElement('button');
+    settingsBtn.innerHTML = '⚙️'; // Minimal gear icon
+    settingsBtn.className = 'btn btn-ghost';
+    settingsBtn.style.fontSize = '1.5rem';
+    settingsBtn.style.padding = 'var(--spacing-xs)';
+    settingsBtn.style.border = 'none';
+    settingsBtn.title = 'Settings';
+    settingsBtn.addEventListener('click', () => Router.navigate('settings'));
+
+    header.appendChild(settingsBtn);
+    container.appendChild(header);
+
     // 1. Data Processing
     const rawTransactions = StorageService.getAll();
     const transactions = rawTransactions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    const dateFormat = StorageService.getSetting('dateFormat') || 'US';
+
+    const formatDate = (isoString) => {
+        const d = new Date(isoString);
+        if (dateFormat === 'ISO') return d.toISOString().split('T')[0];
+        if (dateFormat === 'EU') return d.toLocaleDateString('en-GB'); // DD/MM/YYYY
+        return d.toLocaleDateString('en-US'); // MM/DD/YYYY
+    };
 
     const totalIncome = transactions.reduce((sum, t) => {
         if (t.type === 'income') return sum + t.amount;
@@ -24,6 +51,8 @@ export const DashboardView = () => {
     }, 0);
 
     const availableBalance = totalIncome - totalExpense;
+
+    // 2. Statistics Cards
 
     // 2. Statistics Cards
     const statsContainer = document.createElement('div');
@@ -122,7 +151,7 @@ export const DashboardView = () => {
             cat.style.fontWeight = '500';
 
             const date = document.createElement('div');
-            date.textContent = new Date(t.timestamp).toLocaleDateString();
+            date.textContent = formatDate(t.timestamp);
             date.style.fontSize = '0.75rem';
             date.style.color = 'var(--color-text-muted)';
 

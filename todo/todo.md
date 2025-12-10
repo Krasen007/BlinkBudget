@@ -6,11 +6,10 @@
 [x] style the scroll bar to match the rest of the app feel
 [x] fix inconsistences of how the category text is displayed above the date, it seems some are few pixels apart
 DO NOT IMPLEMENT: when you start the app the default view should be to add new entry
-DO NOT IMPLEMENT: adding multiple same category items of todays date do not sort them properly
-DO NOT IMPLEMENT: We should have the possibility to have multiple Accounts like checking account, savings account etc. 
-DO NOT IMPLEMENT: style the cancel button and the delete confirmation window to be the same style as the rest of the app
-DO NOT IMPLEMENT: add option to edit categories or add new categories
-DO NOT IMPLEMENT: add option to reorder categories or auto sort them by most common, it may also be learning from the user behavior and predict the category based on the amount
+- [ ] We should have the possibility to have multiple Accounts like checking account, savings account etc.
+[x] style the cancel button and the delete confirmation window to be the same style as the rest of the app
+[ ] add option to edit name of categories or add new categories
+[ ] add option to reorder categories or auto sort them by most common, it may also be learning from the user behavior and predict the category based on the amount
 
 [x] add option to add an expense in the past
 [x] add option to delete entries style the date picker to be the same style as the rest of the app.

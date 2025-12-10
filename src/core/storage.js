@@ -43,4 +43,15 @@ export const StorageService = {
     clear() {
         localStorage.removeItem(STORAGE_KEY);
     },
+
+    getSetting(key) {
+        const settings = JSON.parse(localStorage.getItem('blink_settings') || '{}');
+        return settings[key];
+    },
+
+    saveSetting(key, value) {
+        const settings = JSON.parse(localStorage.getItem('blink_settings') || '{}');
+        settings[key] = value;
+        localStorage.setItem('blink_settings', JSON.stringify(settings));
+    }
 };

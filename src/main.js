@@ -2,6 +2,7 @@ import { Router } from './core/router.js';
 import { DashboardView } from './views/DashboardView.js';
 import { AddView } from './views/AddView.js';
 import { EditView } from './views/EditView.js';
+import { SettingsView } from './views/SettingsView.js';
 
 const initApp = () => {
     const app = document.querySelector('#app');
@@ -23,6 +24,11 @@ const initApp = () => {
     Router.on('edit-expense', (params) => {
         app.innerHTML = '';
         app.appendChild(EditView(params));
+    });
+
+    Router.on('settings', () => {
+        app.innerHTML = '';
+        app.appendChild(SettingsView());
     });
 
     // Start
