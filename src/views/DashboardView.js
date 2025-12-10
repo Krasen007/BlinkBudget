@@ -14,12 +14,12 @@ export const DashboardView = () => {
 
     const totalIncome = transactions.reduce((sum, t) => {
         if (t.type === 'income') return sum + t.amount;
-        if (t.type === 'refund') return sum + t.amount; // Treating refund as money back -> positive
         return sum;
     }, 0);
 
     const totalExpense = transactions.reduce((sum, t) => {
         if (t.type === 'expense') return sum + t.amount;
+        if (t.type === 'refund') return sum - t.amount; // Refund reduces the total spent
         return sum;
     }, 0);
 
