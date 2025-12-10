@@ -8,6 +8,7 @@
 DO NOT IMPLEMENT: when you start the app the default view should be to add new entry
 DO NOT IMPLEMENT: adding multiple same category items of todays date do not sort them properly
 DO NOT IMPLEMENT: We should have the possibility to have multiple Accounts like checking account, savings account etc. 
+DO NOT IMPLEMENT: style the cancel button and the delete confirmation window to be the same style as the rest of the app
 
 [x] add option to add an expense in the past
-[x] 1 .add option to delete entries.style the date picker to be the same style as the rest of the app.
+[x] add option to delete entries style the date picker to be the same style as the rest of the app.

@@ -174,26 +174,12 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     renderCategories(); // Initial render
 
     // Update categories when type changes
-    // We need to hook into the existing click listener or modify createTypeBtn to call a callback
-    // Re-implementing the click listener logic from createTypeBtn effectively requires modifying createTypeBtn or attaching a new behavior.
-    // Since I cannot modify createTypeBtn easily inside this chunk without re-writing it, I will assume I can modify the click handler in the first replacement chunk if I had planned it, 
-    // BUT, I can just cheat and add a mutation observer or just re-write the type buttons logic slightly?
-    // Better: I will use the fact that I am replacing the button creation code in the PREVIOUS chunk. 
-    // Wait, I can't cross-reference chunks like that easily if I didn't write it that way. 
-    // Let's look at chunk 1 again. defining `expenseBtn`, `incomeBtn`...
-    // The `createTypeBtn` function was defined BEFORE chunk 1 start line.
-
-    // It is better to redefine `createTypeBtn` to include the callback or side effect.
-    // But `createTypeBtn` is lines 19-41.
-    // My valid range for chunk 1 is 43-50.
-
-    // I should probably have done one big replacement or better targeted replacements.
-    // Let's just redefine the click handler for the buttons I validly have access to, or...
-    // Actually, I can just attach a NEW click listener to the buttons after creation?
-    // No, `currentType` is local to the closure.
-
-    // Let's REWRITE `TransactionForm` more broadly to ensure correctness.
-    // I will use a larger replacement chunk for the whole Type section and Category section to link them.
+    [expenseBtn, incomeBtn, refundBtn].forEach(btn => {
+        btn.addEventListener('click', () => {
+            selectedCategory = null; // Reset selection
+            renderCategories();
+        });
+    });
 
     categoryGroup.appendChild(chipContainer);
 
