@@ -19,14 +19,13 @@ export const ConfirmDialog = ({ message, onConfirm, onCancel }) => {
 
     const cancelBtn = Button({
         text: 'Cancel',
+        className: 'btn-ghost', // Use ghost class
         onClick: () => {
             document.body.removeChild(overlay);
             if (onCancel) onCancel();
         }
     });
-    cancelBtn.style.background = 'transparent';
-    cancelBtn.style.border = '1px solid var(--color-border)';
-    cancelBtn.style.color = 'var(--color-text-muted)';
+    // Removed inline styles to rely on class
 
     const confirmBtn = Button({
         text: 'Delete',

@@ -1,9 +1,11 @@
 import { TransactionForm } from '../components/TransactionForm.js';
 import { Button } from '../components/Button.js';
+import { ConfirmDialog } from '../components/ConfirmDialog.js'; // Import Dialog
 import { StorageService } from '../core/storage.js';
 import { Router } from '../core/router.js';
 
 export const EditView = ({ id }) => {
+    // ... existing initialization ...
     const container = document.createElement('div');
     container.className = 'view-edit';
 
@@ -31,10 +33,13 @@ export const EditView = ({ id }) => {
         text: 'Delete Transaction',
         variant: 'danger',
         onClick: () => {
-            if (window.confirm('Are you sure you want to delete this transaction?')) {
-                StorageService.remove(id);
-                Router.navigate('dashboard');
-            }
+            ConfirmDialog({
+                message: 'Are you sure you want to delete this transaction?',
+                onConfirm: () => {
+                    StorageService.remove(id);
+                    Router.navigate('dashboard');
+                }
+            });
         }
     });
 
