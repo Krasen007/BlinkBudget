@@ -116,9 +116,24 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
         'Personal Care': 'Medical bills, pharmacy, gym memberships, haircuts, tuition/school fees (Education).'
     };
 
+    const categoryColors = {
+        'Food & Groceries': '#10b981', // Green
+        'Dining & Coffee': '#f97316', // Orange
+        'Housing & Bills': '#3b82f6', // Blue
+        'Transportation': '#eab308', // Yellow
+        'Leisure & Shopping': '#a855f7', // Purple
+        'Personal Care': '#ffffff'    // White
+    };
+
     const categoryOptions = {
         expense: Object.keys(expenseDefinitions),
-        income: ['Salary', 'Freelance', 'Business', 'Investment', 'Gift', 'Other'],
+        income: [
+            'Salary',
+            'Gift',
+            'Investment',
+            'Freelance',
+            'Business',
+            'Other'],
         refund: Object.keys(expenseDefinitions)
     };
 
@@ -150,6 +165,27 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
             }
             chip.className = 'btn';
             chip.style.border = '1px solid var(--color-border)';
+            chip.style.transition = 'all 0.2s ease'; // Smooth transition
+
+            const catColor = categoryColors[cat] || 'var(--color-primary)';
+
+            // Hover effects
+            chip.addEventListener('mouseenter', () => {
+                if (selectedCategory !== cat) {
+                    chip.style.borderColor = catColor;
+                    chip.style.color = catColor;
+                    chip.style.boxShadow = `0 0 8px ${catColor}40`; // Subtle glow
+                }
+            });
+
+            chip.addEventListener('mouseleave', () => {
+                if (selectedCategory !== cat) {
+                    chip.style.borderColor = 'var(--color-border)';
+                    chip.style.color = 'var(--color-text-muted)';
+                    chip.style.boxShadow = 'none';
+                }
+            });
+
             updateChipState(); // Initial Render
 
             chip.addEventListener('click', () => {
