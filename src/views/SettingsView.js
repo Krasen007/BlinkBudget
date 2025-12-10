@@ -80,5 +80,104 @@ export const SettingsView = () => {
 
     container.appendChild(dateSection);
 
+    // Feature 2: Data Management (Export)
+    const dataSection = document.createElement('div');
+    dataSection.className = 'card';
+    dataSection.style.marginBottom = 'var(--spacing-lg)';
+
+    const dataTitle = document.createElement('h3');
+    dataTitle.textContent = 'Data Management';
+    dataTitle.style.marginBottom = 'var(--spacing-md)';
+    dataTitle.style.fontSize = '1.2rem';
+
+    // Date Range Inputs
+    const dateRangeContainer = document.createElement('div');
+    dateRangeContainer.style.display = 'flex';
+    dateRangeContainer.style.gap = 'var(--spacing-md)';
+    dateRangeContainer.style.marginBottom = 'var(--spacing-md)';
+
+    const createDateInput = (label, id) => {
+        const wrapper = document.createElement('div');
+        wrapper.style.flex = '1';
+
+        const lbl = document.createElement('label');
+        lbl.textContent = label;
+        lbl.style.display = 'block';
+        lbl.style.fontSize = '0.875rem';
+        lbl.style.color = 'var(--color-text-muted)';
+        lbl.style.marginBottom = 'var(--spacing-xs)';
+
+        const input = document.createElement('input');
+        input.type = 'date';
+        input.id = id;
+        input.style.width = '100%';
+
+        wrapper.appendChild(lbl);
+        wrapper.appendChild(input);
+        return { wrapper, input };
+    };
+
+    const startInput = createDateInput('Start Date', 'export-start');
+    const endInput = createDateInput('End Date', 'export-end');
+
+    // Default: Start of current month to Today
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    startInput.input.value = firstDay.toISOString().split('T')[0];
+    endInput.input.value = now.toISOString().split('T')[0];
+
+    dateRangeContainer.appendChild(startInput.wrapper);
+    dateRangeContainer.appendChild(endInput.wrapper);
+
+    const exportBtn = Button({
+        text: 'Export Transactions (CSV)',
+        variant: 'primary',
+        onClick: () => {
+            const start = new Date(startInput.input.value);
+            const end = new Date(endInput.input.value);
+            // Set end date to end of day for inclusive comparison
+            end.setHours(23, 59, 59, 999);
+
+            const transactions = StorageService.getAll().filter(t => {
+                const tDate = new Date(t.timestamp);
+                return tDate >= start && tDate <= end;
+            });
+
+            if (transactions.length === 0) {
+                alert('No transactions found in this date range.');
+                return;
+            }
+
+            // Generate CSV
+            const headers = ['Date', 'Type', 'Category', 'Amount'];
+            const rows = transactions.map(t => [
+                new Date(t.timestamp).toLocaleDateString(), // Use default locale for simplicity or ISO
+                t.type.charAt(0).toUpperCase() + t.type.slice(1),
+                t.category,
+                t.amount.toFixed(2)
+            ]);
+
+            const csvContent = [
+                headers.join(','),
+                ...rows.map(row => row.join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `blinkbudget_export_${startInput.input.value}_to_${endInput.input.value}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+    });
+
+    exportBtn.style.width = '100%';
+
+    dataSection.appendChild(dataTitle);
+    dataSection.appendChild(dateRangeContainer);
+    dataSection.appendChild(exportBtn);
+    container.appendChild(dataSection);
+
     return container;
 };
