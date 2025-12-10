@@ -107,10 +107,19 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     catLabel.style.color = 'var(--color-text-muted)';
     categoryGroup.appendChild(catLabel);
 
+    const expenseDefinitions = {
+        'Food & Groceries': 'Supermarket runs, bakery, household supplies bought at the grocery store.',
+        'Dining & Coffee': 'Restaurants, fast food, coffee shops, food delivery apps.',
+        'Housing & Bills': 'Rent, Mortgage, Utilities (Electricity/Water/Internet), Repairs, Taxes.',
+        'Transportation': 'Car payments, gas, maintenance, public transit tickets, Uber/Lyft.',
+        'Leisure & Shopping': 'Shopping (clothes/gadgets), hobbies, movies, subscriptions (Netflix/Spotify), vacations.',
+        'Personal Care': 'Medical bills, pharmacy, gym memberships, haircuts, tuition/school fees (Education).'
+    };
+
     const categoryOptions = {
-        expense: ['Food', 'Transport', 'Entertainment', 'Shopping', 'Bills', 'Health', 'Education', 'Utility'],
+        expense: Object.keys(expenseDefinitions),
         income: ['Salary', 'Freelance', 'Business', 'Investment', 'Gift', 'Other'],
-        refund: ['Food', 'Transport', 'Entertainment', 'Shopping', 'Bills', 'Health', 'Education', 'Utility']
+        refund: Object.keys(expenseDefinitions)
     };
 
     const chipContainer = document.createElement('div');
@@ -135,6 +144,10 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
 
             chip.type = 'button';
             chip.textContent = cat;
+            // Add hover text if definition exists
+            if (expenseDefinitions[cat]) {
+                chip.title = expenseDefinitions[cat];
+            }
             chip.className = 'btn';
             chip.style.border = '1px solid var(--color-border)';
             updateChipState(); // Initial Render
