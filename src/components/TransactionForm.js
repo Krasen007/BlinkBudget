@@ -36,6 +36,21 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
             Array.from(typeGroup.children).forEach(b => b.updateState());
         });
 
+        // Hover effect for uniformity
+        btn.addEventListener('mouseenter', () => {
+            if (currentType !== type) {
+                btn.style.borderColor = 'var(--color-text-muted)';
+                btn.style.backgroundColor = 'var(--color-surface-hover)';
+            }
+        });
+
+        btn.addEventListener('mouseleave', () => {
+            if (currentType !== type) {
+                btn.style.borderColor = 'var(--color-border)';
+                btn.style.backgroundColor = 'transparent';
+            }
+        });
+
         btn.updateState = updateState;
         return btn;
     };
@@ -107,34 +122,40 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     catLabel.style.color = 'var(--color-text-muted)';
     categoryGroup.appendChild(catLabel);
 
-    const expenseDefinitions = {
+    const categoryDefinitions = {
+        // Expense
         'Food & Groceries': 'Supermarket runs, bakery, household supplies bought at the grocery store.',
         'Dining & Coffee': 'Restaurants, fast food, coffee shops, food delivery apps.',
         'Housing & Bills': 'Rent, Mortgage, Utilities (Electricity/Water/Internet), Repairs, Taxes.',
         'Transportation': 'Car payments, gas, maintenance, public transit tickets, Uber/Lyft.',
         'Leisure & Shopping': 'Shopping (clothes/gadgets), hobbies, movies, subscriptions (Netflix/Spotify), vacations.',
-        'Personal Care': 'Medical bills, pharmacy, gym memberships, haircuts, tuition/school fees (Education).'
+        'Personal Care': 'Medical bills, pharmacy, gym memberships, haircuts, tuition/school fees (Education).',
+        // Income
+        'Paycheck': 'Most reliable source',
+        'Business / Freelance': 'Variable, side income',
+        'Investment Income': 'Dividends, interest, profits',
+        'Other / Gift': 'Everything else, like cash gifts'
     };
 
     const categoryColors = {
+        // Expense
         'Food & Groceries': '#10b981', // Green
         'Dining & Coffee': '#f97316', // Orange
         'Housing & Bills': '#3b82f6', // Blue
         'Transportation': '#eab308', // Yellow
         'Leisure & Shopping': '#a855f7', // Purple
-        'Personal Care': '#ffffff'    // White
+        'Personal Care': '#ffffff',    // White
+        // Income
+        'Paycheck': '#10b981', // Green
+        'Business / Freelance': '#f97316', // Orange
+        'Investment Income': '#3b82f6', // Blue
+        'Other / Gift': '#eab308' // Yellow
     };
 
     const categoryOptions = {
-        expense: Object.keys(expenseDefinitions),
-        income: [
-            'Salary',
-            'Gift',
-            'Investment',
-            'Freelance',
-            'Business',
-            'Other'],
-        refund: Object.keys(expenseDefinitions)
+        expense: ['Food & Groceries', 'Dining & Coffee', 'Housing & Bills', 'Transportation', 'Leisure & Shopping', 'Personal Care'],
+        income: ['Paycheck', 'Business / Freelance', 'Investment Income', 'Other / Gift'],
+        refund: ['Food & Groceries', 'Dining & Coffee', 'Housing & Bills', 'Transportation', 'Leisure & Shopping', 'Personal Care']
     };
 
     const chipContainer = document.createElement('div');
@@ -160,8 +181,8 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
             chip.type = 'button';
             chip.textContent = cat;
             // Add hover text if definition exists
-            if (expenseDefinitions[cat]) {
-                chip.title = expenseDefinitions[cat];
+            if (categoryDefinitions[cat]) {
+                chip.title = categoryDefinitions[cat];
             }
             chip.className = 'btn';
             chip.style.border = '1px solid var(--color-border)';

@@ -19,12 +19,10 @@ export const AddView = () => {
 
     const backLink = document.createElement('button');
     backLink.textContent = 'Cancel';
-    backLink.className = 'btn';
+    backLink.className = 'btn btn-ghost'; // Use class
     backLink.style.width = '100%';
     backLink.style.marginTop = 'var(--spacing-md)';
-    backLink.style.color = 'var(--color-text-muted)';
-    backLink.style.backgroundColor = 'transparent';
-    backLink.style.border = '1px solid var(--color-border)';
+    // Removed inline background/color/border to let CSS handle it
     backLink.addEventListener('click', () => Router.navigate('dashboard'));
 
     container.appendChild(title);
