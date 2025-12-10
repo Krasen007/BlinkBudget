@@ -50,8 +50,8 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     refundBtn.updateState();
 
     typeGroup.appendChild(expenseBtn);
-    typeGroup.appendChild(incomeBtn);
     typeGroup.appendChild(refundBtn);
+    typeGroup.appendChild(incomeBtn);
     form.appendChild(typeGroup);
 
     // Date Input

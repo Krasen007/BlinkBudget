@@ -17,12 +17,15 @@ export const AddView = () => {
         }
     });
 
-    const backLink = document.createElement('a');
+    const backLink = document.createElement('button');
     backLink.textContent = 'Cancel';
-    backLink.href = '#dashboard';
-    backLink.style.display = 'block';
+    backLink.className = 'btn';
+    backLink.style.width = '100%';
     backLink.style.marginTop = 'var(--spacing-md)';
     backLink.style.color = 'var(--color-text-muted)';
+    backLink.style.backgroundColor = 'transparent';
+    backLink.style.border = '1px solid var(--color-border)';
+    backLink.addEventListener('click', () => Router.navigate('dashboard'));
 
     container.appendChild(title);
     container.appendChild(form);
