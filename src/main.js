@@ -3,6 +3,7 @@ import { DashboardView } from './views/DashboardView.js';
 import { AddView } from './views/AddView.js';
 import { EditView } from './views/EditView.js';
 import { SettingsView } from './views/SettingsView.js';
+import './core/mobile.js'; // Initialize mobile utilities
 
 const initApp = () => {
     const app = document.querySelector('#app');

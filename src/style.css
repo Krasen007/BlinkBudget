@@ -19,17 +19,56 @@
   --color-text-muted: hsl(240, 5%, 65%);
   --color-border: hsl(240, 5%, 20%);
 
-  /* Typography */
+  /* Typography - Mobile-first responsive scales */
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
   --font-heading: 'Outfit', system-ui, -apple-system, sans-serif;
+  
+  /* Mobile typography scale */
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.875rem;   /* 14px */
+  --font-size-base: 1rem;     /* 16px */
+  --font-size-lg: 1.125rem;   /* 18px */
+  --font-size-xl: 1.25rem;    /* 20px */
+  --font-size-2xl: 1.5rem;    /* 24px */
+  --font-size-3xl: 1.875rem;  /* 30px */
+  --font-size-4xl: 2.25rem;   /* 36px */
+  
+  /* Mobile line heights */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
 
-  /* Spacing */
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
-  --spacing-2xl: 4rem;
+  /* Mobile-first spacing scale */
+  --spacing-xs: 0.25rem;   /* 4px */
+  --spacing-sm: 0.5rem;    /* 8px */
+  --spacing-md: 0.75rem;   /* 12px */
+  --spacing-lg: 1rem;      /* 16px */
+  --spacing-xl: 1.5rem;    /* 24px */
+  --spacing-2xl: 2rem;     /* 32px */
+  --spacing-3xl: 3rem;     /* 48px */
+  --spacing-4xl: 4rem;     /* 64px */
+
+  /* Touch-friendly spacing */
+  --touch-target-min: 44px;
+  --touch-spacing-min: 8px;
+  --thumb-reach-zone: 60vh; /* Bottom 60% for thumb reach */
+
+  /* Responsive breakpoints */
+  --breakpoint-sm: 480px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+
+  /* Safe area support for devices with notches */
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
+
+  /* Viewport utilities */
+  --viewport-height: 100vh;
+  --viewport-width: 100vw;
+  --visual-viewport-height: 100vh; /* Will be updated via JS for keyboard handling */
 
   /* Radii */
   --radius-sm: 0.375rem;
@@ -40,6 +79,7 @@
   /* Transitions */
   --transition-fast: 150ms ease;
   --transition-normal: 250ms ease;
+  --transition-slow: 300ms ease;
 }
 
 /* Reset */
@@ -54,16 +94,30 @@
 body {
   margin: 0;
   min-height: 100vh;
+  min-height: var(--viewport-height);
   font-family: var(--font-body);
+  font-size: var(--font-size-base);
   background-color: var(--color-background);
   color: var(--color-text-main);
-  line-height: 1.6;
+  line-height: var(--line-height-normal);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   display: flex;
   flex-direction: column;
+  
+  /* Mobile optimizations */
+  -webkit-text-size-adjust: 100%; /* Prevent iOS text size adjustment */
+  -webkit-tap-highlight-color: transparent; /* Remove tap highlight */
+  touch-action: manipulation; /* Improve touch responsiveness */
+  
+  /* Safe area support */
+  padding-top: var(--safe-area-inset-top);
+  padding-left: var(--safe-area-inset-left);
+  padding-right: var(--safe-area-inset-right);
+  padding-bottom: var(--safe-area-inset-bottom);
 }
 
-/* Typography */
+/* Typography - Mobile-first responsive */
 h1,
 h2,
 h3,
@@ -71,51 +125,90 @@ h4,
 h5,
 h6 {
   font-family: var(--font-heading);
-  line-height: 1.2;
+  line-height: var(--line-height-tight);
   font-weight: 700;
   color: var(--color-text-main);
+  margin-bottom: var(--spacing-md);
 }
 
+/* Mobile-first heading sizes */
 h1 {
-  font-size: 2.5rem;
+  font-size: var(--font-size-3xl); /* 30px on mobile */
   letter-spacing: -0.02em;
 }
 
 h2 {
-  font-size: 2rem;
+  font-size: var(--font-size-2xl); /* 24px on mobile */
   letter-spacing: -0.01em;
+}
+
+h3 {
+  font-size: var(--font-size-xl); /* 20px on mobile */
+}
+
+h4 {
+  font-size: var(--font-size-lg); /* 18px on mobile */
+}
+
+h5,
+h6 {
+  font-size: var(--font-size-base); /* 16px on mobile */
 }
 
 p {
   color: var(--color-text-muted);
-  max-width: 65ch;
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--spacing-md);
 }
 
-/* Layout */
+/* Responsive typography for larger screens */
+@media (min-width: 768px) {
+  h1 {
+    font-size: var(--font-size-4xl); /* 36px on tablet+ */
+  }
+  
+  h2 {
+    font-size: var(--font-size-3xl); /* 30px on tablet+ */
+  }
+  
+  p {
+    max-width: 65ch;
+  }
+}
+
+/* Layout - Mobile-first responsive */
 #app {
   width: 100%;
-  max-width: 600px;
-  /* Limit width for cleaner look on desktop */
   margin: 0 auto;
   padding: var(--spacing-md);
   flex-grow: 1;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  /* Align top */
   align-items: stretch;
-  /* Stretch children */
   text-align: center;
-  padding-top: var(--spacing-xl);
-  /* Add Top Padding for consistency */
+  padding-top: var(--spacing-lg);
+  
+  /* Mobile-specific adjustments */
+  min-height: calc(var(--visual-viewport-height) - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
-/* Components */
+/* Tablet and desktop layout */
+@media (min-width: 768px) {
+  #app {
+    max-width: 600px; /* Limit width for cleaner look on desktop */
+    padding: var(--spacing-xl);
+    padding-top: var(--spacing-2xl);
+  }
+}
+
+/* Components - Touch-optimized */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-sm) var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-xl);
   font-family: var(--font-body);
   font-weight: 600;
   border-radius: var(--radius-md);
@@ -123,7 +216,19 @@ p {
   cursor: pointer;
   transition: all var(--transition-fast);
   text-decoration: none;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
+  
+  /* Touch-friendly sizing */
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  
+  /* Touch optimizations */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  
+  /* Ensure adequate spacing between adjacent buttons */
+  margin: calc(var(--touch-spacing-min) / 2);
 }
 
 .btn-primary {
@@ -176,18 +281,32 @@ p {
   border-color: var(--color-primary-light);
 }
 
-/* Utilities */
+/* Form inputs - Mobile-optimized */
 input {
-  /* Common input styles */
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   color: var(--color-text-main);
   border-radius: var(--radius-md);
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
   transition: border-color var(--transition-fast);
   outline: none;
   font-family: var(--font-body);
-  font-size: 1rem;
+  font-size: var(--font-size-base);
+  
+  /* Touch-friendly sizing */
+  min-height: var(--touch-target-min);
+  
+  /* Mobile input optimizations */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  
+  /* Prevent zoom on focus (iOS) */
+  font-size: max(16px, var(--font-size-base));
+  
+  /* Touch optimizations */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 input:hover {
@@ -196,15 +315,16 @@ input:hover {
 
 input:focus {
   border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
 }
 
-/* Date Specific to handle calendar icon in dark mode */
+/* Specific input types for mobile */
 input[type="date"] {
   color-scheme: dark;
-  /* Helps with native calendar popup */
-  min-height: 42px;
-  /* Touch target size */
+  min-height: var(--touch-target-min);
 }
+
+/* Note: inputmode and pattern attributes should be set in HTML for mobile keyboard optimization */
 
 /* Remove Arrows from Number Input */
 input[type=number]::-webkit-inner-spin-button,
@@ -277,9 +397,120 @@ input[type=number] {
   }
 }
 
-/* Custom Scrollbar */
+/* Mobile-first responsive utilities */
+
+/* Viewport utilities */
+.viewport-height {
+  height: var(--viewport-height);
+}
+
+.visual-viewport-height {
+  height: var(--visual-viewport-height);
+}
+
+.safe-area-top {
+  padding-top: var(--safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: var(--safe-area-inset-bottom);
+}
+
+.safe-area-left {
+  padding-left: var(--safe-area-inset-left);
+}
+
+.safe-area-right {
+  padding-right: var(--safe-area-inset-right);
+}
+
+/* Touch-friendly utilities */
+.touch-target {
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+}
+
+.touch-spacing {
+  margin: calc(var(--touch-spacing-min) / 2);
+}
+
+.thumb-reach-zone {
+  position: relative;
+  bottom: 0;
+  height: var(--thumb-reach-zone);
+}
+
+/* Mobile-specific display utilities */
+.mobile-only {
+  display: block;
+}
+
+.desktop-only {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .mobile-only {
+    display: none;
+  }
+  
+  .desktop-only {
+    display: block;
+  }
+}
+
+/* Responsive spacing utilities */
+.spacing-mobile-sm { margin: var(--spacing-sm); }
+.spacing-mobile-md { margin: var(--spacing-md); }
+.spacing-mobile-lg { margin: var(--spacing-lg); }
+.spacing-mobile-xl { margin: var(--spacing-xl); }
+
+@media (min-width: 768px) {
+  .spacing-mobile-sm { margin: var(--spacing-md); }
+  .spacing-mobile-md { margin: var(--spacing-lg); }
+  .spacing-mobile-lg { margin: var(--spacing-xl); }
+  .spacing-mobile-xl { margin: var(--spacing-2xl); }
+}
+
+/* Mobile layout helpers */
+.mobile-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+  .mobile-column {
+    flex-direction: row;
+    gap: var(--spacing-lg);
+  }
+}
+
+.mobile-full-width {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .mobile-full-width {
+    width: auto;
+  }
+}
+
+/* Smooth scrolling for mobile */
+.smooth-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar - Thinner on mobile */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 4px;
+}
+
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
 }
 
 ::-webkit-scrollbar-track {
@@ -294,4 +525,126 @@ input[type=number] {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-text-muted);
+}
+/* Mobi
+le-specific enhancements */
+
+/* Improve touch interactions */
+.btn:active,
+.card:active,
+input:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+/* Mobile-friendly focus states */
+@media (max-width: 767px) {
+  .btn:focus,
+  input:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+
+/* Orientation-specific styles */
+@media (orientation: landscape) and (max-height: 500px) {
+  #app {
+    padding-top: var(--spacing-sm);
+  }
+  
+  h1 {
+    font-size: var(--font-size-2xl);
+  }
+  
+  h2 {
+    font-size: var(--font-size-xl);
+  }
+}
+
+/* High DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .btn {
+    border-width: 0.5px;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Dark mode optimizations for mobile */
+@media (prefers-color-scheme: dark) {
+  /* Already using dark theme, but ensure mobile-specific adjustments */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
+}
+
+/* Print styles - hide mobile-specific elements */
+@media print {
+  .mobile-only,
+  .touch-target,
+  .btn {
+    display: none !important;
+  }
+}
+
+/* Accessibility improvements for mobile */
+@media (max-width: 767px) {
+  /* Larger focus indicators on mobile */
+  :focus-visible {
+    outline: 3px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+  
+  /* Better contrast for touch targets */
+  .btn:hover,
+  .btn:focus {
+    box-shadow: 0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2);
+  }
+}
+
+/* iOS specific fixes */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari specific styles */
+  input {
+    /* Fix iOS input styling */
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: var(--radius-md);
+  }
+  
+  /* Fix iOS button styling */
+  .btn {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  
+  /* Prevent iOS zoom on input focus */
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="date"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Android specific fixes */
+@media screen and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: .001dpcm) {
+  /* Android Chrome specific styles */
+  input:focus {
+    /* Prevent Android zoom */
+    font-size: 16px;
+  }
 }
