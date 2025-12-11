@@ -10,48 +10,13 @@ export const DashboardView = () => {
 
     // 0. Header (Account Selector & Settings)
     const header = document.createElement('div');
-    header.style.display = 'flex';
-    header.style.justifyContent = 'space-between';
-    header.style.alignItems = 'center';
     header.style.marginBottom = 'var(--spacing-md)';
 
-    // Account Selector
-    const leftHeader = document.createElement('div');
-    leftHeader.style.flex = '1';
-
-    const accountSelect = document.createElement('select');
-    accountSelect.style.padding = 'var(--spacing-xs) var(--spacing-sm)';
-    accountSelect.style.borderRadius = 'var(--radius-sm)';
-    accountSelect.style.background = 'var(--color-surface)'; // Fixed transparency issue
-    accountSelect.style.color = 'var(--color-text-main)';
-    accountSelect.style.border = '1px solid var(--color-border)';
-    accountSelect.style.fontSize = '0.9rem';
-    accountSelect.style.cursor = 'pointer';
-    accountSelect.style.outline = 'none'; // Clean look
-
-    // Filter Logic
-    let currentFilter = 'all'; // Default to All
-
-    const accounts = StorageService.getAccounts();
-    const defaultAccount = StorageService.getDefaultAccount();
-
-    // Add "All Accounts" option
-    const allOption = document.createElement('option');
-    allOption.value = 'all';
-    allOption.textContent = 'All Accounts';
-    allOption.selected = true; // Default selected
-    accountSelect.appendChild(allOption);
-
-    accounts.forEach(acc => {
-        const opt = document.createElement('option');
-        opt.value = acc.id;
-        opt.textContent = acc.name;
-        // if (acc.id === defaultAccount.id) opt.selected = true; // No longer default
-        accountSelect.appendChild(opt);
-    });
-
-    leftHeader.appendChild(accountSelect);
-    header.appendChild(leftHeader);
+    // Title
+    const title = document.createElement('h2');
+    title.textContent = 'Dashboard';
+    title.style.margin = '0';
+    title.style.marginRight = 'var(--spacing-md)';
 
     // Settings Button
     const settingsBtn = document.createElement('button');
@@ -63,7 +28,63 @@ export const DashboardView = () => {
     settingsBtn.title = 'Settings';
     settingsBtn.addEventListener('click', () => Router.navigate('settings'));
 
-    header.appendChild(settingsBtn);
+    // Group Title and Selector for easier layout
+    header.innerHTML = '';
+    header.style.flexDirection = 'column';
+    header.style.alignItems = 'stretch';
+    header.style.gap = 'var(--spacing-md)';
+
+    const topRow = document.createElement('div');
+    topRow.style.display = 'flex';
+    topRow.style.justifyContent = 'space-between';
+    topRow.style.alignItems = 'center';
+
+    topRow.appendChild(title);
+    topRow.appendChild(settingsBtn);
+
+    header.appendChild(topRow);
+
+    // Account Selector Definition
+    const leftHeader = document.createElement('div');
+    // leftHeader.style.flex = '1'; // No longer needed
+
+    const accountSelect = document.createElement('select');
+    accountSelect.style.padding = 'var(--spacing-sm) var(--spacing-md)';
+    accountSelect.style.borderRadius = 'var(--radius-md)';
+    accountSelect.style.background = 'var(--color-surface)';
+    accountSelect.style.color = 'var(--color-text-main)';
+    accountSelect.style.border = '1px solid var(--color-border)';
+    accountSelect.style.fontSize = '1rem';
+    accountSelect.style.cursor = 'pointer';
+    accountSelect.style.outline = 'none';
+    accountSelect.style.minWidth = '150px';
+    accountSelect.style.appearance = 'auto';
+    accountSelect.className = 'input-select';
+
+    // Account Options Logic
+    let currentFilter = 'all'; // Re-added variable
+    const accounts = StorageService.getAccounts();
+    // const defaultAccount = StorageService.getDefaultAccount(); // Unused
+
+    const allOption = document.createElement('option');
+    allOption.value = 'all';
+    allOption.textContent = 'All Accounts';
+    allOption.selected = true;
+    accountSelect.appendChild(allOption);
+
+    accounts.forEach(acc => {
+        const opt = document.createElement('option');
+        opt.value = acc.id;
+        opt.textContent = acc.name;
+        accountSelect.appendChild(opt);
+    });
+
+    // Make selector full width
+    accountSelect.style.width = '100%';
+    leftHeader.appendChild(accountSelect);
+
+    header.appendChild(leftHeader);
+
     container.appendChild(header);
 
     // Filter Logic - Already initialized above logic, but need to remove this line if it re-declares

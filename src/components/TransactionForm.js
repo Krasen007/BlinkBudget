@@ -8,7 +8,6 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     form.style.flexDirection = 'column';
     form.style.gap = 'var(--spacing-lg)';
     form.style.width = '100%';
-    form.style.maxWidth = '400px';
 
     // Account Selection (Source)
     const accounts = StorageService.getAccounts();

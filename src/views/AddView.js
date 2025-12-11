@@ -5,10 +5,14 @@ import { Router } from '../core/router.js';
 export const AddView = () => {
     const container = document.createElement('div');
     container.className = 'view-add';
+    container.style.maxWidth = '600px';
+    container.style.width = '100%';
 
     const title = document.createElement('h2');
-    title.textContent = 'Add Expense';
+    title.textContent = 'Add Transaction';
     title.style.marginBottom = 'var(--spacing-lg)';
+    title.style.margin = '0';
+    title.style.textAlign = 'left';
 
     const form = TransactionForm({
         onSubmit: (data) => {
