@@ -29,6 +29,115 @@ export const SettingsView = () => {
     header.appendChild(backBtn);
     container.appendChild(header);
 
+    // Feature 0: Account Management
+    const accountSection = document.createElement('div');
+    accountSection.className = 'card';
+    accountSection.style.marginBottom = 'var(--spacing-lg)';
+
+    const accountTitle = document.createElement('h3');
+    accountTitle.textContent = 'Accounts';
+    accountTitle.style.marginBottom = 'var(--spacing-md)';
+    accountSection.appendChild(accountTitle);
+
+    const accountList = document.createElement('div');
+    accountList.style.display = 'flex';
+    accountList.style.flexDirection = 'column';
+    accountList.style.gap = 'var(--spacing-sm)';
+    accountList.style.marginBottom = 'var(--spacing-md)';
+
+    const renderAccounts = () => {
+        accountList.innerHTML = '';
+        const accounts = StorageService.getAccounts();
+
+        accounts.forEach(acc => {
+            const item = document.createElement('div');
+            item.style.display = 'flex';
+            item.style.justifyContent = 'space-between';
+            item.style.alignItems = 'center';
+            item.style.padding = 'var(--spacing-md)';
+            item.style.border = '1px solid var(--color-border)';
+            item.style.borderRadius = 'var(--radius-md)';
+            item.style.background = 'var(--color-surface-hover)';
+
+            const info = document.createElement('div');
+            const name = document.createElement('div');
+            name.textContent = acc.name + (acc.isDefault ? ' (Default)' : '');
+            name.style.fontWeight = '500';
+            name.style.color = acc.isDefault ? 'var(--color-primary-light)' : 'var(--color-text-main)';
+
+            const type = document.createElement('div');
+            type.textContent = acc.type.charAt(0).toUpperCase() + acc.type.slice(1);
+            type.style.fontSize = '0.75rem';
+            type.style.color = 'var(--color-text-muted)';
+
+            info.appendChild(name);
+            info.appendChild(type);
+
+            const actions = document.createElement('div');
+            actions.style.display = 'flex';
+            actions.style.gap = 'var(--spacing-sm)';
+
+            if (!acc.isDefault) {
+                const makeDefaultBtn = document.createElement('button');
+                makeDefaultBtn.textContent = 'Set Default';
+                makeDefaultBtn.className = 'btn btn-ghost';
+                makeDefaultBtn.style.fontSize = '0.75rem';
+                makeDefaultBtn.style.padding = 'var(--spacing-xs) var(--spacing-sm)';
+                makeDefaultBtn.onclick = () => {
+                    acc.isDefault = true;
+                    StorageService.saveAccount(acc);
+                    renderAccounts();
+                };
+                actions.appendChild(makeDefaultBtn);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.className = 'btn btn-ghost';
+                deleteBtn.style.color = '#ef4444';
+                deleteBtn.style.fontSize = '0.75rem';
+                deleteBtn.style.padding = 'var(--spacing-xs) var(--spacing-sm)';
+                deleteBtn.onclick = () => {
+                    if (confirm(`Delete account "${acc.name}"? Transactions will remain but might be orphaned if not handled.`)) {
+                        if (StorageService.deleteAccount(acc.id)) {
+                            renderAccounts();
+                        } else {
+                            alert('Cannot delete the last account.');
+                        }
+                    }
+                };
+                actions.appendChild(deleteBtn);
+            }
+
+            item.appendChild(info);
+            item.appendChild(actions);
+            accountList.appendChild(item);
+        });
+    };
+
+    renderAccounts();
+    accountSection.appendChild(accountList);
+
+    const addAccountBtn = Button({
+        text: 'Add New Account',
+        variant: 'secondary',
+        onClick: () => {
+            const name = prompt('Enter account name:');
+            if (name) {
+                StorageService.saveAccount({
+                    id: crypto.randomUUID(),
+                    name: name,
+                    type: 'checking', // Default type for now
+                    isDefault: false
+                });
+                renderAccounts();
+            }
+        }
+    });
+    addAccountBtn.style.width = '100%';
+    accountSection.appendChild(addAccountBtn);
+
+    container.appendChild(accountSection);
+
     // Feature 1: Date Format
     const dateSection = document.createElement('div');
     dateSection.className = 'card';

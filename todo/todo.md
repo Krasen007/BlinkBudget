@@ -6,7 +6,7 @@
 [x] style the scroll bar to match the rest of the app feel
 [x] fix inconsistences of how the category text is displayed above the date, it seems some are few pixels apart
 DO NOT IMPLEMENT: when you start the app the default view should be to add new entry
-- [ ] We should have the possibility to have multiple Accounts like checking account, savings account etc.
+- [x] We should have the possibility to have multiple Accounts like checking account, savings account etc. <!-- id: 9 -->
 [x] style the cancel button and the delete confirmation window to be the same style as the rest of the app
 [ ] add option to edit name of categories or add new categories
 [ ] add option to reorder categories or auto sort them by most common, it may also be learning from the user behavior and predict the category based on the amount

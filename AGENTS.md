@@ -28,16 +28,16 @@ This document serves as the single source of truth for all AI coding agents work
 
 ## 3. Tech Stack & Architecture
 
-The project is a web (browser) application, leveraging a modern, AI-friendly stack optimized for speed and a compelling user interface.
+The project is a web (browser) application, leveraging a modern, lightweight stack optimized for speed and a compelling user interface.
 
-*   **Frontend Framework**: Next.js (React)
-    *   Chosen for its robust framework, file-system routing, API routes, and optimizations for performance (e.g., server-side rendering/static site generation).
-    *   Benefits from the vast React ecosystem, leading to accurate and complete AI code generation.
-*   **Styling & UI Library**: Tailwind CSS + shadcn/ui
-    *   **Tailwind CSS**: Utility-first, highly declarative for straightforward AI generation of consistent and responsive designs.
-    *   **shadcn/ui**: Provides a collection of beautifully designed, accessible, and customizable UI components.
-*   **Deployment**: Vercel (inferred from Next.js recommendation and "free tier" mention in Tech Design).
-*   **Backend/Database**: Not explicitly defined in the provided context. Next.js API routes will be utilized for serverless functions to handle any necessary server-side logic or data persistence if a dedicated backend becomes necessary.
+*   **Frontend**: Vanilla JavaScript (ES Modules) + Vite
+    *   Chosen for maximum performance, zero-bundle-overhead (initial), and "closer to the metal" understanding of web fundamentals.
+    *   Utilizes a custom Router and functional component pattern (returning DOM elements).
+*   **Styling**: Vanilla CSS
+    *   Uses CSS Custom Properties (Variables) for theming (HSL color space).
+    *   Clean, semantic CSS without heavy framework overhead.
+*   **Deployment**: Vercel/Netlify (Static hosting).
+*   **Data Persistence**: `localStorage` (via `StorageService`) for instant, offline-capable data storage.
 
 ---
 
@@ -48,30 +48,22 @@ Standard commands for setting up and running the project locally:
 *   **Install Dependencies**:
     ```bash
     npm install
-    # or
-    yarn install
     ```
 *   **Run Development Server**:
     ```bash
     npm run dev
-    # or
-    yarn dev
     ```
-    (This starts the Next.js development server, typically accessible at `http://localhost:3000` with Hot Module Reloading).
+    (Starts the Vite development server, typically accessible at `http://localhost:5173`).
 *   **Build for Production**:
     ```bash
     npm run build
-    # or
-    yarn build
     ```
-    (Creates an optimized production build of the application).
-*   **Start Production Server**:
+    (Creates an optimized production build of the application in `/dist`).
+*   **Run Unit Tests**:
     ```bash
-    npm run start
-    # or
-    yarn start
+    npm test
     ```
-    (Starts the Next.js application in production mode after it has been built).
+    (Runs Vitest).
 
 ---
 
@@ -79,25 +71,25 @@ Standard commands for setting up and running the project locally:
 
 Adherence to these standards is crucial for maintaining code quality, consistency, and alignment with the project's goals.
 
-*   **Language**: TypeScript (for enhanced type safety and improved code quality, especially beneficial for AI-generated code).
+*   **Language**: JavaScript (ES6+ Modules).
 *   **Component Structure**:
-    *   Exclusively use **Functional Components** with React Hooks.
+    *   **Functional Components**: Functions that return a native `HTMLElement`.
+    *   **Props**: Passed as arguments to the function.
+    *   **State**: Managed via DOM manipulation or simple event listeners within the closure.
     *   Components should be modular, reusable, and focused on single responsibilities.
 *   **Styling**:
-    *   Utilize **Tailwind CSS** for all styling. Avoid inline styles or separate CSS files unless absolutely necessary for third-party integrations.
-    *   Leverage `shadcn/ui` components for pre-built, styled, and accessible UI elements.
+    *   Use **Vanilla CSS** in `style.css`.
+    *   leverage **CSS Variables** defined in `:root` for colors, spacing, and typography.
+    *   Avoid inline styles for static values; use classes.
 *   **Accessibility (a11y)**:
     *   Prioritize **semantic HTML** structure.
     *   Ensure sufficient **color contrast** for readability.
-    *   Use Tailwind CSS accessibility utilities (e.g., `sr-only` for screen reader-only content) where appropriate.
     *   All interactive elements must be keyboard-navigable.
 *   **Code Quality**:
     *   Maintain clean, readable, and well-structured code.
-    *   Follow ESLint recommendations (if configured in the project).
-    *   Minimize complexity; favor simple, direct solutions.
+    *   Minimize complexity; favor simple, direct DOM manipulation where straightforward.
 *   **Performance**:
-    *   Optimize for fast loading times and smooth interactions, consistent with the "extremely fast" core promise.
-    *   Implement efficient data fetching and state management strategies.
+    *   Optimize for fast loading times and smooth interactions (3 clicks rule).
 
 ---
 

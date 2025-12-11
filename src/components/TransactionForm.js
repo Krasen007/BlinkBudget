@@ -1,4 +1,5 @@
 import { Button } from './Button.js';
+import { StorageService } from '../core/storage.js';
 
 export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     const form = document.createElement('form');
@@ -8,6 +9,46 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     form.style.gap = 'var(--spacing-lg)';
     form.style.width = '100%';
     form.style.maxWidth = '400px';
+
+    // Account Selection (Source)
+    const accounts = StorageService.getAccounts();
+    const defaultAccount = StorageService.getDefaultAccount();
+
+    // Allow passing in accountId if needed (e.g. from filter), otherwise default
+    let currentAccountId = initialValues.accountId || defaultAccount.id;
+
+    const accountGroup = document.createElement('div');
+    accountGroup.style.marginBottom = 'var(--spacing-md)';
+
+    const accLabel = document.createElement('label');
+    accLabel.textContent = 'Account';
+    accLabel.style.display = 'block';
+    accLabel.style.marginBottom = 'var(--spacing-xs)';
+    accLabel.style.color = 'var(--color-text-muted)';
+
+    const accSelect = document.createElement('select');
+    accSelect.style.width = '100%';
+    accSelect.style.padding = 'var(--spacing-sm)';
+    accSelect.style.borderRadius = 'var(--radius-md)';
+    accSelect.style.background = 'var(--color-surface)';
+    accSelect.style.color = 'var(--color-text-main)';
+    accSelect.style.border = '1px solid var(--color-border)';
+
+    accounts.forEach(acc => {
+        const opt = document.createElement('option');
+        opt.value = acc.id;
+        opt.textContent = acc.name;
+        if (acc.id === currentAccountId) opt.selected = true;
+        accSelect.appendChild(opt);
+    });
+
+    accSelect.addEventListener('change', (e) => {
+        currentAccountId = e.target.value;
+    });
+
+    accountGroup.appendChild(accLabel);
+    accountGroup.appendChild(accSelect);
+    form.appendChild(accountGroup);
 
     // Type Toggle
     let currentType = initialValues.type || 'expense';
@@ -57,16 +98,16 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
 
     const expenseBtn = createTypeBtn('expense', 'Expense');
     const incomeBtn = createTypeBtn('income', 'Income');
-    const refundBtn = createTypeBtn('refund', 'Refund');
+    const transferBtn = createTypeBtn('transfer', 'Transfer'); // New Type
 
     // Initial state
     expenseBtn.updateState();
     incomeBtn.updateState();
-    refundBtn.updateState();
+    transferBtn.updateState();
 
     typeGroup.appendChild(expenseBtn);
-    typeGroup.appendChild(refundBtn);
     typeGroup.appendChild(incomeBtn);
+    typeGroup.appendChild(transferBtn);
     form.appendChild(typeGroup);
 
     // Date Input
@@ -113,10 +154,11 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     amountGroup.appendChild(amountLabel);
     amountGroup.appendChild(amountInput);
 
-    // Categories
+    // Categories / Destination Account
     const categoryGroup = document.createElement('div');
     const catLabel = document.createElement('label');
-    catLabel.textContent = 'Category';
+    // Label updates dynamically
+    catLabel.textContent = currentType === 'transfer' ? 'To Account' : 'Category';
     catLabel.style.display = 'block';
     catLabel.style.marginBottom = 'var(--spacing-sm)';
     catLabel.style.color = 'var(--color-text-muted)';
@@ -163,92 +205,161 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     chipContainer.style.flexWrap = 'wrap';
     chipContainer.style.gap = 'var(--spacing-sm)';
 
-    let selectedCategory = initialValues.category || null;
+    let selectedCategory = initialValues.category || null; // Or toAccountId for transfers
+    let selectedToAccount = initialValues.toAccountId || null;
 
     const renderCategories = () => {
         chipContainer.innerHTML = ''; // Clear existing
-        const currentCats = categoryOptions[currentType] || categoryOptions.expense;
 
-        currentCats.forEach(cat => {
-            const chip = document.createElement('button');
-            const updateChipState = () => {
-                const isSelected = selectedCategory === cat;
-                chip.style.background = isSelected ? 'var(--color-primary-light)' : 'transparent';
-                chip.style.color = isSelected ? 'var(--color-background)' : 'var(--color-text-muted)';
-                chip.style.borderColor = isSelected ? 'var(--color-primary)' : 'var(--color-border)';
-            };
+        // Dynamic Label
+        catLabel.textContent = currentType === 'transfer' ? 'To Account' : 'Category';
 
-            chip.type = 'button';
-            chip.textContent = cat;
-            // Add hover text if definition exists
-            if (categoryDefinitions[cat]) {
-                chip.title = categoryDefinitions[cat];
+        if (currentType === 'transfer') {
+            // Render Accounts as destinations (exclude current source)
+            const targets = accounts.filter(a => a.id !== currentAccountId);
+
+            if (targets.length === 0) {
+                const msg = document.createElement('p');
+                msg.textContent = 'No other accounts to transfer to.';
+                msg.style.color = 'var(--color-text-muted)';
+                msg.style.fontSize = '0.875rem';
+                chipContainer.appendChild(msg);
+                return;
             }
-            chip.className = 'btn';
-            chip.style.border = '1px solid var(--color-border)';
-            chip.style.transition = 'all 0.2s ease'; // Smooth transition
 
-            const catColor = categoryColors[cat] || 'var(--color-primary)';
+            targets.forEach(acc => {
+                const chip = document.createElement('button');
+                const updateChipState = () => {
+                    const isSelected = selectedToAccount === acc.id;
+                    chip.style.background = isSelected ? 'var(--color-primary-light)' : 'transparent';
+                    chip.style.color = isSelected ? 'var(--color-background)' : 'var(--color-text-muted)';
+                    chip.style.borderColor = isSelected ? 'var(--color-primary)' : 'var(--color-border)';
+                };
 
-            // Hover effects
-            chip.addEventListener('mouseenter', () => {
-                if (selectedCategory !== cat) {
-                    chip.style.borderColor = catColor;
-                    chip.style.color = catColor;
-                    chip.style.boxShadow = `0 0 8px ${catColor}40`; // Subtle glow
-                }
-            });
+                chip.type = 'button';
+                chip.textContent = acc.name;
+                chip.className = 'btn';
+                chip.style.border = '1px solid var(--color-border)';
+                chip.style.transition = 'all 0.2s ease';
 
-            chip.addEventListener('mouseleave', () => {
-                if (selectedCategory !== cat) {
-                    chip.style.borderColor = 'var(--color-border)';
-                    chip.style.color = 'var(--color-text-muted)';
-                    chip.style.boxShadow = 'none';
-                }
-            });
+                chip.addEventListener('click', () => {
+                    // Validate Amount
+                    const amountVal = parseFloat(amountInput.value);
+                    if (isNaN(amountVal) || amountVal === 0) {
+                        amountInput.focus();
+                        amountInput.style.borderColor = '#ef4444';
+                        return;
+                    }
 
-            updateChipState(); // Initial Render
+                    selectedToAccount = acc.id;
 
-            chip.addEventListener('click', () => {
-                // Validate Amount first
-                const amountVal = parseFloat(amountInput.value);
-                if (isNaN(amountVal) || amountVal === 0) {
-                    amountInput.focus();
-                    amountInput.style.borderColor = '#ef4444'; // Red border for error
-                    setTimeout(() => amountInput.style.borderColor = 'var(--color-border)', 2000);
-                    return;
-                }
-
-                // Visual feedback
-                Array.from(chipContainer.children).forEach(c => {
-                    c.style.background = 'transparent';
-                    c.style.color = 'var(--color-text-muted)';
-                    c.style.borderColor = 'var(--color-border)';
+                    // Auto-submit for Transfer
+                    onSubmit({
+                        amount: amountVal,
+                        category: 'Transfer', // Fixed category for transfers
+                        type: 'transfer',
+                        accountId: currentAccountId,
+                        toAccountId: selectedToAccount,
+                        timestamp: new Date(dateInput.value).toISOString()
+                    });
                 });
 
-                selectedCategory = cat;
                 updateChipState();
-
-                // Auto-submit
-                onSubmit({
-                    amount: amountVal,
-                    category: selectedCategory,
-                    type: currentType,
-                    timestamp: new Date(dateInput.value).toISOString() // Use selected date
-                });
+                chipContainer.appendChild(chip);
             });
-            chipContainer.appendChild(chip);
-        });
+
+        } else {
+            // Standard Categories
+            const currentCats = categoryOptions[currentType] || categoryOptions.expense;
+
+            currentCats.forEach(cat => {
+                const chip = document.createElement('button');
+                const updateChipState = () => {
+                    const isSelected = selectedCategory === cat;
+                    chip.style.background = isSelected ? 'var(--color-primary-light)' : 'transparent';
+                    chip.style.color = isSelected ? 'var(--color-background)' : 'var(--color-text-muted)';
+                    chip.style.borderColor = isSelected ? 'var(--color-primary)' : 'var(--color-border)';
+                };
+
+                chip.type = 'button';
+                chip.textContent = cat;
+                // Add hover text if definition exists
+                if (categoryDefinitions[cat]) {
+                    chip.title = categoryDefinitions[cat];
+                }
+                chip.className = 'btn';
+                chip.style.border = '1px solid var(--color-border)';
+                chip.style.transition = 'all 0.2s ease'; // Smooth transition
+
+                const catColor = categoryColors[cat] || 'var(--color-primary)';
+
+                // Hover effects
+                chip.addEventListener('mouseenter', () => {
+                    if (selectedCategory !== cat) {
+                        chip.style.borderColor = catColor;
+                        chip.style.color = catColor;
+                        chip.style.boxShadow = `0 0 8px ${catColor}40`; // Subtle glow
+                    }
+                });
+
+                chip.addEventListener('mouseleave', () => {
+                    if (selectedCategory !== cat) {
+                        chip.style.borderColor = 'var(--color-border)';
+                        chip.style.color = 'var(--color-text-muted)';
+                        chip.style.boxShadow = 'none';
+                    }
+                });
+
+                updateChipState(); // Initial Render
+
+                chip.addEventListener('click', () => {
+                    // Validate Amount first
+                    const amountVal = parseFloat(amountInput.value);
+                    if (isNaN(amountVal) || amountVal === 0) {
+                        amountInput.focus();
+                        amountInput.style.borderColor = '#ef4444'; // Red border for error
+                        setTimeout(() => amountInput.style.borderColor = 'var(--color-border)', 2000);
+                        return;
+                    }
+
+                    // Visual feedback
+                    Array.from(chipContainer.children).forEach(c => {
+                        c.style.background = 'transparent';
+                        c.style.color = 'var(--color-text-muted)';
+                        c.style.borderColor = 'var(--color-border)';
+                    });
+
+                    selectedCategory = cat;
+                    updateChipState();
+
+                    // Auto-submit
+                    onSubmit({
+                        amount: amountVal,
+                        category: selectedCategory,
+                        type: currentType,
+                        accountId: currentAccountId, // Pass selected account
+                        timestamp: new Date(dateInput.value).toISOString() // Use selected date
+                    });
+                });
+                chipContainer.appendChild(chip);
+            });
+        }
     };
 
     renderCategories(); // Initial render
 
     // Update categories when type changes
-    [expenseBtn, incomeBtn, refundBtn].forEach(btn => {
+    [expenseBtn, incomeBtn, transferBtn].forEach(btn => {
         btn.addEventListener('click', () => {
-            selectedCategory = null; // Reset selection
+            selectedCategory = null;
+            selectedToAccount = null;
             renderCategories();
         });
+    });
+
+    // Re-render if account changes (to filter out source from destination list for transfers)
+    accSelect.addEventListener('change', () => {
+        if (currentType === 'transfer') renderCategories();
     });
 
     categoryGroup.appendChild(chipContainer);
