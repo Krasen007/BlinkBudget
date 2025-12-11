@@ -309,7 +309,7 @@ export const SettingsView = () => {
                 new Date(t.timestamp).toLocaleDateString(), // Use default locale for simplicity or ISO
                 t.type.charAt(0).toUpperCase() + t.type.slice(1),
                 t.category,
-                t.amount.toFixed(2)
+                (t.type === 'expense' ? -t.amount : t.amount).toFixed(2)
             ]);
 
             const csvContent = [
