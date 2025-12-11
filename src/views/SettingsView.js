@@ -77,6 +77,23 @@ export const SettingsView = () => {
             actions.style.display = 'flex';
             actions.style.gap = 'var(--spacing-sm)';
 
+            if (true) { // Actions available for all accounts (Rename)
+                const renameBtn = document.createElement('button');
+                renameBtn.textContent = 'Rename';
+                renameBtn.className = 'btn btn-ghost';
+                renameBtn.style.fontSize = '0.75rem';
+                renameBtn.style.padding = 'var(--spacing-xs) var(--spacing-sm)';
+                renameBtn.onclick = () => {
+                    const newName = prompt('Enter new account name:', acc.name);
+                    if (newName && newName.trim() !== '') {
+                        acc.name = newName.trim();
+                        StorageService.saveAccount(acc);
+                        renderAccounts();
+                    }
+                };
+                actions.appendChild(renameBtn);
+            }
+
             if (!acc.isDefault) {
                 const makeDefaultBtn = document.createElement('button');
                 makeDefaultBtn.textContent = 'Set Default';
