@@ -22,11 +22,12 @@ export const DashboardView = () => {
     const accountSelect = document.createElement('select');
     accountSelect.style.padding = 'var(--spacing-xs) var(--spacing-sm)';
     accountSelect.style.borderRadius = 'var(--radius-sm)';
-    accountSelect.style.background = 'transparent';
+    accountSelect.style.background = 'var(--color-surface)'; // Fixed transparency issue
     accountSelect.style.color = 'var(--color-text-main)';
     accountSelect.style.border = '1px solid var(--color-border)';
     accountSelect.style.fontSize = '0.9rem';
     accountSelect.style.cursor = 'pointer';
+    accountSelect.style.outline = 'none'; // Clean look
 
     // Filter Logic
     let currentFilter = 'all'; // Default to All

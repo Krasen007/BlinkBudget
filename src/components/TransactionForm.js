@@ -255,7 +255,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
 
                     // Auto-submit for Transfer
                     onSubmit({
-                        amount: amountVal,
+                        amount: Math.abs(amountVal),
                         category: 'Transfer', // Fixed category for transfers
                         type: 'transfer',
                         accountId: currentAccountId,
@@ -334,7 +334,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
 
                     // Auto-submit
                     onSubmit({
-                        amount: amountVal,
+                        amount: Math.abs(amountVal),
                         category: selectedCategory,
                         type: currentType,
                         accountId: currentAccountId, // Pass selected account
