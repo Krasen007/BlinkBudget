@@ -19,19 +19,18 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     const accountGroup = document.createElement('div');
     accountGroup.style.marginBottom = 'var(--spacing-md)';
 
-    const accLabel = document.createElement('label');
-    accLabel.textContent = 'Account';
-    accLabel.style.display = 'block';
-    accLabel.style.marginBottom = 'var(--spacing-xs)';
-    accLabel.style.color = 'var(--color-text-muted)';
-
     const accSelect = document.createElement('select');
     accSelect.style.width = '100%';
-    accSelect.style.padding = 'var(--spacing-sm)';
+    accSelect.style.padding = 'var(--spacing-sm) var(--spacing-md)';
     accSelect.style.borderRadius = 'var(--radius-md)';
     accSelect.style.background = 'var(--color-surface)';
     accSelect.style.color = 'var(--color-text-main)';
     accSelect.style.border = '1px solid var(--color-border)';
+    accSelect.style.fontSize = '1rem';
+    accSelect.style.cursor = 'pointer';
+    accSelect.style.outline = 'none';
+    accSelect.style.appearance = 'auto';
+    accSelect.className = 'input-select';
 
     accounts.forEach(acc => {
         const opt = document.createElement('option');
@@ -45,7 +44,6 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
         currentAccountId = e.target.value;
     });
 
-    accountGroup.appendChild(accLabel);
     accountGroup.appendChild(accSelect);
     form.appendChild(accountGroup);
 
@@ -111,11 +109,6 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
 
     // Date Input
     const dateGroup = document.createElement('div');
-    const dateLabel = document.createElement('label');
-    dateLabel.textContent = 'Date';
-    dateLabel.style.display = 'block';
-    dateLabel.style.marginBottom = 'var(--spacing-sm)';
-    dateLabel.style.color = 'var(--color-text-muted)';
 
     const dateInput = document.createElement('input');
     dateInput.type = 'date';
@@ -124,17 +117,11 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     const defaultDate = initialValues.timestamp ? initialValues.timestamp.split('T')[0] : new Date().toISOString().split('T')[0];
     dateInput.value = defaultDate;
 
-    dateGroup.appendChild(dateLabel);
     dateGroup.appendChild(dateInput);
     form.appendChild(dateGroup);
 
     // Amount Input
     const amountGroup = document.createElement('div');
-    const amountLabel = document.createElement('label');
-    amountLabel.textContent = 'Amount';
-    amountLabel.style.display = 'block';
-    amountLabel.style.marginBottom = 'var(--spacing-sm)';
-    amountLabel.style.color = 'var(--color-text-muted)';
 
     const amountInput = document.createElement('input');
     amountInput.type = 'number';
@@ -150,18 +137,10 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     amountInput.style.background = 'var(--color-surface)';
     amountInput.style.color = 'var(--color-text-main)';
 
-    amountGroup.appendChild(amountLabel);
     amountGroup.appendChild(amountInput);
 
     // Categories / Destination Account
     const categoryGroup = document.createElement('div');
-    const catLabel = document.createElement('label');
-    // Label updates dynamically
-    catLabel.textContent = currentType === 'transfer' ? 'To Account' : 'Category';
-    catLabel.style.display = 'block';
-    catLabel.style.marginBottom = 'var(--spacing-sm)';
-    catLabel.style.color = 'var(--color-text-muted)';
-    categoryGroup.appendChild(catLabel);
 
     const categoryDefinitions = {
         // Expense
@@ -209,9 +188,6 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
 
     const renderCategories = () => {
         chipContainer.innerHTML = ''; // Clear existing
-
-        // Dynamic Label
-        catLabel.textContent = currentType === 'transfer' ? 'To Account' : 'Category';
 
         if (currentType === 'transfer') {
             // Render Accounts as destinations (exclude current source)

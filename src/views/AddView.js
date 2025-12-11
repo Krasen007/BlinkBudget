@@ -8,11 +8,21 @@ export const AddView = () => {
     container.style.maxWidth = '600px';
     container.style.width = '100%';
 
+    const header = document.createElement('div');
+    header.style.marginBottom = 'var(--spacing-xl)';
+    header.style.flexDirection = 'column';
+    header.style.alignItems = 'stretch';
+    header.style.gap = 'var(--spacing-md)';
+
+    const topRow = document.createElement('div');
+    topRow.style.display = 'flex';
+    topRow.style.justifyContent = 'space-between';
+    topRow.style.alignItems = 'center';
+
     const title = document.createElement('h2');
     title.textContent = 'Add Transaction';
-    title.style.marginBottom = 'var(--spacing-lg)';
     title.style.margin = '0';
-    title.style.textAlign = 'left';
+    title.style.marginRight = 'var(--spacing-md)';
 
     const form = TransactionForm({
         onSubmit: (data) => {
@@ -29,7 +39,9 @@ export const AddView = () => {
     // Removed inline background/color/border to let CSS handle it
     backLink.addEventListener('click', () => Router.navigate('dashboard'));
 
-    container.appendChild(title);
+    topRow.appendChild(title);
+    header.appendChild(topRow);
+    container.appendChild(header);
     container.appendChild(form);
     container.appendChild(backLink);
 
