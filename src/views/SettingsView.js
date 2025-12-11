@@ -117,24 +117,53 @@ export const SettingsView = () => {
     renderAccounts();
     accountSection.appendChild(accountList);
 
-    const addAccountBtn = Button({
-        text: 'Add New Account',
+    // Inline Add Account Form
+    const addContainer = document.createElement('div');
+    addContainer.style.display = 'flex';
+    addContainer.style.gap = 'var(--spacing-sm)';
+    addContainer.style.marginTop = 'var(--spacing-md)';
+
+    const nameInput = document.createElement('input');
+    nameInput.placeholder = 'Account Name';
+    nameInput.style.flex = '1';
+
+    const typeSelect = document.createElement('select');
+    typeSelect.style.borderRadius = 'var(--radius-md)';
+    typeSelect.style.border = '1px solid var(--color-border)';
+    typeSelect.style.background = 'var(--color-surface)';
+    typeSelect.style.color = 'var(--color-text-main)';
+    typeSelect.style.padding = '0 var(--spacing-sm)'; // Compact
+
+    ['Checking', 'Savings', 'Credit Card', 'Cash'].forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.toLowerCase();
+        opt.textContent = t;
+        typeSelect.appendChild(opt);
+    });
+
+    const addBtn = Button({
+        text: 'Add',
         variant: 'secondary',
         onClick: () => {
-            const name = prompt('Enter account name:');
+            const name = nameInput.value.trim();
             if (name) {
                 StorageService.saveAccount({
                     id: crypto.randomUUID(),
                     name: name,
-                    type: 'checking', // Default type for now
+                    type: typeSelect.value,
                     isDefault: false
                 });
+                nameInput.value = ''; // Reset
                 renderAccounts();
             }
         }
     });
-    addAccountBtn.style.width = '100%';
-    accountSection.appendChild(addAccountBtn);
+
+    addContainer.appendChild(nameInput);
+    addContainer.appendChild(typeSelect);
+    addContainer.appendChild(addBtn);
+
+    accountSection.appendChild(addContainer);
 
     container.appendChild(accountSection);
 

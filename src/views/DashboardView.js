@@ -28,6 +28,9 @@ export const DashboardView = () => {
     accountSelect.style.fontSize = '0.9rem';
     accountSelect.style.cursor = 'pointer';
 
+    // Filter Logic
+    let currentFilter = 'all'; // Default to All
+
     const accounts = StorageService.getAccounts();
     const defaultAccount = StorageService.getDefaultAccount();
 
@@ -35,13 +38,14 @@ export const DashboardView = () => {
     const allOption = document.createElement('option');
     allOption.value = 'all';
     allOption.textContent = 'All Accounts';
+    allOption.selected = true; // Default selected
     accountSelect.appendChild(allOption);
 
     accounts.forEach(acc => {
         const opt = document.createElement('option');
         opt.value = acc.id;
         opt.textContent = acc.name;
-        if (acc.id === defaultAccount.id) opt.selected = true; // Default to Main
+        // if (acc.id === defaultAccount.id) opt.selected = true; // No longer default
         accountSelect.appendChild(opt);
     });
 
@@ -61,8 +65,8 @@ export const DashboardView = () => {
     header.appendChild(settingsBtn);
     container.appendChild(header);
 
-    // Filter Logic
-    let currentFilter = accountSelect.value;
+    // Filter Logic - Already initialized above logic, but need to remove this line if it re-declares
+    // let currentFilter = accountSelect.value; <-- REMOVE THIS LINE
 
     // Main Content Wrapper to allow re-rendering
     const content = document.createElement('div');
@@ -237,6 +241,16 @@ export const DashboardView = () => {
                 date.textContent = formatDate(t.timestamp);
                 date.style.fontSize = '0.75rem';
                 date.style.color = 'var(--color-text-muted)';
+                date.style.display = 'flex';
+                date.style.gap = 'var(--spacing-sm)';
+
+                // Show Account Name if not transfer (transfer shows context in title)
+                if (t.type !== 'transfer') {
+                    const accName = accounts.find(a => a.id === t.accountId)?.name || 'Unknown';
+                    const accBadge = document.createElement('span');
+                    accBadge.textContent = `• ${accName}`;
+                    date.appendChild(accBadge);
+                }
 
                 info.appendChild(cat);
                 info.appendChild(date);
