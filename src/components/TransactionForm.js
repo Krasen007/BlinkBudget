@@ -21,16 +21,17 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
 
     const accSelect = document.createElement('select');
     accSelect.style.width = '100%';
-    accSelect.style.padding = 'var(--spacing-sm) var(--spacing-md)';
+    accSelect.style.padding = 'var(--spacing-md) var(--spacing-md)';
     accSelect.style.borderRadius = 'var(--radius-md)';
     accSelect.style.background = 'var(--color-surface)';
     accSelect.style.color = 'var(--color-text-main)';
     accSelect.style.border = '1px solid var(--color-border)';
-    accSelect.style.fontSize = '1rem';
+    accSelect.style.fontSize = 'max(16px, var(--font-size-base))'; // Prevent zoom on iOS
     accSelect.style.cursor = 'pointer';
     accSelect.style.outline = 'none';
     accSelect.style.appearance = 'auto';
-    accSelect.className = 'input-select';
+    accSelect.style.minHeight = 'var(--touch-target-min)'; // Touch-friendly height
+    accSelect.className = 'input-select touch-target';
 
     accounts.forEach(acc => {
         const opt = document.createElement('option');
@@ -58,9 +59,13 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.textContent = label;
-        btn.className = 'btn';
+        btn.className = 'btn type-toggle-btn';
         btn.style.flex = '1';
         btn.style.border = '1px solid var(--color-border)';
+        
+        // Touch-friendly sizing
+        btn.style.minHeight = 'var(--touch-target-min)';
+        btn.style.margin = 'calc(var(--touch-spacing-min) / 2)';
 
         const updateState = () => {
             const isActive = currentType === type;
@@ -74,7 +79,24 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
             Array.from(typeGroup.children).forEach(b => b.updateState());
         });
 
-        // Hover effect for uniformity
+        // Enhanced touch feedback
+        btn.addEventListener('touchstart', (e) => {
+            btn.style.transform = 'scale(0.96)';
+            // Haptic feedback
+            if (navigator.vibrate) {
+                navigator.vibrate(10);
+            }
+        }, { passive: true });
+
+        btn.addEventListener('touchend', () => {
+            btn.style.transform = 'scale(1)';
+        }, { passive: true });
+
+        btn.addEventListener('touchcancel', () => {
+            btn.style.transform = 'scale(1)';
+        }, { passive: true });
+
+        // Hover effect for uniformity (desktop)
         btn.addEventListener('mouseenter', () => {
             if (currentType !== type) {
                 btn.style.borderColor = 'var(--color-text-muted)';
@@ -213,9 +235,41 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
 
                 chip.type = 'button';
                 chip.textContent = acc.name;
-                chip.className = 'btn';
+                chip.className = 'btn category-chip';
                 chip.style.border = '1px solid var(--color-border)';
                 chip.style.transition = 'all 0.2s ease';
+                
+                // Touch-friendly sizing for transfer chips
+                chip.style.minHeight = 'var(--touch-target-min)';
+                chip.style.padding = 'var(--spacing-md) var(--spacing-lg)';
+                chip.style.margin = 'var(--spacing-xs)';
+
+                // Enhanced touch feedback for transfer chips
+                chip.addEventListener('touchstart', (e) => {
+                    chip.style.transform = 'scale(0.95)';
+                    chip.style.boxShadow = '0 0 12px var(--color-primary)60';
+                    // Haptic feedback
+                    if (navigator.vibrate) {
+                        navigator.vibrate(15);
+                    }
+                }, { passive: true });
+
+                chip.addEventListener('touchend', () => {
+                    chip.style.transform = 'scale(1)';
+                    if (selectedToAccount !== acc.id) {
+                        chip.style.boxShadow = 'none';
+                    }
+                }, { passive: true });
+
+                chip.addEventListener('touchcancel', () => {
+                    chip.style.transform = 'scale(1)';
+                    if (selectedToAccount !== acc.id) {
+                        chip.style.boxShadow = 'none';
+                    }
+                }, { passive: true });
+
+                updateChipState();
+                chipContainer.appendChild(chip);
 
                 chip.addEventListener('click', () => {
                     // Validate Amount
@@ -262,13 +316,42 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                 if (categoryDefinitions[cat]) {
                     chip.title = categoryDefinitions[cat];
                 }
-                chip.className = 'btn';
+                chip.className = 'btn category-chip';
                 chip.style.border = '1px solid var(--color-border)';
                 chip.style.transition = 'all 0.2s ease'; // Smooth transition
+                
+                // Touch-friendly sizing for category chips
+                chip.style.minHeight = 'var(--touch-target-min)';
+                chip.style.padding = 'var(--spacing-md) var(--spacing-lg)';
+                chip.style.margin = 'var(--spacing-xs)';
 
                 const catColor = categoryColors[cat] || 'var(--color-primary)';
 
-                // Hover effects
+                // Enhanced touch feedback for category chips
+                chip.addEventListener('touchstart', (e) => {
+                    chip.style.transform = 'scale(0.95)';
+                    chip.style.boxShadow = `0 0 12px ${catColor}60`;
+                    // Haptic feedback
+                    if (navigator.vibrate) {
+                        navigator.vibrate(15);
+                    }
+                }, { passive: true });
+
+                chip.addEventListener('touchend', () => {
+                    chip.style.transform = 'scale(1)';
+                    if (selectedCategory !== cat) {
+                        chip.style.boxShadow = 'none';
+                    }
+                }, { passive: true });
+
+                chip.addEventListener('touchcancel', () => {
+                    chip.style.transform = 'scale(1)';
+                    if (selectedCategory !== cat) {
+                        chip.style.boxShadow = 'none';
+                    }
+                }, { passive: true });
+
+                // Hover effects for desktop
                 chip.addEventListener('mouseenter', () => {
                     if (selectedCategory !== cat) {
                         chip.style.borderColor = catColor;

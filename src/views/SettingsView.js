@@ -80,9 +80,11 @@ export const SettingsView = () => {
             if (true) { // Actions available for all accounts (Rename)
                 const renameBtn = document.createElement('button');
                 renameBtn.textContent = 'Rename';
-                renameBtn.className = 'btn btn-ghost';
+                renameBtn.className = 'btn btn-ghost touch-target';
                 renameBtn.style.fontSize = '0.75rem';
-                renameBtn.style.padding = 'var(--spacing-xs) var(--spacing-sm)';
+                renameBtn.style.padding = 'var(--spacing-sm) var(--spacing-md)';
+                renameBtn.style.minHeight = 'var(--touch-target-min)';
+                renameBtn.style.margin = 'calc(var(--touch-spacing-min) / 2)';
                 renameBtn.onclick = () => {
                     const newName = prompt('Enter new account name:', acc.name);
                     if (newName && newName.trim() !== '') {
@@ -97,9 +99,11 @@ export const SettingsView = () => {
             if (!acc.isDefault) {
                 const makeDefaultBtn = document.createElement('button');
                 makeDefaultBtn.textContent = 'Set Default';
-                makeDefaultBtn.className = 'btn btn-ghost';
+                makeDefaultBtn.className = 'btn btn-ghost touch-target';
                 makeDefaultBtn.style.fontSize = '0.75rem';
-                makeDefaultBtn.style.padding = 'var(--spacing-xs) var(--spacing-sm)';
+                makeDefaultBtn.style.padding = 'var(--spacing-sm) var(--spacing-md)';
+                makeDefaultBtn.style.minHeight = 'var(--touch-target-min)';
+                makeDefaultBtn.style.margin = 'calc(var(--touch-spacing-min) / 2)';
                 makeDefaultBtn.onclick = () => {
                     acc.isDefault = true;
                     StorageService.saveAccount(acc);
@@ -109,10 +113,12 @@ export const SettingsView = () => {
 
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = 'Delete';
-                deleteBtn.className = 'btn btn-ghost';
+                deleteBtn.className = 'btn btn-ghost touch-target';
                 deleteBtn.style.color = '#ef4444';
                 deleteBtn.style.fontSize = '0.75rem';
-                deleteBtn.style.padding = 'var(--spacing-xs) var(--spacing-sm)';
+                deleteBtn.style.padding = 'var(--spacing-sm) var(--spacing-md)';
+                deleteBtn.style.minHeight = 'var(--touch-target-min)';
+                deleteBtn.style.margin = 'calc(var(--touch-spacing-min) / 2)';
                 deleteBtn.onclick = () => {
                     if (confirm(`Delete account "${acc.name}"? Transactions will remain but might be orphaned if not handled.`)) {
                         if (StorageService.deleteAccount(acc.id)) {
@@ -201,8 +207,24 @@ export const SettingsView = () => {
         row.style.display = 'flex';
         row.style.justifyContent = 'space-between';
         row.style.alignItems = 'center';
-        row.style.padding = 'var(--spacing-sm) 0';
+        row.style.padding = 'var(--spacing-md) var(--spacing-sm)';
         row.style.cursor = 'pointer';
+        row.style.minHeight = 'var(--touch-target-min)';
+        row.style.borderRadius = 'var(--radius-sm)';
+        row.style.transition = 'background-color var(--transition-fast)';
+        
+        // Touch feedback for settings options
+        row.addEventListener('touchstart', (e) => {
+            row.style.backgroundColor = 'var(--color-surface-hover)';
+        }, { passive: true });
+        
+        row.addEventListener('touchend', () => {
+            row.style.backgroundColor = 'transparent';
+        }, { passive: true });
+        
+        row.addEventListener('touchcancel', () => {
+            row.style.backgroundColor = 'transparent';
+        }, { passive: true });
 
         const lbl = document.createElement('span');
         lbl.textContent = label;

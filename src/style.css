@@ -217,6 +217,7 @@ p {
   transition: all var(--transition-fast);
   text-decoration: none;
   font-size: var(--font-size-base);
+  position: relative;
   
   /* Touch-friendly sizing */
   min-height: var(--touch-target-min);
@@ -229,6 +230,43 @@ p {
   
   /* Ensure adequate spacing between adjacent buttons */
   margin: calc(var(--touch-spacing-min) / 2);
+}
+
+/* Touch feedback states */
+.btn-touch-active {
+  transform: scale(0.96);
+  transition: transform 0.1s ease;
+}
+
+/* Enhanced visual feedback for touch */
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  pointer-events: none;
+}
+
+.btn:active::before,
+.btn-touch-active::before {
+  opacity: 1;
+}
+
+/* Disabled state */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn:disabled::before {
+  display: none;
 }
 
 .btn-primary {
@@ -351,10 +389,20 @@ input[type=number] {
 }
 
 .transaction-item {
-  transition: background-color var(--transition-fast);
+  transition: all var(--transition-fast);
+  min-height: var(--touch-target-min);
+  
+  /* Touch optimizations */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .transaction-item:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.transaction-item:active {
+  transform: scale(0.98);
   background-color: var(--color-surface-hover);
 }
 
@@ -494,6 +542,79 @@ input[type=number] {
   .mobile-full-width {
     width: auto;
   }
+}
+
+/* Category chips - Touch-optimized */
+.category-chip {
+  /* Ensure minimum touch target size */
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  
+  /* Adequate spacing between chips */
+  margin: var(--spacing-xs);
+  
+  /* Flexible sizing for content */
+  flex: 0 0 auto;
+  
+  /* Enhanced touch feedback */
+  position: relative;
+  overflow: hidden;
+}
+
+.category-chip::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+  pointer-events: none;
+}
+
+.category-chip:active::after {
+  width: 200px;
+  height: 200px;
+}
+
+/* Chip container spacing */
+.transaction-form .category-chip {
+  margin: calc(var(--touch-spacing-min) / 2);
+}
+
+/* Type toggle buttons */
+.type-toggle-btn {
+  /* Ensure minimum touch target */
+  min-height: var(--touch-target-min);
+  
+  /* Adequate spacing between toggle buttons */
+  margin: calc(var(--touch-spacing-min) / 2);
+  
+  /* Enhanced visual feedback */
+  transition: all var(--transition-fast), transform 0.1s ease;
+}
+
+.type-toggle-btn:active {
+  transform: scale(0.96);
+}
+
+/* Select elements - Touch-optimized */
+select.input-select {
+  min-height: var(--touch-target-min);
+  padding: var(--spacing-md);
+  font-size: max(16px, var(--font-size-base)); /* Prevent iOS zoom */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Enhanced focus states for touch */
+select.input-select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  outline: none;
 }
 
 /* Smooth scrolling for mobile */

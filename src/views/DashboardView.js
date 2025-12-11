@@ -227,6 +227,24 @@ export const DashboardView = () => {
                 item.style.padding = 'var(--spacing-md)';
                 item.style.borderBottom = '1px solid var(--color-surface-hover)';
                 item.style.cursor = 'pointer';
+                item.style.minHeight = 'var(--touch-target-min)';
+                item.style.alignItems = 'center';
+                
+                // Touch feedback for transaction items
+                item.addEventListener('touchstart', (e) => {
+                    item.style.backgroundColor = 'var(--color-surface-hover)';
+                    item.style.transform = 'scale(0.98)';
+                }, { passive: true });
+                
+                item.addEventListener('touchend', () => {
+                    item.style.backgroundColor = 'transparent';
+                    item.style.transform = 'scale(1)';
+                }, { passive: true });
+                
+                item.addEventListener('touchcancel', () => {
+                    item.style.backgroundColor = 'transparent';
+                    item.style.transform = 'scale(1)';
+                }, { passive: true });
 
                 item.addEventListener('click', () => {
                     Router.navigate('edit-expense', { id: t.id });
