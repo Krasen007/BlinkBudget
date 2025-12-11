@@ -1,6 +1,7 @@
 import { TransactionForm } from '../components/TransactionForm.js';
 import { StorageService } from '../core/storage.js';
 import { Router } from '../core/router.js';
+import { MobileBackButton } from '../components/MobileNavigation.js';
 
 export const AddView = () => {
     const container = document.createElement('div');
@@ -24,6 +25,12 @@ export const AddView = () => {
     title.style.margin = '0';
     title.style.marginRight = 'var(--spacing-md)';
 
+    // Add mobile back button
+    const mobileBackBtn = MobileBackButton({
+        onBack: () => Router.navigate('dashboard'),
+        label: 'Cancel'
+    });
+
     const form = TransactionForm({
         onSubmit: (data) => {
             StorageService.add(data);
@@ -33,14 +40,14 @@ export const AddView = () => {
 
     const backLink = document.createElement('button');
     backLink.textContent = 'Cancel';
-    backLink.className = 'btn btn-ghost'; // Use class
+    backLink.className = 'btn btn-ghost desktop-only'; // Hide on mobile, show mobile back button instead
     backLink.style.width = '100%';
     backLink.style.marginTop = 'var(--spacing-md)';
-    // Removed inline background/color/border to let CSS handle it
     backLink.addEventListener('click', () => Router.navigate('dashboard'));
 
     topRow.appendChild(title);
     header.appendChild(topRow);
+    header.appendChild(mobileBackBtn); // Add mobile back button to header
     container.appendChild(header);
     container.appendChild(form);
     container.appendChild(backLink);

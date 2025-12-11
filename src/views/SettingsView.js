@@ -1,6 +1,7 @@
 import { Button } from '../components/Button.js';
 import { Router } from '../core/router.js';
 import { StorageService } from '../core/storage.js';
+import { MobileBackButton } from '../components/MobileNavigation.js';
 
 export const SettingsView = () => {
     const container = document.createElement('div');
@@ -18,15 +19,27 @@ export const SettingsView = () => {
     title.textContent = 'Settings';
     title.style.margin = 0;
 
+    // Add mobile back button
+    const mobileBackBtn = MobileBackButton({
+        onBack: () => Router.navigate('dashboard'),
+        label: 'Back'
+    });
+
     const backBtn = Button({
         text: 'Back',
         variant: 'secondary',
         onClick: () => Router.navigate('dashboard')
     });
     backBtn.style.padding = 'var(--spacing-sm) var(--spacing-md)';
+    backBtn.className += ' desktop-only'; // Hide on mobile
 
     header.appendChild(title);
     header.appendChild(backBtn);
+    
+    // Add mobile back button before header
+    const mobileBackContainer = document.createElement('div');
+    mobileBackContainer.appendChild(mobileBackBtn);
+    container.appendChild(mobileBackContainer);
     container.appendChild(header);
 
     // Feature 0: Account Management

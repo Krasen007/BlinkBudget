@@ -1,6 +1,21 @@
 import { Button } from './Button.js';
+import { MobileConfirmDialog } from './MobileModal.js';
 
 export const ConfirmDialog = ({ message, onConfirm, onCancel }) => {
+    // Use mobile modal on mobile devices
+    if (window.mobileUtils?.isMobile()) {
+        return MobileConfirmDialog({
+            title: 'Confirm Action',
+            message,
+            confirmText: 'Delete',
+            cancelText: 'Cancel',
+            onConfirm,
+            onCancel,
+            variant: 'danger'
+        });
+    }
+
+    // Desktop version (existing implementation)
     const overlay = document.createElement('div');
     overlay.className = 'dialog-overlay';
 
@@ -25,7 +40,6 @@ export const ConfirmDialog = ({ message, onConfirm, onCancel }) => {
             if (onCancel) onCancel();
         }
     });
-    // Removed inline styles to rely on class
 
     const confirmBtn = Button({
         text: 'Delete',

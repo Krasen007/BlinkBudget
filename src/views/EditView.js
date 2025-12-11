@@ -3,11 +3,18 @@ import { Button } from '../components/Button.js';
 import { ConfirmDialog } from '../components/ConfirmDialog.js'; // Import Dialog
 import { StorageService } from '../core/storage.js';
 import { Router } from '../core/router.js';
+import { MobileBackButton } from '../components/MobileNavigation.js';
 
 export const EditView = ({ id }) => {
     // ... existing initialization ...
     const container = document.createElement('div');
     container.className = 'view-edit';
+
+    // Add mobile back button
+    const mobileBackBtn = MobileBackButton({
+        onBack: () => Router.navigate('dashboard'),
+        label: 'Cancel'
+    });
 
     const title = document.createElement('h2');
     title.textContent = 'Edit Transaction';
@@ -60,11 +67,12 @@ export const EditView = ({ id }) => {
 
     const backLink = document.createElement('button');
     backLink.textContent = 'Cancel';
-    backLink.className = 'btn btn-ghost'; // Use class
+    backLink.className = 'btn btn-ghost desktop-only'; // Hide on mobile
     backLink.style.width = '100%';
     backLink.style.marginTop = 'var(--spacing-md)';
     backLink.addEventListener('click', () => Router.navigate('dashboard'));
 
+    container.appendChild(mobileBackBtn);
     container.appendChild(title);
     container.appendChild(form);
     container.appendChild(deleteBtn);
