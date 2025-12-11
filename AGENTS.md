@@ -97,6 +97,6 @@ Adherence to these standards is crucial for maintaining code quality, consistenc
 
 The following documents provide additional context and detailed specifications:
 
-*   **`docs/PRD.md`**: Product Requirements Document (for product vision, user journey, and high-level requirements).
-*   **`docs/TechDesign.md`**: Technical Design Document (for detailed technical architecture, stack rationale, and implementation considerations).
+*   **`docs/prd.md`**: Product Requirements Document (for product vision, user journey, and high-level requirements).
+*   **`docs/tech_design.md`**: Technical Design Document (for detailed technical architecture, stack rationale, and implementation considerations).
 ```
