@@ -768,6 +768,216 @@ body.keyboard-visible select:focus {
   transition: all var(--transition-fast);
 }
 
+/* Mobile Settings View Styles */
+.mobile-settings-layout {
+  padding: var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+  .mobile-settings-layout {
+    padding: var(--spacing-lg);
+  }
+}
+
+.mobile-settings-card {
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.mobile-settings-title {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text-main);
+}
+
+/* Mobile Account List Styles */
+.mobile-account-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.mobile-account-item {
+  background: var(--color-surface-hover);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  transition: all var(--transition-fast);
+}
+
+.mobile-account-item:active {
+  transform: scale(0.98);
+}
+
+.mobile-account-info {
+  margin-bottom: var(--spacing-sm);
+}
+
+.mobile-account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.mobile-action-btn {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.mobile-action-btn:active {
+  transform: scale(0.96);
+}
+
+.mobile-delete-btn:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
+}
+
+/* Mobile Form Styles */
+.mobile-add-account-form {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  margin-top: var(--spacing-md);
+}
+
+.mobile-form-input,
+.mobile-form-select {
+  width: 100%;
+  min-height: var(--touch-target-min);
+  font-size: 16px; /* Prevent zoom on iOS */
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-main);
+  transition: all var(--transition-fast);
+}
+
+.mobile-form-input:focus,
+.mobile-form-select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  outline: none;
+}
+
+.mobile-form-button {
+  width: 100%;
+  min-height: var(--touch-target-min);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+/* Mobile Settings Options */
+.mobile-settings-option {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.mobile-settings-option:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-primary-light);
+}
+
+.mobile-settings-option:active {
+  transform: scale(0.98);
+  background: var(--color-surface-hover);
+}
+
+/* Mobile Date Range Form */
+.mobile-date-range-form {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+}
+
+.mobile-date-input-wrapper {
+  width: 100%;
+}
+
+.mobile-date-input-wrapper label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-xs);
+}
+
+/* Mobile Modal Enhancements */
+.mobile-modal-overlay {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.mobile-modal {
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsive adjustments for settings */
+@media (max-width: 767px) {
+  .settings-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+  
+  .mobile-account-actions {
+    flex-direction: column;
+  }
+  
+  .mobile-action-btn {
+    width: 100%;
+  }
+}
+
+@media (min-width: 768px) {
+  .mobile-account-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+    max-width: 300px;
+  }
+  
+  .mobile-date-range-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+    align-items: end;
+  }
+  
+  .mobile-date-input-wrapper:last-child {
+    grid-column: span 2;
+  }
+}
+
 /* Improve touch interactions */
 .btn:active,
 .card:active,
@@ -1245,6 +1455,8 @@ input:active {
 /* Dashboard Transactions Mobile Optimizations */
 .dashboard-transactions-container {
   /* Container for mobile-optimized transaction list */
+  display: flex;
+  flex-direction: column;
 }
 
 .dashboard-transactions-title {
