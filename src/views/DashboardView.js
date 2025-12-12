@@ -143,29 +143,114 @@ export const DashboardView = () => {
 
         const availableBalance = totalIncome - totalExpense;
 
-        // 2. Statistics Cards
+        // 2. Statistics Cards - Mobile-optimized layout
         const statsContainer = document.createElement('div');
+        statsContainer.className = 'dashboard-stats-container';
         statsContainer.style.display = 'grid';
         statsContainer.style.gap = 'var(--spacing-md)';
         statsContainer.style.marginBottom = 'var(--spacing-xl)';
+        
+        // Mobile-first responsive grid: single column on mobile, multi-column on larger screens
+        statsContainer.style.gridTemplateColumns = '1fr'; // Single column on mobile
+        
+        // Add responsive behavior via media query classes
+        if (window.innerWidth >= 768) {
+            statsContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
+        }
+        
+        // Listen for resize events to maintain responsive behavior
+        const updateResponsiveLayout = () => {
+            const isMobile = window.innerWidth < 768;
+            
+            // Update stats container layout
+            if (isMobile) {
+                statsContainer.style.gridTemplateColumns = '1fr';
+            } else {
+                statsContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
+            }
+            
+            // Update typography for all existing elements
+            const statLabels = container.querySelectorAll('.dashboard-stat-label');
+            const statValues = container.querySelectorAll('.dashboard-stat-value');
+            const transactionTitle = container.querySelector('.dashboard-transactions-title');
+            const transactionList = container.querySelector('.dashboard-transactions-list');
+            const transactionCategories = container.querySelectorAll('.transaction-item-category');
+            const transactionDates = container.querySelectorAll('.transaction-item-date');
+            const transactionValues = container.querySelectorAll('.transaction-item-value');
+            
+            statLabels.forEach(label => {
+                label.style.fontSize = isMobile ? 'var(--font-size-sm)' : '0.875rem';
+            });
+            
+            statValues.forEach(value => {
+                value.style.fontSize = isMobile ? 'var(--font-size-2xl)' : '1.75rem';
+            });
+            
+            if (transactionTitle) {
+                transactionTitle.style.fontSize = isMobile ? 'var(--font-size-xl)' : 'var(--font-size-2xl)';
+            }
+            
+            if (transactionList) {
+                transactionList.style.maxHeight = isMobile ? '50vh' : '400px';
+            }
+            
+            transactionCategories.forEach(cat => {
+                cat.style.fontSize = isMobile ? 'var(--font-size-base)' : 'var(--font-size-sm)';
+            });
+            
+            transactionDates.forEach(date => {
+                date.style.fontSize = isMobile ? 'var(--font-size-sm)' : '0.75rem';
+            });
+            
+            transactionValues.forEach(val => {
+                val.style.fontSize = isMobile ? 'var(--font-size-lg)' : 'var(--font-size-base)';
+            });
+        };
+        
+        // Debounced resize handler for better performance
+        let resizeTimeout;
+        const handleResize = () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(updateResponsiveLayout, 150);
+        };
+        
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('orientationchange', () => {
+            // Delay to allow orientation change to complete
+            setTimeout(updateResponsiveLayout, 300);
+        });
 
         const createCard = (label, value, color) => {
             const card = document.createElement('div');
-            card.className = 'card';
+            card.className = 'card dashboard-stat-card';
             card.style.textAlign = 'left';
             card.style.padding = 'var(--spacing-lg)';
+            
+            // Enhanced mobile touch target
+            card.style.minHeight = 'var(--touch-target-min)';
+            card.style.display = 'flex';
+            card.style.flexDirection = 'column';
+            card.style.justifyContent = 'center';
 
             const lbl = document.createElement('p');
             lbl.textContent = label;
-            lbl.style.fontSize = '0.875rem';
+            lbl.className = 'dashboard-stat-label';
+            // Mobile-optimized typography
+            lbl.style.fontSize = window.innerWidth < 768 ? 'var(--font-size-sm)' : '0.875rem';
             lbl.style.marginBottom = 'var(--spacing-xs)';
             lbl.style.color = 'var(--color-text-muted)';
+            lbl.style.lineHeight = 'var(--line-height-normal)';
+            lbl.style.fontWeight = '500';
 
             const val = document.createElement('h2');
             val.textContent = `$${value.toFixed(2)}`;
+            val.className = 'dashboard-stat-value';
             val.style.color = color;
             val.style.margin = 0;
-            val.style.fontSize = '1.75rem';
+            // Responsive font sizing for better mobile readability
+            val.style.fontSize = window.innerWidth < 768 ? 'var(--font-size-2xl)' : '1.75rem';
+            val.style.lineHeight = 'var(--line-height-tight)';
+            val.style.fontWeight = '700';
 
             card.appendChild(lbl);
             card.appendChild(val);
@@ -197,12 +282,19 @@ export const DashboardView = () => {
         addBtn.style.marginBottom = 'var(--spacing-xl)';
         content.appendChild(addBtn);
 
-        // 4. Recent Transactions
+        // 4. Recent Transactions - Mobile-optimized
         const listContainer = document.createElement('div');
+        listContainer.className = 'dashboard-transactions-container';
+        
         const listTitle = document.createElement('h3');
         listTitle.textContent = 'Recent Transactions';
+        listTitle.className = 'dashboard-transactions-title';
         listTitle.style.marginBottom = 'var(--spacing-md)';
         listTitle.style.textAlign = 'left';
+        // Mobile-optimized typography
+        listTitle.style.fontSize = window.innerWidth < 768 ? 'var(--font-size-xl)' : 'var(--font-size-2xl)';
+        listTitle.style.lineHeight = 'var(--line-height-tight)';
+        listTitle.style.fontWeight = '600';
 
         listContainer.appendChild(listTitle);
 
@@ -213,11 +305,22 @@ export const DashboardView = () => {
             listContainer.appendChild(emptyState);
         } else {
             const list = document.createElement('ul');
+            list.className = 'dashboard-transactions-list';
             list.style.listStyle = 'none';
             list.style.padding = 0;
-            list.style.maxHeight = '400px';
+            // Responsive max height for better mobile experience
+            list.style.maxHeight = window.innerWidth < 768 ? '50vh' : '400px';
             list.style.overflowY = 'auto';
             list.style.borderTop = '1px solid var(--color-surface-hover)';
+            
+            // Enhanced mobile scrolling performance
+            list.style.webkitOverflowScrolling = 'touch';
+            list.style.scrollBehavior = 'smooth';
+            list.style.overscrollBehavior = 'contain';
+            
+            // Optimize for mobile performance
+            list.style.willChange = 'scroll-position';
+            list.style.transform = 'translateZ(0)'; // Force hardware acceleration
 
             transactions.forEach(t => {
                 const item = document.createElement('li');
@@ -251,11 +354,14 @@ export const DashboardView = () => {
                 });
 
                 const info = document.createElement('div');
+                info.className = 'transaction-item-info';
                 info.style.display = 'flex';
                 info.style.flexDirection = 'column';
                 info.style.alignItems = 'flex-start';
-                info.style.gap = '2px';
+                info.style.gap = window.innerWidth < 768 ? 'var(--spacing-xs)' : '2px';
                 info.style.textAlign = 'left';
+                info.style.flex = '1';
+                info.style.minWidth = '0'; // Allow text truncation
 
                 const cat = document.createElement('div');
 
@@ -275,14 +381,26 @@ export const DashboardView = () => {
                     cat.textContent = t.category;
                 }
 
+                cat.className = 'transaction-item-category';
                 cat.style.fontWeight = '500';
+                // Mobile-optimized typography
+                cat.style.fontSize = window.innerWidth < 768 ? 'var(--font-size-base)' : 'var(--font-size-sm)';
+                cat.style.lineHeight = 'var(--line-height-normal)';
+                cat.style.color = 'var(--color-text-main)';
+                cat.style.overflow = 'hidden';
+                cat.style.textOverflow = 'ellipsis';
+                cat.style.whiteSpace = 'nowrap';
 
                 const date = document.createElement('div');
                 date.textContent = formatDate(t.timestamp);
-                date.style.fontSize = '0.75rem';
+                date.className = 'transaction-item-date';
+                // Mobile-optimized typography
+                date.style.fontSize = window.innerWidth < 768 ? 'var(--font-size-sm)' : '0.75rem';
                 date.style.color = 'var(--color-text-muted)';
                 date.style.display = 'flex';
                 date.style.gap = 'var(--spacing-sm)';
+                date.style.lineHeight = 'var(--line-height-normal)';
+                date.style.alignItems = 'center';
 
                 // Show Account Name if not transfer (transfer shows context in title)
                 if (t.type !== 'transfer') {
@@ -326,8 +444,14 @@ export const DashboardView = () => {
                 if (t.type === 'transfer' && currentFilter === 'all') sign = ''; // Neutral
 
                 val.textContent = `${sign}$${Math.abs(t.amount).toFixed(2)}`;
+                val.className = 'transaction-item-value';
                 val.style.fontWeight = '600';
                 val.style.color = color;
+                // Mobile-optimized typography
+                val.style.fontSize = window.innerWidth < 768 ? 'var(--font-size-lg)' : 'var(--font-size-base)';
+                val.style.lineHeight = 'var(--line-height-tight)';
+                val.style.textAlign = 'right';
+                val.style.flexShrink = '0';
 
                 item.appendChild(info);
                 item.appendChild(val);
@@ -345,6 +469,12 @@ export const DashboardView = () => {
         currentFilter = e.target.value;
         renderDashboard();
     });
+
+    // Cleanup function for event listeners (called when component unmounts)
+    container.cleanup = () => {
+        window.removeEventListener('resize', handleResize);
+        window.removeEventListener('orientationchange', updateResponsiveLayout);
+    };
 
     return container;
 };
