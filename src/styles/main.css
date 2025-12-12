@@ -1,0 +1,17 @@
+/* Main CSS entry point importing all modules */
+
+/* Import order follows CSS architecture hierarchy */
+/* 1. Design tokens (no dependencies) */
+@import './tokens/index.css';
+
+/* 2. Base styles (depends on tokens) */
+@import './base/index.css';
+
+/* 3. Component styles (depends on tokens and base) */
+@import './components/index.css';
+
+/* 4. Mobile-specific styles (depends on tokens, base, components) */
+@import './mobile/index.css';
+
+/* 5. Utility classes (depends on tokens) */
+@import './utilities/index.css';

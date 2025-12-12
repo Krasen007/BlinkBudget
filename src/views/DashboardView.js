@@ -14,7 +14,7 @@ export const DashboardView = () => {
 
     // Title
     const title = document.createElement('h2');
-    title.textContent = 'Dashboard';
+    title.textContent = 'Dashboard 1.0';
     title.style.margin = '0';
     title.style.marginRight = 'var(--spacing-md)';
 

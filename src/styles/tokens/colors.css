@@ -1,0 +1,28 @@
+/* Color system and theme variables */
+:root {
+  /* Base color palette */
+  --color-primary-hue: 250;
+  --color-primary-sat: 84%;
+  --color-primary-light: 60%;
+  
+  /* Semantic color tokens */
+  --color-primary: hsl(var(--color-primary-hue), var(--color-primary-sat), var(--color-primary-light));
+  --color-primary-dark: hsl(var(--color-primary-hue), var(--color-primary-sat), 50%);
+  --color-primary-lighter: hsl(var(--color-primary-hue), var(--color-primary-sat), 75%);
+  
+  /* Surface colors */
+  --color-background: hsl(240, 10%, 4%);
+  --color-surface: hsl(240, 10%, 10%);
+  --color-surface-hover: hsl(240, 10%, 15%);
+  
+  /* Text colors */
+  --color-text-main: hsl(0, 0%, 100%);
+  --color-text-muted: hsl(240, 5%, 65%);
+  --color-border: hsl(240, 5%, 20%);
+  
+  /* Status colors */
+  --color-success: hsl(142, 76%, 36%);
+  --color-warning: hsl(38, 92%, 50%);
+  --color-error: hsl(0, 84%, 60%);
+  --color-info: hsl(217, 91%, 60%);
+}
