@@ -1,5 +1,6 @@
 import { Button } from './Button.js';
 import { StorageService } from '../core/storage.js';
+import { MobileUtils } from '../core/mobile.js';
 
 export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     const form = document.createElement('form');
@@ -43,7 +44,27 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
 
     accSelect.addEventListener('change', (e) => {
         currentAccountId = e.target.value;
+        
+        // Haptic feedback for account selection
+        if (window.mobileUtils) {
+            window.mobileUtils.hapticFeedback([10]); // Light haptic for selection
+        }
     });
+    
+    // Mobile-specific select handling
+    const handleSelectFocus = () => {
+        if (window.mobileUtils) {
+            window.mobileUtils.preventInputZoom(accSelect);
+        }
+        accSelect.style.borderColor = 'var(--color-primary)';
+    };
+    
+    const handleSelectBlur = () => {
+        accSelect.style.borderColor = 'var(--color-border)';
+    };
+    
+    accSelect.addEventListener('focus', handleSelectFocus);
+    accSelect.addEventListener('blur', handleSelectBlur);
 
     accountGroup.appendChild(accSelect);
     form.appendChild(accountGroup);
@@ -82,9 +103,9 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
         // Enhanced touch feedback
         btn.addEventListener('touchstart', (e) => {
             btn.style.transform = 'scale(0.96)';
-            // Haptic feedback
-            if (navigator.vibrate) {
-                navigator.vibrate(10);
+            // Enhanced haptic feedback for form interactions
+            if (window.mobileUtils) {
+                window.mobileUtils.hapticFeedback([10]); // Light haptic for type toggle
             }
         }, { passive: true });
 
@@ -135,9 +156,32 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     const dateInput = document.createElement('input');
     dateInput.type = 'date';
     dateInput.style.width = '100%';
+    dateInput.style.padding = 'var(--spacing-md)';
+    dateInput.style.borderRadius = 'var(--radius-md)';
+    dateInput.style.border = '1px solid var(--color-border)';
+    dateInput.style.background = 'var(--color-surface)';
+    dateInput.style.color = 'var(--color-text-main)';
+    dateInput.style.fontSize = 'max(16px, var(--font-size-base))'; // Prevent zoom on iOS
+    dateInput.style.minHeight = 'var(--touch-target-min)'; // Touch-friendly height
+    
     // Default to initial value or Today
     const defaultDate = initialValues.timestamp ? initialValues.timestamp.split('T')[0] : new Date().toISOString().split('T')[0];
     dateInput.value = defaultDate;
+    
+    // Mobile-specific date input handling
+    const handleDateFocus = () => {
+        if (window.mobileUtils) {
+            window.mobileUtils.preventInputZoom(dateInput);
+        }
+        dateInput.style.borderColor = 'var(--color-primary)';
+    };
+    
+    const handleDateBlur = () => {
+        dateInput.style.borderColor = 'var(--color-border)';
+    };
+    
+    dateInput.addEventListener('focus', handleDateFocus);
+    dateInput.addEventListener('blur', handleDateBlur);
 
     dateGroup.appendChild(dateInput);
     form.appendChild(dateGroup);
@@ -158,6 +202,37 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     amountInput.style.border = '1px solid var(--color-border)';
     amountInput.style.background = 'var(--color-surface)';
     amountInput.style.color = 'var(--color-text-main)';
+    
+    // Mobile-specific optimizations
+    amountInput.inputMode = 'decimal'; // Show numeric keypad on mobile
+    amountInput.pattern = '[0-9]*\\.?[0-9]*'; // Numeric pattern for better mobile keyboard
+    amountInput.style.fontSize = 'max(16px, 2rem)'; // Prevent zoom on iOS
+    amountInput.style.minHeight = 'var(--touch-target-min)'; // Touch-friendly height
+    
+    // Keyboard-aware viewport adjustments
+    const handleAmountFocus = () => {
+        // Prevent zoom on input focus
+        if (window.mobileUtils) {
+            window.mobileUtils.preventInputZoom(amountInput);
+            
+            // Scroll input into view above keyboard with delay for keyboard animation
+            setTimeout(() => {
+                window.mobileUtils.scrollIntoViewAboveKeyboard(amountInput, 60);
+            }, 300);
+        }
+        
+        // Visual feedback
+        amountInput.style.borderColor = 'var(--color-primary)';
+        amountInput.style.boxShadow = '0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1)';
+    };
+    
+    const handleAmountBlur = () => {
+        amountInput.style.borderColor = 'var(--color-border)';
+        amountInput.style.boxShadow = 'none';
+    };
+    
+    amountInput.addEventListener('focus', handleAmountFocus);
+    amountInput.addEventListener('blur', handleAmountBlur);
 
     amountGroup.appendChild(amountInput);
 
@@ -248,9 +323,9 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                 chip.addEventListener('touchstart', (e) => {
                     chip.style.transform = 'scale(0.95)';
                     chip.style.boxShadow = '0 0 12px var(--color-primary)60';
-                    // Haptic feedback
-                    if (navigator.vibrate) {
-                        navigator.vibrate(15);
+                    // Enhanced haptic feedback for form interactions
+                    if (window.mobileUtils) {
+                        window.mobileUtils.hapticFeedback([15]); // Light haptic for touch start
                     }
                 }, { passive: true });
 
@@ -277,10 +352,20 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                     if (isNaN(amountVal) || amountVal === 0) {
                         amountInput.focus();
                         amountInput.style.borderColor = '#ef4444';
+                        
+                        // Error haptic feedback
+                        if (window.mobileUtils) {
+                            window.mobileUtils.hapticFeedback([50, 50, 50]); // Error pattern
+                        }
                         return;
                     }
 
                     selectedToAccount = acc.id;
+
+                    // Success haptic feedback for transfer completion
+                    if (window.mobileUtils) {
+                        window.mobileUtils.hapticFeedback([25, 25, 50]); // Success pattern
+                    }
 
                     // Auto-submit for Transfer
                     onSubmit({
@@ -331,9 +416,9 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                 chip.addEventListener('touchstart', (e) => {
                     chip.style.transform = 'scale(0.95)';
                     chip.style.boxShadow = `0 0 12px ${catColor}60`;
-                    // Haptic feedback
-                    if (navigator.vibrate) {
-                        navigator.vibrate(15);
+                    // Enhanced haptic feedback for form interactions
+                    if (window.mobileUtils) {
+                        window.mobileUtils.hapticFeedback([15]); // Light haptic for touch start
                     }
                 }, { passive: true });
 
@@ -377,6 +462,11 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                         amountInput.focus();
                         amountInput.style.borderColor = '#ef4444'; // Red border for error
                         setTimeout(() => amountInput.style.borderColor = 'var(--color-border)', 2000);
+                        
+                        // Error haptic feedback
+                        if (window.mobileUtils) {
+                            window.mobileUtils.hapticFeedback([50, 50, 50]); // Error pattern
+                        }
                         return;
                     }
 
@@ -389,6 +479,11 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
 
                     selectedCategory = cat;
                     updateChipState();
+
+                    // Success haptic feedback for form completion
+                    if (window.mobileUtils) {
+                        window.mobileUtils.hapticFeedback([25, 25, 50]); // Success pattern
+                    }
 
                     // Auto-submit
                     onSubmit({
@@ -432,8 +527,75 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     // No submit handler needed on form itself, but keep preventDefault just in case
     form.addEventListener('submit', (e) => e.preventDefault());
 
-    // Focus amount on load
-    setTimeout(() => amountInput.focus(), 100);
+    // Keyboard-aware viewport adjustments for the entire form
+    const setupKeyboardHandling = () => {
+        if (!window.mobileUtils || !window.mobileUtils.isMobile()) return;
+        
+        const formInputs = [amountInput, dateInput, accSelect];
+        
+        formInputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                // Add class to body for keyboard-aware styling
+                document.body.classList.add('keyboard-visible');
+                
+                // Adjust form positioning for keyboard
+                form.style.paddingBottom = '20vh'; // Extra space for keyboard
+                
+                // Scroll the focused input into view with delay for keyboard animation
+                setTimeout(() => {
+                    if (window.mobileUtils) {
+                        window.mobileUtils.scrollIntoViewAboveKeyboard(input, 80);
+                    }
+                }, 300);
+            });
+            
+            input.addEventListener('blur', () => {
+                // Check if any input still has focus before removing keyboard class
+                setTimeout(() => {
+                    const hasActiveFocus = formInputs.some(inp => document.activeElement === inp);
+                    if (!hasActiveFocus) {
+                        document.body.classList.remove('keyboard-visible');
+                        form.style.paddingBottom = '0';
+                    }
+                }, 100);
+            });
+        });
+        
+        // Handle visual viewport changes (keyboard show/hide)
+        if (window.visualViewport) {
+            const handleViewportChange = () => {
+                const keyboardHeight = window.innerHeight - window.visualViewport.height;
+                
+                if (keyboardHeight > 100) { // Keyboard is visible
+                    document.body.classList.add('keyboard-visible');
+                    form.style.paddingBottom = `${keyboardHeight + 20}px`;
+                } else { // Keyboard is hidden
+                    document.body.classList.remove('keyboard-visible');
+                    form.style.paddingBottom = '0';
+                }
+            };
+            
+            window.visualViewport.addEventListener('resize', handleViewportChange);
+            
+            // Cleanup function (would be called when component is destroyed)
+            form._cleanupKeyboardHandling = () => {
+                window.visualViewport.removeEventListener('resize', handleViewportChange);
+            };
+        }
+    };
+    
+    // Initialize keyboard handling
+    setupKeyboardHandling();
+
+    // Focus amount on load with delay to ensure mobile utils are ready
+    setTimeout(() => {
+        amountInput.focus();
+        
+        // Initial haptic feedback to indicate form is ready
+        if (window.mobileUtils && window.mobileUtils.supportsHaptic()) {
+            window.mobileUtils.hapticFeedback([5]); // Very light welcome haptic
+        }
+    }, 100);
 
     return form;
 };

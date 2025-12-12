@@ -650,6 +650,33 @@ select.input-select:focus {
 /* Mobi
 le-specific enhancements */
 
+/* Keyboard-aware viewport adjustments */
+body.keyboard-visible {
+  /* Adjust layout when virtual keyboard is visible */
+  --visual-viewport-height: var(--visual-viewport-height, 100vh);
+}
+
+body.keyboard-visible #app {
+  /* Ensure content remains accessible above keyboard */
+  min-height: var(--visual-viewport-height);
+  padding-bottom: 0; /* Let individual components handle their spacing */
+}
+
+body.keyboard-visible .transaction-form {
+  /* Ensure form content is accessible above keyboard */
+  margin-bottom: 0;
+}
+
+/* Enhanced input focus states for mobile keyboard interaction */
+body.keyboard-visible input:focus,
+body.keyboard-visible select:focus {
+  /* Stronger focus indication when keyboard is active */
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
+  transform: scale(1.02);
+  transition: all var(--transition-fast);
+}
+
 /* Improve touch interactions */
 .btn:active,
 .card:active,
