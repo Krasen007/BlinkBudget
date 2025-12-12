@@ -1,2 +1,16 @@
-/* Imports all utility files */
-/* Utility files will be created in subsequent tasks */
+/* Utilities Index - Import all utility modules */
+
+/* Layout utilities - flexbox, grid, positioning, display */
+@import './layout.css';
+
+/* Spacing utilities - margin, padding, safe areas */
+@import './spacing.css';
+
+/* Typography utilities - fonts, sizes, colors, alignment */
+@import './typography.css';
+
+/* Accessibility utilities - screen readers, focus, touch targets */
+@import './accessibility.css';
+
+/* Responsive utilities - breakpoints, display, containers */
+@import './responsive.css';

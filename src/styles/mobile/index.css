@@ -1,2 +1,5 @@
-/* Imports all mobile files */
-/* Mobile-specific files will be created in subsequent tasks */
+/* Mobile styles index */
+@import './navigation.css';
+@import './modals.css';
+@import './touch.css';
+@import './keyboard.css';

@@ -1,0 +1,302 @@
+/* Card Component Styles */
+
+/* Base card styles */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  transition: border-color var(--transition-normal);
+}
+
+/* Card Hover */
+.card:hover {
+  border-color: var(--color-primary-light);
+}
+
+/* Dashboard stat cards */
+.dashboard-stat-card {
+  /* Enhanced mobile touch targets and visual hierarchy */
+  min-height: var(--touch-target-min);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.dashboard-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 767px) {
+  .dashboard-stat-card {
+    padding: var(--spacing-md);
+    min-height: 80px;
+  }
+}
+
+.dashboard-stat-label {
+  /* Mobile-optimized label typography */
+  font-weight: 500;
+  line-height: var(--line-height-normal);
+  margin-bottom: var(--spacing-xs);
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 767px) {
+  .dashboard-stat-label {
+    font-size: var(--font-size-sm);
+  }
+}
+
+.dashboard-stat-value {
+  /* Mobile-optimized value typography */
+  line-height: var(--line-height-tight);
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text-main);
+}
+
+@media (max-width: 767px) {
+  .dashboard-stat-value {
+    font-size: var(--font-size-2xl);
+  }
+}
+
+/* Dashboard stats container */
+.dashboard-stats-container {
+  /* Single column layout on mobile, responsive grid on larger screens */
+  display: grid;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+@media (max-width: 767px) {
+  .dashboard-stats-container {
+    grid-template-columns: 1fr; /* Single column on mobile */
+    gap: var(--spacing-sm);
+  }
+}
+
+@media (min-width: 768px) {
+  .dashboard-stats-container {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-md);
+  }
+}
+
+/* Mobile settings cards */
+.mobile-settings-card {
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.mobile-settings-title {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text-main);
+}
+
+/* Mobile account item cards */
+.mobile-account-item {
+  background: var(--color-surface-hover);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  transition: all var(--transition-fast);
+}
+
+.mobile-account-item:active {
+  transform: scale(0.98);
+}
+
+.mobile-account-info {
+  margin-bottom: var(--spacing-sm);
+}
+
+.mobile-account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+/* Mobile settings options */
+.mobile-settings-option {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.mobile-settings-option:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-primary-light);
+}
+
+.mobile-settings-option:active {
+  transform: scale(0.98);
+  background: var(--color-surface-hover);
+}
+
+/* Transaction item cards */
+.transaction-item {
+  transition: all var(--transition-fast);
+  min-height: var(--touch-target-min);
+  
+  /* Touch optimizations */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.transaction-item:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.transaction-item:active {
+  transform: scale(0.98);
+  background-color: var(--color-surface-hover);
+}
+
+/* Transaction item info */
+.transaction-item-info {
+  /* Enhanced mobile layout for transaction info */
+  flex: 1;
+  min-width: 0; /* Allow text truncation */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+@media (max-width: 767px) {
+  .transaction-item-info {
+    gap: var(--spacing-xs);
+  }
+}
+
+.transaction-item-category {
+  /* Mobile-optimized category display */
+  font-weight: 500;
+  line-height: var(--line-height-normal);
+  color: var(--color-text-main);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+
+@media (max-width: 767px) {
+  .transaction-item-category {
+    font-size: var(--font-size-base);
+  }
+}
+
+.transaction-item-date {
+  /* Mobile-optimized date display */
+  line-height: var(--line-height-normal);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 767px) {
+  .transaction-item-date {
+    font-size: var(--font-size-sm);
+  }
+}
+
+.transaction-item-value {
+  /* Mobile-optimized value display */
+  font-weight: 600;
+  line-height: var(--line-height-tight);
+  text-align: right;
+  flex-shrink: 0;
+  color: var(--color-text-main);
+}
+
+@media (max-width: 767px) {
+  .transaction-item-value {
+    font-size: var(--font-size-lg);
+  }
+}
+
+/* Dashboard transactions container */
+.dashboard-transactions-container {
+  /* Container for mobile-optimized transaction list */
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-transactions-title {
+  /* Mobile-optimized section title */
+  line-height: var(--line-height-tight);
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+  text-align: left;
+  color: var(--color-text-main);
+}
+
+@media (max-width: 767px) {
+  .dashboard-transactions-title {
+    font-size: var(--font-size-xl);
+  }
+}
+
+.dashboard-transactions-list {
+  /* Enhanced mobile scrolling performance */
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+  will-change: scroll-position;
+  transform: translateZ(0); /* Force hardware acceleration */
+}
+
+@media (max-width: 767px) {
+  .dashboard-transactions-list {
+    max-height: 50vh; /* Responsive height for mobile */
+  }
+}
+
+/* Mobile account list */
+.mobile-account-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Responsive adjustments for cards */
+@media (max-width: 767px) {
+  .mobile-account-actions {
+    flex-direction: column;
+  }
+}
+
+@media (min-width: 768px) {
+  .mobile-account-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+    max-width: 300px;
+  }
+}
+
+/* Improve touch interactions */
+.card:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}

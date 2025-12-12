@@ -1,0 +1,127 @@
+/* Mobile Navigation Styles */
+
+/* Mobile Navigation Bar */
+.mobile-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  padding-bottom: calc(var(--spacing-sm) + var(--safe-area-inset-bottom));
+  z-index: 100;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  
+  /* Hide on desktop */
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .mobile-nav {
+    display: flex;
+  }
+  
+  /* Add bottom padding to body to account for fixed nav */
+  body {
+    padding-bottom: calc(80px + var(--safe-area-inset-bottom));
+  }
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+  position: relative;
+  
+  /* Touch optimizations */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.mobile-nav-item.active {
+  color: var(--color-primary);
+  background: hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+}
+
+.mobile-nav-item.touch-active {
+  transform: scale(0.95);
+  background: var(--color-surface-hover);
+}
+
+.mobile-nav-icon {
+  font-size: 1.25rem;
+  margin-bottom: var(--spacing-xs);
+  transition: transform var(--transition-fast);
+}
+
+.mobile-nav-item.active .mobile-nav-icon {
+  transform: scale(1.1);
+}
+
+.mobile-nav-label {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Mobile Back Button */
+.mobile-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  cursor: pointer;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  min-height: var(--touch-target-min);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  
+  /* Touch optimizations */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  
+  /* Position for thumb reach */
+  margin-bottom: var(--spacing-md);
+}
+
+.mobile-back-btn.touch-active {
+  transform: scale(0.96);
+  background: hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+}
+
+.mobile-back-icon {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.mobile-back-label {
+  font-family: var(--font-body);
+}
+
+/* Hide back button on desktop */
+@media (min-width: 768px) {
+  .mobile-back-btn {
+    display: none;
+  }
+}

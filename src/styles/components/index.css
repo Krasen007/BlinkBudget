@@ -1,2 +1,5 @@
 /* Imports all component files */
-/* Component files will be created in subsequent tasks */
+@import './buttons.css';
+@import './forms.css';
+@import './cards.css';
+@import './dialogs.css';
