@@ -544,14 +544,14 @@ input[type=number] {
   }
 }
 
-/* Category chips - Touch-optimized */
+/* Category chips - Touch-optimized for thumb navigation */
 .category-chip {
-  /* Ensure minimum touch target size */
-  min-height: var(--touch-target-min);
+  /* Enhanced touch target size for better thumb reach */
+  min-height: 56px;
   min-width: var(--touch-target-min);
   
-  /* Adequate spacing between chips */
-  margin: var(--spacing-xs);
+  /* Grid layout handles spacing */
+  margin: 0;
   
   /* Flexible sizing for content */
   flex: 0 0 auto;
@@ -559,6 +559,15 @@ input[type=number] {
   /* Enhanced touch feedback */
   position: relative;
   overflow: hidden;
+  
+  /* Better visual hierarchy */
+  font-weight: 500;
+  border-radius: var(--radius-lg);
+  
+  /* Improved touch interaction */
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .category-chip::after {
@@ -580,9 +589,91 @@ input[type=number] {
   height: 200px;
 }
 
-/* Chip container spacing */
-.transaction-form .category-chip {
-  margin: calc(var(--touch-spacing-min) / 2);
+/* Mobile-optimized transaction form layout */
+.transaction-form.mobile-optimized {
+  /* Optimize for thumb reach on mobile */
+  @media (max-width: 767px) {
+    min-height: calc(var(--visual-viewport-height) - 120px);
+    justify-content: flex-end;
+  }
+}
+
+/* Thumb reach container for important controls */
+.thumb-reach-container {
+  /* Position critical controls in bottom 60% for thumb accessibility */
+  @media (max-width: 767px) {
+    min-height: var(--thumb-reach-zone);
+    justify-content: flex-end;
+    padding-bottom: var(--spacing-xl);
+  }
+}
+
+/* Category chip container - Scrollable grid layout */
+.category-chip-container {
+  /* Enhanced scrollable grid for thumb-friendly navigation */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--spacing-md);
+  max-height: 40vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  
+  /* Enhanced mobile scrolling */
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  
+  /* Optimize for mobile */
+  @media (max-width: 767px) {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    max-height: 35vh;
+    gap: var(--spacing-sm);
+  }
+}
+
+/* Enhanced category chip spacing in grid */
+.category-chip-container .category-chip {
+  margin: 0; /* Grid handles spacing */
+  width: 100%;
+  justify-self: stretch;
+}
+
+/* Responsive adjustments for different mobile screen sizes */
+@media (max-width: 480px) {
+  .category-chip-container {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: var(--spacing-xs);
+    max-height: 30vh;
+  }
+  
+  .category-chip {
+    min-height: 48px;
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-md);
+  }
+  
+  .thumb-reach-container {
+    padding-bottom: var(--spacing-lg);
+  }
+}
+
+/* Landscape orientation optimizations */
+@media (orientation: landscape) and (max-height: 500px) {
+  .category-chip-container {
+    max-height: 25vh;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  }
+  
+  .thumb-reach-container {
+    min-height: 50vh; /* Adjust for landscape */
+  }
+  
+  .transaction-form.mobile-optimized {
+    min-height: calc(var(--visual-viewport-height) - 80px);
+  }
 }
 
 /* Type toggle buttons */

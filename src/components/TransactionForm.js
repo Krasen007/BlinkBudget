@@ -1,14 +1,20 @@
-import { Button } from './Button.js';
 import { StorageService } from '../core/storage.js';
-import { MobileUtils } from '../core/mobile.js';
 
 export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     const form = document.createElement('form');
-    form.className = 'transaction-form';
+    form.className = 'transaction-form mobile-optimized';
     form.style.display = 'flex';
     form.style.flexDirection = 'column';
     form.style.gap = 'var(--spacing-lg)';
     form.style.width = '100%';
+    form.style.height = '100%';
+    form.style.position = 'relative';
+    
+    // Mobile-first layout optimization
+    if (window.mobileUtils && window.mobileUtils.isMobile()) {
+        form.style.minHeight = 'calc(var(--visual-viewport-height) - 120px)'; // Account for navigation
+        form.style.justifyContent = 'flex-end'; // Push content to bottom for thumb reach
+    }
 
     // Account Selection (Source)
     const accounts = StorageService.getAccounts();
@@ -56,11 +62,11 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
         if (window.mobileUtils) {
             window.mobileUtils.preventInputZoom(accSelect);
         }
-        accSelect.style.borderColor = 'var(--color-primary)';
+        accSelect.style.border = '1px solid var(--color-primary)';
     };
     
     const handleSelectBlur = () => {
-        accSelect.style.borderColor = 'var(--color-border)';
+        accSelect.style.border = '1px solid var(--color-border)';
     };
     
     accSelect.addEventListener('focus', handleSelectFocus);
@@ -91,7 +97,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
         const updateState = () => {
             const isActive = currentType === type;
             btn.style.background = isActive ? (type === 'expense' ? 'var(--color-primary)' : '#10b981') : 'transparent';
-            btn.style.borderColor = isActive ? 'transparent' : 'var(--color-border)';
+            btn.style.border = isActive ? '1px solid transparent' : '1px solid var(--color-border)';
             btn.style.color = isActive ? 'white' : 'var(--color-text-muted)';
         };
 
@@ -120,14 +126,14 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
         // Hover effect for uniformity (desktop)
         btn.addEventListener('mouseenter', () => {
             if (currentType !== type) {
-                btn.style.borderColor = 'var(--color-text-muted)';
+                btn.style.border = '1px solid var(--color-text-muted)';
                 btn.style.backgroundColor = 'var(--color-surface-hover)';
             }
         });
 
         btn.addEventListener('mouseleave', () => {
             if (currentType !== type) {
-                btn.style.borderColor = 'var(--color-border)';
+                btn.style.border = '1px solid var(--color-border)';
                 btn.style.backgroundColor = 'transparent';
             }
         });
@@ -173,11 +179,11 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
         if (window.mobileUtils) {
             window.mobileUtils.preventInputZoom(dateInput);
         }
-        dateInput.style.borderColor = 'var(--color-primary)';
+        dateInput.style.border = '1px solid var(--color-primary)';
     };
     
     const handleDateBlur = () => {
-        dateInput.style.borderColor = 'var(--color-border)';
+        dateInput.style.border = '1px solid var(--color-border)';
     };
     
     dateInput.addEventListener('focus', handleDateFocus);
@@ -222,12 +228,12 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
         }
         
         // Visual feedback
-        amountInput.style.borderColor = 'var(--color-primary)';
+        amountInput.style.border = '1px solid var(--color-primary)';
         amountInput.style.boxShadow = '0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1)';
     };
     
     const handleAmountBlur = () => {
-        amountInput.style.borderColor = 'var(--color-border)';
+        amountInput.style.border = '1px solid var(--color-border)';
         amountInput.style.boxShadow = 'none';
     };
     
@@ -276,9 +282,21 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     };
 
     const chipContainer = document.createElement('div');
-    chipContainer.style.display = 'flex';
-    chipContainer.style.flexWrap = 'wrap';
-    chipContainer.style.gap = 'var(--spacing-sm)';
+    chipContainer.className = 'category-chip-container';
+    chipContainer.style.display = 'grid';
+    chipContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(140px, 1fr))';
+    chipContainer.style.gap = 'var(--spacing-md)';
+    chipContainer.style.maxHeight = '40vh';
+    chipContainer.style.overflowY = 'auto';
+    chipContainer.style.overflowX = 'hidden';
+    chipContainer.style.padding = 'var(--spacing-sm)';
+    chipContainer.style.borderRadius = 'var(--radius-md)';
+    chipContainer.style.background = 'var(--color-surface)';
+    chipContainer.style.border = '1px solid var(--color-border)';
+    
+    // Enhanced scrolling for mobile
+    chipContainer.style.webkitOverflowScrolling = 'touch';
+    chipContainer.style.scrollBehavior = 'smooth';
 
     let selectedCategory = initialValues.category || null; // Or toAccountId for transfers
     let selectedToAccount = initialValues.toAccountId || null;
@@ -305,7 +323,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                     const isSelected = selectedToAccount === acc.id;
                     chip.style.background = isSelected ? 'var(--color-primary-light)' : 'transparent';
                     chip.style.color = isSelected ? 'var(--color-background)' : 'var(--color-text-muted)';
-                    chip.style.borderColor = isSelected ? 'var(--color-primary)' : 'var(--color-border)';
+                    chip.style.border = isSelected ? '1px solid var(--color-primary)' : '1px solid var(--color-border)';
                 };
 
                 chip.type = 'button';
@@ -313,16 +331,27 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                 chip.className = 'btn category-chip';
                 chip.style.border = '1px solid var(--color-border)';
                 chip.style.transition = 'all 0.2s ease';
+                chip.style.borderRadius = 'var(--radius-lg)';
                 
-                // Touch-friendly sizing for transfer chips
-                chip.style.minHeight = 'var(--touch-target-min)';
-                chip.style.padding = 'var(--spacing-md) var(--spacing-lg)';
-                chip.style.margin = 'var(--spacing-xs)';
+                // Enhanced touch-friendly sizing for transfer chips
+                chip.style.minHeight = '56px'; // Larger than minimum for better thumb navigation
+                chip.style.padding = 'var(--spacing-lg) var(--spacing-xl)';
+                chip.style.margin = '0'; // Remove margin since grid handles spacing
+                chip.style.fontSize = 'var(--font-size-base)';
+                chip.style.fontWeight = '500';
+                chip.style.display = 'flex';
+                chip.style.alignItems = 'center';
+                chip.style.justifyContent = 'center';
+                chip.style.textAlign = 'center';
+                chip.style.whiteSpace = 'nowrap';
+                chip.style.overflow = 'hidden';
+                chip.style.textOverflow = 'ellipsis';
 
-                // Enhanced touch feedback for transfer chips
+                // Enhanced touch feedback for transfer chips - optimized for thumb navigation
                 chip.addEventListener('touchstart', (e) => {
                     chip.style.transform = 'scale(0.95)';
-                    chip.style.boxShadow = '0 0 12px var(--color-primary)60';
+                    chip.style.boxShadow = '0 4px 20px var(--color-primary)60';
+                    chip.style.border = '1px solid var(--color-primary)';
                     // Enhanced haptic feedback for form interactions
                     if (window.mobileUtils) {
                         window.mobileUtils.hapticFeedback([15]); // Light haptic for touch start
@@ -333,6 +362,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                     chip.style.transform = 'scale(1)';
                     if (selectedToAccount !== acc.id) {
                         chip.style.boxShadow = 'none';
+                        chip.style.border = '1px solid var(--color-border)';
                     }
                 }, { passive: true });
 
@@ -340,6 +370,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                     chip.style.transform = 'scale(1)';
                     if (selectedToAccount !== acc.id) {
                         chip.style.boxShadow = 'none';
+                        chip.style.border = '1px solid var(--color-border)';
                     }
                 }, { passive: true });
 
@@ -351,7 +382,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                     const amountVal = parseFloat(amountInput.value);
                     if (isNaN(amountVal) || amountVal === 0) {
                         amountInput.focus();
-                        amountInput.style.borderColor = '#ef4444';
+                        amountInput.style.border = '1px solid #ef4444';
                         
                         // Error haptic feedback
                         if (window.mobileUtils) {
@@ -392,7 +423,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                     const isSelected = selectedCategory === cat;
                     chip.style.background = isSelected ? 'var(--color-primary-light)' : 'transparent';
                     chip.style.color = isSelected ? 'var(--color-background)' : 'var(--color-text-muted)';
-                    chip.style.borderColor = isSelected ? 'var(--color-primary)' : 'var(--color-border)';
+                    chip.style.border = isSelected ? '1px solid var(--color-primary)' : '1px solid var(--color-border)';
                 };
 
                 chip.type = 'button';
@@ -403,19 +434,30 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                 }
                 chip.className = 'btn category-chip';
                 chip.style.border = '1px solid var(--color-border)';
-                chip.style.transition = 'all 0.2s ease'; // Smooth transition
+                chip.style.transition = 'all 0.2s ease';
+                chip.style.borderRadius = 'var(--radius-lg)';
                 
-                // Touch-friendly sizing for category chips
-                chip.style.minHeight = 'var(--touch-target-min)';
-                chip.style.padding = 'var(--spacing-md) var(--spacing-lg)';
-                chip.style.margin = 'var(--spacing-xs)';
+                // Enhanced touch-friendly sizing for category chips - optimized for thumb navigation
+                chip.style.minHeight = '56px'; // Larger than minimum for better thumb reach
+                chip.style.padding = 'var(--spacing-lg) var(--spacing-xl)';
+                chip.style.margin = '0'; // Remove margin since grid handles spacing
+                chip.style.fontSize = 'var(--font-size-base)';
+                chip.style.fontWeight = '500';
+                chip.style.display = 'flex';
+                chip.style.alignItems = 'center';
+                chip.style.justifyContent = 'center';
+                chip.style.textAlign = 'center';
+                chip.style.whiteSpace = 'nowrap';
+                chip.style.overflow = 'hidden';
+                chip.style.textOverflow = 'ellipsis';
 
                 const catColor = categoryColors[cat] || 'var(--color-primary)';
 
-                // Enhanced touch feedback for category chips
+                            // Enhanced touch feedback for category chips - optimized for thumb navigation
                 chip.addEventListener('touchstart', (e) => {
                     chip.style.transform = 'scale(0.95)';
-                    chip.style.boxShadow = `0 0 12px ${catColor}60`;
+                    chip.style.boxShadow = `0 4px 20px ${catColor}60`;
+                    chip.style.border = `1px solid ${catColor}`;
                     // Enhanced haptic feedback for form interactions
                     if (window.mobileUtils) {
                         window.mobileUtils.hapticFeedback([15]); // Light haptic for touch start
@@ -426,6 +468,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                     chip.style.transform = 'scale(1)';
                     if (selectedCategory !== cat) {
                         chip.style.boxShadow = 'none';
+                        chip.style.border = '1px solid var(--color-border)';
                     }
                 }, { passive: true });
 
@@ -433,13 +476,14 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                     chip.style.transform = 'scale(1)';
                     if (selectedCategory !== cat) {
                         chip.style.boxShadow = 'none';
+                        chip.style.border = '1px solid var(--color-border)';
                     }
                 }, { passive: true });
 
                 // Hover effects for desktop
                 chip.addEventListener('mouseenter', () => {
                     if (selectedCategory !== cat) {
-                        chip.style.borderColor = catColor;
+                        chip.style.border = `1px solid ${catColor}`;
                         chip.style.color = catColor;
                         chip.style.boxShadow = `0 0 8px ${catColor}40`; // Subtle glow
                     }
@@ -447,7 +491,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
 
                 chip.addEventListener('mouseleave', () => {
                     if (selectedCategory !== cat) {
-                        chip.style.borderColor = 'var(--color-border)';
+                        chip.style.border = '1px solid var(--color-border)';
                         chip.style.color = 'var(--color-text-muted)';
                         chip.style.boxShadow = 'none';
                     }
@@ -460,8 +504,8 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                     const amountVal = parseFloat(amountInput.value);
                     if (isNaN(amountVal) || amountVal === 0) {
                         amountInput.focus();
-                        amountInput.style.borderColor = '#ef4444'; // Red border for error
-                        setTimeout(() => amountInput.style.borderColor = 'var(--color-border)', 2000);
+                        amountInput.style.border = '1px solid #ef4444'; // Red border for error
+                        setTimeout(() => amountInput.style.border = '1px solid var(--color-border)', 2000);
                         
                         // Error haptic feedback
                         if (window.mobileUtils) {
@@ -474,7 +518,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                     Array.from(chipContainer.children).forEach(c => {
                         c.style.background = 'transparent';
                         c.style.color = 'var(--color-text-muted)';
-                        c.style.borderColor = 'var(--color-border)';
+                        c.style.border = '1px solid var(--color-border)';
                     });
 
                     selectedCategory = cat;
@@ -520,9 +564,25 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     // Remove separate submit button as per "Auto-save" requirement
     // form.appendChild(submitBtn); 
 
-    form.appendChild(amountGroup);
-    form.appendChild(categoryGroup);
-    // form.appendChild(submitBtn);
+    // Create thumb-reach zone container for most important controls
+    const thumbReachContainer = document.createElement('div');
+    thumbReachContainer.className = 'thumb-reach-container';
+    thumbReachContainer.style.display = 'flex';
+    thumbReachContainer.style.flexDirection = 'column';
+    thumbReachContainer.style.gap = 'var(--spacing-lg)';
+    thumbReachContainer.style.marginTop = 'auto'; // Push to bottom
+    
+    // Position within thumb reach zone (bottom 60% of viewport)
+    if (window.mobileUtils && window.mobileUtils.isMobile()) {
+        thumbReachContainer.style.minHeight = 'var(--thumb-reach-zone)';
+        thumbReachContainer.style.justifyContent = 'flex-end';
+        thumbReachContainer.style.paddingBottom = 'var(--spacing-xl)';
+    }
+    
+    thumbReachContainer.appendChild(amountGroup);
+    thumbReachContainer.appendChild(categoryGroup);
+    
+    form.appendChild(thumbReachContainer);
 
     // No submit handler needed on form itself, but keep preventDefault just in case
     form.addEventListener('submit', (e) => e.preventDefault());
