@@ -23,17 +23,34 @@ body {
   -moz-osx-font-smoothing: grayscale;
   display: flex;
   flex-direction: column;
-  
+
   /* Mobile optimizations */
-  -webkit-text-size-adjust: 100%; /* Prevent iOS text size adjustment */
-  -webkit-tap-highlight-color: transparent; /* Remove tap highlight */
-  touch-action: manipulation; /* Improve touch responsiveness */
-  
+  -webkit-text-size-adjust: 100%;
+  /* Prevent iOS text size adjustment */
+  -webkit-tap-highlight-color: transparent;
+  /* Remove tap highlight */
+  touch-action: manipulation;
+  /* Improve touch responsiveness */
+
   /* Safe area support */
   padding-top: var(--safe-area-inset-top);
   padding-left: var(--safe-area-inset-left);
   padding-right: var(--safe-area-inset-right);
   padding-bottom: var(--safe-area-inset-bottom);
+
+  /* Center application */
+  align-items: center;
+}
+
+#app {
+  width: 100%;
+  max-width: 600px;
+  /* Match typical mobile/tablet constraint */
+  margin: 0 auto;
+  flex: 1;
+  /* Ensure it takes available height */
+  display: flex;
+  flex-direction: column;
 }
 
 /* Remove default input styling */
@@ -57,6 +74,7 @@ input[type=number] {
 
 /* iOS specific fixes */
 @supports (-webkit-touch-callout: none) {
+
   /* iOS Safari specific styles */
   input {
     /* Fix iOS input styling */
@@ -64,13 +82,13 @@ input[type=number] {
     appearance: none;
     border-radius: var(--radius-md);
   }
-  
+
   /* Fix iOS button styling */
   .btn {
     -webkit-appearance: none;
     appearance: none;
   }
-  
+
   /* Prevent iOS zoom on input focus */
   input[type="text"],
   input[type="number"],
@@ -85,6 +103,7 @@ input[type=number] {
 
 /* Android specific fixes */
 @media screen and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: .001dpcm) {
+
   /* Android Chrome specific styles */
   input:focus {
     /* Prevent Android zoom */
@@ -94,6 +113,7 @@ input[type=number] {
 
 /* Dark mode optimizations for mobile */
 @media (prefers-color-scheme: dark) {
+
   /* Already using dark theme, but ensure mobile-specific adjustments */
   input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
@@ -102,6 +122,7 @@ input[type=number] {
 
 /* Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
@@ -114,6 +135,7 @@ input[type=number] {
 
 /* Print styles - hide mobile-specific elements */
 @media print {
+
   .mobile-only,
   .touch-target,
   .btn {
