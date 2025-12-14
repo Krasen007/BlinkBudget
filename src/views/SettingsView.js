@@ -36,7 +36,7 @@ export const SettingsView = () => {
 
     header.appendChild(title);
     header.appendChild(backBtn);
-    
+
     // Add mobile back button before header
     const mobileBackContainer = document.createElement('div');
     mobileBackContainer.className = 'mobile-only';
@@ -227,7 +227,7 @@ export const SettingsView = () => {
             const name = nameInput.value.trim();
             if (name) {
                 StorageService.saveAccount({
-                    id: crypto.randomUUID(),
+                    id: StorageService.generateId(),
                     name: name,
                     type: typeSelect.value,
                     isDefault: false
@@ -291,18 +291,18 @@ export const SettingsView = () => {
         row.style.transition = 'background-color var(--transition-fast)';
         row.style.marginBottom = 'var(--spacing-sm)';
         row.style.border = '1px solid var(--color-border)';
-        
+
         // Touch feedback for settings options
         row.addEventListener('touchstart', (e) => {
             row.style.backgroundColor = 'var(--color-surface-hover)';
             row.style.transform = 'scale(0.98)';
         }, { passive: true });
-        
+
         row.addEventListener('touchend', () => {
             row.style.backgroundColor = 'transparent';
             row.style.transform = 'scale(1)';
         }, { passive: true });
-        
+
         row.addEventListener('touchcancel', () => {
             row.style.backgroundColor = 'transparent';
             row.style.transform = 'scale(1)';

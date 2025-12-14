@@ -9,7 +9,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     form.style.width = '100%';
     form.style.height = '100%';
     form.style.position = 'relative';
-    
+
     // Mobile-first layout optimization
     if (window.mobileUtils && window.mobileUtils.isMobile()) {
         form.style.minHeight = 'calc(var(--visual-viewport-height) - 120px)'; // Account for navigation
@@ -50,13 +50,13 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
 
     accSelect.addEventListener('change', (e) => {
         currentAccountId = e.target.value;
-        
+
         // Haptic feedback for account selection
         if (window.mobileUtils) {
             window.mobileUtils.hapticFeedback([10]); // Light haptic for selection
         }
     });
-    
+
     // Mobile-specific select handling
     const handleSelectFocus = () => {
         if (window.mobileUtils) {
@@ -64,11 +64,11 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
         }
         accSelect.style.border = '1px solid var(--color-primary)';
     };
-    
+
     const handleSelectBlur = () => {
         accSelect.style.border = '1px solid var(--color-border)';
     };
-    
+
     accSelect.addEventListener('focus', handleSelectFocus);
     accSelect.addEventListener('blur', handleSelectBlur);
 
@@ -89,7 +89,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
         btn.className = 'btn type-toggle-btn';
         btn.style.flex = '1';
         btn.style.border = '1px solid var(--color-border)';
-        
+
         // Touch-friendly sizing
         btn.style.minHeight = 'var(--touch-target-min)';
         btn.style.margin = 'calc(var(--touch-spacing-min) / 2)';
@@ -169,11 +169,11 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     dateInput.style.color = 'var(--color-text-main)';
     dateInput.style.fontSize = 'max(16px, var(--font-size-base))'; // Prevent zoom on iOS
     dateInput.style.minHeight = 'var(--touch-target-min)'; // Touch-friendly height
-    
+
     // Default to initial value or Today
     const defaultDate = initialValues.timestamp ? initialValues.timestamp.split('T')[0] : new Date().toISOString().split('T')[0];
     dateInput.value = defaultDate;
-    
+
     // Mobile-specific date input handling
     const handleDateFocus = () => {
         if (window.mobileUtils) {
@@ -181,11 +181,11 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
         }
         dateInput.style.border = '1px solid var(--color-primary)';
     };
-    
+
     const handleDateBlur = () => {
         dateInput.style.border = '1px solid var(--color-border)';
     };
-    
+
     dateInput.addEventListener('focus', handleDateFocus);
     dateInput.addEventListener('blur', handleDateBlur);
 
@@ -208,35 +208,35 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     amountInput.style.border = '1px solid var(--color-border)';
     amountInput.style.background = 'var(--color-surface)';
     amountInput.style.color = 'var(--color-text-main)';
-    
+
     // Mobile-specific optimizations
     amountInput.inputMode = 'decimal'; // Show numeric keypad on mobile
     amountInput.pattern = '[0-9]*\\.?[0-9]*'; // Numeric pattern for better mobile keyboard
     amountInput.style.fontSize = 'max(16px, 2rem)'; // Prevent zoom on iOS
     amountInput.style.minHeight = 'var(--touch-target-min)'; // Touch-friendly height
-    
+
     // Keyboard-aware viewport adjustments
     const handleAmountFocus = () => {
         // Prevent zoom on input focus
         if (window.mobileUtils) {
             window.mobileUtils.preventInputZoom(amountInput);
-            
+
             // Scroll input into view above keyboard with delay for keyboard animation
             setTimeout(() => {
                 window.mobileUtils.scrollIntoViewAboveKeyboard(amountInput, 60);
             }, 300);
         }
-        
+
         // Visual feedback
         amountInput.style.border = '1px solid var(--color-primary)';
         amountInput.style.boxShadow = '0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1)';
     };
-    
+
     const handleAmountBlur = () => {
         amountInput.style.border = '1px solid var(--color-border)';
         amountInput.style.boxShadow = 'none';
     };
-    
+
     amountInput.addEventListener('focus', handleAmountFocus);
     amountInput.addEventListener('blur', handleAmountBlur);
 
@@ -293,7 +293,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     chipContainer.style.borderRadius = 'var(--radius-md)';
     chipContainer.style.background = 'var(--color-surface)';
     chipContainer.style.border = '1px solid var(--color-border)';
-    
+
     // Enhanced scrolling for mobile
     chipContainer.style.webkitOverflowScrolling = 'touch';
     chipContainer.style.scrollBehavior = 'smooth';
@@ -332,7 +332,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                 chip.style.border = '1px solid var(--color-border)';
                 chip.style.transition = 'all 0.2s ease';
                 chip.style.borderRadius = 'var(--radius-lg)';
-                
+
                 // Enhanced touch-friendly sizing for transfer chips
                 chip.style.minHeight = '56px'; // Larger than minimum for better thumb navigation
                 chip.style.padding = 'var(--spacing-lg) var(--spacing-xl)';
@@ -349,7 +349,6 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
 
                 // Enhanced touch feedback for transfer chips - optimized for thumb navigation
                 chip.addEventListener('touchstart', (e) => {
-                    chip.style.transform = 'scale(0.95)';
                     chip.style.boxShadow = '0 4px 20px var(--color-primary)60';
                     chip.style.border = '1px solid var(--color-primary)';
                     // Enhanced haptic feedback for form interactions
@@ -359,7 +358,6 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                 }, { passive: true });
 
                 chip.addEventListener('touchend', () => {
-                    chip.style.transform = 'scale(1)';
                     if (selectedToAccount !== acc.id) {
                         chip.style.boxShadow = 'none';
                         chip.style.border = '1px solid var(--color-border)';
@@ -367,7 +365,6 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                 }, { passive: true });
 
                 chip.addEventListener('touchcancel', () => {
-                    chip.style.transform = 'scale(1)';
                     if (selectedToAccount !== acc.id) {
                         chip.style.boxShadow = 'none';
                         chip.style.border = '1px solid var(--color-border)';
@@ -383,7 +380,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                     if (isNaN(amountVal) || amountVal === 0) {
                         amountInput.focus();
                         amountInput.style.border = '1px solid #ef4444';
-                        
+
                         // Error haptic feedback
                         if (window.mobileUtils) {
                             window.mobileUtils.hapticFeedback([50, 50, 50]); // Error pattern
@@ -436,7 +433,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                 chip.style.border = '1px solid var(--color-border)';
                 chip.style.transition = 'all 0.2s ease';
                 chip.style.borderRadius = 'var(--radius-lg)';
-                
+
                 // Enhanced touch-friendly sizing for category chips - optimized for thumb navigation
                 chip.style.minHeight = '56px'; // Larger than minimum for better thumb reach
                 chip.style.padding = 'var(--spacing-lg) var(--spacing-xl)';
@@ -453,9 +450,8 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
 
                 const catColor = categoryColors[cat] || 'var(--color-primary)';
 
-                            // Enhanced touch feedback for category chips - optimized for thumb navigation
+                // Enhanced touch feedback for category chips - optimized for thumb navigation
                 chip.addEventListener('touchstart', (e) => {
-                    chip.style.transform = 'scale(0.95)';
                     chip.style.boxShadow = `0 4px 20px ${catColor}60`;
                     chip.style.border = `1px solid ${catColor}`;
                     // Enhanced haptic feedback for form interactions
@@ -465,7 +461,6 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                 }, { passive: true });
 
                 chip.addEventListener('touchend', () => {
-                    chip.style.transform = 'scale(1)';
                     if (selectedCategory !== cat) {
                         chip.style.boxShadow = 'none';
                         chip.style.border = '1px solid var(--color-border)';
@@ -473,7 +468,6 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                 }, { passive: true });
 
                 chip.addEventListener('touchcancel', () => {
-                    chip.style.transform = 'scale(1)';
                     if (selectedCategory !== cat) {
                         chip.style.boxShadow = 'none';
                         chip.style.border = '1px solid var(--color-border)';
@@ -506,7 +500,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                         amountInput.focus();
                         amountInput.style.border = '1px solid #ef4444'; // Red border for error
                         setTimeout(() => amountInput.style.border = '1px solid var(--color-border)', 2000);
-                        
+
                         // Error haptic feedback
                         if (window.mobileUtils) {
                             window.mobileUtils.hapticFeedback([50, 50, 50]); // Error pattern
@@ -525,18 +519,27 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                     updateChipState();
 
                     // Success haptic feedback for form completion
-                    if (window.mobileUtils) {
-                        window.mobileUtils.hapticFeedback([25, 25, 50]); // Success pattern
+                    try {
+                        if (window.mobileUtils) {
+                            window.mobileUtils.hapticFeedback([25, 25, 50]); // Success pattern
+                        }
+                    } catch (e) {
+                        console.error('Haptic feedback failed:', e);
                     }
 
                     // Auto-submit
-                    onSubmit({
-                        amount: Math.abs(amountVal),
-                        category: selectedCategory,
-                        type: currentType,
-                        accountId: currentAccountId, // Pass selected account
-                        timestamp: new Date(dateInput.value).toISOString() // Use selected date
-                    });
+                    try {
+                        onSubmit({
+                            amount: Math.abs(amountVal),
+                            category: selectedCategory,
+                            type: currentType,
+                            accountId: currentAccountId, // Pass selected account
+                            timestamp: new Date(dateInput.value).toISOString() // Use selected date
+                        });
+                    } catch (e) {
+                        console.error('Submit failed:', e);
+                        alert('Error submitting transaction: ' + e.message);
+                    }
                 });
                 chipContainer.appendChild(chip);
             });
@@ -571,17 +574,17 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     thumbReachContainer.style.flexDirection = 'column';
     thumbReachContainer.style.gap = 'var(--spacing-lg)';
     thumbReachContainer.style.marginTop = 'auto'; // Push to bottom
-    
+
     // Position within thumb reach zone (bottom 60% of viewport)
     if (window.mobileUtils && window.mobileUtils.isMobile()) {
         thumbReachContainer.style.minHeight = 'var(--thumb-reach-zone)';
         thumbReachContainer.style.justifyContent = 'flex-end';
         thumbReachContainer.style.paddingBottom = 'var(--spacing-xl)';
     }
-    
+
     thumbReachContainer.appendChild(amountGroup);
     thumbReachContainer.appendChild(categoryGroup);
-    
+
     form.appendChild(thumbReachContainer);
 
     // No submit handler needed on form itself, but keep preventDefault just in case
@@ -590,17 +593,17 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     // Keyboard-aware viewport adjustments for the entire form
     const setupKeyboardHandling = () => {
         if (!window.mobileUtils || !window.mobileUtils.isMobile()) return;
-        
+
         const formInputs = [amountInput, dateInput, accSelect];
-        
+
         formInputs.forEach(input => {
             input.addEventListener('focus', () => {
                 // Add class to body for keyboard-aware styling
                 document.body.classList.add('keyboard-visible');
-                
+
                 // Adjust form positioning for keyboard
                 form.style.paddingBottom = '20vh'; // Extra space for keyboard
-                
+
                 // Scroll the focused input into view with delay for keyboard animation
                 setTimeout(() => {
                     if (window.mobileUtils) {
@@ -608,7 +611,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                     }
                 }, 300);
             });
-            
+
             input.addEventListener('blur', () => {
                 // Check if any input still has focus before removing keyboard class
                 setTimeout(() => {
@@ -620,12 +623,12 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                 }, 100);
             });
         });
-        
+
         // Handle visual viewport changes (keyboard show/hide)
         if (window.visualViewport) {
             const handleViewportChange = () => {
                 const keyboardHeight = window.innerHeight - window.visualViewport.height;
-                
+
                 if (keyboardHeight > 100) { // Keyboard is visible
                     document.body.classList.add('keyboard-visible');
                     form.style.paddingBottom = `${keyboardHeight + 20}px`;
@@ -634,23 +637,23 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
                     form.style.paddingBottom = '0';
                 }
             };
-            
+
             window.visualViewport.addEventListener('resize', handleViewportChange);
-            
+
             // Cleanup function (would be called when component is destroyed)
             form._cleanupKeyboardHandling = () => {
                 window.visualViewport.removeEventListener('resize', handleViewportChange);
             };
         }
     };
-    
+
     // Initialize keyboard handling
     setupKeyboardHandling();
 
     // Focus amount on load with delay to ensure mobile utils are ready
     setTimeout(() => {
         amountInput.focus();
-        
+
         // Initial haptic feedback to indicate form is ready
         if (window.mobileUtils && window.mobileUtils.supportsHaptic()) {
             window.mobileUtils.hapticFeedback([5]); // Very light welcome haptic
