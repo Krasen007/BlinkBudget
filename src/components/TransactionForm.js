@@ -5,7 +5,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     form.className = 'transaction-form mobile-optimized';
     form.style.display = 'flex';
     form.style.flexDirection = 'column';
-    form.style.gap = 'var(--spacing-md)'; // Tight fit
+    form.style.gap = 'var(--spacing-sm)'; // Tighter spacing
     form.style.width = '100%';
     form.style.height = '100%';
     form.style.position = 'relative';
@@ -24,7 +24,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     let currentAccountId = initialValues.accountId || defaultAccount.id;
 
     const accountGroup = document.createElement('div');
-    accountGroup.style.marginBottom = 'var(--spacing-md)';
+    accountGroup.style.marginBottom = 'var(--spacing-xs)';
 
     const accSelect = document.createElement('select');
     accSelect.style.width = '100%';
@@ -82,7 +82,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     const typeGroup = document.createElement('div');
     typeGroup.style.display = 'flex';
     typeGroup.style.gap = 'var(--spacing-md)';
-    typeGroup.style.marginBottom = 'var(--spacing-md)';
+    typeGroup.style.marginBottom = 'var(--spacing-xs)';
 
     const createTypeBtn = (type, label) => {
         const btn = document.createElement('button');
@@ -157,98 +157,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     typeGroup.appendChild(incomeBtn);
     typeGroup.appendChild(transferBtn);
     // typeGroup ready (appended at bottom)
-
-    // Date Input with User-Preferred Format
-    const dateGroup = document.createElement('div');
-    dateGroup.style.position = 'relative'; // For absolute positioning of real input
-
-    // 1. Visible "Fake" Input (Displays formatted date)
-    const displayDateInput = document.createElement('input');
-    displayDateInput.type = 'text';
-    displayDateInput.readOnly = true; // User can't type locally
-    displayDateInput.style.width = '100%';
-    displayDateInput.style.padding = 'var(--spacing-md)';
-    displayDateInput.style.borderRadius = 'var(--radius-md)';
-    displayDateInput.style.border = '1px solid var(--color-border)';
-    displayDateInput.style.background = 'var(--color-surface)';
-    displayDateInput.style.color = 'var(--color-text-main)';
-    displayDateInput.style.fontSize = 'max(16px, var(--font-size-base))';
-    displayDateInput.style.minHeight = 'var(--touch-target-min)';
-
-    // 2. Invisible "Real" Input (Triggers native picker)
-    const dateInput = document.createElement('input');
-    dateInput.type = 'date';
-    dateInput.style.position = 'absolute';
-    dateInput.style.top = '0';
-    dateInput.style.left = '0';
-    dateInput.style.width = '100%';
-    dateInput.style.height = '100%';
-    dateInput.style.opacity = '0'; // Invisible
-    dateInput.style.zIndex = '2'; // On top
-    dateInput.style.cursor = 'pointer';
-
-    // Helper: Format Date based on settings
-    const formatDate = (isoDate) => {
-        if (!isoDate) return '';
-        const [year, month, day] = isoDate.split('-');
-        const format = StorageService.getSetting('dateFormat') || 'US';
-
-        switch (format) {
-            case 'ISO': return `${year}-${month}-${day}`;
-            case 'EU': return `${day}/${month}/${year}`;
-            case 'US':
-            default: return `${month}/${day}/${year}`;
-        }
-    };
-
-    // Default to initial value (ISO)
-    const defaultDate = initialValues.timestamp ? initialValues.timestamp.split('T')[0] : new Date().toISOString().split('T')[0];
-    dateInput.value = defaultDate;
-    displayDateInput.value = formatDate(defaultDate);
-
-    // Sync Display when Real Input changes
-    dateInput.addEventListener('change', (e) => {
-        displayDateInput.value = formatDate(e.target.value);
-    });
-
-    // Force picker on click (fixes Desktop where clicking text area only focuses instead of opening picker)
-    dateInput.addEventListener('click', (e) => {
-        try {
-            if (dateInput.showPicker) {
-                dateInput.showPicker();
-            }
-        } catch (err) {
-            console.log('showPicker not supported or blocked', err);
-        }
-    });
-
-    displayDateInput.addEventListener('click', (e) => {
-        // Ensure picker opens even if overlay is missed or unsupported
-        e.preventDefault(); // Prevent focus on the readonly input
-        if (dateInput.showPicker) {
-            dateInput.showPicker();
-        } else {
-            dateInput.click();
-        }
-    });
-
-    // Mobile-specific focus handling (Visual feedback on display input)
-    const handleDateFocus = () => {
-        if (window.mobileUtils) window.mobileUtils.preventInputZoom(dateInput);
-        displayDateInput.style.border = '1px solid var(--color-primary)';
-    };
-
-    const handleDateBlur = () => {
-        displayDateInput.style.border = '1px solid var(--color-border)';
-    };
-
-    dateInput.addEventListener('focus', handleDateFocus); // Focus triggers on hidden input
-    dateInput.addEventListener('blur', handleDateBlur);
-
-    dateGroup.appendChild(displayDateInput);
-    dateGroup.appendChild(dateInput);
-
-    // dateGroup ready (appended at bottom)
+    // Date input removed - using externalDateInput from AddView.js (top of page)
 
     // Amount Input
     const amountGroup = document.createElement('div');
@@ -587,8 +496,9 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
 
                     // Auto-submit
                     try {
-                        // Determine date source
-                        const dateSource = externalDateInput ? externalDateInput : dateInput;
+                        // Use external date input from AddView.js
+                        const dateSource = externalDateInput || document.createElement('input');
+                        dateSource.value = dateSource.value || new Date().toISOString().split('T')[0];
 
                         onSubmit({
                             amount: Math.abs(amountVal),
@@ -628,21 +538,20 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     // Remove separate submit button as per "Auto-save" requirement
     // form.appendChild(submitBtn); 
 
-    // --- REORDERED LAYOUT (Type -> Account -> Amount -> Categories -> Date) ---
+    // --- REORDERED LAYOUT (Amount -> Account -> Categories -> Type) ---
+    // New order prioritizes the most important action (amount) first
 
-    // 1. Type
-    form.appendChild(typeGroup);
-
-    // 2. Account
-    form.appendChild(accountGroup);
-
-    // 3. Amount
+    // 1. Amount (Primary action - user enters this first)
     form.appendChild(amountGroup);
 
-    // 4. Categories (with container)
-    // Reduce gap between amount and categories for "tight fit"
-    categoryGroup.style.marginTop = '-5px';
+    // 2. Account (Secondary context)
+    form.appendChild(accountGroup);
+
+    // 3. Categories (Main selection area)
     form.appendChild(categoryGroup);
+
+    // 4. Type (Last - often inferred from category selection)
+    form.appendChild(typeGroup);
 
     // --- OK Button for Edit Mode ---
     // User requested "OK" button when editing.
@@ -652,7 +561,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
         okBtn.textContent = 'OK';
         okBtn.className = 'btn btn-primary';
         okBtn.style.width = '100%';
-        okBtn.style.marginTop = 'var(--spacing-md)';
+        okBtn.style.marginTop = 'var(--spacing-sm)';
         okBtn.style.padding = 'var(--spacing-md)';
         okBtn.style.fontSize = '1.1rem';
         okBtn.style.fontWeight = '600';
@@ -685,15 +594,18 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
                 return;
             }
 
-            // Submit
+            // Submit - use external date input
             try {
+                const dateSource = externalDateInput || document.createElement('input');
+                dateSource.value = dateSource.value || new Date().toISOString().split('T')[0];
+
                 onSubmit({
                     amount: Math.abs(amountVal),
                     category: selectedCategory || 'Transfer',
                     type: currentType,
                     accountId: currentAccountId,
                     toAccountId: selectedToAccount,
-                    timestamp: new Date(dateInput.value).toISOString()
+                    timestamp: new Date(dateSource.value).toISOString()
                 });
             } catch (e) {
                 console.error('Submit failed:', e);
@@ -703,12 +615,6 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
 
         form.appendChild(okBtn);
     }
-    // --- End OK Button ---
-
-    // 5. Date (Last)
-    // Push date to the bottom if there is space, or just append
-    dateGroup.style.marginTop = 'auto'; // This pushes it to the bottom if container is flex col
-    form.appendChild(dateGroup);
 
     // --- End Reorder ---
 
@@ -719,7 +625,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     const setupKeyboardHandling = () => {
         if (!window.mobileUtils || !window.mobileUtils.isMobile()) return;
 
-        const formInputs = [amountInput, dateInput, accSelect];
+        const formInputs = [amountInput, accSelect];
 
         formInputs.forEach(input => {
             input.addEventListener('focus', () => {
