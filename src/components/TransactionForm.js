@@ -1,6 +1,6 @@
 import { StorageService } from '../core/storage.js';
 
-export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
+export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInput = null }) => {
     const form = document.createElement('form');
     form.className = 'transaction-form mobile-optimized';
     form.style.display = 'flex';
@@ -587,12 +587,15 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
 
                     // Auto-submit
                     try {
+                        // Determine date source
+                        const dateSource = externalDateInput ? externalDateInput : dateInput;
+
                         onSubmit({
                             amount: Math.abs(amountVal),
                             category: selectedCategory,
                             type: currentType,
                             accountId: currentAccountId, // Pass selected account
-                            timestamp: new Date(dateInput.value).toISOString() // Use selected date
+                            timestamp: new Date(dateSource.value).toISOString() // Use selected date
                         });
                     } catch (e) {
                         console.error('Submit failed:', e);
