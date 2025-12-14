@@ -257,6 +257,25 @@ body.keyboard-visible #app {
 body.keyboard-visible .transaction-form {
   /* Ensure form content is accessible above keyboard */
   margin-bottom: 0;
+  justify-content: flex-start !important;
+  /* Move content to top when keyboard is open */
+  padding-top: var(--spacing-md);
+}
+
+/* Collapse category list when keyboard is open to ensure visibility */
+body.keyboard-visible .category-chip-container {
+  max-height: 120px;
+  /* Small scrollable area */
+  flex-shrink: 1;
+  /* Allow shrinking */
+  min-height: 0;
+}
+
+/* Ensure thumb reach container adapts */
+body.keyboard-visible .thumb-reach-container {
+  min-height: 0 !important;
+  justify-content: flex-start !important;
+  padding-bottom: var(--spacing-sm) !important;
 }
 
 /* Enhanced input focus states for mobile keyboard interaction */

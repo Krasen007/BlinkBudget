@@ -5,7 +5,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     form.className = 'transaction-form mobile-optimized';
     form.style.display = 'flex';
     form.style.flexDirection = 'column';
-    form.style.gap = 'var(--spacing-lg)';
+    form.style.gap = 'var(--spacing-md)'; // Tight fit
     form.style.width = '100%';
     form.style.height = '100%';
     form.style.position = 'relative';
@@ -73,7 +73,9 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     accSelect.addEventListener('blur', handleSelectBlur);
 
     accountGroup.appendChild(accSelect);
-    form.appendChild(accountGroup);
+    // Elements created but appended at valid order at the bottom
+    // accountGroup, typeGroup, dateGroup, amountGroup
+
 
     // Type Toggle
     let currentType = initialValues.type || 'expense';
@@ -154,43 +156,99 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     typeGroup.appendChild(expenseBtn);
     typeGroup.appendChild(incomeBtn);
     typeGroup.appendChild(transferBtn);
-    form.appendChild(typeGroup);
+    // typeGroup ready (appended at bottom)
 
-    // Date Input
+    // Date Input with User-Preferred Format
     const dateGroup = document.createElement('div');
+    dateGroup.style.position = 'relative'; // For absolute positioning of real input
 
+    // 1. Visible "Fake" Input (Displays formatted date)
+    const displayDateInput = document.createElement('input');
+    displayDateInput.type = 'text';
+    displayDateInput.readOnly = true; // User can't type locally
+    displayDateInput.style.width = '100%';
+    displayDateInput.style.padding = 'var(--spacing-md)';
+    displayDateInput.style.borderRadius = 'var(--radius-md)';
+    displayDateInput.style.border = '1px solid var(--color-border)';
+    displayDateInput.style.background = 'var(--color-surface)';
+    displayDateInput.style.color = 'var(--color-text-main)';
+    displayDateInput.style.fontSize = 'max(16px, var(--font-size-base))';
+    displayDateInput.style.minHeight = 'var(--touch-target-min)';
+
+    // 2. Invisible "Real" Input (Triggers native picker)
     const dateInput = document.createElement('input');
     dateInput.type = 'date';
+    dateInput.style.position = 'absolute';
+    dateInput.style.top = '0';
+    dateInput.style.left = '0';
     dateInput.style.width = '100%';
-    dateInput.style.padding = 'var(--spacing-md)';
-    dateInput.style.borderRadius = 'var(--radius-md)';
-    dateInput.style.border = '1px solid var(--color-border)';
-    dateInput.style.background = 'var(--color-surface)';
-    dateInput.style.color = 'var(--color-text-main)';
-    dateInput.style.fontSize = 'max(16px, var(--font-size-base))'; // Prevent zoom on iOS
-    dateInput.style.minHeight = 'var(--touch-target-min)'; // Touch-friendly height
+    dateInput.style.height = '100%';
+    dateInput.style.opacity = '0'; // Invisible
+    dateInput.style.zIndex = '2'; // On top
+    dateInput.style.cursor = 'pointer';
 
-    // Default to initial value or Today
+    // Helper: Format Date based on settings
+    const formatDate = (isoDate) => {
+        if (!isoDate) return '';
+        const [year, month, day] = isoDate.split('-');
+        const format = StorageService.getSetting('dateFormat') || 'US';
+
+        switch (format) {
+            case 'ISO': return `${year}-${month}-${day}`;
+            case 'EU': return `${day}/${month}/${year}`;
+            case 'US':
+            default: return `${month}/${day}/${year}`;
+        }
+    };
+
+    // Default to initial value (ISO)
     const defaultDate = initialValues.timestamp ? initialValues.timestamp.split('T')[0] : new Date().toISOString().split('T')[0];
     dateInput.value = defaultDate;
+    displayDateInput.value = formatDate(defaultDate);
 
-    // Mobile-specific date input handling
-    const handleDateFocus = () => {
-        if (window.mobileUtils) {
-            window.mobileUtils.preventInputZoom(dateInput);
+    // Sync Display when Real Input changes
+    dateInput.addEventListener('change', (e) => {
+        displayDateInput.value = formatDate(e.target.value);
+    });
+
+    // Force picker on click (fixes Desktop where clicking text area only focuses instead of opening picker)
+    dateInput.addEventListener('click', (e) => {
+        try {
+            if (dateInput.showPicker) {
+                dateInput.showPicker();
+            }
+        } catch (err) {
+            console.log('showPicker not supported or blocked', err);
         }
-        dateInput.style.border = '1px solid var(--color-primary)';
+    });
+
+    displayDateInput.addEventListener('click', (e) => {
+        // Ensure picker opens even if overlay is missed or unsupported
+        e.preventDefault(); // Prevent focus on the readonly input
+        if (dateInput.showPicker) {
+            dateInput.showPicker();
+        } else {
+            dateInput.click();
+        }
+    });
+
+    // Mobile-specific focus handling (Visual feedback on display input)
+    const handleDateFocus = () => {
+        if (window.mobileUtils) window.mobileUtils.preventInputZoom(dateInput);
+        displayDateInput.style.border = '1px solid var(--color-primary)';
     };
 
     const handleDateBlur = () => {
-        dateInput.style.border = '1px solid var(--color-border)';
+        displayDateInput.style.border = '1px solid var(--color-border)';
     };
 
-    dateInput.addEventListener('focus', handleDateFocus);
+    dateInput.addEventListener('focus', handleDateFocus); // Focus triggers on hidden input
     dateInput.addEventListener('blur', handleDateBlur);
 
+    dateGroup.appendChild(displayDateInput);
     dateGroup.appendChild(dateInput);
-    form.appendChild(dateGroup);
+
+    // dateGroup ready (appended at bottom)
 
     // Amount Input
     const amountGroup = document.createElement('div');
@@ -567,25 +625,89 @@ export const TransactionForm = ({ onSubmit, initialValues = {} }) => {
     // Remove separate submit button as per "Auto-save" requirement
     // form.appendChild(submitBtn); 
 
-    // Create thumb-reach zone container for most important controls
-    const thumbReachContainer = document.createElement('div');
-    thumbReachContainer.className = 'thumb-reach-container';
-    thumbReachContainer.style.display = 'flex';
-    thumbReachContainer.style.flexDirection = 'column';
-    thumbReachContainer.style.gap = 'var(--spacing-lg)';
-    thumbReachContainer.style.marginTop = 'auto'; // Push to bottom
+    // --- REORDERED LAYOUT (Type -> Account -> Amount -> Categories -> Date) ---
 
-    // Position within thumb reach zone (bottom 60% of viewport)
-    if (window.mobileUtils && window.mobileUtils.isMobile()) {
-        thumbReachContainer.style.minHeight = 'var(--thumb-reach-zone)';
-        thumbReachContainer.style.justifyContent = 'flex-end';
-        thumbReachContainer.style.paddingBottom = 'var(--spacing-xl)';
+    // 1. Type
+    form.appendChild(typeGroup);
+
+    // 2. Account
+    form.appendChild(accountGroup);
+
+    // 3. Amount
+    form.appendChild(amountGroup);
+
+    // 4. Categories (with container)
+    // Reduce gap between amount and categories for "tight fit"
+    categoryGroup.style.marginTop = '-5px';
+    form.appendChild(categoryGroup);
+
+    // --- OK Button for Edit Mode ---
+    // User requested "OK" button when editing.
+    // We infer Edit mode if initialValues.id exists (it's an existing transaction)
+    if (initialValues.id) {
+        const okBtn = document.createElement('button');
+        okBtn.textContent = 'OK';
+        okBtn.className = 'btn btn-primary';
+        okBtn.style.width = '100%';
+        okBtn.style.marginTop = 'var(--spacing-md)';
+        okBtn.style.padding = 'var(--spacing-md)';
+        okBtn.style.fontSize = '1.1rem';
+        okBtn.style.fontWeight = '600';
+        okBtn.style.borderRadius = 'var(--radius-md)';
+
+        okBtn.addEventListener('click', () => {
+            // Validate Amount
+            const amountVal = parseFloat(amountInput.value);
+            if (isNaN(amountVal) || amountVal === 0) {
+                amountInput.focus();
+                amountInput.style.border = '1px solid #ef4444';
+                if (window.mobileUtils) window.mobileUtils.hapticFeedback([50, 50, 50]);
+                return;
+            }
+
+            // Validate Category (Must be selected)
+            if (!selectedCategory && currentType !== 'transfer') {
+                // Highlight category container
+                chipContainer.style.border = '1px solid #ef4444';
+                setTimeout(() => chipContainer.style.border = '1px solid var(--color-border)', 2000);
+                if (window.mobileUtils) window.mobileUtils.hapticFeedback([50, 50, 50]);
+                return;
+            }
+
+            if (currentType === 'transfer' && !selectedToAccount) {
+                // Highlight category container
+                chipContainer.style.border = '1px solid #ef4444';
+                setTimeout(() => chipContainer.style.border = '1px solid var(--color-border)', 2000);
+                if (window.mobileUtils) window.mobileUtils.hapticFeedback([50, 50, 50]);
+                return;
+            }
+
+            // Submit
+            try {
+                onSubmit({
+                    amount: Math.abs(amountVal),
+                    category: selectedCategory || 'Transfer',
+                    type: currentType,
+                    accountId: currentAccountId,
+                    toAccountId: selectedToAccount,
+                    timestamp: new Date(dateInput.value).toISOString()
+                });
+            } catch (e) {
+                console.error('Submit failed:', e);
+                alert('Error updating transaction: ' + e.message);
+            }
+        });
+
+        form.appendChild(okBtn);
     }
+    // --- End OK Button ---
 
-    thumbReachContainer.appendChild(amountGroup);
-    thumbReachContainer.appendChild(categoryGroup);
+    // 5. Date (Last)
+    // Push date to the bottom if there is space, or just append
+    dateGroup.style.marginTop = 'auto'; // This pushes it to the bottom if container is flex col
+    form.appendChild(dateGroup);
 
-    form.appendChild(thumbReachContainer);
+    // --- End Reorder ---
 
     // No submit handler needed on form itself, but keep preventDefault just in case
     form.addEventListener('submit', (e) => e.preventDefault());

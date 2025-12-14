@@ -23,11 +23,11 @@ export const SettingsView = () => {
     // Add mobile back button
     const mobileBackBtn = MobileBackButton({
         onBack: () => Router.navigate('dashboard'),
-        label: 'Back'
+        label: 'Save'
     });
 
     const backBtn = Button({
-        text: 'Back',
+        text: 'Save',
         variant: 'secondary',
         onClick: () => Router.navigate('dashboard')
     });
@@ -473,7 +473,24 @@ export const SettingsView = () => {
     dataSection.appendChild(dataTitle);
     dataSection.appendChild(dateRangeContainer);
     dataSection.appendChild(exportBtn);
-    container.appendChild(dataSection);
+
+    // OK / Done Button (Bottom)
+    const doneBtn = Button({
+        text: 'OK',
+        variant: 'primary',
+        onClick: () => Router.navigate('dashboard')
+    });
+    doneBtn.style.width = '100%';
+    doneBtn.style.marginTop = 'var(--spacing-xl)';
+    doneBtn.style.marginBottom = 'var(--spacing-xl)'; // Extra padding at bottom
+    doneBtn.style.padding = 'var(--spacing-md)';
+    doneBtn.style.fontSize = '1.1rem';
+    doneBtn.style.fontWeight = '600';
+    doneBtn.className += ' touch-target';
+
+    container.appendChild(dateSection); // Ensure dateSection is appended first
+    container.appendChild(dataSection); // Then dataSection
+    container.appendChild(doneBtn);
 
     return container;
 };
