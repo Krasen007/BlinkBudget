@@ -25,12 +25,6 @@ export const AddView = () => {
     title.style.margin = '0';
     title.style.marginRight = 'var(--spacing-md)';
 
-    // Add mobile back button
-    const mobileBackBtn = MobileBackButton({
-        onBack: () => Router.navigate('dashboard'),
-        label: 'Cancel'
-    });
-
     // Date Input Container (for Top Right)
     const dateCtx = document.createElement('div');
     dateCtx.style.position = 'relative';
@@ -117,7 +111,6 @@ export const AddView = () => {
     topRow.appendChild(title);
     topRow.appendChild(rightControls);
     header.appendChild(topRow);
-    header.appendChild(mobileBackBtn); // Add mobile back button to header
     container.appendChild(header);
 
     const form = TransactionForm({

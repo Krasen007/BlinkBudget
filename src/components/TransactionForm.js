@@ -5,7 +5,8 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     form.className = 'transaction-form mobile-optimized';
     form.style.display = 'flex';
     form.style.flexDirection = 'column';
-    form.style.gap = 'var(--spacing-sm)'; // Tighter spacing
+    // Tighter spacing on mobile to fit with keyboard
+    form.style.gap = window.mobileUtils?.isMobile() ? 'var(--spacing-xs)' : 'var(--spacing-sm)';
     form.style.width = '100%';
     form.style.position = 'relative';
 
@@ -251,7 +252,6 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     chipContainer.style.display = 'grid';
     chipContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(140px, 1fr))';
     chipContainer.style.gap = 'var(--spacing-md)';
-    chipContainer.style.maxHeight = '40vh';
     chipContainer.style.overflowY = 'auto';
     chipContainer.style.overflowX = 'hidden';
     chipContainer.style.padding = 'var(--spacing-sm)';
@@ -259,9 +259,50 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     chipContainer.style.background = 'var(--color-surface)';
     chipContainer.style.border = '1px solid var(--color-border)';
 
+    // Keyboard-aware height calculation for categories
+    const calculateCategoryHeight = () => {
+        if (!window.mobileUtils?.isMobile()) {
+            return '40vh'; // Desktop default
+        }
+
+        // Get actual visual viewport (accounts for keyboard)
+        const viewportHeight = window.visualViewport?.height || window.innerHeight;
+
+        // Calculate space used by: header, amount input, account, type toggle, margins
+        // Approximate: 60px header + 60px amount + 50px account + 50px type + 100px margins/padding
+        const fixedElementsHeight = 320;
+
+        // Available space for categories
+        const availableHeight = viewportHeight - fixedElementsHeight;
+
+        // Ensure minimum viable height and reasonable maximum
+        const minHeight = 150; // Minimum to show at least 2 rows
+        const maxHeight = 350; // Maximum when keyboard is closed
+        const calculatedHeight = Math.max(minHeight, Math.min(maxHeight, availableHeight));
+
+        return `${calculatedHeight} px`;
+    };
+
+    // Set initial height
+    chipContainer.style.maxHeight = calculateCategoryHeight();
+
     // Enhanced scrolling for mobile
     chipContainer.style.webkitOverflowScrolling = 'touch';
     chipContainer.style.scrollBehavior = 'smooth';
+
+    // Update height when keyboard opens/closes
+    if (window.visualViewport) {
+        const updateCategoryHeight = () => {
+            chipContainer.style.maxHeight = calculateCategoryHeight();
+        };
+
+        window.visualViewport.addEventListener('resize', updateCategoryHeight);
+
+        // Cleanup (would be called when component unmounts)
+        form._cleanupCategoryHeight = () => {
+            window.visualViewport.removeEventListener('resize', updateCategoryHeight);
+        };
+    }
 
     let selectedCategory = initialValues.category || null; // Or toAccountId for transfers
     let selectedToAccount = initialValues.toAccountId || null;
@@ -417,8 +458,8 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
 
                 // Enhanced touch feedback for category chips - optimized for thumb navigation
                 chip.addEventListener('touchstart', (e) => {
-                    chip.style.boxShadow = `0 4px 20px ${catColor}60`;
-                    chip.style.border = `1px solid ${catColor}`;
+                    chip.style.boxShadow = `0 4px 20px ${catColor} 60`;
+                    chip.style.border = `1px solid ${catColor} `;
                     // Enhanced haptic feedback for form interactions
                     if (window.mobileUtils) {
                         window.mobileUtils.hapticFeedback([15]); // Light haptic for touch start
@@ -442,9 +483,9 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
                 // Hover effects for desktop
                 chip.addEventListener('mouseenter', () => {
                     if (selectedCategory !== cat) {
-                        chip.style.border = `1px solid ${catColor}`;
+                        chip.style.border = `1px solid ${catColor} `;
                         chip.style.color = catColor;
-                        chip.style.boxShadow = `0 0 8px ${catColor}40`; // Subtle glow
+                        chip.style.boxShadow = `0 0 8px ${catColor} 40`; // Subtle glow
                     }
                 });
 
@@ -660,7 +701,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
 
                 if (keyboardHeight > 100) { // Keyboard is visible
                     document.body.classList.add('keyboard-visible');
-                    form.style.paddingBottom = `${keyboardHeight + 20}px`;
+                    form.style.paddingBottom = `${keyboardHeight + 20} px`;
                 } else { // Keyboard is hidden
                     document.body.classList.remove('keyboard-visible');
                     form.style.paddingBottom = '0';
