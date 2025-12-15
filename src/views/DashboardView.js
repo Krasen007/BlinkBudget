@@ -149,26 +149,26 @@ export const DashboardView = () => {
         statsContainer.style.display = 'grid';
         statsContainer.style.gap = 'var(--spacing-md)';
         statsContainer.style.marginBottom = 'var(--spacing-xl)';
-        
+
         // Mobile-first responsive grid: single column on mobile, multi-column on larger screens
         statsContainer.style.gridTemplateColumns = '1fr'; // Single column on mobile
-        
+
         // Add responsive behavior via media query classes
         if (window.innerWidth >= 768) {
             statsContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
         }
-        
+
         // Listen for resize events to maintain responsive behavior
         const updateResponsiveLayout = () => {
             const isMobile = window.innerWidth < 768;
-            
+
             // Update stats container layout
             if (isMobile) {
                 statsContainer.style.gridTemplateColumns = '1fr';
             } else {
                 statsContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
             }
-            
+
             // Update typography for all existing elements
             const statLabels = container.querySelectorAll('.dashboard-stat-label');
             const statValues = container.querySelectorAll('.dashboard-stat-value');
@@ -177,43 +177,42 @@ export const DashboardView = () => {
             const transactionCategories = container.querySelectorAll('.transaction-item-category');
             const transactionDates = container.querySelectorAll('.transaction-item-date');
             const transactionValues = container.querySelectorAll('.transaction-item-value');
-            
+
             statLabels.forEach(label => {
                 label.style.fontSize = isMobile ? 'var(--font-size-sm)' : '0.875rem';
             });
-            
+
             statValues.forEach(value => {
                 value.style.fontSize = isMobile ? 'var(--font-size-2xl)' : '1.75rem';
             });
-            
+
             if (transactionTitle) {
                 transactionTitle.style.fontSize = isMobile ? 'var(--font-size-xl)' : 'var(--font-size-2xl)';
             }
-            
-            if (transactionList) {
-                transactionList.style.maxHeight = isMobile ? '50vh' : '400px';
-            }
-            
+
+            // Transaction list height is now calculated dynamically by calculateMaxHeight
+            // No fixed height assignment needed here
+
             transactionCategories.forEach(cat => {
                 cat.style.fontSize = isMobile ? 'var(--font-size-base)' : 'var(--font-size-sm)';
             });
-            
+
             transactionDates.forEach(date => {
                 date.style.fontSize = isMobile ? 'var(--font-size-sm)' : '0.75rem';
             });
-            
+
             transactionValues.forEach(val => {
                 val.style.fontSize = isMobile ? 'var(--font-size-lg)' : 'var(--font-size-base)';
             });
         };
-        
+
         // Debounced resize handler for better performance
         let resizeTimeout;
         const handleResize = () => {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(updateResponsiveLayout, 150);
         };
-        
+
         window.addEventListener('resize', handleResize);
         window.addEventListener('orientationchange', () => {
             // Delay to allow orientation change to complete
@@ -225,7 +224,7 @@ export const DashboardView = () => {
             card.className = 'card dashboard-stat-card';
             card.style.textAlign = 'left';
             card.style.padding = 'var(--spacing-lg)';
-            
+
             // Enhanced mobile touch target
             card.style.minHeight = 'var(--touch-target-min)';
             card.style.display = 'flex';
@@ -285,7 +284,7 @@ export const DashboardView = () => {
         // 4. Recent Transactions - Mobile-optimized
         const listContainer = document.createElement('div');
         listContainer.className = 'dashboard-transactions-container';
-        
+
         const listTitle = document.createElement('h3');
         listTitle.textContent = 'Recent Transactions';
         listTitle.className = 'dashboard-transactions-title';
@@ -308,19 +307,62 @@ export const DashboardView = () => {
             list.className = 'dashboard-transactions-list';
             list.style.listStyle = 'none';
             list.style.padding = 0;
-            // Responsive max height for better mobile experience
-            list.style.maxHeight = window.innerWidth < 768 ? '50vh' : '400px';
+
+            // Dynamic height calculation to prevent main view scrolling
+            const calculateMaxHeight = () => {
+                // Get viewport height
+                const viewportHeight = window.visualViewport?.height || window.innerHeight;
+
+                // Calculate used space: header, stats, button, title, margins
+                const containerRect = container.getBoundingClientRect();
+                const listTitleRect = listTitle.getBoundingClientRect();
+
+                // Space taken by elements above the list
+                const usedSpace = listTitleRect.bottom - containerRect.top;
+
+                // Mobile navigation height (if present)
+                const mobileNav = document.querySelector('.mobile-nav');
+                const mobileNavHeight = mobileNav ? mobileNav.offsetHeight : 0;
+
+                // Calculate available space with some padding for comfort
+                const padding = 40; // Extra padding for breathing room
+                const availableHeight = viewportHeight - usedSpace - mobileNavHeight - padding;
+
+                // Ensure reasonable min/max bounds
+                const minHeight = 200; // Minimum height to show at least a few transactions
+                const maxHeight = Math.max(minHeight, availableHeight);
+
+                return `${maxHeight}px`;
+            };
+
+            // Set initial height
+            list.style.maxHeight = calculateMaxHeight();
             list.style.overflowY = 'auto';
             list.style.borderTop = '1px solid var(--color-surface-hover)';
-            
+
             // Enhanced mobile scrolling performance
             list.style.webkitOverflowScrolling = 'touch';
             list.style.scrollBehavior = 'smooth';
             list.style.overscrollBehavior = 'contain';
-            
+
             // Optimize for mobile performance
             list.style.willChange = 'scroll-position';
             list.style.transform = 'translateZ(0)'; // Force hardware acceleration
+
+            // Update height on resize or orientation change
+            const updateListHeight = () => {
+                requestAnimationFrame(() => {
+                    list.style.maxHeight = calculateMaxHeight();
+                });
+            };
+
+            window.addEventListener('resize', updateListHeight);
+            window.addEventListener('orientationchange', () => {
+                setTimeout(updateListHeight, 300); // Delay for orientation change completion
+            });
+
+            // Recalculate after content loads (delayed)
+            setTimeout(updateListHeight, 100);
 
             transactions.forEach(t => {
                 const item = document.createElement('li');
@@ -332,18 +374,18 @@ export const DashboardView = () => {
                 item.style.cursor = 'pointer';
                 item.style.minHeight = 'var(--touch-target-min)';
                 item.style.alignItems = 'center';
-                
+
                 // Touch feedback for transaction items
                 item.addEventListener('touchstart', (e) => {
                     item.style.backgroundColor = 'var(--color-surface-hover)';
                     item.style.transform = 'scale(0.98)';
                 }, { passive: true });
-                
+
                 item.addEventListener('touchend', () => {
                     item.style.backgroundColor = 'transparent';
                     item.style.transform = 'scale(1)';
                 }, { passive: true });
-                
+
                 item.addEventListener('touchcancel', () => {
                     item.style.backgroundColor = 'transparent';
                     item.style.transform = 'scale(1)';
