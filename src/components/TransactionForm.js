@@ -22,8 +22,9 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     // Allow passing in accountId if needed (e.g. from filter), otherwise default
     let currentAccountId = initialValues.accountId || defaultAccount.id;
 
+    // Account group will be styled when added to row
     const accountGroup = document.createElement('div');
-    accountGroup.style.marginBottom = 'var(--spacing-xs)';
+    accountGroup.style.flex = '1'; // 40% of space
 
     const accSelect = document.createElement('select');
     accSelect.style.width = '100%';
@@ -158,8 +159,16 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     // typeGroup ready (appended at bottom)
     // Date input removed - using externalDateInput from AddView.js (top of page)
 
-    // Amount Input
+    // Amount and Account Row - Side by Side
+    const amountAccountRow = document.createElement('div');
+    amountAccountRow.style.display = 'flex';
+    amountAccountRow.style.gap = 'var(--spacing-sm)';
+    amountAccountRow.style.width = '100%';
+
+    // Amount Input (60% width)
     const amountGroup = document.createElement('div');
+    amountGroup.style.flex = '1.5'; // 60% of space
+    amountGroup.style.marginBottom = '0'; // Remove bottom margin
 
     const amountInput = document.createElement('input');
     amountInput.type = 'number';
@@ -208,6 +217,10 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
 
     amountGroup.appendChild(amountInput);
 
+    // Add both to row
+    amountAccountRow.appendChild(amountGroup);
+    amountAccountRow.appendChild(accountGroup);
+
     // Categories / Destination Account
     const categoryGroup = document.createElement('div');
 
@@ -251,56 +264,51 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     chipContainer.className = 'category-chip-container';
     chipContainer.style.display = 'grid';
     chipContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(140px, 1fr))';
-    chipContainer.style.gap = 'var(--spacing-md)';
-    chipContainer.style.overflowY = 'auto';
-    chipContainer.style.overflowX = 'hidden';
+    chipContainer.style.gap = 'var(--spacing-sm)';
     chipContainer.style.padding = 'var(--spacing-sm)';
     chipContainer.style.borderRadius = 'var(--radius-md)';
     chipContainer.style.background = 'var(--color-surface)';
     chipContainer.style.border = '1px solid var(--color-border)';
 
-    // Keyboard-aware height calculation for categories
+    // Show all categories without scrolling, but contain them properly
+    // Don't set overflow:visible as it causes overlap
+    chipContainer.style.overflow = 'hidden'; // Contain the grid
+    chipContainer.style.marginBottom = 'var(--spacing-md)'; // Add space before type toggle
+
+    // Keyboard-aware: scrollable when keyboard open, show all when closed
+    chipContainer.style.overflowY = 'auto';
+    chipContainer.style.overflowX = 'hidden';
+    chipContainer.style.webkitOverflowScrolling = 'touch';
+
+    // Calculate max-height based on keyboard state
     const calculateCategoryHeight = () => {
         if (!window.mobileUtils?.isMobile()) {
-            return '40vh'; // Desktop default
+            return 'none'; // Desktop - no restriction
         }
 
-        // Get actual visual viewport (accounts for keyboard)
         const viewportHeight = window.visualViewport?.height || window.innerHeight;
 
-        // Calculate space used by: header, amount input, account, type toggle, margins
-        // Approximate: 60px header + 60px amount + 50px account + 50px type + 100px margins/padding
-        const fixedElementsHeight = 320;
-
-        // Available space for categories
+        // Space used: amount+account row (60px) + type toggle (60px) + margins (~80px)
+        const fixedElementsHeight = 200;
         const availableHeight = viewportHeight - fixedElementsHeight;
 
-        // Ensure minimum viable height and reasonable maximum
-        const minHeight = 150; // Minimum to show at least 2 rows
-        const maxHeight = 350; // Maximum when keyboard is closed
-        const calculatedHeight = Math.max(minHeight, Math.min(maxHeight, availableHeight));
+        // Allow enough height to show all 6 categories (2 rows x 56px + gaps)
+        const minHeight = 140; // Minimum for scrolling
+        const idealHeight = 250; // Enough for 2 full rows
 
-        return `${calculatedHeight} px`;
+        return `${Math.max(minHeight, Math.min(idealHeight, availableHeight))}px`;
     };
 
-    // Set initial height
     chipContainer.style.maxHeight = calculateCategoryHeight();
 
-    // Enhanced scrolling for mobile
-    chipContainer.style.webkitOverflowScrolling = 'touch';
-    chipContainer.style.scrollBehavior = 'smooth';
-
-    // Update height when keyboard opens/closes
+    // Update on keyboard open/close
     if (window.visualViewport) {
-        const updateCategoryHeight = () => {
+        const updateHeight = () => {
             chipContainer.style.maxHeight = calculateCategoryHeight();
         };
-
-        window.visualViewport.addEventListener('resize', updateCategoryHeight);
-
-        // Cleanup (would be called when component unmounts)
+        window.visualViewport.addEventListener('resize', updateHeight);
         form._cleanupCategoryHeight = () => {
-            window.visualViewport.removeEventListener('resize', updateCategoryHeight);
+            window.visualViewport.removeEventListener('resize', updateHeight);
         };
     }
 
@@ -577,14 +585,11 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     // Remove separate submit button as per "Auto-save" requirement
     // form.appendChild(submitBtn); 
 
-    // --- REORDERED LAYOUT (Amount -> Account -> Categories -> Type) ---
-    // New order prioritizes the most important action (amount) first
+    // --- REORDERED LAYOUT (Amount+Account Row -> Categories -> Type) ---
+    // Amount and Account are side-by-side to save vertical space
 
-    // 1. Amount (Primary action - user enters this first)
-    form.appendChild(amountGroup);
-
-    // 2. Account (Secondary context)
-    form.appendChild(accountGroup);
+    // 1. Amount + Account Row
+    form.appendChild(amountAccountRow);
 
     // 3. Categories (Main selection area)
     form.appendChild(categoryGroup);
