@@ -12,8 +12,9 @@ input {
   font-family: var(--font-body);
   font-size: var(--font-size-base);
 
-  /* Touch-friendly sizing */
-  min-height: var(--touch-target-min);
+  /* Touch-friendly sizing - match category chips */
+  min-height: 56px;
+  height: 56px;
 
   /* Mobile input optimizations */
   -webkit-appearance: none;
@@ -40,7 +41,8 @@ input:focus {
 /* Specific input types for mobile */
 input[type="date"] {
   color-scheme: dark;
-  min-height: var(--touch-target-min);
+  min-height: 56px;
+  height: 56px;
 }
 
 /* Remove Arrows from Number Input */
@@ -57,7 +59,8 @@ input[type=number] {
 
 /* Select elements - Touch-optimized */
 select.input-select {
-  min-height: var(--touch-target-min);
+  min-height: 56px; /* Match category chip height */
+  height: 56px; /* Fixed height to match category chips exactly */
   padding: var(--spacing-md);
   font-size: max(16px, var(--font-size-base));
   /* Prevent iOS zoom */
@@ -79,13 +82,13 @@ select.input-select:focus {
   outline: none;
 }
 
-/* Mobile Form Styles */
+/* Mobile Form Styles - Unified styling for all form elements */
 .mobile-form-input,
 .mobile-form-select {
   width: 100%;
-  min-height: var(--touch-target-min);
-  font-size: 16px;
-  /* Prevent zoom on iOS */
+  min-height: 56px; /* Match category chip height */
+  height: 56px; /* Fixed height to match category chips exactly */
+  font-size: max(16px, var(--font-size-base)); /* Prevent zoom on iOS */
   padding: var(--spacing-md);
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
@@ -94,6 +97,19 @@ select.input-select:focus {
   transition: all var(--transition-fast);
   font-family: var(--font-body);
   outline: none;
+  box-sizing: border-box;
+  
+  /* Mobile optimizations */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.mobile-form-input:hover,
+.mobile-form-select:hover {
+  border-color: var(--color-text-muted);
 }
 
 .mobile-form-input:focus,
@@ -101,6 +117,16 @@ select.input-select:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
   outline: none;
+}
+
+/* Ensure select elements have proper styling */
+.mobile-form-select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right var(--spacing-md) center;
+  background-size: 16px;
+  padding-right: calc(var(--spacing-md) + 24px); /* Make room for arrow */
 }
 
 /* Mobile add account form */

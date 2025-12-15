@@ -37,16 +37,11 @@ export const AddView = () => {
     const displayDate = document.createElement('input');
     displayDate.type = 'text';
     displayDate.readOnly = true;
-    displayDate.className = 'touch-target'; // Ensure min height
+    displayDate.className = 'mobile-form-input';
     displayDate.style.width = '100%';
-    displayDate.style.padding = 'var(--spacing-xs) var(--spacing-sm)';
-    displayDate.style.borderRadius = 'var(--radius-sm)';
-    displayDate.style.border = '1px solid var(--color-border)';
-    displayDate.style.background = 'var(--color-surface)';
-    displayDate.style.color = 'var(--color-text-muted)';
-    displayDate.style.fontSize = 'var(--font-size-sm)';
     displayDate.style.textAlign = 'center';
     displayDate.style.cursor = 'pointer';
+    displayDate.style.color = 'var(--color-text-muted)';
 
     // 2. Hidden Native Date Input
     const realDate = document.createElement('input');
@@ -100,9 +95,12 @@ export const AddView = () => {
     const smallBackBtn = document.createElement('button');
     smallBackBtn.textContent = 'Back';
     smallBackBtn.className = 'btn btn-ghost';
+    smallBackBtn.style.height = '56px'; // Match form element height
+    smallBackBtn.style.minHeight = '56px';
     smallBackBtn.style.padding = 'var(--spacing-sm) var(--spacing-md)';
     smallBackBtn.style.fontSize = 'var(--font-size-sm)';
-    smallBackBtn.style.color = 'var(--color-text-muted)';
+    smallBackBtn.style.width = 'auto'; // Let it size to content
+    smallBackBtn.style.flexShrink = '0'; // Don't shrink
     smallBackBtn.addEventListener('click', () => Router.navigate('dashboard'));
 
     rightControls.appendChild(dateCtx);
@@ -124,9 +122,16 @@ export const AddView = () => {
 
     const backLink = document.createElement('button');
     backLink.textContent = 'Cancel';
-    backLink.className = 'btn btn-ghost desktop-only'; // Hide on mobile, show mobile back button instead
-    backLink.style.width = '100%';
+    backLink.className = 'mobile-form-input desktop-only'; // Hide on mobile, show mobile back button instead
     backLink.style.marginTop = 'var(--spacing-md)';
+    backLink.style.cursor = 'pointer';
+    backLink.style.border = '1px solid var(--color-border)';
+    backLink.style.background = 'var(--color-surface)';
+    backLink.style.color = 'var(--color-text-main)';
+    backLink.style.display = 'flex';
+    backLink.style.alignItems = 'center';
+    backLink.style.justifyContent = 'center';
+    backLink.style.fontWeight = '500';
     backLink.addEventListener('click', () => Router.navigate('dashboard'));
     container.appendChild(backLink);
 

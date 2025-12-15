@@ -27,18 +27,9 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     accountGroup.style.flex = '1'; // 40% of space
 
     const accSelect = document.createElement('select');
+    accSelect.className = 'mobile-form-select';
     accSelect.style.width = '100%';
-    accSelect.style.padding = 'var(--spacing-md) var(--spacing-md)';
-    accSelect.style.borderRadius = 'var(--radius-md)';
-    accSelect.style.background = 'var(--color-surface)';
-    accSelect.style.color = 'var(--color-text-main)';
-    accSelect.style.border = '1px solid var(--color-border)';
-    accSelect.style.fontSize = 'max(16px, var(--font-size-base))'; // Prevent zoom on iOS
     accSelect.style.cursor = 'pointer';
-    accSelect.style.outline = 'none';
-    accSelect.style.appearance = 'auto';
-    accSelect.style.minHeight = 'var(--touch-target-min)'; // Touch-friendly height
-    accSelect.className = 'input-select touch-target';
 
     accounts.forEach(acc => {
         const opt = document.createElement('option');
@@ -58,19 +49,11 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     });
 
     // Mobile-specific select handling
-    const handleSelectFocus = () => {
+    accSelect.addEventListener('focus', () => {
         if (window.mobileUtils) {
             window.mobileUtils.preventInputZoom(accSelect);
         }
-        accSelect.style.border = '1px solid var(--color-primary)';
-    };
-
-    const handleSelectBlur = () => {
-        accSelect.style.border = '1px solid var(--color-border)';
-    };
-
-    accSelect.addEventListener('focus', handleSelectFocus);
-    accSelect.addEventListener('blur', handleSelectBlur);
+    });
 
     accountGroup.appendChild(accSelect);
     // Elements created but appended at valid order at the bottom
@@ -176,22 +159,16 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     amountInput.step = '0.01';
     amountInput.required = true;
     amountInput.placeholder = '0.00';
+    amountInput.className = 'mobile-form-input';
     amountInput.style.width = '100%';
-    amountInput.style.padding = 'var(--spacing-md)';
-    amountInput.style.fontSize = '2rem';
-    amountInput.style.borderRadius = 'var(--radius-md)';
-    amountInput.style.border = '1px solid var(--color-border)';
-    amountInput.style.background = 'var(--color-surface)';
-    amountInput.style.color = 'var(--color-text-main)';
+    amountInput.style.fontSize = '1.5rem'; // Larger font for amount input
 
     // Mobile-specific optimizations
     amountInput.inputMode = 'decimal'; // Show numeric keypad on mobile
     amountInput.pattern = '[0-9]*\\.?[0-9]*'; // Numeric pattern for better mobile keyboard
-    amountInput.style.fontSize = 'max(16px, 2rem)'; // Prevent zoom on iOS
-    amountInput.style.minHeight = 'var(--touch-target-min)'; // Touch-friendly height
 
     // Keyboard-aware viewport adjustments
-    const handleAmountFocus = () => {
+    amountInput.addEventListener('focus', () => {
         // Prevent zoom on input focus
         if (window.mobileUtils) {
             window.mobileUtils.preventInputZoom(amountInput);
@@ -201,19 +178,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
                 window.mobileUtils.scrollIntoViewAboveKeyboard(amountInput, 60);
             }, 300);
         }
-
-        // Visual feedback
-        amountInput.style.border = '1px solid var(--color-primary)';
-        amountInput.style.boxShadow = '0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1)';
-    };
-
-    const handleAmountBlur = () => {
-        amountInput.style.border = '1px solid var(--color-border)';
-        amountInput.style.boxShadow = 'none';
-    };
-
-    amountInput.addEventListener('focus', handleAmountFocus);
-    amountInput.addEventListener('blur', handleAmountBlur);
+    });
 
     amountGroup.appendChild(amountInput);
 
