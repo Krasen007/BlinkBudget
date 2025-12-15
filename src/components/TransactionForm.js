@@ -7,13 +7,11 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     form.style.flexDirection = 'column';
     form.style.gap = 'var(--spacing-sm)'; // Tighter spacing
     form.style.width = '100%';
-    form.style.height = '100%';
     form.style.position = 'relative';
 
-    // Mobile-first layout optimization
+    // Mobile-first layout optimization - removed fixed height to prevent empty space
     if (window.mobileUtils && window.mobileUtils.isMobile()) {
-        form.style.minHeight = 'calc(var(--visual-viewport-height) - 120px)'; // Account for navigation
-        form.style.justifyContent = 'flex-end'; // Push content to bottom for thumb reach
+        form.style.justifyContent = 'flex-start'; // Start from top, let content flow naturally
     }
 
     // Account Selection (Source)

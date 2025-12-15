@@ -12,7 +12,6 @@ DO NOT IMPLEMENT: add option to reorder categories or auto sort them by most com
 [x] add option to edit name of categories or add new categories
 [x] add option to add an expense in the past
 [x] add option to delete entries style the date picker to be the same style as the rest of the app.
-Make a plan before impleneting the following:
-[ ] Simplify date handling - Remove duplicate date input (keep only top)
-[ ] Adjust spacing - tighter compact layout
-[ ] Reorder elements - Different sequence (e.g., Amount first, then Type at the bottom)
+[x] Simplify date handling - Remove duplicate date input (keep only top)
+[x] Adjust spacing - tighter compact layout
+[x] Reorder elements - Different sequence (e.g., Amount first, then Type at the bottom)
