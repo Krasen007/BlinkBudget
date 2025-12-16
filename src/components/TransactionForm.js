@@ -81,7 +81,21 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
 
         const updateState = () => {
             const isActive = currentType === type;
-            btn.style.background = isActive ? (type === 'expense' ? 'var(--color-primary)' : '#10b981') : 'transparent';
+            let activeColor;
+            switch (type) {
+                case 'expense':
+                    activeColor = 'var(--color-primary)';
+                    break;
+                case 'income':
+                    activeColor = '#10b981';
+                    break;
+                case 'refund':
+                    activeColor = '#06b6d4'; // Teal/cyan for refunds
+                    break;
+                default:
+                    activeColor = '#10b981';
+            }
+            btn.style.background = isActive ? activeColor : 'transparent';
             btn.style.border = isActive ? '1px solid transparent' : '1px solid var(--color-border)';
             btn.style.color = isActive ? 'white' : 'var(--color-text-muted)';
         };
@@ -129,16 +143,19 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
 
     const expenseBtn = createTypeBtn('expense', 'Expense');
     const incomeBtn = createTypeBtn('income', 'Income');
-    const transferBtn = createTypeBtn('transfer', 'Transfer'); // New Type
+    const transferBtn = createTypeBtn('transfer', 'Transfer');
+    const refundBtn = createTypeBtn('refund', 'Refund'); // New refund type
 
     // Initial state
     expenseBtn.updateState();
     incomeBtn.updateState();
     transferBtn.updateState();
+    refundBtn.updateState();
 
     typeGroup.appendChild(expenseBtn);
     typeGroup.appendChild(incomeBtn);
     typeGroup.appendChild(transferBtn);
+    typeGroup.appendChild(refundBtn);
     // typeGroup ready (appended at bottom)
     // Date input removed - using externalDateInput from AddView.js (top of page)
 
@@ -532,7 +549,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     renderCategories(); // Initial render
 
     // Update categories when type changes
-    [expenseBtn, incomeBtn, transferBtn].forEach(btn => {
+    [expenseBtn, incomeBtn, transferBtn, refundBtn].forEach(btn => {
         btn.addEventListener('click', () => {
             selectedCategory = null;
             selectedToAccount = null;

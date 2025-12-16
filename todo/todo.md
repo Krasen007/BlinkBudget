@@ -1,5 +1,7 @@
 DO NOT IMPLEMENT: when you start the app the default view should be to add new entry
 DO NOT IMPLEMENT: add option to reorder categories or auto sort them by most common, it may also be learning from the user behavior and predict the category based on the amount
+DO NOT IMPLEMENT: Add visual indicators for refund transactions in lists
+DO NOT IMPLEMENT: Implement category-based filtering for refund transactions
 [x] fix wrong amount display -$-6.00
 [x] add refund option
 [x] add hover effect when the mouse is going over the items in the dashboard
