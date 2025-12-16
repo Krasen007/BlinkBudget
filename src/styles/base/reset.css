@@ -84,53 +84,7 @@ input[type=number] {
   appearance: textfield;
 }
 
-/* iOS specific fixes */
-@supports (-webkit-touch-callout: none) {
-
-  /* iOS Safari specific styles */
-  input {
-    /* Fix iOS input styling */
-    -webkit-appearance: none;
-    appearance: none;
-    border-radius: var(--radius-md);
-  }
-
-  /* Fix iOS button styling */
-  .btn {
-    -webkit-appearance: none;
-    appearance: none;
-  }
-
-  /* Prevent iOS zoom on input focus */
-  input[type="text"],
-  input[type="number"],
-  input[type="email"],
-  input[type="tel"],
-  input[type="date"],
-  select,
-  textarea {
-    font-size: var(--font-size-base) !important;
-  }
-}
-
-/* Android specific fixes */
-@media screen and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: .001dpcm) {
-
-  /* Android Chrome specific styles */
-  input:focus {
-    /* Prevent Android zoom */
-    font-size: var(--font-size-base);
-  }
-}
-
-/* Dark mode optimizations for mobile */
-@media (prefers-color-scheme: dark) {
-
-  /* Already using dark theme, but ensure mobile-specific adjustments */
-  input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-  }
-}
+/* Note: iOS/Android input fixes moved to components/forms.css to avoid duplication */
 
 /* Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {

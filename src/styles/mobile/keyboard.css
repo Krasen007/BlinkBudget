@@ -15,6 +15,22 @@ body.keyboard-visible #app {
 body.keyboard-visible .transaction-form {
   /* Ensure form content is accessible above keyboard */
   margin-bottom: 0;
+  justify-content: flex-start !important; /* Move content to top when keyboard is open */
+  padding-top: var(--spacing-md);
+}
+
+/* Collapse category list when keyboard is open to ensure visibility */
+body.keyboard-visible .category-chip-container {
+  max-height: 120px; /* Small scrollable area */
+  flex-shrink: 1; /* Allow shrinking */
+  min-height: 0;
+}
+
+/* Ensure thumb reach container adapts */
+body.keyboard-visible .thumb-reach-container {
+  min-height: 0 !important;
+  justify-content: flex-start !important;
+  padding-bottom: var(--spacing-sm) !important;
 }
 
 /* Enhanced input focus states for mobile keyboard interaction */
@@ -27,133 +43,6 @@ body.keyboard-visible select:focus {
   transition: all var(--transition-fast);
 }
 
-/* Form inputs - Mobile keyboard optimized */
-input {
-  /* Mobile input optimizations */
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  
-  /* Prevent zoom on focus (iOS) */
-  font-size: max(var(--font-size-prevent-zoom), var(--font-size-base));
-  
-  /* Touch optimizations */
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
-
-/* Specific input types for mobile keyboard */
-input[type="date"] {
-  color-scheme: dark;
-  min-height: var(--touch-target-min);
-}
-
-/* Remove Arrows from Number Input */
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type=number] {
-  -moz-appearance: textfield;
-  appearance: textfield;
-}
-
-/* Select elements - Touch-optimized for keyboard */
-select.input-select {
-  min-height: var(--touch-target-min);
-  padding: var(--spacing-md);
-  font-size: max(var(--font-size-prevent-zoom), var(--font-size-base)); /* Prevent iOS zoom */
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
-
-/* Enhanced focus states for touch */
-select.input-select:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
-  outline: none;
-}
-
-/* Mobile Form Styles */
-.mobile-form-input,
-.mobile-form-select {
-  width: 100%;
-  min-height: var(--touch-target-min);
-  font-size: var(--font-size-prevent-zoom); /* Prevent zoom on iOS */
-  padding: var(--spacing-md);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text-main);
-  transition: all var(--transition-fast);
-}
-
-.mobile-form-input:focus,
-.mobile-form-select:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
-  outline: none;
-}
-
-/* Mobile Date Range Form */
-.mobile-date-range-form {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-lg);
-}
-
-.mobile-date-input-wrapper {
-  width: 100%;
-}
-
-.mobile-date-input-wrapper label {
-  display: block;
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--color-text-muted);
-  margin-bottom: var(--spacing-xs);
-}
-
-/* iOS specific keyboard fixes */
-@supports (-webkit-touch-callout: none) {
-  /* iOS Safari specific styles */
-  input {
-    /* Fix iOS input styling */
-    -webkit-appearance: none;
-    appearance: none;
-    border-radius: var(--radius-md);
-  }
-  
-  /* Fix iOS button styling */
-  .btn {
-    -webkit-appearance: none;
-    appearance: none;
-  }
-  
-  /* Prevent iOS zoom on input focus */
-  input[type="text"],
-  input[type="number"],
-  input[type="email"],
-  input[type="tel"],
-  input[type="date"],
-  select,
-  textarea {
-    font-size: var(--font-size-prevent-zoom) !important;
-  }
-}
-
-/* Android specific keyboard fixes */
-@media screen and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: .001dpcm) {
-  /* Android Chrome specific styles */
-  input:focus {
-    /* Prevent Android zoom */
-    font-size: var(--font-size-prevent-zoom);
-  }
-}
-
 /* Viewport utilities for keyboard handling */
 .viewport-height {
   height: var(--viewport-height);
@@ -161,26 +50,4 @@ select.input-select:focus {
 
 .visual-viewport-height {
   height: var(--visual-viewport-height);
-}
-
-/* Responsive adjustments for keyboard on tablet */
-@media (min-width: var(--breakpoint-md)) {
-  .mobile-date-range-form {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-lg);
-    align-items: end;
-  }
-  
-  .mobile-date-input-wrapper:last-child {
-    grid-column: span 2;
-  }
-}
-
-/* Dark mode optimizations for mobile keyboard */
-@media (prefers-color-scheme: dark) {
-  /* Already using dark theme, but ensure mobile-specific adjustments */
-  input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-  }
 }

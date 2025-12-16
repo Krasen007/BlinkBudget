@@ -16,30 +16,14 @@
   height: var(--thumb-reach-zone);
 }
 
-/* Touch feedback states */
-.btn-touch-active {
-  transform: scale(0.96);
-  transition: transform 0.1s ease;
-}
-
-/* Enhanced visual feedback for touch */
-.btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: inherit;
-  background: rgba(255, 255, 255, 0.1);
-  opacity: 0;
-  transition: opacity var(--transition-fast);
-  pointer-events: none;
-}
-
-.btn:active::before,
-.btn-touch-active::before {
-  opacity: 1;
+/* Thumb reach container for important controls */
+.thumb-reach-container {
+  /* Position critical controls in bottom 60% for thumb accessibility */
+  @media (max-width: calc(var(--breakpoint-md) - 1px)) {
+    min-height: var(--thumb-reach-zone);
+    justify-content: flex-end;
+    padding-bottom: var(--spacing-xl);
+  }
 }
 
 /* Category chips - Touch-optimized for thumb navigation */
@@ -85,16 +69,6 @@
 .category-chip:active::after {
   width: 200px;
   height: 200px;
-}
-
-/* Thumb reach container for important controls */
-.thumb-reach-container {
-  /* Position critical controls in bottom 60% for thumb accessibility */
-  @media (max-width: calc(var(--breakpoint-md) - 1px)) {
-    min-height: var(--thumb-reach-zone);
-    justify-content: flex-end;
-    padding-bottom: var(--spacing-xl);
-  }
 }
 
 /* Category chip container - Scrollable grid layout */
@@ -233,14 +207,14 @@ input:active {
   transform: translateZ(0); /* Force hardware acceleration */
 }
 
-@media (max-width: 767px) {
+@media (max-width: calc(var(--breakpoint-md) - 1px)) {
   .dashboard-transactions-list {
     max-height: 50vh; /* Responsive height for mobile */
   }
 }
 
 /* Mobile-friendly focus states */
-@media (max-width: 767px) {
+@media (max-width: calc(var(--breakpoint-md) - 1px)) {
   .btn:focus,
   input:focus {
     outline: 2px solid var(--color-primary);
@@ -249,7 +223,7 @@ input:active {
 }
 
 /* Accessibility improvements for mobile */
-@media (max-width: 767px) {
+@media (max-width: calc(var(--breakpoint-md) - 1px)) {
   /* Larger focus indicators on mobile */
   :focus-visible {
     outline: 3px solid var(--color-primary);
