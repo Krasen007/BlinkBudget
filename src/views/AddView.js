@@ -12,10 +12,10 @@ export const AddView = () => {
     container.style.width = '100%';
 
     const header = document.createElement('div');
-    header.style.marginBottom = SPACING.XL;
+    header.style.marginBottom = SPACING.MD;
     header.style.flexDirection = 'column';
     header.style.alignItems = 'stretch';
-    header.style.gap = SPACING.MD;
+    header.style.gap = SPACING.SM;
 
     const topRow = document.createElement('div');
     topRow.style.display = 'flex';
@@ -70,7 +70,7 @@ export const AddView = () => {
         text: 'Cancel',
         className: 'mobile-form-input desktop-only',
         style: {
-            marginTop: SPACING.MD,
+            marginTop: SPACING.SM,
             cursor: 'pointer',
             border: `1px solid ${COLORS.BORDER}`,
             background: COLORS.SURFACE,

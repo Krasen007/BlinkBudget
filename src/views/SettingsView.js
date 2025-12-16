@@ -1,5 +1,4 @@
 import { Button } from '../components/Button.js';
-
 import { Router } from '../core/router.js';
 import { AccountSection } from '../components/AccountSection.js';
 import { DateFormatSection } from '../components/DateFormatSection.js';
@@ -13,12 +12,10 @@ export const SettingsView = () => {
     container.style.maxWidth = DIMENSIONS.CONTAINER_MAX_WIDTH;
     container.style.width = '100%';
 
-    // Header
+    // Header - compact like DashboardView
     const header = document.createElement('div');
-    header.style.marginBottom = SPACING.XL;
-    header.style.flexDirection = 'column';
-    header.style.alignItems = 'stretch';
-    header.style.gap = SPACING.MD;
+    header.style.marginBottom = SPACING.MD;
+    header.style.flexShrink = '0';
 
     const topRow = document.createElement('div');
     topRow.style.display = 'flex';

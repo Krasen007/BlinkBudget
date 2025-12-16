@@ -23,10 +23,10 @@ export const EditView = ({ id }) => {
     }
 
     const header = document.createElement('div');
-    header.style.marginBottom = SPACING.XL;
+    header.style.marginBottom = SPACING.MD;
     header.style.flexDirection = 'column';
     header.style.alignItems = 'stretch';
-    header.style.gap = SPACING.MD;
+    header.style.gap = SPACING.SM;
 
     const topRow = document.createElement('div');
     topRow.style.display = 'flex';
@@ -96,7 +96,7 @@ export const EditView = ({ id }) => {
         color: COLORS.ERROR,
         border: `1px solid ${COLORS.ERROR}`,
         width: '100%',
-        marginTop: SPACING.XL
+        marginTop: SPACING.MD
     });
 
     // Add hover effects
