@@ -50,7 +50,7 @@ body {
 
 #app {
   width: 100%;
-  max-width: 600px;
+  max-width: var(--container-max-width);
   /* Match typical mobile/tablet constraint */
   margin: 0 auto;
   flex: 1;

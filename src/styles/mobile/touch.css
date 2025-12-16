@@ -45,7 +45,7 @@
 /* Category chips - Touch-optimized for thumb navigation */
 .category-chip {
   /* Enhanced touch target size for better thumb reach */
-  min-height: 56px;
+  min-height: var(--touch-target-standard);
   min-width: var(--touch-target-min);
   
   /* Grid layout handles spacing */
@@ -90,7 +90,7 @@
 /* Thumb reach container for important controls */
 .thumb-reach-container {
   /* Position critical controls in bottom 60% for thumb accessibility */
-  @media (max-width: 767px) {
+  @media (max-width: calc(var(--breakpoint-md) - 1px)) {
     min-height: var(--thumb-reach-zone);
     justify-content: flex-end;
     padding-bottom: var(--spacing-xl);
@@ -116,7 +116,7 @@
   scroll-behavior: smooth;
   
   /* Optimize for mobile */
-  @media (max-width: 767px) {
+  @media (max-width: calc(var(--breakpoint-md) - 1px)) {
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     max-height: 35vh;
     gap: var(--spacing-sm);
@@ -176,7 +176,7 @@ input:active {
 /* Mobile-optimized transaction form layout */
 .transaction-form.mobile-optimized {
   /* Optimize for thumb reach on mobile */
-  @media (max-width: 767px) {
+  @media (max-width: calc(var(--breakpoint-md) - 1px)) {
     min-height: calc(var(--visual-viewport-height) - 120px);
     justify-content: flex-end;
   }

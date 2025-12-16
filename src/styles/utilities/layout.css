@@ -445,7 +445,7 @@
 }
 
 /* Responsive layout utilities */
-@media (min-width: 768px) {
+@media (min-width: var(--breakpoint-md)) {
   .md\:flex {
     display: flex;
   }
@@ -508,7 +508,7 @@
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: var(--breakpoint-lg)) {
   .lg\:flex {
     display: flex;
   }

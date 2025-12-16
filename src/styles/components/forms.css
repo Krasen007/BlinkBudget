@@ -13,8 +13,8 @@ input {
   font-size: var(--font-size-base);
 
   /* Touch-friendly sizing - match category chips */
-  min-height: 56px;
-  height: 56px;
+  min-height: var(--touch-target-standard);
+  height: var(--touch-target-standard);
 
   /* Mobile input optimizations */
   -webkit-appearance: none;
@@ -22,7 +22,7 @@ input {
   appearance: none;
 
   /* Prevent zoom on focus (iOS) */
-  font-size: max(16px, var(--font-size-base));
+  font-size: max(var(--font-size-prevent-zoom), var(--font-size-base));
 
   /* Touch optimizations */
   -webkit-tap-highlight-color: transparent;
@@ -41,8 +41,8 @@ input:focus {
 /* Specific input types for mobile */
 input[type="date"] {
   color-scheme: dark;
-  min-height: 56px;
-  height: 56px;
+  min-height: var(--touch-target-standard);
+  height: var(--touch-target-standard);
 }
 
 /* Remove Arrows from Number Input */
@@ -59,10 +59,10 @@ input[type=number] {
 
 /* Select elements - Touch-optimized */
 select.input-select {
-  min-height: 56px; /* Match category chip height */
-  height: 56px; /* Fixed height to match category chips exactly */
+  min-height: var(--touch-target-standard); /* Match category chip height */
+  height: var(--touch-target-standard); /* Fixed height to match category chips exactly */
   padding: var(--spacing-md);
-  font-size: max(16px, var(--font-size-base));
+  font-size: max(var(--font-size-prevent-zoom), var(--font-size-base));
   /* Prevent iOS zoom */
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -86,9 +86,9 @@ select.input-select:focus {
 .mobile-form-input,
 .mobile-form-select {
   width: 100%;
-  min-height: 56px; /* Match category chip height */
-  height: 56px; /* Fixed height to match category chips exactly */
-  font-size: max(16px, var(--font-size-base)); /* Prevent zoom on iOS */
+  min-height: var(--touch-target-standard); /* Match category chip height */
+  height: var(--touch-target-standard); /* Fixed height to match category chips exactly */
+  font-size: max(var(--font-size-prevent-zoom), var(--font-size-base)); /* Prevent zoom on iOS */
   padding: var(--spacing-md);
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
@@ -342,7 +342,7 @@ body.keyboard-visible select:focus {
 }
 
 /* Responsive adjustments for forms */
-@media (min-width: 768px) {
+@media (min-width: var(--breakpoint-md)) {
   .mobile-date-range-form {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -356,7 +356,7 @@ body.keyboard-visible select:focus {
 }
 
 /* Mobile-friendly focus states */
-@media (max-width: 767px) {
+@media (max-width: calc(var(--breakpoint-md) - 1px)) {
   input:focus {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
@@ -382,7 +382,7 @@ body.keyboard-visible select:focus {
   input[type="date"],
   select,
   textarea {
-    font-size: 16px !important;
+    font-size: var(--font-size-prevent-zoom) !important;
   }
 }
 
@@ -392,7 +392,7 @@ body.keyboard-visible select:focus {
   /* Android Chrome specific styles */
   input:focus {
     /* Prevent Android zoom */
-    font-size: 16px;
+    font-size: var(--font-size-prevent-zoom);
   }
 }
 

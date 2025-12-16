@@ -12,6 +12,7 @@
 
   /* Touch-friendly spacing */
   --touch-target-min: 44px;
+  --touch-target-standard: 56px; /* Standard touch target for forms and buttons */
   --touch-spacing-min: 8px;
   --thumb-reach-zone: 60vh; /* Bottom 60% for thumb reach */
 
@@ -25,6 +26,11 @@
   --viewport-height: 100vh;
   --viewport-width: 100vw;
   --visual-viewport-height: 100vh; /* Will be updated via JS for keyboard handling */
+
+  /* Container widths */
+  --container-max-width: 600px;
+  --modal-max-width: 400px;
+  --modal-max-width-small: 350px;
 
   /* Border radii */
   --radius-sm: 0.375rem;

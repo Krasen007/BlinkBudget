@@ -29,7 +29,7 @@
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
-@media (max-width: 767px) {
+@media (max-width: calc(var(--breakpoint-md) - 1px)) {
   .dashboard-stat-card {
     padding: var(--spacing-md);
     min-height: 80px;
@@ -44,7 +44,7 @@
   color: var(--color-text-muted);
 }
 
-@media (max-width: 767px) {
+@media (max-width: calc(var(--breakpoint-md) - 1px)) {
   .dashboard-stat-label {
     font-size: var(--font-size-sm);
   }
@@ -58,7 +58,7 @@
   color: var(--color-text-main);
 }
 
-@media (max-width: 767px) {
+@media (max-width: calc(var(--breakpoint-md) - 1px)) {
   .dashboard-stat-value {
     font-size: var(--font-size-2xl);
   }
@@ -72,14 +72,14 @@
   margin-bottom: var(--spacing-xl);
 }
 
-@media (max-width: 767px) {
+@media (max-width: calc(var(--breakpoint-md) - 1px)) {
   .dashboard-stats-container {
     grid-template-columns: 1fr; /* Single column on mobile */
     gap: var(--spacing-sm);
   }
 }
 
-@media (min-width: 768px) {
+@media (min-width: var(--breakpoint-md)) {
   .dashboard-stats-container {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: var(--spacing-md);
@@ -183,7 +183,7 @@
   text-align: left;
 }
 
-@media (max-width: 767px) {
+@media (max-width: calc(var(--breakpoint-md) - 1px)) {
   .transaction-item-info {
     gap: var(--spacing-xs);
   }
@@ -200,7 +200,7 @@
   width: 100%;
 }
 
-@media (max-width: 767px) {
+@media (max-width: calc(var(--breakpoint-md) - 1px)) {
   .transaction-item-category {
     font-size: var(--font-size-base);
   }
@@ -215,7 +215,7 @@
   color: var(--color-text-muted);
 }
 
-@media (max-width: 767px) {
+@media (max-width: calc(var(--breakpoint-md) - 1px)) {
   .transaction-item-date {
     font-size: var(--font-size-sm);
   }
@@ -230,7 +230,7 @@
   color: var(--color-text-main);
 }
 
-@media (max-width: 767px) {
+@media (max-width: calc(var(--breakpoint-md) - 1px)) {
   .transaction-item-value {
     font-size: var(--font-size-lg);
   }
@@ -252,7 +252,7 @@
   color: var(--color-text-main);
 }
 
-@media (max-width: 767px) {
+@media (max-width: calc(var(--breakpoint-md) - 1px)) {
   .dashboard-transactions-title {
     font-size: var(--font-size-xl);
   }
@@ -267,7 +267,7 @@
   transform: translateZ(0); /* Force hardware acceleration */
 }
 
-@media (max-width: 767px) {
+@media (max-width: calc(var(--breakpoint-md) - 1px)) {
   .dashboard-transactions-list {
     max-height: 50vh; /* Responsive height for mobile */
   }
@@ -281,13 +281,13 @@
 }
 
 /* Responsive adjustments for cards */
-@media (max-width: 767px) {
+@media (max-width: calc(var(--breakpoint-md) - 1px)) {
   .mobile-account-actions {
     flex-direction: column;
   }
 }
 
-@media (min-width: 768px) {
+@media (min-width: var(--breakpoint-md)) {
   .mobile-account-actions {
     flex-direction: row;
     justify-content: flex-end;

@@ -100,7 +100,7 @@
 }
 
 /* Responsive typography utilities */
-@media (min-width: 768px) {
+@media (min-width: var(--breakpoint-md)) {
   .md\:text-xs { font-size: var(--font-size-xs); }
   .md\:text-sm { font-size: var(--font-size-sm); }
   .md\:text-base { font-size: var(--font-size-base); }
@@ -120,7 +120,7 @@
   .md\:font-bold { font-weight: 700; }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: var(--breakpoint-lg)) {
   .lg\:text-xs { font-size: var(--font-size-xs); }
   .lg\:text-sm { font-size: var(--font-size-sm); }
   .lg\:text-base { font-size: var(--font-size-base); }

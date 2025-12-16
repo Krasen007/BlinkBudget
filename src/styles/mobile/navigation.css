@@ -120,7 +120,7 @@
 }
 
 /* Hide back button on desktop */
-@media (min-width: 768px) {
+@media (min-width: var(--breakpoint-md)) {
   .mobile-back-btn {
     display: none;
   }
