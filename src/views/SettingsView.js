@@ -2,6 +2,7 @@ import { Button } from '../components/Button.js';
 import { Router } from '../core/router.js';
 import { StorageService } from '../core/storage.js';
 import { MobileBackButton } from '../components/MobileNavigation.js';
+import { COLORS } from '../utils/constants.js';
 
 export const SettingsView = () => {
     const container = document.createElement('div');
@@ -147,7 +148,9 @@ export const SettingsView = () => {
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = 'Delete';
                 deleteBtn.className = 'btn btn-ghost touch-target mobile-action-btn mobile-delete-btn';
-                deleteBtn.style.color = '#ef4444';
+
+                
+                deleteBtn.style.color = COLORS.ERROR;
                 deleteBtn.style.fontSize = 'var(--font-size-sm)';
                 deleteBtn.style.padding = 'var(--spacing-md) var(--spacing-lg)';
                 deleteBtn.style.minHeight = 'var(--touch-target-min)';
@@ -495,10 +498,14 @@ export const SettingsView = () => {
     return container;
 };
 
+import { createAccountRenameModal, createConfirmModal, createAlertModal } from '../utils/modal-utils.js';
+
 /**
  * Create mobile-friendly account rename modal
+ * @deprecated Use createAccountRenameModal from modal-utils.js instead
  */
 const createMobileAccountModal = (currentName, onSave) => {
+    return createAccountRenameModal(currentName, onSave);
     const overlay = document.createElement('div');
     overlay.className = 'mobile-modal-overlay';
     overlay.style.position = 'fixed';
@@ -599,8 +606,10 @@ const createMobileAccountModal = (currentName, onSave) => {
 
 /**
  * Create mobile-friendly confirmation modal
+ * @deprecated Use createConfirmModal from modal-utils.js instead
  */
 const createMobileConfirmModal = (title, message, onConfirm) => {
+    return createConfirmModal(title, message, onConfirm);
     const overlay = document.createElement('div');
     overlay.className = 'mobile-modal-overlay';
     overlay.style.position = 'fixed';
@@ -664,8 +673,8 @@ const createMobileConfirmModal = (title, message, onConfirm) => {
     confirmBtn.className += ' touch-target';
     confirmBtn.style.flex = '1';
     confirmBtn.style.minHeight = 'var(--touch-target-min)';
-    confirmBtn.style.backgroundColor = '#ef4444';
-    confirmBtn.style.borderColor = '#ef4444';
+    confirmBtn.style.backgroundColor = COLORS.ERROR;
+    confirmBtn.style.borderColor = COLORS.ERROR;
 
     buttonContainer.appendChild(cancelBtn);
     buttonContainer.appendChild(confirmBtn);
@@ -687,8 +696,10 @@ const createMobileConfirmModal = (title, message, onConfirm) => {
 
 /**
  * Create mobile-friendly alert modal
+ * @deprecated Use createAlertModal from modal-utils.js instead
  */
 const createMobileAlert = (message) => {
+    return createAlertModal(message);
     const overlay = document.createElement('div');
     overlay.className = 'mobile-modal-overlay';
     overlay.style.position = 'fixed';

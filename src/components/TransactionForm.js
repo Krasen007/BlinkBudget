@@ -1,4 +1,6 @@
 import { StorageService } from '../core/storage.js';
+import { COLORS, SPACING, TOUCH_TARGETS, FONT_SIZES, DIMENSIONS, HAPTIC_PATTERNS, BREAKPOINTS, TIMING } from '../utils/constants.js';
+import { addTouchFeedback } from '../utils/touch-utils.js';
 
 export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInput = null }) => {
     const form = document.createElement('form');
@@ -87,13 +89,13 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
                     activeColor = 'var(--color-primary)';
                     break;
                 case 'income':
-                    activeColor = '#10b981';
+                    activeColor = COLORS.SUCCESS;
                     break;
                 case 'refund':
-                    activeColor = '#06b6d4'; // Teal/cyan for refunds
+                    activeColor = COLORS.INFO; // Teal/cyan for refunds
                     break;
                 default:
-                    activeColor = '#10b981';
+                    activeColor = COLORS.SUCCESS;
             }
             btn.style.background = isActive ? activeColor : 'transparent';
             btn.style.border = isActive ? '1px solid transparent' : '1px solid var(--color-border)';
@@ -375,7 +377,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
                     const amountVal = parseFloat(amountInput.value);
                     if (isNaN(amountVal) || amountVal === 0) {
                         amountInput.focus();
-                        amountInput.style.border = '1px solid #ef4444';
+                        amountInput.style.border = `1px solid ${COLORS.ERROR}`;
 
                         // Error haptic feedback
                         if (window.mobileUtils) {
@@ -494,7 +496,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
                     const amountVal = parseFloat(amountInput.value);
                     if (isNaN(amountVal) || amountVal === 0) {
                         amountInput.focus();
-                        amountInput.style.border = '1px solid #ef4444'; // Red border for error
+                        amountInput.style.border = `1px solid ${COLORS.ERROR}`; // Red border for error
                         setTimeout(() => amountInput.style.border = '1px solid var(--color-border)', 2000);
 
                         // Error haptic feedback
@@ -606,7 +608,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
             // Validate Category (Must be selected)
             if (!selectedCategory && currentType !== 'transfer') {
                 // Highlight category container
-                chipContainer.style.border = '1px solid #ef4444';
+                chipContainer.style.border = `1px solid ${COLORS.ERROR}`;
                 setTimeout(() => chipContainer.style.border = '1px solid var(--color-border)', 2000);
                 if (window.mobileUtils) window.mobileUtils.hapticFeedback([50, 50, 50]);
                 return;
@@ -614,7 +616,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
 
             if (currentType === 'transfer' && !selectedToAccount) {
                 // Highlight category container
-                chipContainer.style.border = '1px solid #ef4444';
+                chipContainer.style.border = `1px solid ${COLORS.ERROR}`;
                 setTimeout(() => chipContainer.style.border = '1px solid var(--color-border)', 2000);
                 if (window.mobileUtils) window.mobileUtils.hapticFeedback([50, 50, 50]);
                 return;

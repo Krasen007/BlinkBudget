@@ -1,5 +1,6 @@
 import { Button } from './Button.js';
 import { MobileConfirmDialog } from './MobileModal.js';
+import { COLORS } from '../utils/constants.js';
 
 export const ConfirmDialog = ({ message, onConfirm, onCancel }) => {
     // Use mobile modal on mobile devices
@@ -51,9 +52,9 @@ export const ConfirmDialog = ({ message, onConfirm, onCancel }) => {
     });
 
     // Apply danger styles directly
-    confirmBtn.style.backgroundColor = '#ef4444';
+    confirmBtn.style.backgroundColor = COLORS.ERROR;
     confirmBtn.style.color = 'white';
-    confirmBtn.style.border = '1px solid #ef4444';
+    confirmBtn.style.border = `1px solid ${COLORS.ERROR}`;
 
     btnGroup.appendChild(cancelBtn);
     btnGroup.appendChild(confirmBtn);

@@ -1,5 +1,7 @@
-const STORAGE_KEY = 'blinkbudget_transactions';
-const ACCOUNTS_KEY = 'blinkbudget_accounts';
+import { STORAGE_KEYS, DEFAULTS } from '../utils/constants.js';
+
+const STORAGE_KEY = STORAGE_KEYS.TRANSACTIONS;
+const ACCOUNTS_KEY = STORAGE_KEYS.ACCOUNTS;
 
 export const StorageService = {
     // Utility for ID generation (Pollyfill for crypto.randomUUID)
@@ -22,9 +24,9 @@ export const StorageService = {
         if (!data) {
             // Initialize default account if none exist
             const defaultAccount = {
-                id: 'main',
-                name: 'Main Account',
-                type: 'checking',
+                id: DEFAULTS.ACCOUNT_ID,
+                name: DEFAULTS.ACCOUNT_NAME,
+                type: DEFAULTS.ACCOUNT_TYPE,
                 isDefault: true
             };
             // Directly save to avoid recursion with saveAccount -> getAccounts
@@ -150,13 +152,13 @@ export const StorageService = {
     // --- Settings ---
 
     getSetting(key) {
-        const settings = JSON.parse(localStorage.getItem('blink_settings') || '{}');
+        const settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS) || '{}');
         return settings[key];
     },
 
     saveSetting(key, value) {
-        const settings = JSON.parse(localStorage.getItem('blink_settings') || '{}');
+        const settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS) || '{}');
         settings[key] = value;
-        localStorage.setItem('blink_settings', JSON.stringify(settings));
+        localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
     }
 };

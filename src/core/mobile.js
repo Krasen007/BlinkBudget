@@ -84,15 +84,16 @@ export class MobileUtils {
    * Device and capability detection
    */
   isMobile() {
-    return window.innerWidth < 768;
+    // Import at top of file would cause circular dependency, so we inline the constant
+    return window.innerWidth < 768; // BREAKPOINTS.MOBILE
   }
 
   isTablet() {
-    return window.innerWidth >= 768 && window.innerWidth < 1024;
+    return window.innerWidth >= 768 && window.innerWidth < 1024; // BREAKPOINTS.MOBILE to BREAKPOINTS.TABLET
   }
 
   isDesktop() {
-    return window.innerWidth >= 1024;
+    return window.innerWidth >= 1024; // BREAKPOINTS.DESKTOP
   }
 
   getOrientation() {
