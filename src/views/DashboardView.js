@@ -11,10 +11,15 @@ export const DashboardView = () => {
     container.className = 'view-dashboard';
     container.style.width = '100%';
     container.style.maxWidth = DIMENSIONS.CONTAINER_MAX_WIDTH;
+    container.style.height = '100%';
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.overflow = 'hidden'; // Prevent dashboard from scrolling
 
     // Header (Account Selector & Settings)
     const header = document.createElement('div');
     header.style.marginBottom = SPACING.MD;
+    header.style.flexShrink = '0'; // Prevent header from shrinking
 
     // Title
     const title = document.createElement('h2');
@@ -89,6 +94,11 @@ export const DashboardView = () => {
 
     // Main Content Wrapper to allow re-rendering
     const content = document.createElement('div');
+    content.style.flex = '1';
+    content.style.display = 'flex';
+    content.style.flexDirection = 'column';
+    content.style.minHeight = '0'; // Allow flex child to shrink below content size
+    content.style.overflow = 'hidden'; // Prevent content from scrolling
     container.appendChild(content);
 
     const renderDashboard = () => {
@@ -131,6 +141,7 @@ export const DashboardView = () => {
         // Statistics Cards Container
         const statsContainer = document.createElement('div');
         statsContainer.className = 'dashboard-stats-container';
+        statsContainer.style.flexShrink = '0'; // Prevent stats from shrinking
         const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
         Object.assign(statsContainer.style, {
             display: 'grid',
@@ -160,6 +171,7 @@ export const DashboardView = () => {
         });
         addBtn.style.width = '100%';
         addBtn.style.marginBottom = SPACING.XL;
+        addBtn.style.flexShrink = '0'; // Prevent button from shrinking
         content.appendChild(addBtn);
 
         // Recent Transactions

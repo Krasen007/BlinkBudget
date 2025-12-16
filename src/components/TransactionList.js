@@ -12,10 +12,16 @@ import { debounce } from '../utils/touch-utils.js';
 export const TransactionList = ({ transactions, currentFilter, accounts }) => {
     const listContainer = document.createElement('div');
     listContainer.className = 'dashboard-transactions-container';
+    listContainer.style.flex = '1';
+    listContainer.style.display = 'flex';
+    listContainer.style.flexDirection = 'column';
+    listContainer.style.minHeight = '0'; // Allow flex child to shrink
+    listContainer.style.overflow = 'hidden'; // Prevent container from scrolling
     
     const listTitle = document.createElement('h3');
     listTitle.textContent = 'Recent Transactions';
     listTitle.className = 'dashboard-transactions-title';
+    listTitle.style.flexShrink = '0'; // Prevent title from shrinking
     const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
     Object.assign(listTitle.style, {
         marginBottom: SPACING.MD,
@@ -35,10 +41,14 @@ export const TransactionList = ({ transactions, currentFilter, accounts }) => {
     } else {
         const list = document.createElement('ul');
         list.className = 'dashboard-transactions-list';
+        list.style.flex = '1';
+        list.style.minHeight = '0'; // Allow flex child to shrink
         Object.assign(list.style, {
             listStyle: 'none',
             padding: 0,
+            margin: 0,
             overflowY: 'auto',
+            overflowX: 'hidden',
             borderTop: '1px solid var(--color-surface-hover)',
             webkitOverflowScrolling: 'touch',
             scrollBehavior: 'smooth',
@@ -47,27 +57,19 @@ export const TransactionList = ({ transactions, currentFilter, accounts }) => {
             transform: 'translateZ(0)'
         });
         
-        // Dynamic height calculation
-        const calculateMaxHeight = () => {
-            const viewportHeight = window.visualViewport?.height || window.innerHeight;
-            const containerRect = listContainer.getBoundingClientRect();
-            const listTitleRect = listTitle.getBoundingClientRect();
-            const usedSpace = listTitleRect.bottom - containerRect.top;
-            const mobileNav = document.querySelector('.mobile-nav');
-            const mobileNavHeight = mobileNav ? mobileNav.offsetHeight : 0;
-            const padding = 40;
-            const availableHeight = viewportHeight - usedSpace - mobileNavHeight - padding;
+        // Dynamic height calculation - use flex instead of maxHeight
+        const calculateListHeight = () => {
+            // List will use flex: 1, but we can still set a min-height for small screens
             const minHeight = DIMENSIONS.MIN_LIST_HEIGHT;
-            const maxHeight = Math.max(minHeight, availableHeight);
-            return `${maxHeight}px`;
+            list.style.minHeight = `${minHeight}px`;
         };
         
-        list.style.maxHeight = calculateMaxHeight();
+        calculateListHeight();
         
-        // Update height on resize
+        // Update height on resize (for min-height)
         const updateListHeight = debounce(() => {
             requestAnimationFrame(() => {
-                list.style.maxHeight = calculateMaxHeight();
+                calculateListHeight();
             });
         }, TIMING.DEBOUNCE_RESIZE);
         

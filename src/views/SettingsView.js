@@ -1,10 +1,11 @@
 import { Button } from '../components/Button.js';
+
 import { Router } from '../core/router.js';
-import { MobileBackButton } from '../components/MobileNavigation.js';
 import { AccountSection } from '../components/AccountSection.js';
 import { DateFormatSection } from '../components/DateFormatSection.js';
 import { DataManagementSection } from '../components/DataManagementSection.js';
 import { DIMENSIONS, SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
+import { createButton } from '../utils/dom-factory.js';
 
 export const SettingsView = () => {
     const container = document.createElement('div');
@@ -14,40 +15,45 @@ export const SettingsView = () => {
 
     // Header
     const header = document.createElement('div');
-    header.className = 'settings-header';
-    Object.assign(header.style, {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: SPACING.XL
-    });
+    header.style.marginBottom = SPACING.XL;
+    header.style.flexDirection = 'column';
+    header.style.alignItems = 'stretch';
+    header.style.gap = SPACING.MD;
+
+    const topRow = document.createElement('div');
+    topRow.style.display = 'flex';
+    topRow.style.justifyContent = 'space-between';
+    topRow.style.alignItems = 'center';
 
     const title = document.createElement('h2');
     title.textContent = 'Settings';
-    title.style.margin = 0;
+    title.style.margin = '0';
+    title.style.marginRight = SPACING.MD;
 
-    const mobileBackBtn = MobileBackButton({
-        onBack: () => Router.navigate('dashboard'),
-        label: 'Save'
-    });
+    // Save button in top right (same format as back button in AddView)
+    const rightControls = document.createElement('div');
+    rightControls.style.display = 'flex';
+    rightControls.style.alignItems = 'center';
 
-    const backBtn = Button({
+    const saveBtn = createButton({
         text: 'Save',
-        variant: 'secondary',
+        className: 'btn btn-ghost',
+        style: {
+            height: TOUCH_TARGETS.MIN_HEIGHT,
+            minHeight: TOUCH_TARGETS.MIN_HEIGHT,
+            padding: `${SPACING.SM} ${SPACING.MD}`,
+            fontSize: FONT_SIZES.SM,
+            width: 'auto',
+            flexShrink: '0'
+        },
         onClick: () => Router.navigate('dashboard')
     });
-    backBtn.style.padding = `${SPACING.SM} ${SPACING.MD}`;
-    backBtn.className += ' desktop-only';
 
-    header.appendChild(title);
-    header.appendChild(backBtn);
+    rightControls.appendChild(saveBtn);
 
-    // Mobile back button container
-    const mobileBackContainer = document.createElement('div');
-    mobileBackContainer.className = 'mobile-only';
-    mobileBackContainer.style.marginBottom = SPACING.MD;
-    mobileBackContainer.appendChild(mobileBackBtn);
-    container.appendChild(mobileBackContainer);
+    topRow.appendChild(title);
+    topRow.appendChild(rightControls);
+    header.appendChild(topRow);
     container.appendChild(header);
 
     // Account Section
@@ -87,6 +93,5 @@ export const SettingsView = () => {
     });
     doneBtn.className += ' touch-target';
     container.appendChild(doneBtn);
-
     return container;
 };

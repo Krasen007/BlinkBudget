@@ -3,8 +3,8 @@
  * Creates transaction type toggle buttons (expense, income, transfer, refund)
  */
 
-import { TYPE_COLORS, HAPTIC_PATTERNS } from './constants.js';
-import { COLORS } from '../constants.js';
+import { TYPE_COLORS } from './constants.js';
+import { COLORS, HAPTIC_PATTERNS } from '../constants.js';
 import { addTouchFeedback } from '../touch-utils.js';
 
 /**
