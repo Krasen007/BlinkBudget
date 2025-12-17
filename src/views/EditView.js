@@ -32,20 +32,21 @@ export const EditView = ({ id }) => {
     const topRow = document.createElement('div');
     topRow.style.display = 'flex';
     topRow.style.justifyContent = 'space-between';
-    topRow.style.alignItems = 'center';
+    topRow.style.alignItems = 'flex-end';
 
     const title = document.createElement('h2');
     title.textContent = 'Edit Transaction';
     title.style.margin = '0';
     title.style.marginRight = SPACING.MD;
 
-    // Date Input with transaction date
-    const dateInput = DateInput({ value: transaction.timestamp });
+    // Date Input with transaction date and enhanced context
+    const dateInput = DateInput({ value: transaction.timestamp, showLabel: true });
 
     // Back button
     const rightControls = document.createElement('div');
     rightControls.style.display = 'flex';
-    rightControls.style.alignItems = 'center';
+    rightControls.style.alignItems = 'flex-end';
+    rightControls.style.gap = SPACING.SM;
 
     const smallBackBtn = createButton({
         text: 'Back',
