@@ -13,7 +13,7 @@ import { setupFormKeyboardHandling } from '../utils/form-utils/keyboard.js';
 import { validateAmount, validateCategory, validateTransferAccount, showFieldError, showContainerError } from '../utils/form-utils/validation.js';
 import { prepareTransactionData, handleFormSubmit } from '../utils/form-utils/submission.js';
 
-export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInput = null, showCancelButton = false, onCancel = null }) => {
+export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInput = null, showCancelButton = false, onCancel = null, onDelete = null }) => {
     // 1. Form setup
     const form = document.createElement('form');
     form.className = 'transaction-form mobile-optimized';
@@ -218,6 +218,39 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
         });
         
         form.appendChild(okBtn);
+        
+        // 8.5. Delete Button (for Edit mode)
+        if (onDelete) {
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Delete Transaction';
+            deleteBtn.type = 'button';
+            deleteBtn.className = 'btn btn-danger';
+            deleteBtn.style.width = '100%';
+            deleteBtn.style.marginTop = 'var(--spacing-sm)';
+            deleteBtn.style.padding = 'var(--spacing-md)';
+            deleteBtn.style.fontSize = 'var(--font-size-base)';
+            deleteBtn.style.fontWeight = '500';
+            deleteBtn.style.borderRadius = 'var(--radius-md)';
+            deleteBtn.style.backgroundColor = 'transparent';
+            deleteBtn.style.color = COLORS.ERROR;
+            deleteBtn.style.border = `1px solid ${COLORS.ERROR}`;
+            deleteBtn.style.transition = 'all 0.2s ease';
+            
+            // Add hover effects
+            deleteBtn.addEventListener('mouseenter', () => {
+                deleteBtn.style.backgroundColor = COLORS.ERROR;
+                deleteBtn.style.color = 'white';
+            });
+            
+            deleteBtn.addEventListener('mouseleave', () => {
+                deleteBtn.style.backgroundColor = 'transparent';
+                deleteBtn.style.color = COLORS.ERROR;
+            });
+            
+            deleteBtn.addEventListener('click', onDelete);
+            
+            form.appendChild(deleteBtn);
+        }
     }
     
     // 9. Form submit prevention

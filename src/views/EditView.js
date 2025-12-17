@@ -1,12 +1,10 @@
 import { TransactionForm } from '../components/TransactionForm.js';
-import { Button } from '../components/Button.js';
 import { ConfirmDialog } from '../components/ConfirmDialog.js';
 import { DateInput } from '../components/DateInput.js';
 import { StorageService } from '../core/storage.js';
 import { Router } from '../core/router.js';
-import { SPACING, DIMENSIONS, TOUCH_TARGETS, FONT_SIZES, COLORS, TIMING } from '../utils/constants.js';
+import { SPACING, DIMENSIONS, TOUCH_TARGETS, FONT_SIZES, TIMING } from '../utils/constants.js';
 import { createButton } from '../utils/dom-factory.js';
-import { addHoverEffects } from '../utils/touch-utils.js';
 import { markTransactionForHighlight } from '../utils/success-feedback.js';
 
 export const EditView = ({ id }) => {
@@ -81,13 +79,8 @@ export const EditView = ({ id }) => {
             
             // Navigate to dashboard immediately
             Router.navigate('dashboard');
-        }
-    });
-
-    const deleteBtn = Button({
-        text: 'Delete Transaction',
-        variant: 'danger',
-        onClick: () => {
+        },
+        onDelete: () => {
             ConfirmDialog({
                 message: 'Are you sure you want to delete this transaction?',
                 onConfirm: () => {
@@ -98,24 +91,7 @@ export const EditView = ({ id }) => {
         }
     });
 
-    Object.assign(deleteBtn.style, {
-        backgroundColor: 'transparent',
-        color: COLORS.ERROR,
-        border: `1px solid ${COLORS.ERROR}`,
-        width: '100%',
-        marginTop: SPACING.MD
-    });
-
-    // Add hover effects
-    addHoverEffects(deleteBtn, {
-        hoverBackground: COLORS.ERROR,
-        hoverColor: 'white',
-        originalBackground: 'transparent',
-        originalColor: COLORS.ERROR
-    });
-
     container.appendChild(form);
-    container.appendChild(deleteBtn);
 
     return container;
 };
