@@ -125,7 +125,7 @@ const createCategoryContainer = () => {
     const container = document.createElement('div');
     container.className = 'category-chip-container';
     container.style.display = 'grid';
-    container.style.gridTemplateColumns = 'repeat(auto-fit, minmax(140px, 1fr))';
+    container.style.gridTemplateColumns = 'repeat(3, 1fr)';
     container.style.gap = SPACING.SM;
     container.style.padding = SPACING.SM;
     container.style.borderRadius = 'var(--radius-md)';

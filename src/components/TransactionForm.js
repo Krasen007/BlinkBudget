@@ -168,8 +168,10 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
         form.appendChild(cancelBtn);
     }
     
-    // 8. OK Button for Edit Mode
+    // 8. OK Button for Edit Mode (hidden on mobile)
     if (initialValues.id) {
+        const isMobile = window.mobileUtils && window.mobileUtils.isMobile();
+        
         const okBtn = document.createElement('button');
         okBtn.textContent = 'OK';
         okBtn.className = 'btn btn-primary';
@@ -179,6 +181,11 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
         okBtn.style.fontSize = FONT_SIZES.BUTTON_LARGE;
         okBtn.style.fontWeight = '600';
         okBtn.style.borderRadius = 'var(--radius-md)';
+        
+        // Hide OK button on mobile devices
+        if (isMobile) {
+            okBtn.style.display = 'none';
+        }
         
         okBtn.addEventListener('click', () => {
             // Validate amount

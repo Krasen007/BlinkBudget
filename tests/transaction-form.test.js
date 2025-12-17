@@ -65,12 +65,12 @@ describe('TransactionForm', () => {
         const categoryLabels = Array.from(categoryChips).map(chip => chip.textContent);
         
         // Should show expense categories for refunds
-        expect(categoryLabels).toContain('Food & Groceries');
-        expect(categoryLabels).toContain('Dining & Coffee');
-        expect(categoryLabels).toContain('Housing & Bills');
-        expect(categoryLabels).toContain('Transportation');
-        expect(categoryLabels).toContain('Leisure & Shopping');
-        expect(categoryLabels).toContain('Personal Care');
+        expect(categoryLabels).toContain('Groceries');
+        expect(categoryLabels).toContain('Eating Out');
+        expect(categoryLabels).toContain('Bills');
+        expect(categoryLabels).toContain('Travel');
+        expect(categoryLabels).toContain('Lifestyle');
+        expect(categoryLabels).toContain('Self-care');
     });
 
     it('should apply refund-specific styling to refund button when active', () => {
@@ -109,17 +109,17 @@ describe('TransactionForm', () => {
         
         // Select a category to trigger auto-submit
         const categoryChips = form.querySelectorAll('.category-chip');
-        const foodCategory = Array.from(categoryChips).find(chip => chip.textContent === 'Food & Groceries');
-        expect(foodCategory).toBeTruthy();
+        const groceriesCategory = Array.from(categoryChips).find(chip => chip.textContent === 'Groceries');
+        expect(groceriesCategory).toBeTruthy();
         
-        foodCategory.click();
+        groceriesCategory.click();
         
         // Verify the transaction was submitted with the correct account
         expect(mockSubmit).toHaveBeenCalledWith(
             expect.objectContaining({
                 accountId: 'savings',
                 amount: 25.50,
-                category: 'Food & Groceries',
+                category: 'Groceries',
                 type: 'expense'
             })
         );

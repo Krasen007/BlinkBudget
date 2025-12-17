@@ -37,9 +37,9 @@ export const CATEGORY_COLORS = {
 
 // Category options by transaction type
 export const CATEGORY_OPTIONS = {
-    expense: ['Food & Groceries', 'Dining & Coffee', 'Housing & Bills', 'Transportation', 'Leisure & Shopping', 'Personal Care'],
-    income: ['Paycheck', 'Business / Freelance', 'Investment Income', 'Other / Gift'],
-    refund: ['Food & Groceries', 'Dining & Coffee', 'Housing & Bills', 'Transportation', 'Leisure & Shopping', 'Personal Care']
+    expense: ['Groceries', 'Eating Out', 'Bills', 'Travel', 'Lifestyle', 'Self-care'],
+    income: ['Work', 'Side Hustle', 'Investments', 'Extra'],
+    refund: ['Groceries', 'Eating Out', 'Bills', 'Travel', 'Lifestyle', 'Self-care']
 };
 
 // Type toggle button colors
