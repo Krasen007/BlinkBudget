@@ -61,6 +61,7 @@ export const AddView = () => {
 
     const form = TransactionForm({
         externalDateInput: dateInput.querySelector('input[type="date"]'),
+        showCancelButton: true, // Add cancel button to the form
         onSubmit: (data) => {
             // Add the transaction and get the full transaction object
             const newTransaction = StorageService.add(data);
@@ -70,27 +71,10 @@ export const AddView = () => {
             
             // Navigate to dashboard immediately
             Router.navigate('dashboard');
-        }
+        },
+        onCancel: () => Router.navigate('dashboard')
     });
     container.appendChild(form);
-
-    const backLink = createButton({
-        text: 'Cancel',
-        className: 'mobile-form-input desktop-only',
-        style: {
-            marginTop: SPACING.SM,
-            cursor: 'pointer',
-            border: `1px solid ${COLORS.BORDER}`,
-            background: COLORS.SURFACE,
-            color: COLORS.TEXT_MAIN,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: '500'
-        },
-        onClick: () => Router.navigate('dashboard')
-    });
-    container.appendChild(backLink);
 
     return container;
 };

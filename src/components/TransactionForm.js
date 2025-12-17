@@ -13,7 +13,7 @@ import { setupFormKeyboardHandling } from '../utils/form-utils/keyboard.js';
 import { validateAmount, validateCategory, validateTransferAccount, showFieldError, showContainerError } from '../utils/form-utils/validation.js';
 import { prepareTransactionData, handleFormSubmit } from '../utils/form-utils/submission.js';
 
-export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInput = null }) => {
+export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInput = null, showCancelButton = false, onCancel = null }) => {
     // 1. Form setup
     const form = document.createElement('form');
     form.className = 'transaction-form mobile-optimized';
@@ -146,6 +146,27 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     form.appendChild(amountAccountRow);
     form.appendChild(categorySelector.container);
     form.appendChild(typeToggle.container);
+    
+    // 7.5. Cancel Button (for Add mode)
+    if (showCancelButton && onCancel) {
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.type = 'button';
+        cancelBtn.className = 'btn btn-secondary';
+        cancelBtn.style.width = '100%';
+        cancelBtn.style.marginTop = 'var(--spacing-sm)';
+        cancelBtn.style.padding = 'var(--spacing-md)';
+        cancelBtn.style.fontSize = 'var(--font-size-base)';
+        cancelBtn.style.fontWeight = '500';
+        cancelBtn.style.borderRadius = 'var(--radius-md)';
+        cancelBtn.style.border = `1px solid ${COLORS.BORDER}`;
+        cancelBtn.style.background = COLORS.SURFACE;
+        cancelBtn.style.color = COLORS.TEXT_MAIN;
+        
+        cancelBtn.addEventListener('click', onCancel);
+        
+        form.appendChild(cancelBtn);
+    }
     
     // 8. OK Button for Edit Mode
     if (initialValues.id) {

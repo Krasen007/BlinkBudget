@@ -35,7 +35,7 @@ describe('Date Input Integration', () => {
         // Should have visible label
         const label = addView.querySelector('label[for*="date-input"]');
         expect(label).toBeTruthy();
-        expect(label.textContent).toBe('Date');
+        expect(label.textContent).toBe('Select Date');
         expect(label.style.display).toBe('block');
 
         // Should have accessibility attributes
@@ -68,7 +68,7 @@ describe('Date Input Integration', () => {
         // Should have visible label
         const label = editView.querySelector('label[for*="date-input"]');
         expect(label).toBeTruthy();
-        expect(label.textContent).toBe('Date');
+        expect(label.textContent).toBe('Select Date');
         expect(label.style.display).toBe('block');
 
         // Should have accessibility attributes

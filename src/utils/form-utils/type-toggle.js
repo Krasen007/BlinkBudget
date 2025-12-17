@@ -26,10 +26,22 @@ const createTypeButton = (options) => {
     btn.className = 'btn type-toggle-btn';
     btn.style.flex = '1';
     btn.style.border = '1px solid var(--color-border)';
+    btn.style.transition = 'all 0.2s ease';
+    btn.style.borderRadius = 'var(--radius-lg)';
     
-    // Touch-friendly sizing
-    btn.style.minHeight = 'var(--touch-target-min)';
-    btn.style.margin = 'calc(var(--touch-spacing-min) / 2)';
+    // Compact sizing for single row layout
+    btn.style.minHeight = '56px'; // Match TOUCH_TARGETS.MIN_HEIGHT
+    btn.style.padding = 'var(--spacing-sm) var(--spacing-md)'; // Smaller horizontal padding
+    btn.style.margin = '0'; // Grid handles spacing
+    btn.style.fontSize = '0.9rem'; // Slightly smaller font for better fit
+    btn.style.fontWeight = '500';
+    btn.style.display = 'flex';
+    btn.style.alignItems = 'center';
+    btn.style.justifyContent = 'center';
+    btn.style.textAlign = 'center';
+    btn.style.whiteSpace = 'nowrap';
+    btn.style.overflow = 'hidden';
+    btn.style.textOverflow = 'ellipsis';
     
     // State update function - will be called by parent
     const updateButtonState = () => {
@@ -102,9 +114,21 @@ export const createTypeToggleGroup = (options = {}) => {
     let currentType = initialType;
     
     const typeGroup = document.createElement('div');
-    typeGroup.style.display = 'flex';
-    typeGroup.style.gap = 'var(--spacing-md)';
+    typeGroup.style.display = 'grid';
+    typeGroup.style.gap = 'var(--spacing-sm)';
     typeGroup.style.marginBottom = 'var(--spacing-xs)';
+    
+    // Responsive grid: 4 columns on larger screens, 2 rows of 2 on very small screens
+    const updateGridLayout = () => {
+        if (window.innerWidth < 400) {
+            typeGroup.style.gridTemplateColumns = 'repeat(2, 1fr)';
+        } else {
+            typeGroup.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        }
+    };
+    
+    updateGridLayout();
+    window.addEventListener('resize', updateGridLayout);
     
     const buttons = {};
     const buttonConfigs = [
