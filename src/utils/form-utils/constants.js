@@ -46,7 +46,7 @@ export const CATEGORY_OPTIONS = {
 export const TYPE_COLORS = {
     expense: 'var(--color-primary)',
     income: '#10b981', // SUCCESS
-    transfer: '#10b981', // SUCCESS (default)
+    transfer: '#b45309', // Dark yellow/amber
     refund: '#06b6d4'  // INFO
 };
 
