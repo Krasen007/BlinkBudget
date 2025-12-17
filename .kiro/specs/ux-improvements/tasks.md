@@ -1,22 +1,36 @@
 # UX Improvements Implementation Plan
 
+## Critical Bug Fixes
+
+- [x] 1. Fix account selection bug in transaction form
+
+
+
+
+
+  - Fix issue where transactions are saved to wrong account when user selects different account
+  - Ensure currentAccountId is properly synchronized between form and category selector
+  - Update category selector's currentSourceAccount when account select changes
+  - Test account switching with both regular categories and transfers
+  - _Based on: Critical Bug - Wrong Account Selection_
+
 ## High Priority Tasks
 
-- [ ] 1. Add success feedback after transaction submission
+- [ ] 2. Add success feedback after transaction submission
   - Implement visual confirmation when transaction is saved
   - Add brief green highlight to newly added transaction in dashboard
   - Fade highlight to default color after 1 second
   - Ensure feedback is subtle and doesn't disrupt 3-click flow
   - _Based on: Critical Issue #1 - Missing Success Feedback_
 
-- [ ] 2. Optimize mobile keyboard interaction
+- [ ] 3. Optimize mobile keyboard interaction
   - Ensure form components remain visible when mobile keyboard opens
   - Adjust form layout to prevent size changes during keyboard popup
   - Test form usability with keyboard open across different mobile devices
   - Maintain natural feel when keyboard appears
   - _Based on: Critical Issue #4 - Immediate Keyboard Popup_
 
-- [ ] 3. Improve date input visibility and context
+- [ ] 4. Improve date input visibility and context
   - Add label or tooltip to date input explaining it's part of transaction form
   - Consider visual connection between date input and form fields
   - Ensure users understand date input is editable and affects transaction
@@ -24,14 +38,14 @@
 
 ## Medium Priority Tasks
 
-- [ ] 4. Add empty state for dashboard
+- [ ] 5. Add empty state for dashboard
   - Create friendly empty state when no transactions exist
   - Add "Add your first transaction" call-to-action
   - Include helpful tips or onboarding guidance
   - Design with illustration or icon for visual appeal
   - _Based on: Medium Priority Issue #6 - No Empty States_
 
-- [ ] 5. Improve error handling with custom notifications
+- [ ] 6. Improve error handling with custom notifications
   - Replace browser alert() with custom toast notifications
   - Create better error messages with actionable guidance
   - Ensure error notifications are accessible and dismissible
@@ -40,21 +54,21 @@
 
 ## Accessibility & Polish Tasks
 
-- [ ] 6. Enhance accessibility with ARIA labels
+- [ ] 7. Enhance accessibility with ARIA labels
   - Add ARIA labels to all interactive buttons
   - Add ARIA descriptions for complex interactions
   - Ensure screen reader compatibility
   - Test with keyboard navigation
   - _Based on: Accessibility Issue #21 - ARIA Labels_
 
-- [ ] 7. Improve focus management
+- [ ] 8. Improve focus management
   - Ensure logical tab order throughout app
   - Add visible focus indicators for keyboard users
   - Implement focus trapping in modals
   - Return focus appropriately after modal close
   - _Based on: Accessibility Issue #22 - Focus Management_
 
-- [ ] 8. Standardize color usage
+- [ ] 9. Standardize color usage
   - Audit all hardcoded colors in codebase
   - Ensure all colors use CSS custom properties
   - Add semantic color tokens for consistent theming
@@ -63,14 +77,14 @@
 
 ## Performance & Polish Tasks
 
-- [ ] 9. Add optimistic UI updates
+- [ ] 10. Add optimistic UI updates
   - Show transaction immediately when submitted
   - Sync data in background
   - Display success state immediately for better perceived performance
   - Handle any sync failures gracefully
   - _Based on: Performance Issue #23 - Optimistic Updates_
 
-- [ ] 10. Add loading states and skeleton screens
+- [ ] 11. Add loading states and skeleton screens
   - Create skeleton screens for transaction loading
   - Add progressive loading indicators
   - Ensure smooth transitions between loading and loaded states
@@ -78,13 +92,13 @@
 
 ## Testing & Validation Tasks
 
-- [ ] 11. Test mobile UX improvements
+- [ ] 12. Test mobile UX improvements
   - Validate keyboard interaction improvements on various devices
   - Test success feedback timing and visibility
   - Ensure empty states display correctly
   - Verify accessibility improvements work as expected
 
-- [ ] 12. Performance validation
+- [ ] 13. Performance validation
   - Ensure UX improvements don't impact 3-click rule performance
   - Test loading states and transitions
   - Validate mobile responsiveness after changes

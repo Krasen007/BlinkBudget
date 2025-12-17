@@ -94,12 +94,43 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     });
     
     // Setup type toggle change handler (after categorySelector is created)
-    typeToggle.setType = ((originalSetType) => {
-        return (type) => {
-            originalSetType(type);
-            categorySelector.setType(type);
-        };
-    })(typeToggle.setType);
+    const originalSetType = typeToggle.setType;
+    typeToggle.setType = (type) => {
+        originalSetType(type);
+        categorySelector.setType(type);
+    };
+    
+    // Update button click handlers to use the wrapped setType
+    Object.entries(typeToggle.buttons).forEach(([type, btn]) => {
+        // Remove existing click listeners by cloning the button
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        typeToggle.buttons[type] = newBtn;
+        
+        // Add new click handler that uses wrapped setType
+        newBtn.addEventListener('click', () => {
+            typeToggle.setType(type);
+            if (window.mobileUtils) {
+                window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.LIGHT);
+            }
+        });
+        
+        // Re-add touch feedback
+        newBtn.addEventListener('touchstart', () => {
+            newBtn.style.transform = 'scale(0.96)';
+            if (window.mobileUtils) {
+                window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.LIGHT);
+            }
+        }, { passive: true });
+        
+        newBtn.addEventListener('touchend', () => {
+            newBtn.style.transform = 'scale(1)';
+        }, { passive: true });
+        
+        newBtn.addEventListener('touchcancel', () => {
+            newBtn.style.transform = 'scale(1)';
+        }, { passive: true });
+    });
     
     // Setup account select change handler (after categorySelector is created)
     accSelect.addEventListener('change', (e) => {
@@ -107,10 +138,8 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
         if (window.mobileUtils) {
             window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.LIGHT);
         }
-        // Update category selector if transfer type
-        if (typeToggle.currentType() === 'transfer') {
-            categorySelector.setSourceAccount(currentAccountId);
-        }
+        // Always update category selector's source account for all transaction types
+        categorySelector.setSourceAccount(currentAccountId);
     });
     
     // 7. Layout Assembly

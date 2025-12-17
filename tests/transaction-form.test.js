@@ -21,7 +21,7 @@ global.window.mobileUtils = {
     scrollIntoViewAboveKeyboard: vi.fn()
 };
 
-describe('TransactionForm Refund Support', () => {
+describe('TransactionForm', () => {
     beforeEach(() => {
         document.body.innerHTML = '';
         vi.clearAllMocks();
@@ -88,5 +88,68 @@ describe('TransactionForm Refund Support', () => {
         // Check that it has the teal/cyan background color for refunds (browser converts hex to rgb)
         expect(refundButton.style.background).toBe('rgb(6, 182, 212)');
         expect(refundButton.style.color).toBe('white');
+    });
+
+    it('should save transaction to correct account when account is changed', () => {
+        const mockSubmit = vi.fn();
+        const form = TransactionForm({ onSubmit: mockSubmit });
+        document.body.appendChild(form);
+        
+        // Find the account select dropdown
+        const accountSelect = form.querySelector('select');
+        expect(accountSelect).toBeTruthy();
+        
+        // Change account to savings
+        accountSelect.value = 'savings';
+        accountSelect.dispatchEvent(new Event('change'));
+        
+        // Fill in amount
+        const amountInput = form.querySelector('input[type="number"]');
+        amountInput.value = '25.50';
+        
+        // Select a category to trigger auto-submit
+        const categoryChips = form.querySelectorAll('.category-chip');
+        const foodCategory = Array.from(categoryChips).find(chip => chip.textContent === 'Food & Groceries');
+        expect(foodCategory).toBeTruthy();
+        
+        foodCategory.click();
+        
+        // Verify the transaction was submitted with the correct account
+        expect(mockSubmit).toHaveBeenCalledWith(
+            expect.objectContaining({
+                accountId: 'savings',
+                amount: 25.50,
+                category: 'Food & Groceries',
+                type: 'expense'
+            })
+        );
+    });
+
+    it('should update transfer destination options when source account changes', () => {
+        const mockSubmit = vi.fn();
+        const form = TransactionForm({ onSubmit: mockSubmit });
+        document.body.appendChild(form);
+        
+        // Switch to transfer type
+        const typeButtons = form.querySelectorAll('.type-toggle-btn');
+        const transferButton = Array.from(typeButtons).find(btn => btn.textContent === 'Transfer');
+        transferButton.click();
+        
+        // Initially should show savings as destination (main is default source)
+        let categoryChips = form.querySelectorAll('.category-chip');
+        let chipLabels = Array.from(categoryChips).map(chip => chip.textContent);
+        expect(chipLabels).toContain('Savings');
+        expect(chipLabels).not.toContain('Main Account');
+        
+        // Change source account to savings
+        const accountSelect = form.querySelector('select');
+        accountSelect.value = 'savings';
+        accountSelect.dispatchEvent(new Event('change'));
+        
+        // Now should show main account as destination (savings is source)
+        categoryChips = form.querySelectorAll('.category-chip');
+        chipLabels = Array.from(categoryChips).map(chip => chip.textContent);
+        expect(chipLabels).toContain('Main Account');
+        expect(chipLabels).not.toContain('Savings');
     });
 });
