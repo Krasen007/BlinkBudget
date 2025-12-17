@@ -25,7 +25,7 @@ describe('DateInput Component', () => {
         // Should have a label
         const label = dateInput.querySelector('label');
         expect(label).toBeTruthy();
-        expect(label.textContent).toBe('Date');
+        expect(label.textContent).toBe('Select Date');
         expect(label.style.display).toBe('block');
     });
 
