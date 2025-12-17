@@ -7,6 +7,7 @@ import { Router } from '../core/router.js';
 import { SPACING, DIMENSIONS, TOUCH_TARGETS, FONT_SIZES, COLORS, TIMING } from '../utils/constants.js';
 import { createButton } from '../utils/dom-factory.js';
 import { addHoverEffects } from '../utils/touch-utils.js';
+import { markTransactionForHighlight } from '../utils/success-feedback.js';
 
 export const EditView = ({ id }) => {
     const container = document.createElement('div');
@@ -73,6 +74,11 @@ export const EditView = ({ id }) => {
         externalDateInput: dateInput.querySelector('input[type="date"]'),
         onSubmit: (data) => {
             StorageService.update(id, data);
+            
+            // Mark transaction for highlighting in dashboard
+            markTransactionForHighlight(id);
+            
+            // Navigate to dashboard immediately
             Router.navigate('dashboard');
         }
     });

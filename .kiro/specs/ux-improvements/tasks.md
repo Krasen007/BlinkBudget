@@ -16,7 +16,11 @@
 
 ## High Priority Tasks
 
-- [ ] 2. Add success feedback after transaction submission
+- [x] 2. Add success feedback after transaction submission
+
+
+
+
   - Implement visual confirmation when transaction is saved
   - Add brief green highlight to newly added transaction in dashboard
   - Fade highlight to default color after 1 second

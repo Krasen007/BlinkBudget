@@ -8,8 +8,9 @@ import { StorageService } from '../core/storage.js';
 import { formatDateForDisplay } from '../utils/date-utils.js';
 import { COLORS, FONT_SIZES, SPACING, TOUCH_TARGETS, BREAKPOINTS } from '../utils/constants.js';
 import { addTouchFeedback } from '../utils/touch-utils.js';
+import { highlightTransactionSuccess } from '../utils/success-feedback.js';
 
-export const TransactionListItem = ({ transaction, currentFilter, accounts }) => {
+export const TransactionListItem = ({ transaction, currentFilter, accounts, shouldHighlight = false }) => {
     const item = document.createElement('li');
     item.className = 'transaction-item';
     
@@ -138,6 +139,14 @@ export const TransactionListItem = ({ transaction, currentFilter, accounts }) =>
     
     item.appendChild(info);
     item.appendChild(val);
+    
+    // Apply success highlight if this transaction should be highlighted
+    if (shouldHighlight) {
+        // Use a small delay to ensure the item is rendered before highlighting
+        setTimeout(() => {
+            highlightTransactionSuccess(item, 1500);
+        }, 100);
+    }
     
     return item;
 };

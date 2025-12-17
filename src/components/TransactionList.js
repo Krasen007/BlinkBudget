@@ -9,7 +9,7 @@ import { formatDateForDisplay } from '../utils/date-utils.js';
 import { SPACING, DIMENSIONS, BREAKPOINTS, TIMING, FONT_SIZES } from '../utils/constants.js';
 import { debounce } from '../utils/touch-utils.js';
 
-export const TransactionList = ({ transactions, currentFilter, accounts }) => {
+export const TransactionList = ({ transactions, currentFilter, accounts, highlightTransactionId = null }) => {
     const listContainer = document.createElement('div');
     listContainer.className = 'dashboard-transactions-container';
     listContainer.style.flex = '1';
@@ -85,7 +85,8 @@ export const TransactionList = ({ transactions, currentFilter, accounts }) => {
             const item = TransactionListItem({
                 transaction,
                 currentFilter,
-                accounts
+                accounts,
+                shouldHighlight: highlightTransactionId === transaction.id
             });
             list.appendChild(item);
         });

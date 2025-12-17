@@ -5,6 +5,7 @@ import { StorageService } from '../core/storage.js';
 import { Router } from '../core/router.js';
 import { COLORS, SPACING, BREAKPOINTS, DIMENSIONS, TIMING } from '../utils/constants.js';
 import { debounce } from '../utils/touch-utils.js';
+import { getTransactionToHighlight } from '../utils/success-feedback.js';
 
 export const DashboardView = () => {
     const container = document.createElement('div');
@@ -175,10 +176,12 @@ export const DashboardView = () => {
         content.appendChild(addBtn);
 
         // Recent Transactions
+        const highlightTransactionId = getTransactionToHighlight();
         const transactionList = TransactionList({
             transactions,
             currentFilter,
-            accounts
+            accounts,
+            highlightTransactionId
         });
         content.appendChild(transactionList);
 

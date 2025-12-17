@@ -15,6 +15,7 @@ export const COLORS = {
     // Semantic colors
     ERROR: '#ef4444',
     SUCCESS: '#10b981',
+    SUCCESS_LIGHT: 'rgba(16, 185, 129, 0.1)',
     WARNING: '#f97316',
     INFO: '#06b6d4',
     

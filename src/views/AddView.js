@@ -4,6 +4,7 @@ import { StorageService } from '../core/storage.js';
 import { Router } from '../core/router.js';
 import { SPACING, DIMENSIONS, TOUCH_TARGETS, FONT_SIZES, COLORS } from '../utils/constants.js';
 import { createButton } from '../utils/dom-factory.js';
+import { markTransactionForHighlight } from '../utils/success-feedback.js';
 
 export const AddView = () => {
     const container = document.createElement('div');
@@ -60,7 +61,13 @@ export const AddView = () => {
     const form = TransactionForm({
         externalDateInput: dateInput.querySelector('input[type="date"]'),
         onSubmit: (data) => {
-            StorageService.add(data);
+            // Add the transaction and get the full transaction object
+            const newTransaction = StorageService.add(data);
+            
+            // Mark transaction for highlighting in dashboard
+            markTransactionForHighlight(newTransaction.id);
+            
+            // Navigate to dashboard immediately
             Router.navigate('dashboard');
         }
     });
