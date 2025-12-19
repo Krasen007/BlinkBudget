@@ -18,19 +18,19 @@ export const createButton = (options = {}) => {
         onClick = null,
         type = 'button'
     } = options;
-    
+
     const btn = document.createElement('button');
     btn.type = type;
     btn.textContent = text;
     btn.className = className;
-    
+
     // Apply styles
     Object.assign(btn.style, style);
-    
+
     if (onClick) {
         btn.addEventListener('click', onClick);
     }
-    
+
     return btn;
 };
 
@@ -48,10 +48,12 @@ export const createInput = (options = {}) => {
         style = {},
         required = false,
         readOnly = false,
+        id = '',
+        name = '',
         minHeight = TOUCH_TARGETS.MIN_HEIGHT,
         fontSize = FONT_SIZES.PREVENT_ZOOM
     } = options;
-    
+
     const input = document.createElement('input');
     input.type = type;
     input.value = value;
@@ -59,7 +61,9 @@ export const createInput = (options = {}) => {
     input.className = className;
     input.required = required;
     input.readOnly = readOnly;
-    
+    if (id) input.id = id;
+    if (name) input.name = name;
+
     // Apply default mobile-friendly styles
     const defaultStyle = {
         width: '100%',
@@ -72,9 +76,9 @@ export const createInput = (options = {}) => {
         color: COLORS.TEXT_MAIN,
         ...style
     };
-    
+
     Object.assign(input.style, defaultStyle);
-    
+
     return input;
 };
 
@@ -90,13 +94,17 @@ export const createSelect = (options = {}) => {
         className = '',
         style = {},
         onChange = null,
+        id = '',
+        name = '',
         minHeight = TOUCH_TARGETS.MIN_HEIGHT,
         fontSize = FONT_SIZES.PREVENT_ZOOM
     } = options;
-    
+
     const select = document.createElement('select');
     select.className = className;
-    
+    if (id) select.id = id;
+    if (name) select.name = name;
+
     // Apply default mobile-friendly styles
     const defaultStyle = {
         width: '100%',
@@ -111,9 +119,9 @@ export const createSelect = (options = {}) => {
         appearance: 'auto',
         ...style
     };
-    
+
     Object.assign(select.style, defaultStyle);
-    
+
     // Add options
     selectOptions.forEach(opt => {
         const option = document.createElement('option');
@@ -122,15 +130,15 @@ export const createSelect = (options = {}) => {
         if (opt.selected) option.selected = true;
         select.appendChild(option);
     });
-    
+
     if (value) {
         select.value = value;
     }
-    
+
     if (onChange) {
         select.addEventListener('change', onChange);
     }
-    
+
     return select;
 };
 
@@ -145,10 +153,10 @@ export const createCard = (options = {}) => {
         style = {},
         children = []
     } = options;
-    
+
     const card = document.createElement('div');
     card.className = className;
-    
+
     const defaultStyle = {
         padding: SPACING.LG,
         borderRadius: 'var(--radius-md)',
@@ -156,15 +164,15 @@ export const createCard = (options = {}) => {
         border: `1px solid ${COLORS.BORDER}`,
         ...style
     };
-    
+
     Object.assign(card.style, defaultStyle);
-    
+
     children.forEach(child => {
         if (child instanceof HTMLElement) {
             card.appendChild(child);
         }
     });
-    
+
     return card;
 };
 
@@ -183,10 +191,10 @@ export const createFlexContainer = (options = {}) => {
         style = {},
         children = []
     } = options;
-    
+
     const container = document.createElement('div');
     container.className = className;
-    
+
     const defaultStyle = {
         display: 'flex',
         flexDirection: direction,
@@ -195,15 +203,15 @@ export const createFlexContainer = (options = {}) => {
         justifyContent,
         ...style
     };
-    
+
     Object.assign(container.style, defaultStyle);
-    
+
     children.forEach(child => {
         if (child instanceof HTMLElement) {
             container.appendChild(child);
         }
     });
-    
+
     return container;
 };
 
@@ -220,19 +228,19 @@ export const createTextElement = (options = {}) => {
         style = {},
         fontSize = FONT_SIZES.BASE
     } = options;
-    
+
     const element = document.createElement(tag);
     element.textContent = text;
     element.className = className;
-    
+
     const defaultStyle = {
         fontSize,
         margin: 0,
         ...style
     };
-    
+
     Object.assign(element.style, defaultStyle);
-    
+
     return element;
 };
 

@@ -10,7 +10,7 @@ import { DIMENSIONS, Z_INDEX, SPACING, COLORS, FONT_SIZES } from '../utils/const
 
 export const DateInput = (options = {}) => {
     const { value = null, onChange = null, showLabel = true } = options;
-    
+
     const container = document.createElement('div');
     container.style.position = 'relative';
     container.style.display = 'flex';
@@ -37,11 +37,15 @@ export const DateInput = (options = {}) => {
     inputWrapper.style.display = 'flex';
     inputWrapper.style.alignItems = 'center';
 
+    const inputId = `date-input-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
     // Visible Display Input
     const displayDate = createInput({
         type: 'text',
         readOnly: true,
         className: 'mobile-form-input',
+        id: `${inputId}-display`,
+        name: 'transaction_date_display',
         style: {
             width: '100%',
             textAlign: 'center',
@@ -62,6 +66,8 @@ export const DateInput = (options = {}) => {
     // Hidden Native Date Input
     const realDate = createInput({
         type: 'date',
+        id: inputId,
+        name: 'transaction_date',
         style: {
             position: 'absolute',
             top: '0',
@@ -75,9 +81,8 @@ export const DateInput = (options = {}) => {
     });
 
     // Connect label to input for accessibility
-    const inputId = `date-input-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    realDate.id = inputId;
     label.setAttribute('for', inputId);
+
 
     // Initialize with today's date or provided value
     const initialDate = value ? dateToISO(new Date(value)) : getTodayISO();
@@ -128,7 +133,7 @@ export const DateInput = (options = {}) => {
     // Build the component structure
     inputWrapper.appendChild(displayDate);
     inputWrapper.appendChild(realDate);
-    
+
     // Always append label for accessibility, but control visibility
     container.appendChild(label);
     container.appendChild(inputWrapper);

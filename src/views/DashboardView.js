@@ -57,14 +57,14 @@ export const DashboardView = () => {
     // Account Selector
     const leftHeader = document.createElement('div');
     const accountSelect = document.createElement('select');
+    accountSelect.id = 'account-filter-select';
+    accountSelect.name = 'account-filter';
     Object.assign(accountSelect.style, {
         padding: `${SPACING.SM} ${SPACING.MD}`,
         borderRadius: 'var(--radius-md)',
         background: COLORS.SURFACE,
         color: COLORS.TEXT_MAIN,
         border: `1px solid ${COLORS.BORDER}`,
-        fontSize: '1rem',
-        cursor: 'pointer',
         outline: 'none',
         minWidth: '150px',
         appearance: 'auto',

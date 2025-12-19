@@ -22,20 +22,22 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     form.style.gap = window.mobileUtils?.isMobile() ? 'var(--spacing-xs)' : 'var(--spacing-sm)';
     form.style.width = '100%';
     form.style.position = 'relative';
-    
+
     if (window.mobileUtils && window.mobileUtils.isMobile()) {
         form.style.justifyContent = 'flex-start';
     }
-    
+
     // 2. Account Selection (Source)
     const accounts = StorageService.getAccounts();
     const defaultAccount = StorageService.getDefaultAccount();
     let currentAccountId = initialValues.accountId || defaultAccount.id;
-    
+
     const accountGroup = document.createElement('div');
     accountGroup.style.flex = '1';
-    
+
     const accSelect = createSelect({
+        id: 'source-account-select',
+        name: 'source_account',
         options: accounts.map(acc => ({
             value: acc.id,
             text: acc.name,
@@ -44,33 +46,33 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
         className: 'mobile-form-select',
         style: { cursor: 'pointer' }
     });
-    
+
     // Mobile-specific select handling
     accSelect.addEventListener('focus', () => {
         if (window.mobileUtils) {
             window.mobileUtils.preventInputZoom(accSelect);
         }
     });
-    
+
     accountGroup.appendChild(accSelect);
-    
+
     // 3. Type Toggle
     const typeToggle = createTypeToggleGroup({
         initialType: initialValues.type || 'expense'
     });
-    
+
     // 4. Amount Input
     const amountState = createAmountInput({
         initialValue: initialValues.amount || '',
         externalDateInput
     });
     const amountInput = amountState.input;
-    
+
     const amountGroup = document.createElement('div');
     amountGroup.style.flex = '1.5';
     amountGroup.style.marginBottom = '0';
     amountGroup.appendChild(amountInput);
-    
+
     // 5. Amount and Account Row
     const amountAccountRow = document.createElement('div');
     amountAccountRow.style.display = 'flex';
@@ -78,7 +80,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     amountAccountRow.style.width = '100%';
     amountAccountRow.appendChild(amountGroup);
     amountAccountRow.appendChild(accountGroup);
-    
+
     // 6. Category Selector
     const categorySelector = createCategorySelector({
         type: typeToggle.currentType(),
@@ -92,21 +94,21 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
             handleFormSubmit(data, onSubmit);
         }
     });
-    
+
     // Setup type toggle change handler (after categorySelector is created)
     const originalSetType = typeToggle.setType;
     typeToggle.setType = (type) => {
         originalSetType(type);
         categorySelector.setType(type);
     };
-    
+
     // Update button click handlers to use the wrapped setType
     Object.entries(typeToggle.buttons).forEach(([type, btn]) => {
         // Remove existing click listeners by cloning the button
         const newBtn = btn.cloneNode(true);
         btn.parentNode.replaceChild(newBtn, btn);
         typeToggle.buttons[type] = newBtn;
-        
+
         // Add new click handler that uses wrapped setType
         newBtn.addEventListener('click', () => {
             typeToggle.setType(type);
@@ -114,7 +116,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
                 window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.LIGHT);
             }
         });
-        
+
         // Re-add touch feedback
         newBtn.addEventListener('touchstart', () => {
             newBtn.style.transform = 'scale(0.96)';
@@ -122,16 +124,16 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
                 window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.LIGHT);
             }
         }, { passive: true });
-        
+
         newBtn.addEventListener('touchend', () => {
             newBtn.style.transform = 'scale(1)';
         }, { passive: true });
-        
+
         newBtn.addEventListener('touchcancel', () => {
             newBtn.style.transform = 'scale(1)';
         }, { passive: true });
     });
-    
+
     // Setup account select change handler (after categorySelector is created)
     accSelect.addEventListener('change', (e) => {
         currentAccountId = e.target.value;
@@ -141,12 +143,12 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
         // Always update category selector's source account for all transaction types
         categorySelector.setSourceAccount(currentAccountId);
     });
-    
+
     // 7. Layout Assembly
     form.appendChild(amountAccountRow);
     form.appendChild(categorySelector.container);
     form.appendChild(typeToggle.container);
-    
+
     // 7.5. Cancel Button (for Add mode)
     if (showCancelButton && onCancel) {
         const cancelBtn = document.createElement('button');
@@ -162,16 +164,16 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
         cancelBtn.style.border = `1px solid ${COLORS.BORDER}`;
         cancelBtn.style.background = COLORS.SURFACE;
         cancelBtn.style.color = COLORS.TEXT_MAIN;
-        
+
         cancelBtn.addEventListener('click', onCancel);
-        
+
         form.appendChild(cancelBtn);
     }
-    
+
     // 8. OK Button for Edit Mode (hidden on mobile)
     if (initialValues.id) {
         const isMobile = window.mobileUtils && window.mobileUtils.isMobile();
-        
+
         const okBtn = document.createElement('button');
         okBtn.textContent = 'OK';
         okBtn.className = 'btn btn-primary';
@@ -181,12 +183,12 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
         okBtn.style.fontSize = FONT_SIZES.BUTTON_LARGE;
         okBtn.style.fontWeight = '600';
         okBtn.style.borderRadius = 'var(--radius-md)';
-        
+
         // Hide OK button on mobile devices
         if (isMobile) {
             okBtn.style.display = 'none';
         }
-        
+
         okBtn.addEventListener('click', () => {
             // Validate amount
             const amountValidation = validateAmount(amountInput.value);
@@ -194,7 +196,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
                 showFieldError(amountInput);
                 return;
             }
-            
+
             // Validate category/transfer account
             const currentType = typeToggle.currentType();
             if (currentType === 'transfer') {
@@ -210,7 +212,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
                     return;
                 }
             }
-            
+
             // Prepare and submit data
             const transactionData = prepareTransactionData({
                 amount: amountValidation.value,
@@ -220,12 +222,12 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
                 toAccountId: categorySelector.selectedToAccount(),
                 externalDateInput
             });
-            
+
             handleFormSubmit(transactionData, onSubmit);
         });
-        
+
         form.appendChild(okBtn);
-        
+
         // 8.5. Delete Button (for Edit mode)
         if (onDelete) {
             const deleteBtn = document.createElement('button');
@@ -242,30 +244,30 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
             deleteBtn.style.color = COLORS.ERROR;
             deleteBtn.style.border = `1px solid ${COLORS.ERROR}`;
             deleteBtn.style.transition = 'all 0.2s ease';
-            
+
             // Add hover effects
             deleteBtn.addEventListener('mouseenter', () => {
                 deleteBtn.style.backgroundColor = COLORS.ERROR;
                 deleteBtn.style.color = 'white';
             });
-            
+
             deleteBtn.addEventListener('mouseleave', () => {
                 deleteBtn.style.backgroundColor = 'transparent';
                 deleteBtn.style.color = COLORS.ERROR;
             });
-            
+
             deleteBtn.addEventListener('click', onDelete);
-            
+
             form.appendChild(deleteBtn);
         }
     }
-    
+
     // 9. Form submit prevention
     form.addEventListener('submit', (e) => e.preventDefault());
-    
+
     // 10. Keyboard handling
     setupFormKeyboardHandling(form, [amountInput, accSelect]);
-    
+
     // 11. Initial focus and haptic feedback
     setTimeout(() => {
         amountInput.focus();
@@ -273,6 +275,6 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
             window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.WELCOME);
         }
     }, TIMING.INITIAL_LOAD_DELAY);
-    
+
     return form;
 };

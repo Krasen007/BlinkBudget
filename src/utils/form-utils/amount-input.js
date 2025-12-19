@@ -17,34 +17,37 @@ export const createAmountInput = (options = {}) => {
         initialValue = '',
         externalDateInput = null
     } = options;
-    
+
     const input = document.createElement('input');
+    input.id = 'transaction-amount-input';
+    input.name = 'amount';
     input.type = 'number';
     input.value = initialValue || '';
     input.step = '0.01';
     input.required = true;
+
     input.placeholder = '0.00';
     input.className = 'mobile-form-input';
     input.style.width = '100%';
     input.style.fontSize = FONT_SIZES.AMOUNT_INPUT; // 1.5rem
-    
+
     // Mobile-specific optimizations
     input.inputMode = 'decimal'; // Show numeric keypad on mobile
     input.pattern = '[0-9]*\\.?[0-9]*'; // Numeric pattern for better mobile keyboard
-    
+
     // Keyboard-aware viewport adjustments
     input.addEventListener('focus', () => {
         // Prevent zoom on input focus
         if (window.mobileUtils) {
             window.mobileUtils.preventInputZoom(input);
-            
+
             // Scroll input into view above keyboard with delay for keyboard animation
             setTimeout(() => {
                 window.mobileUtils.scrollIntoViewAboveKeyboard(input, 60);
             }, TIMING.KEYBOARD_DELAY);
         }
     });
-    
+
     /**
      * Get the current value as a number
      * @returns {number|null} Parsed amount or null if invalid
@@ -53,7 +56,7 @@ export const createAmountInput = (options = {}) => {
         const value = parseFloat(input.value);
         return isNaN(value) ? null : value;
     };
-    
+
     /**
      * Set the input value
      * @param {string|number} value - Value to set
@@ -61,7 +64,7 @@ export const createAmountInput = (options = {}) => {
     const setValue = (value) => {
         input.value = value || '';
     };
-    
+
     /**
      * Validate the current input value
      * @returns {Object} Validation result
@@ -79,7 +82,7 @@ export const createAmountInput = (options = {}) => {
             value: Math.abs(value)
         };
     };
-    
+
     /**
      * Get date source for submission
      * @returns {HTMLInputElement} Date input element
@@ -92,7 +95,7 @@ export const createAmountInput = (options = {}) => {
             return fallback;
         })();
     };
-    
+
     return {
         input,
         getValue,

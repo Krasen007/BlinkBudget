@@ -50,7 +50,7 @@ export const AccountSection = () => {
 
             const info = document.createElement('div');
             info.className = 'mobile-account-info';
-            
+
             const name = document.createElement('div');
             name.textContent = acc.name + (acc.isDefault ? ' (Default)' : '');
             Object.assign(name.style, {
@@ -178,12 +178,16 @@ export const AccountSection = () => {
     });
 
     const nameInput = createInput({
+        id: 'new-account-name',
+        name: 'new-account-name',
         placeholder: 'Account Name',
         className: 'touch-target mobile-form-input',
         fontSize: FONT_SIZES.PREVENT_ZOOM
     });
 
     const typeSelect = createSelect({
+        id: 'new-account-type',
+        name: 'new-account-type',
         className: 'touch-target mobile-form-select input-select',
         options: [
             { value: ACCOUNT_TYPES.CHECKING, text: 'Checking' },
