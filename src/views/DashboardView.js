@@ -148,7 +148,7 @@ export const DashboardView = () => {
             display: 'grid',
             gap: SPACING.MD,
             marginBottom: SPACING.XL,
-            gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(250px, 1fr))'
+            gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(auto-fit, minmax(250px, 1fr))'
         });
 
         statsContainer.appendChild(DashboardStatsCard({
@@ -188,7 +188,7 @@ export const DashboardView = () => {
         // Responsive layout updates
         const updateResponsiveLayout = debounce(() => {
             const isMobileNow = window.innerWidth < BREAKPOINTS.MOBILE;
-            statsContainer.style.gridTemplateColumns = isMobileNow ? '1fr' : 'repeat(auto-fit, minmax(250px, 1fr))';
+            statsContainer.style.gridTemplateColumns = isMobileNow ? '1fr 1fr' : 'repeat(auto-fit, minmax(250px, 1fr))';
         }, TIMING.DEBOUNCE_RESIZE);
 
         window.addEventListener('resize', updateResponsiveLayout);

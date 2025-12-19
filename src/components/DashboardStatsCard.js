@@ -6,22 +6,23 @@
 import { COLORS, FONT_SIZES, SPACING, TOUCH_TARGETS, BREAKPOINTS } from '../utils/constants.js';
 
 export const DashboardStatsCard = ({ label, value, color }) => {
+    const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
     const card = document.createElement('div');
     card.className = 'card dashboard-stat-card';
-    
+
     Object.assign(card.style, {
         textAlign: 'left',
-        padding: SPACING.LG,
+        padding: isMobile ? `${SPACING.MD} ${SPACING.SM}` : SPACING.LG,
         minHeight: TOUCH_TARGETS.MIN_HEIGHT,
+
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center'
     });
-    
+
     const lbl = document.createElement('p');
     lbl.textContent = label;
     lbl.className = 'dashboard-stat-label';
-    const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
     Object.assign(lbl.style, {
         fontSize: isMobile ? FONT_SIZES.STAT_LABEL_MOBILE : FONT_SIZES.STAT_LABEL_DESKTOP,
         marginBottom: SPACING.XS,
@@ -29,7 +30,7 @@ export const DashboardStatsCard = ({ label, value, color }) => {
         lineHeight: 'var(--line-height-normal)',
         fontWeight: '500'
     });
-    
+
     const val = document.createElement('h2');
     val.textContent = `$${value.toFixed(2)}`;
     val.className = 'dashboard-stat-value';
@@ -40,10 +41,10 @@ export const DashboardStatsCard = ({ label, value, color }) => {
         lineHeight: 'var(--line-height-tight)',
         fontWeight: '700'
     });
-    
+
     card.appendChild(lbl);
     card.appendChild(val);
-    
+
     return card;
 };
 
