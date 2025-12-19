@@ -24,11 +24,6 @@
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-.dashboard-stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
 @media (max-width: calc(var(--breakpoint-md) - 1px)) {
   .dashboard-stat-card {
     padding: var(--spacing-md);
@@ -74,7 +69,8 @@
 
 @media (max-width: calc(var(--breakpoint-md) - 1px)) {
   .dashboard-stats-container {
-    grid-template-columns: 1fr; /* Single column on mobile */
+    grid-template-columns: 1fr;
+    /* Single column on mobile */
     gap: var(--spacing-sm);
   }
 }
@@ -149,7 +145,7 @@
 .transaction-item {
   transition: all var(--transition-fast);
   min-height: var(--touch-target-min);
-  
+
   /* Touch optimizations */
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -176,7 +172,8 @@
 .transaction-item-info {
   /* Enhanced mobile layout for transaction info */
   flex: 1;
-  min-width: 0; /* Allow text truncation */
+  min-width: 0;
+  /* Allow text truncation */
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -264,12 +261,14 @@
   scroll-behavior: smooth;
   overscroll-behavior: contain;
   will-change: scroll-position;
-  transform: translateZ(0); /* Force hardware acceleration */
+  transform: translateZ(0);
+  /* Force hardware acceleration */
 }
 
 @media (max-width: calc(var(--breakpoint-md) - 1px)) {
   .dashboard-transactions-list {
-    max-height: 50vh; /* Responsive height for mobile */
+    max-height: 50vh;
+    /* Responsive height for mobile */
   }
 }
 
