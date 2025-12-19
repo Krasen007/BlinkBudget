@@ -3,7 +3,7 @@ import { DashboardStatsCard } from '../components/DashboardStatsCard.js';
 import { TransactionList } from '../components/TransactionList.js';
 import { StorageService } from '../core/storage.js';
 import { Router } from '../core/router.js';
-import { COLORS, SPACING, BREAKPOINTS, DIMENSIONS, TIMING } from '../utils/constants.js';
+import { COLORS, SPACING, BREAKPOINTS, DIMENSIONS, TIMING, STORAGE_KEYS } from '../utils/constants.js';
 import { debounce } from '../utils/touch-utils.js';
 import { getTransactionToHighlight } from '../utils/success-feedback.js';
 
@@ -73,19 +73,20 @@ export const DashboardView = () => {
     accountSelect.className = 'input-select';
 
     // Account Options Logic
-    let currentFilter = 'all';
+    let currentFilter = StorageService.getSetting(STORAGE_KEYS.DASHBOARD_FILTER) || 'all';
     const accounts = StorageService.getAccounts();
 
     const allOption = document.createElement('option');
     allOption.value = 'all';
     allOption.textContent = 'All Accounts';
-    allOption.selected = true;
+    allOption.selected = currentFilter === 'all';
     accountSelect.appendChild(allOption);
 
     accounts.forEach(acc => {
         const opt = document.createElement('option');
         opt.value = acc.id;
         opt.textContent = acc.name;
+        if (acc.id === currentFilter) opt.selected = true;
         accountSelect.appendChild(opt);
     });
 
@@ -201,6 +202,7 @@ export const DashboardView = () => {
 
     accountSelect.addEventListener('change', (e) => {
         currentFilter = e.target.value;
+        StorageService.saveSetting(STORAGE_KEYS.DASHBOARD_FILTER, currentFilter);
         renderDashboard();
     });
 

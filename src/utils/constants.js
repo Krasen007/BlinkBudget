@@ -18,7 +18,7 @@ export const COLORS = {
     SUCCESS_LIGHT: 'rgba(16, 185, 129, 0.1)',
     WARNING: '#f97316',
     INFO: '#06b6d4',
-    
+
     // Category colors
     CATEGORY_FOOD_GROCERIES: '#10b981',
     CATEGORY_DINING_COFFEE: '#f97316',
@@ -26,7 +26,7 @@ export const COLORS = {
     CATEGORY_TRANSPORTATION: '#eab308',
     CATEGORY_LEISURE_SHOPPING: '#a855f7',
     CATEGORY_PERSONAL_CARE: '#ffffff',
-    
+
     // CSS variable references (for consistency)
     PRIMARY: 'var(--color-primary)',
     PRIMARY_LIGHT: 'var(--color-primary-light)',
@@ -141,8 +141,10 @@ export const HAPTIC_PATTERNS = {
 export const STORAGE_KEYS = {
     TRANSACTIONS: 'blinkbudget_transactions',
     ACCOUNTS: 'blinkbudget_accounts',
-    SETTINGS: 'blink_settings'
+    SETTINGS: 'blink_settings',
+    DASHBOARD_FILTER: 'dashboard_filter'
 };
+
 
 // Default values
 export const DEFAULTS = {
