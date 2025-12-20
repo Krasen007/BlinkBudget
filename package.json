@@ -26,5 +26,8 @@
     "stylelint-config-standard": "^39.0.1",
     "vite": "^7.2.7",
     "vitest": "^4.0.15"
+  },
+  "dependencies": {
+    "firebase": "^12.7.0"
   }
 }

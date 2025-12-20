@@ -1,4 +1,5 @@
 import { STORAGE_KEYS, DEFAULTS } from '../utils/constants.js';
+import { SyncService } from './sync-service.js';
 
 const STORAGE_KEY = STORAGE_KEYS.TRANSACTIONS;
 const ACCOUNTS_KEY = STORAGE_KEYS.ACCOUNTS;
@@ -54,6 +55,7 @@ export const StorageService = {
         }
 
         localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+        SyncService.pushToCloud(STORAGE_KEYS.ACCOUNTS, accounts);
         return account;
     },
 
@@ -71,6 +73,7 @@ export const StorageService = {
         }
 
         localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+        SyncService.pushToCloud(STORAGE_KEYS.ACCOUNTS, accounts);
         return true;
     },
 
@@ -119,6 +122,7 @@ export const StorageService = {
         };
         transactions.unshift(newTransaction); // Newest first
         localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+        SyncService.pushToCloud(STORAGE_KEYS.TRANSACTIONS, transactions);
         return newTransaction;
     },
 
@@ -133,6 +137,7 @@ export const StorageService = {
         if (index !== -1) {
             transactions[index] = { ...transactions[index], ...updates };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+            SyncService.pushToCloud(STORAGE_KEYS.TRANSACTIONS, transactions);
             return transactions[index];
         }
         return null;
@@ -142,6 +147,7 @@ export const StorageService = {
         let transactions = this.getAll();
         transactions = transactions.filter(t => t.id !== id);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+        SyncService.pushToCloud(STORAGE_KEYS.TRANSACTIONS, transactions);
     },
 
     clear() {

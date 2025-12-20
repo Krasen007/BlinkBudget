@@ -94,6 +94,26 @@ export const DashboardView = () => {
     header.appendChild(leftHeader);
     container.appendChild(header);
 
+    const refreshAccountOptions = () => {
+        const accounts = StorageService.getAccounts();
+        const currentVal = accountSelect.value;
+        accountSelect.innerHTML = '';
+
+        const allOption = document.createElement('option');
+        allOption.value = 'all';
+        allOption.textContent = 'All Accounts';
+        accountSelect.appendChild(allOption);
+
+        accounts.forEach(acc => {
+            const opt = document.createElement('option');
+            opt.value = acc.id;
+            opt.textContent = acc.name;
+            accountSelect.appendChild(opt);
+        });
+
+        accountSelect.value = currentVal;
+    };
+
     // Main Content Wrapper to allow re-rendering
     const content = document.createElement('div');
     content.style.flex = '1';
@@ -185,20 +205,32 @@ export const DashboardView = () => {
             highlightTransactionId
         });
         content.appendChild(transactionList);
-
-        // Responsive layout updates
-        const updateResponsiveLayout = debounce(() => {
-            const isMobileNow = window.innerWidth < BREAKPOINTS.MOBILE;
-            statsContainer.style.gridTemplateColumns = isMobileNow ? '1fr 1fr' : 'repeat(auto-fit, minmax(250px, 1fr))';
-        }, TIMING.DEBOUNCE_RESIZE);
-
-        window.addEventListener('resize', updateResponsiveLayout);
-        window.addEventListener('orientationchange', () => {
-            setTimeout(updateResponsiveLayout, TIMING.DEBOUNCE_ORIENTATION);
-        });
     };
 
+    // Responsive layout updates
+    const updateResponsiveLayout = debounce(() => {
+        const statsContainer = container.querySelector('.dashboard-stats-container');
+        if (!statsContainer) return;
+        const isMobileNow = window.innerWidth < BREAKPOINTS.MOBILE;
+        statsContainer.style.gridTemplateColumns = isMobileNow ? '1fr 1fr' : 'repeat(auto-fit, minmax(250px, 1fr))';
+    }, TIMING.DEBOUNCE_RESIZE);
+
+    window.addEventListener('resize', updateResponsiveLayout);
+    window.addEventListener('orientationchange', () => {
+        setTimeout(updateResponsiveLayout, TIMING.DEBOUNCE_ORIENTATION);
+    });
+
     renderDashboard();
+
+    const handleStorageUpdate = (e) => {
+        console.log(`[Dashboard] Storage updated (${e.detail.key}), re-rendering...`);
+        if (e.detail.key === STORAGE_KEYS.ACCOUNTS) {
+            refreshAccountOptions();
+        }
+        renderDashboard();
+    };
+
+    window.addEventListener('storage-updated', handleStorageUpdate);
 
     accountSelect.addEventListener('change', (e) => {
         currentFilter = e.target.value;
@@ -210,6 +242,7 @@ export const DashboardView = () => {
     container.cleanup = () => {
         window.removeEventListener('resize', updateResponsiveLayout);
         window.removeEventListener('orientationchange', updateResponsiveLayout);
+        window.removeEventListener('storage-updated', handleStorageUpdate);
     };
 
     return container;

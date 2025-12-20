@@ -1,5 +1,6 @@
 import { Button } from '../components/Button.js';
 import { Router } from '../core/router.js';
+import { AuthService } from '../core/auth-service.js';
 import { AccountSection } from '../components/AccountSection.js';
 import { DateFormatSection } from '../components/DateFormatSection.js';
 import { DataManagementSection } from '../components/DataManagementSection.js';
@@ -90,5 +91,25 @@ export const SettingsView = () => {
     });
     doneBtn.className += ' touch-target';
     container.appendChild(doneBtn);
+
+    // Logout Button
+    const logoutBtn = Button({
+        text: 'Logout',
+        variant: 'ghost',
+        onClick: async () => {
+            if (confirm('Are you sure you want to logout? Syncing will stop.')) {
+                await AuthService.logout();
+                Router.navigate('login');
+            }
+        }
+    });
+    Object.assign(logoutBtn.style, {
+        width: '100%',
+        color: 'var(--color-error)',
+        marginTop: SPACING.MD,
+        fontSize: FONT_SIZES.SM
+    });
+    container.appendChild(logoutBtn);
+
     return container;
 };
