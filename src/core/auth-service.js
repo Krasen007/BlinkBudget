@@ -3,7 +3,9 @@ import {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
     onAuthStateChanged,
-    signOut
+    signOut,
+    GoogleAuthProvider,
+    signInWithPopup
 } from "firebase/auth";
 
 export const AuthService = {
@@ -34,6 +36,17 @@ export const AuthService = {
     async signup(email, password) {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            this.user = userCredential.user;
+            return { user: this.user, error: null };
+        } catch (error) {
+            return { user: null, error: error.message };
+        }
+    },
+
+    async loginWithGoogle() {
+        try {
+            const provider = new GoogleAuthProvider();
+            const userCredential = await signInWithPopup(auth, provider);
             this.user = userCredential.user;
             return { user: this.user, error: null };
         } catch (error) {

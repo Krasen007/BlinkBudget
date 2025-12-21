@@ -91,6 +91,68 @@ export const LoginView = () => {
         }
     });
 
+    const separator = document.createElement('div');
+    separator.className = 'login-separator';
+    Object.assign(separator.style, {
+        display: 'flex',
+        alignItems: 'center',
+        gap: SPACING.MD,
+        margin: `${SPACING.MD} 0`,
+        color: COLORS.TEXT_MUTED,
+        fontSize: FONT_SIZES.SM
+    });
+
+    const line1 = document.createElement('div');
+    Object.assign(line1.style, { flex: 1, height: '1px', background: COLORS.BORDER });
+    const orText = document.createElement('span');
+    orText.textContent = 'OR';
+    const line2 = document.createElement('div');
+    Object.assign(line2.style, { flex: 1, height: '1px', background: COLORS.BORDER });
+
+    separator.appendChild(line1);
+    separator.appendChild(orText);
+    separator.appendChild(line2);
+
+    const googleBtn = Button({
+        text: 'Sign in with Google',
+        variant: 'ghost',
+        className: 'btn-google',
+        onClick: async () => {
+            errorMsg.textContent = '';
+            googleBtn.disabled = true;
+            googleBtn.textContent = 'Connecting...';
+
+            const { user, error } = await AuthService.loginWithGoogle();
+
+            if (error) {
+                errorMsg.textContent = error;
+                googleBtn.disabled = false;
+                googleBtn.textContent = 'Sign in with Google';
+            } else {
+                Router.navigate('dashboard');
+            }
+        }
+    });
+
+    // Add Google icon to the button
+    const googleIcon = document.createElement('img');
+    googleIcon.src = 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg';
+    Object.assign(googleIcon.style, {
+        width: '18px',
+        height: '18px',
+        marginRight: SPACING.SM
+    });
+    googleBtn.prepend(googleIcon);
+    Object.assign(googleBtn.style, {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: '0',
+        background: COLORS.SURFACE,
+        color: COLORS.TEXT_MAIN,
+        border: `1px solid ${COLORS.BORDER}`
+    });
+
     const toggleBtn = document.createElement('button');
     toggleBtn.type = 'button';
     toggleBtn.textContent = 'Don\'t have an account? Sign Up';
@@ -122,6 +184,8 @@ export const LoginView = () => {
 
     container.appendChild(title);
     container.appendChild(form);
+    container.appendChild(separator);
+    container.appendChild(googleBtn);
     container.appendChild(toggleBtn);
 
     return container;
