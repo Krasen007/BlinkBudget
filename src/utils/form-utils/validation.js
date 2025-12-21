@@ -11,8 +11,10 @@ import { COLORS, HAPTIC_PATTERNS, TIMING } from '../constants.js';
  * @returns {Object} Validation result with valid flag and value/error
  */
 export const validateAmount = (value) => {
-    const amount = parseFloat(value);
-    
+    // Support both comma and dot by normalizing
+    const normalized = String(value).replace(/,/g, '.');
+    const amount = parseFloat(normalized);
+
     if (isNaN(amount) || amount === 0) {
         return {
             valid: false,
@@ -20,7 +22,7 @@ export const validateAmount = (value) => {
             value: null
         };
     }
-    
+
     return {
         valid: true,
         value: Math.abs(amount),
@@ -39,14 +41,14 @@ export const validateCategory = (category, type) => {
         // Transfers don't require category (they use toAccountId)
         return { valid: true, error: null };
     }
-    
+
     if (!category || category.trim() === '') {
         return {
             valid: false,
             error: 'Please select a category'
         };
     }
-    
+
     return { valid: true, error: null };
 };
 
@@ -62,7 +64,7 @@ export const validateTransferAccount = (toAccountId) => {
             error: 'Please select a destination account'
         };
     }
-    
+
     return { valid: true, error: null };
 };
 
@@ -74,17 +76,17 @@ export const validateTransferAccount = (toAccountId) => {
 export const showFieldError = (element, errorMessage = null) => {
     // Visual error feedback
     element.style.border = `1px solid ${COLORS.ERROR}`;
-    
+
     // Auto-clear error after timeout
     setTimeout(() => {
         element.style.border = '1px solid var(--color-border)';
     }, TIMING.ANIMATION_NORMAL * 10); // 2 seconds
-    
+
     // Haptic error feedback
     if (window.mobileUtils?.supportsHaptic()) {
         window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.ERROR);
     }
-    
+
     // Focus the element
     if (element.focus) {
         element.focus();
@@ -97,11 +99,11 @@ export const showFieldError = (element, errorMessage = null) => {
  */
 export const showContainerError = (container) => {
     container.style.border = `1px solid ${COLORS.ERROR}`;
-    
+
     setTimeout(() => {
         container.style.border = '1px solid var(--color-border)';
     }, TIMING.ANIMATION_NORMAL * 10);
-    
+
     if (window.mobileUtils?.supportsHaptic()) {
         window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.ERROR);
     }
@@ -114,13 +116,13 @@ export const showContainerError = (container) => {
  */
 export const validateTransactionForm = (data) => {
     const errors = {};
-    
+
     // Validate amount
     const amountValidation = validateAmount(data.amount);
     if (!amountValidation.valid) {
         errors.amount = amountValidation.error;
     }
-    
+
     // Validate category/transfer account
     if (data.type === 'transfer') {
         const transferValidation = validateTransferAccount(data.toAccountId);
@@ -133,7 +135,7 @@ export const validateTransactionForm = (data) => {
             errors.category = categoryValidation.error;
         }
     }
-    
+
     return {
         valid: Object.keys(errors).length === 0,
         errors

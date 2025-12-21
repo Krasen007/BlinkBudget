@@ -21,9 +21,9 @@ export const createAmountInput = (options = {}) => {
     const input = document.createElement('input');
     input.id = 'transaction-amount-input';
     input.name = 'amount';
-    input.type = 'number';
+    input.type = 'text'; // Use text allow both comma and dot
     input.value = initialValue || '';
-    input.step = '0.01';
+    // input.step = '0.01'; // Not needed for text input
     input.required = true;
     input.autocomplete = 'off';
 
@@ -34,7 +34,7 @@ export const createAmountInput = (options = {}) => {
 
     // Mobile-specific optimizations
     input.inputMode = 'decimal'; // Show numeric keypad on mobile
-    input.pattern = '[0-9]*\\.?[0-9]*'; // Numeric pattern for better mobile keyboard
+    input.pattern = '[0-9]*[.,]?[0-9]*'; // Allow both dot and comma
 
     // Keyboard-aware viewport adjustments
     input.addEventListener('focus', () => {
@@ -54,7 +54,9 @@ export const createAmountInput = (options = {}) => {
      * @returns {number|null} Parsed amount or null if invalid
      */
     const getValue = () => {
-        const value = parseFloat(input.value);
+        // Support both comma and dot
+        const normalized = input.value.replace(/,/g, '.');
+        const value = parseFloat(normalized);
         return isNaN(value) ? null : value;
     };
 

@@ -129,7 +129,9 @@ export const DashboardView = () => {
     const renderDashboard = () => {
         content.innerHTML = '';
 
+        // Always get fresh data
         const allTransactions = StorageService.getAll();
+        const currentAccounts = StorageService.getAccounts();
 
         // Filter Transactions
         const transactions = allTransactions.filter(t => {
@@ -204,7 +206,7 @@ export const DashboardView = () => {
         const transactionList = TransactionList({
             transactions,
             currentFilter,
-            accounts,
+            accounts: currentAccounts,
             highlightTransactionId
         });
         content.appendChild(transactionList);
