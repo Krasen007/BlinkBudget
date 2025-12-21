@@ -2,6 +2,7 @@ import { Button } from '../components/Button.js';
 import { DashboardStatsCard } from '../components/DashboardStatsCard.js';
 import { TransactionList } from '../components/TransactionList.js';
 import { StorageService } from '../core/storage.js';
+import { AuthService } from '../core/auth-service.js';
 import { Router } from '../core/router.js';
 import { COLORS, SPACING, BREAKPOINTS, DIMENSIONS, TIMING, STORAGE_KEYS } from '../utils/constants.js';
 import { debounce } from '../utils/touch-utils.js';
@@ -24,7 +25,9 @@ export const DashboardView = () => {
 
     // Title
     const title = document.createElement('h2');
-    title.textContent = 'Dashboard 1.2';
+    const user = AuthService.user;
+    const userName = user ? (user.displayName || user.email) : '';
+    title.textContent = `Dashboard 1.3 ${userName ? ` - ${userName}` : ''}`;
     title.style.margin = '0';
     title.style.marginRight = SPACING.MD;
 
