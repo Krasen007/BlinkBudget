@@ -96,11 +96,19 @@ export const SettingsView = () => {
     const logoutBtn = Button({
         text: 'Logout',
         variant: 'ghost',
-        onClick: async () => {
-            if (confirm('Are you sure you want to logout? Syncing will stop.')) {
-                await AuthService.logout();
-                Router.navigate('login');
-            }
+        onClick: () => {
+            import('../components/ConfirmDialog.js').then(({ ConfirmDialog }) => {
+                ConfirmDialog({
+                    title: 'Logout',
+                    message: 'Are you sure you want to logout? Cloud sync will stop.',
+                    confirmText: 'Logout',
+                    variant: 'danger',
+                    onConfirm: async () => {
+                        await AuthService.logout();
+                        Router.navigate('login');
+                    }
+                });
+            });
         }
     });
     Object.assign(logoutBtn.style, {

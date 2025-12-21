@@ -2,26 +2,38 @@ import { Button } from './Button.js';
 import { MobileConfirmDialog } from './MobileModal.js';
 import { COLORS } from '../utils/constants.js';
 
-export const ConfirmDialog = ({ message, onConfirm, onCancel }) => {
+export const ConfirmDialog = ({
+    message,
+    onConfirm,
+    onCancel,
+    confirmText = 'Delete', // Default to delete for backward compatibility
+    title = 'Confirm Action',
+    variant = 'danger'
+}) => {
     // Use mobile modal on mobile devices
     if (window.mobileUtils?.isMobile()) {
         return MobileConfirmDialog({
-            title: 'Confirm Action',
+            title,
             message,
-            confirmText: 'Delete',
+            confirmText,
             cancelText: 'Cancel',
             onConfirm,
             onCancel,
-            variant: 'danger'
+            variant
         });
     }
 
-    // Desktop version (existing implementation)
+    // Desktop version
     const overlay = document.createElement('div');
     overlay.className = 'dialog-overlay';
 
     const card = document.createElement('div');
     card.className = 'dialog-card';
+
+    const titleEl = document.createElement('h3');
+    titleEl.textContent = title;
+    titleEl.style.marginBottom = 'var(--spacing-md)';
+    titleEl.style.textAlign = 'center';
 
     const text = document.createElement('p');
     text.textContent = message;
@@ -35,7 +47,7 @@ export const ConfirmDialog = ({ message, onConfirm, onCancel }) => {
 
     const cancelBtn = Button({
         text: 'Cancel',
-        className: 'btn-ghost', // Use ghost class
+        className: 'btn-ghost',
         onClick: () => {
             document.body.removeChild(overlay);
             if (onCancel) onCancel();
@@ -43,22 +55,24 @@ export const ConfirmDialog = ({ message, onConfirm, onCancel }) => {
     });
 
     const confirmBtn = Button({
-        text: 'Delete',
-        variant: 'danger',
+        text: confirmText,
+        variant: variant,
         onClick: () => {
             document.body.removeChild(overlay);
             if (onConfirm) onConfirm();
         }
     });
 
-    // Apply danger styles directly
-    confirmBtn.style.backgroundColor = COLORS.ERROR;
-    confirmBtn.style.color = 'white';
-    confirmBtn.style.border = `1px solid ${COLORS.ERROR}`;
+    if (variant === 'danger') {
+        confirmBtn.style.backgroundColor = COLORS.ERROR;
+        confirmBtn.style.color = 'white';
+        confirmBtn.style.border = `1px solid ${COLORS.ERROR}`;
+    }
 
     btnGroup.appendChild(cancelBtn);
     btnGroup.appendChild(confirmBtn);
 
+    card.appendChild(titleEl);
     card.appendChild(text);
     card.appendChild(btnGroup);
     overlay.appendChild(card);
