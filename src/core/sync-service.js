@@ -35,10 +35,12 @@ export const SyncService = {
         if (!userId) return;
 
         try {
-            console.log(`[Sync] Pushing ${dataType} to cloud...`, data.length, "items");
             const userDocRef = doc(db, "users", userId);
-            await setDoc(doc(userDocRef, dataType, "data"), { items: data }, { merge: true });
-            console.log(`[Sync] ${dataType} pushed successfully.`);
+            // Wrap arrays in { items: data } for consistent storage, objects stay as they are
+            const payload = Array.isArray(data) ? { items: data } : data;
+
+            console.log(`[Sync] Pushing ${dataType} to cloud...`);
+            await setDoc(doc(userDocRef, dataType, "data"), payload, { merge: true });
         } catch (error) {
             console.error(`[Sync] Failed to push ${dataType} to cloud:`, error);
         }
@@ -46,28 +48,22 @@ export const SyncService = {
 
     async pullFromCloud(userId) {
         console.log("[Sync] Pulling data from cloud for user:", userId);
-        try {
-            // Pull transactions
-            const txSnap = await getDocs(collection(doc(db, "users", userId), STORAGE_KEYS.TRANSACTIONS));
-            if (!txSnap.empty) {
-                const txData = txSnap.docs.find(d => d.id === "data")?.data()?.items || [];
-                console.log(`[Sync] Found ${txData.length} transactions in cloud.`);
-                if (txData.length > 0) {
-                    this.mergeLocalWithCloud(STORAGE_KEYS.TRANSACTIONS, txData);
-                }
-            }
+        const userDocRef = doc(db, "users", userId);
+        const keys = [STORAGE_KEYS.TRANSACTIONS, STORAGE_KEYS.ACCOUNTS, STORAGE_KEYS.SETTINGS];
 
-            // Pull accounts
-            const accSnap = await getDocs(collection(doc(db, "users", userId), STORAGE_KEYS.ACCOUNTS));
-            if (!accSnap.empty) {
-                const accData = accSnap.docs.find(d => d.id === "data")?.data()?.items || [];
-                console.log(`[Sync] Found ${accData.length} accounts in cloud.`);
-                if (accData.length > 0) {
-                    this.mergeLocalWithCloud(STORAGE_KEYS.ACCOUNTS, accData);
+        for (const key of keys) {
+            try {
+                const snap = await getDocs(collection(userDocRef, key));
+                const dataDoc = snap.docs.find(d => d.id === "data");
+                if (dataDoc) {
+                    const rawData = dataDoc.data();
+                    const processedData = rawData.items || rawData;
+                    console.log(`[Sync] Found ${key} in cloud.`);
+                    this.mergeLocalWithCloud(key, processedData);
                 }
+            } catch (error) {
+                console.error(`[Sync] Failed to pull ${key} from cloud:`, error);
             }
-        } catch (error) {
-            console.error("[Sync] Failed to pull from cloud:", error);
         }
     },
 
@@ -75,36 +71,35 @@ export const SyncService = {
         this.stopSync();
         console.log("[Sync] Starting realtime sync for user:", userId);
 
-        // Listen for transaction changes
-        const txUnsub = onSnapshot(doc(db, "users", userId, STORAGE_KEYS.TRANSACTIONS, "data"), (doc) => {
-            if (doc.exists()) {
-                const cloudData = doc.data().items || [];
-                console.log(`[Sync] Realtime Update: ${cloudData.length} transactions received.`);
-                this.mergeLocalWithCloud(STORAGE_KEYS.TRANSACTIONS, cloudData);
-            }
-        });
+        const keys = [STORAGE_KEYS.TRANSACTIONS, STORAGE_KEYS.ACCOUNTS, STORAGE_KEYS.SETTINGS];
 
-        // Listen for account changes
-        const accUnsub = onSnapshot(doc(db, "users", userId, STORAGE_KEYS.ACCOUNTS, "data"), (doc) => {
-            if (doc.exists()) {
-                const cloudData = doc.data().items || [];
-                console.log(`[Sync] Realtime Update: ${cloudData.length} accounts received.`);
-                this.mergeLocalWithCloud(STORAGE_KEYS.ACCOUNTS, cloudData);
-            }
+        keys.forEach(key => {
+            const unsub = onSnapshot(doc(db, "users", userId, key, "data"), (doc) => {
+                if (doc.exists()) {
+                    const rawData = doc.data();
+                    const processedData = rawData.items || rawData;
+                    console.log(`[Sync] Realtime Update for ${key} received.`);
+                    this.mergeLocalWithCloud(key, processedData);
+                }
+            });
+            this.unsubscribes.push(unsub);
         });
-
-        this.unsubscribes.push(txUnsub, accUnsub);
     },
 
     mergeLocalWithCloud(key, cloudData) {
-        const localData = JSON.parse(localStorage.getItem(key) || '[]');
+        const localRaw = localStorage.getItem(key);
 
-        // Simple merge: if cloud has it and local doesn't, add it.
-        // For existing items, we'd need a lastModified timestamp to be robust.
-        // For now, cloud takes precedence if it exists but we merge to avoid data loss.
-
-        const merged = this.uniqueById([...localData, ...cloudData]);
-        localStorage.setItem(key, JSON.stringify(merged));
+        if (Array.isArray(cloudData)) {
+            const localData = JSON.parse(localRaw || '[]');
+            // Cloud items take precedence over local items with same ID
+            const merged = this.uniqueById([...cloudData, ...localData]);
+            localStorage.setItem(key, JSON.stringify(merged));
+        } else if (typeof cloudData === 'object' && cloudData !== null) {
+            // For settings objects, merge them
+            const localData = JSON.parse(localRaw || '{}');
+            const merged = { ...localData, ...cloudData };
+            localStorage.setItem(key, JSON.stringify(merged));
+        }
 
         // Dispatch event so UI updates
         window.dispatchEvent(new CustomEvent('storage-updated', { detail: { key } }));
@@ -113,7 +108,7 @@ export const SyncService = {
     uniqueById(items) {
         const seen = new Set();
         return items.filter(item => {
-            if (seen.has(item.id)) return false;
+            if (!item.id || seen.has(item.id)) return false;
             seen.add(item.id);
             return true;
         });

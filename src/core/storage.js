@@ -166,5 +166,6 @@ export const StorageService = {
         const settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS) || '{}');
         settings[key] = value;
         localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+        SyncService.pushToCloud(STORAGE_KEYS.SETTINGS, settings);
     }
 };

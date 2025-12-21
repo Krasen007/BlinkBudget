@@ -111,5 +111,20 @@ export const SettingsView = () => {
     });
     container.appendChild(logoutBtn);
 
+    const handleStorageUpdate = (e) => {
+        console.log(`[Settings] Storage updated (${e.detail.key}), re-rendering...`);
+        const parent = container.parentNode;
+        if (parent) {
+            parent.innerHTML = '';
+            parent.appendChild(SettingsView());
+        }
+    };
+
+    window.addEventListener('storage-updated', handleStorageUpdate);
+
+    container.cleanup = () => {
+        window.removeEventListener('storage-updated', handleStorageUpdate);
+    };
+
     return container;
 };
