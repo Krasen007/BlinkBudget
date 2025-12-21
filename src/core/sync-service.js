@@ -13,6 +13,7 @@ import { STORAGE_KEYS } from '../utils/constants.js';
 
 export const SyncService = {
     unsubscribes: [],
+    pendingWrites: new Map(), // Track pending writes to avoid race conditions
 
     async init() {
         AuthService.init(async (user) => {
@@ -35,14 +36,27 @@ export const SyncService = {
         if (!userId) return;
 
         try {
+            // Mark that we're writing to this dataType to prevent race conditions
+            const writeId = Date.now();
+            this.pendingWrites.set(dataType, writeId);
+
             const userDocRef = doc(db, "users", userId);
             // Wrap arrays in { items: data } for consistent storage, objects stay as they are
             const payload = Array.isArray(data) ? { items: data } : data;
 
             console.log(`[Sync] Pushing ${dataType} to cloud...`);
             await setDoc(doc(userDocRef, dataType, "data"), payload, { merge: true });
+
+            // Keep the write lock for a brief moment to allow Firebase to propagate
+            setTimeout(() => {
+                if (this.pendingWrites.get(dataType) === writeId) {
+                    this.pendingWrites.delete(dataType);
+                    console.log(`[Sync] Write lock released for ${dataType}`);
+                }
+            }, 1000); // 1 second should be enough for Firebase to process
         } catch (error) {
             console.error(`[Sync] Failed to push ${dataType} to cloud:`, error);
+            this.pendingWrites.delete(dataType);
         }
     },
 
@@ -87,29 +101,58 @@ export const SyncService = {
     },
 
     mergeLocalWithCloud(key, cloudData) {
+        if (!cloudData) return;
+
+        // If we're currently writing to this key, skip the merge to prevent race conditions
+        if (this.pendingWrites.has(key)) {
+            console.log(`[Sync] Skipping merge for ${key} - write in progress`);
+            return;
+        }
+
         const localRaw = localStorage.getItem(key);
 
         if (Array.isArray(cloudData)) {
+            // For simple lists, we trust the cloud data to support deletions and renames correctly.
+            // Additive merging was causing deleted items to be resurrected and renames to be reverted.
             const localData = JSON.parse(localRaw || '[]');
-            // Cloud items take precedence over local items with same ID
-            const merged = this.uniqueById([...cloudData, ...localData]);
-            localStorage.setItem(key, JSON.stringify(merged));
+
+            // Deduplicate incoming cloud data just in case of server-side duplicates
+            const cleanedCloudData = this.uniqueById(cloudData, key);
+
+            // Only update and dispatch if there's an actual change to avoid infinite loops or unnecessary re-renders
+            if (JSON.stringify(cleanedCloudData) !== JSON.stringify(localData)) {
+                console.log(`[Sync] Updating local ${key} from cloud (Authoritative).`);
+                localStorage.setItem(key, JSON.stringify(cleanedCloudData));
+                window.dispatchEvent(new CustomEvent('storage-updated', { detail: { key } }));
+            }
         } else if (typeof cloudData === 'object' && cloudData !== null) {
-            // For settings objects, merge them
+            // For settings objects, we still perform a shallow merge to preserve local settings not yet in cloud
             const localData = JSON.parse(localRaw || '{}');
             const merged = { ...localData, ...cloudData };
-            localStorage.setItem(key, JSON.stringify(merged));
-        }
 
-        // Dispatch event so UI updates
-        window.dispatchEvent(new CustomEvent('storage-updated', { detail: { key } }));
+            if (JSON.stringify(merged) !== JSON.stringify(localData)) {
+                console.log(`[Sync] Merging local ${key} with cloud data.`);
+                localStorage.setItem(key, JSON.stringify(merged));
+                window.dispatchEvent(new CustomEvent('storage-updated', { detail: { key } }));
+            }
+        }
     },
 
-    uniqueById(items) {
-        const seen = new Set();
+    uniqueById(items, key = null) {
+        const seenId = new Set();
+        const seenNameType = new Set();
+
         return items.filter(item => {
-            if (!item.id || seen.has(item.id)) return false;
-            seen.add(item.id);
+            if (!item.id || seenId.has(item.id)) return false;
+
+            // Special handling for accounts: prevent same name + type combo
+            if (key === STORAGE_KEYS.ACCOUNTS && item.name) {
+                const combo = `${item.name.toLowerCase()}|${item.type}`;
+                if (seenNameType.has(combo)) return false;
+                seenNameType.add(combo);
+            }
+
+            seenId.add(item.id);
             return true;
         });
     }

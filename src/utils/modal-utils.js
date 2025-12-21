@@ -18,12 +18,12 @@ export const createModalOverlay = (options = {}) => {
         className = 'mobile-modal-overlay',
         zIndex = Z_INDEX.MODAL_OVERLAY
     } = options;
-    
+
     const overlay = document.createElement('div');
     overlay.className = className;
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
-    
+
     const style = {
         position: 'fixed',
         top: '0',
@@ -37,9 +37,9 @@ export const createModalOverlay = (options = {}) => {
         zIndex: zIndex.toString(),
         padding: SPACING.LG
     };
-    
+
     Object.assign(overlay.style, style);
-    
+
     if (onClick) {
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) {
@@ -47,7 +47,7 @@ export const createModalOverlay = (options = {}) => {
             }
         });
     }
-    
+
     return overlay;
 };
 
@@ -62,10 +62,10 @@ export const createModal = (options = {}) => {
         className = 'mobile-modal',
         padding = SPACING.XL
     } = options;
-    
+
     const modal = document.createElement('div');
     modal.className = className;
-    
+
     const style = {
         backgroundColor: COLORS.SURFACE,
         borderRadius: 'var(--radius-lg)',
@@ -74,9 +74,9 @@ export const createModal = (options = {}) => {
         maxWidth,
         boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
     };
-    
+
     Object.assign(modal.style, style);
-    
+
     return modal;
 };
 
@@ -88,19 +88,24 @@ export const createModal = (options = {}) => {
 export const createAccountRenameModal = (currentName, onSave) => {
     const closeModal = () => {
         if (overlay.parentNode) {
-            document.body.removeChild(overlay);
+            overlay.classList.remove('visible');
+            setTimeout(() => {
+                if (overlay.parentNode) {
+                    document.body.removeChild(overlay);
+                }
+            }, 200); // Match the CSS transition duration
         }
     };
-    
+
     const overlay = createModalOverlay({ onClick: closeModal });
     const modal = createModal();
-    
+
     const title = document.createElement('h3');
     title.textContent = 'Rename Account';
     title.style.margin = `0 0 ${SPACING.LG} 0`;
     title.style.fontSize = FONT_SIZES.XL;
     title.style.textAlign = 'center';
-    
+
     const input = document.createElement('input');
     input.type = 'text';
     input.value = currentName;
@@ -117,11 +122,13 @@ export const createAccountRenameModal = (currentName, onSave) => {
         background: COLORS.SURFACE,
         color: COLORS.TEXT_MAIN
     });
-    
-    const buttonContainer = createFlexContainer({
+
+    const buttonContainer = document.createElement('div');
+    Object.assign(buttonContainer.style, {
+        display: 'flex',
         gap: SPACING.MD
     });
-    
+
     const cancelBtn = Button({
         text: 'Cancel',
         variant: 'secondary',
@@ -130,7 +137,7 @@ export const createAccountRenameModal = (currentName, onSave) => {
     cancelBtn.className += ' touch-target';
     cancelBtn.style.flex = '1';
     cancelBtn.style.minHeight = TOUCH_TARGETS.MIN_HEIGHT;
-    
+
     const saveBtn = Button({
         text: 'Save',
         variant: 'primary',
@@ -145,22 +152,27 @@ export const createAccountRenameModal = (currentName, onSave) => {
     saveBtn.className += ' touch-target';
     saveBtn.style.flex = '1';
     saveBtn.style.minHeight = TOUCH_TARGETS.MIN_HEIGHT;
-    
+
     buttonContainer.appendChild(cancelBtn);
     buttonContainer.appendChild(saveBtn);
-    
+
     modal.appendChild(title);
     modal.appendChild(input);
     modal.appendChild(buttonContainer);
     overlay.appendChild(modal);
-    
+
+    document.body.appendChild(overlay);
+
+    // Trigger fade-in animation by adding visible class
+    setTimeout(() => {
+        overlay.classList.add('visible');
+    }, 10);
+
     // Focus input and select text
     setTimeout(() => {
         input.focus();
         input.select();
     }, TIMING.FOCUS_DELAY);
-    
-    document.body.appendChild(overlay);
 };
 
 /**
@@ -172,19 +184,24 @@ export const createAccountRenameModal = (currentName, onSave) => {
 export const createConfirmModal = (titleText, message, onConfirm) => {
     const closeModal = () => {
         if (overlay.parentNode) {
-            document.body.removeChild(overlay);
+            overlay.classList.remove('visible');
+            setTimeout(() => {
+                if (overlay.parentNode) {
+                    document.body.removeChild(overlay);
+                }
+            }, 200); // Match the CSS transition duration
         }
     };
-    
+
     const overlay = createModalOverlay({ onClick: closeModal });
     const modal = createModal();
-    
+
     const titleEl = document.createElement('h3');
     titleEl.textContent = titleText;
     titleEl.style.margin = `0 0 ${SPACING.MD} 0`;
     titleEl.style.fontSize = FONT_SIZES.XL;
     titleEl.style.textAlign = 'center';
-    
+
     const messageEl = document.createElement('p');
     messageEl.textContent = message;
     messageEl.style.margin = `0 0 ${SPACING.LG} 0`;
@@ -192,11 +209,13 @@ export const createConfirmModal = (titleText, message, onConfirm) => {
     messageEl.style.color = COLORS.TEXT_MUTED;
     messageEl.style.textAlign = 'center';
     messageEl.style.lineHeight = 'var(--line-height-relaxed)';
-    
-    const buttonContainer = createFlexContainer({
+
+    const buttonContainer = document.createElement('div');
+    Object.assign(buttonContainer.style, {
+        display: 'flex',
         gap: SPACING.MD
     });
-    
+
     const cancelBtn = Button({
         text: 'Cancel',
         variant: 'secondary',
@@ -205,7 +224,7 @@ export const createConfirmModal = (titleText, message, onConfirm) => {
     cancelBtn.className += ' touch-target';
     cancelBtn.style.flex = '1';
     cancelBtn.style.minHeight = TOUCH_TARGETS.MIN_HEIGHT;
-    
+
     const confirmBtn = Button({
         text: 'Delete',
         variant: 'primary',
@@ -219,16 +238,21 @@ export const createConfirmModal = (titleText, message, onConfirm) => {
     confirmBtn.style.minHeight = TOUCH_TARGETS.MIN_HEIGHT;
     confirmBtn.style.backgroundColor = COLORS.ERROR;
     confirmBtn.style.borderColor = COLORS.ERROR;
-    
+
     buttonContainer.appendChild(cancelBtn);
     buttonContainer.appendChild(confirmBtn);
-    
+
     modal.appendChild(titleEl);
     modal.appendChild(messageEl);
     modal.appendChild(buttonContainer);
     overlay.appendChild(modal);
-    
+
     document.body.appendChild(overlay);
+
+    // Trigger fade-in animation by adding visible class
+    setTimeout(() => {
+        overlay.classList.add('visible');
+    }, 10);
 };
 
 /**
@@ -238,22 +262,27 @@ export const createConfirmModal = (titleText, message, onConfirm) => {
 export const createAlertModal = (message) => {
     const closeModal = () => {
         if (overlay.parentNode) {
-            document.body.removeChild(overlay);
+            overlay.classList.remove('visible');
+            setTimeout(() => {
+                if (overlay.parentNode) {
+                    document.body.removeChild(overlay);
+                }
+            }, 200); // Match the CSS transition duration
         }
     };
-    
+
     const overlay = createModalOverlay({ onClick: closeModal });
     const modal = createModal({
         maxWidth: DIMENSIONS.MODAL_MAX_WIDTH_SMALL
     });
-    
+
     const messageEl = document.createElement('p');
     messageEl.textContent = message;
     messageEl.style.margin = `0 0 ${SPACING.LG} 0`;
     messageEl.style.fontSize = FONT_SIZES.BASE;
     messageEl.style.textAlign = 'center';
     messageEl.style.lineHeight = 'var(--line-height-relaxed)';
-    
+
     const okBtn = Button({
         text: 'OK',
         variant: 'primary',
@@ -262,11 +291,16 @@ export const createAlertModal = (message) => {
     okBtn.className += ' touch-target';
     okBtn.style.width = '100%';
     okBtn.style.minHeight = TOUCH_TARGETS.MIN_HEIGHT;
-    
+
     modal.appendChild(messageEl);
     modal.appendChild(okBtn);
     overlay.appendChild(modal);
-    
+
     document.body.appendChild(overlay);
+
+    // Trigger fade-in animation by adding visible class
+    setTimeout(() => {
+        overlay.classList.add('visible');
+    }, 10);
 };
 

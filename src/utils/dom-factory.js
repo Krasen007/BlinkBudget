@@ -50,6 +50,7 @@ export const createInput = (options = {}) => {
         readOnly = false,
         id = '',
         name = '',
+        autocomplete = '',
         minHeight = TOUCH_TARGETS.MIN_HEIGHT,
         fontSize = FONT_SIZES.PREVENT_ZOOM
     } = options;
@@ -63,6 +64,7 @@ export const createInput = (options = {}) => {
     input.readOnly = readOnly;
     if (id) input.id = id;
     if (name) input.name = name;
+    if (autocomplete) input.autocomplete = autocomplete;
 
     // Apply default mobile-friendly styles
     const defaultStyle = {

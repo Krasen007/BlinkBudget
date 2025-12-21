@@ -38,12 +38,14 @@ export const LoginView = () => {
     emailInput.type = 'email';
     emailInput.placeholder = 'Email';
     emailInput.required = true;
+    emailInput.autocomplete = 'username';
     applyInputStyles(emailInput);
 
     const passwordInput = document.createElement('input');
     passwordInput.type = 'password';
     passwordInput.placeholder = 'Password';
     passwordInput.required = true;
+    passwordInput.autocomplete = 'current-password';
     applyInputStyles(passwordInput);
 
     const errorMsg = document.createElement('div');
@@ -109,6 +111,7 @@ export const LoginView = () => {
         toggleBtn.textContent = isSignup
             ? 'Already have an account? Login'
             : 'Don\'t have an account? Sign Up';
+        passwordInput.autocomplete = isSignup ? 'new-password' : 'current-password';
         errorMsg.textContent = '';
     });
 

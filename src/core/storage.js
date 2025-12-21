@@ -34,10 +34,41 @@ export const StorageService = {
             localStorage.setItem(ACCOUNTS_KEY, JSON.stringify([defaultAccount]));
             return [defaultAccount];
         }
-        return JSON.parse(data);
+        const accounts = JSON.parse(data);
+
+        // Final fallback: Ensure no duplicates by ID or Name+Type combo
+        const seenId = new Set();
+        const seenNameType = new Set();
+        const cleaned = accounts.filter(acc => {
+            if (!acc.id || seenId.has(acc.id)) return false;
+            const combo = `${(acc.name || '').toLowerCase()}|${acc.type}`;
+            if (seenNameType.has(combo)) return false;
+            seenId.add(acc.id);
+            seenNameType.add(combo);
+            return true;
+        });
+
+        if (cleaned.length !== accounts.length) {
+            localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(cleaned));
+        }
+
+        return cleaned;
+    },
+
+    isAccountDuplicate(name, type, excludeId = null) {
+        const accounts = this.getAccounts();
+        return accounts.some(acc =>
+            acc.name.toLowerCase() === name.toLowerCase() &&
+            acc.type === type &&
+            acc.id !== excludeId
+        );
     },
 
     saveAccount(account) {
+        if (!account.timestamp) {
+            account.timestamp = new Date().toISOString();
+        }
+        console.log("[Storage] Saving account:", account.name, account.id);
         const accounts = this.getAccounts(); // This handles initialization if needed
         const index = accounts.findIndex(a => a.id === account.id);
 
@@ -60,6 +91,7 @@ export const StorageService = {
     },
 
     deleteAccount(id) {
+        console.log("[Storage] Deleting account:", id);
         let accounts = this.getAccounts();
 
         // Prevent deleting the last account

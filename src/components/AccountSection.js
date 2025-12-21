@@ -95,7 +95,12 @@ export const AccountSection = () => {
             renameBtn.onclick = () => {
                 createAccountRenameModal(acc.name, (newName) => {
                     if (newName && newName.trim() !== '') {
-                        acc.name = newName.trim();
+                        const trimmedName = newName.trim();
+                        if (StorageService.isAccountDuplicate(trimmedName, acc.type, acc.id)) {
+                            createAlertModal(`An account named "${trimmedName}" of type "${acc.type}" already exists.`);
+                            return;
+                        }
+                        acc.name = trimmedName;
                         StorageService.saveAccount(acc);
                         renderAccounts();
                     }
@@ -180,6 +185,7 @@ export const AccountSection = () => {
     const nameInput = createInput({
         id: 'new-account-name',
         name: 'new-account-name',
+        autocomplete: 'off',
         placeholder: 'Account Name',
         className: 'touch-target mobile-form-input',
         fontSize: FONT_SIZES.PREVENT_ZOOM
@@ -208,19 +214,45 @@ export const AccountSection = () => {
         });
     });
 
+    const errorMsg = document.createElement('div');
+    Object.assign(errorMsg.style, {
+        color: COLORS.ERROR,
+        fontSize: FONT_SIZES.SM,
+        marginTop: `-${SPACING.SM}`,
+        marginBottom: SPACING.SM,
+        display: 'none'
+    });
+
+    // Clear error on input
+    nameInput.addEventListener('input', () => {
+        errorMsg.style.display = 'none';
+        nameInput.style.borderColor = COLORS.BORDER;
+    });
+
     const addBtn = Button({
         text: 'Add Account',
         variant: 'secondary',
         onClick: () => {
             const name = nameInput.value.trim();
+            const type = typeSelect.value;
             if (name) {
+                if (StorageService.isAccountDuplicate(name, type)) {
+                    errorMsg.textContent = `An account named "${name}" of type "${type}" already exists.`;
+                    errorMsg.style.display = 'block';
+                    nameInput.style.borderColor = COLORS.ERROR;
+                    if (window.mobileUtils?.supportsHaptic()) {
+                        window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.ERROR);
+                    }
+                    return;
+                }
                 StorageService.saveAccount({
                     id: StorageService.generateId(),
                     name: name,
-                    type: typeSelect.value,
+                    type: type,
                     isDefault: false
                 });
                 nameInput.value = '';
+                errorMsg.style.display = 'none';
                 renderAccounts();
                 if (window.mobileUtils?.supportsHaptic()) {
                     window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.LIGHT);
@@ -237,6 +269,7 @@ export const AccountSection = () => {
     });
 
     addContainer.appendChild(nameInput);
+    addContainer.appendChild(errorMsg);
     addContainer.appendChild(typeSelect);
     addContainer.appendChild(addBtn);
     section.appendChild(addContainer);

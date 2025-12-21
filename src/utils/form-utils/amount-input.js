@@ -25,6 +25,7 @@ export const createAmountInput = (options = {}) => {
     input.value = initialValue || '';
     input.step = '0.01';
     input.required = true;
+    input.autocomplete = 'off';
 
     input.placeholder = '0.00';
     input.className = 'mobile-form-input';
