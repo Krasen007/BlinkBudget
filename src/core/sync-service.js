@@ -83,19 +83,33 @@ export const SyncService = {
 
     startRealtimeSync(userId) {
         this.stopSync();
-        console.log("[Sync] Starting realtime sync for user:", userId);
+        console.log("[Sync] Starting offline-first realtime sync for user:", userId);
 
         const keys = [STORAGE_KEYS.TRANSACTIONS, STORAGE_KEYS.ACCOUNTS, STORAGE_KEYS.SETTINGS];
 
         keys.forEach(key => {
-            const unsub = onSnapshot(doc(db, "users", userId, key, "data"), (doc) => {
-                if (doc.exists()) {
-                    const rawData = doc.data();
-                    const processedData = rawData.items || rawData;
-                    console.log(`[Sync] Realtime Update for ${key} received.`);
-                    this.mergeLocalWithCloud(key, processedData);
+            const unsub = onSnapshot(
+                doc(db, "users", userId, key, "data"),
+                {
+                    // includeMetadataChanges to know if data is from cache or server
+                    includeMetadataChanges: true
+                },
+                (doc) => {
+                    if (doc.exists()) {
+                        const rawData = doc.data();
+                        const processedData = rawData.items || rawData;
+
+                        // Log whether this is cached data or fresh from server
+                        const source = doc.metadata.fromCache ? "cache" : "server";
+                        console.log(`[Sync] ${key} loaded from ${source}`);
+
+                        this.mergeLocalWithCloud(key, processedData);
+                    }
+                },
+                (error) => {
+                    console.error(`[Sync] Error in realtime listener for ${key}:`, error);
                 }
-            });
+            );
             this.unsubscribes.push(unsub);
         });
     },

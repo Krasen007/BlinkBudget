@@ -7,6 +7,7 @@ import { EditView } from './views/EditView.js';
 import { SettingsView } from './views/SettingsView.js';
 import { LoginView } from './views/LoginView.js';
 import { MobileNavigation, updateMobileNavigation } from './components/MobileNavigation.js';
+import { NetworkStatus } from './components/NetworkStatus.js';
 import './core/mobile.js'; // Initialize mobile utilities
 import './pwa.js'; // Register PWA service worker
 
@@ -104,6 +105,10 @@ const initApp = () => {
     // Initialize mobile navigation
     initMobileNav();
 
+    // Add network status indicator
+    const networkStatus = NetworkStatus();
+    document.body.appendChild(networkStatus);
+
     // Re-initialize mobile nav on resize (for responsive behavior)
     window.addEventListener('resize', () => {
         setTimeout(initMobileNav, 100); // Debounce
@@ -115,8 +120,13 @@ const initApp = () => {
         const currentRoute = getCurrentRoute();
 
         if (user) {
-            console.log("[Main] User authenticated, ensuring data sync...");
-            await SyncService.pullFromCloud(user.uid);
+            console.log("[Main] User authenticated, starting offline-first sync...");
+            // With Firestore persistence enabled, we don't need to pull all data on startup.
+            // The realtime listeners will:
+            // 1. Serve cached data immediately from IndexedDB
+            // 2. Sync incremental changes from the server in the background
+            // Only pull from cloud on first use (when cache is empty) - handled automatically by Firestore
+
             SyncService.startRealtimeSync(user.uid);
 
             if (currentRoute === 'login') {
