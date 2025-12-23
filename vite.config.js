@@ -13,7 +13,7 @@ export default defineConfig({
         clientsClaim: true,
         skipWaiting: true
       },
-      includeAssets: ['favicon.png', 'favicon.ico', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.png', 'favicon.ico'],
       manifest: {
         name: 'BlinkBudget',
         short_name: 'BlinkBudget',
@@ -21,17 +21,17 @@ export default defineConfig({
         theme_color: '#ffffff',
         icons: [
           {
-            src: 'pwa-192x192.png',
+            src: 'favicon.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'pwa-512x512.png',
+            src: 'favicon.png',
             sizes: '512x512',
             type: 'image/png'
           },
           {
-            src: 'pwa-512x512.png',
+            src: 'favicon.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
@@ -46,6 +46,17 @@ export default defineConfig({
     cssCodeSplit: false, // Combine all CSS into single file for production
     rollupOptions: {
       output: {
+        // Manual chunking for better optimization
+        manualChunks: (id) => {
+          // Firebase gets its own chunk (largest dependency)
+          if (id.includes('node_modules/firebase') || id.includes('node_modules/@firebase')) {
+            return 'firebase';
+          }
+          // Other vendor dependencies
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
+        },
         // Ensure CSS is properly chunked
         assetFileNames: (assetInfo) => {
           if (assetInfo.name && assetInfo.name.endsWith('.css')) {

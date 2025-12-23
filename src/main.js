@@ -1,11 +1,7 @@
 import { Router } from './core/router.js';
 import { AuthService } from './core/auth-service.js';
 import { SyncService } from './core/sync-service.js';
-import { DashboardView } from './views/DashboardView.js';
-import { AddView } from './views/AddView.js';
-import { EditView } from './views/EditView.js';
-import { SettingsView } from './views/SettingsView.js';
-import { LoginView } from './views/LoginView.js';
+// Views are now loaded dynamically to reduce initial bundle size
 import { MobileNavigation, updateMobileNavigation } from './components/MobileNavigation.js';
 import { NetworkStatus } from './components/NetworkStatus.js';
 import './core/mobile.js'; // Initialize mobile utilities
@@ -69,32 +65,37 @@ const initApp = () => {
         app.appendChild(view);
     };
 
-    // Route Handlers
-    Router.on('dashboard', withAuth(() => {
+    // Route Handlers (with dynamic imports for code splitting)
+    Router.on('dashboard', withAuth(async () => {
+        const { DashboardView } = await import('./views/DashboardView.js');
         setView(DashboardView());
         updateMobileNavigation('dashboard');
     }));
 
-    Router.on('add-expense', withAuth(() => {
+    Router.on('add-expense', withAuth(async () => {
+        const { AddView } = await import('./views/AddView.js');
         setView(AddView());
         updateMobileNavigation('add-expense');
     }));
 
-    Router.on('edit-expense', withAuth((params) => {
+    Router.on('edit-expense', withAuth(async (params) => {
+        const { EditView } = await import('./views/EditView.js');
         setView(EditView(params));
         updateMobileNavigation('dashboard'); // Edit doesn't have nav item, highlight dashboard
     }));
 
-    Router.on('settings', withAuth(() => {
+    Router.on('settings', withAuth(async () => {
+        const { SettingsView } = await import('./views/SettingsView.js');
         setView(SettingsView());
         updateMobileNavigation('settings');
     }));
 
-    Router.on('login', () => {
+    Router.on('login', async () => {
         if (AuthService.isAuthenticated()) {
             Router.navigate('dashboard');
             return;
         }
+        const { LoginView } = await import('./views/LoginView.js');
         setView(LoginView());
         updateMobileNavigation('login');
     });
