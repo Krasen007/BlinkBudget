@@ -21,7 +21,7 @@ export const DateInput = (options = {}) => {
 
     // Label for accessibility and context
     const label = document.createElement('label');
-    label.textContent = 'Select Date';
+    //label.textContent = 'Select Date';
     label.style.fontSize = FONT_SIZES.XS;
     label.style.color = COLORS.TEXT_MUTED;
     label.style.marginBottom = SPACING.XS;

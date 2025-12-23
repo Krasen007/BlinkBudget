@@ -130,9 +130,10 @@ const createCategoryContainer = () => {
     container.style.gridTemplateColumns = 'none';
     container.style.gridTemplateRows = 'repeat(2, 1fr)';
     container.style.gridAutoFlow = 'column';
-    container.style.gridAutoColumns = 'calc((100% - var(--spacing-sm) * 2) / 3)';
+    container.style.gridAutoColumns = 'calc((100% - var(--spacing-sm) * 2) / 3 - 1px)';
     container.style.gap = SPACING.SM;
     container.style.padding = SPACING.SM;
+    container.style.boxSizing = 'border-box';
     container.style.borderRadius = 'var(--radius-md)';
     container.style.background = 'var(--color-surface)';
     container.style.border = '1px solid var(--color-border)';
@@ -141,6 +142,7 @@ const createCategoryContainer = () => {
     container.style.webkitOverflowScrolling = 'touch';
     container.style.scrollSnapType = 'x mandatory';
     container.style.marginBottom = SPACING.MD;
+    container.style.maxHeight = 'none'; // Override CSS max-height to prevents vertical clipping
 
     // Remove dynamic height calculation as we use fixed rows now
 
