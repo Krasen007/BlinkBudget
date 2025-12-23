@@ -53,8 +53,9 @@ const createCategoryChip = (options) => {
     chip.style.textAlign = 'center';
     chip.style.whiteSpace = 'nowrap';
     chip.style.overflow = 'hidden';
+    chip.style.overflow = 'hidden';
     chip.style.textOverflow = 'ellipsis';
-    chip.style.scrollSnapAlign = 'start';
+    // scrollSnapAlign is now handled in the render loop for paging
 
     // State update function
     const updateChipState = (selected) => {
@@ -282,7 +283,7 @@ export const createCategorySelector = (options = {}) => {
             // Standard Categories
             const currentCats = CATEGORY_OPTIONS[currentType] || CATEGORY_OPTIONS.expense;
 
-            currentCats.forEach(cat => {
+            currentCats.forEach((cat, index) => {
                 const catColor = CATEGORY_COLORS[cat] || 'var(--color-primary)';
                 const chip = createCategoryChip({
                     label: cat,
@@ -350,6 +351,13 @@ export const createCategorySelector = (options = {}) => {
                         }
                     }
                 });
+
+                // Apply page snapping logic: Only the start of a "page" (6 items) should snap
+                if (index % 6 === 0) {
+                    chip.style.scrollSnapAlign = 'start';
+                } else {
+                    chip.style.scrollSnapAlign = 'none';
+                }
 
                 container.appendChild(chip);
             });

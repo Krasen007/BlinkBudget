@@ -89,6 +89,12 @@
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
   
+  /* Hide scrollbar for cleaner UI */
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  
   /* Optimize for mobile */
   @media (max-width: calc(var(--breakpoint-md) - 1px)) {
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
