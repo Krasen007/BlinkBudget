@@ -1,5 +1,5 @@
 import { TransactionForm } from '../components/TransactionForm.js';
-import { ConfirmDialog } from '../components/ConfirmDialog.js';
+
 import { DateInput } from '../components/DateInput.js';
 import { StorageService } from '../core/storage.js';
 import { Router } from '../core/router.js';
@@ -73,20 +73,22 @@ export const EditView = ({ id }) => {
         externalDateInput: dateInput.querySelector('input[type="date"]'),
         onSubmit: (data) => {
             StorageService.update(id, data);
-            
+
             // Mark transaction for highlighting in dashboard
             markTransactionForHighlight(id);
-            
+
             // Navigate to dashboard immediately
             Router.navigate('dashboard');
         },
         onDelete: () => {
-            ConfirmDialog({
-                message: 'Are you sure you want to delete this transaction?',
-                onConfirm: () => {
-                    StorageService.remove(id);
-                    Router.navigate('dashboard');
-                }
+            import('../components/ConfirmDialog.js').then(({ ConfirmDialog }) => {
+                ConfirmDialog({
+                    message: 'Are you sure you want to delete this transaction?',
+                    onConfirm: () => {
+                        StorageService.remove(id);
+                        Router.navigate('dashboard');
+                    }
+                });
             });
         }
     });

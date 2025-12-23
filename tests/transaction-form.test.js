@@ -124,7 +124,7 @@ describe('TransactionForm', () => {
 
         // Select a category to trigger auto-submit
         const categoryChips = form.querySelectorAll('.category-chip');
-        const groceriesCategory = Array.from(categoryChips).find(chip => chip.textContent === 'Groceries');
+        const groceriesCategory = Array.from(categoryChips).find(chip => chip.textContent === 'Храна');
         expect(groceriesCategory).toBeTruthy();
 
         groceriesCategory.click();
@@ -134,7 +134,7 @@ describe('TransactionForm', () => {
             expect.objectContaining({
                 accountId: 'savings',
                 amount: 25.50,
-                category: 'Groceries',
+                category: 'Храна',
                 type: 'expense'
             })
         );

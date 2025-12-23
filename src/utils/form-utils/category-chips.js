@@ -54,6 +54,7 @@ const createCategoryChip = (options) => {
     chip.style.whiteSpace = 'nowrap';
     chip.style.overflow = 'hidden';
     chip.style.textOverflow = 'ellipsis';
+    chip.style.scrollSnapAlign = 'start';
 
     // State update function
     const updateChipState = (selected) => {
@@ -125,46 +126,22 @@ const createCategoryContainer = () => {
     const container = document.createElement('div');
     container.className = 'category-chip-container';
     container.style.display = 'grid';
-    container.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    container.style.gridTemplateColumns = 'none';
+    container.style.gridTemplateRows = 'repeat(2, 1fr)';
+    container.style.gridAutoFlow = 'column';
+    container.style.gridAutoColumns = 'calc((100% - var(--spacing-sm) * 2) / 3)';
     container.style.gap = SPACING.SM;
     container.style.padding = SPACING.SM;
     container.style.borderRadius = 'var(--radius-md)';
     container.style.background = 'var(--color-surface)';
     container.style.border = '1px solid var(--color-border)';
-    container.style.overflowY = 'auto';
-    container.style.overflowX = 'hidden';
+    container.style.overflowX = 'auto';
+    container.style.overflowY = 'hidden';
     container.style.webkitOverflowScrolling = 'touch';
+    container.style.scrollSnapType = 'x mandatory';
     container.style.marginBottom = SPACING.MD;
 
-    // Calculate max-height based on keyboard state
-    const calculateCategoryHeight = () => {
-        if (!window.mobileUtils?.isMobile()) {
-            return 'none'; // Desktop - no restriction
-        }
-
-        const viewportHeight = window.visualViewport?.height || window.innerHeight;
-        const availableHeight = viewportHeight - DIMENSIONS.FIXED_ELEMENTS_HEIGHT;
-
-        return `${Math.max(
-            DIMENSIONS.MIN_CATEGORY_HEIGHT,
-            Math.min(DIMENSIONS.IDEAL_CATEGORY_HEIGHT, availableHeight)
-        )}px`;
-    };
-
-    container.style.maxHeight = calculateCategoryHeight();
-
-    // Update on keyboard open/close
-    if (window.visualViewport) {
-        const updateHeight = () => {
-            container.style.maxHeight = calculateCategoryHeight();
-        };
-        window.visualViewport.addEventListener('resize', updateHeight);
-
-        // Store cleanup function
-        container._cleanupHeight = () => {
-            window.visualViewport.removeEventListener('resize', updateHeight);
-        };
-    }
+    // Remove dynamic height calculation as we use fixed rows now
 
     return container;
 };
