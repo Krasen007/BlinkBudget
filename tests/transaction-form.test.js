@@ -65,12 +65,27 @@ describe('TransactionForm', () => {
         const categoryLabels = Array.from(categoryChips).map(chip => chip.textContent);
 
         // Should show expense categories for refunds
-        expect(categoryLabels).toContain('Groceries');
-        expect(categoryLabels).toContain('Eating Out');
-        expect(categoryLabels).toContain('Bills');
-        expect(categoryLabels).toContain('Travel');
-        expect(categoryLabels).toContain('Lifestyle');
-        expect(categoryLabels).toContain('Self-care');
+        expect(categoryLabels).toContain('Храна');
+        expect(categoryLabels).toContain('Заведения');
+        expect(categoryLabels).toContain('Други');
+        expect(categoryLabels).toContain('Подаръци');
+        expect(categoryLabels).toContain('Гориво');
+        expect(categoryLabels).toContain('Автомобил');
+        expect(categoryLabels).toContain('Дрехи');
+        expect(categoryLabels).toContain('Сметки');
+        expect(categoryLabels).toContain('Лекарства');
+        expect(categoryLabels).toContain('Забавления');
+        expect(categoryLabels).toContain('Кредит');
+        expect(categoryLabels).toContain('Телефон');
+        expect(categoryLabels).toContain('Почивка');
+        expect(categoryLabels).toContain('Транспорт');
+        expect(categoryLabels).toContain('Баланс');
+        expect(categoryLabels).toContain('Лекар');
+        expect(categoryLabels).toContain('Инвестиции');
+        expect(categoryLabels).toContain('Ремонти');
+        expect(categoryLabels).toContain('Данъци');
+        expect(categoryLabels).toContain('Застраховки');
+        expect(categoryLabels).toContain('Зъболекар');
     });
 
     it('should apply refund-specific styling to refund button when active', () => {

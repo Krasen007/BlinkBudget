@@ -1,7 +1,6 @@
 DO NOT IMPLEMENT: when you start the app the default view should be to add new entry
 DO NOT IMPLEMENT: add option to reorder categories or auto sort them by most common, it may also be learning from the user behavior and predict the category based on the amount
 DO NOT IMPLEMENT: Add visual indicators for refund transactions in lists
-DO NOT IMPLEMENT: Implement category-based filtering
 DO NOT IMPLEMENT: when deleting a transaction create animation of the row dissapearing
 [x] fix wrong amount display -$-6.00
 [x] add refund option
@@ -18,3 +17,7 @@ DO NOT IMPLEMENT: when deleting a transaction create animation of the row dissap
 [x] Simplify date handling - Remove duplicate date input (keep only top)
 [x] Adjust spacing - tighter compact layout
 [x] Reorder elements - Different sequence (e.g., Amount first, then Type at the bottom)
+[ ] Begin work on sorting and filtering by month and year, seeing old transactions and being able to filter them
+[ ] Implement category-based filtering
+[ ] begin work on PWA
+[ ] make security.md following all the security best practices 

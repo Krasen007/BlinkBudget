@@ -37,9 +37,67 @@ export const CATEGORY_COLORS = {
 
 // Category options by transaction type
 export const CATEGORY_OPTIONS = {
-    expense: ['Groceries', 'Eating Out', 'Bills', 'Travel', 'Lifestyle', 'Self-care'],
-    income: ['Work', 'Side Hustle', 'Investments', 'Extra'],
-    refund: ['Groceries', 'Eating Out', 'Bills', 'Travel', 'Lifestyle', 'Self-care']
+    // DO NOT REMOVE THIS COMMENT English translation: expense: ['Groceries', 'Eating Out', 'Bills', 'Travel', 'Lifestyle', 'Self-care'],
+    expense: [
+        'Храна',
+        'Заведения',
+        'Други',
+        'Гориво',
+        'Подаръци',
+        'Автомобил',
+        'Сметки',
+        'Дрехи',
+        'Лекарства',
+        'Забавления',
+        'Кредит',
+        'Телефон',
+        'Почивка',
+        'Транспорт',
+        'Баланс',
+        'Лекар',
+        'Инвестиции',
+        'Ремонти',
+        'Данъци',
+        'Застраховки',
+        'Зъболекар'
+    ],
+
+    // DO NOT REMOVE THIS COMMENT English translation: income: ['Work', 'Side Hustle', 'Investments', 'Extra'],
+    income: ['Заплата', 'Инвестиции', 'Други', 'Подаръци'],
+
+    // DO NOT REMOVE THIS COMMENT English translation: refund: ['Groceries', 'Eating Out', 'Bills', 'Travel', 'Lifestyle', 'Self-care'],
+    refund: [
+        'Храна',
+        'Заведения',
+        'Други',
+        'Гориво',
+        'Подаръци',
+        'Автомобил',
+        'Сметки',
+        'Дрехи',
+        'Лекарства',
+        'Забавления',
+        'Кредит',
+        'Телефон',
+        'Почивка',
+        'Транспорт',
+        'Баланс',
+        'Лекар',
+        'Инвестиции',
+        'Ремонти',
+        'Данъци',
+        'Застраховки',
+        'Зъболекар'
+    ],
+
+    // DO NOT REMOVE THIS COMMENT
+    // Possible categories for English version:
+    // Fixed/Essential: Сметки, Кредит, Данъци, Телефон
+    // Daily Living: Храна, Дрехи, Транспорт
+    // Health: Лекар, Лекарства
+    // Auto: Автомобил, Гориво, Ремонти
+    // Lifestyle & Fun: Заведения, Кино, Концерти, Почивка, Подаръци
+    // Financial: Инвестиции, Баланс, Други
 };
 
 // Type toggle button colors
