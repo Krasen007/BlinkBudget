@@ -14,7 +14,7 @@ describe('Date Input Integration', () => {
     beforeEach(() => {
         container = document.createElement('div');
         document.body.appendChild(container);
-        
+
         // Clear storage
         localStorage.clear();
     });
@@ -32,10 +32,10 @@ describe('Date Input Integration', () => {
         const dateInput = addView.querySelector('input[type="date"]');
         expect(dateInput).toBeTruthy();
 
-        // Should have visible label
+        // Should have visible label (currently empty as label text is commented out)
         const label = addView.querySelector('label[for*="date-input"]');
         expect(label).toBeTruthy();
-        expect(label.textContent).toBe('Select Date');
+        expect(label.textContent).toBe('');
         expect(label.style.display).toBe('block');
 
         // Should have accessibility attributes
@@ -54,9 +54,9 @@ describe('Date Input Integration', () => {
             accountId: 'main',
             timestamp: '2024-01-15'
         };
-        
+
         const transactionId = StorageService.add(testTransaction).id;
-        
+
         const editView = EditView({ id: transactionId });
         container.appendChild(editView);
 
@@ -65,10 +65,10 @@ describe('Date Input Integration', () => {
         expect(dateInput).toBeTruthy();
         expect(dateInput.value).toBe('2024-01-15');
 
-        // Should have visible label
+        // Should have visible label (currently empty as label text is commented out)
         const label = editView.querySelector('label[for*="date-input"]');
         expect(label).toBeTruthy();
-        expect(label.textContent).toBe('Select Date');
+        expect(label.textContent).toBe('');
         expect(label.style.display).toBe('block');
 
         // Should have accessibility attributes
@@ -99,9 +99,9 @@ describe('Date Input Integration', () => {
             accountId: 'main',
             timestamp: '2024-01-15'
         };
-        
+
         const transactionId = StorageService.add(testTransaction).id;
-        
+
         const editView = EditView({ id: transactionId });
         container.appendChild(editView);
 

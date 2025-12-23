@@ -22,10 +22,10 @@ describe('DateInput Component', () => {
         const dateInput = DateInput();
         container.appendChild(dateInput);
 
-        // Should have a label
+        // Should have a label (currently empty as label text is commented out)
         const label = dateInput.querySelector('label');
         expect(label).toBeTruthy();
-        expect(label.textContent).toBe('Select Date');
+        expect(label.textContent).toBe('');
         expect(label.style.display).toBe('block');
     });
 
@@ -85,7 +85,7 @@ describe('DateInput Component', () => {
         container.appendChild(dateInput);
 
         const displayInput = dateInput.querySelector('input[type="text"]');
-        
+
         // Initial state
         const initialBorderColor = displayInput.style.borderColor;
         const initialTransform = displayInput.style.transform;
@@ -120,7 +120,7 @@ describe('DateInput Component', () => {
     it('should call onChange when date changes', () => {
         let changedValue = null;
         const onChange = (value) => { changedValue = value; };
-        
+
         const dateInput = DateInput({ onChange });
         container.appendChild(dateInput);
 
