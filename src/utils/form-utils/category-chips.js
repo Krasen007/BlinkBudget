@@ -143,6 +143,28 @@ const createCategoryContainer = () => {
 
     // Remove dynamic height calculation as we use fixed rows now
 
+    // Enable horizontal scrolling with mouse wheel (paged)
+    let isScrolling = false;
+    container.addEventListener('wheel', (e) => {
+        if (e.deltaY !== 0) {
+            e.preventDefault();
+
+            if (isScrolling) return;
+
+            isScrolling = true;
+            const direction = e.deltaY > 0 ? 1 : -1;
+
+            container.scrollBy({
+                left: direction * container.clientWidth,
+                behavior: 'smooth'
+            });
+
+            setTimeout(() => {
+                isScrolling = false;
+            }, 500);
+        }
+    });
+
     return container;
 };
 

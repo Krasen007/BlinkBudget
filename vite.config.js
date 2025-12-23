@@ -20,6 +20,11 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    host: true, // Open to local network and display URL
+  },
+  preview: {
+    host: true, // Open to local network for preview
+    port: 4173, // Default preview port
   },
   css: {
     // PostCSS configuration will be loaded from postcss.config.js
