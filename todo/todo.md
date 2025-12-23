@@ -19,5 +19,5 @@ DO NOT IMPLEMENT: when deleting a transaction create animation of the row dissap
 [x] Reorder elements - Different sequence (e.g., Amount first, then Type at the bottom)
 [ ] Begin work on sorting and filtering by month and year, seeing old transactions and being able to filter them
 [ ] Implement category-based filtering
-[ ] begin work on PWA
+[x] begin work on PWA
 [ ] make security.md following all the security best practices 

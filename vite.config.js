@@ -1,7 +1,45 @@
 import { defineConfig } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
   root: '.',
+  plugins: [
+    VitePWA({
+      registerType: 'autoUpdate',
+      strategies: 'generateSW',
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true
+      },
+      includeAssets: ['favicon.png', 'favicon.ico', 'apple-touch-icon.png'],
+      manifest: {
+        name: 'BlinkBudget',
+        short_name: 'BlinkBudget',
+        description: 'Making expense tracking effortless, all in 3 clicks.',
+        theme_color: '#ffffff',
+        icons: [
+          {
+            src: 'pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png'
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable'
+          }
+        ]
+      }
+    })
+  ],
   build: {
     outDir: 'dist',
     // CSS optimization settings

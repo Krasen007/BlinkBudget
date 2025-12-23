@@ -8,6 +8,7 @@ import { SettingsView } from './views/SettingsView.js';
 import { LoginView } from './views/LoginView.js';
 import { MobileNavigation, updateMobileNavigation } from './components/MobileNavigation.js';
 import './core/mobile.js'; // Initialize mobile utilities
+import './pwa.js'; // Register PWA service worker
 
 const initApp = () => {
     const app = document.querySelector('#app');
