@@ -27,7 +27,7 @@ export const DashboardView = () => {
     const title = document.createElement('h2');
     const user = AuthService.user;
     const userName = user ? (user.displayName || user.email) : '';
-    title.textContent = `Dashboard 0.1 ${userName ? ` - ${userName}` : ''}`;
+    title.textContent = `Dashboard 1.5 ${userName ? ` - ${userName}` : ''}`;
     title.style.margin = '0';
     title.style.marginRight = SPACING.MD;
 
