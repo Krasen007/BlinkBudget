@@ -166,7 +166,7 @@ const createCategoryContainer = () => {
                 isScrolling = false;
             }, 500);
         }
-    });
+    }, { passive: false });
 
     return container;
 };
@@ -283,76 +283,122 @@ export const createCategorySelector = (options = {}) => {
 
         } else {
             // Standard Categories
-            const currentCats = CATEGORY_OPTIONS[currentType] || CATEGORY_OPTIONS.expense;
+            const rawCats = CATEGORY_OPTIONS[currentType] || CATEGORY_OPTIONS.expense;
 
-            currentCats.forEach((cat, index) => {
-                const catColor = CATEGORY_COLORS[cat] || 'var(--color-primary)';
-                const chip = createCategoryChip({
-                    label: cat,
-                    color: catColor,
-                    isSelected: selectedCategory === cat,
-                    title: CATEGORY_DEFINITIONS[cat] || null,
-                    onClick: () => {
-                        // Validate amount
-                        // Validate amount
-                        let amountValidation = { valid: true, value: 0 };
-                        if (amountInput) {
-                            amountValidation = validateAmount(amountInput.value);
-                            if (!amountValidation.valid) {
-                                showFieldError(amountInput);
-                                return;
-                            }
-                        }
+            // Reorder categories to fill rows visually (Horizontal order)
+            // Grid flows Column-first. To appear Row-first in a 3x2 grid:
+            // Visual:  0 1 2
+            //          3 4 5
+            // Grid:    0 3
+            //          1 4
+            //          2 5
+            // Sequence needed: 0, 3, 1, 4, 2, 5
 
-                        // Visual feedback - deselect all
-                        Array.from(container.children).forEach(c => {
-                            if (c.updateState) {
-                                c.updateState(false);
-                            }
-                        });
+            const reorderForVisualLayout = (items) => {
+                const result = [];
+                const chunkSize = 6;
+                // indices for 3x2 grid column-first fill to appear row-first
+                const order = [0, 3, 1, 4, 2, 5];
 
-                        selectedCategory = cat;
-
-                        // Update this chip state
-                        chip.updateState(true);
-
-                        // Success haptic feedback
-                        try {
-                            if (window.mobileUtils) {
-                                window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.SUCCESS);
-                            }
-                        } catch (e) {
-                            console.error('Haptic feedback failed:', e);
-                        }
-
-                        // Auto-submit
-                        if (onSubmit && amountInput) {
-                            try {
-                                const dateSource = externalDateInput || (() => {
-                                    const fallback = document.createElement('input');
-                                    fallback.type = 'date';
-                                    fallback.value = new Date().toISOString().split('T')[0];
-                                    return fallback;
-                                })();
-
-                                onSubmit({
-                                    amount: amountValidation.value,
-                                    category: selectedCategory,
-                                    type: currentType,
-                                    accountId: currentSourceAccount,
-                                    timestamp: new Date(dateSource.value || new Date().toISOString().split('T')[0]).toISOString()
-                                });
-                            } catch (e) {
-                                console.error('Submit failed:', e);
-                                alert('Error submitting transaction: ' + e.message);
-                            }
-                        }
-
-                        if (onSelect) {
-                            onSelect({ type: 'category', category: cat });
-                        }
+                for (let i = 0; i < items.length; i += chunkSize) {
+                    const chunk = items.slice(i, i + chunkSize);
+                    // Pad chunk to 6 if needed to ensure correct layout
+                    while (chunk.length < 6) {
+                        chunk.push(null);
                     }
-                });
+
+                    const reorderedChunk = new Array(6);
+                    chunk.forEach((item, index) => {
+                        if (index < 6) {
+                            reorderedChunk[order.indexOf(index)] = item;
+                        }
+                    });
+
+                    result.push(...reorderedChunk);
+                }
+                return result;
+            };
+
+            const processedCats = reorderForVisualLayout(rawCats);
+
+            processedCats.forEach((cat, index) => {
+                let chip;
+
+                if (cat === null) {
+                    // Invisible spacer to maintain grid layout
+                    chip = document.createElement('div');
+                    chip.style.minHeight = TOUCH_TARGETS.MIN_HEIGHT;
+                    chip.style.margin = '0';
+                    chip.style.visibility = 'hidden';
+                } else {
+                    const catColor = CATEGORY_COLORS[cat] || 'var(--color-primary)';
+                    chip = createCategoryChip({
+                        label: cat,
+                        color: catColor,
+                        isSelected: selectedCategory === cat,
+                        title: CATEGORY_DEFINITIONS[cat] || null,
+                        onClick: () => {
+                            // Validate amount
+                            // Validate amount
+                            let amountValidation = { valid: true, value: 0 };
+                            if (amountInput) {
+                                amountValidation = validateAmount(amountInput.value);
+                                if (!amountValidation.valid) {
+                                    showFieldError(amountInput);
+                                    return;
+                                }
+                            }
+
+                            // Visual feedback - deselect all
+                            Array.from(container.children).forEach(c => {
+                                if (c.classList.contains('category-chip')) {
+                                    if (c.updateState) c.updateState(false);
+                                }
+                            });
+
+                            selectedCategory = cat;
+
+                            // Update this chip state
+                            chip.updateState(true);
+
+                            // Success haptic feedback
+                            try {
+                                if (window.mobileUtils) {
+                                    window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.SUCCESS);
+                                }
+                            } catch (e) {
+                                console.error('Haptic feedback failed:', e);
+                            }
+
+                            // Auto-submit
+                            if (onSubmit && amountInput) {
+                                try {
+                                    const dateSource = externalDateInput || (() => {
+                                        const fallback = document.createElement('input');
+                                        fallback.type = 'date';
+                                        fallback.value = new Date().toISOString().split('T')[0];
+                                        return fallback;
+                                    })();
+
+                                    onSubmit({
+                                        amount: amountValidation.value,
+                                        category: selectedCategory,
+                                        type: currentType,
+                                        accountId: currentSourceAccount,
+                                        timestamp: new Date(dateSource.value || new Date().toISOString().split('T')[0]).toISOString()
+                                    });
+                                } catch (e) {
+                                    console.error('Submit failed:', e);
+                                    alert('Error submitting transaction: ' + e.message);
+                                }
+                            }
+
+                            if (onSelect) {
+                                onSelect({ type: 'category', category: cat });
+                            }
+                        }
+                    });
+                }
 
                 // Apply page snapping logic: Only the start of a "page" (6 items) should snap
                 if (index % 6 === 0) {

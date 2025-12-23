@@ -268,12 +268,9 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     // 10. Keyboard handling
     setupFormKeyboardHandling(form, [amountInput, accSelect]);
 
-    // 11. Initial focus and haptic feedback
+    // 11. Initial focus
     setTimeout(() => {
         amountInput.focus();
-        if (window.mobileUtils && window.mobileUtils.supportsHaptic()) {
-            window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.WELCOME);
-        }
     }, TIMING.INITIAL_LOAD_DELAY);
 
     return form;
