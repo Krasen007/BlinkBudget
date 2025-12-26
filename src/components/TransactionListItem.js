@@ -7,7 +7,6 @@ import { Router } from '../core/router.js';
 import { StorageService } from '../core/storage.js';
 import { formatDateForDisplay } from '../utils/date-utils.js';
 import { COLORS, FONT_SIZES, SPACING, TOUCH_TARGETS, BREAKPOINTS, CURRENCY_SYMBOL } from '../utils/constants.js';
-import { addTouchFeedback } from '../utils/touch-utils.js';
 import { highlightTransactionSuccess } from '../utils/success-feedback.js';
 
 export const TransactionListItem = ({ transaction, currentFilter, accounts, shouldHighlight = false }) => {
@@ -24,11 +23,6 @@ export const TransactionListItem = ({ transaction, currentFilter, accounts, shou
         alignItems: 'center'
     });
 
-    // Add touch feedback
-    addTouchFeedback(item, {
-        backgroundColor: COLORS.SURFACE_HOVER,
-        scale: 0.98
-    });
 
     item.addEventListener('click', () => {
         Router.navigate('edit-expense', { id: transaction.id });

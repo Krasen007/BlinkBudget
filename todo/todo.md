@@ -28,5 +28,5 @@ DO NOT IMPLEMENT: when deleting a transaction create animation of the row dissap
 [ ] on mobile, the accounts in the settings view, the name and type should be shown on a single row to save space
 [ ] add possibility to import transactions from a csv file
 [ ] when oppening the PWA app, the text blinking your transctions should is good but in reality the app should load the transactions from the local storage and after that it should sync the latest transactions from the server 
-[ ] on mobile when scrolling the transactions a hover effect should removed
-[ ] change the $ in the transactions to €
+[x] on mobile when scrolling the transactions a hover effect should removed
+[x] change the $ in the transactions to €

@@ -159,14 +159,6 @@
   gap: var(--spacing-md);
 }
 
-.transaction-item:hover {
-  background-color: var(--color-surface-hover);
-}
-
-.transaction-item:active {
-  transform: scale(0.98);
-  background-color: var(--color-surface-hover);
-}
 
 /* Transaction item info */
 .transaction-item-info {

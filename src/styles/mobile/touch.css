@@ -18,6 +18,7 @@
 
 /* Thumb reach container for important controls */
 .thumb-reach-container {
+
   /* Position critical controls in bottom 60% for thumb accessibility */
   @media (max-width: calc(var(--breakpoint-md) - 1px)) {
     min-height: var(--thumb-reach-zone);
@@ -31,21 +32,21 @@
   /* Enhanced touch target size for better thumb reach */
   min-height: var(--touch-target-standard);
   min-width: var(--touch-target-min);
-  
+
   /* Grid layout handles spacing */
   margin: 0;
-  
+
   /* Flexible sizing for content */
   flex: 0 0 auto;
-  
+
   /* Enhanced touch feedback */
   position: relative;
   overflow: hidden;
-  
+
   /* Better visual hierarchy */
   font-weight: 500;
   border-radius: var(--radius-lg);
-  
+
   /* Improved touch interaction */
   cursor: pointer;
   user-select: none;
@@ -84,17 +85,18 @@
   border-radius: var(--radius-md);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  
+
   /* Enhanced mobile scrolling */
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
-  
+
   /* Hide scrollbar for cleaner UI */
   scrollbar-width: none;
+
   &::-webkit-scrollbar {
     display: none;
   }
-  
+
   /* Optimize for mobile */
   @media (max-width: calc(var(--breakpoint-md) - 1px)) {
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -105,7 +107,8 @@
 
 /* Enhanced category chip spacing in grid */
 .category-chip-container .category-chip {
-  margin: 0; /* Grid handles spacing */
+  margin: 0;
+  /* Grid handles spacing */
   width: 100%;
   justify-self: stretch;
 }
@@ -114,10 +117,10 @@
 .type-toggle-btn {
   /* Ensure minimum touch target */
   min-height: var(--touch-target-min);
-  
+
   /* Adequate spacing between toggle buttons */
   margin: calc(var(--touch-spacing-min) / 2);
-  
+
   /* Enhanced visual feedback */
   transition: all var(--transition-fast), transform 0.1s ease;
 }
@@ -130,20 +133,12 @@
 .transaction-item {
   transition: all var(--transition-fast);
   min-height: var(--touch-target-min);
-  
+
   /* Touch optimizations */
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
 
-.transaction-item:hover {
-  background-color: var(--color-surface-hover);
-}
-
-.transaction-item:active {
-  transform: scale(0.98);
-  background-color: var(--color-surface-hover);
-}
 
 /* Improve touch interactions for general elements */
 .btn:active,
@@ -155,6 +150,7 @@ input:active {
 
 /* Mobile-optimized transaction form layout */
 .transaction-form.mobile-optimized {
+
   /* Optimize for thumb reach on mobile */
   @media (max-width: calc(var(--breakpoint-md) - 1px)) {
     min-height: calc(var(--visual-viewport-height) - 120px);
@@ -169,13 +165,13 @@ input:active {
     gap: var(--spacing-xs);
     max-height: 30vh;
   }
-  
+
   .category-chip {
     min-height: 48px;
     font-size: var(--font-size-sm);
     padding: var(--spacing-md);
   }
-  
+
   .thumb-reach-container {
     padding-bottom: var(--spacing-lg);
   }
@@ -187,11 +183,12 @@ input:active {
     max-height: 25vh;
     grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
   }
-  
+
   .thumb-reach-container {
-    min-height: 50vh; /* Adjust for landscape */
+    min-height: 50vh;
+    /* Adjust for landscape */
   }
-  
+
   .transaction-form.mobile-optimized {
     min-height: calc(var(--visual-viewport-height) - 80px);
   }
@@ -210,17 +207,20 @@ input:active {
   scroll-behavior: smooth;
   overscroll-behavior: contain;
   will-change: scroll-position;
-  transform: translateZ(0); /* Force hardware acceleration */
+  transform: translateZ(0);
+  /* Force hardware acceleration */
 }
 
 @media (max-width: calc(var(--breakpoint-md) - 1px)) {
   .dashboard-transactions-list {
-    max-height: 50vh; /* Responsive height for mobile */
+    max-height: 50vh;
+    /* Responsive height for mobile */
   }
 }
 
 /* Mobile-friendly focus states */
 @media (max-width: calc(var(--breakpoint-md) - 1px)) {
+
   .btn:focus,
   input:focus {
     outline: 2px solid var(--color-primary);
@@ -230,12 +230,13 @@ input:active {
 
 /* Accessibility improvements for mobile */
 @media (max-width: calc(var(--breakpoint-md) - 1px)) {
+
   /* Larger focus indicators on mobile */
   :focus-visible {
     outline: 3px solid var(--color-primary);
     outline-offset: 2px;
   }
-  
+
   /* Better contrast for touch targets */
   .btn:hover,
   .btn:focus {
@@ -244,7 +245,8 @@ input:active {
 }
 
 /* High DPI display optimizations */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
   .btn {
     border-width: 0.5px;
   }
