@@ -3,7 +3,7 @@ import { TransactionForm } from '../components/TransactionForm.js';
 import { DateInput } from '../components/DateInput.js';
 import { StorageService } from '../core/storage.js';
 import { Router } from '../core/router.js';
-import { SPACING, DIMENSIONS, TOUCH_TARGETS, FONT_SIZES, TIMING } from '../utils/constants.js';
+import { SPACING, DIMENSIONS, TOUCH_TARGETS, FONT_SIZES, TIMING, STORAGE_KEYS } from '../utils/constants.js';
 import { createButton } from '../utils/dom-factory.js';
 import { markTransactionForHighlight } from '../utils/success-feedback.js';
 
@@ -72,6 +72,11 @@ export const EditView = ({ id }) => {
         initialValues: transaction,
         externalDateInput: dateInput.querySelector('input[type="date"]'),
         onSubmit: (data) => {
+            // Update dashboard filter to show the account used for this transaction
+            if (data.accountId) {
+                sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, data.accountId);
+            }
+
             StorageService.update(id, data);
 
             // Mark transaction for highlighting in dashboard

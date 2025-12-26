@@ -79,7 +79,7 @@ export const DashboardView = () => {
     accountSelect.className = 'input-select';
 
     // Account Options Logic
-    let currentFilter = localStorage.getItem(STORAGE_KEYS.DASHBOARD_FILTER) || 'all';
+    let currentFilter = sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_FILTER) || 'all';
     const accounts = StorageService.getAccounts();
 
     const allOption = document.createElement('option');
@@ -252,7 +252,7 @@ export const DashboardView = () => {
     accountSelect.addEventListener('change', (e) => {
         currentFilter = e.target.value;
         // Use localStorage directly to avoid syncing this preference
-        localStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, currentFilter);
+        sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, currentFilter);
         renderDashboard();
     });
 

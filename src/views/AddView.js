@@ -2,7 +2,7 @@ import { TransactionForm } from '../components/TransactionForm.js';
 import { DateInput } from '../components/DateInput.js';
 import { StorageService } from '../core/storage.js';
 import { Router } from '../core/router.js';
-import { SPACING, DIMENSIONS, TOUCH_TARGETS, FONT_SIZES, COLORS } from '../utils/constants.js';
+import { SPACING, DIMENSIONS, TOUCH_TARGETS, FONT_SIZES, COLORS, STORAGE_KEYS } from '../utils/constants.js';
 import { createButton } from '../utils/dom-factory.js';
 import { markTransactionForHighlight } from '../utils/success-feedback.js';
 
@@ -64,6 +64,11 @@ export const AddView = ({ accountId } = {}) => {
         externalDateInput: dateInput.querySelector('input[type="date"]'),
         showCancelButton: true, // Add cancel button to the form
         onSubmit: (data) => {
+            // Update dashboard filter to show the account used for this transaction
+            if (data.accountId) {
+                sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, data.accountId);
+            }
+
             // Add the transaction and get the full transaction object
             const newTransaction = StorageService.add(data);
 
