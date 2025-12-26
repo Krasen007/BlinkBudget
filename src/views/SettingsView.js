@@ -132,6 +132,9 @@ export const SettingsView = () => {
 
     container.cleanup = () => {
         window.removeEventListener('storage-updated', handleStorageUpdate);
+        if (dataSection && typeof dataSection.cleanup === 'function') {
+            dataSection.cleanup();
+        }
     };
 
     return container;

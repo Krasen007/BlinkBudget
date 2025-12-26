@@ -9,6 +9,7 @@ import { createAlertModal } from '../utils/modal-utils.js';
 import { SPACING, TOUCH_TARGETS, FONT_SIZES, HAPTIC_PATTERNS } from '../utils/constants.js';
 import { createInput } from '../utils/dom-factory.js';
 import { getFirstDayOfMonthISO, getTodayISO } from '../utils/date-utils.js';
+import { InstallService } from '../core/install.js';
 
 export const DataManagementSection = () => {
     const section = document.createElement('div');
@@ -156,6 +157,42 @@ export const DataManagementSection = () => {
         color: 'var(--color-primary-light)'
     });
     section.appendChild(refreshBtn);
+
+    // Install Button
+    const installBtn = Button({
+        text: 'Install App',
+        variant: 'primary',
+        onClick: async () => {
+            if (window.mobileUtils?.supportsHaptic()) {
+                window.mobileUtils.hapticFeedback([10, 5, 10]);
+            }
+            const installed = await InstallService.promptInstall();
+            if (installed) {
+                installBtn.style.display = 'none';
+            }
+        }
+    });
+    installBtn.className += ' touch-target mobile-form-button';
+    Object.assign(installBtn.style, {
+        width: '100%',
+        marginTop: SPACING.MD,
+        minHeight: TOUCH_TARGETS.MIN_HEIGHT,
+        padding: SPACING.MD,
+        fontSize: FONT_SIZES.BASE,
+        display: InstallService.isInstallable() ? 'block' : 'none'
+    });
+
+    // Subscribe to installable state changes
+    const unsubscribeInstall = InstallService.subscribe((isInstallable) => {
+        installBtn.style.display = isInstallable ? 'block' : 'none';
+    });
+
+    section.appendChild(installBtn);
+
+    // Add cleanup to section or handle it in the view
+    section.cleanup = () => {
+        unsubscribeInstall();
+    };
 
     return section;
 };

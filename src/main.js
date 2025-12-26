@@ -6,6 +6,9 @@ import { MobileNavigation, updateMobileNavigation } from './components/MobileNav
 import { NetworkStatus } from './components/NetworkStatus.js';
 import './core/mobile.js'; // Initialize mobile utilities
 import './pwa.js'; // Register PWA service worker
+import { InstallService } from './core/install.js';
+
+InstallService.init();
 
 const initApp = () => {
     const app = document.querySelector('#app');
