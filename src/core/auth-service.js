@@ -27,6 +27,7 @@ export const AuthService = {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             this.user = userCredential.user;
+            localStorage.setItem('auth_hint', 'true');
             return { user: this.user, error: null };
         } catch (error) {
             return { user: null, error: error.message };
@@ -37,6 +38,7 @@ export const AuthService = {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             this.user = userCredential.user;
+            localStorage.setItem('auth_hint', 'true');
             return { user: this.user, error: null };
         } catch (error) {
             return { user: null, error: error.message };
@@ -48,6 +50,7 @@ export const AuthService = {
             const provider = new GoogleAuthProvider();
             const userCredential = await signInWithPopup(auth, provider);
             this.user = userCredential.user;
+            localStorage.setItem('auth_hint', 'true');
             return { user: this.user, error: null };
         } catch (error) {
             return { user: null, error: error.message };
@@ -58,6 +61,7 @@ export const AuthService = {
         try {
             await signOut(auth);
             this.user = null;
+            localStorage.removeItem('auth_hint');
         } catch (error) {
             console.error("Logout failed", error);
         }
@@ -65,6 +69,10 @@ export const AuthService = {
 
     isAuthenticated() {
         return !!this.user;
+    },
+
+    hasAuthHint() {
+        return localStorage.getItem('auth_hint') === 'true';
     },
 
     getUserId() {

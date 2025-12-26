@@ -46,7 +46,7 @@ const initApp = () => {
     // Route Guard
     const withAuth = (handler) => {
         return (params) => {
-            if (!AuthService.isAuthenticated()) {
+            if (!AuthService.isAuthenticated() && !AuthService.hasAuthHint()) {
                 Router.navigate('login');
                 return;
             }
@@ -115,19 +115,14 @@ const initApp = () => {
         setTimeout(initMobileNav, 100); // Debounce
     });
 
-    // Start
+    // Initialize Auth in background
     AuthService.init(async (user) => {
         // Handle auth state changes and data synchronization
         const currentRoute = getCurrentRoute();
 
         if (user) {
             console.log("[Main] User authenticated, starting offline-first sync...");
-            // With Firestore persistence enabled, we don't need to pull all data on startup.
-            // The realtime listeners will:
-            // 1. Serve cached data immediately from IndexedDB
-            // 2. Sync incremental changes from the server in the background
-            // Only pull from cloud on first use (when cache is empty) - handled automatically by Firestore
-
+            localStorage.setItem('auth_hint', 'true'); // Ensure hint is set
             SyncService.startRealtimeSync(user.uid);
 
             if (currentRoute === 'login') {
@@ -135,6 +130,7 @@ const initApp = () => {
             }
         } else {
             console.log("[Main] No user, stopping sync.");
+            localStorage.removeItem('auth_hint'); // Clear hint if auth fails
             SyncService.stopSync();
             if (currentRoute !== 'login') {
                 Router.navigate('login');
@@ -143,10 +139,13 @@ const initApp = () => {
 
         // Re-init mobile nav if needed
         initMobileNav();
-    }).then(() => {
-        console.log("[Main] App initialized, starting router.");
-        Router.init();
+
+        // Dispatch auth state change event for components to update (e.g., Dashboard title)
+        window.dispatchEvent(new CustomEvent('auth-state-changed', { detail: { user } }));
     });
+
+    console.log("[Main] App initialized, starting router.");
+    Router.init();
 };
 
 initApp();

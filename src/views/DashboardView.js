@@ -25,9 +25,12 @@ export const DashboardView = () => {
 
     // Title
     const title = document.createElement('h2');
-    const user = AuthService.user;
-    const userName = user ? (user.displayName || user.email) : '';
-    title.textContent = `Dashboard 1.6 ${userName ? ` - ${userName}` : ''}`;
+    const updateTitle = (userObj) => {
+        const u = userObj || AuthService.user;
+        const uName = u ? (u.displayName || u.email) : '';
+        title.textContent = `Dashboard 1.6 ${uName ? ` - ${uName}` : ''}`;
+    };
+    updateTitle();
     title.style.margin = '0';
     title.style.marginRight = SPACING.MD;
 
@@ -235,7 +238,13 @@ export const DashboardView = () => {
         renderDashboard();
     };
 
+    const handleAuthChange = (e) => {
+        console.log(`[Dashboard] Auth state changed, updating title...`);
+        updateTitle(e.detail.user);
+    };
+
     window.addEventListener('storage-updated', handleStorageUpdate);
+    window.addEventListener('auth-state-changed', handleAuthChange);
 
     accountSelect.addEventListener('change', (e) => {
         currentFilter = e.target.value;
@@ -249,6 +258,7 @@ export const DashboardView = () => {
         window.removeEventListener('resize', updateResponsiveLayout);
         window.removeEventListener('orientationchange', updateResponsiveLayout);
         window.removeEventListener('storage-updated', handleStorageUpdate);
+        window.removeEventListener('auth-state-changed', handleAuthChange);
     };
 
     return container;
