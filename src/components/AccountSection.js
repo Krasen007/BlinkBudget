@@ -40,8 +40,8 @@ export const AccountSection = () => {
             Object.assign(item.style, {
                 display: 'flex',
                 flexDirection: 'column',
-                gap: SPACING.SM,
-                padding: SPACING.LG,
+                gap: SPACING.XS,
+                padding: SPACING.MD,
                 border: `1px solid ${COLORS.BORDER}`,
                 borderRadius: 'var(--radius-md)',
                 background: COLORS.SURFACE_HOVER,
@@ -50,21 +50,32 @@ export const AccountSection = () => {
 
             const info = document.createElement('div');
             info.className = 'mobile-account-info';
+            Object.assign(info.style, {
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'baseline',
+                gap: SPACING.MD,
+                width: '100%'
+            });
 
             const name = document.createElement('div');
             name.textContent = acc.name + (acc.isDefault ? ' (Default)' : '');
             Object.assign(name.style, {
-                fontWeight: '500',
-                fontSize: FONT_SIZES.LG,
+                fontWeight: '600',
+                fontSize: FONT_SIZES.BASE,
                 color: acc.isDefault ? COLORS.PRIMARY_LIGHT : COLORS.TEXT_MAIN,
-                marginBottom: SPACING.XS
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                flex: '1'
             });
 
             const type = document.createElement('div');
             type.textContent = acc.type.charAt(0).toUpperCase() + acc.type.slice(1);
             Object.assign(type.style, {
-                fontSize: FONT_SIZES.SM,
-                color: COLORS.TEXT_MUTED
+                fontSize: '0.75rem',
+                color: COLORS.TEXT_MUTED,
+                flexShrink: '0'
             });
 
             info.appendChild(name);
