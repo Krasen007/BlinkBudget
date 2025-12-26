@@ -30,3 +30,5 @@ DO NOT IMPLEMENT: when deleting a transaction create animation of the row dissap
 [ ] when oppening the PWA app, the text blinking your transctions should is good but in reality the app should load the transactions from the local storage and after that it should sync the latest transactions from the server 
 [x] on mobile when scrolling the transactions a hover effect should removed
 [x] change the $ in the transactions to €
+[ ] add install PWA button in the settings
+[ ] add refresh button in the settings

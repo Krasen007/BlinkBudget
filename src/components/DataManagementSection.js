@@ -135,6 +135,28 @@ export const DataManagementSection = () => {
     section.appendChild(dateRangeContainer);
     section.appendChild(exportBtn);
 
+    const refreshBtn = Button({
+        text: 'Refresh App',
+        variant: 'ghost',
+        onClick: () => {
+            if (window.mobileUtils?.supportsHaptic()) {
+                window.mobileUtils.hapticFeedback([10]);
+            }
+            window.location.hash = '#dashboard';
+            window.location.reload();
+        }
+    });
+    refreshBtn.className += ' touch-target mobile-form-button';
+    Object.assign(refreshBtn.style, {
+        width: '100%',
+        marginTop: SPACING.MD,
+        minHeight: TOUCH_TARGETS.MIN_HEIGHT,
+        padding: SPACING.MD,
+        fontSize: FONT_SIZES.BASE,
+        color: 'var(--color-primary-light)'
+    });
+    section.appendChild(refreshBtn);
+
     return section;
 };
 
