@@ -25,7 +25,7 @@ DO NOT IMPLEMENT: when deleting a transaction create animation of the row dissap
 [ ] when addin new transaction the selected account should be the account when adding the transaction
 [ ] when editing a trasaction the selected categorie should show at the first position in the list to make it easier to select it
 [ ] change the name of the date format to remove the iso / us etc. just leave the format.
-[ ] on mobile, the accounts in the settings view, the name and type should be shown on a single row to save space
+[x] on mobile, the accounts in the settings view, the name and type should be shown on a single row to save space
 [ ] add possibility to import transactions from a csv file
 [ ] when oppening the PWA app, the text blinking your transctions should is good but in reality the app should load the transactions from the local storage and after that it should sync the latest transactions from the server 
 [x] on mobile when scrolling the transactions a hover effect should removed

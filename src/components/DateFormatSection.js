@@ -74,9 +74,9 @@ export const DateFormatSection = ({ onFormatChange }) => {
         return row;
     };
 
-    section.appendChild(createOption('US (MM/DD/YYYY)', DATE_FORMATS.US));
-    section.appendChild(createOption('ISO (YYYY-MM-DD)', DATE_FORMATS.ISO));
-    section.appendChild(createOption('European (DD/MM/YYYY)', DATE_FORMATS.EU));
+    section.appendChild(createOption('MM/DD/YYYY', DATE_FORMATS.US));
+    section.appendChild(createOption('YYYY-MM-DD', DATE_FORMATS.ISO));
+    section.appendChild(createOption('DD/MM/YYYY', DATE_FORMATS.EU));
 
     return section;
 };
