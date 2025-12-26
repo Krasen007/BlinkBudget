@@ -15,6 +15,7 @@ export default defineConfig({
       },
       includeAssets: ['favicon.png', 'favicon.ico'],
       manifest: {
+        id: '/',
         name: 'BlinkBudget',
         short_name: 'BlinkBudget',
         description: 'Making expense tracking effortless, all in 3 clicks.',
@@ -22,19 +23,30 @@ export default defineConfig({
         icons: [
           {
             src: 'favicon.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: 'favicon.png',
-            sizes: '512x512',
-            type: 'image/png'
-          },
-          {
-            src: 'favicon.png',
-            sizes: '512x512',
+            sizes: '1024x1024',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
+          },
+          {
+            src: 'favicon.png',
+            sizes: '1024x1024',
+            type: 'image/png',
+            purpose: 'maskable'
+          }
+        ],
+        screenshots: [
+          {
+            src: 'screenshot-desktop.png',
+            sizes: '1264x705',
+            type: 'image/png',
+            form_factor: 'wide',
+            label: 'Desktop Dashboard'
+          },
+          {
+            src: 'screenshot-mobile.png',
+            sizes: '500x749',
+            type: 'image/png',
+            label: 'Mobile Dashboard'
           }
         ]
       }
