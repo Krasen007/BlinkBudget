@@ -196,7 +196,10 @@ export const DashboardView = () => {
         // Action Button
         const addBtn = Button({
             text: '+ Add Transaction',
-            onClick: () => Router.navigate('add-expense'),
+            onClick: () => {
+                const params = currentFilter !== 'all' ? { accountId: currentFilter } : {};
+                Router.navigate('add-expense', params);
+            },
             variant: 'primary'
         });
         addBtn.style.width = '100%';

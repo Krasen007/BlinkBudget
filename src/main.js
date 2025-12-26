@@ -75,9 +75,9 @@ const initApp = () => {
         updateMobileNavigation('dashboard');
     }));
 
-    Router.on('add-expense', withAuth(async () => {
+    Router.on('add-expense', withAuth(async (params) => {
         const { AddView } = await import('./views/AddView.js');
-        setView(AddView());
+        setView(AddView(params));
         updateMobileNavigation('add-expense');
     }));
 
