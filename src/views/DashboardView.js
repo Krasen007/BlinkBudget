@@ -28,7 +28,7 @@ export const DashboardView = () => {
     const updateTitle = (userObj) => {
         const u = userObj || AuthService.user;
         const uName = u ? (u.displayName || u.email) : '';
-        title.textContent = `Dashboard 1.7 ${uName ? ` - ${uName}` : ''}`;
+        title.textContent = `Dashboard 1.8 ${uName ? ` - ${uName}` : ''}`;
     };
     updateTitle();
     title.style.margin = '0';

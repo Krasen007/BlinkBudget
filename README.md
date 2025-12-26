@@ -163,6 +163,6 @@ GPLv3 License
 
 ---
 
-**BlinkBudget** - Making expense tracking effortless, one click at a time.
+**BlinkBudget** - Making expense tracking effortless, all in 3 moves.
 
 Reminder: Most of the app was created using various AI tools, I am not responsible in any way for what they did...
