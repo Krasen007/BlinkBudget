@@ -11,6 +11,7 @@ export const BREAKPOINTS = {
 };
 
 // Colors
+export const CURRENCY_SYMBOL = '€';
 export const COLORS = {
     // Semantic colors
     ERROR: '#ef4444',

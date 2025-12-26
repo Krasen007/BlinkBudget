@@ -6,14 +6,14 @@
 import { Router } from '../core/router.js';
 import { StorageService } from '../core/storage.js';
 import { formatDateForDisplay } from '../utils/date-utils.js';
-import { COLORS, FONT_SIZES, SPACING, TOUCH_TARGETS, BREAKPOINTS } from '../utils/constants.js';
+import { COLORS, FONT_SIZES, SPACING, TOUCH_TARGETS, BREAKPOINTS, CURRENCY_SYMBOL } from '../utils/constants.js';
 import { addTouchFeedback } from '../utils/touch-utils.js';
 import { highlightTransactionSuccess } from '../utils/success-feedback.js';
 
 export const TransactionListItem = ({ transaction, currentFilter, accounts, shouldHighlight = false }) => {
     const item = document.createElement('li');
     item.className = 'transaction-item';
-    
+
     Object.assign(item.style, {
         display: 'flex',
         justifyContent: 'space-between',
@@ -23,17 +23,17 @@ export const TransactionListItem = ({ transaction, currentFilter, accounts, shou
         minHeight: TOUCH_TARGETS.MIN_HEIGHT,
         alignItems: 'center'
     });
-    
+
     // Add touch feedback
     addTouchFeedback(item, {
         backgroundColor: COLORS.SURFACE_HOVER,
         scale: 0.98
     });
-    
+
     item.addEventListener('click', () => {
         Router.navigate('edit-expense', { id: transaction.id });
     });
-    
+
     const info = document.createElement('div');
     info.className = 'transaction-item-info';
     const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
@@ -46,13 +46,13 @@ export const TransactionListItem = ({ transaction, currentFilter, accounts, shou
         flex: '1',
         minWidth: '0'
     });
-    
+
     const cat = document.createElement('div');
-    
+
     // Special Display for Transfers
     if (transaction.type === 'transfer') {
         const getAccName = (id) => accounts.find(a => a.id === id)?.name || 'Unknown';
-        
+
         if (currentFilter === 'all') {
             cat.textContent = `Transfer: ${getAccName(transaction.accountId)} → ${getAccName(transaction.toAccountId)}`;
         } else if (transaction.accountId === currentFilter) {
@@ -63,7 +63,7 @@ export const TransactionListItem = ({ transaction, currentFilter, accounts, shou
     } else {
         cat.textContent = transaction.category;
     }
-    
+
     cat.className = 'transaction-item-category';
     Object.assign(cat.style, {
         fontWeight: '500',
@@ -74,7 +74,7 @@ export const TransactionListItem = ({ transaction, currentFilter, accounts, shou
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap'
     });
-    
+
     const date = document.createElement('div');
     date.textContent = formatDateForDisplay(transaction.timestamp);
     date.className = 'transaction-item-date';
@@ -86,7 +86,7 @@ export const TransactionListItem = ({ transaction, currentFilter, accounts, shou
         lineHeight: 'var(--line-height-normal)',
         alignItems: 'center'
     });
-    
+
     // Show Account Name if not transfer
     if (transaction.type !== 'transfer') {
         const accName = accounts.find(a => a.id === transaction.accountId)?.name || 'Unknown';
@@ -94,16 +94,16 @@ export const TransactionListItem = ({ transaction, currentFilter, accounts, shou
         accBadge.textContent = `• ${accName}`;
         date.appendChild(accBadge);
     }
-    
+
     info.appendChild(cat);
     info.appendChild(date);
-    
+
     const val = document.createElement('div');
-    
+
     // Color Logic
     let isPositive = false;
     let color = 'inherit';
-    
+
     if (transaction.type === 'income' || transaction.type === 'refund') {
         isPositive = true;
         color = COLORS.SUCCESS;
@@ -121,12 +121,12 @@ export const TransactionListItem = ({ transaction, currentFilter, accounts, shou
             color = COLORS.TEXT_MUTED;
         }
     }
-    
+
     // Append sign
     let sign = isPositive ? '+' : '-';
     if (transaction.type === 'transfer' && currentFilter === 'all') sign = '';
-    
-    val.textContent = `${sign}$${Math.abs(transaction.amount).toFixed(2)}`;
+
+    val.textContent = `${sign}${CURRENCY_SYMBOL}${Math.abs(transaction.amount).toFixed(2)}`;
     val.className = 'transaction-item-value';
     Object.assign(val.style, {
         fontWeight: '600',
@@ -136,10 +136,10 @@ export const TransactionListItem = ({ transaction, currentFilter, accounts, shou
         textAlign: 'right',
         flexShrink: '0'
     });
-    
+
     item.appendChild(info);
     item.appendChild(val);
-    
+
     // Apply success highlight if this transaction should be highlighted
     if (shouldHighlight) {
         // Use a small delay to ensure the item is rendered before highlighting
@@ -147,7 +147,7 @@ export const TransactionListItem = ({ transaction, currentFilter, accounts, shou
             highlightTransactionSuccess(item, 1500);
         }, 100);
     }
-    
+
     return item;
 };
 

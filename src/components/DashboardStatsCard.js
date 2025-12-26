@@ -3,7 +3,7 @@
  * Displays a single stat card (Total Available, Total Spent, etc.)
  */
 
-import { COLORS, FONT_SIZES, SPACING, TOUCH_TARGETS, BREAKPOINTS } from '../utils/constants.js';
+import { COLORS, FONT_SIZES, SPACING, TOUCH_TARGETS, BREAKPOINTS, CURRENCY_SYMBOL } from '../utils/constants.js';
 
 export const DashboardStatsCard = ({ label, value, color }) => {
     const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
@@ -32,7 +32,7 @@ export const DashboardStatsCard = ({ label, value, color }) => {
     });
 
     const val = document.createElement('h2');
-    val.textContent = `$${value.toFixed(2)}`;
+    val.textContent = `${CURRENCY_SYMBOL}${value.toFixed(2)}`;
     val.className = 'dashboard-stat-value';
     Object.assign(val.style, {
         color,
