@@ -202,6 +202,7 @@ export const createCategorySelector = (options = {}) => {
     let selectedToAccount = initialToAccount;
     let currentType = type;
     let currentSourceAccount = currentAccountId;
+    let prioritizedCategory = initialCategory; // Track category to show first in list
 
     const container = createCategoryContainer();
     const categoryGroup = document.createElement('div');
@@ -283,7 +284,15 @@ export const createCategorySelector = (options = {}) => {
 
         } else {
             // Standard Categories
-            const rawCats = CATEGORY_OPTIONS[currentType] || CATEGORY_OPTIONS.expense;
+            let rawCats = CATEGORY_OPTIONS[currentType] || CATEGORY_OPTIONS.expense;
+
+            // REFINEMENT: If we have a prioritized category, move it to the front
+            if (prioritizedCategory && rawCats.includes(prioritizedCategory)) {
+                rawCats = [
+                    prioritizedCategory,
+                    ...rawCats.filter(cat => cat !== prioritizedCategory)
+                ];
+            }
 
             // Reorder categories to fill rows visually (Horizontal order)
             // Grid flows Column-first. To appear Row-first in a 3x2 grid:
@@ -420,6 +429,7 @@ export const createCategorySelector = (options = {}) => {
         currentType = type;
         selectedCategory = null;
         selectedToAccount = null;
+        prioritizedCategory = null; // Reset priority when manually changing type
         render();
     };
 
