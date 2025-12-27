@@ -16,6 +16,7 @@ import { Router } from '../core/router.js';
 import { NavigationState } from '../core/navigation-state.js';
 import { COLORS, SPACING, BREAKPOINTS, DIMENSIONS, TIMING } from '../utils/constants.js';
 import { debounce } from '../utils/touch-utils.js';
+import { getChartColors } from '../core/chart-config.js';
 
 export const ReportsView = () => {
     const container = document.createElement('div');
@@ -553,7 +554,7 @@ export const ReportsView = () => {
     /**
      * Render the complete reports interface with enhanced error handling
      */
-    function renderReports() {
+    async function renderReports() {
         try {
             // Clear existing content
             content.innerHTML = '';
@@ -625,8 +626,8 @@ export const ReportsView = () => {
                 </p>
             `;
             
-            placeholder.innerHTML = dataInfo;
-            chartContainer.appendChild(placeholder);
+            // Render beautiful charts with category selection
+            await renderCharts(chartContainer);
 
             // Add Back to Dashboard button after charts
             const backButton = Button({
@@ -821,6 +822,554 @@ export const ReportsView = () => {
             container.removeChild(errorState);
         }
         content.style.display = 'flex';
+    }
+
+    /**
+     * Render beautiful charts with category selection and trends
+     */
+    async function renderCharts(chartContainer) {
+        try {
+            // Create chart sections
+            const chartsSection = document.createElement('div');
+            chartsSection.style.display = 'flex';
+            chartsSection.style.flexDirection = 'column';
+            chartsSection.style.gap = SPACING.XL;
+
+            // 1. Category Breakdown Pie Chart
+            const categorySection = await createCategoryBreakdownChart();
+            chartsSection.appendChild(categorySection);
+
+            // 2. Income vs Expenses Bar Chart
+            const incomeExpenseSection = await createIncomeExpenseChart();
+            chartsSection.appendChild(incomeExpenseSection);
+
+            // 3. Category Trends Over Time (if enough historical data)
+            const trendsSection = await createCategoryTrendsChart();
+            if (trendsSection) {
+                chartsSection.appendChild(trendsSection);
+            }
+
+            // 4. Interactive Category Selector
+            const categorySelectorSection = createCategorySelector();
+            chartsSection.appendChild(categorySelectorSection);
+
+            chartContainer.appendChild(chartsSection);
+
+        } catch (error) {
+            console.error('Error rendering charts:', error);
+            
+            // Fallback to basic data display
+            const fallback = document.createElement('div');
+            fallback.style.padding = SPACING.LG;
+            fallback.style.textAlign = 'center';
+            fallback.innerHTML = `
+                <h3>Unable to render charts</h3>
+                <p>Showing basic financial summary instead.</p>
+                <div style="margin-top: ${SPACING.MD};">
+                    <strong>Total Expenses:</strong> €${currentData.incomeVsExpenses.totalExpenses.toFixed(2)}<br>
+                    <strong>Total Income:</strong> €${currentData.incomeVsExpenses.totalIncome.toFixed(2)}<br>
+                    <strong>Net Balance:</strong> €${currentData.incomeVsExpenses.netBalance.toFixed(2)}
+                </div>
+            `;
+            chartContainer.appendChild(fallback);
+        }
+    }
+
+    /**
+     * Create interactive category breakdown pie chart
+     */
+    async function createCategoryBreakdownChart() {
+        const section = document.createElement('div');
+        section.className = 'chart-section';
+        section.style.background = COLORS.SURFACE;
+        section.style.borderRadius = 'var(--radius-lg)';
+        section.style.border = `1px solid ${COLORS.BORDER}`;
+        section.style.padding = SPACING.LG;
+
+        // Section header
+        const header = document.createElement('div');
+        header.style.display = 'flex';
+        header.style.justifyContent = 'space-between';
+        header.style.alignItems = 'center';
+        header.style.marginBottom = SPACING.MD;
+
+        const title = document.createElement('h3');
+        title.textContent = 'Spending by Category';
+        title.style.margin = '0';
+        title.style.color = COLORS.TEXT_MAIN;
+
+        // Chart type toggle
+        const chartTypeToggle = document.createElement('div');
+        chartTypeToggle.style.display = 'flex';
+        chartTypeToggle.style.gap = SPACING.XS;
+
+        const pieBtn = createToggleButton('Pie', true);
+        const doughnutBtn = createToggleButton('Doughnut', false);
+
+        chartTypeToggle.appendChild(pieBtn);
+        chartTypeToggle.appendChild(doughnutBtn);
+
+        header.appendChild(title);
+        header.appendChild(chartTypeToggle);
+        section.appendChild(header);
+
+        // Chart container
+        const chartDiv = document.createElement('div');
+        chartDiv.style.position = 'relative';
+        chartDiv.style.height = '400px';
+        chartDiv.style.marginBottom = SPACING.MD;
+
+        const canvas = document.createElement('canvas');
+        canvas.id = 'category-breakdown-chart';
+        canvas.style.maxHeight = '100%';
+        chartDiv.appendChild(canvas);
+
+        section.appendChild(chartDiv);
+
+        // Prepare chart data
+        const categoryData = currentData.categoryBreakdown;
+        const chartData = {
+            labels: categoryData.categories.map(cat => cat.name),
+            datasets: [{
+                data: categoryData.categories.map(cat => cat.amount),
+                backgroundColor: [],
+                borderColor: '#ffffff',
+                borderWidth: 2
+            }]
+        };
+
+        // Create initial pie chart
+        let currentChart = chartRenderer.createPieChart(canvas, chartData, {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: window.innerWidth < 768 ? 'bottom' : 'right'
+                }
+            }
+        });
+
+        // Add click handler for category selection
+        canvas.addEventListener('chartSegmentClick', (event) => {
+            const clickData = event.detail;
+            showCategoryDetails(clickData.label, clickData.value, clickData.percentage);
+        });
+
+        // Toggle between pie and doughnut
+        pieBtn.addEventListener('click', () => {
+            if (!pieBtn.classList.contains('active')) {
+                chartRenderer.destroyChart(currentChart);
+                currentChart = chartRenderer.createPieChart(canvas, chartData);
+                setActiveToggle(pieBtn, doughnutBtn);
+            }
+        });
+
+        doughnutBtn.addEventListener('click', () => {
+            if (!doughnutBtn.classList.contains('active')) {
+                chartRenderer.destroyChart(currentChart);
+                currentChart = chartRenderer.createDoughnutChart(canvas, chartData);
+                setActiveToggle(doughnutBtn, pieBtn);
+            }
+        });
+
+        // Category details panel
+        const detailsPanel = document.createElement('div');
+        detailsPanel.id = 'category-details-panel';
+        detailsPanel.style.display = 'none';
+        detailsPanel.style.padding = SPACING.MD;
+        detailsPanel.style.background = 'rgba(59, 130, 246, 0.05)';
+        detailsPanel.style.borderRadius = 'var(--radius-md)';
+        detailsPanel.style.border = '1px solid rgba(59, 130, 246, 0.2)';
+        section.appendChild(detailsPanel);
+
+        return section;
+    }
+
+    /**
+     * Create income vs expenses bar chart
+     */
+    async function createIncomeExpenseChart() {
+        const section = document.createElement('div');
+        section.className = 'chart-section';
+        section.style.background = COLORS.SURFACE;
+        section.style.borderRadius = 'var(--radius-lg)';
+        section.style.border = `1px solid ${COLORS.BORDER}`;
+        section.style.padding = SPACING.LG;
+
+        const title = document.createElement('h3');
+        title.textContent = 'Income vs Expenses';
+        title.style.margin = `0 0 ${SPACING.MD} 0`;
+        title.style.color = COLORS.TEXT_MAIN;
+        section.appendChild(title);
+
+        const chartDiv = document.createElement('div');
+        chartDiv.style.position = 'relative';
+        chartDiv.style.height = '300px';
+
+        const canvas = document.createElement('canvas');
+        canvas.id = 'income-expense-chart';
+        chartDiv.appendChild(canvas);
+        section.appendChild(chartDiv);
+
+        // Prepare chart data
+        const incomeExpenseData = currentData.incomeVsExpenses;
+        const chartData = {
+            labels: ['Income', 'Expenses', 'Net Balance'],
+            datasets: [{
+                label: 'Amount (€)',
+                data: [
+                    incomeExpenseData.totalIncome,
+                    incomeExpenseData.totalExpenses,
+                    Math.abs(incomeExpenseData.netBalance)
+                ],
+                backgroundColor: [
+                    'rgba(34, 197, 94, 0.8)',   // Green for income
+                    'rgba(239, 68, 68, 0.8)',   // Red for expenses
+                    incomeExpenseData.netBalance >= 0 
+                        ? 'rgba(34, 197, 94, 0.6)'   // Green for positive balance
+                        : 'rgba(239, 68, 68, 0.6)'   // Red for negative balance
+                ],
+                borderColor: [
+                    'rgba(34, 197, 94, 1)',
+                    'rgba(239, 68, 68, 1)',
+                    incomeExpenseData.netBalance >= 0 
+                        ? 'rgba(34, 197, 94, 1)'
+                        : 'rgba(239, 68, 68, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        chartRenderer.createBarChart(canvas, chartData, {
+            responsive: true,
+            maintainAspectRatio: false
+        });
+
+        return section;
+    }
+
+    /**
+     * Create category trends over time chart
+     */
+    async function createCategoryTrendsChart() {
+        // Get historical data for trends
+        const allTransactions = StorageService.getAll();
+        
+        // Check if we have enough historical data (at least 3 months)
+        const oldestTransaction = allTransactions.reduce((oldest, transaction) => {
+            const transactionDate = new Date(transaction.date || transaction.timestamp);
+            return transactionDate < oldest ? transactionDate : oldest;
+        }, new Date());
+
+        const monthsOfData = Math.floor((new Date() - oldestTransaction) / (1000 * 60 * 60 * 24 * 30));
+        
+        if (monthsOfData < 3) {
+            return null; // Not enough data for trends
+        }
+
+        const section = document.createElement('div');
+        section.className = 'chart-section';
+        section.style.background = COLORS.SURFACE;
+        section.style.borderRadius = 'var(--radius-lg)';
+        section.style.border = `1px solid ${COLORS.BORDER}`;
+        section.style.padding = SPACING.LG;
+
+        const title = document.createElement('h3');
+        title.textContent = 'Category Trends Over Time';
+        title.style.margin = `0 0 ${SPACING.MD} 0`;
+        title.style.color = COLORS.TEXT_MAIN;
+        section.appendChild(title);
+
+        const chartDiv = document.createElement('div');
+        chartDiv.style.position = 'relative';
+        chartDiv.style.height = '350px';
+
+        const canvas = document.createElement('canvas');
+        canvas.id = 'category-trends-chart';
+        chartDiv.appendChild(canvas);
+        section.appendChild(chartDiv);
+
+        // Generate monthly data for top 3 categories
+        const topCategories = currentData.categoryBreakdown.categories.slice(0, 3);
+        const monthlyData = generateMonthlyTrendData(allTransactions, topCategories);
+
+        const chartData = {
+            labels: monthlyData.months,
+            datasets: topCategories.map((category, index) => ({
+                label: category.name,
+                data: monthlyData.categoryData[category.name] || [],
+                borderColor: getChartColors(topCategories.length)[index],
+                backgroundColor: getChartColors(topCategories.length)[index].replace(')', ', 0.1)').replace('hsl', 'hsla'),
+                borderWidth: 3,
+                fill: false,
+                tension: 0.4
+            }))
+        };
+
+        chartRenderer.createLineChart(canvas, chartData, {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            }
+        });
+
+        return section;
+    }
+
+    /**
+     * Create interactive category selector
+     */
+    function createCategorySelector() {
+        const section = document.createElement('div');
+        section.className = 'category-selector-section';
+        section.style.background = COLORS.SURFACE;
+        section.style.borderRadius = 'var(--radius-lg)';
+        section.style.border = `1px solid ${COLORS.BORDER}`;
+        section.style.padding = SPACING.LG;
+
+        const title = document.createElement('h3');
+        title.textContent = 'Explore Categories';
+        title.style.margin = `0 0 ${SPACING.MD} 0`;
+        title.style.color = COLORS.TEXT_MAIN;
+        section.appendChild(title);
+
+        const description = document.createElement('p');
+        description.textContent = 'Click on any category below to see detailed spending patterns and trends.';
+        description.style.margin = `0 0 ${SPACING.LG} 0`;
+        description.style.color = COLORS.TEXT_MUTED;
+        section.appendChild(description);
+
+        // Category grid
+        const categoryGrid = document.createElement('div');
+        categoryGrid.style.display = 'grid';
+        categoryGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(200px, 1fr))';
+        categoryGrid.style.gap = SPACING.MD;
+
+        currentData.categoryBreakdown.categories.forEach((category, index) => {
+            const categoryCard = createCategoryCard(category, index);
+            categoryGrid.appendChild(categoryCard);
+        });
+
+        section.appendChild(categoryGrid);
+
+        return section;
+    }
+
+    /**
+     * Create individual category card
+     */
+    function createCategoryCard(category, index) {
+        const card = document.createElement('button');
+        card.className = 'category-card';
+        card.style.background = COLORS.SURFACE;
+        card.style.border = `2px solid ${COLORS.BORDER}`;
+        card.style.borderRadius = 'var(--radius-md)';
+        card.style.padding = SPACING.MD;
+        card.style.cursor = 'pointer';
+        card.style.transition = 'all 0.2s ease';
+        card.style.textAlign = 'left';
+        card.style.width = '100%';
+
+        // Hover effects
+        card.addEventListener('mouseenter', () => {
+            card.style.borderColor = COLORS.PRIMARY;
+            card.style.transform = 'translateY(-2px)';
+            card.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+        });
+
+        card.addEventListener('mouseleave', () => {
+            card.style.borderColor = COLORS.BORDER;
+            card.style.transform = 'translateY(0)';
+            card.style.boxShadow = 'none';
+        });
+
+        // Category color indicator
+        const colorIndicator = document.createElement('div');
+        colorIndicator.style.width = '4px';
+        colorIndicator.style.height = '40px';
+        colorIndicator.style.background = getChartColors(currentData.categoryBreakdown.categories.length)[index];
+        colorIndicator.style.borderRadius = '2px';
+        colorIndicator.style.marginBottom = SPACING.SM;
+
+        // Category name
+        const name = document.createElement('div');
+        name.textContent = category.name;
+        name.style.fontWeight = '600';
+        name.style.color = COLORS.TEXT_MAIN;
+        name.style.marginBottom = SPACING.XS;
+
+        // Category amount
+        const amount = document.createElement('div');
+        amount.textContent = `€${category.amount.toFixed(2)}`;
+        amount.style.fontSize = '1.25rem';
+        amount.style.fontWeight = 'bold';
+        amount.style.color = COLORS.PRIMARY;
+        amount.style.marginBottom = SPACING.XS;
+
+        // Category percentage
+        const percentage = document.createElement('div');
+        percentage.textContent = `${category.percentage.toFixed(1)}% of expenses`;
+        percentage.style.fontSize = '0.875rem';
+        percentage.style.color = COLORS.TEXT_MUTED;
+
+        // Transaction count
+        const transactionCount = document.createElement('div');
+        transactionCount.textContent = `${category.transactionCount} transaction${category.transactionCount !== 1 ? 's' : ''}`;
+        transactionCount.style.fontSize = '0.75rem';
+        transactionCount.style.color = COLORS.TEXT_MUTED;
+        transactionCount.style.marginTop = SPACING.XS;
+
+        card.appendChild(colorIndicator);
+        card.appendChild(name);
+        card.appendChild(amount);
+        card.appendChild(percentage);
+        card.appendChild(transactionCount);
+
+        // Click handler to show category details
+        card.addEventListener('click', () => {
+            showCategoryDetails(category.name, category.amount, category.percentage);
+        });
+
+        return card;
+    }
+
+    /**
+     * Show detailed information for a selected category
+     */
+    function showCategoryDetails(categoryName, amount, percentage) {
+        const detailsPanel = document.getElementById('category-details-panel');
+        if (!detailsPanel) return;
+
+        // Get transactions for this category
+        const categoryTransactions = currentData.transactions.filter(t => 
+            (t.category || 'Uncategorized') === categoryName && t.type === 'expense'
+        );
+
+        detailsPanel.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: ${SPACING.MD};">
+                <h4 style="margin: 0; color: ${COLORS.TEXT_MAIN};">${categoryName} Details</h4>
+                <button onclick="this.parentElement.parentElement.style.display='none'" 
+                        style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: ${COLORS.TEXT_MUTED};">×</button>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: ${SPACING.MD}; margin-bottom: ${SPACING.MD};">
+                <div>
+                    <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED};">Total Spent</div>
+                    <div style="font-size: 1.25rem; font-weight: bold; color: ${COLORS.PRIMARY};">€${amount.toFixed(2)}</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED};">Percentage</div>
+                    <div style="font-size: 1.25rem; font-weight: bold; color: ${COLORS.PRIMARY};">${percentage.toFixed(1)}%</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED};">Transactions</div>
+                    <div style="font-size: 1.25rem; font-weight: bold; color: ${COLORS.PRIMARY};">${categoryTransactions.length}</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED};">Average</div>
+                    <div style="font-size: 1.25rem; font-weight: bold; color: ${COLORS.PRIMARY};">€${(amount / categoryTransactions.length).toFixed(2)}</div>
+                </div>
+            </div>
+            <div style="margin-top: ${SPACING.MD};">
+                <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED}; margin-bottom: ${SPACING.SM};">Recent Transactions:</div>
+                <div style="max-height: 150px; overflow-y: auto;">
+                    ${categoryTransactions.slice(0, 5).map(t => `
+                        <div style="display: flex; justify-content: space-between; padding: ${SPACING.XS} 0; border-bottom: 1px solid ${COLORS.BORDER};">
+                            <span style="color: ${COLORS.TEXT_MAIN};">${t.description || 'No description'}</span>
+                            <span style="font-weight: 600; color: ${COLORS.ERROR};">€${t.amount.toFixed(2)}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+
+        detailsPanel.style.display = 'block';
+    }
+
+    /**
+     * Helper functions for chart creation
+     */
+    function createToggleButton(text, active = false) {
+        const button = document.createElement('button');
+        button.textContent = text;
+        button.style.padding = `${SPACING.XS} ${SPACING.SM}`;
+        button.style.border = `1px solid ${COLORS.BORDER}`;
+        button.style.borderRadius = 'var(--radius-sm)';
+        button.style.background = active ? COLORS.PRIMARY : 'transparent';
+        button.style.color = active ? 'white' : COLORS.TEXT_MAIN;
+        button.style.cursor = 'pointer';
+        button.style.fontSize = '0.875rem';
+        button.style.transition = 'all 0.2s ease';
+        
+        if (active) {
+            button.classList.add('active');
+        }
+
+        return button;
+    }
+
+    function setActiveToggle(activeBtn, inactiveBtn) {
+        activeBtn.style.background = COLORS.PRIMARY;
+        activeBtn.style.color = 'white';
+        activeBtn.classList.add('active');
+        
+        inactiveBtn.style.background = 'transparent';
+        inactiveBtn.style.color = COLORS.TEXT_MAIN;
+        inactiveBtn.classList.remove('active');
+    }
+
+    function generateMonthlyTrendData(transactions, topCategories) {
+        const months = [];
+        const categoryData = {};
+        
+        // Initialize category data
+        topCategories.forEach(cat => {
+            categoryData[cat.name] = [];
+        });
+
+        // Generate last 6 months
+        for (let i = 5; i >= 0; i--) {
+            const date = new Date();
+            date.setMonth(date.getMonth() - i);
+            const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            months.push(monthKey);
+
+            // Calculate spending for each category in this month
+            const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+            const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+            topCategories.forEach(category => {
+                const monthlySpending = transactions
+                    .filter(t => {
+                        const tDate = new Date(t.date || t.timestamp);
+                        return tDate >= monthStart && tDate <= monthEnd && 
+                               (t.category || 'Uncategorized') === category.name &&
+                               t.type === 'expense';
+                    })
+                    .reduce((sum, t) => sum + (t.amount || 0), 0);
+                
+                categoryData[category.name].push(monthlySpending);
+            });
+        }
+
+        return { months, categoryData };
+    }
+
+    function getChartColors(count) {
+        const colors = [
+            'hsl(220, 70%, 50%)',   // Blue
+            'hsl(142, 71%, 45%)',   // Green
+            'hsl(0, 84%, 60%)',     // Red
+            'hsl(38, 92%, 50%)',    // Orange
+            'hsl(271, 81%, 56%)',   // Purple
+            'hsl(198, 93%, 60%)',   // Cyan
+            'hsl(48, 96%, 53%)',    // Yellow
+            'hsl(339, 82%, 52%)',   // Pink
+        ];
+        
+        return colors.slice(0, count);
     }
 
     /**
