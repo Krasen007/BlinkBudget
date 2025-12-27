@@ -9,6 +9,7 @@
 
 import { AnalyticsEngine } from '../core/analytics-engine.js';
 import { ChartRenderer } from '../components/ChartRenderer.js';
+import { TimePeriodSelector } from '../components/TimePeriodSelector.js';
 import { StorageService } from '../core/storage.js';
 import { Router } from '../core/router.js';
 import { COLORS, SPACING, BREAKPOINTS, DIMENSIONS, TIMING } from '../utils/constants.js';
@@ -34,14 +35,20 @@ export const ReportsView = () => {
     let isLoading = false;
     let currentData = null;
     let activeCharts = new Map(); // Track active chart instances for cleanup
+    let timePeriodSelectorComponent = null; // Reference to the time period selector
 
     // Header section
     const header = createHeader();
     container.appendChild(header);
 
-    // Time period selector
-    const timePeriodSelector = createTimePeriodSelector();
-    container.appendChild(timePeriodSelector);
+    // Time period selector - using the new component
+    timePeriodSelectorComponent = TimePeriodSelector({
+        initialPeriod: currentTimePeriod,
+        onChange: handleTimePeriodChange,
+        showCustomRange: true,
+        className: 'reports-time-selector'
+    });
+    container.appendChild(timePeriodSelectorComponent);
 
     // Main content area
     const content = document.createElement('div');
@@ -62,6 +69,35 @@ export const ReportsView = () => {
 
     // Error state
     const errorState = createErrorState();
+
+    /**
+     * Handle time period changes from the TimePeriodSelector component
+     * Requirements: 1.2, 2.5
+     */
+    function handleTimePeriodChange(newTimePeriod) {
+        console.log('[ReportsView] Time period changed:', newTimePeriod);
+        
+        // Validate the new time period
+        if (!newTimePeriod || !newTimePeriod.startDate || !newTimePeriod.endDate) {
+            console.error('Invalid time period provided:', newTimePeriod);
+            return;
+        }
+
+        // Update current time period
+        const previousPeriod = currentTimePeriod;
+        currentTimePeriod = newTimePeriod;
+
+        // Invalidate relevant cache entries since time period changed
+        analyticsEngine.invalidateCache('categoryBreakdown');
+        analyticsEngine.invalidateCache('incomeVsExpenses');
+        analyticsEngine.invalidateCache('costOfLiving');
+
+        // Reload data with new time period
+        loadReportData();
+
+        // Log the change for debugging/analytics
+        console.log(`[ReportsView] Time period updated from ${previousPeriod.label || 'Unknown'} to ${newTimePeriod.label || 'Unknown'}`);
+    }
 
     /**
      * Create header with title and navigation
@@ -101,73 +137,6 @@ export const ReportsView = () => {
         headerEl.appendChild(title);
 
         return headerEl;
-    }
-
-    /**
-     * Create time period selector component
-     */
-    function createTimePeriodSelector() {
-        const selectorContainer = document.createElement('div');
-        selectorContainer.className = 'time-period-selector';
-        selectorContainer.style.display = 'flex';
-        selectorContainer.style.gap = SPACING.SM;
-        selectorContainer.style.marginBottom = SPACING.LG;
-        selectorContainer.style.flexShrink = '0';
-        selectorContainer.style.flexWrap = 'wrap';
-
-        // Period buttons
-        const periods = [
-            { key: 'week', label: 'This Week', getValue: getCurrentWeekPeriod },
-            { key: 'month', label: 'This Month', getValue: getCurrentMonthPeriod },
-            { key: 'quarter', label: 'This Quarter', getValue: getCurrentQuarterPeriod },
-            { key: 'year', label: 'This Year', getValue: getCurrentYearPeriod }
-        ];
-
-        periods.forEach(period => {
-            const button = document.createElement('button');
-            button.textContent = period.label;
-            button.className = 'btn btn-outline time-period-btn';
-            button.dataset.period = period.key;
-            button.style.padding = `${SPACING.SM} ${SPACING.MD}`;
-            button.style.border = `1px solid ${COLORS.BORDER}`;
-            button.style.background = COLORS.SURFACE;
-            button.style.color = COLORS.TEXT_MAIN;
-            button.style.borderRadius = 'var(--radius-md)';
-            button.style.cursor = 'pointer';
-            button.style.transition = 'all 0.2s ease';
-            button.style.fontSize = window.innerWidth < BREAKPOINTS.MOBILE ? '0.875rem' : '1rem';
-
-            // Set active state for current month (default)
-            if (period.key === 'month') {
-                button.style.background = COLORS.PRIMARY;
-                button.style.color = 'white';
-                button.style.borderColor = COLORS.PRIMARY;
-                button.classList.add('active');
-            }
-
-            button.addEventListener('click', () => {
-                // Update active state
-                selectorContainer.querySelectorAll('.time-period-btn').forEach(btn => {
-                    btn.style.background = COLORS.SURFACE;
-                    btn.style.color = COLORS.TEXT_MAIN;
-                    btn.style.borderColor = COLORS.BORDER;
-                    btn.classList.remove('active');
-                });
-
-                button.style.background = COLORS.PRIMARY;
-                button.style.color = 'white';
-                button.style.borderColor = COLORS.PRIMARY;
-                button.classList.add('active');
-
-                // Update time period and reload data
-                currentTimePeriod = period.getValue();
-                loadReportData();
-            });
-
-            selectorContainer.appendChild(button);
-        });
-
-        return selectorContainer;
     }
 
     /**
@@ -823,11 +792,8 @@ export const ReportsView = () => {
             title.style.fontSize = isMobile ? '1.5rem' : '2rem';
         }
 
-        // Update time period button sizes
-        const periodButtons = timePeriodSelector.querySelectorAll('.time-period-btn');
-        periodButtons.forEach(button => {
-            button.style.fontSize = isMobile ? '0.875rem' : '1rem';
-        });
+        // The TimePeriodSelector component handles its own responsive updates
+        // No need to manually update button sizes here
 
         // Update back button visibility
         const backButton = header.querySelector('.btn-ghost');
@@ -924,6 +890,11 @@ export const ReportsView = () => {
         // Clear any pending refresh timeouts
         if (container._refreshTimeout) {
             clearTimeout(container._refreshTimeout);
+        }
+        
+        // Clean up TimePeriodSelector component
+        if (timePeriodSelectorComponent && timePeriodSelectorComponent.cleanup) {
+            timePeriodSelectorComponent.cleanup();
         }
         
         // Clean up charts and analytics cache
