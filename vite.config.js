@@ -79,6 +79,10 @@ export default defineConfig({
           if (id.includes('node_modules/firebase') || id.includes('node_modules/@firebase')) {
             return 'firebase';
           }
+          // Chart.js gets its own chunk for reports feature
+          if (id.includes('node_modules/chart.js')) {
+            return 'charts';
+          }
           // Other vendor dependencies
           if (id.includes('node_modules')) {
             return 'vendor';

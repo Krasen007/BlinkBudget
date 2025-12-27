@@ -1,3 +1,10 @@
-  * Enhanced the settings interface with a new General section.
-  * Fixed functionality issues for the dashboard and installation buttons.
-  * Optimized PWA performance and applied general system improvements.
+# Changelog
+
+## Summary of Changes:
+
+*   Began basic work for Beautiful Reports & Insights.
+*   Removed distracting effects in settings.
+*   Lazy loaded firebase when not authenticated.
+*   Improved security and validation.
+*   Improved security.
+*   Updated readme for version 1.8.

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chart.js Integration Demo</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .demo-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+        
+        h1, h2 {
+            color: #333;
+        }
+        
+        .demo-controls {
+            margin: 20px 0;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>BlinkBudget Chart.js Integration Demo</h1>
+    
+    <div class="demo-section">
+        <h2>Pie Chart - Category Breakdown</h2>
+        <div class="chart-container">
+            <canvas id="pieChart"></canvas>
+        </div>
+        <div class="demo-controls">
+            <button onclick="updatePieChart()">Update Data</button>
+            <button onclick="toggleChartType()">Toggle Doughnut</button>
+        </div>
+    </div>
+    
+    <div class="demo-section">
+        <h2>Bar Chart - Monthly Spending</h2>
+        <div class="chart-container">
+            <canvas id="barChart"></canvas>
+        </div>
+        <div class="demo-controls">
+            <button onclick="updateBarChart()">Update Data</button>
+        </div>
+    </div>
+    
+    <div class="demo-section">
+        <h2>Line Chart - Spending Trend</h2>
+        <div class="chart-container">
+            <canvas id="lineChart"></canvas>
+        </div>
+        <div class="demo-controls">
+            <button onclick="updateLineChart()">Update Data</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { chartRenderer } from '../components/ChartRenderer.js';
+        import { preparePieChartData, prepareBarChartData, prepareLineChartData } from '../utils/chart-utils.js';
+
+        // Sample data
+        const sampleCategoryData = [
+            { category: 'Food & Dining', amount: 850 },
+            { category: 'Transportation', amount: 320 },
+            { category: 'Entertainment', amount: 180 },
+            { category: 'Shopping', amount: 420 },
+            { category: 'Bills & Utilities', amount: 650 }
+        ];
+
+        const sampleMonthlyData = [
+            { month: 'Jan', total: 2100 },
+            { month: 'Feb', total: 1950 },
+            { month: 'Mar', total: 2300 },
+            { month: 'Apr', total: 1800 },
+            { month: 'May', total: 2150 },
+            { month: 'Jun', total: 2400 }
+        ];
+
+        const sampleTrendData = [
+            { date: '2024-01-01', value: 2100 },
+            { date: '2024-01-08', value: 1950 },
+            { date: '2024-01-15', value: 2300 },
+            { date: '2024-01-22', value: 1800 },
+            { date: '2024-01-29', value: 2150 }
+        ];
+
+        let isPieChart = true;
+
+        // Initialize charts
+        function initCharts() {
+            // Pie Chart
+            const pieCanvas = document.getElementById('pieChart');
+            const pieData = preparePieChartData(sampleCategoryData);
+            chartRenderer.createPieChart(pieCanvas, pieData);
+
+            // Bar Chart
+            const barCanvas = document.getElementById('barChart');
+            const barData = prepareBarChartData(sampleMonthlyData, 'month', 'total', 'Monthly Spending');
+            chartRenderer.createBarChart(barCanvas, barData);
+
+            // Line Chart
+            const lineCanvas = document.getElementById('lineChart');
+            const lineData = prepareLineChartData(sampleTrendData, 'Weekly Spending');
+            chartRenderer.createLineChart(lineCanvas, lineData);
+        }
+
+        // Update functions
+        window.updatePieChart = function() {
+            const newData = sampleCategoryData.map(item => ({
+                ...item,
+                amount: Math.floor(Math.random() * 1000) + 100
+            }));
+            
+            const pieCanvas = document.getElementById('pieChart');
+            const chart = chartRenderer.getActiveCharts().get('pieChart');
+            if (chart) {
+                const chartData = preparePieChartData(newData);
+                chartRenderer.updateChart(chart, chartData);
+            }
+        };
+
+        window.toggleChartType = function() {
+            const pieCanvas = document.getElementById('pieChart');
+            chartRenderer.destroyChart('pieChart');
+            
+            const chartData = preparePieChartData(sampleCategoryData);
+            
+            if (isPieChart) {
+                chartRenderer.createDoughnutChart(pieCanvas, chartData);
+                isPieChart = false;
+            } else {
+                chartRenderer.createPieChart(pieCanvas, chartData);
+                isPieChart = true;
+            }
+        };
+
+        window.updateBarChart = function() {
+            const newData = sampleMonthlyData.map(item => ({
+                ...item,
+                total: Math.floor(Math.random() * 2000) + 1000
+            }));
+            
+            const chart = chartRenderer.getActiveCharts().get('barChart');
+            if (chart) {
+                const chartData = prepareBarChartData(newData, 'month', 'total', 'Monthly Spending');
+                chartRenderer.updateChart(chart, chartData);
+            }
+        };
+
+        window.updateLineChart = function() {
+            const newData = sampleTrendData.map(item => ({
+                ...item,
+                value: Math.floor(Math.random() * 1500) + 1000
+            }));
+            
+            const chart = chartRenderer.getActiveCharts().get('lineChart');
+            if (chart) {
+                const chartData = prepareLineChartData(newData, 'Weekly Spending');
+                chartRenderer.updateChart(chart, chartData);
+            }
+        };
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initCharts);
+
+        // Clean up when page unloads
+        window.addEventListener('beforeunload', () => {
+            chartRenderer.destroyAllCharts();
+        });
+    </script>
+</body>
+</html>
