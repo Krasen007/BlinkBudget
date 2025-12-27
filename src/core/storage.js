@@ -167,7 +167,7 @@ export const StorageService = {
     get(id) {
         const transactions = this.getAll();
         const t = transactions.find(t => t.id === id);
-        if (!t) return null;
+        if (!t) return undefined;
 
         // IDOR Protection: Verify ownership if userId is present
         const currentUserId = AuthService.getUserId();
