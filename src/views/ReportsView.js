@@ -51,9 +51,12 @@ export const ReportsView = () => {
     });
     container.appendChild(timePeriodSelectorComponent);
 
-    // Main content area
-    const content = document.createElement('div');
+    // Main content area with proper semantic structure
+    const content = document.createElement('main');
     content.className = 'reports-content';
+    content.id = 'reports-main-content';
+    content.setAttribute('role', 'main');
+    content.setAttribute('aria-labelledby', 'reports-title');
     content.style.flex = '1';
     content.style.display = 'flex';
     content.style.flexDirection = 'column';
@@ -107,25 +110,35 @@ export const ReportsView = () => {
      * Create header with title and navigation
      */
     function createHeader() {
-        const headerEl = document.createElement('div');
+        const headerEl = document.createElement('header');
         headerEl.className = 'reports-header';
+        headerEl.setAttribute('role', 'banner');
         headerEl.style.display = 'flex';
         headerEl.style.justifyContent = 'space-between';
         headerEl.style.alignItems = 'center';
         headerEl.style.marginBottom = SPACING.MD;
         headerEl.style.flexShrink = '0';
 
-        // Title
+        // Skip link for keyboard navigation
+        const skipLink = document.createElement('a');
+        skipLink.href = '#reports-main-content';
+        skipLink.className = 'skip-link';
+        skipLink.textContent = 'Skip to main content';
+        headerEl.appendChild(skipLink);
+
+        // Title with proper heading hierarchy
         const title = document.createElement('h1');
         title.textContent = 'Reports & Insights';
         title.style.margin = '0';
         title.style.color = COLORS.TEXT_MAIN;
         title.style.fontSize = window.innerWidth < BREAKPOINTS.MOBILE ? '1.5rem' : '2rem';
+        title.id = 'reports-title';
 
-        // Back button (for mobile)
+        // Back button (for mobile) with enhanced accessibility
         const backButton = document.createElement('button');
-        backButton.innerHTML = '← Dashboard';
-        backButton.className = 'btn btn-ghost';
+        backButton.innerHTML = '<span aria-hidden="true">←</span> Dashboard';
+        backButton.className = 'btn btn-ghost mobile-only';
+        backButton.setAttribute('aria-label', 'Go back to Dashboard');
         backButton.style.padding = `${SPACING.SM} ${SPACING.MD}`;
         backButton.style.border = 'none';
         backButton.style.background = 'transparent';
@@ -144,11 +157,14 @@ export const ReportsView = () => {
     }
 
     /**
-     * Create loading state component
+     * Create loading state component with accessibility
      */
     function createLoadingState() {
         const loadingEl = document.createElement('div');
         loadingEl.className = 'loading-state';
+        loadingEl.setAttribute('role', 'status');
+        loadingEl.setAttribute('aria-live', 'polite');
+        loadingEl.setAttribute('aria-label', 'Loading financial reports');
         loadingEl.style.display = 'none';
         loadingEl.style.flex = '1';
         loadingEl.style.justifyContent = 'center';
@@ -157,15 +173,20 @@ export const ReportsView = () => {
         loadingEl.style.gap = SPACING.MD;
         loadingEl.style.color = COLORS.TEXT_MUTED;
 
-        // Loading spinner
+        // Loading spinner with accessibility
         const spinner = document.createElement('div');
         spinner.className = 'loading-spinner';
+        spinner.setAttribute('aria-hidden', 'true');
         spinner.style.width = '40px';
         spinner.style.height = '40px';
         spinner.style.border = `3px solid ${COLORS.BORDER}`;
         spinner.style.borderTop = `3px solid ${COLORS.PRIMARY}`;
         spinner.style.borderRadius = '50%';
-        spinner.style.animation = 'spin 1s linear infinite';
+        
+        // Only animate if user doesn't prefer reduced motion
+        if (!window.matchMedia || !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            spinner.style.animation = 'spin 1s linear infinite';
+        }
 
         // Add CSS animation for spinner
         if (!document.querySelector('#loading-spinner-styles')) {
@@ -176,6 +197,11 @@ export const ReportsView = () => {
                     0% { transform: rotate(0deg); }
                     100% { transform: rotate(360deg); }
                 }
+                @media (prefers-reduced-motion: reduce) {
+                    .loading-spinner {
+                        animation: none !important;
+                    }
+                }
             `;
             document.head.appendChild(style);
         }
@@ -184,6 +210,7 @@ export const ReportsView = () => {
         loadingText.textContent = 'Loading your financial insights...';
         loadingText.style.margin = '0';
         loadingText.style.fontSize = '1rem';
+        loadingText.setAttribute('aria-live', 'polite');
 
         loadingEl.appendChild(spinner);
         loadingEl.appendChild(loadingText);
@@ -192,11 +219,13 @@ export const ReportsView = () => {
     }
 
     /**
-     * Create empty state component with different scenarios
+     * Create empty state component with different scenarios and accessibility
      */
     function createEmptyState() {
         const emptyEl = document.createElement('div');
         emptyEl.className = 'empty-state';
+        emptyEl.setAttribute('role', 'status');
+        emptyEl.setAttribute('aria-live', 'polite');
         emptyEl.style.display = 'none';
         emptyEl.style.flex = '1';
         emptyEl.style.justifyContent = 'center';
@@ -211,11 +240,13 @@ export const ReportsView = () => {
     }
 
     /**
-     * Create error state component with custom messages
+     * Create error state component with custom messages and accessibility
      */
     function createErrorState() {
         const errorEl = document.createElement('div');
         errorEl.className = 'error-state';
+        errorEl.setAttribute('role', 'alert');
+        errorEl.setAttribute('aria-live', 'assertive');
         errorEl.style.display = 'none';
         errorEl.style.flex = '1';
         errorEl.style.justifyContent = 'center';
@@ -230,11 +261,13 @@ export const ReportsView = () => {
     }
 
     /**
-     * Create chart container for displaying visualizations
+     * Create chart container for displaying visualizations with accessibility
      */
     function createChartContainer() {
-        const chartContainer = document.createElement('div');
+        const chartContainer = document.createElement('section');
         chartContainer.className = 'chart-container';
+        chartContainer.setAttribute('role', 'region');
+        chartContainer.setAttribute('aria-labelledby', 'chart-section-title');
         chartContainer.style.display = 'flex';
         chartContainer.style.flexDirection = 'column';
         chartContainer.style.gap = SPACING.LG;
@@ -242,6 +275,13 @@ export const ReportsView = () => {
         chartContainer.style.background = COLORS.SURFACE;
         chartContainer.style.borderRadius = 'var(--radius-lg)';
         chartContainer.style.border = `1px solid ${COLORS.BORDER}`;
+
+        // Add section title for screen readers
+        const sectionTitle = document.createElement('h2');
+        sectionTitle.id = 'chart-section-title';
+        sectionTitle.className = 'sr-only';
+        sectionTitle.textContent = 'Financial Charts and Visualizations';
+        chartContainer.appendChild(sectionTitle);
 
         // Chart will be populated by loadReportData
         return chartContainer;
@@ -785,32 +825,114 @@ export const ReportsView = () => {
     }
 
     /**
-     * Handle responsive layout updates
+     * Handle responsive layout updates with comprehensive optimizations
      */
     const updateResponsiveLayout = debounce(() => {
         const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
+        const isTablet = window.innerWidth >= BREAKPOINTS.MOBILE && window.innerWidth < 1024;
+        const isDesktop = window.innerWidth >= 1024;
+        const isLandscape = window.innerHeight < window.innerWidth;
+        const isShortLandscape = isLandscape && window.innerHeight < 500;
         
         // Update header title size
         const title = header.querySelector('h1');
         if (title) {
-            title.style.fontSize = isMobile ? '1.5rem' : '2rem';
+            if (isMobile) {
+                title.style.fontSize = isShortLandscape ? '1.125rem' : '1.5rem';
+            } else if (isTablet) {
+                title.style.fontSize = '1.75rem';
+            } else {
+                title.style.fontSize = '2rem';
+            }
+        }
+
+        // Update back button visibility
+        const backButton = header.querySelector('.btn-ghost');
+        if (backButton) {
+            backButton.style.display = isMobile ? 'flex' : 'none';
+        }
+
+        // Update container padding based on screen size
+        if (isMobile) {
+            container.style.padding = isShortLandscape ? 
+                `${SPACING.XS} ${SPACING.SM}` : 
+                `${SPACING.SM} ${SPACING.SM}`;
+        } else if (isTablet) {
+            container.style.padding = `${SPACING.MD} ${SPACING.LG}`;
+        } else {
+            container.style.padding = `${SPACING.LG} ${SPACING.XL}`;
+        }
+
+        // Update content gap
+        if (content) {
+            content.style.gap = isMobile ? SPACING.MD : SPACING.LG;
+        }
+
+        // Apply mobile optimizations to active charts
+        activeCharts.forEach((chart) => {
+            if (chart && typeof chart.resize === 'function') {
+                // Resize chart to fit new container
+                chart.resize();
+                
+                // Apply mobile-specific optimizations
+                chartRenderer.applyMobileOptimizations(chart);
+            }
+        });
+
+        // Update visual viewport height for mobile keyboard handling
+        if (isMobile) {
+            updateVisualViewportHeight();
         }
 
         // The TimePeriodSelector component handles its own responsive updates
         // No need to manually update button sizes here
 
-        // Update back button visibility
-        const backButton = header.querySelector('.btn-ghost');
-        if (backButton) {
-            backButton.style.display = isMobile ? 'block' : 'none';
-        }
+        console.log(`[ReportsView] Layout updated for ${isMobile ? 'mobile' : isTablet ? 'tablet' : 'desktop'} view`);
     }, TIMING.DEBOUNCE_RESIZE);
 
-    // Event listeners
+    /**
+     * Update visual viewport height for mobile keyboard handling
+     */
+    function updateVisualViewportHeight() {
+        if (window.visualViewport) {
+            const vh = window.visualViewport.height * 0.01;
+            document.documentElement.style.setProperty('--visual-viewport-height', `${window.visualViewport.height}px`);
+        } else {
+            // Fallback for browsers without visualViewport support
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--visual-viewport-height', `${window.innerHeight}px`);
+        }
+    }
+
+    /**
+     * Handle orientation changes with optimizations
+     */
+    const handleOrientationChange = debounce(() => {
+        // Wait for orientation change to complete
+        setTimeout(() => {
+            updateResponsiveLayout();
+            
+            // Force chart resize after orientation change
+            activeCharts.forEach((chart) => {
+                if (chart && typeof chart.resize === 'function') {
+                    chart.resize();
+                }
+            });
+        }, 100);
+    }, TIMING.DEBOUNCE_ORIENTATION);
+
+    // Event listeners for responsive behavior
     window.addEventListener('resize', updateResponsiveLayout);
-    window.addEventListener('orientationchange', () => {
-        setTimeout(updateResponsiveLayout, TIMING.DEBOUNCE_ORIENTATION);
-    });
+    window.addEventListener('orientationchange', handleOrientationChange);
+    
+    // Visual viewport API support for mobile keyboards
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', updateVisualViewportHeight);
+    }
+
+    // Initial responsive setup
+    updateResponsiveLayout();
+    updateVisualViewportHeight();
 
     // Listen for storage updates to refresh data
     const handleStorageUpdate = (e) => {
@@ -907,13 +1029,18 @@ export const ReportsView = () => {
         }
     }
 
-    // Cleanup function
+    // Cleanup function with enhanced cleanup
     container.cleanup = () => {
         window.removeEventListener('resize', updateResponsiveLayout);
-        window.removeEventListener('orientationchange', updateResponsiveLayout);
+        window.removeEventListener('orientationchange', handleOrientationChange);
         window.removeEventListener('storage-updated', handleStorageUpdate);
         window.removeEventListener('auth-state-changed', handleAuthChange);
         window.removeEventListener('navigation-state-changed', handleNavigationStateChange);
+        
+        // Clean up visual viewport listener
+        if (window.visualViewport) {
+            window.visualViewport.removeEventListener('resize', updateVisualViewportHeight);
+        }
         
         // Clear any pending refresh timeouts
         if (container._refreshTimeout) {
@@ -928,6 +1055,9 @@ export const ReportsView = () => {
         // Clean up charts and analytics cache
         cleanupCharts();
         analyticsEngine.clearCache();
+        
+        // Reset visual viewport height
+        document.documentElement.style.removeProperty('--visual-viewport-height');
     };
 
     // Expose useful methods for external access

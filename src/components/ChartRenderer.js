@@ -376,6 +376,42 @@ export class ChartRenderer {
       }
     }
 
+    if (chart && chart.canvas) {
+      const canvas = chart.canvas;
+      
+      // Clean up keyboard navigation handlers and accessibility elements
+      if (canvas._keyboardHandlers) {
+        canvas.removeEventListener('keydown', canvas._keyboardHandlers.keydown);
+        canvas.removeEventListener('focus', canvas._keyboardHandlers.focus);
+        canvas.removeEventListener('blur', canvas._keyboardHandlers.blur);
+        
+        // Remove description element
+        if (canvas._keyboardHandlers.descriptionElement) {
+          document.body.removeChild(canvas._keyboardHandlers.descriptionElement);
+        }
+        
+        delete canvas._keyboardHandlers;
+      }
+      
+      // Clean up touch event handlers
+      if (canvas._touchHandlers) {
+        canvas.removeEventListener('touchstart', canvas._touchHandlers.touchstart);
+        canvas.removeEventListener('touchmove', canvas._touchHandlers.touchmove);
+        canvas.removeEventListener('touchend', canvas._touchHandlers.touchend);
+        delete canvas._touchHandlers;
+      }
+      
+      // Remove accessibility attributes
+      canvas.removeAttribute('aria-describedby');
+      canvas.removeAttribute('aria-label');
+      canvas.removeAttribute('role');
+      canvas.removeAttribute('tabindex');
+      
+      // Reset touch styles
+      canvas.style.touchAction = '';
+      canvas.style.opacity = '';
+    }
+
     if (chart) {
       chart.destroy();
     }
@@ -399,19 +435,186 @@ export class ChartRenderer {
     if (!chartInstance) return;
 
     const isMobile = window.innerWidth < 768;
+    const isSmallMobile = window.innerWidth < 480;
+    const isLandscape = window.innerHeight < window.innerWidth;
+    const isShortLandscape = isLandscape && window.innerHeight < 500;
     
     if (isMobile) {
-      // Reduce legend padding on mobile
-      chartInstance.options.plugins.legend.labels.padding = 10;
+      // Mobile-specific chart options
+      const mobileOptions = {
+        // Reduce legend padding on mobile
+        plugins: {
+          legend: {
+            position: isShortLandscape ? 'right' : 'bottom',
+            labels: {
+              padding: isSmallMobile ? 8 : 12,
+              font: {
+                size: isSmallMobile ? 10 : 11
+              },
+              boxWidth: isSmallMobile ? 12 : 15,
+              boxHeight: isSmallMobile ? 12 : 15,
+              usePointStyle: true
+            }
+          },
+          tooltip: {
+            // Larger tooltips for touch interaction
+            padding: 16,
+            titleFont: {
+              size: 14
+            },
+            bodyFont: {
+              size: 13
+            },
+            cornerRadius: 8,
+            caretSize: 8,
+            // Position tooltips to avoid screen edges
+            position: 'nearest',
+            xAlign: 'center',
+            yAlign: 'top'
+          }
+        },
+        
+        // Optimize animations for mobile performance
+        animation: {
+          duration: isSmallMobile ? 300 : 400 // Faster animations on slower devices
+        },
+        
+        // Enhanced interaction for touch
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        },
+        
+        // Mobile-specific scales
+        scales: chartInstance.config.type !== 'pie' && chartInstance.config.type !== 'doughnut' ? {
+          x: {
+            ticks: {
+              font: {
+                size: isSmallMobile ? 10 : 11
+              },
+              maxRotation: isSmallMobile ? 45 : 30,
+              minRotation: 0,
+              // Reduce number of ticks on small screens
+              maxTicksLimit: isSmallMobile ? 5 : 8
+            }
+          },
+          y: {
+            ticks: {
+              font: {
+                size: isSmallMobile ? 10 : 11
+              },
+              // Shorter number formatting on mobile
+              callback: function(value) {
+                if (value >= 1000000) {
+                  return '$' + (value / 1000000).toFixed(1) + 'M';
+                } else if (value >= 1000) {
+                  return '$' + (value / 1000).toFixed(1) + 'K';
+                } else {
+                  return '$' + value.toFixed(0);
+                }
+              }
+            }
+          }
+        } : undefined
+      };
       
-      // Smaller font sizes
-      chartInstance.options.plugins.legend.labels.font.size = 10;
+      // Apply mobile optimizations
+      Object.assign(chartInstance.options.plugins.legend, mobileOptions.plugins.legend);
+      Object.assign(chartInstance.options.plugins.tooltip, mobileOptions.plugins.tooltip);
+      chartInstance.options.animation.duration = mobileOptions.animation.duration;
+      chartInstance.options.interaction = mobileOptions.interaction;
       
-      // Reduce animation duration for better performance
-      chartInstance.options.animation.duration = 400;
+      if (mobileOptions.scales) {
+        Object.assign(chartInstance.options.scales, mobileOptions.scales);
+      }
       
-      // Update the chart
+      // Update the chart with mobile optimizations
       chartInstance.update('none'); // No animation for performance
+      
+      // Add touch-specific event handlers
+      this.addTouchOptimizations(chartInstance);
+    }
+  }
+
+  /**
+   * Add touch-specific optimizations for mobile devices
+   * @param {Chart} chartInstance - Chart.js instance
+   */
+  addTouchOptimizations(chartInstance) {
+    const canvas = chartInstance.canvas;
+    if (!canvas) return;
+
+    // Prevent default touch behaviors that interfere with chart interaction
+    canvas.style.touchAction = 'manipulation';
+    
+    // Add touch feedback
+    let touchStartTime = 0;
+    let touchMoved = false;
+    
+    const touchStartHandler = (event) => {
+      touchStartTime = Date.now();
+      touchMoved = false;
+      
+      // Add visual feedback for touch
+      canvas.style.opacity = '0.9';
+    };
+    
+    const touchMoveHandler = (event) => {
+      touchMoved = true;
+      canvas.style.opacity = '1';
+    };
+    
+    const touchEndHandler = (event) => {
+      const touchDuration = Date.now() - touchStartTime;
+      canvas.style.opacity = '1';
+      
+      // Only trigger chart interaction for quick taps (not scrolls)
+      if (!touchMoved && touchDuration < 300) {
+        // Get touch position relative to canvas
+        const rect = canvas.getBoundingClientRect();
+        const touch = event.changedTouches[0];
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+        
+        // Create synthetic mouse event for Chart.js
+        const syntheticEvent = {
+          type: 'click',
+          clientX: touch.clientX,
+          clientY: touch.clientY,
+          target: canvas,
+          preventDefault: () => {},
+          stopPropagation: () => {}
+        };
+        
+        // Get elements at touch position
+        const elements = chartInstance.getElementsAtEventForMode(
+          syntheticEvent, 
+          'nearest', 
+          { intersect: true }, 
+          false
+        );
+        
+        if (elements.length > 0) {
+          // Trigger click handler
+          if (chartInstance.options.onClick) {
+            chartInstance.options.onClick(syntheticEvent, elements, chartInstance);
+          }
+        }
+      }
+    };
+    
+    // Add touch event listeners
+    canvas.addEventListener('touchstart', touchStartHandler, { passive: true });
+    canvas.addEventListener('touchmove', touchMoveHandler, { passive: true });
+    canvas.addEventListener('touchend', touchEndHandler, { passive: true });
+    
+    // Store handlers for cleanup
+    if (!canvas._touchHandlers) {
+      canvas._touchHandlers = {
+        touchstart: touchStartHandler,
+        touchmove: touchMoveHandler,
+        touchend: touchEndHandler
+      };
     }
   }
 
@@ -529,21 +732,41 @@ export class ChartRenderer {
     // Guard against null canvas (e.g., in test environments)
     if (!canvas) return;
     
-    // Make canvas focusable
+    // Make canvas focusable and add accessibility attributes
     canvas.setAttribute('tabindex', '0');
     canvas.setAttribute('role', 'img');
-    canvas.setAttribute('aria-label', 'Interactive chart. Use arrow keys to navigate.');
+    
+    // Generate comprehensive aria-label based on chart data
+    const ariaLabel = this.generateChartAriaLabel(chart);
+    canvas.setAttribute('aria-label', ariaLabel);
+    
+    // Add detailed description for screen readers
+    const description = this.generateChartDescription(chart);
+    const descriptionId = `chart-desc-${Date.now()}`;
+    
+    // Create description element
+    const descElement = document.createElement('div');
+    descElement.id = descriptionId;
+    descElement.className = 'sr-only';
+    descElement.textContent = description;
+    document.body.appendChild(descElement);
+    
+    canvas.setAttribute('aria-describedby', descriptionId);
     
     let currentIndex = 0;
     const maxIndex = chart.data.labels.length - 1;
     
-    canvas.addEventListener('keydown', (event) => {
+    // Enhanced keyboard event handling
+    const keydownHandler = (event) => {
+      let handled = false;
+      
       switch (event.key) {
         case 'ArrowRight':
         case 'ArrowDown':
           event.preventDefault();
           currentIndex = Math.min(currentIndex + 1, maxIndex);
           this.focusSegment(chart, currentIndex);
+          handled = true;
           break;
           
         case 'ArrowLeft':
@@ -551,6 +774,21 @@ export class ChartRenderer {
           event.preventDefault();
           currentIndex = Math.max(currentIndex - 1, 0);
           this.focusSegment(chart, currentIndex);
+          handled = true;
+          break;
+          
+        case 'Home':
+          event.preventDefault();
+          currentIndex = 0;
+          this.focusSegment(chart, currentIndex);
+          handled = true;
+          break;
+          
+        case 'End':
+          event.preventDefault();
+          currentIndex = maxIndex;
+          this.focusSegment(chart, currentIndex);
+          handled = true;
           break;
           
         case 'Enter':
@@ -562,21 +800,51 @@ export class ChartRenderer {
             index: currentIndex
           }];
           this.handleChartClick(event, activeElements, chart, chart.config.type);
+          handled = true;
+          break;
+          
+        case 'Escape':
+          event.preventDefault();
+          canvas.blur();
+          handled = true;
           break;
       }
-    });
+      
+      if (handled) {
+        // Announce keyboard navigation instructions
+        this.announceKeyboardInstructions(chart, currentIndex);
+      }
+    };
     
-    // Add focus/blur handlers
-    canvas.addEventListener('focus', () => {
-      canvas.style.outline = '2px solid #007bff';
+    canvas.addEventListener('keydown', keydownHandler);
+    
+    // Enhanced focus/blur handlers
+    const focusHandler = () => {
+      canvas.style.outline = '3px solid var(--color-primary)';
+      canvas.style.outlineOffset = '2px';
       this.focusSegment(chart, currentIndex);
-    });
+      
+      // Announce chart entry
+      this.announceChartEntry(chart);
+    };
     
-    canvas.addEventListener('blur', () => {
+    const blurHandler = () => {
       canvas.style.outline = 'none';
+      canvas.style.outlineOffset = '0';
       chart.setActiveElements([]);
       chart.update('none');
-    });
+    };
+    
+    canvas.addEventListener('focus', focusHandler);
+    canvas.addEventListener('blur', blurHandler);
+    
+    // Store event handlers for cleanup
+    canvas._keyboardHandlers = {
+      keydown: keydownHandler,
+      focus: focusHandler,
+      blur: blurHandler,
+      descriptionElement: descElement
+    };
   }
 
   /**
@@ -593,7 +861,7 @@ export class ChartRenderer {
     chart.setActiveElements(activeElements);
     chart.update('none');
     
-    // Announce to screen readers
+    // Announce to screen readers with enhanced information
     const label = chart.data.labels[index];
     const value = chart.data.datasets[0].data[index];
     const formattedValue = new Intl.NumberFormat('en-US', {
@@ -607,32 +875,152 @@ export class ChartRenderer {
     if (chart.config.type === 'pie' || chart.config.type === 'doughnut') {
       const total = chart.data.datasets[0].data.reduce((sum, val) => sum + val, 0);
       const percentage = ((value / total) * 100).toFixed(1);
-      announcement += ` (${percentage}%)`;
+      announcement += ` (${percentage}% of total)`;
     }
     
-    // Create temporary element for screen reader announcement
-    const announcement_element = document.createElement('div');
-    announcement_element.setAttribute('aria-live', 'polite');
-    announcement_element.setAttribute('aria-atomic', 'true');
-    announcement_element.style.position = 'absolute';
-    announcement_element.style.left = '-10000px';
-    announcement_element.textContent = announcement;
+    // Add position information
+    const totalItems = chart.data.labels.length;
+    announcement += `. Item ${index + 1} of ${totalItems}`;
     
-    document.body.appendChild(announcement_element);
-    setTimeout(() => {
-      document.body.removeChild(announcement_element);
-    }, 1000);
+    // Create temporary element for screen reader announcement
+    this.announceToScreenReader(announcement, 'polite');
   }
 
   /**
-   * Clean up all active charts
+   * Generate comprehensive ARIA label for chart
+   * @param {Chart} chart - Chart.js instance
+   * @returns {string} ARIA label text
+   */
+  generateChartAriaLabel(chart) {
+    const chartType = chart.config.type;
+    const datasetCount = chart.data.datasets.length;
+    const itemCount = chart.data.labels.length;
+    
+    let label = `${chartType} chart with ${itemCount} data point${itemCount !== 1 ? 's' : ''}`;
+    
+    if (datasetCount > 1) {
+      label += ` across ${datasetCount} datasets`;
+    }
+    
+    label += '. Use arrow keys to navigate, Enter to select, Escape to exit.';
+    
+    return label;
+  }
+
+  /**
+   * Generate detailed description for screen readers
+   * @param {Chart} chart - Chart.js instance
+   * @returns {string} Detailed description
+   */
+  generateChartDescription(chart) {
+    const chartType = chart.config.type;
+    const labels = chart.data.labels;
+    const dataset = chart.data.datasets[0];
+    
+    if (!dataset || !labels) return 'Chart data unavailable';
+    
+    let description = `This ${chartType} chart shows `;
+    
+    // Add summary based on chart type
+    if (chartType === 'pie' || chartType === 'doughnut') {
+      const total = dataset.data.reduce((sum, val) => sum + val, 0);
+      description += `spending breakdown across ${labels.length} categories. `;
+      
+      // Add top categories
+      const sortedData = labels.map((label, index) => ({
+        label,
+        value: dataset.data[index],
+        percentage: ((dataset.data[index] / total) * 100).toFixed(1)
+      })).sort((a, b) => b.value - a.value);
+      
+      description += `Top categories: `;
+      sortedData.slice(0, 3).forEach((item, index) => {
+        if (index > 0) description += ', ';
+        description += `${item.label} at ${item.percentage}%`;
+      });
+      
+    } else if (chartType === 'bar') {
+      description += `comparison across ${labels.length} categories. `;
+      const maxValue = Math.max(...dataset.data);
+      const maxIndex = dataset.data.indexOf(maxValue);
+      description += `Highest value is ${labels[maxIndex]} at ${new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+      }).format(maxValue)}.`;
+      
+    } else if (chartType === 'line') {
+      description += `trends over ${labels.length} time periods. `;
+      const firstValue = dataset.data[0];
+      const lastValue = dataset.data[dataset.data.length - 1];
+      const trend = lastValue > firstValue ? 'increasing' : lastValue < firstValue ? 'decreasing' : 'stable';
+      description += `Overall trend is ${trend}.`;
+    }
+    
+    return description;
+  }
+
+  /**
+   * Announce chart entry to screen readers
+   * @param {Chart} chart - Chart.js instance
+   */
+  announceChartEntry(chart) {
+    const announcement = `Entered ${chart.config.type} chart. Use arrow keys to navigate between data points, Enter to select, Escape to exit.`;
+    this.announceToScreenReader(announcement, 'polite');
+  }
+
+  /**
+   * Announce keyboard navigation instructions
+   * @param {Chart} chart - Chart.js instance
+   * @param {number} currentIndex - Current focused index
+   */
+  announceKeyboardInstructions(chart, currentIndex) {
+    const totalItems = chart.data.labels.length;
+    const announcement = `Navigating chart. Currently on item ${currentIndex + 1} of ${totalItems}. Use arrow keys to move, Enter to select.`;
+    this.announceToScreenReader(announcement, 'polite');
+  }
+
+  /**
+   * Announce text to screen readers using ARIA live regions
+   * @param {string} text - Text to announce
+   * @param {string} priority - 'polite' or 'assertive'
+   */
+  announceToScreenReader(text, priority = 'polite') {
+    const liveRegionId = `chart-live-region-${priority}`;
+    let liveRegion = document.getElementById(liveRegionId);
+    
+    if (!liveRegion) {
+      liveRegion = document.createElement('div');
+      liveRegion.id = liveRegionId;
+      liveRegion.setAttribute('aria-live', priority);
+      liveRegion.setAttribute('aria-atomic', 'true');
+      liveRegion.className = 'sr-only';
+      document.body.appendChild(liveRegion);
+    }
+    
+    // Clear and set new text
+    liveRegion.textContent = '';
+    setTimeout(() => {
+      liveRegion.textContent = text;
+    }, 100);
+  }
+
+  /**
+   * Clean up all active charts and accessibility elements
    * Call this when navigating away from reports view
    */
   destroyAllCharts() {
     for (const chart of this.activeCharts.values()) {
-      chart.destroy();
+      this.destroyChart(chart);
     }
     this.activeCharts.clear();
+    
+    // Clean up any remaining ARIA live regions
+    const liveRegions = document.querySelectorAll('[id^="chart-live-region"]');
+    liveRegions.forEach(region => {
+      if (region.parentNode) {
+        region.parentNode.removeChild(region);
+      }
+    });
   }
 
   /**
