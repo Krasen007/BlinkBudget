@@ -10,6 +10,7 @@
 import { AnalyticsEngine } from '../core/analytics-engine.js';
 import { ChartRenderer } from '../components/ChartRenderer.js';
 import { TimePeriodSelector } from '../components/TimePeriodSelector.js';
+import { Button } from '../components/Button.js';
 import { StorageService } from '../core/storage.js';
 import { Router } from '../core/router.js';
 import { NavigationState } from '../core/navigation-state.js';
@@ -119,13 +120,6 @@ export const ReportsView = () => {
         headerEl.style.marginBottom = SPACING.MD;
         headerEl.style.flexShrink = '0';
 
-        // Skip link for keyboard navigation
-        const skipLink = document.createElement('a');
-        skipLink.href = '#reports-main-content';
-        skipLink.className = 'skip-link';
-        skipLink.textContent = 'Skip to main content';
-        headerEl.appendChild(skipLink);
-
         // Title with proper heading hierarchy
         const title = document.createElement('h1');
         title.textContent = 'Reports & Insights';
@@ -134,24 +128,29 @@ export const ReportsView = () => {
         title.style.fontSize = window.innerWidth < BREAKPOINTS.MOBILE ? '1.5rem' : '2rem';
         title.id = 'reports-title';
 
-        // Back button (for mobile) with enhanced accessibility
-        const backButton = document.createElement('button');
-        backButton.innerHTML = '<span aria-hidden="true">←</span> Dashboard';
-        backButton.className = 'btn btn-ghost mobile-only';
-        backButton.setAttribute('aria-label', 'Go back to Dashboard');
-        backButton.style.padding = `${SPACING.SM} ${SPACING.MD}`;
-        backButton.style.border = 'none';
-        backButton.style.background = 'transparent';
-        backButton.style.color = COLORS.TEXT_MUTED;
-        backButton.style.cursor = 'pointer';
-        backButton.style.borderRadius = 'var(--radius-md)';
-        backButton.addEventListener('click', () => Router.navigate('dashboard'));
-
-        // Show back button only on mobile
-        if (window.innerWidth < BREAKPOINTS.MOBILE) {
-            headerEl.appendChild(backButton);
-        }
         headerEl.appendChild(title);
+
+        // Right side - keyboard shortcuts info (only show on desktop)
+        const rightSide = document.createElement('div');
+        rightSide.style.display = 'flex';
+        rightSide.style.alignItems = 'center';
+        rightSide.style.gap = SPACING.SM;
+        
+        if (window.innerWidth >= BREAKPOINTS.MOBILE) {
+            const shortcutsInfo = document.createElement('div');
+            shortcutsInfo.className = 'keyboard-shortcuts-info';
+            shortcutsInfo.style.fontSize = '0.75rem';
+            shortcutsInfo.style.color = COLORS.TEXT_MUTED;
+            shortcutsInfo.style.textAlign = 'right';
+            shortcutsInfo.style.lineHeight = '1.2';
+            shortcutsInfo.innerHTML = `
+                <div>Press <kbd style="background: ${COLORS.SURFACE}; padding: 2px 4px; border-radius: 3px; font-size: 0.7rem;">Esc</kbd> to go back</div>
+                <div>Press <kbd style="background: ${COLORS.SURFACE}; padding: 2px 4px; border-radius: 3px; font-size: 0.7rem;">Ctrl+R</kbd> to refresh</div>
+            `;
+            rightSide.appendChild(shortcutsInfo);
+        }
+        
+        headerEl.appendChild(rightSide);
 
         return headerEl;
     }
@@ -629,6 +628,18 @@ export const ReportsView = () => {
             placeholder.innerHTML = dataInfo;
             chartContainer.appendChild(placeholder);
 
+            // Add Back to Dashboard button after charts
+            const backButton = Button({
+                text: '← Back to Dashboard',
+                onClick: () => Router.navigate('dashboard'),
+                variant: 'ghost'
+            });
+            backButton.style.width = '100%';
+            backButton.style.margin = '0';
+            backButton.style.marginTop = SPACING.LG;
+            backButton.style.flexShrink = '0';
+            content.appendChild(backButton);
+
             // Show the content
             showContentState();
 
@@ -846,12 +857,6 @@ export const ReportsView = () => {
             }
         }
 
-        // Update back button visibility
-        const backButton = header.querySelector('.btn-ghost');
-        if (backButton) {
-            backButton.style.display = isMobile ? 'flex' : 'none';
-        }
-
         // Update container padding based on screen size
         if (isMobile) {
             container.style.padding = isShortLandscape ? 
@@ -979,9 +984,25 @@ export const ReportsView = () => {
         }
     };
 
+    // Handle keyboard shortcuts
+    const handleKeyboardShortcuts = (e) => {
+        // Escape key or Ctrl+B to go back to dashboard
+        if (e.key === 'Escape' || (e.ctrlKey && e.key === 'b')) {
+            e.preventDefault();
+            Router.navigate('dashboard');
+        }
+        
+        // Ctrl+R to refresh data
+        if (e.ctrlKey && e.key === 'r') {
+            e.preventDefault();
+            refreshData();
+        }
+    };
+
     window.addEventListener('storage-updated', handleStorageUpdate);
     window.addEventListener('auth-state-changed', handleAuthChange);
     window.addEventListener('navigation-state-changed', handleNavigationStateChange);
+    window.addEventListener('keydown', handleKeyboardShortcuts);
 
     /**
      * Manual refresh function for user-initiated refreshes
@@ -1036,6 +1057,7 @@ export const ReportsView = () => {
         window.removeEventListener('storage-updated', handleStorageUpdate);
         window.removeEventListener('auth-state-changed', handleAuthChange);
         window.removeEventListener('navigation-state-changed', handleNavigationStateChange);
+        window.removeEventListener('keydown', handleKeyboardShortcuts);
         
         // Clean up visual viewport listener
         if (window.visualViewport) {

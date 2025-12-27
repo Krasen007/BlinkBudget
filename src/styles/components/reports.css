@@ -1,0 +1,79 @@
+/* Reports View Styles */
+
+/* Reports Header */
+.reports-header {
+    position: relative;
+    z-index: 10;
+}
+
+/* Keyboard shortcuts info styling */
+.keyboard-shortcuts-info {
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.keyboard-shortcuts-info:hover {
+    opacity: 1;
+}
+
+.keyboard-shortcuts-info kbd {
+    font-family: var(--font-mono, 'Courier New', monospace);
+    font-size: 0.7rem;
+    font-weight: normal;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .reports-header {
+        padding: 0 var(--spacing-sm);
+    }
+    
+    .reports-header h1 {
+        font-size: 1.5rem;
+        line-height: 1.2;
+    }
+    
+    .keyboard-shortcuts-info {
+        display: none; /* Hide keyboard shortcuts on mobile */
+    }
+}
+
+/* Tablet optimizations */
+@media (min-width: 769px) and (max-width: 1023px) {
+    .reports-header h1 {
+        font-size: 1.75rem;
+    }
+}
+
+/* Desktop optimizations */
+@media (min-width: 1024px) {
+    .reports-header {
+        padding: 0 var(--spacing-lg);
+    }
+    
+    .reports-header h1 {
+        font-size: 2rem;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .keyboard-shortcuts-info kbd {
+        border: 1px solid currentColor;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .keyboard-shortcuts-info {
+        transition: none;
+    }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+    .keyboard-shortcuts-info kbd {
+        background: var(--color-surface-dark, #2a2a2a);
+        border: 1px solid var(--color-border-dark, #404040);
+    }
+}
