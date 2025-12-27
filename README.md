@@ -1,52 +1,65 @@
 # BlinkBudget - Fast Expense Tracking
 
+![Icon](public/favicon.png)
+
 **Track your expenses in 3 clicks max.** BlinkBudget transforms expense tracking into a swift, almost unconscious habit with beautiful, actionable insights for smarter financial decisions.
 
-## ✨ Key Features
+## Screenshots
 
-### 🚀 Lightning Fast Entry
-- **3-click expense logging** - Amount → Category → Done
+### Desktop View
+![Desktop Screenshot](public/screenshot-desktop.png)
+
+### Mobile View
+![Mobile Screenshot](public/screenshot-mobile.png)
+
+## Key Features
+
+### Lightning Fast Entry
+- **3-click expense logging** - Amount -> Category -> Done
 - **Auto-submit on category selection** - No save buttons needed
 - **Mobile-optimized interface** with haptic feedback
-- **Offline-capable** with localStorage persistence
+- **Offline-capable** with localStorage and Service Worker persistence
 
-### 💰 Transaction Management
+### Transaction Management
 - **Multiple transaction types**: Expenses, Income, Transfers, Refunds
 - **Smart categorization** with visual category chips:
-  - 🛒 Groceries, 🍕 Eating Out, 🏠 Housing & Bills
-  - 🚗 Transportation, 🛍️ Leisure & Shopping, 💄 Personal Care
+  - Food & Groceries, Dining & Coffee, Housing & Bills
+  - Transportation, Leisure & Shopping, Personal Care
 - **Multi-account support** (Checking, Savings, Credit Card, Cash)
 - **Account-to-account transfers** with automatic balance updates
 
-### 📊 Dashboard & Analytics
+### Dashboard & Analytics
 - **Real-time balance calculations** across all accounts
 - **Account filtering** - View transactions by specific account or all accounts
 - **Transaction history** with edit/delete capabilities
 - **Visual feedback** for recently added transactions
+- **Fixed Dashboard layout** with improved spacing and non-clipping action buttons
 
-### 📱 Mobile-First Design
+### Mobile-First Design
 - **Responsive layout** optimized for mobile devices
 - **Touch-friendly interface** with proper touch targets (56px minimum)
 - **Mobile navigation** with bottom tab bar
 - **Keyboard-aware UI** that adapts to virtual keyboard
 - **Haptic feedback** for enhanced user experience
+- **PWA support** - Installable as a standalone app with offline support
 
-### ⚙️ Settings & Customization
+### Settings & Customization
+- **General Settings section** - Unified Refresh App, Install App, and Logout actions
 - **Account management** - Add, edit, delete accounts
 - **Date format preferences** (US, ISO, EU formats)
 - **Data export/import** capabilities
 - **Transaction editing** with validation
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Frontend**: Vanilla JavaScript (ES6 Modules) + Vite
 - **Styling**: Vanilla CSS with CSS Custom Properties
-- **Storage**: localStorage for offline-capable data persistence
+- **Storage**: Firebase (Sync) + localStorage for offline-capable data persistence
 - **Testing**: Vitest with jsdom environment
 - **Build**: Vite with PostCSS optimization
-- **Linting**: Stylelint for CSS quality
+- **PWA**: vite-plugin-pwa for service worker and manifest management
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Node.js (v16 or higher)
@@ -67,15 +80,13 @@ npm run dev
 
 ### Available Scripts
 ```bash
-npm run dev        # Start development server (http://localhost:3000)
+npm run dev        # Start development server
 npm run build      # Build for production
 npm run preview    # Preview production build
 npm test           # Run unit tests
-npm run lint:css   # Lint CSS files
-npm run lint:css:fix # Fix CSS linting issues
 ```
 
-## 📱 Usage
+## Usage
 
 ### Adding a Transaction (3 clicks)
 1. **Click** "Add Transaction" button
@@ -83,7 +94,7 @@ npm run lint:css:fix # Fix CSS linting issues
 3. **Click category** - Transaction automatically saves!
 
 ### Managing Accounts
-- Go to Settings → Account Management
+- Go to Settings -> Account Management
 - Add new accounts (Checking, Savings, Credit Card, Cash)
 - Set default account for quick entry
 
@@ -92,7 +103,7 @@ npm run lint:css:fix # Fix CSS linting issues
 - Choose source and destination accounts
 - Amount is automatically debited/credited
 
-## 🏗️ Architecture
+## Architecture
 
 ### Component Structure
 - **Functional Components** returning native HTMLElements
@@ -104,7 +115,7 @@ npm run lint:css:fix # Fix CSS linting issues
 src/
 ├── components/     # Reusable UI components
 ├── views/         # Main application screens
-├── core/          # Router, storage, mobile utilities
+├── core/          # Router, storage, mobile utilities, auth
 ├── utils/         # Helper functions and constants
 └── styles/        # CSS files with design tokens
 ```
@@ -112,10 +123,10 @@ src/
 ### Key Components
 - **TransactionForm** - Smart form with auto-submit
 - **DashboardView** - Main screen with stats and transaction list
+- **GeneralSection** - Centralized settings for app maintenance and installation
 - **MobileNavigation** - Bottom tab navigation for mobile
-- **CategorySelector** - Visual category chips with haptic feedback
 
-## 🎨 Design System
+## Design System
 
 ### Colors & Theming
 - **HSL color space** for consistent theming
@@ -127,37 +138,37 @@ src/
 - **Touch-friendly** 56px minimum touch targets
 - **Adaptive layouts** for different screen sizes
 
-## 🧪 Testing
+## Testing
 
 Comprehensive test suite covering:
 - Component functionality
 - Form validation and submission
 - Mobile-specific features
 - CSS architecture and optimization
-- PostCSS integration
 
 ```bash
 npm test           # Run all tests
 npm test -- --watch # Run tests in watch mode
 ```
 
-## 📦 Production Build
+## Production Build
 
 Optimized production builds include:
 - **CSS purging** to remove unused styles
 - **Autoprefixer** for browser compatibility
 - **CSS minification** with cssnano
 - **Asset optimization** through Vite
+- **PWA Service Worker** generation
 
-## 🤝 Contributing
+## Contributing
 
-This project follows strict coding standards defined in `AGENTS.md`:
+This project follows strict coding standards:
 - Vanilla JavaScript ES6+ modules
 - Functional component patterns
 - Semantic HTML with accessibility focus
 - Performance-optimized implementations
 
-## 📄 License
+## License
 
 GPLv3 License
 
@@ -165,4 +176,4 @@ GPLv3 License
 
 **BlinkBudget** - Making expense tracking effortless, all in 3 moves.
 
-Reminder: Most of the app was created using various AI tools, I am not responsible in any way for what they did...
+Reminder: This application leverages AI-assisted development. Most logic and UI components were generated through collaborative AI engineering.

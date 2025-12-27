@@ -1,0 +1,3 @@
+  * Enhanced the settings interface with a new General section.
+  * Fixed functionality issues for the dashboard and installation buttons.
+  * Optimized PWA performance and applied general system improvements.
