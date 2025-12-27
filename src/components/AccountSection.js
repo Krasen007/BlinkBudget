@@ -60,6 +60,7 @@ export const AccountSection = () => {
             });
 
             const name = document.createElement('div');
+            name.className = 'mobile-account-name-container';
             name.textContent = acc.name + (acc.isDefault ? ' (Default)' : '');
             Object.assign(name.style, {
                 fontWeight: '600',

@@ -50,3 +50,13 @@ export const validatePasswordStrength = (password) => {
 
     return { isValid: true, message: '' };
 };
+/**
+ * Validates email format.
+ * @param {string} email 
+ * @returns {boolean}
+ */
+export const validateEmail = (email) => {
+    if (!email) return false;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+};

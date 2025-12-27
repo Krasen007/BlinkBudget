@@ -1,5 +1,6 @@
 import { STORAGE_KEYS, DEFAULTS } from '../utils/constants.js';
 import { SyncService } from './sync-service.js';
+import { AuthService } from './auth-service.js';
 
 const STORAGE_KEY = STORAGE_KEYS.TRANSACTIONS;
 const ACCOUNTS_KEY = STORAGE_KEYS.ACCOUNTS;
@@ -67,6 +68,10 @@ export const StorageService = {
     saveAccount(account) {
         if (!account.timestamp) {
             account.timestamp = new Date().toISOString();
+        }
+        const userId = AuthService.getUserId();
+        if (userId) {
+            account.userId = userId;
         }
         console.log("[Storage] Saving account:", account.name, account.id);
         const accounts = this.getAccounts(); // This handles initialization if needed
@@ -150,6 +155,7 @@ export const StorageService = {
         const newTransaction = {
             id: this.generateId(),
             timestamp: new Date().toISOString(),
+            userId: AuthService.getUserId(),
             ...transaction,
         };
         transactions.unshift(newTransaction); // Newest first
@@ -160,7 +166,17 @@ export const StorageService = {
 
     get(id) {
         const transactions = this.getAll();
-        return transactions.find(t => t.id === id);
+        const t = transactions.find(t => t.id === id);
+        if (!t) return null;
+
+        // IDOR Protection: Verify ownership if userId is present
+        const currentUserId = AuthService.getUserId();
+        if (t.userId && currentUserId && t.userId !== currentUserId) {
+            console.warn(`[Storage] Ownership mismatch for transaction ${id}`);
+            return null;
+        }
+
+        return t;
     },
 
     update(id, updates) {

@@ -110,6 +110,23 @@ export const showContainerError = (container) => {
 };
 
 /**
+ * Validate string length
+ * @param {string} value - String to validate
+ * @param {number} max - Maximum length
+ * @param {string} fieldName - Field name for error message
+ * @returns {Object} Validation result
+ */
+export const validateLength = (value, max, fieldName) => {
+    if (value && value.length > max) {
+        return {
+            valid: false,
+            error: `${fieldName} is too long (max ${max} characters)`
+        };
+    }
+    return { valid: true, error: null };
+};
+
+/**
  * Validate complete transaction form
  * @param {Object} data - Transaction data
  * @returns {Object} Validation result with errors object
@@ -133,6 +150,14 @@ export const validateTransactionForm = (data) => {
         const categoryValidation = validateCategory(data.category, data.type);
         if (!categoryValidation.valid) {
             errors.category = categoryValidation.error;
+        }
+    }
+
+    // Validate note length if present
+    if (data.note) {
+        const noteValidation = validateLength(data.note, 255, 'Note');
+        if (!noteValidation.valid) {
+            errors.note = noteValidation.error;
         }
     }
 
