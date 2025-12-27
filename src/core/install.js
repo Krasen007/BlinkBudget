@@ -32,11 +32,21 @@ export const InstallService = {
     },
 
     /**
+     * Check if the app is running in standalone mode (already installed).
+     * @returns {boolean}
+     */
+    isStandalone() {
+        return window.matchMedia('(display-mode: standalone)').matches ||
+            window.navigator.standalone ||
+            document.referrer.includes('android-app://');
+    },
+
+    /**
      * Check if the app is currently installable.
      * @returns {boolean}
      */
     isInstallable() {
-        return deferredPrompt !== null;
+        return deferredPrompt !== null && !this.isStandalone();
     },
 
     /**

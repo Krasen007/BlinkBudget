@@ -136,64 +136,6 @@ export const DataManagementSection = () => {
     section.appendChild(dateRangeContainer);
     section.appendChild(exportBtn);
 
-    const refreshBtn = Button({
-        text: 'Refresh App',
-        variant: 'ghost',
-        onClick: () => {
-            if (window.mobileUtils?.supportsHaptic()) {
-                window.mobileUtils.hapticFeedback([10]);
-            }
-            window.location.hash = '#dashboard';
-            window.location.reload();
-        }
-    });
-    refreshBtn.className += ' touch-target mobile-form-button';
-    Object.assign(refreshBtn.style, {
-        width: '100%',
-        marginTop: SPACING.MD,
-        minHeight: TOUCH_TARGETS.MIN_HEIGHT,
-        padding: SPACING.MD,
-        fontSize: FONT_SIZES.BASE,
-        color: 'var(--color-primary-light)'
-    });
-    section.appendChild(refreshBtn);
-
-    // Install Button
-    const installBtn = Button({
-        text: 'Install App',
-        variant: 'primary',
-        onClick: async () => {
-            if (window.mobileUtils?.supportsHaptic()) {
-                window.mobileUtils.hapticFeedback([10, 5, 10]);
-            }
-            const installed = await InstallService.promptInstall();
-            if (installed) {
-                installBtn.style.display = 'none';
-            }
-        }
-    });
-    installBtn.className += ' touch-target mobile-form-button';
-    Object.assign(installBtn.style, {
-        width: '100%',
-        marginTop: SPACING.MD,
-        minHeight: TOUCH_TARGETS.MIN_HEIGHT,
-        padding: SPACING.MD,
-        fontSize: FONT_SIZES.BASE,
-        display: InstallService.isInstallable() ? 'block' : 'none'
-    });
-
-    // Subscribe to installable state changes
-    const unsubscribeInstall = InstallService.subscribe((isInstallable) => {
-        installBtn.style.display = isInstallable ? 'block' : 'none';
-    });
-
-    section.appendChild(installBtn);
-
-    // Add cleanup to section or handle it in the view
-    section.cleanup = () => {
-        unsubscribeInstall();
-    };
-
     return section;
 };
 

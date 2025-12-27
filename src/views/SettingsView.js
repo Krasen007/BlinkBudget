@@ -6,6 +6,7 @@ import { DateFormatSection } from '../components/DateFormatSection.js';
 import { DataManagementSection } from '../components/DataManagementSection.js';
 import { DIMENSIONS, SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
 import { createButton } from '../utils/dom-factory.js';
+import { createPWAInstructionsModal } from '../utils/modal-utils.js';
 import { InstallService } from '../core/install.js';
 
 export const SettingsView = () => {
@@ -76,7 +77,29 @@ export const SettingsView = () => {
     const dataSection = DataManagementSection();
     container.appendChild(dataSection);
 
-    // Done Button
+    const refreshBtn = Button({
+        text: 'Refresh App',
+        variant: 'ghost',
+        onClick: () => {
+            if (window.mobileUtils?.supportsHaptic()) {
+                window.mobileUtils.hapticFeedback([10]);
+            }
+            window.location.hash = '#dashboard';
+            window.location.reload();
+        }
+    });
+    refreshBtn.className += ' touch-target mobile-form-button';
+    Object.assign(refreshBtn.style, {
+        width: '100%',
+        marginTop: SPACING.MD,
+        minHeight: TOUCH_TARGETS.MIN_HEIGHT,
+        padding: SPACING.MD,
+        fontSize: FONT_SIZES.BASE,
+        color: 'var(--color-primary-light)'
+    });
+    container.appendChild(refreshBtn);
+
+    // OK Button
     const doneBtn = Button({
         text: 'OK',
         variant: 'primary',
@@ -98,22 +121,43 @@ export const SettingsView = () => {
         text: 'Install App',
         variant: 'primary',
         onClick: async () => {
-            const installed = await InstallService.promptInstall();
-            if (installed) {
-                installBtn.style.display = 'none';
+            if (InstallService.isInstallable()) {
+                const installed = await InstallService.promptInstall();
+                if (installed) {
+                    installBtn.style.display = 'none';
+                }
+            } else {
+                // Show manual instructions
+                createPWAInstructionsModal();
             }
         }
     });
 
+    const updateInstallBtnVisibility = () => {
+        const isStandalone = InstallService.isStandalone();
+        const isMobile = window.mobileUtils?.isMobile();
+        const isInstallable = InstallService.isInstallable();
+
+        if (isStandalone) {
+            installBtn.style.display = 'none';
+        } else if (isInstallable || isMobile) {
+            // Show button if it's installable OR if we're on mobile (to show manual instructions)
+            installBtn.style.display = 'block';
+        } else {
+            installBtn.style.display = 'none';
+        }
+    };
+
     Object.assign(installBtn.style, {
         width: '100%',
-        marginTop: SPACING.XL,
-        display: InstallService.isInstallable() ? 'block' : 'none'
+        marginTop: SPACING.XL
     });
 
+    updateInstallBtnVisibility();
+
     // Subscribe to installable changes
-    const unsubscribeInstall = InstallService.subscribe((isInstallable) => {
-        installBtn.style.display = isInstallable ? 'block' : 'none';
+    const unsubscribeInstall = InstallService.subscribe(() => {
+        updateInstallBtnVisibility();
     });
 
     container.appendChild(installBtn);

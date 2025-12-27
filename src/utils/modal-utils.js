@@ -304,3 +304,74 @@ export const createAlertModal = (message) => {
     }, 10);
 };
 
+/**
+ * Create a modal with manual PWA installation instructions
+ */
+export const createPWAInstructionsModal = () => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+    const closeModal = () => {
+        if (overlay.parentNode) {
+            overlay.classList.remove('visible');
+            setTimeout(() => {
+                if (overlay.parentNode) {
+                    document.body.removeChild(overlay);
+                }
+            }, 200);
+        }
+    };
+
+    const overlay = createModalOverlay({ onClick: closeModal });
+    const modal = createModal();
+
+    const titleEl = document.createElement('h3');
+    titleEl.textContent = 'Install App';
+    titleEl.style.margin = `0 0 ${SPACING.MD} 0`;
+    titleEl.style.fontSize = FONT_SIZES.XL;
+    titleEl.style.textAlign = 'center';
+
+    const messageEl = document.createElement('div');
+    messageEl.style.marginBottom = SPACING.LG;
+    messageEl.style.fontSize = FONT_SIZES.BASE;
+    messageEl.style.lineHeight = '1.6';
+
+    if (isIOS) {
+        messageEl.innerHTML = `
+            <p style="margin-bottom: 12px;">To install BlinkBudget on your iPhone/iPad:</p>
+            <ol style="padding-left: 20px;">
+                <li style="margin-bottom: 8px;">Tap the <strong>Share</strong> button (box with upward arrow) at the bottom of the screen.</li>
+                <li style="margin-bottom: 8px;">Scroll down and tap <strong>Add to Home Screen</strong>.</li>
+                <li>Tap <strong>Add</strong> in the top right corner.</li>
+            </ol>
+        `;
+    } else {
+        messageEl.innerHTML = `
+            <p style="margin-bottom: 12px;">To install BlinkBudget on your device:</p>
+            <ol style="padding-left: 20px;">
+                <li style="margin-bottom: 8px;">Open your browser's menu (usually three dots or lines in the corner).</li>
+                <li style="margin-bottom: 8px;">Look for <strong>Install App</strong> or <strong>Add to Home Screen</strong>.</li>
+                <li>Follow the on-screen instructions.</li>
+            </ol>
+        `;
+    }
+
+    const okBtn = Button({
+        text: 'Got it',
+        variant: 'primary',
+        onClick: closeModal
+    });
+    okBtn.className += ' touch-target';
+    okBtn.style.width = '100%';
+    okBtn.style.minHeight = TOUCH_TARGETS.MIN_HEIGHT;
+
+    modal.appendChild(titleEl);
+    modal.appendChild(messageEl);
+    modal.appendChild(okBtn);
+    overlay.appendChild(modal);
+
+    document.body.appendChild(overlay);
+
+    setTimeout(() => {
+        overlay.classList.add('visible');
+    }, 10);
+};
