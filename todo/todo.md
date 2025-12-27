@@ -2,6 +2,10 @@ DO NOT IMPLEMENT: when you start the app the default view should be to add new e
 DO NOT IMPLEMENT: add option to reorder categories or auto sort them by most common, it may also be learning from the user behavior and predict the category based on the amount
 DO NOT IMPLEMENT: Add visual indicators for refund transactions in lists
 DO NOT IMPLEMENT: when deleting a transaction create animation of the row dissapearing
+DO NOT IMPLEMENT: Client-side session timeout (30 minutes of inactivity; monitor clicks/keypresses, auto logout)
+DO NOT IMPLEMENT: Local data encryption for sensitive information in localStorage (encryptData/decryptData)
+DO NOT IMPLEMENT: Mask technical error messages from Firestore operations
+DO NOT IMPLEMENT: Implement an audit logging mechanism for sensitive user actions (account changes, data export)
 [x] fix wrong amount display -$-6.00
 [x] add refund option
 [x] add hover effect when the mouse is going over the items in the dashboard
@@ -32,7 +36,3 @@ DO NOT IMPLEMENT: when deleting a transaction create animation of the row dissap
 [x] change the $ in the transactions to €
 [x] add install PWA button in the settings
 [x] add refresh button in the settings
-[ ] Client-side session timeout (30 minutes of inactivity; monitor clicks/keypresses, auto logout)
-[ ] Local data encryption for sensitive information in localStorage (encryptData/decryptData)
-[ ] Mask technical error messages from Firestore operations
-[ ] Implement an audit logging mechanism for sensitive user actions (account changes, data export)

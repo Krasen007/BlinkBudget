@@ -53,24 +53,6 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.category-chip::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
-  transform: translate(-50%, -50%);
-  transition: width 0.3s ease, height 0.3s ease;
-  pointer-events: none;
-}
-
-.category-chip:active::after {
-  width: 200px;
-  height: 200px;
-}
 
 /* Category chip container - Scrollable grid layout */
 .category-chip-container {
@@ -126,7 +108,7 @@
 }
 
 .type-toggle-btn:active {
-  transform: scale(0.96);
+  filter: brightness(0.9);
 }
 
 /* Transaction item touch interactions */
@@ -140,13 +122,6 @@
 }
 
 
-/* Improve touch interactions for general elements */
-.btn:active,
-.card:active,
-input:active {
-  transform: scale(0.98);
-  transition: transform 0.1s ease;
-}
 
 /* Mobile-optimized transaction form layout */
 .transaction-form.mobile-optimized {

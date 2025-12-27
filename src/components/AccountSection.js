@@ -104,7 +104,7 @@ export const AccountSection = () => {
                 minWidth: TOUCH_TARGETS.MIN_HEIGHT,
                 flex: '1'
             });
-            addTouchFeedback(renameBtn);
+            renameBtn.style.flex = '1';
             renameBtn.onclick = () => {
                 createAccountRenameModal(acc.name, (newName) => {
                     if (newName && newName.trim() !== '') {
@@ -133,7 +133,7 @@ export const AccountSection = () => {
                     minWidth: TOUCH_TARGETS.MIN_HEIGHT,
                     flex: '1'
                 });
-                addTouchFeedback(makeDefaultBtn);
+                makeDefaultBtn.style.flex = '1';
                 makeDefaultBtn.onclick = () => {
                     acc.isDefault = true;
                     StorageService.saveAccount(acc);
@@ -156,7 +156,7 @@ export const AccountSection = () => {
                     minWidth: TOUCH_TARGETS.MIN_HEIGHT,
                     flex: '1'
                 });
-                addTouchFeedback(deleteBtn);
+                deleteBtn.style.flex = '1';
                 deleteBtn.onclick = () => {
                     createConfirmModal(
                         `Delete account "${acc.name}"?`,

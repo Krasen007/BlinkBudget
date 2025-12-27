@@ -104,9 +104,6 @@
   transition: all var(--transition-fast);
 }
 
-.mobile-account-item:active {
-  transform: scale(0.98);
-}
 
 .mobile-account-info {
   margin-bottom: var(--spacing-sm);
@@ -137,7 +134,6 @@
 }
 
 .mobile-settings-option:active {
-  transform: scale(0.98);
   background: var(--color-surface-hover);
 }
 
@@ -287,7 +283,3 @@
 }
 
 /* Improve touch interactions */
-.card:active {
-  transform: scale(0.98);
-  transition: transform 0.1s ease;
-}

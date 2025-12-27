@@ -16,7 +16,7 @@
   transition: opacity var(--transition-normal);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  
+
   /* Safe area support */
   padding: var(--safe-area-inset-top) var(--safe-area-inset-right) var(--safe-area-inset-bottom) var(--safe-area-inset-left);
 }
@@ -101,7 +101,7 @@
   align-items: center;
   justify-content: center;
   font-size: 1.25rem;
-  
+
   /* Touch optimizations */
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -113,10 +113,7 @@
   color: var(--color-text-main);
 }
 
-.mobile-modal-close.touch-active {
-  transform: scale(0.9);
-  background: var(--color-surface-hover);
-}
+background: var(--color-surface-hover);
 
 .mobile-modal-content {
   padding: var(--spacing-lg);
@@ -181,7 +178,7 @@
   flex-direction: column;
   transform: translateY(100%);
   transition: transform var(--transition-normal);
-  
+
   /* Safe area support */
   padding-bottom: var(--safe-area-inset-bottom);
 }
@@ -233,11 +230,12 @@
 @keyframes modalSlideIn {
   from {
     opacity: 0;
-    transform: translateY(20px) scale(0.95);
+    transform: translateY(20px);
   }
+
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
@@ -248,15 +246,15 @@
     max-height: 85vh;
     margin: var(--spacing-md);
   }
-  
+
   .mobile-modal-full {
     margin: 0;
   }
-  
+
   .mobile-confirm-actions {
     flex-direction: column;
   }
-  
+
   .mobile-confirm-btn {
     max-width: none;
   }
@@ -267,7 +265,7 @@
   .mobile-modal {
     max-height: 95vh;
   }
-  
+
   .mobile-bottom-sheet {
     max-height: 90vh;
   }

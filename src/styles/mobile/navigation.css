@@ -16,7 +16,7 @@
   z-index: 100;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  
+
   /* Hide on desktop */
   display: none;
 }
@@ -25,7 +25,7 @@
   .mobile-nav {
     display: flex;
   }
-  
+
   /* Add bottom padding to body to account for fixed nav */
   body {
     padding-bottom: calc(80px + var(--safe-area-inset-bottom));
@@ -47,7 +47,7 @@
   min-width: var(--touch-target-min);
   min-height: var(--touch-target-min);
   position: relative;
-  
+
   /* Touch optimizations */
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -60,7 +60,6 @@
 }
 
 .mobile-nav-item.touch-active {
-  transform: scale(0.95);
   background: var(--color-surface-hover);
 }
 
@@ -95,18 +94,17 @@
   min-height: var(--touch-target-min);
   font-size: var(--font-size-base);
   font-weight: 500;
-  
+
   /* Touch optimizations */
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   user-select: none;
-  
+
   /* Position for thumb reach */
   margin-bottom: var(--spacing-md);
 }
 
 .mobile-back-btn.touch-active {
-  transform: scale(0.96);
   background: hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
 }
 

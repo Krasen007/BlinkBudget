@@ -38,10 +38,6 @@ export const DateFormatSection = ({ onFormatChange }) => {
             border: '1px solid var(--color-border)'
         });
 
-        addTouchFeedback(row, {
-            backgroundColor: 'var(--color-surface-hover)',
-            scale: 0.98
-        });
 
         const lbl = document.createElement('span');
         lbl.textContent = label;

@@ -15,24 +15,23 @@
   text-decoration: none;
   font-size: var(--font-size-base);
   position: relative;
-  
+
   /* Touch-friendly sizing */
   min-height: var(--touch-target-min);
   min-width: var(--touch-target-min);
-  
+
   /* Touch optimizations */
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   user-select: none;
-  
+
   /* Ensure adequate spacing between adjacent buttons */
   margin: calc(var(--touch-spacing-min) / 2);
 }
 
 /* Touch feedback states */
 .btn-touch-active {
-  transform: scale(0.96);
-  transition: transform 0.1s ease;
+  transition: all var(--transition-fast);
 }
 
 /* Enhanced visual feedback for touch */
@@ -77,7 +76,8 @@
   background-color: var(--color-primary-dark);
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(100, 108, 255, 0.23);
-  filter: none; /* override brightness since we handle color */
+  filter: none;
+  /* override brightness since we handle color */
 }
 
 .btn:hover {
@@ -121,16 +121,16 @@
 .type-toggle-btn {
   /* Ensure minimum touch target */
   min-height: var(--touch-target-min);
-  
+
   /* Adequate spacing between toggle buttons */
   margin: calc(var(--touch-spacing-min) / 2);
-  
+
   /* Enhanced visual feedback */
   transition: all var(--transition-fast), transform 0.1s ease;
 }
 
 .type-toggle-btn:active {
-  transform: scale(0.96);
+  filter: brightness(0.9);
 }
 
 /* Mobile action buttons */
@@ -145,7 +145,7 @@
 }
 
 .mobile-action-btn:active {
-  transform: scale(0.96);
+  filter: brightness(0.9);
 }
 
 .mobile-delete-btn:hover {
@@ -185,18 +185,17 @@
   min-height: var(--touch-target-min);
   font-size: var(--font-size-base);
   font-weight: 500;
-  
+
   /* Touch optimizations */
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   user-select: none;
-  
+
   /* Position for thumb reach */
   margin-bottom: var(--spacing-md);
 }
 
 .mobile-back-btn.touch-active {
-  transform: scale(0.96);
   background: hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
 }
 
@@ -232,7 +231,7 @@
   min-width: var(--touch-target-min);
   min-height: var(--touch-target-min);
   position: relative;
-  
+
   /* Touch optimizations */
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -245,7 +244,6 @@
 }
 
 .mobile-nav-item.touch-active {
-  transform: scale(0.95);
   background: var(--color-surface-hover);
 }
 
@@ -280,7 +278,7 @@
   align-items: center;
   justify-content: center;
   font-size: 1.25rem;
-  
+
   /* Touch optimizations */
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -293,7 +291,6 @@
 }
 
 .mobile-modal-close.touch-active {
-  transform: scale(0.9);
   background: var(--color-surface-hover);
 }
 
@@ -302,7 +299,7 @@
   .mobile-confirm-actions {
     flex-direction: column;
   }
-  
+
   .mobile-confirm-btn {
     max-width: none;
   }
@@ -311,8 +308,7 @@
 /* Improve touch interactions */
 .btn:active,
 input:active {
-  transform: scale(0.98);
-  transition: transform 0.1s ease;
+  opacity: 0.9;
 }
 
 /* Mobile-friendly focus states */
@@ -324,7 +320,8 @@ input:active {
 }
 
 /* High DPI display optimizations */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
   .btn {
     border-width: 0.5px;
   }
@@ -332,6 +329,7 @@ input:active {
 
 /* Accessibility improvements for mobile */
 @media (max-width: 767px) {
+
   /* Better contrast for touch targets */
   .btn:hover,
   .btn:focus {
@@ -341,6 +339,7 @@ input:active {
 
 /* iOS specific fixes */
 @supports (-webkit-touch-callout: none) {
+
   /* Fix iOS button styling */
   .btn {
     -webkit-appearance: none;
