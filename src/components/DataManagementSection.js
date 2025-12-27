@@ -30,15 +30,15 @@ export const DataManagementSection = () => {
     dateRangeContainer.className = 'mobile-date-range-form';
     Object.assign(dateRangeContainer.style, {
         display: 'flex',
-        flexDirection: 'column',
-        gap: SPACING.MD,
+        flexDirection: 'row',
+        gap: SPACING.SM,
         marginBottom: SPACING.LG
     });
 
     const createDateInput = (label, id) => {
         const wrapper = document.createElement('div');
         wrapper.className = 'mobile-date-input-wrapper';
-        wrapper.style.width = '100%';
+        wrapper.style.flex = '1';
 
         const lbl = document.createElement('label');
         lbl.textContent = label;

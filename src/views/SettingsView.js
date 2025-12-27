@@ -17,7 +17,7 @@ export const SettingsView = () => {
 
     // Header - compact like DashboardView
     const header = document.createElement('div');
-    header.style.marginBottom = SPACING.MD;
+    header.style.marginBottom = SPACING.SM;
     header.style.flexShrink = '0';
 
     const topRow = document.createElement('div');
@@ -28,7 +28,7 @@ export const SettingsView = () => {
     const title = document.createElement('h2');
     title.textContent = 'Settings';
     title.style.margin = '0';
-    title.style.marginRight = SPACING.MD;
+    title.style.marginRight = SPACING.SM;
 
     // Save button in top right (same format as back button in AddView)
     const rightControls = document.createElement('div');
@@ -41,8 +41,8 @@ export const SettingsView = () => {
         style: {
             height: TOUCH_TARGETS.MIN_HEIGHT,
             minHeight: TOUCH_TARGETS.MIN_HEIGHT,
-            padding: `${SPACING.SM} ${SPACING.MD}`,
-            fontSize: FONT_SIZES.SM,
+            padding: `${SPACING.SM} ${SPACING.SM}`,
+            fontSize: FONT_SIZES.MD,
             width: 'auto',
             flexShrink: '0'
         },
@@ -88,13 +88,14 @@ export const SettingsView = () => {
             window.location.reload();
         }
     });
-    refreshBtn.className += ' touch-target mobile-form-button';
+    refreshBtn.className += ' touch-target';
     Object.assign(refreshBtn.style, {
         width: '100%',
-        marginTop: SPACING.MD,
+        marginTop: SPACING.SM,
         minHeight: TOUCH_TARGETS.MIN_HEIGHT,
-        padding: SPACING.MD,
-        fontSize: FONT_SIZES.BASE,
+        padding: SPACING.SM,
+        fontSize: FONT_SIZES.MD,
+        fontWeight: '500',
         color: 'var(--color-primary-light)'
     });
     container.appendChild(refreshBtn);
@@ -105,15 +106,16 @@ export const SettingsView = () => {
         variant: 'primary',
         onClick: () => Router.navigate('dashboard')
     });
+    doneBtn.className += ' touch-target';
     Object.assign(doneBtn.style, {
         width: '100%',
-        marginTop: SPACING.XL,
-        marginBottom: SPACING.XL,
-        padding: SPACING.MD,
-        fontSize: FONT_SIZES.BUTTON_LARGE,
+        marginTop: SPACING.SM,
+        marginBottom: 0,
+        padding: SPACING.SM,
+        minHeight: TOUCH_TARGETS.MIN_HEIGHT,
+        fontSize: FONT_SIZES.MD,
         fontWeight: '600'
     });
-    doneBtn.className += ' touch-target';
     container.appendChild(doneBtn);
 
     // Install App Button (Conditional)
@@ -148,9 +150,14 @@ export const SettingsView = () => {
         }
     };
 
+    installBtn.className += ' touch-target';
     Object.assign(installBtn.style, {
         width: '100%',
-        marginTop: SPACING.XL
+        marginTop: SPACING.SM,
+        minHeight: TOUCH_TARGETS.MIN_HEIGHT,
+        padding: SPACING.SM,
+        fontSize: FONT_SIZES.MD,
+        fontWeight: '600'
     });
 
     updateInstallBtnVisibility();
@@ -181,11 +188,15 @@ export const SettingsView = () => {
             });
         }
     });
+    logoutBtn.className += ' touch-target';
     Object.assign(logoutBtn.style, {
         width: '100%',
-        color: 'var(--color-error)',
-        marginTop: SPACING.MD,
-        fontSize: FONT_SIZES.SM
+        marginTop: SPACING.SM,
+        minHeight: TOUCH_TARGETS.MIN_HEIGHT,
+        padding: SPACING.SM,
+        fontSize: FONT_SIZES.MD,
+        fontWeight: '500',
+        color: 'var(--color-error)'
     });
     container.appendChild(logoutBtn);
 
