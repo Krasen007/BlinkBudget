@@ -21,7 +21,7 @@ describe('MobileNavigation', () => {
     });
 
     it('should create navigation with correct structure', () => {
-        const nav = MobileNavigation({ currentRoute: 'dashboard' });
+        const nav = MobileNavigation({ currentRoute: 'reports' });
         
         expect(nav.tagName).toBe('NAV');
         expect(nav.className).toBe('mobile-nav');
@@ -32,41 +32,41 @@ describe('MobileNavigation', () => {
         const navItems = nav.querySelectorAll('.mobile-nav-item');
         expect(navItems.length).toBe(3);
         
-        // Check navigation item structure
-        const dashboardItem = navItems[0];
-        expect(dashboardItem.classList.contains('active')).toBe(true);
-        expect(dashboardItem.getAttribute('data-route')).toBe('dashboard');
+        // Check navigation item structure - first item is now Charts/Reports
+        const reportsItem = navItems[0];
+        expect(reportsItem.classList.contains('active')).toBe(true);
+        expect(reportsItem.getAttribute('data-route')).toBe('reports');
         
-        const icon = dashboardItem.querySelector('.mobile-nav-icon');
-        const label = dashboardItem.querySelector('.mobile-nav-label');
+        const icon = reportsItem.querySelector('.mobile-nav-icon');
+        const label = reportsItem.querySelector('.mobile-nav-label');
         expect(icon).toBeTruthy();
         expect(label).toBeTruthy();
-        expect(label.textContent).toBe('Dashboard');
+        expect(label.textContent).toBe('Charts');
     });
 
     it('should highlight correct active route', () => {
         const nav = MobileNavigation({ currentRoute: 'add-expense' });
         
         const navItems = nav.querySelectorAll('.mobile-nav-item');
-        const dashboardItem = navItems[0];
+        const reportsItem = navItems[0]; // First item is now reports/charts
         const addItem = navItems[1];
         
-        expect(dashboardItem.classList.contains('active')).toBe(false);
+        expect(reportsItem.classList.contains('active')).toBe(false);
         expect(addItem.classList.contains('active')).toBe(true);
     });
 
     it('should update navigation active state', () => {
-        const nav = MobileNavigation({ currentRoute: 'dashboard' });
+        const nav = MobileNavigation({ currentRoute: 'reports' });
         document.body.appendChild(nav);
         
         // Update to settings
         updateMobileNavigation('settings');
         
         const navItems = nav.querySelectorAll('.mobile-nav-item');
-        const dashboardItem = navItems[0];
+        const reportsItem = navItems[0]; // First item is now reports/charts
         const settingsItem = navItems[2];
         
-        expect(dashboardItem.classList.contains('active')).toBe(false);
+        expect(reportsItem.classList.contains('active')).toBe(false);
         expect(settingsItem.classList.contains('active')).toBe(true);
     });
 });

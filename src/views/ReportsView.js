@@ -12,6 +12,7 @@ import { ChartRenderer } from '../components/ChartRenderer.js';
 import { TimePeriodSelector } from '../components/TimePeriodSelector.js';
 import { StorageService } from '../core/storage.js';
 import { Router } from '../core/router.js';
+import { NavigationState } from '../core/navigation-state.js';
 import { COLORS, SPACING, BREAKPOINTS, DIMENSIONS, TIMING } from '../utils/constants.js';
 import { debounce } from '../utils/touch-utils.js';
 
@@ -31,7 +32,7 @@ export const ReportsView = () => {
     const chartRenderer = new ChartRenderer();
 
     // State management
-    let currentTimePeriod = getCurrentMonthPeriod();
+    let currentTimePeriod = NavigationState.restoreTimePeriod() || getCurrentMonthPeriod();
     let isLoading = false;
     let currentData = null;
     let activeCharts = new Map(); // Track active chart instances for cleanup
@@ -72,7 +73,7 @@ export const ReportsView = () => {
 
     /**
      * Handle time period changes from the TimePeriodSelector component
-     * Requirements: 1.2, 2.5
+     * Requirements: 1.2, 2.5, 7.4
      */
     function handleTimePeriodChange(newTimePeriod) {
         console.log('[ReportsView] Time period changed:', newTimePeriod);
@@ -86,6 +87,9 @@ export const ReportsView = () => {
         // Update current time period
         const previousPeriod = currentTimePeriod;
         currentTimePeriod = newTimePeriod;
+
+        // Save time period to navigation state for persistence across views
+        NavigationState.saveTimePeriod(newTimePeriod);
 
         // Invalidate relevant cache entries since time period changed
         analyticsEngine.invalidateCache('categoryBreakdown');
@@ -831,8 +835,31 @@ export const ReportsView = () => {
         loadReportData();
     };
 
+    // Listen for navigation state changes from other tabs/windows
+    const handleNavigationStateChange = (e) => {
+        console.log(`[ReportsView] Navigation state changed:`, e.detail);
+        
+        // If time period was updated in another tab, sync it
+        if (e.detail.key === NavigationState.STATE_KEYS.REPORTS_TIME_PERIOD) {
+            const restoredTimePeriod = NavigationState.restoreTimePeriod();
+            if (restoredTimePeriod && restoredTimePeriod !== currentTimePeriod) {
+                console.log('[ReportsView] Syncing time period from another tab');
+                currentTimePeriod = restoredTimePeriod;
+                
+                // Update the time period selector component
+                if (timePeriodSelectorComponent && timePeriodSelectorComponent.updatePeriod) {
+                    timePeriodSelectorComponent.updatePeriod(restoredTimePeriod);
+                }
+                
+                // Reload data with synced time period
+                loadReportData();
+            }
+        }
+    };
+
     window.addEventListener('storage-updated', handleStorageUpdate);
     window.addEventListener('auth-state-changed', handleAuthChange);
+    window.addEventListener('navigation-state-changed', handleNavigationStateChange);
 
     /**
      * Manual refresh function for user-initiated refreshes
@@ -886,6 +913,7 @@ export const ReportsView = () => {
         window.removeEventListener('orientationchange', updateResponsiveLayout);
         window.removeEventListener('storage-updated', handleStorageUpdate);
         window.removeEventListener('auth-state-changed', handleAuthChange);
+        window.removeEventListener('navigation-state-changed', handleNavigationStateChange);
         
         // Clear any pending refresh timeouts
         if (container._refreshTimeout) {

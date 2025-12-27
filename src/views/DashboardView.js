@@ -45,6 +45,24 @@ export const DashboardView = () => {
     settingsBtn.title = 'Settings';
     settingsBtn.addEventListener('click', () => Router.navigate('settings'));
 
+    // Charts Button (Desktop only - positioned left of settings)
+    const chartsBtn = document.createElement('button');
+    chartsBtn.innerHTML = '📊';
+    chartsBtn.className = 'btn btn-ghost';
+    chartsBtn.style.fontSize = '1.5rem';
+    chartsBtn.style.padding = SPACING.XS;
+    chartsBtn.style.border = 'none';
+    chartsBtn.style.marginRight = SPACING.SM;
+    chartsBtn.title = 'Charts & Reports';
+    chartsBtn.addEventListener('click', () => Router.navigate('reports'));
+
+    // Hide charts button on mobile (mobile uses navigation bar)
+    const updateChartsButtonVisibility = () => {
+        const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
+        chartsBtn.style.display = isMobile ? 'none' : 'inline-block';
+    };
+    updateChartsButtonVisibility();
+
     // Group Title and Selector for easier layout
     header.innerHTML = '';
     header.style.flexDirection = 'column';
@@ -57,6 +75,7 @@ export const DashboardView = () => {
     topRow.style.alignItems = 'center';
 
     topRow.appendChild(title);
+    topRow.appendChild(chartsBtn);
     topRow.appendChild(settingsBtn);
 
     header.appendChild(topRow);
@@ -226,6 +245,9 @@ export const DashboardView = () => {
         if (!statsContainer) return;
         const isMobileNow = window.innerWidth < BREAKPOINTS.MOBILE;
         statsContainer.style.gridTemplateColumns = isMobileNow ? '1fr 1fr' : 'repeat(auto-fit, minmax(250px, 1fr))';
+        
+        // Update charts button visibility
+        updateChartsButtonVisibility();
     }, TIMING.DEBOUNCE_RESIZE);
 
     window.addEventListener('resize', updateResponsiveLayout);

@@ -1,6 +1,7 @@
 import { Router } from './core/router.js';
 import { AuthService } from './core/auth-service.js';
 import { SyncService } from './core/sync-service.js';
+import { NavigationState } from './core/navigation-state.js';
 // Views are now loaded dynamically to reduce initial bundle size
 import { MobileNavigation, updateMobileNavigation } from './components/MobileNavigation.js';
 import { NetworkStatus } from './components/NetworkStatus.js';
@@ -57,15 +58,25 @@ const initApp = () => {
         };
     };
 
-    // View Management
+    // View Management with smooth transitions
     let currentView = null;
     const setView = (view) => {
         if (currentView && typeof currentView.cleanup === 'function') {
             currentView.cleanup();
         }
-        app.innerHTML = '';
-        currentView = view;
-        app.appendChild(view);
+        
+        // Add smooth transition effect
+        app.style.opacity = '0';
+        app.style.transition = 'opacity 0.2s ease-in-out';
+        
+        setTimeout(() => {
+            app.innerHTML = '';
+            currentView = view;
+            app.appendChild(view);
+            
+            // Fade in the new view
+            app.style.opacity = '1';
+        }, 100); // Short delay for smooth transition
     };
 
     // Route Handlers (with dynamic imports for code splitting)
@@ -92,36 +103,42 @@ const initApp = () => {
 
     // Route Handlers (with dynamic imports for code splitting)
     Router.on('dashboard', async () => {
+        NavigationState.setLastActiveView('dashboard');
         const { DashboardView } = await import('./views/DashboardView.js');
         setView(DashboardView());
-        updateMobileNavigation('dashboard');
+        updateMobileNavigation('dashboard'); // Keep dashboard for desktop, but mobile nav shows charts
     });
 
     Router.on('add-expense', async (params) => {
+        NavigationState.setLastActiveView('add-expense');
         const { AddView } = await import('./views/AddView.js');
         setView(AddView(params));
         updateMobileNavigation('add-expense');
     });
 
     Router.on('edit-expense', async (params) => {
+        NavigationState.setLastActiveView('edit-expense');
         const { EditView } = await import('./views/EditView.js');
         setView(EditView(params));
         updateMobileNavigation('dashboard'); // Edit doesn't have nav item, highlight dashboard
     });
 
     Router.on('settings', async () => {
+        NavigationState.setLastActiveView('settings');
         const { SettingsView } = await import('./views/SettingsView.js');
         setView(SettingsView());
         updateMobileNavigation('settings');
     });
 
     Router.on('reports', async () => {
+        NavigationState.setLastActiveView('reports');
         const { ReportsView } = await import('./views/ReportsView.js');
         setView(ReportsView());
         updateMobileNavigation('reports');
     });
 
     Router.on('login', async () => {
+        NavigationState.setLastActiveView('login');
         const { LoginView } = await import('./views/LoginView.js');
         setView(LoginView());
         updateMobileNavigation('login');
@@ -159,6 +176,8 @@ const initApp = () => {
             console.log("[Main] No user, stopping sync.");
             localStorage.removeItem('auth_hint'); // Clear hint if auth fails
             SyncService.stopSync();
+            // Clear navigation state on logout
+            NavigationState.clearState();
             if (currentRoute !== 'login') {
                 Router.navigate('login');
             }
@@ -170,6 +189,9 @@ const initApp = () => {
         // Dispatch auth state change event for components to update (e.g., Dashboard title)
         window.dispatchEvent(new CustomEvent('auth-state-changed', { detail: { user } }));
     });
+
+    // Initialize navigation state management
+    NavigationState.init();
 
     console.log("[Main] App initialized, starting router.");
     Router.init();
