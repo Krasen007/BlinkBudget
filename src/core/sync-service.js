@@ -1,4 +1,4 @@
-import { db } from './firebase-config.js';
+import { getDb } from './firebase-config.js';
 import { AuthService } from './auth-service.js';
 import {
     doc,
@@ -51,7 +51,7 @@ export const SyncService = {
             const writeId = Date.now();
             this.pendingWrites.set(dataType, writeId);
 
-            const userDocRef = doc(db, "users", userId);
+            const userDocRef = doc(getDb(), "users", userId);
             // Wrap arrays in { items: data } for consistent storage, objects stay as they are
             const payload = Array.isArray(data) ? { items: data } : data;
 
@@ -73,7 +73,7 @@ export const SyncService = {
 
     async pullFromCloud(userId) {
         console.log("[Sync] Pulling data from cloud for user:", userId);
-        const userDocRef = doc(db, "users", userId);
+        const userDocRef = doc(getDb(), "users", userId);
         const keys = [STORAGE_KEYS.TRANSACTIONS, STORAGE_KEYS.ACCOUNTS, STORAGE_KEYS.SETTINGS];
 
         for (const key of keys) {
@@ -100,7 +100,7 @@ export const SyncService = {
 
         keys.forEach(key => {
             const unsub = onSnapshot(
-                doc(db, "users", userId, key, "data"),
+                doc(getDb(), "users", userId, key, "data"),
                 {
                     // includeMetadataChanges to know if data is from cache or server
                     includeMetadataChanges: true

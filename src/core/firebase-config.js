@@ -25,13 +25,19 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Initialize Firestore with persistent cache and multi-tab support
-const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({
-    tabManager: persistentMultipleTabManager()
-  })
-});
-console.log("Firestore initialized with persistent cache and multi-tab support.");
+// Defer Firestore initialization until needed (e.g., after login)
+let dbInstance = null;
+export const getDb = () => {
+  if (!dbInstance) {
+    dbInstance = initializeFirestore(app, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager()
+      })
+    });
+    console.log("Firestore initialized with persistent cache and multi-tab support.");
+  }
+  return dbInstance;
+};
 
 // Initialize Analytics conditionally
 let analytics = null;
@@ -45,4 +51,4 @@ isSupported().then(supported => {
   console.warn("Analytics not supported in this environment:", e.message);
 });
 
-export { app, analytics, auth, db };
+export { app, analytics, auth };
