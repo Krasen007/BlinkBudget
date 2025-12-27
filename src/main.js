@@ -80,7 +80,7 @@ const initApp = () => {
         }
 
         // Protected routes
-        const protectedRoutes = ['dashboard', 'add-expense', 'edit-expense', 'settings'];
+        const protectedRoutes = ['dashboard', 'add-expense', 'edit-expense', 'settings', 'reports'];
         if (protectedRoutes.includes(route)) {
             if (!AuthService.isAuthenticated() && !AuthService.hasAuthHint()) {
                 Router.navigate('login');
@@ -113,6 +113,12 @@ const initApp = () => {
         const { SettingsView } = await import('./views/SettingsView.js');
         setView(SettingsView());
         updateMobileNavigation('settings');
+    });
+
+    Router.on('reports', async () => {
+        const { ReportsView } = await import('./views/ReportsView.js');
+        setView(ReportsView());
+        updateMobileNavigation('reports');
     });
 
     Router.on('login', async () => {
