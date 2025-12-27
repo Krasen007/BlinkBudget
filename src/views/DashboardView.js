@@ -16,6 +16,7 @@ export const DashboardView = () => {
     container.style.height = '100%';
     container.style.display = 'flex';
     container.style.flexDirection = 'column';
+    container.style.padding = `0 ${SPACING.MD}`;
     container.style.overflow = 'hidden'; // Prevent dashboard from scrolling
 
     // Header (Account Selector & Settings)
@@ -203,6 +204,7 @@ export const DashboardView = () => {
             variant: 'primary'
         });
         addBtn.style.width = '100%';
+        addBtn.style.margin = '0';
         addBtn.style.marginBottom = SPACING.XL;
         addBtn.style.flexShrink = '0'; // Prevent button from shrinking
         content.appendChild(addBtn);
