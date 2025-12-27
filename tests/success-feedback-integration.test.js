@@ -34,7 +34,7 @@ describe('Success Feedback Integration', () => {
 
         // Simulate dashboard rendering (what happens in DashboardView)
         const highlightTransactionId = getTransactionToHighlight();
-        
+
         // Create transaction list item with highlight flag
         const transactionItem = TransactionListItem({
             transaction: mockTransaction,
@@ -48,7 +48,7 @@ describe('Success Feedback Integration', () => {
         // Verify the transaction item was created
         expect(transactionItem).toBeTruthy();
         expect(transactionItem.querySelector('.transaction-item-category').textContent).toBe('Food & Groceries');
-        expect(transactionItem.querySelector('.transaction-item-value').textContent).toBe('-$25.50');
+        expect(transactionItem.querySelector('.transaction-item-value').textContent).toBe('-€25.50');
 
         // Wait for highlight animation to be applied
         await new Promise(resolve => setTimeout(resolve, 150));

@@ -22,8 +22,8 @@ DO NOT IMPLEMENT: when deleting a transaction create animation of the row dissap
 [x] begin work on PWA
 [ ] make security.md following all the security best practices 
 [x] when editing transactions the original selected category should be shown in the first position
-[ ] when adding new transaction the selected account should be the account when adding the transaction
-[ ] when editing a trasaction the selected categorie should show at the first position in the list to make it easier to select it
+[x] when adding new transaction the selected account should be the account when adding the transaction
+[x] when editing a trasaction the selected categorie should show at the first position in the list to make it easier to select it
 [x] change the name of the date format to remove the iso / us etc. just leave the format.
 [x] on mobile, the accounts in the settings view, the name and type should be shown on a single row to save space
 [ ] add possibility to import transactions from a csv file

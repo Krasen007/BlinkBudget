@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - BlinkBudget</title>
+    <style>
+        :root {
+            --color-background: #000000;
+            --color-surface: #1a1a1a;
+            --color-primary: #6c5ce7;
+            --color-text-main: #ffffff;
+            --color-text-muted: #a0a0a0;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            background-color: var(--color-background);
+            color: var(--color-text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 0 20px rgba(108, 92, 231, 0.4));
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            margin: 0 0 1rem 0;
+            font-weight: 700;
+        }
+
+        p {
+            font-size: 1rem;
+            color: var(--color-text-muted);
+            max-width: 300px;
+            line-height: 1.5;
+            margin: 0 0 2rem 0;
+        }
+
+        .btn {
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            text-decoration: none;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .offline-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            color: var(--color-text-muted);
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background-color: #ff4757;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #ff4757;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="icon">📡</div>
+    <div class="offline-status">
+        <span class="dot"></span>
+        No Connection
+    </div>
+    <h1>You're Offline</h1>
+    <p>It seems you've lost your connection. You can still use the app to track expenses, and they'll sync once you're
+        back online.</p>
+    <button class="btn" onclick="window.location.reload()">Retry Connection</button>
+
+    <script>
+        // Check if back online
+        window.addEventListener('online', () => {
+            window.location.reload();
+        });
+    </script>
+</body>
+
+</html>

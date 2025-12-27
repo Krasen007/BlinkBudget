@@ -6,6 +6,7 @@ import { DateFormatSection } from '../components/DateFormatSection.js';
 import { DataManagementSection } from '../components/DataManagementSection.js';
 import { DIMENSIONS, SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
 import { createButton } from '../utils/dom-factory.js';
+import { InstallService } from '../core/install.js';
 
 export const SettingsView = () => {
     const container = document.createElement('div');
@@ -92,6 +93,31 @@ export const SettingsView = () => {
     doneBtn.className += ' touch-target';
     container.appendChild(doneBtn);
 
+    // Install App Button (Conditional)
+    const installBtn = Button({
+        text: 'Install App',
+        variant: 'primary',
+        onClick: async () => {
+            const installed = await InstallService.promptInstall();
+            if (installed) {
+                installBtn.style.display = 'none';
+            }
+        }
+    });
+
+    Object.assign(installBtn.style, {
+        width: '100%',
+        marginTop: SPACING.XL,
+        display: InstallService.isInstallable() ? 'block' : 'none'
+    });
+
+    // Subscribe to installable changes
+    const unsubscribeInstall = InstallService.subscribe((isInstallable) => {
+        installBtn.style.display = isInstallable ? 'block' : 'none';
+    });
+
+    container.appendChild(installBtn);
+
     // Logout Button
     const logoutBtn = Button({
         text: 'Logout',
@@ -132,6 +158,7 @@ export const SettingsView = () => {
 
     container.cleanup = () => {
         window.removeEventListener('storage-updated', handleStorageUpdate);
+        unsubscribeInstall();
         if (dataSection && typeof dataSection.cleanup === 'function') {
             dataSection.cleanup();
         }

@@ -47,7 +47,7 @@ export const NetworkStatus = () => {
     icon.style.filter = 'drop-shadow(0 0 8px rgba(255, 159, 67, 0.5))';
 
     const text = document.createElement('span');
-    text.textContent = 'Offline';
+    text.textContent = 'Offline - Using local data';
     text.style.color = '#fff';
     text.style.textShadow = `
         0 0 10px rgba(255, 159, 67, 0.8),
@@ -56,6 +56,26 @@ export const NetworkStatus = () => {
 
     container.appendChild(icon);
     container.appendChild(text);
+
+    // Add a subtext for more info
+    const subtext = document.createElement('div');
+    subtext.textContent = 'Changes will sync when online';
+    Object.assign(subtext.style, {
+        fontSize: '0.7rem',
+        color: 'rgba(255, 255, 255, 0.7)',
+        marginTop: '2px',
+        fontWeight: '400'
+    });
+
+    const textContainer = document.createElement('div');
+    textContainer.style.display = 'flex';
+    textContainer.style.flexDirection = 'column';
+    textContainer.appendChild(text);
+    textContainer.appendChild(subtext);
+
+    container.innerHTML = '';
+    container.appendChild(icon);
+    container.appendChild(textContainer);
 
     // Update status based on network
     const updateStatus = () => {

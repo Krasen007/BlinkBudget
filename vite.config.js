@@ -11,15 +11,21 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
-        skipWaiting: true
+        skipWaiting: true,
+        navigateFallback: 'offline.html',
+        navigateFallbackAllowlist: [/^(?!\/__).*/], // Allow all except Firebase auth paths
       },
-      includeAssets: ['favicon.png', 'favicon.ico'],
+      includeAssets: ['favicon.png', 'favicon.ico', 'offline.html'],
       manifest: {
         id: '/',
         name: 'BlinkBudget',
         short_name: 'BlinkBudget',
         description: 'Making expense tracking effortless, all in 3 clicks.',
-        theme_color: '#ffffff',
+        theme_color: '#000000',
+        background_color: '#000000',
+        display: 'standalone',
+        orientation: 'portrait',
+        categories: ['finance', 'productivity'],
         icons: [
           {
             src: 'favicon.png',
@@ -32,6 +38,15 @@ export default defineConfig({
             sizes: '1024x1024',
             type: 'image/png',
             purpose: 'maskable'
+          }
+        ],
+        shortcuts: [
+          {
+            name: 'Add Transaction',
+            short_name: 'Add',
+            description: 'Quickly add a new expense or income',
+            url: '/#add-expense',
+            icons: [{ src: 'favicon.png', sizes: '1024x1024' }]
           }
         ],
         screenshots: [
