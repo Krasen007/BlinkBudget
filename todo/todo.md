@@ -32,3 +32,7 @@ DO NOT IMPLEMENT: when deleting a transaction create animation of the row dissap
 [x] change the $ in the transactions to €
 [x] add install PWA button in the settings
 [x] add refresh button in the settings
+[ ] Implement client-side session timeout (30 minutes of inactivity)
+[ ] Implement local data encryption for sensitive information in localStorage
+[ ] Mask technical error messages from Firestore operations
+[ ] Implement an audit logging mechanism for sensitive user actions (account changes, data export)

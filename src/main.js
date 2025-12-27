@@ -69,35 +69,53 @@ const initApp = () => {
     };
 
     // Route Handlers (with dynamic imports for code splitting)
-    Router.on('dashboard', withAuth(async () => {
+    // Register Global Route Guard
+    Router.before(async (route) => {
+        if (route === 'login') {
+            if (AuthService.isAuthenticated()) {
+                Router.navigate('dashboard');
+                return false;
+            }
+            return true;
+        }
+
+        // Protected routes
+        const protectedRoutes = ['dashboard', 'add-expense', 'edit-expense', 'settings'];
+        if (protectedRoutes.includes(route)) {
+            if (!AuthService.isAuthenticated() && !AuthService.hasAuthHint()) {
+                Router.navigate('login');
+                return false;
+            }
+        }
+        return true;
+    });
+
+    // Route Handlers (with dynamic imports for code splitting)
+    Router.on('dashboard', async () => {
         const { DashboardView } = await import('./views/DashboardView.js');
         setView(DashboardView());
         updateMobileNavigation('dashboard');
-    }));
+    });
 
-    Router.on('add-expense', withAuth(async (params) => {
+    Router.on('add-expense', async (params) => {
         const { AddView } = await import('./views/AddView.js');
         setView(AddView(params));
         updateMobileNavigation('add-expense');
-    }));
+    });
 
-    Router.on('edit-expense', withAuth(async (params) => {
+    Router.on('edit-expense', async (params) => {
         const { EditView } = await import('./views/EditView.js');
         setView(EditView(params));
         updateMobileNavigation('dashboard'); // Edit doesn't have nav item, highlight dashboard
-    }));
+    });
 
-    Router.on('settings', withAuth(async () => {
+    Router.on('settings', async () => {
         const { SettingsView } = await import('./views/SettingsView.js');
         setView(SettingsView());
         updateMobileNavigation('settings');
-    }));
+    });
 
     Router.on('login', async () => {
-        if (AuthService.isAuthenticated()) {
-            Router.navigate('dashboard');
-            return;
-        }
         const { LoginView } = await import('./views/LoginView.js');
         setView(LoginView());
         updateMobileNavigation('login');

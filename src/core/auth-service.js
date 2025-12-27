@@ -30,7 +30,13 @@ export const AuthService = {
             localStorage.setItem('auth_hint', 'true');
             return { user: this.user, error: null };
         } catch (error) {
-            return { user: null, error: error.message };
+            let message = "An unexpected error occurred. Please try again.";
+            if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+                message = "Invalid email or password.";
+            } else if (error.code === 'auth/too-many-requests') {
+                message = "Too many failed attempts. Please try again later.";
+            }
+            return { user: null, error: message };
         }
     },
 
@@ -41,7 +47,15 @@ export const AuthService = {
             localStorage.setItem('auth_hint', 'true');
             return { user: this.user, error: null };
         } catch (error) {
-            return { user: null, error: error.message };
+            let message = "An unexpected error occurred. Please try again.";
+            if (error.code === 'auth/email-already-in-use') {
+                message = "This email address is already in use.";
+            } else if (error.code === 'auth/invalid-email') {
+                message = "Please enter a valid email address.";
+            } else if (error.code === 'auth/weak-password') {
+                message = "The password is too weak.";
+            }
+            return { user: null, error: message };
         }
     },
 

@@ -9,6 +9,7 @@ import { createAccountRenameModal, createConfirmModal, createAlertModal } from '
 import { COLORS, SPACING, TOUCH_TARGETS, FONT_SIZES, HAPTIC_PATTERNS, ACCOUNT_TYPES } from '../utils/constants.js';
 import { createInput, createSelect, createFlexContainer } from '../utils/dom-factory.js';
 import { addTouchFeedback } from '../utils/touch-utils.js';
+import { sanitizeInput } from '../utils/security-utils.js';
 
 export const AccountSection = () => {
     const section = document.createElement('div');
@@ -106,7 +107,7 @@ export const AccountSection = () => {
             renameBtn.onclick = () => {
                 createAccountRenameModal(acc.name, (newName) => {
                     if (newName && newName.trim() !== '') {
-                        const trimmedName = newName.trim();
+                        const trimmedName = sanitizeInput(newName.trim(), 50); // Typical account name limit
                         if (StorageService.isAccountDuplicate(trimmedName, acc.type, acc.id)) {
                             createAlertModal(`An account named "${trimmedName}" of type "${acc.type}" already exists.`);
                             return;
@@ -244,7 +245,7 @@ export const AccountSection = () => {
         text: 'Add Account',
         variant: 'secondary',
         onClick: () => {
-            const name = nameInput.value.trim();
+            const name = sanitizeInput(nameInput.value.trim(), 50);
             const type = typeSelect.value;
             if (name) {
                 if (StorageService.isAccountDuplicate(name, type)) {

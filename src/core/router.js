@@ -20,8 +20,13 @@ export const Router = {
         window.location.hash = hash;
     },
 
+    // Register a global before hook
+    before(hook) {
+        this.beforeHook = hook;
+    },
+
     // Internal: Handle the current hash
-    handleRoute() {
+    async handleRoute() {
         const rawHash = window.location.hash.slice(1) || 'dashboard'; // Default to dashboard
 
         // Split route and params (e.g. edit-expense?id=123)
@@ -33,6 +38,12 @@ export const Router = {
             for (const [key, value] of searchParams) {
                 params[key] = value;
             }
+        }
+
+        // Execute global before hook if it exists
+        if (this.beforeHook) {
+            const canProceed = await this.beforeHook(route, params);
+            if (canProceed === false) return;
         }
 
         const handler = this.routes[route];

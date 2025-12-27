@@ -14,6 +14,7 @@ import { STORAGE_KEYS } from '../utils/constants.js';
 export const SyncService = {
     unsubscribes: [],
     pendingWrites: new Map(), // Track pending writes to avoid race conditions
+    lastPushTimes: new Map(), // Track last push time per dataType for rate limiting
 
     async init() {
         AuthService.init(async (user) => {
@@ -34,6 +35,16 @@ export const SyncService = {
     async pushToCloud(dataType, data) {
         const userId = AuthService.getUserId();
         if (!userId) return;
+
+        // Rate limiting: Ensure at least 2 seconds between pushes for the same dataType
+        const now = Date.now();
+        const lastPush = this.lastPushTimes.get(dataType) || 0;
+        if (now - lastPush < 2000) {
+            console.log(`[Sync] Throttling push for ${dataType}...`);
+            // We could use a debounce here instead, but for now simple throttle/skip is safer for security context
+            return;
+        }
+        this.lastPushTimes.set(dataType, now);
 
         try {
             // Mark that we're writing to this dataType to prevent race conditions

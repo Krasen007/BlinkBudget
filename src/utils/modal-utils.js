@@ -6,6 +6,7 @@
 import { Button } from '../components/Button.js';
 import { COLORS, DIMENSIONS, SPACING, FONT_SIZES, TOUCH_TARGETS, Z_INDEX, TIMING } from './constants.js';
 import { addTouchFeedback } from './touch-utils.js';
+import { sanitizeInput } from './security-utils.js';
 
 /**
  * Create a modal overlay
@@ -142,7 +143,7 @@ export const createAccountRenameModal = (currentName, onSave) => {
         text: 'Save',
         variant: 'primary',
         onClick: () => {
-            const newName = input.value.trim();
+            const newName = sanitizeInput(input.value.trim(), 50);
             if (newName) {
                 onSave(newName);
                 closeModal();

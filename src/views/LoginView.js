@@ -2,6 +2,7 @@ import { AuthService } from '../core/auth-service.js';
 import { Router } from '../core/router.js';
 import { Button } from '../components/Button.js';
 import { COLORS, SPACING, DIMENSIONS, FONT_SIZES } from '../utils/constants.js';
+import { validatePasswordStrength } from '../utils/security-utils.js';
 
 export const LoginView = () => {
     const container = document.createElement('div');
@@ -72,6 +73,14 @@ export const LoginView = () => {
             if (!email || !password) {
                 errorMsg.textContent = 'Please fill in all fields.';
                 return;
+            }
+
+            if (isSignup) {
+                const strength = validatePasswordStrength(password);
+                if (!strength.isValid) {
+                    errorMsg.textContent = strength.message;
+                    return;
+                }
             }
 
             submitBtn.disabled = true;

@@ -4,6 +4,7 @@
  */
 
 import { getTodayISO } from '../date-utils.js';
+import { sanitizeInput } from '../security-utils.js';
 
 /**
  * Get date source for transaction timestamp
@@ -14,7 +15,7 @@ export const getDateSource = (externalDateInput = null) => {
     if (externalDateInput) {
         return externalDateInput;
     }
-    
+
     // Create fallback date input with today's date
     const fallback = document.createElement('input');
     fallback.type = 'date';
@@ -42,24 +43,24 @@ export const prepareTransactionData = (formState) => {
         toAccountId = null,
         externalDateInput = null
     } = formState;
-    
+
     const dateSource = getDateSource(externalDateInput);
     const dateValue = dateSource.value || getTodayISO();
-    
+
     const transactionData = {
         amount: Math.abs(amount),
         type,
         accountId,
         timestamp: new Date(dateValue).toISOString()
     };
-    
+
     if (type === 'transfer') {
         transactionData.category = 'Transfer';
         transactionData.toAccountId = toAccountId;
     } else {
-        transactionData.category = category;
+        transactionData.category = sanitizeInput(category || '');
     }
-    
+
     return transactionData;
 };
 
@@ -75,7 +76,7 @@ export const handleFormSubmit = (transactionData, onSubmit, onError = null) => {
     } catch (e) {
         console.error('Submit failed:', e);
         const errorMessage = 'Error submitting transaction: ' + e.message;
-        
+
         if (onError) {
             onError(e, errorMessage);
         } else {
