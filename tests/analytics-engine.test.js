@@ -255,4 +255,130 @@ describe('AnalyticsEngine', () => {
             expect(categoryInsight.category).toBe('Food & Groceries');
         });
     });
+
+    describe('predictFutureSpending', () => {
+        it('should return insufficient data message for limited transaction history', () => {
+            const prediction = analyticsEngine.predictFutureSpending(sampleTransactions, 3);
+            
+            expect(prediction.hasEnoughData).toBe(false);
+            expect(prediction.message).toContain('Insufficient historical data');
+            expect(prediction.predictions).toEqual([]);
+        });
+
+        it('should generate predictions when sufficient historical data exists', () => {
+            // Create more historical data spanning multiple months
+            const historicalTransactions = [];
+            for (let month = 0; month < 6; month++) {
+                for (let day = 1; day <= 10; day++) {
+                    const date = new Date(2024, month, day);
+                    historicalTransactions.push({
+                        id: `${month}-${day}-expense`,
+                        amount: 50 + Math.random() * 100,
+                        category: 'Food & Groceries',
+                        type: TRANSACTION_TYPES.EXPENSE,
+                        date: date.toISOString().split('T')[0],
+                        accountId: 'main'
+                    });
+                    
+                    if (day % 5 === 0) {
+                        historicalTransactions.push({
+                            id: `${month}-${day}-income`,
+                            amount: 1000,
+                            category: 'Paycheck',
+                            type: TRANSACTION_TYPES.INCOME,
+                            date: date.toISOString().split('T')[0],
+                            accountId: 'main'
+                        });
+                    }
+                }
+            }
+
+            const prediction = analyticsEngine.predictFutureSpending(historicalTransactions, 2);
+            
+            expect(prediction.hasEnoughData).toBe(true);
+            expect(prediction.predictions).toHaveLength(2);
+            expect(prediction.confidence).toBeDefined();
+            expect(prediction.historicalAnalysis).toBeDefined();
+            expect(prediction.historicalAnalysis.monthsAnalyzed).toBeGreaterThanOrEqual(3);
+        });
+    });
+
+    describe('comparePeriodsSpending', () => {
+        it('should compare spending between two periods', () => {
+            const currentPeriod = {
+                startDate: '2024-01-15',
+                endDate: '2024-01-17'
+            };
+            
+            const comparisonPeriod = {
+                startDate: '2024-01-10',
+                endDate: '2024-01-12'
+            };
+
+            // Add some transactions for the comparison period
+            const extendedTransactions = [
+                ...sampleTransactions,
+                {
+                    id: '5',
+                    amount: 30.00,
+                    category: 'Food & Groceries',
+                    type: TRANSACTION_TYPES.EXPENSE,
+                    date: '2024-01-10',
+                    accountId: 'main'
+                },
+                {
+                    id: '6',
+                    amount: 800.00,
+                    category: 'Paycheck',
+                    type: TRANSACTION_TYPES.INCOME,
+                    date: '2024-01-11',
+                    accountId: 'main'
+                }
+            ];
+
+            const comparison = analyticsEngine.comparePeriodsSpending(
+                extendedTransactions, 
+                currentPeriod, 
+                comparisonPeriod
+            );
+            
+            expect(comparison.currentPeriod).toEqual(currentPeriod);
+            expect(comparison.comparisonPeriod).toEqual(comparisonPeriod);
+            expect(comparison.overallComparison).toBeDefined();
+            expect(comparison.categoryComparison).toBeDefined();
+            expect(comparison.behaviorChanges).toBeDefined();
+            expect(comparison.insights).toBeInstanceOf(Array);
+            expect(comparison.summary).toBeDefined();
+        });
+    });
+
+    describe('getHistoricalInsights', () => {
+        it('should preserve historical insights for multiple periods', () => {
+            const periods = [
+                {
+                    startDate: '2024-01-01',
+                    endDate: '2024-01-31'
+                },
+                {
+                    startDate: '2024-02-01',
+                    endDate: '2024-02-29'
+                }
+            ];
+
+            const historicalInsights = analyticsEngine.getHistoricalInsights(sampleTransactions, periods);
+            
+            expect(historicalInsights.historicalInsights).toHaveLength(2);
+            expect(historicalInsights.totalPeriods).toBe(2);
+            expect(historicalInsights.overallTrends).toBeDefined();
+            expect(historicalInsights.preservedAt).toBeDefined();
+            
+            // Each period should have insights and summary
+            historicalInsights.historicalInsights.forEach(periodData => {
+                expect(periodData.period).toBeDefined();
+                expect(periodData.insights).toBeInstanceOf(Array);
+                expect(periodData.summary).toBeDefined();
+                expect(periodData.summary.totalInsights).toBeDefined();
+            });
+        });
+    });
 });
