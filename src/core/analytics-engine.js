@@ -313,9 +313,479 @@ export class AnalyticsEngine {
                         : null
                 });
             }
+
+            // Category-specific insights
+            const categoryInsights = this.generateCategoryComparisonInsights(currentCategories, previousCategories);
+            insights.push(...categoryInsights);
+        }
+
+        // Add spending pattern insights
+        const patternInsights = this.analyzeSpendingPatterns(transactions, currentPeriod);
+        insights.push(...patternInsights);
+
+        // Add anomaly detection insights
+        const anomalyInsights = this.detectSpendingAnomalies(transactions, currentPeriod);
+        insights.push(...anomalyInsights);
+
+        return insights;
+    }
+
+    /**
+     * Analyze spending patterns and generate insights
+     * @param {Array} transactions - All transaction data
+     * @param {Object} timePeriod - Current time period
+     * @returns {Array} Array of pattern-based insights
+     */
+    analyzeSpendingPatterns(transactions, timePeriod) {
+        const insights = [];
+        const filteredTransactions = this.filterTransactionsByTimePeriod(transactions, timePeriod);
+        const expenseTransactions = filteredTransactions.filter(t => t.type === TRANSACTION_TYPES.EXPENSE);
+
+        if (expenseTransactions.length === 0) {
+            return insights;
+        }
+
+        // Analyze spending frequency patterns
+        const frequencyInsights = this.analyzeSpendingFrequency(expenseTransactions, timePeriod);
+        insights.push(...frequencyInsights);
+
+        // Analyze timing patterns (day of week, time of day)
+        const timingInsights = this.analyzeSpendingTiming(expenseTransactions);
+        insights.push(...timingInsights);
+
+        // Analyze transaction size patterns
+        const sizeInsights = this.analyzeTransactionSizes(expenseTransactions);
+        insights.push(...sizeInsights);
+
+        return insights;
+    }
+
+    /**
+     * Analyze spending frequency patterns
+     * @param {Array} expenseTransactions - Expense transactions
+     * @param {Object} timePeriod - Time period
+     * @returns {Array} Frequency-based insights
+     */
+    analyzeSpendingFrequency(expenseTransactions, timePeriod) {
+        const insights = [];
+        
+        // Calculate average transactions per day
+        const startDate = new Date(timePeriod.startDate);
+        const endDate = new Date(timePeriod.endDate);
+        const durationDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+        const avgTransactionsPerDay = expenseTransactions.length / durationDays;
+
+        if (avgTransactionsPerDay > 5) {
+            insights.push({
+                id: 'high_frequency_spending',
+                type: 'pattern',
+                message: `You're making ${avgTransactionsPerDay.toFixed(1)} expense transactions per day on average. This suggests frequent small purchases.`,
+                severity: 'medium',
+                actionable: true,
+                recommendation: 'Consider consolidating purchases or setting daily spending limits to reduce transaction frequency.'
+            });
+        } else if (avgTransactionsPerDay < 1) {
+            insights.push({
+                id: 'low_frequency_spending',
+                type: 'pattern',
+                message: `You're making ${avgTransactionsPerDay.toFixed(1)} expense transactions per day on average. This suggests infrequent, larger purchases.`,
+                severity: 'low',
+                actionable: false
+            });
         }
 
         return insights;
+    }
+
+    /**
+     * Analyze spending timing patterns
+     * @param {Array} expenseTransactions - Expense transactions
+     * @returns {Array} Timing-based insights
+     */
+    analyzeSpendingTiming(expenseTransactions) {
+        const insights = [];
+        
+        // Analyze day of week patterns
+        const dayOfWeekCounts = {};
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        
+        expenseTransactions.forEach(transaction => {
+            const date = new Date(transaction.date || transaction.timestamp);
+            const dayOfWeek = date.getDay();
+            const dayName = dayNames[dayOfWeek];
+            
+            if (!dayOfWeekCounts[dayName]) {
+                dayOfWeekCounts[dayName] = { count: 0, amount: 0 };
+            }
+            dayOfWeekCounts[dayName].count += 1;
+            dayOfWeekCounts[dayName].amount += Math.abs(transaction.amount || 0);
+        });
+
+        // Find the day with highest spending
+        const sortedDays = Object.entries(dayOfWeekCounts)
+            .sort((a, b) => b[1].amount - a[1].amount);
+
+        if (sortedDays.length > 0) {
+            const [topDay, topDayData] = sortedDays[0];
+            const totalAmount = Object.values(dayOfWeekCounts).reduce((sum, day) => sum + day.amount, 0);
+            const dayPercentage = (topDayData.amount / totalAmount) * 100;
+
+            if (dayPercentage > 30) {
+                insights.push({
+                    id: 'day_spending_pattern',
+                    type: 'pattern',
+                    message: `${dayPercentage.toFixed(1)}% of your spending happens on ${topDay}s. This suggests a strong weekly spending pattern.`,
+                    severity: 'low',
+                    actionable: true,
+                    recommendation: `Consider if your ${topDay} spending aligns with your budget goals.`
+                });
+            }
+        }
+
+        return insights;
+    }
+
+    /**
+     * Analyze transaction size patterns
+     * @param {Array} expenseTransactions - Expense transactions
+     * @returns {Array} Size-based insights
+     */
+    analyzeTransactionSizes(expenseTransactions) {
+        const insights = [];
+        
+        if (expenseTransactions.length < 3) {
+            return insights;
+        }
+
+        const amounts = expenseTransactions.map(t => Math.abs(t.amount || 0)).sort((a, b) => a - b);
+        const totalAmount = amounts.reduce((sum, amount) => sum + amount, 0);
+        const averageAmount = totalAmount / amounts.length;
+        
+        // Calculate median
+        const median = amounts.length % 2 === 0
+            ? (amounts[amounts.length / 2 - 1] + amounts[amounts.length / 2]) / 2
+            : amounts[Math.floor(amounts.length / 2)];
+
+        // Identify small vs large transaction patterns
+        const smallTransactions = amounts.filter(amount => amount < averageAmount * 0.5);
+        const largeTransactions = amounts.filter(amount => amount > averageAmount * 2);
+
+        if (smallTransactions.length > amounts.length * 0.7) {
+            insights.push({
+                id: 'small_transaction_pattern',
+                type: 'pattern',
+                message: `${((smallTransactions.length / amounts.length) * 100).toFixed(1)}% of your transactions are small purchases under ${(averageAmount * 0.5).toFixed(2)}.`,
+                severity: 'low',
+                actionable: true,
+                recommendation: 'Small frequent purchases can add up. Consider tracking these more closely or setting daily limits.'
+            });
+        }
+
+        if (largeTransactions.length > 0) {
+            const largeTransactionTotal = largeTransactions.reduce((sum, amount) => sum + amount, 0);
+            const largeTransactionPercentage = (largeTransactionTotal / totalAmount) * 100;
+            
+            insights.push({
+                id: 'large_transaction_pattern',
+                type: 'pattern',
+                message: `${largeTransactions.length} large transactions (over ${(averageAmount * 2).toFixed(2)}) account for ${largeTransactionPercentage.toFixed(1)}% of your total spending.`,
+                severity: 'medium',
+                actionable: true,
+                recommendation: 'Large transactions have significant impact. Consider if these align with your financial priorities.'
+            });
+        }
+
+        return insights;
+    }
+
+    /**
+     * Generate category comparison insights between periods
+     * @param {Object} currentCategories - Current period category breakdown
+     * @param {Object} previousCategories - Previous period category breakdown
+     * @returns {Array} Category comparison insights
+     */
+    generateCategoryComparisonInsights(currentCategories, previousCategories) {
+        const insights = [];
+        
+        // Create maps for easier comparison
+        const currentCategoryMap = new Map();
+        const previousCategoryMap = new Map();
+        
+        currentCategories.categories.forEach(cat => {
+            currentCategoryMap.set(cat.name, cat);
+        });
+        
+        previousCategories.categories.forEach(cat => {
+            previousCategoryMap.set(cat.name, cat);
+        });
+
+        // Find categories with significant changes
+        for (const [categoryName, currentCat] of currentCategoryMap) {
+            const previousCat = previousCategoryMap.get(categoryName);
+            
+            if (previousCat) {
+                const amountChange = currentCat.amount - previousCat.amount;
+                const percentChange = previousCat.amount > 0 
+                    ? (amountChange / previousCat.amount) * 100 
+                    : 0;
+
+                if (Math.abs(percentChange) > 25 && Math.abs(amountChange) > 10) {
+                    insights.push({
+                        id: `category_change_${categoryName.toLowerCase().replace(/\s+/g, '_')}`,
+                        type: amountChange > 0 ? 'increase' : 'decrease',
+                        category: categoryName,
+                        message: `Your "${categoryName}" spending ${amountChange > 0 ? 'increased' : 'decreased'} by ${Math.abs(percentChange).toFixed(1)}% (${Math.abs(amountChange).toFixed(2)}) compared to the previous period.`,
+                        severity: Math.abs(percentChange) > 50 ? 'high' : 'medium',
+                        actionable: amountChange > 0,
+                        recommendation: amountChange > 0 
+                            ? `Review your recent "${categoryName}" purchases to understand what drove the increase.`
+                            : null
+                    });
+                }
+            } else if (currentCat.amount > 20) {
+                // New category with significant spending
+                insights.push({
+                    id: `new_category_${categoryName.toLowerCase().replace(/\s+/g, '_')}`,
+                    type: 'pattern',
+                    category: categoryName,
+                    message: `You started spending in a new category "${categoryName}" with ${currentCat.amount.toFixed(2)} this period.`,
+                    severity: 'low',
+                    actionable: false
+                });
+            }
+        }
+
+        return insights;
+    }
+
+    /**
+     * Detect spending anomalies and unusual patterns
+     * @param {Array} transactions - All transaction data
+     * @param {Object} currentPeriod - Current time period
+     * @returns {Array} Anomaly-based insights
+     */
+    detectSpendingAnomalies(transactions, currentPeriod) {
+        const insights = [];
+        const filteredTransactions = this.filterTransactionsByTimePeriod(transactions, currentPeriod);
+        const expenseTransactions = filteredTransactions.filter(t => t.type === TRANSACTION_TYPES.EXPENSE);
+
+        if (expenseTransactions.length < 5) {
+            return insights; // Need sufficient data for anomaly detection
+        }
+
+        // Detect spending spikes
+        const spikeInsights = this.detectSpendingSpikes(expenseTransactions);
+        insights.push(...spikeInsights);
+
+        // Detect unusual category concentrations
+        const concentrationInsights = this.detectCategoryConcentration(expenseTransactions);
+        insights.push(...concentrationInsights);
+
+        // Detect unusual timing patterns
+        const timingAnomalies = this.detectTimingAnomalies(expenseTransactions);
+        insights.push(...timingAnomalies);
+
+        return insights;
+    }
+
+    /**
+     * Detect spending spikes using statistical analysis
+     * @param {Array} expenseTransactions - Expense transactions
+     * @returns {Array} Spike detection insights
+     */
+    detectSpendingSpikes(expenseTransactions) {
+        const insights = [];
+        const amounts = expenseTransactions.map(t => Math.abs(t.amount || 0));
+        
+        if (amounts.length < 5) {
+            return insights;
+        }
+
+        // Calculate statistical measures
+        const mean = amounts.reduce((sum, amount) => sum + amount, 0) / amounts.length;
+        const variance = amounts.reduce((sum, amount) => sum + Math.pow(amount - mean, 2), 0) / amounts.length;
+        const standardDeviation = Math.sqrt(variance);
+        
+        // Define spike threshold (2 standard deviations above mean)
+        const spikeThreshold = mean + (2 * standardDeviation);
+        
+        // Find transactions that exceed the spike threshold
+        const spikes = expenseTransactions.filter(t => Math.abs(t.amount || 0) > spikeThreshold);
+        
+        if (spikes.length > 0) {
+            const totalSpikeAmount = spikes.reduce((sum, t) => sum + Math.abs(t.amount || 0), 0);
+            const totalAmount = amounts.reduce((sum, amount) => sum + amount, 0);
+            const spikePercentage = (totalSpikeAmount / totalAmount) * 100;
+            
+            insights.push({
+                id: 'spending_spikes',
+                type: 'anomaly',
+                message: `Detected ${spikes.length} unusually large transaction${spikes.length > 1 ? 's' : ''} totaling ${totalSpikeAmount.toFixed(2)} (${spikePercentage.toFixed(1)}% of total spending).`,
+                severity: spikePercentage > 30 ? 'high' : 'medium',
+                actionable: true,
+                recommendation: 'Review these large transactions to ensure they align with your budget and financial goals.',
+                metadata: {
+                    spikeTransactions: spikes.map(t => ({
+                        amount: t.amount,
+                        category: t.category,
+                        description: t.description,
+                        date: t.date || t.timestamp
+                    })),
+                    threshold: spikeThreshold
+                }
+            });
+        }
+
+        return insights;
+    }
+
+    /**
+     * Detect unusual category concentration
+     * @param {Array} expenseTransactions - Expense transactions
+     * @returns {Array} Category concentration insights
+     */
+    detectCategoryConcentration(expenseTransactions) {
+        const insights = [];
+        
+        // Calculate category distribution
+        const categoryTotals = {};
+        let totalAmount = 0;
+        
+        expenseTransactions.forEach(transaction => {
+            const category = transaction.category || 'Uncategorized';
+            const amount = Math.abs(transaction.amount || 0);
+            
+            if (!categoryTotals[category]) {
+                categoryTotals[category] = 0;
+            }
+            categoryTotals[category] += amount;
+            totalAmount += amount;
+        });
+
+        // Find categories with unusually high concentration
+        for (const [category, amount] of Object.entries(categoryTotals)) {
+            const percentage = (amount / totalAmount) * 100;
+            
+            if (percentage > 60) {
+                insights.push({
+                    id: `high_concentration_${category.toLowerCase().replace(/\s+/g, '_')}`,
+                    type: 'anomaly',
+                    category: category,
+                    message: `Unusually high spending concentration: ${percentage.toFixed(1)}% of your expenses are in "${category}".`,
+                    severity: 'high',
+                    actionable: true,
+                    recommendation: `Consider diversifying your spending or reviewing if this level of "${category}" spending is sustainable.`
+                });
+            }
+        }
+
+        return insights;
+    }
+
+    /**
+     * Detect unusual timing patterns
+     * @param {Array} expenseTransactions - Expense transactions
+     * @returns {Array} Timing anomaly insights
+     */
+    detectTimingAnomalies(expenseTransactions) {
+        const insights = [];
+        
+        // Group transactions by date
+        const dailySpending = {};
+        
+        expenseTransactions.forEach(transaction => {
+            const date = new Date(transaction.date || transaction.timestamp);
+            const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+            const amount = Math.abs(transaction.amount || 0);
+            
+            if (!dailySpending[dateKey]) {
+                dailySpending[dateKey] = 0;
+            }
+            dailySpending[dateKey] += amount;
+        });
+
+        const dailyAmounts = Object.values(dailySpending);
+        
+        if (dailyAmounts.length < 3) {
+            return insights;
+        }
+
+        // Calculate daily spending statistics
+        const meanDaily = dailyAmounts.reduce((sum, amount) => sum + amount, 0) / dailyAmounts.length;
+        const maxDaily = Math.max(...dailyAmounts);
+        
+        // Detect days with unusually high spending (more than 3x average)
+        if (maxDaily > meanDaily * 3 && maxDaily > 50) {
+            const highSpendingDays = Object.entries(dailySpending)
+                .filter(([date, amount]) => amount > meanDaily * 3)
+                .length;
+                
+            insights.push({
+                id: 'daily_spending_spike',
+                type: 'anomaly',
+                message: `Detected ${highSpendingDays} day${highSpendingDays > 1 ? 's' : ''} with unusually high spending (over ${(meanDaily * 3).toFixed(2)}).`,
+                severity: 'medium',
+                actionable: true,
+                recommendation: 'Review what caused the high spending on these days to better plan for similar situations.'
+            });
+        }
+
+        return insights;
+    }
+
+    /**
+     * Identify top spending categories with detailed analysis
+     * @param {Array} transactions - Transaction data
+     * @param {Object} timePeriod - Time period
+     * @param {number} topN - Number of top categories to return (default: 5)
+     * @returns {Object} Top categories analysis
+     */
+    identifyTopSpendingCategories(transactions, timePeriod, topN = 5) {
+        const cacheKey = `topCategories_${JSON.stringify(timePeriod)}_${topN}`;
+        const cached = this.getCachedResult(cacheKey);
+        if (cached) return cached;
+
+        const categoryBreakdown = this.calculateCategoryBreakdown(transactions, timePeriod);
+        
+        // Get top N categories
+        const topCategories = categoryBreakdown.categories.slice(0, topN);
+        
+        // Calculate additional metrics for top categories
+        const enrichedCategories = topCategories.map(category => {
+            const categoryTransactions = this.filterTransactionsByTimePeriod(transactions, timePeriod)
+                .filter(t => t.type === TRANSACTION_TYPES.EXPENSE && (t.category || 'Uncategorized') === category.name);
+            
+            const amounts = categoryTransactions.map(t => Math.abs(t.amount || 0));
+            const avgTransactionAmount = amounts.length > 0 
+                ? amounts.reduce((sum, amount) => sum + amount, 0) / amounts.length 
+                : 0;
+            
+            const maxTransaction = Math.max(...amounts, 0);
+            const minTransaction = Math.min(...amounts, Infinity);
+            
+            return {
+                ...category,
+                averageTransactionAmount: avgTransactionAmount,
+                maxTransactionAmount: maxTransaction,
+                minTransactionAmount: minTransaction === Infinity ? 0 : minTransaction,
+                transactionFrequency: categoryTransactions.length,
+                transactions: categoryTransactions.map(t => ({
+                    amount: t.amount,
+                    description: t.description,
+                    date: t.date || t.timestamp
+                }))
+            };
+        });
+
+        const result = {
+            topCategories: enrichedCategories,
+            totalCategoriesAnalyzed: categoryBreakdown.categories.length,
+            topCategoriesPercentage: topCategories.reduce((sum, cat) => sum + cat.percentage, 0),
+            timePeriod
+        };
+
+        this.setCachedResult(cacheKey, result);
+        return result;
     }
 
     /**
