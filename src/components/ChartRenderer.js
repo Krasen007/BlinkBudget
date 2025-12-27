@@ -52,7 +52,30 @@ export class ChartRenderer {
               return [];
             }
           }
+        },
+        tooltip: {
+          ...defaultChartOptions.plugins.tooltip,
+          callbacks: {
+            label: (context) => {
+              const label = context.label || '';
+              const value = context.parsed;
+              const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
+              const percentage = ((value / total) * 100).toFixed(1);
+              const formattedValue = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+              }).format(value);
+              
+              return `${label}: ${formattedValue} (${percentage}%)`;
+            }
+          }
         }
+      },
+      onHover: (event, activeElements, chart) => {
+        this.handleChartHover(event, activeElements, chart);
+      },
+      onClick: (event, activeElements, chart) => {
+        this.handleChartClick(event, activeElements, chart, 'pie');
       }
     });
 
@@ -68,6 +91,9 @@ export class ChartRenderer {
       data,
       options: chartOptions
     });
+
+    // Add keyboard navigation for accessibility
+    this.addKeyboardNavigation(chart);
 
     this.activeCharts.set(canvasElement.id, chart);
     return chart;
@@ -104,6 +130,30 @@ export class ChartRenderer {
             display: false
           }
         }
+      },
+      plugins: {
+        ...options.plugins,
+        tooltip: {
+          ...defaultChartOptions.plugins.tooltip,
+          callbacks: {
+            label: (context) => {
+              const label = context.dataset.label || '';
+              const value = context.parsed.y;
+              const formattedValue = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+              }).format(value);
+              
+              return `${label}: ${formattedValue}`;
+            }
+          }
+        }
+      },
+      onHover: (event, activeElements, chart) => {
+        this.handleChartHover(event, activeElements, chart);
+      },
+      onClick: (event, activeElements, chart) => {
+        this.handleChartClick(event, activeElements, chart, 'bar');
       }
     });
 
@@ -123,6 +173,9 @@ export class ChartRenderer {
       data,
       options: chartOptions
     });
+
+    // Add keyboard navigation for accessibility
+    this.addKeyboardNavigation(chart);
 
     this.activeCharts.set(canvasElement.id, chart);
     return chart;
@@ -168,6 +221,30 @@ export class ChartRenderer {
           radius: 4,
           hoverRadius: 6
         }
+      },
+      plugins: {
+        ...options.plugins,
+        tooltip: {
+          ...defaultChartOptions.plugins.tooltip,
+          callbacks: {
+            label: (context) => {
+              const label = context.dataset.label || '';
+              const value = context.parsed.y;
+              const formattedValue = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+              }).format(value);
+              
+              return `${label}: ${formattedValue}`;
+            }
+          }
+        }
+      },
+      onHover: (event, activeElements, chart) => {
+        this.handleChartHover(event, activeElements, chart);
+      },
+      onClick: (event, activeElements, chart) => {
+        this.handleChartClick(event, activeElements, chart, 'line');
       }
     });
 
@@ -189,6 +266,9 @@ export class ChartRenderer {
       data,
       options: chartOptions
     });
+
+    // Add keyboard navigation for accessibility
+    this.addKeyboardNavigation(chart);
 
     this.activeCharts.set(canvasElement.id, chart);
     return chart;
@@ -213,7 +293,30 @@ export class ChartRenderer {
             padding: 20,
             usePointStyle: true
           }
+        },
+        tooltip: {
+          ...defaultChartOptions.plugins.tooltip,
+          callbacks: {
+            label: (context) => {
+              const label = context.label || '';
+              const value = context.parsed;
+              const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
+              const percentage = ((value / total) * 100).toFixed(1);
+              const formattedValue = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+              }).format(value);
+              
+              return `${label}: ${formattedValue} (${percentage}%)`;
+            }
+          }
         }
+      },
+      onHover: (event, activeElements, chart) => {
+        this.handleChartHover(event, activeElements, chart);
+      },
+      onClick: (event, activeElements, chart) => {
+        this.handleChartClick(event, activeElements, chart, 'doughnut');
       }
     });
 
@@ -229,6 +332,9 @@ export class ChartRenderer {
       data,
       options: chartOptions
     });
+
+    // Add keyboard navigation for accessibility
+    this.addKeyboardNavigation(chart);
 
     this.activeCharts.set(canvasElement.id, chart);
     return chart;
@@ -307,6 +413,215 @@ export class ChartRenderer {
       // Update the chart
       chartInstance.update('none'); // No animation for performance
     }
+  }
+
+  /**
+   * Handle chart hover interactions
+   * @param {Event} event - Mouse event
+   * @param {Array} activeElements - Active chart elements
+   * @param {Chart} chart - Chart.js instance
+   */
+  handleChartHover(event, activeElements, chart) {
+    // Change cursor to pointer when hovering over chart segments
+    const canvas = chart.canvas;
+    if (activeElements && activeElements.length > 0) {
+      canvas.style.cursor = 'pointer';
+      
+      // Add visual feedback by slightly scaling the hovered element
+      const activeElement = activeElements[0];
+      if (chart.config.type === 'pie' || chart.config.type === 'doughnut') {
+        // For pie/doughnut charts, we can add a subtle hover effect
+        chart.setActiveElements(activeElements);
+        chart.update('none');
+      }
+    } else {
+      canvas.style.cursor = 'default';
+      chart.setActiveElements([]);
+      chart.update('none');
+    }
+  }
+
+  /**
+   * Handle chart click interactions
+   * @param {Event} event - Click event
+   * @param {Array} activeElements - Active chart elements
+   * @param {Chart} chart - Chart.js instance
+   * @param {string} chartType - Type of chart (pie, bar, line, doughnut)
+   */
+  handleChartClick(event, activeElements, chart, chartType) {
+    if (!activeElements || activeElements.length === 0) return;
+
+    const activeElement = activeElements[0];
+    const datasetIndex = activeElement.datasetIndex;
+    const index = activeElement.index;
+    
+    // Get the clicked data
+    const dataset = chart.data.datasets[datasetIndex];
+    const label = chart.data.labels[index];
+    const value = dataset.data[index];
+    
+    // Create click event data
+    const clickData = {
+      chartType,
+      label,
+      value,
+      datasetIndex,
+      index,
+      dataset: dataset.label || 'Dataset',
+      formattedValue: new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+      }).format(value)
+    };
+
+    // For pie and doughnut charts, calculate percentage
+    if (chartType === 'pie' || chartType === 'doughnut') {
+      const total = dataset.data.reduce((sum, val) => sum + val, 0);
+      clickData.percentage = ((value / total) * 100).toFixed(1);
+    }
+
+    // Dispatch custom event for other components to listen to
+    const customEvent = new CustomEvent('chartSegmentClick', {
+      detail: clickData,
+      bubbles: true
+    });
+    
+    chart.canvas.dispatchEvent(customEvent);
+
+    // Optional: Log click for debugging
+    console.log('Chart segment clicked:', clickData);
+
+    // Visual feedback: briefly highlight the clicked segment
+    this.highlightSegment(chart, activeElement, chartType);
+  }
+
+  /**
+   * Provide visual feedback when a chart segment is clicked
+   * @param {Chart} chart - Chart.js instance
+   * @param {Object} activeElement - The clicked element
+   * @param {string} chartType - Type of chart
+   */
+  highlightSegment(chart, activeElement, chartType) {
+    const originalBorderWidth = chart.data.datasets[activeElement.datasetIndex].borderWidth;
+    
+    // Temporarily increase border width for visual feedback
+    chart.data.datasets[activeElement.datasetIndex].borderWidth = 
+      Array.isArray(originalBorderWidth) 
+        ? originalBorderWidth.map((width, i) => i === activeElement.index ? width + 2 : width)
+        : originalBorderWidth + 2;
+    
+    chart.update('none');
+    
+    // Reset after a short delay
+    setTimeout(() => {
+      chart.data.datasets[activeElement.datasetIndex].borderWidth = originalBorderWidth;
+      chart.update('none');
+    }, 200);
+  }
+
+  /**
+   * Add keyboard navigation support to a chart
+   * @param {Chart} chart - Chart.js instance
+   */
+  addKeyboardNavigation(chart) {
+    const canvas = chart.canvas;
+    
+    // Guard against null canvas (e.g., in test environments)
+    if (!canvas) return;
+    
+    // Make canvas focusable
+    canvas.setAttribute('tabindex', '0');
+    canvas.setAttribute('role', 'img');
+    canvas.setAttribute('aria-label', 'Interactive chart. Use arrow keys to navigate.');
+    
+    let currentIndex = 0;
+    const maxIndex = chart.data.labels.length - 1;
+    
+    canvas.addEventListener('keydown', (event) => {
+      switch (event.key) {
+        case 'ArrowRight':
+        case 'ArrowDown':
+          event.preventDefault();
+          currentIndex = Math.min(currentIndex + 1, maxIndex);
+          this.focusSegment(chart, currentIndex);
+          break;
+          
+        case 'ArrowLeft':
+        case 'ArrowUp':
+          event.preventDefault();
+          currentIndex = Math.max(currentIndex - 1, 0);
+          this.focusSegment(chart, currentIndex);
+          break;
+          
+        case 'Enter':
+        case ' ':
+          event.preventDefault();
+          // Simulate click on focused segment
+          const activeElements = [{
+            datasetIndex: 0,
+            index: currentIndex
+          }];
+          this.handleChartClick(event, activeElements, chart, chart.config.type);
+          break;
+      }
+    });
+    
+    // Add focus/blur handlers
+    canvas.addEventListener('focus', () => {
+      canvas.style.outline = '2px solid #007bff';
+      this.focusSegment(chart, currentIndex);
+    });
+    
+    canvas.addEventListener('blur', () => {
+      canvas.style.outline = 'none';
+      chart.setActiveElements([]);
+      chart.update('none');
+    });
+  }
+
+  /**
+   * Focus a specific segment for keyboard navigation
+   * @param {Chart} chart - Chart.js instance
+   * @param {number} index - Index of segment to focus
+   */
+  focusSegment(chart, index) {
+    const activeElements = [{
+      datasetIndex: 0,
+      index: index
+    }];
+    
+    chart.setActiveElements(activeElements);
+    chart.update('none');
+    
+    // Announce to screen readers
+    const label = chart.data.labels[index];
+    const value = chart.data.datasets[0].data[index];
+    const formattedValue = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(value);
+    
+    let announcement = `${label}: ${formattedValue}`;
+    
+    // Add percentage for pie/doughnut charts
+    if (chart.config.type === 'pie' || chart.config.type === 'doughnut') {
+      const total = chart.data.datasets[0].data.reduce((sum, val) => sum + val, 0);
+      const percentage = ((value / total) * 100).toFixed(1);
+      announcement += ` (${percentage}%)`;
+    }
+    
+    // Create temporary element for screen reader announcement
+    const announcement_element = document.createElement('div');
+    announcement_element.setAttribute('aria-live', 'polite');
+    announcement_element.setAttribute('aria-atomic', 'true');
+    announcement_element.style.position = 'absolute';
+    announcement_element.style.left = '-10000px';
+    announcement_element.textContent = announcement;
+    
+    document.body.appendChild(announcement_element);
+    setTimeout(() => {
+      document.body.removeChild(announcement_element);
+    }, 1000);
   }
 
   /**
