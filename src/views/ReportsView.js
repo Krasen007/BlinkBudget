@@ -1322,39 +1322,8 @@ export const ReportsView = () => {
                 </p>
             `;
             
-            // Render beautiful charts with category selection
+            // Render beautiful charts with category selection (includes income-expense section)
             await renderCharts(chartContainer);
-
-            // Add Income vs Expenses in separate container after charts
-            try {
-                const incomeExpenseContainer = document.createElement('div');
-                incomeExpenseContainer.className = 'income-expense-container';
-                incomeExpenseContainer.style.marginTop = `calc(${SPACING.XL} * 2)`;
-                incomeExpenseContainer.style.position = 'relative';
-                incomeExpenseContainer.style.zIndex = '1';
-                incomeExpenseContainer.style.clear = 'both';
-                
-                const incomeExpenseSection = await createIncomeExpenseChart();
-                incomeExpenseContainer.appendChild(incomeExpenseSection);
-                
-                // Add to main content area after chart container
-                content.appendChild(incomeExpenseContainer);
-            } catch (incomeExpenseError) {
-                console.error('Failed to render income vs expense chart:', incomeExpenseError);
-                
-                // Add fallback income/expense display in separate container
-                const incomeExpenseContainer = document.createElement('div');
-                incomeExpenseContainer.className = 'income-expense-container';
-                incomeExpenseContainer.style.marginTop = `calc(${SPACING.XL} * 2)`;
-                incomeExpenseContainer.style.marginBottom = `calc(${SPACING.XL} * 2 + 80px)`; // Extra bottom margin for tooltips
-                incomeExpenseContainer.style.position = 'relative';
-                incomeExpenseContainer.style.zIndex = '1';
-                incomeExpenseContainer.style.clear = 'both';
-                
-                const fallbackSection = createFallbackIncomeExpenseDisplay();
-                incomeExpenseContainer.appendChild(fallbackSection);
-                content.appendChild(incomeExpenseContainer);
-            }
 
             // Show the content
             showContentState();
@@ -1589,7 +1558,39 @@ export const ReportsView = () => {
                 // Category selector is optional, continue without it
             }
 
-            // 3. Category Trends Over Time (if enough historical data)
+            // 3. Income vs Expenses Chart - Position after category selector
+            try {
+                const incomeExpenseContainer = document.createElement('div');
+                incomeExpenseContainer.className = 'income-expense-container';
+                incomeExpenseContainer.style.marginTop = `calc(${SPACING.XL} * 2)`;
+                incomeExpenseContainer.style.marginBottom = `calc(${SPACING.XL} * 2 + 80px)`; // Extra bottom margin for tooltips
+                incomeExpenseContainer.style.position = 'relative';
+                incomeExpenseContainer.style.zIndex = '1';
+                incomeExpenseContainer.style.clear = 'both';
+                
+                const incomeExpenseSection = await createIncomeExpenseChart();
+                incomeExpenseContainer.appendChild(incomeExpenseSection);
+                chartsSection.appendChild(incomeExpenseContainer);
+                chartRenderResults.push({ name: 'Income vs Expenses', success: true });
+            } catch (incomeExpenseError) {
+                console.error('Failed to render income vs expense chart:', incomeExpenseError);
+                chartRenderResults.push({ name: 'Income vs Expenses', success: false, error: incomeExpenseError });
+                
+                // Add fallback income/expense display
+                const incomeExpenseContainer = document.createElement('div');
+                incomeExpenseContainer.className = 'income-expense-container';
+                incomeExpenseContainer.style.marginTop = `calc(${SPACING.XL} * 2)`;
+                incomeExpenseContainer.style.marginBottom = `calc(${SPACING.XL} * 2 + 80px)`; // Extra bottom margin for tooltips
+                incomeExpenseContainer.style.position = 'relative';
+                incomeExpenseContainer.style.zIndex = '1';
+                incomeExpenseContainer.style.clear = 'both';
+                
+                const fallbackSection = createFallbackIncomeExpenseDisplay();
+                incomeExpenseContainer.appendChild(fallbackSection);
+                chartsSection.appendChild(incomeExpenseContainer);
+            }
+
+            // 4. Category Trends Over Time (if enough historical data)
             try {
                 const trendsSection = await createCategoryTrendsChart();
                 if (trendsSection) {
@@ -1600,6 +1601,20 @@ export const ReportsView = () => {
                 console.error('Failed to render category trends chart:', trendsError);
                 chartRenderResults.push({ name: 'Category Trends', success: false, error: trendsError });
                 // Trends chart is optional, so no fallback needed
+            }
+
+            // 5. Financial Insights Section (if insights are available)
+            if (currentData.insights && currentData.insights.length > 0) {
+                try {
+                    const insightsSection = createInsightsSection();
+                    insightsSection.style.marginTop = `calc(${SPACING.XL} * 2)`;
+                    chartsSection.appendChild(insightsSection);
+                    chartRenderResults.push({ name: 'Financial Insights', success: true });
+                } catch (insightsError) {
+                    console.error('Failed to render insights section:', insightsError);
+                    chartRenderResults.push({ name: 'Financial Insights', success: false, error: insightsError });
+                    // Insights are optional, continue without them
+                }
             }
 
             // Add the charts section to the chart container (only category-related content)
@@ -1759,43 +1774,8 @@ export const ReportsView = () => {
             }
         });
 
-        // Category details panel - positioned as overlay
-        const detailsPanel = document.createElement('div');
-        detailsPanel.id = 'category-details-panel';
-        detailsPanel.style.display = 'none';
-        detailsPanel.style.position = 'fixed';
-        detailsPanel.style.top = '50%';
-        detailsPanel.style.left = '50%';
-        detailsPanel.style.transform = 'translate(-50%, -50%)';
-        detailsPanel.style.maxWidth = '90vw';
-        detailsPanel.style.maxHeight = '80vh';
-        detailsPanel.style.overflow = 'auto';
-        detailsPanel.style.padding = SPACING.LG;
-        detailsPanel.style.background = COLORS.SURFACE;
-        detailsPanel.style.borderRadius = 'var(--radius-lg)';
-        detailsPanel.style.border = `2px solid ${COLORS.BORDER}`;
-        detailsPanel.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.3)';
-        detailsPanel.style.zIndex = '1000';
-        
-        // Add backdrop
-        const backdrop = document.createElement('div');
-        backdrop.id = 'category-details-backdrop';
-        backdrop.style.display = 'none';
-        backdrop.style.position = 'fixed';
-        backdrop.style.top = '0';
-        backdrop.style.left = '0';
-        backdrop.style.width = '100%';
-        backdrop.style.height = '100%';
-        backdrop.style.background = 'rgba(0, 0, 0, 0.5)';
-        backdrop.style.zIndex = '999';
-        backdrop.addEventListener('click', () => {
-            detailsPanel.style.display = 'none';
-            backdrop.style.display = 'none';
-        });
-        
-        // Add to document body instead of section to prevent layout interference
-        document.body.appendChild(backdrop);
-        document.body.appendChild(detailsPanel);
+        // Category details are now shown inline below the category selector section
+        // No popup needed - see showCategoryDetails function
 
         return section;
     }
@@ -2007,6 +1987,15 @@ export const ReportsView = () => {
 
         section.appendChild(categoryGrid);
 
+        // Category details section - appears below category grid when a category is clicked
+        const categoryDetailsSection = document.createElement('div');
+        categoryDetailsSection.id = 'category-details-section';
+        categoryDetailsSection.style.display = 'none';
+        categoryDetailsSection.style.marginTop = SPACING.XL;
+        categoryDetailsSection.style.paddingTop = SPACING.XL;
+        categoryDetailsSection.style.borderTop = `2px solid ${COLORS.BORDER}`;
+        section.appendChild(categoryDetailsSection);
+
         return section;
     }
 
@@ -2093,23 +2082,24 @@ export const ReportsView = () => {
     }
 
     /**
-     * Show detailed information for a selected category
+     * Show detailed information for a selected category (inline below category selector)
      */
     function showCategoryDetails(categoryName, amount, percentage) {
-        const detailsPanel = document.getElementById('category-details-panel');
-        const backdrop = document.getElementById('category-details-backdrop');
-        if (!detailsPanel || !backdrop) return;
+        const detailsSection = document.getElementById('category-details-section');
+        if (!detailsSection) return;
 
         // Get transactions for this category
         const categoryTransactions = currentData.transactions.filter(t => 
             (t.category || 'Uncategorized') === categoryName && t.type === 'expense'
         );
 
-        detailsPanel.innerHTML = `
+        const averageAmount = categoryTransactions.length > 0 ? (amount / categoryTransactions.length) : 0;
+
+        detailsSection.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: ${SPACING.MD};">
                 <h4 style="margin: 0; color: ${COLORS.TEXT_MAIN};">${categoryName} Details</h4>
-                <button onclick="document.getElementById('category-details-panel').style.display='none'; document.getElementById('category-details-backdrop').style.display='none';" 
-                        style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: ${COLORS.TEXT_MUTED};">×</button>
+                <button id="close-category-details" 
+                        style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: ${COLORS.TEXT_MUTED}; padding: ${SPACING.XS};">×</button>
             </div>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: ${SPACING.MD}; margin-bottom: ${SPACING.MD};">
                 <div>
@@ -2126,25 +2116,35 @@ export const ReportsView = () => {
                 </div>
                 <div>
                     <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED};">Average</div>
-                    <div style="font-size: 1.25rem; font-weight: bold; color: ${COLORS.PRIMARY};">€${(amount / categoryTransactions.length).toFixed(2)}</div>
+                    <div style="font-size: 1.25rem; font-weight: bold; color: ${COLORS.PRIMARY};">€${averageAmount.toFixed(2)}</div>
                 </div>
             </div>
             <div style="margin-top: ${SPACING.MD};">
                 <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED}; margin-bottom: ${SPACING.SM};">Recent Transactions:</div>
-                <div style="max-height: 150px; overflow-y: auto;">
-                    ${categoryTransactions.slice(0, 5).map(t => `
+                <div style="max-height: 200px; overflow-y: auto;">
+                    ${categoryTransactions.length > 0 ? categoryTransactions.slice(0, 10).map(t => `
                         <div style="display: flex; justify-content: space-between; padding: ${SPACING.XS} 0; border-bottom: 1px solid ${COLORS.BORDER};">
                             <span style="color: ${COLORS.TEXT_MAIN};">${t.description || 'No description'}</span>
-                            <span style="font-weight: 600; color: ${COLORS.ERROR};">€${t.amount.toFixed(2)}</span>
+                            <span style="font-weight: 600; color: ${COLORS.ERROR};">€${Math.abs(t.amount).toFixed(2)}</span>
                         </div>
-                    `).join('')}
+                    `).join('') : '<div style="color: ' + COLORS.TEXT_MUTED + ';">No transactions found</div>'}
                 </div>
             </div>
         `;
 
-        // Show both backdrop and panel
-        backdrop.style.display = 'block';
-        detailsPanel.style.display = 'block';
+        // Show the details section
+        detailsSection.style.display = 'block';
+
+        // Add close button handler
+        const closeBtn = detailsSection.querySelector('#close-category-details');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                detailsSection.style.display = 'none';
+            });
+        }
+
+        // Scroll to details section smoothly
+        detailsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     /**
@@ -2177,11 +2177,20 @@ export const ReportsView = () => {
         insightsGrid.style.gap = SPACING.MD;
 
         // Display top insights (limit to 5 for better UX)
-        const topInsights = currentData.insights.slice(0, 5);
-        topInsights.forEach((insight, index) => {
-            const insightCard = createInsightCard(insight, index);
-            insightsGrid.appendChild(insightCard);
-        });
+        if (currentData.insights && Array.isArray(currentData.insights) && currentData.insights.length > 0) {
+            const topInsights = currentData.insights.slice(0, 5);
+            topInsights.forEach((insight, index) => {
+                const insightCard = createInsightCard(insight, index);
+                insightsGrid.appendChild(insightCard);
+            });
+        } else {
+            const noInsights = document.createElement('div');
+            noInsights.style.padding = SPACING.MD;
+            noInsights.style.textAlign = 'center';
+            noInsights.style.color = COLORS.TEXT_MUTED;
+            noInsights.textContent = 'No insights available yet. Add more transactions to see personalized insights.';
+            insightsGrid.appendChild(noInsights);
+        }
 
         section.appendChild(insightsGrid);
 
