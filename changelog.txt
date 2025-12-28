@@ -6,5 +6,4 @@
 *   Removed distracting effects in settings.
 *   Lazy loaded firebase when not authenticated.
 *   Improved security and validation.
-*   Improved security.
 *   Updated readme for version 1.8.

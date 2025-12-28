@@ -82,9 +82,11 @@ export function prepareBarChartData(data, labelKey, valueKey, datasetLabel = 'Am
     };
   }
 
-  const labels = data.map(item => item[labelKey]);
-  const values = data.map(item => Math.abs(item[valueKey] || 0));
-
+  const labels = data.map(item => item[labelKey] ?? 'Unknown');
+  const values = data.map(item => {
+    const val = item[valueKey];
+    return typeof val === 'number' ? Math.abs(val) : 0;
+  });
   return {
     labels,
     datasets: [{
@@ -177,8 +179,6 @@ export function sortByAmount(categoryData) {
  * @param {Array} categoryData - Array of category objects
  * @param {number} threshold - Minimum percentage to show separately (default: 0.05 = 5%)
  * @param {number} maxCategories - Maximum number of categories to show (default: 8)
- * @returns {Array} Grouped category data
- */
 export function groupSmallCategories(categoryData, threshold = 0.05, maxCategories = 8) {
   if (!categoryData || categoryData.length === 0) {
     return [];
@@ -186,29 +186,45 @@ export function groupSmallCategories(categoryData, threshold = 0.05, maxCategori
 
   const dataWithPercentages = calculatePercentages(categoryData);
   const sorted = sortByAmount(dataWithPercentages);
+  
+  // Separate categories above and below threshold
+  const aboveThreshold = sorted.filter(item => item.percentage >= threshold);
+  const belowThreshold = sorted.filter(item => item.percentage < threshold);
 
-  // If we have fewer categories than the limit, return as-is
-  if (sorted.length <= maxCategories) {
-    return sorted;
+  // If categories above threshold fit within limit, return them with grouped below-threshold
+  if (aboveThreshold.length <= maxCategories - 1) {
+    if (belowThreshold.length > 0) {
+      const otherTotal = belowThreshold.reduce((sum, item) => sum + Math.abs(item.amount || 0), 0);
+      const total = sorted.reduce((sum, item) => sum + Math.abs(item.amount || 0), 0);
+      aboveThreshold.push({
+        category: 'Other',
+        amount: otherTotal,
+        percentage: otherTotal / total,
+        count: belowThreshold.length
+      });
+    }
+    return aboveThreshold;
   }
 
   // Take the top categories
-  const topCategories = sorted.slice(0, maxCategories - 1);
-  const otherCategories = sorted.slice(maxCategories - 1);
+  const topCategories = aboveThreshold.slice(0, maxCategories - 1);
+  const otherCategories = [...aboveThreshold.slice(maxCategories - 1), ...belowThreshold];
 
   // Group remaining categories into "Other"
   if (otherCategories.length > 0) {
     const otherTotal = otherCategories.reduce((sum, item) => sum + Math.abs(item.amount || 0), 0);
+    const total = sorted.reduce((sum, item) => sum + Math.abs(item.amount || 0), 0);
     
     topCategories.push({
       category: 'Other',
       amount: otherTotal,
-      percentage: otherTotal / sorted.reduce((sum, item) => sum + Math.abs(item.amount || 0), 0),
+      percentage: otherTotal / total,
       count: otherCategories.length
     });
   }
 
   return topCategories;
+}  return topCategories;
 }
 
 /**

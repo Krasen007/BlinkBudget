@@ -193,8 +193,17 @@ export function showEmptyState(emptyState, scenario, currentTimePeriod, formatTi
         `;
         addButton.textContent = '+ Add Transaction';
         addButton.addEventListener('click', () => Router.navigate('add-expense'));
+    } else {
+        icon.innerHTML = '📊';
+        message.innerHTML = `
+            <h3 style="margin: 0 0 ${SPACING.SM} 0; color: ${COLORS.TEXT_MAIN};">No Data Available</h3>
+            <p style="margin: 0; max-width: 300px; line-height: 1.5;">
+                No data to display at this time.
+            </p>
+        `;
+        addButton.textContent = 'Back to Dashboard';
+        addButton.addEventListener('click', () => Router.navigate('dashboard'));
     }
-
     emptyState.appendChild(icon);
     emptyState.appendChild(message);
     emptyState.appendChild(addButton);
@@ -312,16 +321,21 @@ export function showUnsupportedBrowserError(container, missingFeatures) {
     title.style.color = COLORS.ERROR;
     title.style.marginBottom = SPACING.MD;
 
-    const message = document.createElement('p');
-    message.innerHTML = `
-        Your browser doesn't support some features required for BlinkBudget Reports.<br>
-        Please update your browser or try a different one.
-    `;
-    message.style.color = COLORS.TEXT_MUTED;
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    featuresList = document.createElement('div');
+    featuresList.innerHTML = `
+        <strong>Missing features:</strong><br>
+        ${missingFeatures.map(f => escapeHtml(f)).join(', ')}
+    `;    message.style.color = COLORS.TEXT_MUTED;
     message.style.lineHeight = '1.6';
     message.style.marginBottom = SPACING.LG;
 
-    const featuresList = document.createElement('div');
+    featuresList = document.createElement('div');
     featuresList.innerHTML = `
         <strong>Missing features:</strong><br>
         ${missingFeatures.join(', ')}
@@ -348,9 +362,15 @@ export function showUnsupportedBrowserError(container, missingFeatures) {
 }
 
 /**
- * Show browser warning for limited functionality
+ * Show browser compatibility warning to user
  */
 export function showBrowserWarning(container, limitedFeatures) {
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
     const warning = document.createElement('div');
     warning.style.background = 'rgba(251, 191, 36, 0.1)';
     warning.style.border = '1px solid rgba(251, 191, 36, 0.3)';
@@ -363,7 +383,7 @@ export function showBrowserWarning(container, limitedFeatures) {
     warning.innerHTML = `
         ⚠️ <strong>Limited Browser Support:</strong> 
         Some advanced features may not work properly. 
-        Missing: ${limitedFeatures.join(', ')}
+        Missing: ${limitedFeatures.map(f => escapeHtml(f)).join(', ')}
     `;
 
     // Add close button

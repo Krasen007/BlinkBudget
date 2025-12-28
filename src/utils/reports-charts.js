@@ -597,8 +597,9 @@ function createPredictionsSection(currentData) {
     predictionsGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(150px, 1fr))';
     predictionsGrid.style.gap = SPACING.MD;
 
-    currentData.predictions.predictions.forEach(prediction => {
-        const predictionCard = document.createElement('div');
+    const predictions = currentData.predictions?.predictions || [];
+    
+    predictions.forEach(prediction => {        const predictionCard = document.createElement('div');
         predictionCard.style.background = 'rgba(59, 130, 246, 0.05)';
         predictionCard.style.border = '1px solid rgba(59, 130, 246, 0.2)';
         predictionCard.style.borderRadius = 'var(--radius-md)';

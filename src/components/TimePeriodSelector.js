@@ -90,12 +90,21 @@ export const TimePeriodSelector = (options = {}) => {
         button.style.fontSize = window.innerWidth < BREAKPOINTS.MOBILE ? FONT_SIZES.SM : FONT_SIZES.BASE;
         button.style.whiteSpace = 'nowrap';
 
-        // Set active state for initial period
-        if (period.key === initialPeriod.type || 
-            (period.key === 'month' && !initialPeriod.type)) {
-            setActiveButton(button);
-        }
+    // Map period types to button keys
+    const typeToKeyMap = {
+        'daily': 'today',
+        'weekly': 'week',
+        'monthly': 'month',
+        'quarterly': 'quarter',
+        'yearly': 'year',
+        'custom': 'custom'
+    };
 
+    // Set active state for initial period
+    const initialKey = typeToKeyMap[initialPeriod.type] || 'month';
+    if (period.key === initialKey) {
+        setActiveButton(button);
+    }
         button.addEventListener('click', () => {
             if (period.key === 'custom') {
                 handleCustomPeriodSelection();

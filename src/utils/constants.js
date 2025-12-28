@@ -46,13 +46,13 @@ export const TOUCH_TARGETS = {
     SPACING: '8px'
 };
 
-// Spacing values (in pixels)
+// Spacing values (for JavaScript usage - actual pixel values)
 export const SPACING = {
-    XS: 'var(--spacing-xs)',
-    SM: 'var(--spacing-sm)',
-    MD: 'var(--spacing-md)',
-    LG: 'var(--spacing-lg)',
-    XL: 'var(--spacing-xl)'
+    XS: '4px',    // 0.25rem
+    SM: '8px',    // 0.5rem  
+    MD: '12px',   // 0.75rem
+    LG: '16px',   // 1rem
+    XL: '24px'    // 1.5rem
 };
 
 // Timing values (in milliseconds)

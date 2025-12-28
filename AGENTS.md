@@ -38,7 +38,7 @@ The project is a web (browser) application, leveraging a modern, lightweight sta
     *   Clean, semantic CSS without heavy framework overhead.
 *   **Deployment**: Netlify + Firebase for Auth and Database.
 *   **Data Persistence**: `localStorage` (via `StorageService`) for instant, offline-capable data storage. Also Firebase for cloud sync.
-*   **System**: You should use Windows commands for the terminal, do not try to use Linux tools and commands.
+*   **System**: Use Windows commands when developing locally on Windows for the terminal, do not try to use Linux tools and commands.
 
 
 ---

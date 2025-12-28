@@ -9,8 +9,6 @@
  * Requirements: 7.4
  */
 
-import { STORAGE_KEYS } from '../utils/constants.js';
-
 export const NavigationState = {
     // State storage keys
     STATE_KEYS: {
@@ -27,6 +25,16 @@ export const NavigationState = {
      */
     saveTimePeriod(timePeriod) {
         try {
+            if (!timePeriod || !timePeriod.startDate || !timePeriod.endDate) {
+                console.warn('[NavigationState] Invalid timePeriod parameter');
+                return;
+            }
+            
+            if (!(timePeriod.startDate instanceof Date) || !(timePeriod.endDate instanceof Date)) {
+                console.warn('[NavigationState] startDate and endDate must be Date objects');
+                return;
+            }
+            
             const timePeriodData = {
                 type: timePeriod.type,
                 startDate: timePeriod.startDate.toISOString(),
@@ -41,7 +49,6 @@ export const NavigationState = {
             console.error('[NavigationState] Failed to save time period:', error);
         }
     },
-
     /**
      * Restore the saved time period selection
      * @returns {Object|null} Restored time period object or null if none saved
@@ -112,18 +119,23 @@ export const NavigationState = {
     },
 
     /**
-     * Save general view preferences for reports
+     * Save view preferences for reports
      * @param {Object} preferences - View preferences object
      */
     saveViewPreferences(preferences) {
         try {
+            if (!preferences || typeof preferences !== 'object') {
+                console.warn('[NavigationState] Invalid preferences parameter');
+                return;
+            }
+            
             const preferencesData = {
                 ...preferences,
                 savedAt: new Date().toISOString()
             };
             
             sessionStorage.setItem(this.STATE_KEYS.REPORTS_VIEW_PREFERENCES, JSON.stringify(preferencesData));
-            console.log('[NavigationState] View preferences saved:', preferences);
+            console.log('[NavigationState] View preferences saved');
         } catch (error) {
             console.error('[NavigationState] Failed to save view preferences:', error);
         }
@@ -139,7 +151,7 @@ export const NavigationState = {
             if (!savedData) return null;
 
             const preferences = JSON.parse(savedData);
-            console.log('[NavigationState] View preferences restored:', preferences);
+            console.log('[NavigationState] View preferences restored');
             return preferences;
         } catch (error) {
             console.error('[NavigationState] Failed to restore view preferences:', error);
@@ -259,22 +271,6 @@ export const NavigationState = {
      */
     init() {
         // Listen for page unload to save current state
-        window.addEventListener('beforeunload', () => {
-            // Save any pending state before page unload
-            console.log('[NavigationState] Page unloading, state preserved in sessionStorage');
-        });
-
-        // Listen for storage events to sync state across tabs
-        window.addEventListener('storage', (e) => {
-            if (Object.values(this.STATE_KEYS).includes(e.key)) {
-                console.log('[NavigationState] Navigation state updated in another tab:', e.key);
-                // Dispatch custom event for components to react to state changes
-                window.dispatchEvent(new CustomEvent('navigation-state-changed', {
-                    detail: { key: e.key, newValue: e.newValue, oldValue: e.oldValue }
-                }));
-            }
-        });
-
         console.log('[NavigationState] Navigation state management initialized');
     }
 };

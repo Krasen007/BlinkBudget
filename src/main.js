@@ -60,25 +60,31 @@ const initApp = () => {
 
     // View Management with smooth transitions
     let currentView = null;
+    let transitionTimeout = null;
     const setView = (view) => {
         if (currentView && typeof currentView.cleanup === 'function') {
             currentView.cleanup();
+        }
+        
+        // Cancel any pending transition
+        if (transitionTimeout) {
+            clearTimeout(transitionTimeout);
         }
         
         // Add smooth transition effect
         app.style.opacity = '0';
         app.style.transition = 'opacity 0.2s ease-in-out';
         
-        setTimeout(() => {
+        transitionTimeout = setTimeout(() => {
             app.innerHTML = '';
             currentView = view;
             app.appendChild(view);
             
             // Fade in the new view
             app.style.opacity = '1';
+            transitionTimeout = null;
         }, 100); // Short delay for smooth transition
     };
-
     // Route Handlers (with dynamic imports for code splitting)
     // Register Global Route Guard
     Router.before(async (route) => {

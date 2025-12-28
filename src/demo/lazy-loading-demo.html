@@ -224,9 +224,9 @@
         function generateMockData(count) {
             const data = [];
             const categories = ['Food', 'Transportation', 'Shopping', 'Bills', 'Entertainment'];
-            const startDate = new Date('2024-01-01');
-            const endDate = new Date('2024-12-31');
-            
+            const currentYear = new Date().getFullYear();
+            const startDate = new Date(`${currentYear}-01-01`);
+            const endDate = new Date(`${currentYear}-12-31`);            
             for (let i = 0; i < count; i++) {
                 const randomDate = new Date(startDate.getTime() + Math.random() * (endDate.getTime() - startDate.getTime()));
                 data.push({

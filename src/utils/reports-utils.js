@@ -84,11 +84,13 @@ export function getCurrentYearPeriod() {
  * Format time period for display
  */
 export function formatTimePeriod(timePeriod) {
+    if (!timePeriod || !timePeriod.startDate || !timePeriod.endDate) {
+        throw new Error('Invalid time period object');
+    }
     const startDate = timePeriod.startDate.toLocaleDateString();
     const endDate = timePeriod.endDate.toLocaleDateString();
     return `${startDate} - ${endDate}`;
 }
-
 /**
  * Check browser support for required features
  * Returns object with support status and missing/limited features

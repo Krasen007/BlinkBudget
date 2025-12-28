@@ -20,5 +20,8 @@ export const Button = ({ text, onClick, variant = 'primary', type = 'button', cl
         btn.classList.remove('btn-touch-active');
     }, { passive: true });
 
+    btn.addEventListener('touchcancel', (e) => {
+        btn.classList.remove('btn-touch-active');
+    }, { passive: true });
     return btn;
 };

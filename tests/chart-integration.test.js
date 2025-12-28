@@ -159,26 +159,27 @@ describe('Chart.js Integration', () => {
     });
 
     it('should clean up charts properly', async () => {
+      // Check if canvas context is available
+      const ctx = mockCanvas.getContext('2d');
+      if (!ctx) {
+        console.warn('Canvas context not available, skipping chart cleanup test');
+        return;
+      }
+
       const testData = {
         labels: ['Test'],
         datasets: [{ data: [100] }]
       };
 
       const chart = await chartRenderer.createPieChart(mockCanvas, testData);
-      
-      // In test environment, chart creation may fail due to canvas context issues
-      if (chart) {
-        expect(chartRenderer.getActiveCharts().size).toBe(1);
-        chartRenderer.destroyChart('test-chart');
-        expect(chartRenderer.getActiveCharts().size).toBe(0);
-      } else {
-        // Chart creation failed (expected in test environment)
-        expect(chartRenderer.getActiveCharts().size).toBe(0);
-        // Test cleanup with non-existent chart (should not throw)
-        expect(() => chartRenderer.destroyChart('test-chart')).not.toThrow();
-      }
+      expect(chartRenderer.getActiveCharts().size).toBe(1);
+      chartRenderer.destroyChart('test-chart');
+      expect(chartRenderer.getActiveCharts().size).toBe(0);
     });
 
+    it('should not throw when destroying non-existent chart', () => {
+      expect(() => chartRenderer.destroyChart('non-existent')).not.toThrow();
+    });
     it('should destroy all charts', async () => {
       const testData = {
         labels: ['Test'],

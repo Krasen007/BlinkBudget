@@ -78,10 +78,11 @@ export const defaultChartOptions = {
               
               // Add accessibility information to labels
               labels.forEach((label, index) => {
-                if (chart.data.datasets[0] && chart.data.datasets[0].data) {
-                  const value = chart.data.datasets[0].data[index];
-                  const total = chart.data.datasets[0].data.reduce((sum, val) => sum + val, 0);
-                  const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                const dataset = chart.data.datasets[0];
+                if (dataset?.data && index < dataset.data.length) {
+                  const value = dataset.data[index];
+                  const total = dataset.data.reduce((sum, val) => sum + val, 0);
+                  const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
                   
                   // Store accessibility info for screen readers
                   label.ariaLabel = `${label.text}: ${value} (${percentage}% of total)`;
@@ -351,11 +352,12 @@ export function getChartColors(count, highContrast = false, style = 'solid') {
     
     switch (style) {
       case 'gradient':
-        // Create gradient objects for Chart.js
+        // Note: Gradient support is currently non-functional with Chart.js canvas rendering
+        // Falling back to solid colors with enhanced styling
         result.push({
-          backgroundColor: createGradient(baseColor, 'radial'),
-          borderColor: baseColor,
-          hoverBackgroundColor: createGradient(baseColor, 'linear', 0.8),
+          backgroundColor: baseColor,
+          borderColor: darkenColor(baseColor, 15),
+          hoverBackgroundColor: lightenColor(baseColor, 10),
           hoverBorderColor: lightenColor(baseColor, 20)
         });
         break;
@@ -380,28 +382,21 @@ export function getChartColors(count, highContrast = false, style = 'solid') {
 
 /**
  * Create gradient color for enhanced visual appeal
+ * Note: This function creates CSS gradient strings which are not compatible with Chart.js canvas rendering.
+ * Chart.js requires CanvasGradient objects created via canvas context methods.
+ * This function is currently non-functional for Chart.js and should be refactored.
+ * 
  * @param {string} baseColor - Base HSL color string
  * @param {string} type - 'linear' or 'radial'
  * @param {number} opacity - Opacity for the gradient (0-1)
- * @returns {string} CSS gradient string
+ * @returns {string} CSS gradient string (non-functional with Chart.js)
+ * @deprecated Use canvas context gradients instead
  */
 function createGradient(baseColor, type = 'linear', opacity = 1) {
-  // Extract HSL values from color string
-  const hslMatch = baseColor.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
-  if (!hslMatch) return baseColor;
-  
-  const [, h, s, l] = hslMatch.map(Number);
-  const lighterL = Math.min(l + 15, 90);
-  const darkerL = Math.max(l - 10, 10);
-  
-  const lightColor = `hsla(${h}, ${s}%, ${lighterL}%, ${opacity})`;
-  const darkColor = `hsla(${h}, ${s}%, ${darkerL}%, ${opacity})`;
-  
-  if (type === 'radial') {
-    return `radial-gradient(circle, ${lightColor} 0%, ${darkColor} 100%)`;
-  } else {
-    return `linear-gradient(135deg, ${lightColor} 0%, ${darkColor} 100%)`;
-  }
+  // TODO: Refactor to create CanvasGradient objects when canvas context is available
+  // For now, return solid color as fallback
+  console.warn('[ChartConfig] CSS gradients not supported by Chart.js canvas rendering. Using solid color fallback.');
+  return baseColor;
 }
 
 /**
@@ -465,12 +460,18 @@ export function createThemedChartOptions(chartType, customOptions = {}) {
                     const dataset = data.datasets[0];
                     const value = dataset.data[i];
                     const total = dataset.data.reduce((sum, val) => sum + val, 0);
-                    const percentage = ((value / total) * 100).toFixed(1);
+                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+                    const bgColor = Array.isArray(dataset.backgroundColor) 
+                      ? dataset.backgroundColor[i] 
+                      : dataset.backgroundColor;
+                    const borderColor = Array.isArray(dataset.borderColor)
+                      ? dataset.borderColor?.[i]
+                      : dataset.borderColor;
                     
                     return {
                       text: `${label} (${percentage}%)`,
-                      fillStyle: dataset.backgroundColor[i],
-                      strokeStyle: dataset.borderColor?.[i] || '#fff',
+                      fillStyle: bgColor,
+                      strokeStyle: borderColor || '#fff',
                       lineWidth: 2,
                       pointStyle: 'circle',
                       index: i,
@@ -479,8 +480,7 @@ export function createThemedChartOptions(chartType, customOptions = {}) {
                         style: 'currency',
                         currency: 'USD'
                       }).format(value)} (${percentage}% of total)`
-                    };
-                  });
+                    };                  });
                 }
                 return [];
               }
@@ -594,13 +594,23 @@ export function createThemedChartOptions(chartType, customOptions = {}) {
  * @returns {Object} Complete chart options with accessibility features
  */
 export function createChartOptions(customOptions = {}) {
+  // Deep merge helper for nested objects
+  const deepMerge = (target, source) => {
+    const result = { ...target };
+    for (const key of Object.keys(source)) {
+      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+        result[key] = deepMerge(target[key] || {}, source[key]);
+      } else {
+        result[key] = source[key];
+      }
+    }
+    return result;
+  };
+
   const baseOptions = {
     ...defaultChartOptions,
     ...customOptions,
-    plugins: {
-      ...defaultChartOptions.plugins,
-      ...customOptions.plugins
-    }
+    plugins: deepMerge(defaultChartOptions.plugins, customOptions.plugins || {})
   };
 
   // Add accessibility enhancements based on user preferences
@@ -650,8 +660,10 @@ function updateAriaLiveRegion(chart, activeElements) {
     // Add percentage for pie/doughnut charts
     if (chart.config.type === 'pie' || chart.config.type === 'doughnut') {
       const total = dataset.data.reduce((sum, val) => sum + val, 0);
-      const percentage = ((value / total) * 100).toFixed(1);
-      announcement += ` (${percentage}% of total)`;
+      if (total > 0) {
+        const percentage = ((value / total) * 100).toFixed(1);
+        announcement += ` (${percentage}% of total)`;
+      }
     }
     
     // Find or create ARIA live region
@@ -665,6 +677,5 @@ function updateAriaLiveRegion(chart, activeElements) {
       document.body.appendChild(liveRegion);
     }
     
-    liveRegion.textContent = announcement;
-  }
+    liveRegion.textContent = announcement;  }
 }

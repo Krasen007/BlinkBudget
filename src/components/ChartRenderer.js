@@ -15,6 +15,7 @@ export class ChartRenderer {
     this.activeCharts = new Map(); // Track active chart instances for cleanup
     this.chartJSModules = null; // Cache for Chart.js modules
     this.isInitialized = false;
+    this._initPromise = null;
   }
 
   /**
@@ -26,11 +27,17 @@ export class ChartRenderer {
       return this.chartJSModules;
     }
 
+    // Return existing promise if initialization is in progress
+    if (this._initPromise) {
+      return this._initPromise;
+    }
+
     try {
       console.log('[ChartRenderer] Loading Chart.js...');
       const startTime = performance.now();
       
-      this.chartJSModules = await initializeChartJS();
+      this._initPromise = initializeChartJS();
+      this.chartJSModules = await this._initPromise;
       this.isInitialized = true;
       
       const loadTime = performance.now() - startTime;
@@ -38,6 +45,7 @@ export class ChartRenderer {
       
       return this.chartJSModules;
     } catch (error) {
+      this._initPromise = null; // Allow retry on failure
       console.error('[ChartRenderer] Failed to initialize Chart.js:', error);
       
       // Enhanced error handling with specific error types
@@ -270,11 +278,17 @@ export class ChartRenderer {
         const colors = getChartColors(data.datasets.length);
         if (!dataset.borderColor) {
           dataset.borderColor = colors[index];
-          dataset.backgroundColor = colors[index].replace(')', ', 0.1)').replace('hsl', 'hsla');
+          // Convert to HSLA with alpha, handling HSL format
+          const color = colors[index];
+          if (color.startsWith('hsl(')) {
+            dataset.backgroundColor = color.replace('hsl(', 'hsla(').replace(')', ', 0.1)');
+          } else {
+            // Fallback for other formats - use transparent version or keep original
+            dataset.backgroundColor = 'transparent';
+          }
           dataset.borderWidth = 3;
           dataset.fill = false;
-        }
-      });
+        }      });
     }
 
     try {
@@ -406,7 +420,7 @@ export class ChartRenderer {
     if (chart && chart.canvas) {
       const canvas = chart.canvas;
       
-      // Clean up keyboard navigation handlers and accessibility elements
+      // Clean up keyboard event handlers
       if (canvas._keyboardHandlers) {
         canvas.removeEventListener('keydown', canvas._keyboardHandlers.keydown);
         canvas.removeEventListener('focus', canvas._keyboardHandlers.focus);
@@ -414,7 +428,7 @@ export class ChartRenderer {
         
         // Remove description element
         if (canvas._keyboardHandlers.descriptionElement) {
-          document.body.removeChild(canvas._keyboardHandlers.descriptionElement);
+          canvas._keyboardHandlers.descriptionElement.remove();
         }
         
         delete canvas._keyboardHandlers;
@@ -546,15 +560,20 @@ export class ChartRenderer {
       };
       
       // Apply mobile optimizations
-      Object.assign(chartInstance.options.plugins.legend, mobileOptions.plugins.legend);
-      Object.assign(chartInstance.options.plugins.tooltip, mobileOptions.plugins.tooltip);
-      chartInstance.options.animation.duration = mobileOptions.animation.duration;
+      if (chartInstance.options.plugins?.legend) {
+        Object.assign(chartInstance.options.plugins.legend, mobileOptions.plugins.legend);
+      }
+      if (chartInstance.options.plugins?.tooltip) {
+        Object.assign(chartInstance.options.plugins.tooltip, mobileOptions.plugins.tooltip);
+      }
+      if (chartInstance.options.animation) {
+        chartInstance.options.animation.duration = mobileOptions.animation.duration;
+      }
       chartInstance.options.interaction = mobileOptions.interaction;
       
       if (mobileOptions.scales) {
         Object.assign(chartInstance.options.scales, mobileOptions.scales);
-      }
-      
+      }      
       // Update the chart with mobile optimizations
       chartInstance.update('none'); // No animation for performance
       
@@ -631,19 +650,23 @@ export class ChartRenderer {
     };
     
     // Add touch event listeners
+    // Remove existing handlers first to prevent duplicates
+    if (canvas._touchHandlers) {
+      canvas.removeEventListener('touchstart', canvas._touchHandlers.touchstart);
+      canvas.removeEventListener('touchmove', canvas._touchHandlers.touchmove);
+      canvas.removeEventListener('touchend', canvas._touchHandlers.touchend);
+    }
+    
     canvas.addEventListener('touchstart', touchStartHandler, { passive: true });
     canvas.addEventListener('touchmove', touchMoveHandler, { passive: true });
     canvas.addEventListener('touchend', touchEndHandler, { passive: true });
     
     // Store handlers for cleanup
-    if (!canvas._touchHandlers) {
-      canvas._touchHandlers = {
-        touchstart: touchStartHandler,
-        touchmove: touchMoveHandler,
-        touchend: touchEndHandler
-      };
-    }
-  }
+    canvas._touchHandlers = {
+      touchstart: touchStartHandler,
+      touchmove: touchMoveHandler,
+      touchend: touchEndHandler
+    };  }
 
   /**
    * Handle chart hover interactions with simplified micro-interactions

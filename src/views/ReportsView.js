@@ -621,9 +621,8 @@ export const ReportsView = () => {
             try {
                 const incomeExpenseContainer = document.createElement('div');
                 incomeExpenseContainer.className = 'income-expense-container';
-                incomeExpenseContainer.style.marginTop = SPACING.XL + ' !important';
-                incomeExpenseContainer.style.marginBottom = SPACING.LG + ' !important';
-                incomeExpenseContainer.style.position = 'relative';
+                incomeExpenseContainer.style.setProperty('margin-top', SPACING.XL, 'important');
+                incomeExpenseContainer.style.setProperty('margin-bottom', SPACING.LG, 'important');                incomeExpenseContainer.style.position = 'relative';
                 incomeExpenseContainer.style.zIndex = '1';
                 incomeExpenseContainer.style.clear = 'both';
                 

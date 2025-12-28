@@ -93,15 +93,14 @@ export class ProgressiveDataLoader {
             this.isLoading = false;
             console.error('[ProgressiveLoader] Progressive loading failed:', error);
             
-            if (error.name === 'AbortError') {
+            if (error.message === 'Data loading was cancelled') {
                 throw new Error('Data loading was cancelled');
             }
             
             // Fallback to direct processing
             console.warn('[ProgressiveLoader] Falling back to direct processing');
             return this.processDataDirectly(transactions, timePeriod);
-        }
-    }
+        }    }
 
     /**
      * Process small datasets directly without chunking
