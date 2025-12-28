@@ -72,6 +72,57 @@
     min-height: 400px;
 }
 
+/* Charts Section - Force proper block layout */
+.charts-section {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: var(--spacing-xl) !important;
+    position: relative !important;
+    /* Ensure each child is a proper block */
+    /* Add containment to prevent layout issues */
+    contain: layout style !important;
+}
+
+.charts-section > * {
+    display: block !important;
+    width: 100% !important;
+    position: relative !important;
+    /* Force each section to be on its own line */
+    clear: both !important;
+    /* Ensure proper spacing between sections */
+    margin-bottom: var(--spacing-lg) !important;
+}
+
+/* Chart Section Base Styles */
+.chart-section {
+    background: var(--color-surface) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: var(--spacing-lg) !important;
+    margin-bottom: var(--spacing-xl) !important;
+    position: relative !important;
+    /* Ensure proper block behavior */
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    /* Prevent any floating or positioning issues */
+    float: none !important;
+    clear: both !important;
+    /* Force each section to be independent */
+    isolation: isolate !important;
+    /* Add visual separation */
+    margin-top: var(--spacing-lg) !important;
+}
+
+/* Specific styling for different chart sections */
+.chart-section:first-child {
+    margin-top: 0 !important;
+}
+
+.chart-section:not(:last-child) {
+    margin-bottom: calc(var(--spacing-xl) * 1.5) !important;
+}
+
 .chart-container::before {
     content: '';
     position: absolute;
@@ -89,6 +140,20 @@
 .chart-container canvas {
     border-radius: var(--radius-md);
     transition: var(--transition-normal);
+    /* Ensure canvas fits properly in container */
+    max-width: 100% !important;
+    max-height: 100% !important;
+    width: 100% !important;
+    height: auto !important;
+}
+
+/* Specific styling for income expense chart */
+#income-expense-chart {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
 }
 
 .chart-container canvas:hover {
@@ -645,6 +710,210 @@
         background: radial-gradient(circle, currentColor 0%, transparent 70%);
         opacity: 0.5;
     }
+}
+
+/* Category Selector Section Styles */
+.category-selector-section {
+    margin-top: var(--spacing-xl) !important;
+    margin-bottom: var(--spacing-xl) !important;
+    position: relative !important;
+    z-index: 1 !important;
+    clear: both !important; /* Ensure it clears any floating elements */
+}
+
+.category-selector-section .category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+}
+
+.category-card {
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.category-card:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.category-card:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* Add a subtle left border that matches the category color */
+.category-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--category-color, var(--color-primary));
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.category-card:hover::before {
+    opacity: 1;
+}
+
+/* Income vs Expenses Section Styles */
+.income-expense-section {
+    margin-bottom: var(--spacing-xl) !important;
+    position: relative !important;
+    z-index: 2 !important;
+    /* Ensure proper containment without overflow hidden */
+    overflow: visible !important;
+    /* Remove height constraints to let content size naturally */
+    min-height: auto !important;
+    max-height: none !important;
+    /* Force block behavior */
+    display: block !important;
+    width: 100% !important;
+    clear: both !important;
+    /* Prevent any content from appearing inside */
+    contain: layout !important;
+    /* Add proper padding to contain the chart */
+    padding: var(--spacing-lg) !important;
+    box-sizing: border-box !important;
+    /* Force complete separation from other sections */
+    isolation: isolate !important;
+    transform: translateZ(0) !important;
+}
+
+/* Category Breakdown Section - Ensure it's separate */
+.chart-section:has(canvas[id*="category"]),
+.chart-section:has(h3:contains("Spending by Category")),
+.chart-section:first-child {
+    margin-bottom: calc(var(--spacing-xl) * 2) !important;
+    border-bottom: 2px solid var(--color-border) !important;
+    padding-bottom: calc(var(--spacing-lg) * 1.5) !important;
+}
+
+/* Specific section styling */
+.category-breakdown-section {
+    /* Ensure category breakdown is clearly separated */
+    border-bottom: 2px solid var(--color-border) !important;
+    margin-bottom: calc(var(--spacing-xl) * 2) !important;
+    padding-bottom: calc(var(--spacing-lg) * 1.5) !important;
+}
+
+.income-expense-section {
+    /* Ensure income vs expense is clearly separated */
+    border-top: 3px solid var(--color-border) !important;
+    margin-top: calc(var(--spacing-xl) * 2) !important;
+    padding-top: calc(var(--spacing-lg) * 1.5) !important;
+    /* Add background differentiation */
+    background: linear-gradient(145deg, 
+        var(--color-surface) 0%, 
+        rgba(59, 130, 246, 0.02) 100%) !important;
+}
+
+/* Ensure sections don't overlap */
+[data-chart-type="category-breakdown"] + [data-chart-type="income-expense"] {
+    margin-top: calc(var(--spacing-xl) * 3) !important;
+    clear: both !important;
+}
+.income-expense-section > div[style*="height"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    border-radius: var(--radius-md) !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Ensure income expense section title and content stay contained */
+.income-expense-section h3 {
+    margin: 0 0 var(--spacing-md) 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Ensure no content escapes the income expense section */
+.income-expense-section * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Category Selector Section Styles - Ensure it's completely separate */
+.category-selector-section {
+    margin-top: calc(var(--spacing-xl) * 2) !important;
+    margin-bottom: var(--spacing-xl) !important;
+    position: relative !important;
+    z-index: 1 !important;
+    clear: both !important; /* Ensure it clears any floating elements */
+    /* Force it to be on a new line */
+    display: block !important;
+    width: 100% !important;
+    /* Ensure it starts on a new line after previous content */
+    page-break-before: always !important;
+    /* Add top border to visually separate */
+    border-top: 3px solid var(--color-border) !important;
+    padding-top: calc(var(--spacing-xl) * 1.5) !important;
+    /* Add visual separation */
+    background: linear-gradient(to bottom, 
+        rgba(255, 255, 255, 0.02) 0%, 
+        var(--color-surface) 10%
+    ) !important;
+}
+
+/* Ensure proper spacing between chart sections */
+.chart-section + .chart-section {
+    margin-top: var(--spacing-xl) !important;
+}
+
+.chart-section + .category-selector-section {
+    margin-top: var(--spacing-xl) !important;
+}
+
+/* Force separation between income-expense and category sections */
+.income-expense-section + .category-selector-section {
+    margin-top: calc(var(--spacing-xl) * 2) !important;
+    clear: both !important;
+    /* Add a visual separator */
+    border-top: 1px solid var(--color-border) !important;
+    padding-top: var(--spacing-xl) !important;
+}
+
+/* Ensure category selector never appears inside other sections */
+.category-selector-section {
+    /* Force it to be outside any parent containers */
+    position: relative !important;
+    /* Ensure it's treated as a separate block */
+    isolation: isolate !important;
+    /* Add a strong visual break */
+    transform: translateZ(0) !important; /* Force new layer */
+    /* Ensure it starts fresh after any previous content */
+    break-before: always !important;
+}
+
+/* Prevent any section from containing category selector content */
+.chart-section:not(.category-selector-section) {
+    /* Ensure other chart sections don't contain category content */
+    contain: layout style !important;
+    overflow: visible !important; /* Allow proper chart display */
+}
+
+/* Force separation between different section types */
+.income-expense-section + * {
+    margin-top: calc(var(--spacing-xl) * 2) !important;
+    clear: both !important;
 }
 
 /* Screen reader only content */

@@ -94,23 +94,28 @@ export class ChartRenderer {
       });
     }
 
-    const chart = new ChartJS(canvasElement, {
-      type: 'pie',
-      data,
-      options: chartOptions
-    });
+    try {
+      const chart = new ChartJS(canvasElement, {
+        type: 'pie',
+        data,
+        options: chartOptions
+      });
 
-    // Add keyboard navigation for accessibility
-    this.addKeyboardNavigation(chart);
-    
-    // Add chart title styling
-    this.addChartTitle(canvasElement, options.title || 'Expense Breakdown');
-    
-    // Add entrance animation
-    this.addEntranceAnimation(chart, 'pie');
+      // Add keyboard navigation for accessibility
+      this.addKeyboardNavigation(chart);
+      
+      // Add chart title styling
+      this.addChartTitle(canvasElement, options.title || 'Expense Breakdown');
+      
+      // Add entrance animation
+      this.addEntranceAnimation(chart, 'pie');
 
-    this.activeCharts.set(canvasElement.id, chart);
-    return chart;
+      this.activeCharts.set(canvasElement.id, chart);
+      return chart;
+    } catch (error) {
+      console.error('Failed to create chart:', error.message);
+      return null;
+    }
   }
 
   /**
@@ -165,23 +170,28 @@ export class ChartRenderer {
       });
     }
 
-    const chart = new ChartJS(canvasElement, {
-      type: 'bar',
-      data,
-      options: chartOptions
-    });
+    try {
+      const chart = new ChartJS(canvasElement, {
+        type: 'bar',
+        data,
+        options: chartOptions
+      });
 
-    // Add keyboard navigation for accessibility
-    this.addKeyboardNavigation(chart);
-    
-    // Add chart title styling
-    this.addChartTitle(canvasElement, options.title || 'Comparison Chart');
-    
-    // Add entrance animation
-    this.addEntranceAnimation(chart, 'bar');
+      // Add keyboard navigation for accessibility
+      this.addKeyboardNavigation(chart);
+      
+      // Add chart title styling
+      this.addChartTitle(canvasElement, options.title || 'Comparison Chart');
+      
+      // Add entrance animation
+      this.addEntranceAnimation(chart, 'bar');
 
-    this.activeCharts.set(canvasElement.id, chart);
-    return chart;
+      this.activeCharts.set(canvasElement.id, chart);
+      return chart;
+    } catch (error) {
+      console.error('Failed to create chart:', error.message);
+      return null;
+    }
   }
 
   /**
@@ -265,17 +275,22 @@ export class ChartRenderer {
       });
     }
 
-    const chart = new ChartJS(canvasElement, {
-      type: 'line',
-      data,
-      options: chartOptions
-    });
+    try {
+      const chart = new ChartJS(canvasElement, {
+        type: 'line',
+        data,
+        options: chartOptions
+      });
 
-    // Add keyboard navigation for accessibility
-    this.addKeyboardNavigation(chart);
+      // Add keyboard navigation for accessibility
+      this.addKeyboardNavigation(chart);
 
-    this.activeCharts.set(canvasElement.id, chart);
-    return chart;
+      this.activeCharts.set(canvasElement.id, chart);
+      return chart;
+    } catch (error) {
+      console.error('Failed to create chart:', error.message);
+      return null;
+    }
   }
 
   /**
@@ -332,17 +347,22 @@ export class ChartRenderer {
       data.datasets[0].borderWidth = 2;
     }
 
-    const chart = new ChartJS(canvasElement, {
-      type: 'doughnut',
-      data,
-      options: chartOptions
-    });
+    try {
+      const chart = new ChartJS(canvasElement, {
+        type: 'doughnut',
+        data,
+        options: chartOptions
+      });
 
-    // Add keyboard navigation for accessibility
-    this.addKeyboardNavigation(chart);
+      // Add keyboard navigation for accessibility
+      this.addKeyboardNavigation(chart);
 
-    this.activeCharts.set(canvasElement.id, chart);
-    return chart;
+      this.activeCharts.set(canvasElement.id, chart);
+      return chart;
+    } catch (error) {
+      console.error('Failed to create chart:', error.message);
+      return null;
+    }
   }
 
   /**

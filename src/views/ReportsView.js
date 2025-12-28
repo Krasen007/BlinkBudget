@@ -532,6 +532,7 @@ export const ReportsView = () => {
     let activeCharts = new Map(); // Track active chart instances for cleanup
     let timePeriodSelectorComponent = null; // Reference to the time period selector
     let loadingProgress = 0; // Track progressive loading progress
+    let categoryColorMap = new Map(); // Store consistent colors for categories
 
     // Header section
     const header = createHeader();
@@ -1263,6 +1264,11 @@ export const ReportsView = () => {
                 return;
             }
 
+            // Initialize consistent category colors
+            if (currentData.categoryBreakdown && currentData.categoryBreakdown.categories) {
+                getCategoryColors(currentData.categoryBreakdown.categories);
+            }
+
             // Create chart container
             const chartContainer = createChartContainer();
             content.appendChild(chartContainer);
@@ -1509,9 +1515,11 @@ export const ReportsView = () => {
         try {
             // Create chart sections
             const chartsSection = document.createElement('div');
+            chartsSection.className = 'charts-section';
             chartsSection.style.display = 'flex';
             chartsSection.style.flexDirection = 'column';
             chartsSection.style.gap = SPACING.XL;
+            chartsSection.style.position = 'relative'; // Ensure proper positioning context
 
             // Track successful chart renders for fallback handling
             const chartRenderResults = [];
@@ -1519,6 +1527,10 @@ export const ReportsView = () => {
             // 1. Category Breakdown Pie Chart
             try {
                 const categorySection = await createCategoryBreakdownChart();
+                // Add visual separation at the bottom
+                categorySection.style.borderBottom = `2px solid ${COLORS.BORDER}`;
+                categorySection.style.paddingBottom = `calc(${SPACING.LG} * 1.5)`;
+                categorySection.style.marginBottom = `calc(${SPACING.XL} * 1.5)`;
                 chartsSection.appendChild(categorySection);
                 chartRenderResults.push({ name: 'Category Breakdown', success: true });
             } catch (categoryError) {
@@ -1533,6 +1545,10 @@ export const ReportsView = () => {
             // 2. Income vs Expenses Bar Chart
             try {
                 const incomeExpenseSection = await createIncomeExpenseChart();
+                // Add explicit separation
+                incomeExpenseSection.style.marginTop = `calc(${SPACING.XL} * 2)`;
+                incomeExpenseSection.style.borderTop = `3px solid ${COLORS.BORDER}`;
+                incomeExpenseSection.style.paddingTop = `calc(${SPACING.LG} * 1.5)`;
                 chartsSection.appendChild(incomeExpenseSection);
                 chartRenderResults.push({ name: 'Income vs Expenses', success: true });
             } catch (incomeExpenseError) {
@@ -1640,7 +1656,8 @@ export const ReportsView = () => {
      */
     async function createCategoryBreakdownChart() {
         const section = document.createElement('div');
-        section.className = 'chart-section';
+        section.className = 'chart-section category-breakdown-section';
+        section.setAttribute('data-chart-type', 'category-breakdown');
         section.style.background = COLORS.SURFACE;
         section.style.borderRadius = 'var(--radius-lg)';
         section.style.border = `1px solid ${COLORS.BORDER}`;
@@ -1688,11 +1705,15 @@ export const ReportsView = () => {
 
         // Prepare chart data
         const categoryData = currentData.categoryBreakdown;
+        
+        // Get consistent colors for all categories
+        const categoryColors = getCategoryColors(categoryData.categories);
+        
         const chartData = {
             labels: categoryData.categories.map(cat => cat.name),
             datasets: [{
                 data: categoryData.categories.map(cat => cat.amount),
-                backgroundColor: [],
+                backgroundColor: categoryColors,
                 borderColor: '#ffffff',
                 borderWidth: 2
             }]
@@ -1750,11 +1771,20 @@ export const ReportsView = () => {
      */
     async function createIncomeExpenseChart() {
         const section = document.createElement('div');
-        section.className = 'chart-section';
+        section.className = 'chart-section income-expense-section';
+        section.setAttribute('data-chart-type', 'income-expense');
         section.style.background = COLORS.SURFACE;
         section.style.borderRadius = 'var(--radius-lg)';
         section.style.border = `1px solid ${COLORS.BORDER}`;
         section.style.padding = SPACING.LG;
+        section.style.marginBottom = SPACING.XL; // Add explicit bottom margin
+        section.style.position = 'relative'; // Ensure proper positioning
+        section.style.zIndex = '2'; // Ensure it's above category selector
+        // Force block behavior and proper containment
+        section.style.display = 'block';
+        section.style.width = '100%';
+        section.style.boxSizing = 'border-box';
+        section.style.contain = 'layout';
 
         const title = document.createElement('h3');
         title.textContent = 'Income vs Expenses';
@@ -1764,10 +1794,19 @@ export const ReportsView = () => {
 
         const chartDiv = document.createElement('div');
         chartDiv.style.position = 'relative';
-        chartDiv.style.height = '300px';
+        chartDiv.style.height = '400px'; // Increase height to properly fit the chart
+        chartDiv.style.width = '100%';
+        chartDiv.style.marginBottom = SPACING.MD;
+        chartDiv.style.padding = SPACING.SM; // Add padding inside chart container
+        chartDiv.style.boxSizing = 'border-box';
+        chartDiv.style.overflow = 'hidden'; // Contain the chart properly
 
         const canvas = document.createElement('canvas');
         canvas.id = 'income-expense-chart';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.maxWidth = '100%';
+        canvas.style.maxHeight = '100%';
         chartDiv.appendChild(canvas);
         section.appendChild(chartDiv);
 
@@ -1858,8 +1897,8 @@ export const ReportsView = () => {
             datasets: topCategories.map((category, index) => ({
                 label: category.name,
                 data: monthlyData.categoryData[category.name] || [],
-                borderColor: getChartColors(topCategories.length)[index],
-                backgroundColor: getChartColors(topCategories.length)[index].replace(')', ', 0.1)').replace('hsl', 'hsla'),
+                borderColor: categoryColorMap.get(category.name) || getChartColors(topCategories.length)[index],
+                backgroundColor: (categoryColorMap.get(category.name) || getChartColors(topCategories.length)[index]).replace(')', ', 0.1)').replace('hsl', 'hsla'),
                 borderWidth: 3,
                 fill: false,
                 tension: 0.4
@@ -1889,6 +1928,14 @@ export const ReportsView = () => {
         section.style.borderRadius = 'var(--radius-lg)';
         section.style.border = `1px solid ${COLORS.BORDER}`;
         section.style.padding = SPACING.LG;
+        section.style.marginTop = SPACING.XL; // Add explicit top margin to prevent overlap
+        section.style.position = 'relative'; // Ensure proper positioning
+        section.style.zIndex = '1'; // Ensure it's above other elements
+        // Force proper block separation
+        section.style.display = 'block';
+        section.style.width = '100%';
+        section.style.clear = 'both';
+        section.style.isolation = 'isolate';
 
         const title = document.createElement('h3');
         title.textContent = 'Explore Categories';
@@ -1904,9 +1951,11 @@ export const ReportsView = () => {
 
         // Category grid
         const categoryGrid = document.createElement('div');
+        categoryGrid.className = 'category-grid';
         categoryGrid.style.display = 'grid';
         categoryGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(200px, 1fr))';
         categoryGrid.style.gap = SPACING.MD;
+        categoryGrid.style.marginTop = SPACING.MD; // Add margin to separate from description
 
         currentData.categoryBreakdown.categories.forEach((category, index) => {
             const categoryCard = createCategoryCard(category, index);
@@ -1933,6 +1982,10 @@ export const ReportsView = () => {
         card.style.textAlign = 'left';
         card.style.width = '100%';
 
+        // Set the category color as a CSS custom property for the ::before pseudo-element
+        const categoryColor = categoryColorMap.get(category.name) || getChartColors(1)[0];
+        card.style.setProperty('--category-color', categoryColor);
+
         // Hover effects
         card.addEventListener('mouseenter', () => {
             card.style.borderColor = COLORS.PRIMARY;
@@ -1946,11 +1999,11 @@ export const ReportsView = () => {
             card.style.boxShadow = 'none';
         });
 
-        // Category color indicator
+        // Category color indicator - use the same color as in charts
         const colorIndicator = document.createElement('div');
         colorIndicator.style.width = '4px';
         colorIndicator.style.height = '40px';
-        colorIndicator.style.background = getChartColors(currentData.categoryBreakdown.categories.length)[index];
+        colorIndicator.style.background = categoryColor;
         colorIndicator.style.borderRadius = '2px';
         colorIndicator.style.marginBottom = SPACING.SM;
 
@@ -2318,19 +2371,24 @@ export const ReportsView = () => {
         return { months, categoryData };
     }
 
-    function getChartColors(count) {
-        const colors = [
-            'hsl(220, 70%, 50%)',   // Blue
-            'hsl(142, 71%, 45%)',   // Green
-            'hsl(0, 84%, 60%)',     // Red
-            'hsl(38, 92%, 50%)',    // Orange
-            'hsl(271, 81%, 56%)',   // Purple
-            'hsl(198, 93%, 60%)',   // Cyan
-            'hsl(48, 96%, 53%)',    // Yellow
-            'hsl(339, 82%, 52%)',   // Pink
-        ];
+    /**
+     * Get consistent colors for categories across all charts and UI elements
+     * @param {Array} categories - Array of category objects
+     * @returns {Array} Array of colors matching the categories
+     */
+    function getCategoryColors(categories) {
+        // Generate colors for all categories if not already mapped
+        if (categoryColorMap.size === 0 || categoryColorMap.size < categories.length) {
+            const colors = getChartColors(categories.length);
+            categories.forEach((category, index) => {
+                if (!categoryColorMap.has(category.name)) {
+                    categoryColorMap.set(category.name, colors[index]);
+                }
+            });
+        }
         
-        return colors.slice(0, count);
+        // Return colors in the same order as categories
+        return categories.map(category => categoryColorMap.get(category.name));
     }
 
     /**
