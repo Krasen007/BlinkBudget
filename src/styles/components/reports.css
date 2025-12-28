@@ -972,7 +972,7 @@
 /* Income vs Expenses Container - Separate container with proper isolation */
 .income-expense-container {
     margin-top: var(--spacing-xl) !important;
-    margin-bottom: calc(var(--spacing-lg) + 40px) !important; /* Reduced spacing for tooltips */
+    margin-bottom: var(--spacing-lg) !important; /* Minimal spacing */
     position: relative !important;
     z-index: 1 !important;
     clear: both !important;
@@ -980,8 +980,8 @@
     width: 100% !important;
     /* Visual separation from content above */
     border-top: 2px solid var(--color-border) !important;
-    padding-top: calc(var(--spacing-lg) * 1.5) !important;
-    padding-bottom: calc(var(--spacing-lg) + 40px) !important; /* Reduced padding for tooltips */
+    padding-top: var(--spacing-lg) !important;
+    padding-bottom: 0 !important; /* No bottom padding - section handles it */
     /* Ensure proper containment and no overlap */
     contain: layout style !important;
     isolation: isolate !important;

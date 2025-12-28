@@ -1563,7 +1563,7 @@ export const ReportsView = () => {
                 const incomeExpenseContainer = document.createElement('div');
                 incomeExpenseContainer.className = 'income-expense-container';
                 incomeExpenseContainer.style.marginTop = SPACING.XL + ' !important'; // Reduced spacing
-                incomeExpenseContainer.style.marginBottom = `calc(${SPACING.LG} + 40px) !important`; // Minimal spacing for tooltips
+                incomeExpenseContainer.style.marginBottom = SPACING.LG + ' !important'; // Minimal spacing
                 incomeExpenseContainer.style.position = 'relative';
                 incomeExpenseContainer.style.zIndex = '1';
                 incomeExpenseContainer.style.clear = 'both';
@@ -1580,7 +1580,7 @@ export const ReportsView = () => {
                 const incomeExpenseContainer = document.createElement('div');
                 incomeExpenseContainer.className = 'income-expense-container';
                 incomeExpenseContainer.style.marginTop = SPACING.XL + ' !important'; // Reduced spacing
-                incomeExpenseContainer.style.marginBottom = `calc(${SPACING.LG} + 40px) !important`; // Minimal spacing for tooltips
+                incomeExpenseContainer.style.marginBottom = SPACING.LG + ' !important'; // Minimal spacing
                 incomeExpenseContainer.style.position = 'relative';
                 incomeExpenseContainer.style.zIndex = '1';
                 incomeExpenseContainer.style.clear = 'both';
@@ -1791,8 +1791,8 @@ export const ReportsView = () => {
         section.style.borderRadius = 'var(--radius-lg)';
         section.style.border = `1px solid ${COLORS.BORDER}`;
         section.style.padding = SPACING.LG;
-        section.style.marginBottom = '0 !important'; // No bottom margin - container handles spacing
-        section.style.paddingBottom = `calc(${SPACING.LG} + 40px) !important`; // Reduced padding at bottom for tooltips
+        section.style.marginBottom = '0 !important'; // No bottom margin
+        section.style.paddingBottom = `calc(${SPACING.MD}) !important`; // Minimal padding for tooltips only
         section.style.position = 'relative'; // Ensure proper positioning
         section.style.zIndex = '2'; // Ensure it's above category selector
         // Force block behavior and proper containment
@@ -1812,10 +1812,10 @@ export const ReportsView = () => {
         const chartDiv = document.createElement('div');
         chartDiv.style.position = 'relative';
         chartDiv.style.width = '100%';
-        chartDiv.style.minHeight = '400px'; // Minimum height for chart
-        chartDiv.style.marginBottom = `calc(${SPACING.XL} + 60px)`; // Extra margin for tooltips
+        chartDiv.style.height = '400px'; // Fixed height - no min-height to prevent expansion
+        chartDiv.style.marginBottom = '0'; // No margin
         chartDiv.style.padding = SPACING.SM;
-        chartDiv.style.paddingBottom = `calc(${SPACING.SM} + 60px)`; // Extra bottom padding for tooltips
+        chartDiv.style.paddingBottom = `calc(${SPACING.SM} + 20px)`; // Small padding for tooltips only
         chartDiv.style.boxSizing = 'border-box';
         chartDiv.style.overflow = 'visible'; // Allow tooltips to show
 
