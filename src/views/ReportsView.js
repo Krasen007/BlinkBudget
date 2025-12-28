@@ -1562,8 +1562,8 @@ export const ReportsView = () => {
             try {
                 const incomeExpenseContainer = document.createElement('div');
                 incomeExpenseContainer.className = 'income-expense-container';
-                incomeExpenseContainer.style.marginTop = `calc(${SPACING.XL} * 2)`;
-                incomeExpenseContainer.style.marginBottom = `calc(${SPACING.XL} * 2 + 80px)`; // Extra bottom margin for tooltips
+                incomeExpenseContainer.style.marginTop = SPACING.XL + ' !important'; // Reduced spacing
+                incomeExpenseContainer.style.marginBottom = `calc(${SPACING.LG} + 40px) !important`; // Minimal spacing for tooltips
                 incomeExpenseContainer.style.position = 'relative';
                 incomeExpenseContainer.style.zIndex = '1';
                 incomeExpenseContainer.style.clear = 'both';
@@ -1579,8 +1579,8 @@ export const ReportsView = () => {
                 // Add fallback income/expense display
                 const incomeExpenseContainer = document.createElement('div');
                 incomeExpenseContainer.className = 'income-expense-container';
-                incomeExpenseContainer.style.marginTop = `calc(${SPACING.XL} * 2)`;
-                incomeExpenseContainer.style.marginBottom = `calc(${SPACING.XL} * 2 + 80px)`; // Extra bottom margin for tooltips
+                incomeExpenseContainer.style.marginTop = SPACING.XL + ' !important'; // Reduced spacing
+                incomeExpenseContainer.style.marginBottom = `calc(${SPACING.LG} + 40px) !important`; // Minimal spacing for tooltips
                 incomeExpenseContainer.style.position = 'relative';
                 incomeExpenseContainer.style.zIndex = '1';
                 incomeExpenseContainer.style.clear = 'both';
@@ -1607,7 +1607,7 @@ export const ReportsView = () => {
             if (currentData.insights && currentData.insights.length > 0) {
                 try {
                     const insightsSection = createInsightsSection();
-                    insightsSection.style.marginTop = `calc(${SPACING.XL} * 2)`;
+                    insightsSection.style.marginTop = SPACING.LG + ' !important'; // Minimal spacing
                     chartsSection.appendChild(insightsSection);
                     chartRenderResults.push({ name: 'Financial Insights', success: true });
                 } catch (insightsError) {
@@ -1791,8 +1791,8 @@ export const ReportsView = () => {
         section.style.borderRadius = 'var(--radius-lg)';
         section.style.border = `1px solid ${COLORS.BORDER}`;
         section.style.padding = SPACING.LG;
-        section.style.marginBottom = `calc(${SPACING.XL} * 2)`; // Add extra bottom margin for tooltips
-        section.style.paddingBottom = `calc(${SPACING.LG} * 2)`; // Extra padding at bottom
+        section.style.marginBottom = '0 !important'; // No bottom margin - container handles spacing
+        section.style.paddingBottom = `calc(${SPACING.LG} + 40px) !important`; // Reduced padding at bottom for tooltips
         section.style.position = 'relative'; // Ensure proper positioning
         section.style.zIndex = '2'; // Ensure it's above category selector
         // Force block behavior and proper containment
@@ -1808,22 +1808,23 @@ export const ReportsView = () => {
         title.style.color = COLORS.TEXT_MAIN;
         section.appendChild(title);
 
+        // Chart container - properly sized to accommodate chart without clipping
         const chartDiv = document.createElement('div');
         chartDiv.style.position = 'relative';
-        chartDiv.style.height = '400px'; // Increase height to properly fit the chart
         chartDiv.style.width = '100%';
-        chartDiv.style.marginBottom = `calc(${SPACING.XL} + 60px)`; // Extra margin for tooltips (60px for tooltip height)
-        chartDiv.style.padding = SPACING.SM; // Add padding inside chart container
+        chartDiv.style.minHeight = '400px'; // Minimum height for chart
+        chartDiv.style.marginBottom = `calc(${SPACING.XL} + 60px)`; // Extra margin for tooltips
+        chartDiv.style.padding = SPACING.SM;
         chartDiv.style.paddingBottom = `calc(${SPACING.SM} + 60px)`; // Extra bottom padding for tooltips
         chartDiv.style.boxSizing = 'border-box';
-        chartDiv.style.overflow = 'visible'; // Allow tooltips to show but they should be positioned correctly
+        chartDiv.style.overflow = 'visible'; // Allow tooltips to show
 
         const canvas = document.createElement('canvas');
         canvas.id = 'income-expense-chart';
         canvas.style.width = '100%';
-        canvas.style.height = '100%';
+        canvas.style.height = '400px'; // Fixed height for the chart
         canvas.style.maxWidth = '100%';
-        canvas.style.maxHeight = '100%';
+        canvas.style.display = 'block';
         chartDiv.appendChild(canvas);
         section.appendChild(chartDiv);
 
@@ -1859,6 +1860,7 @@ export const ReportsView = () => {
         await chartRenderer.createBarChart(canvas, chartData, {
             responsive: true,
             maintainAspectRatio: false,
+            title: undefined, // Don't add "Comparison Chart" title - we already have "Income vs Expenses"
             plugins: {
                 tooltip: {
                     position: 'nearest',

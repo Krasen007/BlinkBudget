@@ -180,8 +180,10 @@ export class ChartRenderer {
       // Add keyboard navigation for accessibility
       this.addKeyboardNavigation(chart);
       
-      // Add chart title styling
-      this.addChartTitle(canvasElement, options.title || 'Comparison Chart');
+      // Add chart title styling (only if title is explicitly provided, not default)
+      if (options.title !== undefined) {
+        this.addChartTitle(canvasElement, options.title);
+      }
       
       // Add entrance animation
       this.addEntranceAnimation(chart, 'bar');
@@ -1130,6 +1132,7 @@ export class ChartRenderer {
    * @param {string} title - Chart title
    */
   addChartTitle(canvasElement, title) {
+    // Skip if no title provided or canvas has no parent
     if (!title || !canvasElement.parentElement) return;
     
     // Check if title already exists
@@ -1143,6 +1146,8 @@ export class ChartRenderer {
     titleElement.className = 'chart-title';
     titleElement.textContent = title;
     titleElement.setAttribute('id', `chart-title-${canvasElement.id}`);
+    titleElement.style.marginTop = '0';
+    titleElement.style.marginBottom = 'var(--spacing-md)';
     
     // Insert title before canvas
     canvasElement.parentElement.insertBefore(titleElement, canvasElement);
