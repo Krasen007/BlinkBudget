@@ -1,9 +1,7 @@
-# Changelog
+**Key Updates and Improvements:**
 
-## Summary of Changes:
-
-*   Began basic work for Beautiful Reports & Insights.
-*   Removed distracting effects in settings.
-*   Lazy loaded firebase when not authenticated.
-*   Improved security and validation.
-*   Updated readme for version 1.8.
+*   **Reporting & Analytics:** Significant progress was made on the reporting features, including the implementation of advanced analytics, insights generation, chart rendering, and the Reports View.
+*   **User Experience & Design:** Visual design and styling were implemented, alongside accessibility improvements, responsive design, and corrected UI elements like tooltips and navigation.      
+*   **Performance:** Optimizations were introduced through lazy loading, code splitting, and refactoring.
+*   **Bug Fixes:** Several issues were addressed, including CSS problems, overlap issues, and general bug fixes.
+*   **Project Foundation:** Initial setup for Chart.js integration and core engine functionalities were established.
