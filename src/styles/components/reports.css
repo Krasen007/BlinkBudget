@@ -1,79 +1,661 @@
-/* Reports View Styles */
+/* Reports View Styles - Enhanced with BlinkBudget Design System */
+
+/* Reports View Container - Override default view constraints for proper scrolling */
+.view-reports {
+    height: 100vh !important; /* Use viewport height and override responsive styles */
+    max-height: 100vh !important;
+    min-height: unset !important; /* Override responsive min-height */
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    /* Ensure scrolling works on mobile */
+    touch-action: pan-y;
+    /* Override any conflicting padding from responsive styles */
+    padding: 0 var(--spacing-md) !important;
+}
+
+/* Reports Content Area - Ensure proper scrolling */
+.reports-content {
+    flex: 1 !important;
+    min-height: 0 !important; /* Allow flex item to shrink */
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-bottom: var(--spacing-xl); /* Add bottom padding for better UX */
+    display: flex !important;
+    flex-direction: column !important;
+    /* Ensure content can scroll */
+    touch-action: pan-y;
+    /* Force scrollable area */
+    max-height: calc(100vh - 120px); /* Account for header and time selector */
+}
 
 /* Reports Header */
 .reports-header {
     position: relative;
     z-index: 10;
+    background: linear-gradient(135deg, 
+        hsl(var(--primary-hue), var(--primary-sat), calc(var(--primary-light) - 10%)) 0%,
+        hsl(var(--primary-hue), var(--primary-sat), var(--primary-light)) 100%);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    border: 1px solid hsl(var(--primary-hue), var(--primary-sat), calc(var(--primary-light) + 10%));
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.reports-header h1 {
+    background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.9) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Chart Container Styling */
+.chart-container {
+    background: linear-gradient(145deg, 
+        var(--color-surface) 0%, 
+        hsl(240, 10%, 12%) 100%);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    position: relative;
+    overflow: visible; /* Allow content to be visible for scrolling */
+    /* Ensure charts don't interfere with scrolling */
+    touch-action: pan-y;
+    /* Ensure minimum height to trigger scrolling */
+    min-height: 400px;
+}
+
+.chart-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        hsl(var(--primary-hue), var(--primary-sat), var(--primary-light)) 50%, 
+        transparent 100%);
+}
+
+/* Chart Canvas Styling */
+.chart-container canvas {
+    border-radius: var(--radius-md);
+    transition: var(--transition-normal);
+}
+
+.chart-container canvas:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.chart-container canvas:focus {
+    outline: 3px solid hsl(var(--primary-hue), var(--primary-sat), var(--primary-light));
+    outline-offset: 4px;
+    box-shadow: 
+        0 0 0 4px rgba(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2),
+        0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Chart Title Styling */
+.chart-title {
+    font-family: var(--font-heading);
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--color-text-main);
+    margin-bottom: var(--spacing-lg);
+    text-align: center;
+    position: relative;
+}
+
+.chart-title::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, 
+        hsl(var(--primary-hue), var(--primary-sat), var(--primary-light)) 0%,
+        hsl(var(--primary-hue), var(--primary-sat), calc(var(--primary-light) + 15%)) 100%);
+    border-radius: var(--radius-full);
+}
+
+/* Chart Legend Enhancements */
+.chart-container .chartjs-legend {
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--color-border);
+}
+
+.chart-container .chartjs-legend ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--spacing-md);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.chart-container .chartjs-legend li {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    transition: var(--transition-fast);
+    cursor: pointer;
+}
+
+.chart-container .chartjs-legend li:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.chart-container .chartjs-legend li span {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Loading State Enhancements */
+.loading-state {
+    background: linear-gradient(145deg, 
+        var(--color-surface) 0%, 
+        hsl(240, 10%, 12%) 100%);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-3xl);
+    text-align: center;
+}
+
+.loading-spinner {
+    position: relative;
+}
+
+.loading-spinner::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    background: hsl(var(--primary-hue), var(--primary-sat), var(--primary-light));
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.2); }
+}
+
+/* Progress Bar Styling */
+.progress-container {
+    background: var(--color-border);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, 
+        hsl(var(--primary-hue), var(--primary-sat), var(--primary-light)) 0%,
+        hsl(var(--primary-hue), var(--primary-sat), calc(var(--primary-light) + 15%)) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.4) 50%, 
+        transparent 100%);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Empty State Styling */
+.empty-state {
+    background: linear-gradient(145deg, 
+        var(--color-surface) 0%, 
+        hsl(240, 10%, 12%) 100%);
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-3xl);
+    text-align: center;
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: var(--spacing-lg);
+    opacity: 0.6;
+}
+
+/* Error State Styling */
+.error-state {
+    background: linear-gradient(145deg, 
+        hsl(0, 50%, 10%) 0%, 
+        hsl(0, 30%, 8%) 100%);
+    border: 1px solid hsl(0, 50%, 20%);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-3xl);
+    text-align: center;
+}
+
+/* Data Summary Cards */
+.data-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+    margin: var(--spacing-xl) 0;
+}
+
+.data-summary-card {
+    background: linear-gradient(145deg, 
+        var(--color-surface) 0%, 
+        hsl(240, 10%, 12%) 100%);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    text-align: center;
+    transition: var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.data-summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, 
+        hsl(var(--primary-hue), var(--primary-sat), var(--primary-light)) 0%,
+        hsl(var(--primary-hue), var(--primary-sat), calc(var(--primary-light) + 15%)) 100%);
+}
+
+.data-summary-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+    border-color: hsl(var(--primary-hue), var(--primary-sat), calc(var(--primary-light) + 10%));
+}
+
+.data-summary-value {
+    font-family: var(--font-heading);
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    margin-bottom: var(--spacing-sm);
+    background: linear-gradient(135deg, 
+        var(--color-text-main) 0%, 
+        rgba(255, 255, 255, 0.8) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.data-summary-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
 }
 
 /* Keyboard shortcuts info styling */
 .keyboard-shortcuts-info {
     opacity: 0.8;
-    transition: opacity 0.2s ease;
+    transition: var(--transition-fast);
+    background: rgba(255, 255, 255, 0.05);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-md);
 }
 
 .keyboard-shortcuts-info:hover {
     opacity: 1;
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .keyboard-shortcuts-info kbd {
     font-family: var(--font-mono, 'Courier New', monospace);
-    font-size: 0.7rem;
-    font-weight: normal;
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 2px 6px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 /* Mobile optimizations */
 @media (max-width: 768px) {
     .reports-header {
-        padding: 0 var(--spacing-sm);
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
     }
     
     .reports-header h1 {
-        font-size: 1.5rem;
-        line-height: 1.2;
+        font-size: var(--font-size-2xl);
+        line-height: var(--line-height-tight);
     }
     
     .keyboard-shortcuts-info {
         display: none; /* Hide keyboard shortcuts on mobile */
+    }
+    
+    .chart-container {
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .data-summary {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+    
+    /* Ensure proper scrolling on mobile - override responsive styles */
+    .view-reports {
+        height: 100vh !important;
+        height: 100dvh !important; /* Use dynamic viewport height on supported browsers */
+        min-height: unset !important; /* Remove min-height constraint */
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+        padding: 0 var(--spacing-sm) !important; /* Override responsive padding */
+    }
+    
+    .reports-content {
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+        /* Add extra padding for mobile scrolling */
+        padding-bottom: calc(var(--spacing-xl) + env(safe-area-inset-bottom, 0px)) !important;
     }
 }
 
 /* Tablet optimizations */
 @media (min-width: 769px) and (max-width: 1023px) {
     .reports-header h1 {
-        font-size: 1.75rem;
+        font-size: var(--font-size-3xl);
+    }
+    
+    .data-summary {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
 /* Desktop optimizations */
 @media (min-width: 1024px) {
     .reports-header {
-        padding: 0 var(--spacing-lg);
+        padding: var(--spacing-xl);
     }
     
     .reports-header h1 {
-        font-size: 2rem;
+        font-size: var(--font-size-4xl);
+    }
+    
+    .chart-container:hover {
+        transform: translateY(-2px);
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
 }
 
 /* High contrast mode support */
 @media (prefers-contrast: high) {
+    .chart-container {
+        border-width: 2px;
+        border-color: var(--color-text-main);
+    }
+    
     .keyboard-shortcuts-info kbd {
-        border: 1px solid currentColor;
+        border: 2px solid currentColor;
+        background: var(--color-background);
+    }
+    
+    .data-summary-card {
+        border-width: 2px;
     }
 }
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-    .keyboard-shortcuts-info {
+    .keyboard-shortcuts-info,
+    .chart-container canvas,
+    .data-summary-card,
+    .chart-container .chartjs-legend li {
         transition: none;
+    }
+    
+    .loading-spinner::after,
+    .progress-bar::after {
+        animation: none;
+    }
+    
+    .chart-container:hover,
+    .data-summary-card:hover {
+        transform: none;
     }
 }
 
 /* Dark mode adjustments */
 @media (prefers-color-scheme: dark) {
     .keyboard-shortcuts-info kbd {
-        background: var(--color-surface-dark, #2a2a2a);
-        border: 1px solid var(--color-border-dark, #404040);
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
     }
+    
+    .chart-container {
+        box-shadow: 
+            0 4px 12px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+}
+
+/* Focus management for accessibility */
+.chart-container:focus-within {
+    outline: 2px solid hsl(var(--primary-hue), var(--primary-sat), var(--primary-light));
+    outline-offset: 2px;
+}
+
+/* Simplified chart animations and micro-interactions */
+@keyframes chart-entrance {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes loading-pulse {
+    0%, 100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Chart Container Animations */
+.chart-container {
+    animation: chart-entrance 0.4s ease-out;
+}
+
+.chart-container.loading {
+    animation: loading-pulse 2s ease-in-out infinite;
+}
+
+/* Chart Canvas Interactions - Simplified */
+.chart-container canvas {
+    transition: 
+        transform 0.2s ease-out,
+        opacity 0.2s ease-out;
+}
+
+.chart-container canvas:hover {
+    transform: translateY(-1px);
+}
+
+.chart-container canvas:active {
+    transform: translateY(0) scale(0.99);
+    transition: transform 0.1s ease-out;
+}
+
+/* Legend Animations - Simplified */
+.chart-container .chartjs-legend li {
+    transition: 
+        background-color 0.2s ease-out,
+        transform 0.2s ease-out;
+}
+
+.chart-container .chartjs-legend li:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+/* Data Summary Card Animations - Simplified */
+.data-summary-card {
+    transition: 
+        transform 0.2s ease-out,
+        box-shadow 0.2s ease-out;
+    animation: chart-entrance 0.3s ease-out;
+}
+
+.data-summary-card:nth-child(2) {
+    animation-delay: 0.05s;
+}
+
+.data-summary-card:nth-child(3) {
+    animation-delay: 0.1s;
+}
+
+.data-summary-card:nth-child(4) {
+    animation-delay: 0.15s;
+}
+
+.data-summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Loading State Animations - Simplified */
+.loading-spinner {
+    animation: spin 1s linear infinite;
+}
+
+.progress-bar::after {
+    animation: shimmer 2s infinite;
+}
+
+/* Entrance animations for chart elements - Simplified */
+.chart-container[data-chart-type="pie"] canvas,
+.chart-container[data-chart-type="doughnut"] canvas,
+.chart-container[data-chart-type="bar"] canvas,
+.chart-container[data-chart-type="line"] canvas {
+    animation: chart-entrance 0.4s ease-out;
+}
+
+/* Focus animations - Simplified */
+.chart-container canvas:focus {
+    outline: 2px solid hsl(var(--primary-hue), var(--primary-sat), var(--primary-light));
+    outline-offset: 2px;
+}
+
+/* Error and empty state animations */
+.error-state,
+.empty-state {
+    animation: chart-entrance 0.3s ease-out;
+}
+
+/* Responsive animation adjustments */
+@media (max-width: 768px) {
+    .chart-container canvas:hover {
+        transform: none; /* Disable hover transforms on mobile */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .data-summary-card:hover {
+        transform: translateY(-3px) scale(1.01);
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .chart-container,
+    .chart-container canvas,
+    .data-summary-card,
+    .chart-container .chartjs-legend li,
+    .loading-spinner,
+    .loading-spinner::after,
+    .progress-bar::after,
+    .empty-state-icon {
+        animation: none !important;
+        transition: none !important;
+    }
+    
+    .chart-container:hover,
+    .chart-container canvas:hover,
+    .data-summary-card:hover {
+        transform: none !important;
+    }
+    
+    .chart-ripple {
+        display: none;
+    }
+}
+
+/* High contrast mode adjustments */
+@media (prefers-contrast: high) {
+    .chart-container canvas:focus {
+        outline: 3px solid currentColor;
+        outline-offset: 2px;
+    }
+    
+    .chart-ripple {
+        background: radial-gradient(circle, currentColor 0%, transparent 70%);
+        opacity: 0.5;
+    }
+}
+
+/* Screen reader only content */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }

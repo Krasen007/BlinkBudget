@@ -14,11 +14,11 @@ export const Button = ({ text, onClick, variant = 'primary', type = 'button', cl
         if (!btn.disabled) {
             btn.classList.add('btn-touch-active');
         }
-    });
+    }, { passive: true });
 
     btn.addEventListener('touchend', (e) => {
         btn.classList.remove('btn-touch-active');
-    });
+    }, { passive: true });
 
     return btn;
 };

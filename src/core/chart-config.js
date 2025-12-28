@@ -15,10 +15,22 @@ let ChartJS = null;
 /**
  * Default chart configuration that aligns with BlinkBudget's design system
  * Includes comprehensive accessibility features for WCAG 2.1 AA compliance
+ * Enhanced with modern styling and smooth animations
  */
 export const defaultChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
+  
+  // Enhanced layout with BlinkBudget spacing
+  layout: {
+    padding: {
+      top: 16,
+      right: 16,
+      bottom: 16,
+      left: 16
+    }
+  },
+  
   // Accessibility configuration
   accessibility: {
     enabled: true,
@@ -35,16 +47,23 @@ export const defaultChartOptions = {
       }
     }
   },
+  
   plugins: {
     legend: {
       position: 'bottom',
+      align: 'center',
       labels: {
         padding: 20,
         usePointStyle: true,
+        pointStyle: 'circle',
         font: {
-          family: 'system-ui, -apple-system, sans-serif',
-          size: 12
+          family: 'Inter, system-ui, -apple-system, sans-serif', // BlinkBudget font
+          size: 12,
+          weight: '500'
         },
+        color: 'hsl(0, 0%, 100%)', // --color-text-main
+        boxWidth: 12,
+        boxHeight: 12,
         // Enhanced accessibility for legend
         generateLabels: function(chart) {
           // Get ChartJS from the chart instance or modules
@@ -99,21 +118,25 @@ export const defaultChartOptions = {
         }
       }
     },
+    
     tooltip: {
-      backgroundColor: 'rgba(0, 0, 0, 0.9)', // Higher contrast
+      backgroundColor: 'rgba(0, 0, 0, 0.95)', // Enhanced contrast
       titleColor: '#ffffff',
       bodyColor: '#ffffff',
-      borderColor: '#666666',
-      borderWidth: 2, // Thicker border for better visibility
-      cornerRadius: 8,
+      borderColor: 'hsl(250, 84%, 60%)', // Primary color border
+      borderWidth: 2,
+      cornerRadius: 12, // Rounded corners matching BlinkBudget
       displayColors: true,
-      padding: 16, // Larger padding for better readability
+      padding: 16,
       titleFont: {
+        family: 'Outfit, system-ui, -apple-system, sans-serif', // BlinkBudget heading font
         size: 14,
-        weight: 'bold'
+        weight: '600'
       },
       bodyFont: {
-        size: 13
+        family: 'Inter, system-ui, -apple-system, sans-serif', // BlinkBudget body font
+        size: 13,
+        weight: '400'
       },
       // Enhanced accessibility for tooltips
       filter: function(tooltipItem) {
@@ -137,38 +160,73 @@ export const defaultChartOptions = {
       }
     }
   },
-  // Enhanced animation with reduced motion support
+  
+  // Simplified animation with BlinkBudget timing
   animation: {
     duration: function() {
       // Check for reduced motion preference
       if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         return 0; // No animation for users who prefer reduced motion
       }
-      return 750;
+      return 600; // Shorter duration for snappier feel
     },
-    easing: 'easeInOutQuart'
+    easing: 'easeOutQuart', // Simpler easing
+    animateRotate: true,
+    animateScale: false // Disable scale animation for simplicity
   },
+  
+  // Simplified transitions for smooth interactions
+  transitions: {
+    active: {
+      animation: {
+        duration: 200,
+        easing: 'easeOutQuart'
+      }
+    },
+    resize: {
+      animation: {
+        duration: 300,
+        easing: 'easeInOutQuart'
+      }
+    }
+  },
+  
   // Interaction configuration for accessibility
   interaction: {
     intersect: false,
     mode: 'index'
   },
-  // Scale configuration for better readability
+  
+  // Enhanced scale configuration for better readability
   scales: {
     x: {
+      grid: {
+        color: 'hsl(240, 5%, 20%)', // Subtle grid lines
+        lineWidth: 1
+      },
       ticks: {
         font: {
-          size: 12
+          family: 'Inter, system-ui, -apple-system, sans-serif',
+          size: 12,
+          weight: '400'
         },
-        maxRotation: 45, // Prevent text from being too rotated
+        color: 'hsl(240, 5%, 65%)', // Muted text color
+        maxRotation: 45,
         minRotation: 0
       }
     },
     y: {
+      grid: {
+        color: 'hsl(240, 5%, 20%)', // Subtle grid lines
+        lineWidth: 1
+      },
       ticks: {
         font: {
-          size: 12
-        }
+          family: 'Inter, system-ui, -apple-system, sans-serif',
+          size: 12,
+          weight: '400'
+        },
+        color: 'hsl(240, 5%, 65%)', // Muted text color
       }
     }
   }
@@ -176,22 +234,39 @@ export const defaultChartOptions = {
 
 /**
  * BlinkBudget color palette for charts
- * Uses HSL color space for consistent theming
+ * Uses HSL color space for consistent theming with the app's design system
+ * Colors are carefully selected for accessibility and visual harmony
  */
 export const chartColors = {
+  // Primary palette - harmonious with BlinkBudget's purple theme
   primary: [
-    'hsl(210, 100%, 60%)',   // Blue
-    'hsl(150, 100%, 45%)',   // Green
-    'hsl(30, 100%, 60%)',    // Orange
-    'hsl(300, 100%, 60%)',   // Purple
-    'hsl(0, 100%, 60%)',     // Red
-    'hsl(60, 100%, 50%)',    // Yellow
-    'hsl(180, 100%, 45%)',   // Cyan
-    'hsl(270, 100%, 60%)',   // Violet
+    'hsl(250, 84%, 60%)',    // Primary purple (matches --color-primary)
+    'hsl(150, 70%, 45%)',    // Success green
+    'hsl(30, 85%, 55%)',     // Warning orange
+    'hsl(200, 80%, 55%)',    // Info blue
+    'hsl(0, 75%, 60%)',      // Error red
+    'hsl(280, 70%, 65%)',    // Secondary purple
+    'hsl(180, 60%, 50%)',    // Teal
+    'hsl(45, 80%, 60%)',     // Gold
+    'hsl(320, 65%, 60%)',    // Pink
+    'hsl(120, 60%, 50%)',    // Lime green
   ],
-  income: 'hsl(150, 100%, 45%)',    // Green for income
-  expense: 'hsl(0, 100%, 60%)',     // Red for expenses
-  neutral: 'hsl(210, 10%, 60%)',    // Gray for neutral data
+  
+  // Semantic colors matching BlinkBudget's design
+  income: 'hsl(150, 70%, 45%)',     // Success green
+  expense: 'hsl(0, 75%, 60%)',      // Error red
+  neutral: 'hsl(240, 5%, 65%)',     // Muted gray (matches --color-text-muted)
+  
+  // Surface colors for backgrounds
+  surface: 'hsl(240, 10%, 10%)',    // Matches --color-surface
+  surfaceHover: 'hsl(240, 10%, 15%)', // Matches --color-surface-hover
+  
+  // Gradient colors for enhanced visuals
+  gradients: {
+    primary: ['hsl(250, 84%, 60%)', 'hsl(250, 84%, 75%)'],
+    income: ['hsl(150, 70%, 45%)', 'hsl(150, 70%, 60%)'],
+    expense: ['hsl(0, 75%, 60%)', 'hsl(0, 75%, 75%)'],
+  }
 };
 
 /**
@@ -252,12 +327,13 @@ export async function initializeChartJS() {
 }
 
 /**
- * Utility function to get colors for a dataset
+ * Utility function to get colors for a dataset with enhanced styling
  * @param {number} count - Number of colors needed
  * @param {boolean} highContrast - Whether to use high contrast colors
- * @returns {string[]} Array of color strings
+ * @param {string} style - Color style: 'solid', 'gradient', 'pattern'
+ * @returns {string[]|Object[]} Array of color strings or gradient objects
  */
-export function getChartColors(count, highContrast = false) {
+export function getChartColors(count, highContrast = false, style = 'solid') {
   // Check user's contrast preference
   const prefersHighContrast = window.matchMedia && 
     window.matchMedia('(prefers-contrast: high)').matches;
@@ -267,10 +343,245 @@ export function getChartColors(count, highContrast = false) {
   const result = [];
   
   for (let i = 0; i < count; i++) {
-    result.push(colors[i % colors.length]);
+    const baseColor = colors[i % colors.length];
+    
+    switch (style) {
+      case 'gradient':
+        // Create gradient objects for Chart.js
+        result.push({
+          backgroundColor: createGradient(baseColor, 'radial'),
+          borderColor: baseColor,
+          hoverBackgroundColor: createGradient(baseColor, 'linear', 0.8),
+          hoverBorderColor: lightenColor(baseColor, 20)
+        });
+        break;
+        
+      case 'pattern':
+        // For future pattern support
+        result.push({
+          backgroundColor: baseColor,
+          borderColor: darkenColor(baseColor, 20),
+          pattern: accessibleColors.patterns[Object.keys(accessibleColors.patterns)[i % Object.keys(accessibleColors.patterns).length]]
+        });
+        break;
+        
+      default: // 'solid'
+        result.push(baseColor);
+        break;
+    }
   }
   
   return result;
+}
+
+/**
+ * Create gradient color for enhanced visual appeal
+ * @param {string} baseColor - Base HSL color string
+ * @param {string} type - 'linear' or 'radial'
+ * @param {number} opacity - Opacity for the gradient (0-1)
+ * @returns {string} CSS gradient string
+ */
+function createGradient(baseColor, type = 'linear', opacity = 1) {
+  // Extract HSL values from color string
+  const hslMatch = baseColor.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+  if (!hslMatch) return baseColor;
+  
+  const [, h, s, l] = hslMatch.map(Number);
+  const lighterL = Math.min(l + 15, 90);
+  const darkerL = Math.max(l - 10, 10);
+  
+  const lightColor = `hsla(${h}, ${s}%, ${lighterL}%, ${opacity})`;
+  const darkColor = `hsla(${h}, ${s}%, ${darkerL}%, ${opacity})`;
+  
+  if (type === 'radial') {
+    return `radial-gradient(circle, ${lightColor} 0%, ${darkColor} 100%)`;
+  } else {
+    return `linear-gradient(135deg, ${lightColor} 0%, ${darkColor} 100%)`;
+  }
+}
+
+/**
+ * Lighten a color by a percentage
+ * @param {string} color - HSL color string
+ * @param {number} percent - Percentage to lighten (0-100)
+ * @returns {string} Lightened color
+ */
+function lightenColor(color, percent) {
+  const hslMatch = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+  if (!hslMatch) return color;
+  
+  const [, h, s, l] = hslMatch.map(Number);
+  const newL = Math.min(l + percent, 100);
+  
+  return `hsl(${h}, ${s}%, ${newL}%)`;
+}
+
+/**
+ * Darken a color by a percentage
+ * @param {string} color - HSL color string
+ * @param {number} percent - Percentage to darken (0-100)
+ * @returns {string} Darkened color
+ */
+function darkenColor(color, percent) {
+  const hslMatch = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+  if (!hslMatch) return color;
+  
+  const [, h, s, l] = hslMatch.map(Number);
+  const newL = Math.max(l - percent, 0);
+  
+  return `hsl(${h}, ${s}%, ${newL}%)`;
+}
+
+/**
+ * Create themed chart options for specific chart types
+ * @param {string} chartType - Type of chart ('pie', 'bar', 'line', 'doughnut')
+ * @param {Object} customOptions - Custom options to merge
+ * @returns {Object} Themed chart options
+ */
+export function createThemedChartOptions(chartType, customOptions = {}) {
+  const baseOptions = createChartOptions(customOptions);
+  
+  // Chart-specific theming
+  switch (chartType) {
+    case 'pie':
+    case 'doughnut':
+      return {
+        ...baseOptions,
+        plugins: {
+          ...baseOptions.plugins,
+          legend: {
+            ...baseOptions.plugins.legend,
+            position: 'bottom',
+            labels: {
+              ...baseOptions.plugins.legend.labels,
+              generateLabels: function(chart) {
+                const data = chart.data;
+                if (data.labels.length && data.datasets.length) {
+                  return data.labels.map((label, i) => {
+                    const dataset = data.datasets[0];
+                    const value = dataset.data[i];
+                    const total = dataset.data.reduce((sum, val) => sum + val, 0);
+                    const percentage = ((value / total) * 100).toFixed(1);
+                    
+                    return {
+                      text: `${label} (${percentage}%)`,
+                      fillStyle: dataset.backgroundColor[i],
+                      strokeStyle: dataset.borderColor?.[i] || '#fff',
+                      lineWidth: 2,
+                      pointStyle: 'circle',
+                      index: i,
+                      fontColor: 'hsl(0, 0%, 100%)', // Ensure text is visible
+                      ariaLabel: `${label}: ${new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD'
+                      }).format(value)} (${percentage}% of total)`
+                    };
+                  });
+                }
+                return [];
+              }
+            }
+          }
+        },
+        // Enhanced hover effects for pie/doughnut charts
+        onHover: (event, activeElements, chart) => {
+          if (customOptions.onHover) {
+            customOptions.onHover(event, activeElements, chart);
+          }
+          
+          // Add subtle scale effect on hover
+          if (activeElements.length > 0) {
+            chart.canvas.style.cursor = 'pointer';
+          } else {
+            chart.canvas.style.cursor = 'default';
+          }
+        }
+      };
+      
+    case 'bar':
+      return {
+        ...baseOptions,
+        scales: {
+          ...baseOptions.scales,
+          x: {
+            ...baseOptions.scales.x,
+            grid: {
+              display: false // Clean look for bar charts
+            }
+          },
+          y: {
+            ...baseOptions.scales.y,
+            beginAtZero: true,
+            grid: {
+              color: 'hsl(240, 5%, 20%)',
+              lineWidth: 1
+            },
+            ticks: {
+              ...baseOptions.scales.y.ticks,
+              callback: function(value) {
+                return new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: 'USD',
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0
+                }).format(value);
+              }
+            }
+          }
+        }
+      };
+      
+    case 'line':
+      return {
+        ...baseOptions,
+        elements: {
+          line: {
+            tension: 0.4, // Smooth curves
+            borderWidth: 3,
+            fill: false
+          },
+          point: {
+            radius: 4,
+            hoverRadius: 8,
+            borderWidth: 2,
+            backgroundColor: 'hsl(240, 10%, 10%)', // Match surface color
+            hoverBorderWidth: 3
+          }
+        },
+        scales: {
+          ...baseOptions.scales,
+          x: {
+            ...baseOptions.scales.x,
+            grid: {
+              color: 'hsl(240, 5%, 15%)',
+              lineWidth: 1
+            }
+          },
+          y: {
+            ...baseOptions.scales.y,
+            beginAtZero: true,
+            grid: {
+              color: 'hsl(240, 5%, 15%)',
+              lineWidth: 1
+            },
+            ticks: {
+              ...baseOptions.scales.y.ticks,
+              callback: function(value) {
+                return new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: 'USD',
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0
+                }).format(value);
+              }
+            }
+          }
+        }
+      };
+      
+    default:
+      return baseOptions;
+  }
 }
 
 /**

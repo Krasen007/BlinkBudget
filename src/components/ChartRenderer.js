@@ -8,7 +8,7 @@
  * Requirements: 9.2 - Lazy loading and performance optimization
  */
 
-import { initializeChartJS, defaultChartOptions, getChartColors, createChartOptions } from '../core/chart-config.js';
+import { initializeChartJS, defaultChartOptions, getChartColors, createChartOptions, createThemedChartOptions } from '../core/chart-config.js';
 
 export class ChartRenderer {
   constructor() {
@@ -44,7 +44,7 @@ export class ChartRenderer {
   }
 
   /**
-   * Create a pie chart for category breakdowns
+   * Create a pie chart for category breakdowns with enhanced BlinkBudget styling
    * @param {HTMLCanvasElement} canvasElement - Canvas element to render chart
    * @param {Object} data - Chart data in Chart.js format
    * @param {Object} options - Custom chart options
@@ -52,56 +52,8 @@ export class ChartRenderer {
    */
   async createPieChart(canvasElement, data, options = {}) {
     const { ChartJS } = await this.ensureChartJSLoaded();
-    const chartOptions = createChartOptions({
+    const chartOptions = createThemedChartOptions('pie', {
       ...options,
-      plugins: {
-        ...options.plugins,
-        legend: {
-          position: 'bottom',
-          labels: {
-            padding: 20,
-            usePointStyle: true,
-            generateLabels: (chart) => {
-              const data = chart.data;
-              if (data.labels.length && data.datasets.length) {
-                return data.labels.map((label, i) => {
-                  const dataset = data.datasets[0];
-                  const value = dataset.data[i];
-                  const total = dataset.data.reduce((sum, val) => sum + val, 0);
-                  const percentage = ((value / total) * 100).toFixed(1);
-                  
-                  return {
-                    text: `${label} (${percentage}%)`,
-                    fillStyle: dataset.backgroundColor[i],
-                    strokeStyle: dataset.borderColor?.[i] || '#fff',
-                    lineWidth: 2,
-                    pointStyle: 'circle',
-                    index: i
-                  };
-                });
-              }
-              return [];
-            }
-          }
-        },
-        tooltip: {
-          ...defaultChartOptions.plugins.tooltip,
-          callbacks: {
-            label: (context) => {
-              const label = context.label || '';
-              const value = context.parsed;
-              const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
-              const percentage = ((value / total) * 100).toFixed(1);
-              const formattedValue = new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD'
-              }).format(value);
-              
-              return `${label}: ${formattedValue} (${percentage}%)`;
-            }
-          }
-        }
-      },
       onHover: (event, activeElements, chart) => {
         this.handleChartHover(event, activeElements, chart);
       },
@@ -110,11 +62,25 @@ export class ChartRenderer {
       }
     });
 
-    // Ensure data has proper colors
+    // Ensure data has proper colors with enhanced styling
     if (data.datasets && data.datasets[0] && !data.datasets[0].backgroundColor) {
-      data.datasets[0].backgroundColor = getChartColors(data.labels.length);
+      const colors = getChartColors(data.labels.length, false, 'solid');
+      data.datasets[0].backgroundColor = colors;
       data.datasets[0].borderColor = '#ffffff';
-      data.datasets[0].borderWidth = 2;
+      data.datasets[0].borderWidth = 3;
+      data.datasets[0].hoverBorderWidth = 4;
+      data.datasets[0].hoverBorderColor = 'hsl(250, 84%, 60%)'; // Primary color
+      
+      // Add subtle hover effects
+      data.datasets[0].hoverBackgroundColor = colors.map(color => {
+        // Lighten colors on hover
+        const hslMatch = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+        if (hslMatch) {
+          const [, h, s, l] = hslMatch.map(Number);
+          return `hsl(${h}, ${s}%, ${Math.min(l + 10, 90)}%)`;
+        }
+        return color;
+      });
     }
 
     const chart = new ChartJS(canvasElement, {
@@ -125,13 +91,19 @@ export class ChartRenderer {
 
     // Add keyboard navigation for accessibility
     this.addKeyboardNavigation(chart);
+    
+    // Add chart title styling
+    this.addChartTitle(canvasElement, options.title || 'Expense Breakdown');
+    
+    // Add entrance animation
+    this.addEntranceAnimation(chart, 'pie');
 
     this.activeCharts.set(canvasElement.id, chart);
     return chart;
   }
 
   /**
-   * Create a bar chart for comparisons
+   * Create a bar chart for comparisons with enhanced BlinkBudget styling
    * @param {HTMLCanvasElement} canvasElement - Canvas element to render chart
    * @param {Object} data - Chart data in Chart.js format
    * @param {Object} options - Custom chart options
@@ -139,48 +111,8 @@ export class ChartRenderer {
    */
   async createBarChart(canvasElement, data, options = {}) {
     const { ChartJS } = await this.ensureChartJSLoaded();
-    const chartOptions = createChartOptions({
+    const chartOptions = createThemedChartOptions('bar', {
       ...options,
-      scales: {
-        y: {
-          beginAtZero: true,
-          grid: {
-            color: 'rgba(0, 0, 0, 0.1)'
-          },
-          ticks: {
-            callback: function(value) {
-              return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD',
-                minimumFractionDigits: 0
-              }).format(value);
-            }
-          }
-        },
-        x: {
-          grid: {
-            display: false
-          }
-        }
-      },
-      plugins: {
-        ...options.plugins,
-        tooltip: {
-          ...defaultChartOptions.plugins.tooltip,
-          callbacks: {
-            label: (context) => {
-              const label = context.dataset.label || '';
-              const value = context.parsed.y;
-              const formattedValue = new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD'
-              }).format(value);
-              
-              return `${label}: ${formattedValue}`;
-            }
-          }
-        }
-      },
       onHover: (event, activeElements, chart) => {
         this.handleChartHover(event, activeElements, chart);
       },
@@ -189,13 +121,35 @@ export class ChartRenderer {
       }
     });
 
-    // Ensure data has proper colors
+    // Ensure data has proper colors with enhanced styling
     if (data.datasets) {
       data.datasets.forEach((dataset, index) => {
         if (!dataset.backgroundColor) {
-          dataset.backgroundColor = getChartColors(data.labels.length);
-          dataset.borderColor = getChartColors(data.labels.length);
-          dataset.borderWidth = 1;
+          const colors = getChartColors(data.labels.length, false, 'solid');
+          dataset.backgroundColor = colors;
+          dataset.borderColor = colors.map(color => {
+            // Darken border colors slightly
+            const hslMatch = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+            if (hslMatch) {
+              const [, h, s, l] = hslMatch.map(Number);
+              return `hsl(${h}, ${s}%, ${Math.max(l - 15, 10)}%)`;
+            }
+            return color;
+          });
+          dataset.borderWidth = 2;
+          dataset.borderRadius = 8; // Rounded corners
+          dataset.borderSkipped = false; 
+          
+          // Enhanced hover effects
+          dataset.hoverBackgroundColor = colors.map(color => {
+            const hslMatch = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+            if (hslMatch) {
+              const [, h, s, l] = hslMatch.map(Number);
+              return `hsl(${h}, ${s}%, ${Math.min(l + 8, 85)}%)`;
+            }
+            return color;
+          });
+          dataset.hoverBorderWidth = 3;
         }
       });
     }
@@ -208,6 +162,12 @@ export class ChartRenderer {
 
     // Add keyboard navigation for accessibility
     this.addKeyboardNavigation(chart);
+    
+    // Add chart title styling
+    this.addChartTitle(canvasElement, options.title || 'Comparison Chart');
+    
+    // Add entrance animation
+    this.addEntranceAnimation(chart, 'bar');
 
     this.activeCharts.set(canvasElement.id, chart);
     return chart;
@@ -578,8 +538,8 @@ export class ChartRenderer {
     const canvas = chartInstance.canvas;
     if (!canvas) return;
 
-    // Prevent default touch behaviors that interfere with chart interaction
-    canvas.style.touchAction = 'manipulation';
+    // Allow scrolling while preventing zoom and other gestures that interfere with chart interaction
+    canvas.style.touchAction = 'pan-y';
     
     // Add touch feedback
     let touchStartTime = 0;
@@ -653,33 +613,54 @@ export class ChartRenderer {
   }
 
   /**
-   * Handle chart hover interactions
+   * Handle chart hover interactions with simplified micro-interactions
    * @param {Event} event - Mouse event
    * @param {Array} activeElements - Active chart elements
    * @param {Chart} chart - Chart.js instance
    */
   handleChartHover(event, activeElements, chart) {
-    // Change cursor to pointer when hovering over chart segments
     const canvas = chart.canvas;
+    
     if (activeElements && activeElements.length > 0) {
+      // Change cursor
       canvas.style.cursor = 'pointer';
       
-      // Add visual feedback by slightly scaling the hovered element
-      const activeElement = activeElements[0];
+      // Simple hover effect for pie/doughnut charts
       if (chart.config.type === 'pie' || chart.config.type === 'doughnut') {
-        // For pie/doughnut charts, we can add a subtle hover effect
+        const activeElement = activeElements[0];
+        const dataset = chart.data.datasets[activeElement.datasetIndex];
+        
+        if (!dataset._originalHoverOffset) {
+          dataset._originalHoverOffset = dataset.hoverOffset || 0;
+        }
+        dataset.hoverOffset = 8; // Subtle separation
+        
         chart.setActiveElements(activeElements);
-        chart.update('none');
+        chart.update('active');
       }
+      
     } else {
       canvas.style.cursor = 'default';
+      
+      // Reset hover effects
+      if (chart.config.type === 'pie' || chart.config.type === 'doughnut') {
+        chart.data.datasets.forEach(dataset => {
+          if (dataset._originalHoverOffset !== undefined) {
+            dataset.hoverOffset = dataset._originalHoverOffset;
+          }
+        });
+      }
+      
       chart.setActiveElements([]);
-      chart.update('none');
+      chart.update('active');
     }
+    
+    // Simplified canvas hover animation
+    this.addSimpleCanvasHoverAnimation(canvas, activeElements.length > 0);
   }
 
   /**
-   * Handle chart click interactions
+   * Handle chart click interactions with enhanced feedback animations
    * @param {Event} event - Click event
    * @param {Array} activeElements - Active chart elements
    * @param {Chart} chart - Chart.js instance
@@ -717,6 +698,12 @@ export class ChartRenderer {
       clickData.percentage = ((value / total) * 100).toFixed(1);
     }
 
+    // Add enhanced click animations
+    this.addClickAnimation(chart, activeElement, chartType);
+    
+    // Add haptic feedback for mobile devices
+    this.addHapticFeedback();
+
     // Dispatch custom event for other components to listen to
     const customEvent = new CustomEvent('chartSegmentClick', {
       detail: clickData,
@@ -727,13 +714,81 @@ export class ChartRenderer {
 
     // Optional: Log click for debugging
     console.log('Chart segment clicked:', clickData);
-
-    // Visual feedback: briefly highlight the clicked segment
-    this.highlightSegment(chart, activeElement, chartType);
   }
 
   /**
-   * Provide visual feedback when a chart segment is clicked
+   * Add simplified click animation with subtle effects
+   * @param {Chart} chart - Chart.js instance
+   * @param {Object} activeElement - The clicked element
+   * @param {string} chartType - Type of chart
+   */
+  addClickAnimation(chart, activeElement, chartType) {
+    const canvas = chart.canvas;
+    
+    // Simple pulse animation for the entire canvas
+    canvas.style.transform = 'scale(0.99)';
+    canvas.style.transition = 'transform 0.1s ease-out';
+    
+    setTimeout(() => {
+      canvas.style.transform = 'scale(1)';
+      canvas.style.transition = 'transform 0.15s ease-out';
+    }, 100);
+    
+    // Simplified chart-specific animations
+    if (chartType === 'pie' || chartType === 'doughnut') {
+      this.addSimplePieClickAnimation(chart, activeElement);
+    }
+  }
+  
+  /**
+   * Add simplified pie chart click animation
+   * @param {Chart} chart - Chart.js instance
+   * @param {Object} activeElement - The clicked element
+   */
+  addSimplePieClickAnimation(chart, activeElement) {
+    const dataset = chart.data.datasets[activeElement.datasetIndex];
+    const originalOffset = dataset.hoverOffset || 0;
+    
+    // Brief segment separation
+    dataset.hoverOffset = 10;
+    chart.update('active');
+    
+    setTimeout(() => {
+      dataset.hoverOffset = originalOffset;
+      chart.update('active');
+    }, 200);
+  }
+  
+  /**
+   * Add simplified canvas hover animation
+   * @param {HTMLCanvasElement} canvas - Canvas element
+   * @param {boolean} isHovering - Whether currently hovering
+   */
+  addSimpleCanvasHoverAnimation(canvas, isHovering) {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return; // Skip animations for users who prefer reduced motion
+    }
+    
+    if (isHovering) {
+      canvas.style.opacity = '0.95';
+      canvas.style.transition = 'opacity 0.2s ease-out';
+    } else {
+      canvas.style.opacity = '1';
+      canvas.style.transition = 'opacity 0.2s ease-out';
+    }
+  }
+  
+  /**
+   * Add haptic feedback for mobile devices
+   */
+  addHapticFeedback() {
+    if ('vibrate' in navigator) {
+      navigator.vibrate(50); // Short vibration
+    }
+  }
+  
+  /**
+   * Provide visual feedback when a chart segment is clicked (legacy method, enhanced)
    * @param {Chart} chart - Chart.js instance
    * @param {Object} activeElement - The clicked element
    * @param {string} chartType - Type of chart
@@ -1036,6 +1091,74 @@ export class ChartRenderer {
     setTimeout(() => {
       liveRegion.textContent = text;
     }, 100);
+  }
+
+  /**
+   * Add styled chart title above the canvas
+   * @param {HTMLCanvasElement} canvasElement - Canvas element
+   * @param {string} title - Chart title
+   */
+  addChartTitle(canvasElement, title) {
+    if (!title || !canvasElement.parentElement) return;
+    
+    // Check if title already exists
+    const existingTitle = canvasElement.parentElement.querySelector('.chart-title');
+    if (existingTitle) {
+      existingTitle.textContent = title;
+      return;
+    }
+    
+    const titleElement = document.createElement('h3');
+    titleElement.className = 'chart-title';
+    titleElement.textContent = title;
+    titleElement.setAttribute('id', `chart-title-${canvasElement.id}`);
+    
+    // Insert title before canvas
+    canvasElement.parentElement.insertBefore(titleElement, canvasElement);
+    
+    // Update canvas aria-labelledby
+    canvasElement.setAttribute('aria-labelledby', titleElement.id);
+  }
+
+  /**
+   * Add simplified loading animation to chart container
+   * @param {HTMLElement} container - Chart container element
+   * @param {string} message - Loading message
+   */
+  addLoadingAnimation(container, message = 'Loading chart...') {
+    if (!container) return;
+    
+    // Add loading class for CSS animations
+    container.classList.add('loading');
+    
+    return null; // Simplified - no overlay needed
+  }
+  
+  /**
+   * Remove loading animation from chart container
+   * @param {HTMLElement} container - Chart container element
+   */
+  removeLoadingAnimation(container) {
+    if (!container) return;
+    
+    container.classList.remove('loading');
+  }
+  
+  /**
+   * Add simplified entrance animation to newly created charts
+   * @param {Chart} chart - Chart.js instance
+   * @param {string} chartType - Type of chart
+   */
+  addEntranceAnimation(chart, chartType) {
+    if (!chart.canvas) return;
+    
+    const canvas = chart.canvas;
+    const container = canvas.parentElement;
+    
+    // Set chart type data attribute for CSS animations
+    if (container) {
+      container.setAttribute('data-chart-type', chartType);
+    }
   }
 
   /**

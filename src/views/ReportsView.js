@@ -25,11 +25,10 @@ export const ReportsView = () => {
     container.className = 'view-reports';
     container.style.width = '100%';
     container.style.maxWidth = DIMENSIONS.CONTAINER_MAX_WIDTH;
-    container.style.height = '100%';
     container.style.display = 'flex';
     container.style.flexDirection = 'column';
     container.style.padding = `0 ${SPACING.MD}`;
-    container.style.overflow = 'hidden';
+    // Remove height and overflow styles - let CSS handle it
 
     // Initialize analytics engine, chart renderer, and progressive data loader
     const analyticsEngine = new AnalyticsEngine();
@@ -68,12 +67,8 @@ export const ReportsView = () => {
     content.id = 'reports-main-content';
     content.setAttribute('role', 'main');
     content.setAttribute('aria-labelledby', 'reports-title');
-    content.style.flex = '1';
-    content.style.display = 'flex';
-    content.style.flexDirection = 'column';
-    content.style.minHeight = '0';
-    content.style.overflow = 'auto';
     content.style.gap = SPACING.LG;
+    // Remove flex and overflow styles - let CSS handle it
     container.appendChild(content);
 
     // Loading state
