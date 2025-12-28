@@ -39,7 +39,18 @@ export class ChartRenderer {
       return this.chartJSModules;
     } catch (error) {
       console.error('[ChartRenderer] Failed to initialize Chart.js:', error);
-      throw new Error(`Chart rendering unavailable: ${error.message}`);
+      
+      // Enhanced error handling with specific error types
+      let errorMessage = 'Chart rendering unavailable';
+      if (error.message.includes('network')) {
+        errorMessage = 'Network error loading chart library';
+      } else if (error.message.includes('module')) {
+        errorMessage = 'Chart library module loading failed';
+      } else if (error.message.includes('browser')) {
+        errorMessage = 'Browser compatibility issue with chart library';
+      }
+      
+      throw new Error(`${errorMessage}: ${error.message}`);
     }
   }
 

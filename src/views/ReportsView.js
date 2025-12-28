@@ -30,10 +30,495 @@ export const ReportsView = () => {
     container.style.padding = `0 ${SPACING.MD}`;
     // Remove height and overflow styles - let CSS handle it
 
+    // Global error boundary for the entire reports view
+    let hasGlobalError = false;
+    const handleGlobalError = (error, context = 'Unknown') => {
+        console.error(`[ReportsView] Global error in ${context}:`, error);
+        hasGlobalError = true;
+        
+        // Show user-friendly error message
+        showErrorState(`Something went wrong while ${context.toLowerCase()}. Please try refreshing the page.`);
+        
+        // Track error for debugging
+        if (typeof window.gtag === 'function') {
+            window.gtag('event', 'exception', {
+                description: `ReportsView: ${context} - ${error.message}`,
+                fatal: false
+            });
+        }
+    };
+
+    // Set up global error handlers
+    const originalOnError = window.onerror;
+    const originalOnUnhandledRejection = window.onunhandledrejection;
+    
+    window.onerror = (message, source, lineno, colno, error) => {
+        if (source && source.includes('ReportsView')) {
+            handleGlobalError(error || new Error(message), 'JavaScript execution');
+            return true; // Prevent default browser error handling
+        }
+        return originalOnError ? originalOnError(message, source, lineno, colno, error) : false;
+    };
+    
+    window.onunhandledrejection = (event) => {
+        if (event.reason && event.reason.stack && event.reason.stack.includes('ReportsView')) {
+            handleGlobalError(event.reason, 'Promise rejection');
+            event.preventDefault(); // Prevent default browser error handling
+        } else if (originalOnUnhandledRejection) {
+            originalOnUnhandledRejection(event);
+        }
+    };
+
     // Initialize analytics engine, chart renderer, and progressive data loader
     const analyticsEngine = new AnalyticsEngine();
     const chartRenderer = new ChartRenderer();
     const progressiveLoader = new ProgressiveDataLoader();
+
+    // Browser compatibility checks and graceful degradation
+    const browserSupport = checkBrowserSupport();
+    if (!browserSupport.isSupported) {
+        showUnsupportedBrowserError(browserSupport.missingFeatures);
+        return container;
+    }
+
+    // Warn about limited functionality on older browsers
+    if (browserSupport.hasLimitedSupport) {
+        showBrowserWarning(browserSupport.limitedFeatures);
+    }
+
+    /**
+     * Show unsupported browser error
+     */
+    function showUnsupportedBrowserError(missingFeatures) {
+        const errorContainer = document.createElement('div');
+        errorContainer.style.display = 'flex';
+        errorContainer.style.flexDirection = 'column';
+        errorContainer.style.alignItems = 'center';
+        errorContainer.style.justifyContent = 'center';
+        errorContainer.style.height = '100vh';
+        errorContainer.style.padding = SPACING.XL;
+        errorContainer.style.textAlign = 'center';
+        errorContainer.style.background = COLORS.SURFACE;
+
+        const icon = document.createElement('div');
+        icon.innerHTML = '🌐';
+        icon.style.fontSize = '4rem';
+        icon.style.marginBottom = SPACING.LG;
+
+        const title = document.createElement('h2');
+        title.textContent = 'Browser Not Supported';
+        title.style.color = COLORS.ERROR;
+        title.style.marginBottom = SPACING.MD;
+
+        const message = document.createElement('p');
+        message.innerHTML = `
+            Your browser doesn't support some features required for BlinkBudget Reports.<br>
+            Please update your browser or try a different one.
+        `;
+        message.style.color = COLORS.TEXT_MUTED;
+        message.style.lineHeight = '1.6';
+        message.style.marginBottom = SPACING.LG;
+
+        const featuresList = document.createElement('div');
+        featuresList.innerHTML = `
+            <strong>Missing features:</strong><br>
+            ${missingFeatures.join(', ')}
+        `;
+        featuresList.style.fontSize = '0.875rem';
+        featuresList.style.color = COLORS.TEXT_MUTED;
+        featuresList.style.marginBottom = SPACING.LG;
+
+        const recommendedBrowsers = document.createElement('div');
+        recommendedBrowsers.innerHTML = `
+            <strong>Recommended browsers:</strong><br>
+            Chrome 70+, Firefox 65+, Safari 12+, Edge 79+
+        `;
+        recommendedBrowsers.style.fontSize = '0.875rem';
+        recommendedBrowsers.style.color = COLORS.TEXT_MUTED;
+
+        errorContainer.appendChild(icon);
+        errorContainer.appendChild(title);
+        errorContainer.appendChild(message);
+        errorContainer.appendChild(featuresList);
+        errorContainer.appendChild(recommendedBrowsers);
+
+        container.appendChild(errorContainer);
+    }
+
+    /**
+     * Show browser warning for limited functionality
+     */
+    function showBrowserWarning(limitedFeatures) {
+        const warning = document.createElement('div');
+        warning.style.background = 'rgba(251, 191, 36, 0.1)';
+        warning.style.border = '1px solid rgba(251, 191, 36, 0.3)';
+        warning.style.borderRadius = 'var(--radius-md)';
+        warning.style.padding = SPACING.MD;
+        warning.style.margin = `${SPACING.MD} 0`;
+        warning.style.fontSize = '0.875rem';
+        warning.style.color = '#92400e';
+
+        warning.innerHTML = `
+            ⚠️ <strong>Limited Browser Support:</strong> 
+            Some advanced features may not work properly. 
+            Missing: ${limitedFeatures.join(', ')}
+        `;
+
+        // Add close button
+        const closeBtn = document.createElement('button');
+        closeBtn.innerHTML = '×';
+        closeBtn.style.float = 'right';
+        closeBtn.style.background = 'none';
+        closeBtn.style.border = 'none';
+        closeBtn.style.fontSize = '1.2rem';
+        closeBtn.style.cursor = 'pointer';
+        closeBtn.style.color = '#92400e';
+        closeBtn.addEventListener('click', () => warning.remove());
+
+        warning.appendChild(closeBtn);
+        container.appendChild(warning);
+    }
+
+    /**
+     * Create minimal analytics data as last resort fallback
+     */
+    function createMinimalAnalyticsData(transactions, timePeriod) {
+        const filteredTransactions = transactions.filter(t => {
+            const transactionDate = new Date(t.date || t.timestamp);
+            const startDate = new Date(timePeriod.startDate);
+            const endDate = new Date(timePeriod.endDate);
+            return transactionDate >= startDate && transactionDate <= endDate;
+        });
+
+        let totalIncome = 0;
+        let totalExpenses = 0;
+
+        filteredTransactions.forEach(t => {
+            const amount = Math.abs(t.amount || 0);
+            if (t.type === 'income') {
+                totalIncome += amount;
+            } else {
+                totalExpenses += amount;
+            }
+        });
+
+        return {
+            transactions: filteredTransactions,
+            categoryBreakdown: {
+                categories: [{
+                    name: 'All Expenses',
+                    amount: totalExpenses,
+                    percentage: 100,
+                    transactionCount: filteredTransactions.filter(t => t.type !== 'income').length
+                }],
+                totalAmount: totalExpenses,
+                transactionCount: filteredTransactions.filter(t => t.type !== 'income').length
+            },
+            incomeVsExpenses: {
+                totalIncome,
+                totalExpenses,
+                netBalance: totalIncome - totalExpenses,
+                timePeriod
+            },
+            costOfLiving: {
+                totalExpenditure: totalExpenses,
+                dailySpending: totalExpenses / 30,
+                timePeriod
+            },
+            isMinimal: true
+        };
+    }
+
+    /**
+     * Validate analytics data structure
+     */
+    function validateAnalyticsData(data) {
+        if (!data || typeof data !== 'object') {
+            throw new Error('Analytics data is not an object');
+        }
+
+        if (!Array.isArray(data.transactions)) {
+            throw new Error('Analytics data missing transactions array');
+        }
+
+        if (!data.categoryBreakdown || !Array.isArray(data.categoryBreakdown.categories)) {
+            throw new Error('Analytics data missing category breakdown');
+        }
+
+        if (!data.incomeVsExpenses || typeof data.incomeVsExpenses.totalIncome !== 'number') {
+            throw new Error('Analytics data missing income vs expenses');
+        }
+
+        // Check for NaN values
+        const numericFields = [
+            data.incomeVsExpenses.totalIncome,
+            data.incomeVsExpenses.totalExpenses,
+            data.incomeVsExpenses.netBalance
+        ];
+
+        if (numericFields.some(field => isNaN(field))) {
+            throw new Error('Analytics data contains invalid numeric values');
+        }
+    }
+
+    /**
+     * Sanitize analytics data to fix common issues
+     */
+    function sanitizeAnalyticsData(data) {
+        // Create a deep copy to avoid modifying original
+        const sanitized = JSON.parse(JSON.stringify(data));
+
+        // Fix NaN values
+        if (isNaN(sanitized.incomeVsExpenses.totalIncome)) {
+            sanitized.incomeVsExpenses.totalIncome = 0;
+        }
+        if (isNaN(sanitized.incomeVsExpenses.totalExpenses)) {
+            sanitized.incomeVsExpenses.totalExpenses = 0;
+        }
+        if (isNaN(sanitized.incomeVsExpenses.netBalance)) {
+            sanitized.incomeVsExpenses.netBalance = sanitized.incomeVsExpenses.totalIncome - sanitized.incomeVsExpenses.totalExpenses;
+        }
+
+        // Fix category breakdown
+        if (!sanitized.categoryBreakdown.categories) {
+            sanitized.categoryBreakdown.categories = [];
+        }
+
+        sanitized.categoryBreakdown.categories = sanitized.categoryBreakdown.categories.filter(cat => 
+            cat && typeof cat.amount === 'number' && !isNaN(cat.amount)
+        );
+
+        return sanitized;
+    }
+
+    /**
+     * Show performance warning to user
+     */
+    function showPerformanceWarning(processingTime) {
+        const warning = document.createElement('div');
+        warning.style.background = 'rgba(251, 191, 36, 0.1)';
+        warning.style.border = '1px solid rgba(251, 191, 36, 0.3)';
+        warning.style.borderRadius = 'var(--radius-md)';
+        warning.style.padding = SPACING.MD;
+        warning.style.margin = `${SPACING.MD} 0`;
+        warning.style.fontSize = '0.875rem';
+        warning.style.color = '#92400e';
+
+        warning.innerHTML = `
+            ⏱️ <strong>Performance Notice:</strong> 
+            Report loading took ${(processingTime / 1000).toFixed(1)} seconds. 
+            Consider reducing the time period or clearing old data for better performance.
+        `;
+
+        // Add close button
+        const closeBtn = document.createElement('button');
+        closeBtn.innerHTML = '×';
+        closeBtn.style.float = 'right';
+        closeBtn.style.background = 'none';
+        closeBtn.style.border = 'none';
+        closeBtn.style.fontSize = '1.2rem';
+        closeBtn.style.cursor = 'pointer';
+        closeBtn.style.color = '#92400e';
+        closeBtn.addEventListener('click', () => warning.remove());
+
+        warning.appendChild(closeBtn);
+        
+        // Insert after header
+        const header = container.querySelector('.reports-header');
+        if (header && header.nextSibling) {
+            container.insertBefore(warning, header.nextSibling);
+        } else {
+            container.appendChild(warning);
+        }
+
+        // Auto-remove after 10 seconds
+        setTimeout(() => {
+            if (warning.parentNode) {
+                warning.remove();
+            }
+        }, 10000);
+    }
+
+    /**
+     * Create fallback category display when chart rendering fails
+     */
+    function createFallbackCategoryDisplay() {
+        const section = document.createElement('div');
+        section.className = 'fallback-category-section';
+        section.style.background = COLORS.SURFACE;
+        section.style.borderRadius = 'var(--radius-lg)';
+        section.style.border = `1px solid ${COLORS.BORDER}`;
+        section.style.padding = SPACING.LG;
+
+        const title = document.createElement('h3');
+        title.textContent = 'Spending by Category';
+        title.style.margin = `0 0 ${SPACING.MD} 0`;
+        title.style.color = COLORS.TEXT_MAIN;
+        section.appendChild(title);
+
+        const warning = document.createElement('div');
+        warning.textContent = '⚠️ Chart view unavailable - showing table format';
+        warning.style.fontSize = '0.875rem';
+        warning.style.color = COLORS.TEXT_MUTED;
+        warning.style.marginBottom = SPACING.MD;
+        section.appendChild(warning);
+
+        // Create table
+        const table = document.createElement('div');
+        table.style.display = 'grid';
+        table.style.gridTemplateColumns = '1fr auto auto';
+        table.style.gap = SPACING.SM;
+        table.style.alignItems = 'center';
+
+        // Header
+        const headers = ['Category', 'Amount', 'Percentage'];
+        headers.forEach(header => {
+            const headerEl = document.createElement('div');
+            headerEl.textContent = header;
+            headerEl.style.fontWeight = 'bold';
+            headerEl.style.color = COLORS.TEXT_MAIN;
+            headerEl.style.padding = SPACING.SM;
+            headerEl.style.borderBottom = `1px solid ${COLORS.BORDER}`;
+            table.appendChild(headerEl);
+        });
+
+        // Data rows
+        currentData.categoryBreakdown.categories.forEach(category => {
+            const nameEl = document.createElement('div');
+            nameEl.textContent = category.name;
+            nameEl.style.padding = SPACING.SM;
+            nameEl.style.color = COLORS.TEXT_MAIN;
+
+            const amountEl = document.createElement('div');
+            amountEl.textContent = `€${category.amount.toFixed(2)}`;
+            amountEl.style.padding = SPACING.SM;
+            amountEl.style.color = COLORS.TEXT_MAIN;
+            amountEl.style.textAlign = 'right';
+
+            const percentageEl = document.createElement('div');
+            percentageEl.textContent = `${category.percentage.toFixed(1)}%`;
+            percentageEl.style.padding = SPACING.SM;
+            percentageEl.style.color = COLORS.TEXT_MUTED;
+            percentageEl.style.textAlign = 'right';
+
+            table.appendChild(nameEl);
+            table.appendChild(amountEl);
+            table.appendChild(percentageEl);
+        });
+
+        section.appendChild(table);
+        return section;
+    }
+
+    /**
+     * Create fallback income/expense display when chart rendering fails
+     */
+    function createFallbackIncomeExpenseDisplay() {
+        const section = document.createElement('div');
+        section.className = 'fallback-income-expense-section';
+        section.style.background = COLORS.SURFACE;
+        section.style.borderRadius = 'var(--radius-lg)';
+        section.style.border = `1px solid ${COLORS.BORDER}`;
+        section.style.padding = SPACING.LG;
+
+        const title = document.createElement('h3');
+        title.textContent = 'Income vs Expenses';
+        title.style.margin = `0 0 ${SPACING.MD} 0`;
+        title.style.color = COLORS.TEXT_MAIN;
+        section.appendChild(title);
+
+        const warning = document.createElement('div');
+        warning.textContent = '⚠️ Chart view unavailable - showing summary format';
+        warning.style.fontSize = '0.875rem';
+        warning.style.color = COLORS.TEXT_MUTED;
+        warning.style.marginBottom = SPACING.MD;
+        section.appendChild(warning);
+
+        const summaryGrid = document.createElement('div');
+        summaryGrid.style.display = 'grid';
+        summaryGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(150px, 1fr))';
+        summaryGrid.style.gap = SPACING.MD;
+
+        const incomeCard = document.createElement('div');
+        incomeCard.style.padding = SPACING.MD;
+        incomeCard.style.background = 'rgba(34, 197, 94, 0.1)';
+        incomeCard.style.borderRadius = 'var(--radius-md)';
+        incomeCard.style.textAlign = 'center';
+        incomeCard.innerHTML = `
+            <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED}; margin-bottom: ${SPACING.XS};">Total Income</div>
+            <div style="font-size: 1.5rem; font-weight: bold; color: ${COLORS.SUCCESS};">€${currentData.incomeVsExpenses.totalIncome.toFixed(2)}</div>
+        `;
+
+        const expenseCard = document.createElement('div');
+        expenseCard.style.padding = SPACING.MD;
+        expenseCard.style.background = 'rgba(239, 68, 68, 0.1)';
+        expenseCard.style.borderRadius = 'var(--radius-md)';
+        expenseCard.style.textAlign = 'center';
+        expenseCard.innerHTML = `
+            <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED}; margin-bottom: ${SPACING.XS};">Total Expenses</div>
+            <div style="font-size: 1.5rem; font-weight: bold; color: ${COLORS.ERROR};">€${currentData.incomeVsExpenses.totalExpenses.toFixed(2)}</div>
+        `;
+
+        const balanceCard = document.createElement('div');
+        const isPositive = currentData.incomeVsExpenses.netBalance >= 0;
+        balanceCard.style.padding = SPACING.MD;
+        balanceCard.style.background = isPositive ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)';
+        balanceCard.style.borderRadius = 'var(--radius-md)';
+        balanceCard.style.textAlign = 'center';
+        balanceCard.innerHTML = `
+            <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED}; margin-bottom: ${SPACING.XS};">Net Balance</div>
+            <div style="font-size: 1.5rem; font-weight: bold; color: ${isPositive ? COLORS.SUCCESS : COLORS.ERROR};">€${currentData.incomeVsExpenses.netBalance.toFixed(2)}</div>
+        `;
+
+        summaryGrid.appendChild(incomeCard);
+        summaryGrid.appendChild(expenseCard);
+        summaryGrid.appendChild(balanceCard);
+        section.appendChild(summaryGrid);
+
+        return section;
+    }
+
+    /**
+     * Show warning when some charts fail to render
+     */
+    function showChartRenderingWarning(failedCharts) {
+        const warning = document.createElement('div');
+        warning.style.background = 'rgba(239, 68, 68, 0.1)';
+        warning.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+        warning.style.borderRadius = 'var(--radius-md)';
+        warning.style.padding = SPACING.MD;
+        warning.style.margin = `${SPACING.MD} 0`;
+        warning.style.fontSize = '0.875rem';
+        warning.style.color = '#dc2626';
+
+        const failedChartNames = failedCharts.map(chart => chart.name).join(', ');
+        warning.innerHTML = `
+            ⚠️ <strong>Chart Rendering Issues:</strong> 
+            Some charts couldn't be displayed (${failedChartNames}). 
+            Fallback displays are shown instead. Try refreshing the page if the issue persists.
+        `;
+
+        // Add close button
+        const closeBtn = document.createElement('button');
+        closeBtn.innerHTML = '×';
+        closeBtn.style.float = 'right';
+        closeBtn.style.background = 'none';
+        closeBtn.style.border = 'none';
+        closeBtn.style.fontSize = '1.2rem';
+        closeBtn.style.cursor = 'pointer';
+        closeBtn.style.color = '#dc2626';
+        closeBtn.addEventListener('click', () => warning.remove());
+
+        warning.appendChild(closeBtn);
+        
+        // Insert at the top of content
+        const content = container.querySelector('.reports-content');
+        if (content && content.firstChild) {
+            content.insertBefore(warning, content.firstChild);
+        } else {
+            container.appendChild(warning);
+        }
+    }
 
     // Preload Chart.js in background for better UX
     preloadChartJS().catch(error => {
@@ -52,7 +537,59 @@ export const ReportsView = () => {
     const header = createHeader();
     container.appendChild(header);
 
-    // Time period selector - using the new component
+    // Add floating back button for mobile (additional safety measure)
+    const floatingBackButton = document.createElement('button');
+    floatingBackButton.innerHTML = '←';
+    floatingBackButton.className = 'floating-back-btn';
+    floatingBackButton.title = 'Back to Dashboard';
+    floatingBackButton.style.position = 'fixed';
+    floatingBackButton.style.bottom = window.innerWidth < BREAKPOINTS.MOBILE ? '80px' : '20px'; // Above mobile nav if present
+    floatingBackButton.style.left = '20px';
+    floatingBackButton.style.width = '48px';
+    floatingBackButton.style.height = '48px';
+    floatingBackButton.style.borderRadius = '50%';
+    floatingBackButton.style.background = COLORS.PRIMARY;
+    floatingBackButton.style.color = 'white';
+    floatingBackButton.style.border = 'none';
+    floatingBackButton.style.fontSize = '1.5rem';
+    floatingBackButton.style.cursor = 'pointer';
+    floatingBackButton.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+    floatingBackButton.style.zIndex = '1000';
+    floatingBackButton.style.display = 'none'; // Hidden by default
+    floatingBackButton.style.transition = 'all 0.3s ease';
+    
+    floatingBackButton.addEventListener('click', () => Router.navigate('dashboard'));
+    
+    // Show floating button when scrolled down
+    let isFloatingButtonVisible = false;
+    const toggleFloatingButton = () => {
+        const shouldShow = window.scrollY > 100; // Show after scrolling 100px
+        
+        if (shouldShow && !isFloatingButtonVisible) {
+            floatingBackButton.style.display = 'flex';
+            floatingBackButton.style.alignItems = 'center';
+            floatingBackButton.style.justifyContent = 'center';
+            setTimeout(() => {
+                floatingBackButton.style.opacity = '1';
+                floatingBackButton.style.transform = 'scale(1)';
+            }, 10);
+            isFloatingButtonVisible = true;
+        } else if (!shouldShow && isFloatingButtonVisible) {
+            floatingBackButton.style.opacity = '0';
+            floatingBackButton.style.transform = 'scale(0.8)';
+            setTimeout(() => {
+                floatingBackButton.style.display = 'none';
+            }, 300);
+            isFloatingButtonVisible = false;
+        }
+    };
+    
+    // Initial setup for floating button
+    floatingBackButton.style.opacity = '0';
+    floatingBackButton.style.transform = 'scale(0.8)';
+    
+    window.addEventListener('scroll', toggleFloatingButton, { passive: true });
+    container.appendChild(floatingBackButton);
     timePeriodSelectorComponent = TimePeriodSelector({
         initialPeriod: currentTimePeriod,
         onChange: handleTimePeriodChange,
@@ -124,16 +661,38 @@ export const ReportsView = () => {
         headerEl.style.alignItems = 'center';
         headerEl.style.marginBottom = SPACING.MD;
         headerEl.style.flexShrink = '0';
+        headerEl.style.position = 'sticky';
+        headerEl.style.top = '0';
+        headerEl.style.background = COLORS.BACKGROUND;
+        headerEl.style.zIndex = '10';
+        headerEl.style.padding = `${SPACING.SM} 0`;
+
+        // Left side - Back button
+        const leftSide = document.createElement('div');
+        leftSide.style.display = 'flex';
+        leftSide.style.alignItems = 'center';
+        leftSide.style.gap = SPACING.MD;
+
+        const backButton = Button({
+            text: '← Back',
+            onClick: () => Router.navigate('dashboard'),
+            variant: 'ghost'
+        });
+        backButton.style.padding = `${SPACING.XS} ${SPACING.SM}`;
+        backButton.style.fontSize = '0.875rem';
+        backButton.style.flexShrink = '0';
+        backButton.title = 'Back to Dashboard (Esc)';
 
         // Title with proper heading hierarchy
         const title = document.createElement('h1');
         title.textContent = 'Reports & Insights';
         title.style.margin = '0';
         title.style.color = COLORS.TEXT_MAIN;
-        title.style.fontSize = window.innerWidth < BREAKPOINTS.MOBILE ? '1.5rem' : '2rem';
+        title.style.fontSize = window.innerWidth < BREAKPOINTS.MOBILE ? '1.25rem' : '1.5rem';
         title.id = 'reports-title';
 
-        headerEl.appendChild(title);
+        leftSide.appendChild(backButton);
+        leftSide.appendChild(title);
 
         // Right side - keyboard shortcuts info (only show on desktop)
         const rightSide = document.createElement('div');
@@ -155,6 +714,7 @@ export const ReportsView = () => {
             rightSide.appendChild(shortcutsInfo);
         }
         
+        headerEl.appendChild(leftSide);
         headerEl.appendChild(rightSide);
 
         return headerEl;
@@ -363,7 +923,7 @@ export const ReportsView = () => {
             // Performance monitoring - start timer
             const startTime = Date.now();
             
-            // Get transaction data from storage with error handling
+            // Get transaction data from storage with comprehensive error handling
             let transactions;
             try {
                 transactions = StorageService.getAll();
@@ -377,10 +937,20 @@ export const ReportsView = () => {
                 
             } catch (storageError) {
                 console.error('Storage access error:', storageError);
-                throw new Error('Unable to access transaction data. Please check your browser storage settings.');
+                
+                // Try to recover from storage errors
+                try {
+                    // Clear potentially corrupted data and try again
+                    console.warn('[ReportsView] Attempting storage recovery...');
+                    localStorage.removeItem('blinkbudget_transactions');
+                    transactions = [];
+                } catch (recoveryError) {
+                    console.error('Storage recovery failed:', recoveryError);
+                    throw new Error('Unable to access transaction data. Please check your browser storage settings and try refreshing the page.');
+                }
             }
 
-            // Use progressive data loader for large datasets
+            // Use progressive data loader for large datasets with enhanced error handling
             let analyticsData;
             try {
                 analyticsData = await progressiveLoader.loadTransactionData(
@@ -404,9 +974,43 @@ export const ReportsView = () => {
             } catch (analyticsError) {
                 console.error('Progressive data loading error:', analyticsError);
                 
-                // Fallback to direct processing
-                console.warn('[ReportsView] Falling back to direct processing');
-                analyticsData = progressiveLoader.processDataDirectly(transactions, currentTimePeriod);
+                // Enhanced fallback with multiple recovery strategies
+                console.warn('[ReportsView] Attempting fallback strategies...');
+                
+                try {
+                    // Strategy 1: Direct processing without progressive loading
+                    analyticsData = progressiveLoader.processDataDirectly(transactions, currentTimePeriod);
+                    console.log('[ReportsView] Fallback to direct processing successful');
+                } catch (directProcessingError) {
+                    console.error('Direct processing fallback failed:', directProcessingError);
+                    
+                    try {
+                        // Strategy 2: Basic processing with minimal features
+                        analyticsData = createMinimalAnalyticsData(transactions, currentTimePeriod);
+                        console.log('[ReportsView] Fallback to minimal processing successful');
+                    } catch (minimalProcessingError) {
+                        console.error('Minimal processing fallback failed:', minimalProcessingError);
+                        throw new Error('Unable to process your financial data. This might be due to corrupted data or a browser compatibility issue.');
+                    }
+                }
+            }
+
+            // Enhanced data validation
+            try {
+                validateAnalyticsData(analyticsData);
+            } catch (validationError) {
+                console.error('Analytics data validation failed:', validationError);
+                
+                // Try to fix common data issues
+                analyticsData = sanitizeAnalyticsData(analyticsData);
+                
+                // Validate again after sanitization
+                try {
+                    validateAnalyticsData(analyticsData);
+                } catch (secondValidationError) {
+                    console.error('Analytics data validation failed after sanitization:', secondValidationError);
+                    throw new Error('The processed financial data appears to be invalid. Please try refreshing the page or contact support if the issue persists.');
+                }
             }
 
             // Check if we have data after processing
@@ -424,10 +1028,36 @@ export const ReportsView = () => {
             // Store current data for chart rendering
             currentData = analyticsData;
 
+            // Generate insights using Analytics Engine for enhanced analysis
+            try {
+                if (currentData.transactions && currentData.transactions.length > 0) {
+                    // Generate insights for the current period
+                    const insights = analyticsEngine.generateSpendingInsights(
+                        transactions, // Use all transactions for historical comparison
+                        currentTimePeriod
+                    );
+                    currentData.insights = insights;
+
+                    // Generate predictive analytics if enough historical data
+                    const predictions = analyticsEngine.predictFutureSpending(transactions, 3);
+                    if (predictions.hasEnoughData) {
+                        currentData.predictions = predictions;
+                    }
+
+                    console.log(`[ReportsView] Generated ${insights.length} insights and predictions`);
+                }
+            } catch (insightsError) {
+                console.warn('[ReportsView] Failed to generate insights:', insightsError);
+                // Continue without insights - not critical for basic functionality
+            }
+
             // Performance check - ensure we meet the 2-second requirement (Requirement 7.5)
             const processingTime = Date.now() - startTime;
             if (processingTime > 2000) {
                 console.warn(`Report loading took ${processingTime}ms, exceeding 2-second target`);
+                
+                // Show performance warning to user
+                showPerformanceWarning(processingTime);
             } else {
                 console.log(`[ReportsView] Report loading completed in ${processingTime}ms`);
             }
@@ -444,9 +1074,33 @@ export const ReportsView = () => {
 
         } catch (error) {
             console.error('Error loading report data:', error);
-            showErrorState(error.message || 'An unexpected error occurred while loading your reports.');
+            
+            // Enhanced error categorization and user feedback
+            let userMessage = 'An unexpected error occurred while loading your reports.';
+            let actionable = true;
+            
+            if (error.message.includes('storage')) {
+                userMessage = 'There was a problem accessing your stored data. Please check your browser settings and try again.';
+            } else if (error.message.includes('browser')) {
+                userMessage = 'Your browser may not support all features required for reports. Please try updating your browser.';
+            } else if (error.message.includes('network')) {
+                userMessage = 'Network connection issues detected. Please check your internet connection and try again.';
+            } else if (error.message.includes('memory')) {
+                userMessage = 'Your device may be running low on memory. Please close other tabs and try again.';
+                actionable = false;
+            }
+            
+            showErrorState(userMessage);
             isLoading = false;
             loadingProgress = 0;
+            
+            // Track error for debugging
+            if (typeof window.gtag === 'function') {
+                window.gtag('event', 'exception', {
+                    description: `ReportsView loadReportData: ${error.message}`,
+                    fatal: false
+                });
+            }
         }
     }
 
@@ -665,18 +1319,6 @@ export const ReportsView = () => {
             // Render beautiful charts with category selection
             await renderCharts(chartContainer);
 
-            // Add Back to Dashboard button after charts
-            const backButton = Button({
-                text: '← Back to Dashboard',
-                onClick: () => Router.navigate('dashboard'),
-                variant: 'ghost'
-            });
-            backButton.style.width = '100%';
-            backButton.style.margin = '0';
-            backButton.style.marginTop = SPACING.LG;
-            backButton.style.flexShrink = '0';
-            content.appendChild(backButton);
-
             // Show the content
             showContentState();
 
@@ -871,40 +1513,122 @@ export const ReportsView = () => {
             chartsSection.style.flexDirection = 'column';
             chartsSection.style.gap = SPACING.XL;
 
+            // Track successful chart renders for fallback handling
+            const chartRenderResults = [];
+
             // 1. Category Breakdown Pie Chart
-            const categorySection = await createCategoryBreakdownChart();
-            chartsSection.appendChild(categorySection);
+            try {
+                const categorySection = await createCategoryBreakdownChart();
+                chartsSection.appendChild(categorySection);
+                chartRenderResults.push({ name: 'Category Breakdown', success: true });
+            } catch (categoryError) {
+                console.error('Failed to render category breakdown chart:', categoryError);
+                chartRenderResults.push({ name: 'Category Breakdown', success: false, error: categoryError });
+                
+                // Add fallback category display
+                const fallbackSection = createFallbackCategoryDisplay();
+                chartsSection.appendChild(fallbackSection);
+            }
 
             // 2. Income vs Expenses Bar Chart
-            const incomeExpenseSection = await createIncomeExpenseChart();
-            chartsSection.appendChild(incomeExpenseSection);
+            try {
+                const incomeExpenseSection = await createIncomeExpenseChart();
+                chartsSection.appendChild(incomeExpenseSection);
+                chartRenderResults.push({ name: 'Income vs Expenses', success: true });
+            } catch (incomeExpenseError) {
+                console.error('Failed to render income vs expense chart:', incomeExpenseError);
+                chartRenderResults.push({ name: 'Income vs Expenses', success: false, error: incomeExpenseError });
+                
+                // Add fallback income/expense display
+                const fallbackSection = createFallbackIncomeExpenseDisplay();
+                chartsSection.appendChild(fallbackSection);
+            }
 
             // 3. Category Trends Over Time (if enough historical data)
-            const trendsSection = await createCategoryTrendsChart();
-            if (trendsSection) {
-                chartsSection.appendChild(trendsSection);
+            try {
+                const trendsSection = await createCategoryTrendsChart();
+                if (trendsSection) {
+                    chartsSection.appendChild(trendsSection);
+                    chartRenderResults.push({ name: 'Category Trends', success: true });
+                }
+            } catch (trendsError) {
+                console.error('Failed to render category trends chart:', trendsError);
+                chartRenderResults.push({ name: 'Category Trends', success: false, error: trendsError });
+                // Trends chart is optional, so no fallback needed
             }
 
             // 4. Interactive Category Selector
-            const categorySelectorSection = createCategorySelector();
-            chartsSection.appendChild(categorySelectorSection);
+            try {
+                const categorySelectorSection = createCategorySelector();
+                chartsSection.appendChild(categorySelectorSection);
+                chartRenderResults.push({ name: 'Category Selector', success: true });
+            } catch (selectorError) {
+                console.error('Failed to render category selector:', selectorError);
+                chartRenderResults.push({ name: 'Category Selector', success: false, error: selectorError });
+                // Category selector is optional, continue without it
+            }
+
+            // 5. Insights Section (if available)
+            if (currentData.insights && currentData.insights.length > 0) {
+                try {
+                    const insightsSection = createInsightsSection();
+                    chartsSection.appendChild(insightsSection);
+                    chartRenderResults.push({ name: 'Insights', success: true });
+                } catch (insightsError) {
+                    console.error('Failed to render insights section:', insightsError);
+                    chartRenderResults.push({ name: 'Insights', success: false, error: insightsError });
+                    // Insights are optional, continue without them
+                }
+            }
 
             chartContainer.appendChild(chartsSection);
+
+            // Show warning if some charts failed to render
+            const failedCharts = chartRenderResults.filter(result => !result.success);
+            if (failedCharts.length > 0) {
+                showChartRenderingWarning(failedCharts);
+            }
 
         } catch (error) {
             console.error('Error rendering charts:', error);
             
-            // Fallback to basic data display
+            // Complete fallback to basic data display
             const fallback = document.createElement('div');
             fallback.style.padding = SPACING.LG;
             fallback.style.textAlign = 'center';
+            fallback.style.background = COLORS.SURFACE;
+            fallback.style.borderRadius = 'var(--radius-lg)';
+            fallback.style.border = `1px solid ${COLORS.BORDER}`;
+            
             fallback.innerHTML = `
-                <h3>Unable to render charts</h3>
-                <p>Showing basic financial summary instead.</p>
-                <div style="margin-top: ${SPACING.MD};">
-                    <strong>Total Expenses:</strong> €${currentData.incomeVsExpenses.totalExpenses.toFixed(2)}<br>
-                    <strong>Total Income:</strong> €${currentData.incomeVsExpenses.totalIncome.toFixed(2)}<br>
-                    <strong>Net Balance:</strong> €${currentData.incomeVsExpenses.netBalance.toFixed(2)}
+                <div style="margin-bottom: ${SPACING.LG};">
+                    <h3 style="color: ${COLORS.ERROR}; margin-bottom: ${SPACING.MD};">⚠️ Chart Rendering Failed</h3>
+                    <p style="color: ${COLORS.TEXT_MUTED}; margin-bottom: ${SPACING.LG};">
+                        Unable to render interactive charts. Showing basic financial summary instead.
+                    </p>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: ${SPACING.MD};">
+                    <div style="padding: ${SPACING.MD}; background: ${COLORS.BACKGROUND}; border-radius: var(--radius-md);">
+                        <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED}; margin-bottom: ${SPACING.XS};">Total Expenses</div>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: ${COLORS.ERROR};">€${currentData.incomeVsExpenses.totalExpenses.toFixed(2)}</div>
+                    </div>
+                    <div style="padding: ${SPACING.MD}; background: ${COLORS.BACKGROUND}; border-radius: var(--radius-md);">
+                        <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED}; margin-bottom: ${SPACING.XS};">Total Income</div>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: ${COLORS.SUCCESS};">€${currentData.incomeVsExpenses.totalIncome.toFixed(2)}</div>
+                    </div>
+                    <div style="padding: ${SPACING.MD}; background: ${COLORS.BACKGROUND}; border-radius: var(--radius-md);">
+                        <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED}; margin-bottom: ${SPACING.XS};">Net Balance</div>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: ${currentData.incomeVsExpenses.netBalance >= 0 ? COLORS.SUCCESS : COLORS.ERROR};">€${currentData.incomeVsExpenses.netBalance.toFixed(2)}</div>
+                    </div>
+                    <div style="padding: ${SPACING.MD}; background: ${COLORS.BACKGROUND}; border-radius: var(--radius-md);">
+                        <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED}; margin-bottom: ${SPACING.XS};">Transactions</div>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: ${COLORS.PRIMARY};">${currentData.transactions.length}</div>
+                    </div>
+                </div>
+                <div style="margin-top: ${SPACING.LG};">
+                    <button onclick="location.reload()" style="padding: ${SPACING.MD} ${SPACING.LG}; background: ${COLORS.PRIMARY}; color: white; border: none; border-radius: var(--radius-md); cursor: pointer;">
+                        Refresh Page
+                    </button>
                 </div>
             `;
             chartContainer.appendChild(fallback);
@@ -1325,6 +2049,207 @@ export const ReportsView = () => {
     }
 
     /**
+     * Create insights section displaying AI-generated financial insights
+     */
+    function createInsightsSection() {
+        const section = document.createElement('div');
+        section.className = 'insights-section';
+        section.style.background = COLORS.SURFACE;
+        section.style.borderRadius = 'var(--radius-lg)';
+        section.style.border = `1px solid ${COLORS.BORDER}`;
+        section.style.padding = SPACING.LG;
+
+        const title = document.createElement('h3');
+        title.textContent = 'Financial Insights';
+        title.style.margin = `0 0 ${SPACING.MD} 0`;
+        title.style.color = COLORS.TEXT_MAIN;
+        section.appendChild(title);
+
+        const description = document.createElement('p');
+        description.textContent = 'AI-powered insights based on your spending patterns and trends.';
+        description.style.margin = `0 0 ${SPACING.LG} 0`;
+        description.style.color = COLORS.TEXT_MUTED;
+        section.appendChild(description);
+
+        // Insights grid
+        const insightsGrid = document.createElement('div');
+        insightsGrid.style.display = 'flex';
+        insightsGrid.style.flexDirection = 'column';
+        insightsGrid.style.gap = SPACING.MD;
+
+        // Display top insights (limit to 5 for better UX)
+        const topInsights = currentData.insights.slice(0, 5);
+        topInsights.forEach((insight, index) => {
+            const insightCard = createInsightCard(insight, index);
+            insightsGrid.appendChild(insightCard);
+        });
+
+        section.appendChild(insightsGrid);
+
+        // Show predictions if available
+        if (currentData.predictions && currentData.predictions.hasEnoughData) {
+            const predictionsSection = createPredictionsSection();
+            section.appendChild(predictionsSection);
+        }
+
+        return section;
+    }
+
+    /**
+     * Create individual insight card
+     */
+    function createInsightCard(insight, index) {
+        const card = document.createElement('div');
+        card.className = 'insight-card';
+        card.style.background = getInsightBackgroundColor(insight.type);
+        card.style.border = `1px solid ${getInsightBorderColor(insight.type)}`;
+        card.style.borderRadius = 'var(--radius-md)';
+        card.style.padding = SPACING.MD;
+        card.style.position = 'relative';
+
+        // Insight icon
+        const icon = document.createElement('div');
+        icon.style.fontSize = '1.5rem';
+        icon.style.marginBottom = SPACING.SM;
+        icon.textContent = getInsightIcon(insight.type);
+
+        // Insight message
+        const message = document.createElement('div');
+        message.textContent = insight.message;
+        message.style.color = COLORS.TEXT_MAIN;
+        message.style.lineHeight = '1.5';
+        message.style.marginBottom = insight.recommendation ? SPACING.SM : '0';
+
+        card.appendChild(icon);
+        card.appendChild(message);
+
+        // Add recommendation if available
+        if (insight.recommendation) {
+            const recommendation = document.createElement('div');
+            recommendation.textContent = `💡 ${insight.recommendation}`;
+            recommendation.style.fontSize = '0.875rem';
+            recommendation.style.color = COLORS.TEXT_MUTED;
+            recommendation.style.fontStyle = 'italic';
+            recommendation.style.marginTop = SPACING.SM;
+            recommendation.style.paddingTop = SPACING.SM;
+            recommendation.style.borderTop = `1px solid ${COLORS.BORDER}`;
+            card.appendChild(recommendation);
+        }
+
+        // Severity indicator
+        if (insight.severity === 'high') {
+            const severityIndicator = document.createElement('div');
+            severityIndicator.style.position = 'absolute';
+            severityIndicator.style.top = SPACING.SM;
+            severityIndicator.style.right = SPACING.SM;
+            severityIndicator.style.width = '8px';
+            severityIndicator.style.height = '8px';
+            severityIndicator.style.borderRadius = '50%';
+            severityIndicator.style.background = COLORS.ERROR;
+            card.appendChild(severityIndicator);
+        }
+
+        return card;
+    }
+
+    /**
+     * Create predictions section
+     */
+    function createPredictionsSection() {
+        const section = document.createElement('div');
+        section.style.marginTop = SPACING.LG;
+        section.style.paddingTop = SPACING.LG;
+        section.style.borderTop = `1px solid ${COLORS.BORDER}`;
+
+        const title = document.createElement('h4');
+        title.textContent = 'Spending Predictions';
+        title.style.margin = `0 0 ${SPACING.MD} 0`;
+        title.style.color = COLORS.TEXT_MAIN;
+        section.appendChild(title);
+
+        const predictionsGrid = document.createElement('div');
+        predictionsGrid.style.display = 'grid';
+        predictionsGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(150px, 1fr))';
+        predictionsGrid.style.gap = SPACING.MD;
+
+        // Show next 3 months predictions
+        currentData.predictions.predictions.forEach(prediction => {
+            const predictionCard = document.createElement('div');
+            predictionCard.style.background = 'rgba(59, 130, 246, 0.05)';
+            predictionCard.style.border = '1px solid rgba(59, 130, 246, 0.2)';
+            predictionCard.style.borderRadius = 'var(--radius-md)';
+            predictionCard.style.padding = SPACING.MD;
+            predictionCard.style.textAlign = 'center';
+
+            const monthName = document.createElement('div');
+            monthName.textContent = prediction.monthName;
+            monthName.style.fontSize = '0.875rem';
+            monthName.style.color = COLORS.TEXT_MUTED;
+            monthName.style.marginBottom = SPACING.XS;
+
+            const amount = document.createElement('div');
+            amount.textContent = `€${prediction.predictedAmount.toFixed(0)}`;
+            amount.style.fontSize = '1.25rem';
+            amount.style.fontWeight = 'bold';
+            amount.style.color = COLORS.PRIMARY;
+
+            const confidence = document.createElement('div');
+            confidence.textContent = `${prediction.confidence} confidence`;
+            confidence.style.fontSize = '0.75rem';
+            confidence.style.color = COLORS.TEXT_MUTED;
+            confidence.style.marginTop = SPACING.XS;
+
+            predictionCard.appendChild(monthName);
+            predictionCard.appendChild(amount);
+            predictionCard.appendChild(confidence);
+
+            predictionsGrid.appendChild(predictionCard);
+        });
+
+        section.appendChild(predictionsGrid);
+        return section;
+    }
+
+    /**
+     * Helper functions for insights
+     */
+    function getInsightIcon(type) {
+        const icons = {
+            'positive': '✅',
+            'warning': '⚠️',
+            'pattern': '📈',
+            'anomaly': '🔍',
+            'increase': '📈',
+            'decrease': '📉'
+        };
+        return icons[type] || '💡';
+    }
+
+    function getInsightBackgroundColor(type) {
+        const colors = {
+            'positive': 'rgba(34, 197, 94, 0.05)',
+            'warning': 'rgba(251, 191, 36, 0.05)',
+            'pattern': 'rgba(59, 130, 246, 0.05)',
+            'anomaly': 'rgba(239, 68, 68, 0.05)',
+            'increase': 'rgba(251, 191, 36, 0.05)',
+            'decrease': 'rgba(34, 197, 94, 0.05)'
+        };
+        return colors[type] || 'rgba(156, 163, 175, 0.05)';
+    }
+
+    function getInsightBorderColor(type) {
+        const colors = {
+            'positive': 'rgba(34, 197, 94, 0.2)',
+            'warning': 'rgba(251, 191, 36, 0.2)',
+            'pattern': 'rgba(59, 130, 246, 0.2)',
+            'anomaly': 'rgba(239, 68, 68, 0.2)',
+            'increase': 'rgba(251, 191, 36, 0.2)',
+            'decrease': 'rgba(34, 197, 94, 0.2)'
+        };
+        return colors[type] || 'rgba(156, 163, 175, 0.2)';
+    }
+
+    /**
      * Helper functions for chart creation
      */
     function createToggleButton(text, active = false) {
@@ -1681,6 +2606,26 @@ export const ReportsView = () => {
     // Initial data load
     loadReportData();
 
+    // Cleanup function for global error handlers
+    container.cleanup = () => {
+        // Restore original error handlers
+        window.onerror = originalOnError;
+        window.onunhandledrejection = originalOnUnhandledRejection;
+        
+        // Remove scroll event listener
+        window.removeEventListener('scroll', toggleFloatingButton);
+        
+        // Clean up charts
+        cleanupCharts();
+        
+        // Cancel any ongoing progressive loading
+        if (progressiveLoader.isCurrentlyLoading()) {
+            progressiveLoader.cancelLoading();
+        }
+        
+        console.log('[ReportsView] Cleanup completed');
+    };
+
     return container;
 };
 
@@ -1717,6 +2662,77 @@ function getCurrentMonthPeriod() {
         startDate: startOfMonth,
         endDate: endOfMonth,
         label: 'This Month'
+    };
+}
+
+/**
+ * Check browser support for required features
+ * Requirements: 9.5 - Graceful degradation for unsupported browsers
+ */
+function checkBrowserSupport() {
+    const requiredFeatures = {
+        'ES6 Classes': () => {
+            try {
+                eval('class TestClass {}');
+                return true;
+            } catch (e) {
+                return false;
+            }
+        },
+        'Promises': () => typeof Promise !== 'undefined',
+        'Fetch API': () => typeof fetch !== 'undefined',
+        'Canvas': () => {
+            const canvas = document.createElement('canvas');
+            return !!(canvas.getContext && canvas.getContext('2d'));
+        },
+        'Local Storage': () => {
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                return true;
+            } catch (e) {
+                return false;
+            }
+        },
+        'CSS Grid': () => {
+            const div = document.createElement('div');
+            return 'grid' in div.style;
+        }
+    };
+
+    const optionalFeatures = {
+        'Web Workers': () => typeof Worker !== 'undefined',
+        'Intersection Observer': () => typeof IntersectionObserver !== 'undefined',
+        'CSS Custom Properties': () => {
+            const div = document.createElement('div');
+            div.style.setProperty('--test', 'test');
+            return div.style.getPropertyValue('--test') === 'test';
+        },
+        'Performance API': () => typeof performance !== 'undefined' && typeof performance.now === 'function'
+    };
+
+    const missingFeatures = [];
+    const limitedFeatures = [];
+
+    // Check required features
+    for (const [feature, check] of Object.entries(requiredFeatures)) {
+        if (!check()) {
+            missingFeatures.push(feature);
+        }
+    }
+
+    // Check optional features
+    for (const [feature, check] of Object.entries(optionalFeatures)) {
+        if (!check()) {
+            limitedFeatures.push(feature);
+        }
+    }
+
+    return {
+        isSupported: missingFeatures.length === 0,
+        hasLimitedSupport: limitedFeatures.length > 0,
+        missingFeatures,
+        limitedFeatures
     };
 }
 
