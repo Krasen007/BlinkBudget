@@ -124,7 +124,6 @@ class ChartRenderer {
   createPieChart(canvasElement, data, options)
   createBarChart(canvasElement, data, options)
   createLineChart(canvasElement, data, options)
-  createDoughnutChart(canvasElement, data, options)
   
   // Chart management
   updateChart(chartInstance, newData)

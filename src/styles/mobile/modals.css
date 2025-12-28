@@ -113,8 +113,6 @@
   color: var(--color-text-main);
 }
 
-background: var(--color-surface-hover);
-
 .mobile-modal-content {
   padding: var(--spacing-lg);
   overflow-y: auto;

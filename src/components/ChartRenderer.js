@@ -310,78 +310,6 @@ export class ChartRenderer {
   }
 
   /**
-   * Create a doughnut chart (similar to pie but with center hole)
-   * @param {HTMLCanvasElement} canvasElement - Canvas element to render chart
-   * @param {Object} data - Chart data in Chart.js format
-   * @param {Object} options - Custom chart options
-   * @returns {Promise<Chart>} Chart.js instance
-   */
-  async createDoughnutChart(canvasElement, data, options = {}) {
-    const { ChartJS } = await this.ensureChartJSLoaded();
-    const chartOptions = createChartOptions({
-      ...options,
-      cutout: '60%', // Size of center hole
-      plugins: {
-        ...options.plugins,
-        legend: {
-          position: 'bottom',
-          labels: {
-            padding: 20,
-            usePointStyle: true
-          }
-        },
-        tooltip: {
-          ...defaultChartOptions.plugins.tooltip,
-          callbacks: {
-            label: (context) => {
-              const label = context.label || '';
-              const value = context.parsed;
-              const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
-              const percentage = ((value / total) * 100).toFixed(1);
-              const formattedValue = new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD'
-              }).format(value);
-              
-              return `${label}: ${formattedValue} (${percentage}%)`;
-            }
-          }
-        }
-      },
-      onHover: (event, activeElements, chart) => {
-        this.handleChartHover(event, activeElements, chart);
-      },
-      onClick: (event, activeElements, chart) => {
-        this.handleChartClick(event, activeElements, chart, 'doughnut');
-      }
-    });
-
-    // Ensure data has proper colors
-    if (data.datasets && data.datasets[0] && !data.datasets[0].backgroundColor) {
-      data.datasets[0].backgroundColor = getChartColors(data.labels.length);
-      data.datasets[0].borderColor = '#ffffff';
-      data.datasets[0].borderWidth = 2;
-    }
-
-    try {
-      const chart = new ChartJS(canvasElement, {
-        type: 'doughnut',
-        data,
-        options: chartOptions
-      });
-
-      // Add keyboard navigation for accessibility
-      this.addKeyboardNavigation(chart);
-
-      this.activeCharts.set(canvasElement.id, chart);
-      return chart;
-    } catch (error) {
-      console.error('Failed to create chart:', error.message);
-      return null;
-    }
-  }
-
-  /**
    * Update an existing chart with new data
    * @param {Chart} chartInstance - Chart.js instance to update
    * @param {Object} newData - New data to display
@@ -527,7 +455,7 @@ export class ChartRenderer {
         },
         
         // Mobile-specific scales
-        scales: chartInstance.config.type !== 'pie' && chartInstance.config.type !== 'doughnut' ? {
+        scales: chartInstance.config.type !== 'pie' ? {
           x: {
             ticks: {
               font: {
@@ -681,8 +609,8 @@ export class ChartRenderer {
       // Change cursor
       canvas.style.cursor = 'pointer';
       
-      // Simple hover effect for pie/doughnut charts
-      if (chart.config.type === 'pie' || chart.config.type === 'doughnut') {
+      // Simple hover effect for pie charts
+      if (chart.config.type === 'pie') {
         const activeElement = activeElements[0];
         const dataset = chart.data.datasets[activeElement.datasetIndex];
         
@@ -699,7 +627,7 @@ export class ChartRenderer {
       canvas.style.cursor = 'default';
       
       // Reset hover effects
-      if (chart.config.type === 'pie' || chart.config.type === 'doughnut') {
+      if (chart.config.type === 'pie') {
         chart.data.datasets.forEach(dataset => {
           if (dataset._originalHoverOffset !== undefined) {
             dataset.hoverOffset = dataset._originalHoverOffset;
@@ -720,7 +648,7 @@ export class ChartRenderer {
    * @param {Event} event - Click event
    * @param {Array} activeElements - Active chart elements
    * @param {Chart} chart - Chart.js instance
-   * @param {string} chartType - Type of chart (pie, bar, line, doughnut)
+   * @param {string} chartType - Type of chart (pie, bar, line)
    */
   handleChartClick(event, activeElements, chart, chartType) {
     if (!activeElements || activeElements.length === 0) return;
@@ -748,8 +676,8 @@ export class ChartRenderer {
       }).format(value)
     };
 
-    // For pie and doughnut charts, calculate percentage
-    if (chartType === 'pie' || chartType === 'doughnut') {
+    // For pie charts, calculate percentage
+    if (chartType === 'pie') {
       const total = dataset.data.reduce((sum, val) => sum + val, 0);
       clickData.percentage = ((value / total) * 100).toFixed(1);
     }
@@ -791,7 +719,7 @@ export class ChartRenderer {
     }, 100);
     
     // Simplified chart-specific animations
-    if (chartType === 'pie' || chartType === 'doughnut') {
+    if (chartType === 'pie') {
       this.addSimplePieClickAnimation(chart, activeElement);
     }
   }
@@ -1016,8 +944,8 @@ export class ChartRenderer {
     
     let announcement = `${label}: ${formattedValue}`;
     
-    // Add percentage for pie/doughnut charts
-    if (chart.config.type === 'pie' || chart.config.type === 'doughnut') {
+    // Add percentage for pie charts
+    if (chart.config.type === 'pie') {
       const total = chart.data.datasets[0].data.reduce((sum, val) => sum + val, 0);
       const percentage = ((value / total) * 100).toFixed(1);
       announcement += ` (${percentage}% of total)`;
@@ -1067,7 +995,7 @@ export class ChartRenderer {
     let description = `This ${chartType} chart shows `;
     
     // Add summary based on chart type
-    if (chartType === 'pie' || chartType === 'doughnut') {
+    if (chartType === 'pie') {
       const total = dataset.data.reduce((sum, val) => sum + val, 0);
       description += `spending breakdown across ${labels.length} categories. `;
       

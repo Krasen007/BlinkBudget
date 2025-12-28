@@ -676,7 +676,6 @@
 
 /* Entrance animations for chart elements - Simplified */
 .chart-container[data-chart-type="pie"] canvas,
-.chart-container[data-chart-type="doughnut"] canvas,
 .chart-container[data-chart-type="bar"] canvas,
 .chart-container[data-chart-type="line"] canvas {
     animation: chart-entrance 0.4s ease-out;

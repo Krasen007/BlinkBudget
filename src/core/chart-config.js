@@ -433,7 +433,7 @@ function darkenColor(color, percent) {
 
 /**
  * Create themed chart options for specific chart types
- * @param {string} chartType - Type of chart ('pie', 'bar', 'line', 'doughnut')
+ * @param {string} chartType - Type of chart ('pie', 'bar', 'line')
  * @param {Object} customOptions - Custom options to merge
  * @returns {Object} Themed chart options
  */
@@ -443,7 +443,6 @@ export function createThemedChartOptions(chartType, customOptions = {}) {
   // Chart-specific theming
   switch (chartType) {
     case 'pie':
-    case 'doughnut':
       return {
         ...baseOptions,
         plugins: {
@@ -487,7 +486,7 @@ export function createThemedChartOptions(chartType, customOptions = {}) {
             }
           }
         },
-        // Enhanced hover effects for pie/doughnut charts
+        // Enhanced hover effects for pie charts
         onHover: (event, activeElements, chart) => {
           if (customOptions.onHover) {
             customOptions.onHover(event, activeElements, chart);
@@ -657,8 +656,8 @@ function updateAriaLiveRegion(chart, activeElements) {
     
     let announcement = `${label}: ${formattedValue}`;
     
-    // Add percentage for pie/doughnut charts
-    if (chart.config.type === 'pie' || chart.config.type === 'doughnut') {
+    // Add percentage for pie charts
+    if (chart.config.type === 'pie') {
       const total = dataset.data.reduce((sum, val) => sum + val, 0);
       if (total > 0) {
         const percentage = ((value / total) * 100).toFixed(1);

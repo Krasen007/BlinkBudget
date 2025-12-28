@@ -100,16 +100,13 @@ export async function createCategoryBreakdownChart(chartRenderer, currentData, c
     title.style.margin = '0';
     title.style.color = COLORS.TEXT_MAIN;
 
-    // Chart type toggle
+    // Chart type toggle (pie chart only)
     const chartTypeToggle = document.createElement('div');
     chartTypeToggle.style.display = 'flex';
     chartTypeToggle.style.gap = SPACING.XS;
 
     const pieBtn = createToggleButton('Pie', true);
-    const doughnutBtn = createToggleButton('Doughnut', false);
-
     chartTypeToggle.appendChild(pieBtn);
-    chartTypeToggle.appendChild(doughnutBtn);
 
     header.appendChild(title);
     header.appendChild(chartTypeToggle);
@@ -164,22 +161,7 @@ export async function createCategoryBreakdownChart(chartRenderer, currentData, c
         }
     });
 
-    // Toggle between pie and doughnut
-    pieBtn.addEventListener('click', async () => {
-        if (!pieBtn.classList.contains('active')) {
-            chartRenderer.destroyChart(currentChart);
-            currentChart = await chartRenderer.createPieChart(canvas, chartData);
-            setActiveToggle(pieBtn, doughnutBtn);
-        }
-    });
-
-    doughnutBtn.addEventListener('click', async () => {
-        if (!doughnutBtn.classList.contains('active')) {
-            chartRenderer.destroyChart(currentChart);
-            currentChart = await chartRenderer.createDoughnutChart(canvas, chartData);
-            setActiveToggle(doughnutBtn, pieBtn);
-        }
-    });
+    // Only pie chart is supported now
 
     return { section, chart: currentChart };
 }
@@ -604,10 +586,19 @@ function createInsightCard(insight, index) {
     card.style.padding = SPACING.MD;
     card.style.position = 'relative';
 
+    // Create a container for icon and message on the same row
+    const contentContainer = document.createElement('div');
+    contentContainer.style.display = 'flex';
+    contentContainer.style.alignItems = 'flex-start';
+    contentContainer.style.gap = SPACING.SM;
+
     const icon = document.createElement('div');
     icon.style.fontSize = '1.5rem';
-    icon.style.marginBottom = SPACING.SM;
+    icon.style.flexShrink = '0'; // Prevent icon from shrinking
     icon.textContent = getInsightIcon(insight.type);
+
+    const messageContainer = document.createElement('div');
+    messageContainer.style.flex = '1'; // Take remaining space
 
     const message = document.createElement('div');
     message.textContent = insight.message;
@@ -615,8 +606,7 @@ function createInsightCard(insight, index) {
     message.style.lineHeight = '1.5';
     message.style.marginBottom = insight.recommendation ? SPACING.SM : '0';
 
-    card.appendChild(icon);
-    card.appendChild(message);
+    messageContainer.appendChild(message);
 
     if (insight.recommendation) {
         const recommendation = document.createElement('div');
@@ -627,8 +617,12 @@ function createInsightCard(insight, index) {
         recommendation.style.marginTop = SPACING.SM;
         recommendation.style.paddingTop = SPACING.SM;
         recommendation.style.borderTop = `1px solid ${COLORS.BORDER}`;
-        card.appendChild(recommendation);
+        messageContainer.appendChild(recommendation);
     }
+
+    contentContainer.appendChild(icon);
+    contentContainer.appendChild(messageContainer);
+    card.appendChild(contentContainer);
 
     if (insight.severity === 'high') {
         const severityIndicator = document.createElement('div');
@@ -764,14 +758,10 @@ function createToggleButton(text, active = false) {
     return button;
 }
 
-function setActiveToggle(activeBtn, inactiveBtn) {
+function setActiveToggle(activeBtn) {
     activeBtn.style.background = COLORS.PRIMARY;
     activeBtn.style.color = 'white';
     activeBtn.classList.add('active');
-    
-    inactiveBtn.style.background = 'transparent';
-    inactiveBtn.style.color = COLORS.TEXT_MAIN;
-    inactiveBtn.classList.remove('active');
 }
 
 /**

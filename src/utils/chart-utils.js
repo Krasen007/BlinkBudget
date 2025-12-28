@@ -32,7 +32,7 @@ export function formatPercentage(value, decimals = 1) {
 }
 
 /**
- * Prepare data for pie/doughnut charts from category breakdown
+ * Prepare data for pie charts from category breakdown
  * @param {Array} categoryData - Array of {category, amount} objects
  * @returns {Object} Chart.js compatible data structure
  */

@@ -99,8 +99,8 @@ export function checkBrowserSupport() {
     const requiredFeatures = {
         'ES6 Classes': () => {
             try {
-                eval('class TestClass {}');
-                return true;
+                // Test ES6 class support without eval
+                return typeof class {} === 'function';
             } catch (e) {
                 return false;
             }

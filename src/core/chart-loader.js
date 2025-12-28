@@ -69,7 +69,6 @@ async function loadChartJSModules() {
             Legend,
             // Chart controllers
             PieController,
-            DoughnutController,
             BarController,
             LineController,
         } = chartModule;
@@ -83,7 +82,7 @@ async function loadChartJSModules() {
             // Elements
             PointElement,     // For line charts
             LineElement,      // For line charts
-            ArcElement,       // For pie and doughnut charts
+            ArcElement,       // For pie charts
             BarElement,       // For bar charts
             
             // Plugins
@@ -93,7 +92,6 @@ async function loadChartJSModules() {
             
             // Controllers
             PieController,    // For pie charts
-            DoughnutController, // For doughnut charts
             BarController,    // For bar charts
             LineController    // For line charts
         );
@@ -113,7 +111,6 @@ async function loadChartJSModules() {
             Tooltip,
             Legend,
             PieController,
-            DoughnutController,
             BarController,
             LineController,
         };
