@@ -9,6 +9,73 @@ import { getChartColors } from '../core/chart-config.js';
 import { StorageService } from '../core/storage.js';
 import { generateMonthlyTrendData } from './reports-utils.js';
 
+
+/**
+ * Create tooltip configuration for category charts
+ */
+function createCategoryTooltipConfig() {
+    return {
+        enabled: false, // Disable default tooltip
+        external: function(context) {
+            const tooltip = context.tooltip;
+            const chartElement = context.chart.canvas;
+            
+            // Get or create tooltip element
+            let tooltipEl = document.getElementById('category-chart-tooltip');
+            if (!tooltipEl) {
+                tooltipEl = document.createElement('div');
+                tooltipEl.id = 'category-chart-tooltip';
+                tooltipEl.style.cssText = `
+                    position: absolute;
+                    background: rgba(0, 0, 0, 0.9);
+                    color: white;
+                    border: 1px solid hsl(250, 84%, 60%);
+                    border-radius: 8px;
+                    padding: 12px;
+                    pointer-events: none;
+                    z-index: 1000;
+                    font-size: 13px;
+                    display: none;
+                `;
+                document.body.appendChild(tooltipEl);
+            }
+            
+            if (tooltip.opacity === 0) {
+                tooltipEl.style.display = 'none';
+                return;
+            }
+            
+            // Position tooltip below the chart
+            const chartRect = chartElement.getBoundingClientRect();
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            tooltipEl.style.left = chartRect.left + (chartRect.width / 2) - 100 + 'px';
+            tooltipEl.style.top = chartRect.bottom + scrollTop + 10 + 'px';
+            
+            // Update tooltip content
+            if (tooltip.body && tooltip.body.length > 0) {
+                const bodyLines = tooltip.body.map(b => b.lines);
+                tooltipEl.innerHTML = bodyLines[0][0];
+                tooltipEl.style.display = 'block';
+            }
+        },
+        callbacks: {
+            label: function(context) {
+                const label = context.label || '';
+                const value = context.parsed;
+                const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
+                const percentage = ((value / total) * 100).toFixed(1);
+                const formattedValue = new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                }).format(value);
+                
+                return `${label}: ${formattedValue} (${percentage}%)`;
+            }
+        }
+    };
+}
+
 /**
  * Create interactive category breakdown pie chart
  */
@@ -84,7 +151,8 @@ export async function createCategoryBreakdownChart(chartRenderer, currentData, c
         plugins: {
             legend: {
                 position: window.innerWidth < 768 ? 'bottom' : 'right'
-            }
+            },
+            tooltip: createCategoryTooltipConfig()
         }
     });
 
