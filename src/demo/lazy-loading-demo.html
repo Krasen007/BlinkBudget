@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lazy Loading Demo - BlinkBudget</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .demo-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status.loading {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #007bff;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>BlinkBudget Lazy Loading Demo</h1>
+    <p>This demo shows how Chart.js is loaded lazily and how progressive data loading works with large datasets.</p>
+
+    <div class="demo-section">
+        <h2>Chart.js Lazy Loading</h2>
+        <p>Chart.js is not loaded until you click the button below. Check the network tab to see the dynamic import.</p>
+        
+        <div id="chart-status" class="status">Chart.js not loaded</div>
+        <button id="load-charts-btn">Load Chart.js</button>
+        <button id="preload-charts-btn">Preload Chart.js</button>
+        <button id="reset-charts-btn">Reset Loader</button>
+        
+        <div id="chart-log" class="log"></div>
+    </div>
+
+    <div class="demo-section">
+        <h2>Progressive Data Loading</h2>
+        <p>Simulate loading a large dataset (1000+ transactions) with progress updates.</p>
+        
+        <div id="data-status" class="status">Ready to load data</div>
+        <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill"></div>
+        </div>
+        <div id="progress-text">0% - Ready</div>
+        
+        <button id="load-small-data-btn">Load Small Dataset (100 items)</button>
+        <button id="load-large-data-btn">Load Large Dataset (1000 items)</button>
+        <button id="cancel-loading-btn" disabled>Cancel Loading</button>
+        
+        <div id="data-log" class="log"></div>
+    </div>
+
+    <div class="demo-section">
+        <h2>Performance Metrics</h2>
+        <div id="performance-metrics">
+            <p>No metrics yet. Run the demos above to see performance data.</p>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import the lazy loading modules
+        import { loadChartJS, isChartJSReady, resetChartLoader, preloadChartJS } from '../core/chart-loader.js';
+        import { ProgressiveDataLoader } from '../core/progressive-data-loader.js';
+
+        // DOM elements
+        const chartStatus = document.getElementById('chart-status');
+        const chartLog = document.getElementById('chart-log');
+        const dataStatus = document.getElementById('data-status');
+        const dataLog = document.getElementById('data-log');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+        const performanceMetrics = document.getElementById('performance-metrics');
+
+        // Progressive data loader instance
+        const progressiveLoader = new ProgressiveDataLoader();
+
+        // Logging functions
+        function logChart(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            chartLog.innerHTML += `[${timestamp}] ${message}\n`;
+            chartLog.scrollTop = chartLog.scrollHeight;
+        }
+
+        function logData(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            dataLog.innerHTML += `[${timestamp}] ${message}\n`;
+            dataLog.scrollTop = dataLog.scrollHeight;
+        }
+
+        function updatePerformanceMetrics(metrics) {
+            performanceMetrics.innerHTML = `
+                <h4>Latest Performance Metrics:</h4>
+                <ul>
+                    ${Object.entries(metrics).map(([key, value]) => 
+                        `<li><strong>${key}:</strong> ${value}</li>`
+                    ).join('')}
+                </ul>
+            `;
+        }
+
+        // Chart.js lazy loading demo
+        document.getElementById('load-charts-btn').addEventListener('click', async () => {
+            chartStatus.className = 'status loading';
+            chartStatus.textContent = 'Loading Chart.js...';
+            logChart('Starting Chart.js load...');
+
+            const startTime = performance.now();
+            
+            try {
+                const modules = await loadChartJS();
+                const loadTime = performance.now() - startTime;
+                
+                chartStatus.className = 'status success';
+                chartStatus.textContent = `Chart.js loaded successfully (${loadTime.toFixed(2)}ms)`;
+                logChart(`Chart.js loaded in ${loadTime.toFixed(2)}ms`);
+                logChart(`Available modules: ${Object.keys(modules).join(', ')}`);
+                
+                updatePerformanceMetrics({
+                    'Chart.js Load Time': `${loadTime.toFixed(2)}ms`,
+                    'Chart.js Ready': isChartJSReady() ? 'Yes' : 'No',
+                    'Modules Loaded': Object.keys(modules).length
+                });
+            } catch (error) {
+                const loadTime = performance.now() - startTime;
+                chartStatus.className = 'status error';
+                chartStatus.textContent = `Failed to load Chart.js: ${error.message}`;
+                logChart(`Chart.js loading failed after ${loadTime.toFixed(2)}ms: ${error.message}`);
+            }
+        });
+
+        document.getElementById('preload-charts-btn').addEventListener('click', async () => {
+            chartStatus.className = 'status loading';
+            chartStatus.textContent = 'Preloading Chart.js...';
+            logChart('Starting Chart.js preload...');
+
+            const startTime = performance.now();
+            
+            try {
+                await preloadChartJS();
+                const loadTime = performance.now() - startTime;
+                
+                chartStatus.className = 'status success';
+                chartStatus.textContent = `Chart.js preloaded successfully (${loadTime.toFixed(2)}ms)`;
+                logChart(`Chart.js preloaded in ${loadTime.toFixed(2)}ms`);
+            } catch (error) {
+                const loadTime = performance.now() - startTime;
+                chartStatus.className = 'status error';
+                chartStatus.textContent = `Failed to preload Chart.js: ${error.message}`;
+                logChart(`Chart.js preloading failed: ${error.message}`);
+            }
+        });
+
+        document.getElementById('reset-charts-btn').addEventListener('click', () => {
+            resetChartLoader();
+            chartStatus.className = 'status';
+            chartStatus.textContent = 'Chart.js not loaded';
+            logChart('Chart.js loader reset');
+            chartLog.innerHTML = '';
+        });
+
+        // Progressive data loading demo
+        function generateMockData(count) {
+            const data = [];
+            const categories = ['Food', 'Transportation', 'Shopping', 'Bills', 'Entertainment'];
+            const startDate = new Date('2024-01-01');
+            const endDate = new Date('2024-12-31');
+            
+            for (let i = 0; i < count; i++) {
+                const randomDate = new Date(startDate.getTime() + Math.random() * (endDate.getTime() - startDate.getTime()));
+                data.push({
+                    id: `transaction-${i}`,
+                    amount: Math.random() * 100,
+                    type: Math.random() > 0.8 ? 'income' : 'expense',
+                    category: categories[Math.floor(Math.random() * categories.length)],
+                    description: `Transaction ${i}`,
+                    date: randomDate.toISOString(),
+                    accountId: 'main'
+                });
+            }
+            return data;
+        }
+
+        async function loadData(count, isLarge = false) {
+            const timePeriod = {
+                startDate: new Date('2024-01-01'),
+                endDate: new Date('2024-12-31'),
+                type: 'yearly'
+            };
+
+            dataStatus.className = 'status loading';
+            dataStatus.textContent = `Loading ${count} transactions...`;
+            logData(`Starting to load ${count} transactions`);
+
+            const cancelBtn = document.getElementById('cancel-loading-btn');
+            cancelBtn.disabled = false;
+
+            const startTime = performance.now();
+            
+            try {
+                const mockData = generateMockData(count);
+                logData(`Generated ${mockData.length} mock transactions`);
+
+                const result = await progressiveLoader.loadTransactionData(mockData, timePeriod, {
+                    onProgress: (progress, message) => {
+                        progressFill.style.width = `${progress}%`;
+                        progressText.textContent = `${progress}% - ${message}`;
+                        logData(`Progress: ${progress}% - ${message}`);
+                    },
+                    onChunkProcessed: (current, total, chunkSize) => {
+                        logData(`Processed chunk ${current}/${total} (${chunkSize} transactions)`);
+                    }
+                });
+
+                const loadTime = performance.now() - startTime;
+                
+                dataStatus.className = 'status success';
+                dataStatus.textContent = `Loaded ${result.transactions.length} transactions successfully`;
+                progressFill.style.width = '100%';
+                progressText.textContent = '100% - Complete';
+                
+                logData(`Data loading completed in ${loadTime.toFixed(2)}ms`);
+                logData(`Progressive: ${result.isProgressive ? 'Yes' : 'No'}`);
+                logData(`Chunks processed: ${result.chunksProcessed || 'N/A'}`);
+                logData(`Categories found: ${result.categoryBreakdown.categories.length}`);
+                logData(`Total income: €${result.incomeVsExpenses.totalIncome.toFixed(2)}`);
+                logData(`Total expenses: €${result.incomeVsExpenses.totalExpenses.toFixed(2)}`);
+
+                updatePerformanceMetrics({
+                    'Data Load Time': `${loadTime.toFixed(2)}ms`,
+                    'Processing Time': `${result.processingTime?.toFixed(2) || 0}ms`,
+                    'Transactions Processed': result.transactions.length,
+                    'Progressive Loading': result.isProgressive ? 'Yes' : 'No',
+                    'Chunks Processed': result.chunksProcessed || 'N/A',
+                    'Categories Found': result.categoryBreakdown.categories.length
+                });
+
+            } catch (error) {
+                const loadTime = performance.now() - startTime;
+                dataStatus.className = 'status error';
+                dataStatus.textContent = `Failed to load data: ${error.message}`;
+                progressFill.style.width = '0%';
+                progressText.textContent = '0% - Error';
+                logData(`Data loading failed after ${loadTime.toFixed(2)}ms: ${error.message}`);
+            } finally {
+                cancelBtn.disabled = true;
+            }
+        }
+
+        document.getElementById('load-small-data-btn').addEventListener('click', () => {
+            loadData(100, false);
+        });
+
+        document.getElementById('load-large-data-btn').addEventListener('click', () => {
+            loadData(1000, true);
+        });
+
+        document.getElementById('cancel-loading-btn').addEventListener('click', () => {
+            progressiveLoader.cancelLoading();
+            logData('Loading cancelled by user');
+        });
+
+        // Initial status
+        logChart('Demo ready - Chart.js not loaded yet');
+        logData('Demo ready - Click buttons to test progressive loading');
+    </script>
+</body>
+</html>

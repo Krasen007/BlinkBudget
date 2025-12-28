@@ -9,6 +9,8 @@
 
 import { AnalyticsEngine } from '../core/analytics-engine.js';
 import { ChartRenderer } from '../components/ChartRenderer.js';
+import { ProgressiveDataLoader } from '../core/progressive-data-loader.js';
+import { preloadChartJS } from '../core/chart-loader.js';
 import { TimePeriodSelector } from '../components/TimePeriodSelector.js';
 import { Button } from '../components/Button.js';
 import { StorageService } from '../core/storage.js';
@@ -29,9 +31,15 @@ export const ReportsView = () => {
     container.style.padding = `0 ${SPACING.MD}`;
     container.style.overflow = 'hidden';
 
-    // Initialize analytics engine and chart renderer
+    // Initialize analytics engine, chart renderer, and progressive data loader
     const analyticsEngine = new AnalyticsEngine();
     const chartRenderer = new ChartRenderer();
+    const progressiveLoader = new ProgressiveDataLoader();
+
+    // Preload Chart.js in background for better UX
+    preloadChartJS().catch(error => {
+        console.warn('[ReportsView] Chart.js preloading failed:', error);
+    });
 
     // State management
     let currentTimePeriod = NavigationState.restoreTimePeriod() || getCurrentMonthPeriod();
@@ -39,6 +47,7 @@ export const ReportsView = () => {
     let currentData = null;
     let activeCharts = new Map(); // Track active chart instances for cleanup
     let timePeriodSelectorComponent = null; // Reference to the time period selector
+    let loadingProgress = 0; // Track progressive loading progress
 
     // Header section
     const header = createHeader();
@@ -157,7 +166,7 @@ export const ReportsView = () => {
     }
 
     /**
-     * Create loading state component with accessibility
+     * Create loading state component with progress indicator
      */
     function createLoadingState() {
         const loadingEl = document.createElement('div');
@@ -212,10 +221,67 @@ export const ReportsView = () => {
         loadingText.style.fontSize = '1rem';
         loadingText.setAttribute('aria-live', 'polite');
 
+        // Progress bar for large datasets
+        const progressContainer = document.createElement('div');
+        progressContainer.className = 'progress-container';
+        progressContainer.style.width = '200px';
+        progressContainer.style.height = '4px';
+        progressContainer.style.background = COLORS.BORDER;
+        progressContainer.style.borderRadius = '2px';
+        progressContainer.style.overflow = 'hidden';
+        progressContainer.style.display = 'none'; // Hidden by default
+
+        const progressBar = document.createElement('div');
+        progressBar.className = 'progress-bar';
+        progressBar.style.width = '0%';
+        progressBar.style.height = '100%';
+        progressBar.style.background = COLORS.PRIMARY;
+        progressBar.style.borderRadius = '2px';
+        progressBar.style.transition = 'width 0.3s ease';
+
+        progressContainer.appendChild(progressBar);
+
+        // Progress text
+        const progressText = document.createElement('div');
+        progressText.className = 'progress-text';
+        progressText.style.fontSize = '0.875rem';
+        progressText.style.color = COLORS.TEXT_MUTED;
+        progressText.style.marginTop = SPACING.SM;
+        progressText.style.display = 'none'; // Hidden by default
+
         loadingEl.appendChild(spinner);
         loadingEl.appendChild(loadingText);
+        loadingEl.appendChild(progressContainer);
+        loadingEl.appendChild(progressText);
 
         return loadingEl;
+    }
+
+    /**
+     * Update loading progress for large datasets
+     * @param {number} progress - Progress percentage (0-100)
+     * @param {string} message - Progress message
+     */
+    function updateLoadingProgress(progress, message) {
+        const progressContainer = loadingState.querySelector('.progress-container');
+        const progressBar = loadingState.querySelector('.progress-bar');
+        const progressText = loadingState.querySelector('.progress-text');
+        const loadingText = loadingState.querySelector('p');
+
+        if (progress > 0 && progress < 100) {
+            // Show progress bar for progressive loading
+            progressContainer.style.display = 'block';
+            progressText.style.display = 'block';
+            
+            progressBar.style.width = `${progress}%`;
+            progressText.textContent = `${progress}% - ${message}`;
+            loadingText.textContent = 'Processing your financial data...';
+        } else if (progress >= 100) {
+            // Hide progress bar when complete
+            progressContainer.style.display = 'none';
+            progressText.style.display = 'none';
+            loadingText.textContent = 'Preparing your reports...';
+        }
     }
 
     /**
@@ -288,14 +354,15 @@ export const ReportsView = () => {
     }
 
     /**
-     * Load and display report data with comprehensive error handling
-     * Requirements: 9.1, 9.5, 1.6, 5.5
+     * Load and display report data with progressive loading for large datasets
+     * Requirements: 9.1, 9.5, 1.6, 5.5, 9.2
      */
     async function loadReportData() {
         if (isLoading) return;
 
         try {
             isLoading = true;
+            loadingProgress = 0;
             showLoadingState();
 
             // Performance monitoring - start timer
@@ -311,34 +378,44 @@ export const ReportsView = () => {
                     throw new Error('Invalid transaction data format - expected array');
                 }
 
-                // Validate individual transactions
-                transactions = validateAndCleanTransactions(transactions);
+                console.log(`[ReportsView] Loading ${transactions.length} transactions`);
                 
             } catch (storageError) {
                 console.error('Storage access error:', storageError);
                 throw new Error('Unable to access transaction data. Please check your browser storage settings.');
             }
-            
-            // Filter transactions for the selected time period
-            let filteredTransactions;
+
+            // Use progressive data loader for large datasets
+            let analyticsData;
             try {
-                filteredTransactions = analyticsEngine.filterTransactionsByTimePeriod(
+                analyticsData = await progressiveLoader.loadTransactionData(
                     transactions, 
-                    currentTimePeriod
+                    currentTimePeriod,
+                    {
+                        onProgress: (progress, message) => {
+                            loadingProgress = progress;
+                            updateLoadingProgress(progress, message);
+                        },
+                        onChunkProcessed: (current, total, chunkSize) => {
+                            console.log(`[ReportsView] Processed chunk ${current}/${total} (${chunkSize} transactions)`);
+                        },
+                        prioritizeCategories: true,
+                        enableCaching: true
+                    }
                 );
 
-                // Validate filtered results
-                if (!Array.isArray(filteredTransactions)) {
-                    throw new Error('Transaction filtering failed');
-                }
-
-            } catch (filterError) {
-                console.error('Transaction filtering error:', filterError);
-                throw new Error('Unable to filter transactions for the selected time period.');
+                console.log(`[ReportsView] Data processing completed in ${analyticsData.processingTime?.toFixed(2) || 0}ms`);
+                
+            } catch (analyticsError) {
+                console.error('Progressive data loading error:', analyticsError);
+                
+                // Fallback to direct processing
+                console.warn('[ReportsView] Falling back to direct processing');
+                analyticsData = progressiveLoader.processDataDirectly(transactions, currentTimePeriod);
             }
 
-            // Check if we have data after filtering
-            if (filteredTransactions.length === 0) {
+            // Check if we have data after processing
+            if (!analyticsData.transactions || analyticsData.transactions.length === 0) {
                 // Check if we have any transactions at all
                 if (transactions.length === 0) {
                     showEmptyState('no-transactions');
@@ -349,46 +426,6 @@ export const ReportsView = () => {
                 return;
             }
 
-            // Calculate analytics data with individual error handling
-            let analyticsData;
-            try {
-                const categoryBreakdown = analyticsEngine.calculateCategoryBreakdown(
-                    transactions, 
-                    currentTimePeriod
-                );
-                const incomeVsExpenses = analyticsEngine.calculateIncomeVsExpenses(
-                    transactions, 
-                    currentTimePeriod
-                );
-                const costOfLiving = analyticsEngine.calculateCostOfLiving(
-                    transactions, 
-                    currentTimePeriod
-                );
-
-                // Validate calculation results
-                validateAnalyticsResults(categoryBreakdown, incomeVsExpenses, costOfLiving);
-
-                analyticsData = {
-                    categoryBreakdown,
-                    incomeVsExpenses,
-                    costOfLiving,
-                    transactions: filteredTransactions
-                };
-
-            } catch (analyticsError) {
-                console.error('Analytics calculation error:', analyticsError);
-                
-                // Try to provide partial data if possible
-                try {
-                    const basicData = createFallbackAnalytics(filteredTransactions);
-                    analyticsData = basicData;
-                    console.warn('Using fallback analytics due to calculation error');
-                } catch (fallbackError) {
-                    console.error('Fallback analytics failed:', fallbackError);
-                    throw new Error('Unable to process your financial data. Please try again.');
-                }
-            }
-
             // Store current data for chart rendering
             currentData = analyticsData;
 
@@ -396,6 +433,8 @@ export const ReportsView = () => {
             const processingTime = Date.now() - startTime;
             if (processingTime > 2000) {
                 console.warn(`Report loading took ${processingTime}ms, exceeding 2-second target`);
+            } else {
+                console.log(`[ReportsView] Report loading completed in ${processingTime}ms`);
             }
 
             // Ensure minimum loading time for better UX (but don't exceed 2 seconds total)
@@ -405,12 +444,14 @@ export const ReportsView = () => {
             setTimeout(() => {
                 renderReports();
                 isLoading = false;
+                loadingProgress = 100;
             }, remainingTime);
 
         } catch (error) {
             console.error('Error loading report data:', error);
             showErrorState(error.message || 'An unexpected error occurred while loading your reports.');
             isLoading = false;
+            loadingProgress = 0;
         }
     }
 
@@ -939,7 +980,7 @@ export const ReportsView = () => {
         };
 
         // Create initial pie chart
-        let currentChart = chartRenderer.createPieChart(canvas, chartData, {
+        let currentChart = await chartRenderer.createPieChart(canvas, chartData, {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
@@ -956,18 +997,18 @@ export const ReportsView = () => {
         });
 
         // Toggle between pie and doughnut
-        pieBtn.addEventListener('click', () => {
+        pieBtn.addEventListener('click', async () => {
             if (!pieBtn.classList.contains('active')) {
                 chartRenderer.destroyChart(currentChart);
-                currentChart = chartRenderer.createPieChart(canvas, chartData);
+                currentChart = await chartRenderer.createPieChart(canvas, chartData);
                 setActiveToggle(pieBtn, doughnutBtn);
             }
         });
 
-        doughnutBtn.addEventListener('click', () => {
+        doughnutBtn.addEventListener('click', async () => {
             if (!doughnutBtn.classList.contains('active')) {
                 chartRenderer.destroyChart(currentChart);
-                currentChart = chartRenderer.createDoughnutChart(canvas, chartData);
+                currentChart = await chartRenderer.createDoughnutChart(canvas, chartData);
                 setActiveToggle(doughnutBtn, pieBtn);
             }
         });
@@ -1040,7 +1081,7 @@ export const ReportsView = () => {
             }]
         };
 
-        chartRenderer.createBarChart(canvas, chartData, {
+        await chartRenderer.createBarChart(canvas, chartData, {
             responsive: true,
             maintainAspectRatio: false
         });
@@ -1106,7 +1147,7 @@ export const ReportsView = () => {
             }))
         };
 
-        chartRenderer.createLineChart(canvas, chartData, {
+        await chartRenderer.createLineChart(canvas, chartData, {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
@@ -1211,7 +1252,7 @@ export const ReportsView = () => {
 
         // Category percentage
         const percentage = document.createElement('div');
-        percentage.textContent = `${category.percentage.toFixed(1)}% of expenses`;
+        percentage.textContent = `${typeof category.percentage === 'string' ? category.percentage : category.percentage.toFixed(1)}% of expenses`;
         percentage.style.fontSize = '0.875rem';
         percentage.style.color = COLORS.TEXT_MUTED;
 
@@ -1261,7 +1302,7 @@ export const ReportsView = () => {
                 </div>
                 <div>
                     <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED};">Percentage</div>
-                    <div style="font-size: 1.25rem; font-weight: bold; color: ${COLORS.PRIMARY};">${percentage.toFixed(1)}%</div>
+                    <div style="font-size: 1.25rem; font-weight: bold; color: ${COLORS.PRIMARY};">${typeof percentage === 'string' ? percentage : percentage.toFixed(1)}%</div>
                 </div>
                 <div>
                     <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED};">Transactions</div>
@@ -1373,7 +1414,7 @@ export const ReportsView = () => {
     }
 
     /**
-     * Clean up chart instances to prevent memory leaks
+     * Clean up chart instances and progressive loader to prevent memory leaks
      */
     function cleanupCharts() {
         activeCharts.forEach((chart, key) => {
@@ -1382,6 +1423,11 @@ export const ReportsView = () => {
             }
         });
         activeCharts.clear();
+
+        // Cancel any ongoing progressive loading
+        if (progressiveLoader.isCurrentlyLoading()) {
+            progressiveLoader.cancelLoading();
+        }
     }
 
     /**

@@ -1,16 +1,46 @@
 /**
  * ChartRenderer Component
  * 
- * Handles all chart creation, updates, and interactions using Chart.js library.
+ * Handles all chart creation, updates, and interactions using lazy-loaded Chart.js library.
  * Provides a consistent interface for rendering different chart types with
  * BlinkBudget's design system and accessibility features.
+ * 
+ * Requirements: 9.2 - Lazy loading and performance optimization
  */
 
-import { ChartJS, defaultChartOptions, getChartColors, createChartOptions } from '../core/chart-config.js';
+import { initializeChartJS, defaultChartOptions, getChartColors, createChartOptions } from '../core/chart-config.js';
 
 export class ChartRenderer {
   constructor() {
     this.activeCharts = new Map(); // Track active chart instances for cleanup
+    this.chartJSModules = null; // Cache for Chart.js modules
+    this.isInitialized = false;
+  }
+
+  /**
+   * Initialize Chart.js if not already loaded
+   * @returns {Promise<Object>} Chart.js modules
+   */
+  async ensureChartJSLoaded() {
+    if (this.isInitialized && this.chartJSModules) {
+      return this.chartJSModules;
+    }
+
+    try {
+      console.log('[ChartRenderer] Loading Chart.js...');
+      const startTime = performance.now();
+      
+      this.chartJSModules = await initializeChartJS();
+      this.isInitialized = true;
+      
+      const loadTime = performance.now() - startTime;
+      console.log(`[ChartRenderer] Chart.js initialized in ${loadTime.toFixed(2)}ms`);
+      
+      return this.chartJSModules;
+    } catch (error) {
+      console.error('[ChartRenderer] Failed to initialize Chart.js:', error);
+      throw new Error(`Chart rendering unavailable: ${error.message}`);
+    }
   }
 
   /**
@@ -18,9 +48,10 @@ export class ChartRenderer {
    * @param {HTMLCanvasElement} canvasElement - Canvas element to render chart
    * @param {Object} data - Chart data in Chart.js format
    * @param {Object} options - Custom chart options
-   * @returns {Chart} Chart.js instance
+   * @returns {Promise<Chart>} Chart.js instance
    */
-  createPieChart(canvasElement, data, options = {}) {
+  async createPieChart(canvasElement, data, options = {}) {
+    const { ChartJS } = await this.ensureChartJSLoaded();
     const chartOptions = createChartOptions({
       ...options,
       plugins: {
@@ -104,9 +135,10 @@ export class ChartRenderer {
    * @param {HTMLCanvasElement} canvasElement - Canvas element to render chart
    * @param {Object} data - Chart data in Chart.js format
    * @param {Object} options - Custom chart options
-   * @returns {Chart} Chart.js instance
+   * @returns {Promise<Chart>} Chart.js instance
    */
-  createBarChart(canvasElement, data, options = {}) {
+  async createBarChart(canvasElement, data, options = {}) {
+    const { ChartJS } = await this.ensureChartJSLoaded();
     const chartOptions = createChartOptions({
       ...options,
       scales: {
@@ -186,9 +218,10 @@ export class ChartRenderer {
    * @param {HTMLCanvasElement} canvasElement - Canvas element to render chart
    * @param {Object} data - Chart data in Chart.js format
    * @param {Object} options - Custom chart options
-   * @returns {Chart} Chart.js instance
+   * @returns {Promise<Chart>} Chart.js instance
    */
-  createLineChart(canvasElement, data, options = {}) {
+  async createLineChart(canvasElement, data, options = {}) {
+    const { ChartJS } = await this.ensureChartJSLoaded();
     const chartOptions = createChartOptions({
       ...options,
       scales: {
@@ -279,9 +312,10 @@ export class ChartRenderer {
    * @param {HTMLCanvasElement} canvasElement - Canvas element to render chart
    * @param {Object} data - Chart data in Chart.js format
    * @param {Object} options - Custom chart options
-   * @returns {Chart} Chart.js instance
+   * @returns {Promise<Chart>} Chart.js instance
    */
-  createDoughnutChart(canvasElement, data, options = {}) {
+  async createDoughnutChart(canvasElement, data, options = {}) {
+    const { ChartJS } = await this.ensureChartJSLoaded();
     const chartOptions = createChartOptions({
       ...options,
       cutout: '60%', // Size of center hole

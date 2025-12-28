@@ -1,37 +1,16 @@
 /**
  * Chart.js Configuration and Setup
  * 
- * This module provides modular Chart.js imports to minimize bundle size
- * and sets up the basic chart rendering infrastructure for BlinkBudget.
+ * This module provides lazy-loaded Chart.js configuration to minimize bundle size
+ * and improve initial loading performance. Chart.js is only loaded when needed.
  * 
- * Only imports the components we actually need for the reports feature.
+ * Requirements: 9.2 - Performance optimization with lazy loading
  */
 
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  ArcElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
+import { loadChartJS, isChartJSReady, getChartJSModules } from './chart-loader.js';
 
-// Register only the Chart.js components we need
-ChartJS.register(
-  CategoryScale,    // For bar charts
-  LinearScale,      // For line and bar charts
-  PointElement,     // For line charts
-  LineElement,      // For line charts
-  ArcElement,       // For pie and doughnut charts
-  BarElement,       // For bar charts
-  Title,            // For chart titles
-  Tooltip,          // For hover tooltips
-  Legend            // For chart legends
-);
+// Chart.js modules will be loaded lazily
+let ChartJS = null;
 
 /**
  * Default chart configuration that aligns with BlinkBudget's design system
@@ -68,22 +47,55 @@ export const defaultChartOptions = {
         },
         // Enhanced accessibility for legend
         generateLabels: function(chart) {
-          const original = ChartJS.defaults.plugins.legend.labels.generateLabels;
-          const labels = original.call(this, chart);
+          // Get ChartJS from the chart instance or modules
+          const chartJSModules = getChartJSModules();
+          const ChartJSInstance = chartJSModules?.ChartJS || chart.constructor;
           
-          // Add accessibility information to labels
-          labels.forEach((label, index) => {
-            if (chart.data.datasets[0] && chart.data.datasets[0].data) {
-              const value = chart.data.datasets[0].data[index];
-              const total = chart.data.datasets[0].data.reduce((sum, val) => sum + val, 0);
+          // Check if we can access the default generateLabels function
+          if (ChartJSInstance && ChartJSInstance.defaults && ChartJSInstance.defaults.plugins && ChartJSInstance.defaults.plugins.legend) {
+            try {
+              const original = ChartJSInstance.defaults.plugins.legend.labels.generateLabels;
+              const labels = original.call(this, chart);
+              
+              // Add accessibility information to labels
+              labels.forEach((label, index) => {
+                if (chart.data.datasets[0] && chart.data.datasets[0].data) {
+                  const value = chart.data.datasets[0].data[index];
+                  const total = chart.data.datasets[0].data.reduce((sum, val) => sum + val, 0);
+                  const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                  
+                  // Store accessibility info for screen readers
+                  label.ariaLabel = `${label.text}: ${value} (${percentage}% of total)`;
+                }
+              });
+              
+              return labels;
+            } catch (error) {
+              console.warn('[ChartConfig] Error using default generateLabels, falling back to custom implementation:', error);
+            }
+          }
+          
+          // Fallback to basic label generation
+          const data = chart.data;
+          if (data.labels.length && data.datasets.length) {
+            return data.labels.map((label, i) => {
+              const dataset = data.datasets[0];
+              const value = dataset.data[i];
+              const total = dataset.data.reduce((sum, val) => sum + val, 0);
               const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
               
-              // Store accessibility info for screen readers
-              label.accessibilityLabel = `${label.text}: ${percentage}% of total`;
-            }
-          });
-          
-          return labels;
+              return {
+                text: `${label} (${percentage}%)`,
+                fillStyle: dataset.backgroundColor[i],
+                strokeStyle: dataset.borderColor?.[i] || '#fff',
+                lineWidth: 2,
+                pointStyle: 'circle',
+                index: i,
+                ariaLabel: `${label}: ${value} (${percentage}% of total)`
+              };
+            });
+          }
+          return [];
         }
       }
     },
@@ -211,9 +223,33 @@ export const accessibleColors = {
 };
 
 /**
- * Export Chart.js for use in other modules
+ * Export Chart.js for use in other modules (lazy-loaded)
+ * @returns {Promise<Object>} Promise that resolves to Chart.js modules
  */
-export { ChartJS };
+export async function getChartJS() {
+    if (isChartJSReady()) {
+        const modules = getChartJSModules();
+        return modules.ChartJS;
+    }
+    
+    const modules = await loadChartJS();
+    ChartJS = modules.ChartJS;
+    return modules.ChartJS;
+}
+
+/**
+ * Initialize Chart.js if not already loaded
+ * @returns {Promise<Object>} Promise that resolves to all Chart.js modules
+ */
+export async function initializeChartJS() {
+    if (isChartJSReady()) {
+        return getChartJSModules();
+    }
+    
+    const modules = await loadChartJS();
+    ChartJS = modules.ChartJS;
+    return modules;
+}
 
 /**
  * Utility function to get colors for a dataset
