@@ -138,6 +138,10 @@ export const defaultChartOptions = {
         size: 13,
         weight: '400'
       },
+      // Position tooltips to prevent overlap with content below
+      position: 'nearest',
+      // Use smart positioning - Chart.js will position tooltips to avoid viewport edges
+      yAlign: 'auto',
       // Enhanced accessibility for tooltips
       filter: function(tooltipItem) {
         // Always show tooltips for accessibility

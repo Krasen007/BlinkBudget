@@ -36,8 +36,10 @@ The project is a web (browser) application, leveraging a modern, lightweight sta
 *   **Styling**: Vanilla CSS
     *   Uses CSS Custom Properties (Variables) for theming (HSL color space).
     *   Clean, semantic CSS without heavy framework overhead.
-*   **Deployment**: Vercel/Netlify (Static hosting).
-*   **Data Persistence**: `localStorage` (via `StorageService`) for instant, offline-capable data storage.
+*   **Deployment**: Netlify + Firebase for Auth and Database.
+*   **Data Persistence**: `localStorage` (via `StorageService`) for instant, offline-capable data storage. Also Firebase for cloud sync.
+*   **System**: You should use Windows commands for the terminal, do not try to use Linux tools and commands.
+
 
 ---
 

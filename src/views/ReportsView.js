@@ -1325,6 +1325,37 @@ export const ReportsView = () => {
             // Render beautiful charts with category selection
             await renderCharts(chartContainer);
 
+            // Add Income vs Expenses in separate container after charts
+            try {
+                const incomeExpenseContainer = document.createElement('div');
+                incomeExpenseContainer.className = 'income-expense-container';
+                incomeExpenseContainer.style.marginTop = `calc(${SPACING.XL} * 2)`;
+                incomeExpenseContainer.style.position = 'relative';
+                incomeExpenseContainer.style.zIndex = '1';
+                incomeExpenseContainer.style.clear = 'both';
+                
+                const incomeExpenseSection = await createIncomeExpenseChart();
+                incomeExpenseContainer.appendChild(incomeExpenseSection);
+                
+                // Add to main content area after chart container
+                content.appendChild(incomeExpenseContainer);
+            } catch (incomeExpenseError) {
+                console.error('Failed to render income vs expense chart:', incomeExpenseError);
+                
+                // Add fallback income/expense display in separate container
+                const incomeExpenseContainer = document.createElement('div');
+                incomeExpenseContainer.className = 'income-expense-container';
+                incomeExpenseContainer.style.marginTop = `calc(${SPACING.XL} * 2)`;
+                incomeExpenseContainer.style.marginBottom = `calc(${SPACING.XL} * 2 + 80px)`; // Extra bottom margin for tooltips
+                incomeExpenseContainer.style.position = 'relative';
+                incomeExpenseContainer.style.zIndex = '1';
+                incomeExpenseContainer.style.clear = 'both';
+                
+                const fallbackSection = createFallbackIncomeExpenseDisplay();
+                incomeExpenseContainer.appendChild(fallbackSection);
+                content.appendChild(incomeExpenseContainer);
+            }
+
             // Show the content
             showContentState();
 
@@ -1542,22 +1573,20 @@ export const ReportsView = () => {
                 chartsSection.appendChild(fallbackSection);
             }
 
-            // 2. Income vs Expenses Bar Chart
+            // 2. Interactive Category Selector - Position after category breakdown
             try {
-                const incomeExpenseSection = await createIncomeExpenseChart();
-                // Add explicit separation
-                incomeExpenseSection.style.marginTop = `calc(${SPACING.XL} * 2)`;
-                incomeExpenseSection.style.borderTop = `3px solid ${COLORS.BORDER}`;
-                incomeExpenseSection.style.paddingTop = `calc(${SPACING.LG} * 1.5)`;
-                chartsSection.appendChild(incomeExpenseSection);
-                chartRenderResults.push({ name: 'Income vs Expenses', success: true });
-            } catch (incomeExpenseError) {
-                console.error('Failed to render income vs expense chart:', incomeExpenseError);
-                chartRenderResults.push({ name: 'Income vs Expenses', success: false, error: incomeExpenseError });
-                
-                // Add fallback income/expense display
-                const fallbackSection = createFallbackIncomeExpenseDisplay();
-                chartsSection.appendChild(fallbackSection);
+                const categorySelectorSection = createCategorySelector();
+                // Position it right after the category breakdown
+                categorySelectorSection.style.marginTop = `calc(${SPACING.XL} * 2)`;
+                categorySelectorSection.style.clear = 'both';
+                categorySelectorSection.style.position = 'relative';
+                categorySelectorSection.style.zIndex = '2';
+                chartsSection.appendChild(categorySelectorSection);
+                chartRenderResults.push({ name: 'Category Selector', success: true });
+            } catch (selectorError) {
+                console.error('Failed to render category selector:', selectorError);
+                chartRenderResults.push({ name: 'Category Selector', success: false, error: selectorError });
+                // Category selector is optional, continue without it
             }
 
             // 3. Category Trends Over Time (if enough historical data)
@@ -1573,30 +1602,7 @@ export const ReportsView = () => {
                 // Trends chart is optional, so no fallback needed
             }
 
-            // 4. Interactive Category Selector
-            try {
-                const categorySelectorSection = createCategorySelector();
-                chartsSection.appendChild(categorySelectorSection);
-                chartRenderResults.push({ name: 'Category Selector', success: true });
-            } catch (selectorError) {
-                console.error('Failed to render category selector:', selectorError);
-                chartRenderResults.push({ name: 'Category Selector', success: false, error: selectorError });
-                // Category selector is optional, continue without it
-            }
-
-            // 5. Insights Section (if available)
-            if (currentData.insights && currentData.insights.length > 0) {
-                try {
-                    const insightsSection = createInsightsSection();
-                    chartsSection.appendChild(insightsSection);
-                    chartRenderResults.push({ name: 'Insights', success: true });
-                } catch (insightsError) {
-                    console.error('Failed to render insights section:', insightsError);
-                    chartRenderResults.push({ name: 'Insights', success: false, error: insightsError });
-                    // Insights are optional, continue without them
-                }
-            }
-
+            // Add the charts section to the chart container (only category-related content)
             chartContainer.appendChild(chartsSection);
 
             // Show warning if some charts failed to render
@@ -1753,15 +1759,43 @@ export const ReportsView = () => {
             }
         });
 
-        // Category details panel
+        // Category details panel - positioned as overlay
         const detailsPanel = document.createElement('div');
         detailsPanel.id = 'category-details-panel';
         detailsPanel.style.display = 'none';
-        detailsPanel.style.padding = SPACING.MD;
-        detailsPanel.style.background = 'rgba(59, 130, 246, 0.05)';
-        detailsPanel.style.borderRadius = 'var(--radius-md)';
-        detailsPanel.style.border = '1px solid rgba(59, 130, 246, 0.2)';
-        section.appendChild(detailsPanel);
+        detailsPanel.style.position = 'fixed';
+        detailsPanel.style.top = '50%';
+        detailsPanel.style.left = '50%';
+        detailsPanel.style.transform = 'translate(-50%, -50%)';
+        detailsPanel.style.maxWidth = '90vw';
+        detailsPanel.style.maxHeight = '80vh';
+        detailsPanel.style.overflow = 'auto';
+        detailsPanel.style.padding = SPACING.LG;
+        detailsPanel.style.background = COLORS.SURFACE;
+        detailsPanel.style.borderRadius = 'var(--radius-lg)';
+        detailsPanel.style.border = `2px solid ${COLORS.BORDER}`;
+        detailsPanel.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.3)';
+        detailsPanel.style.zIndex = '1000';
+        
+        // Add backdrop
+        const backdrop = document.createElement('div');
+        backdrop.id = 'category-details-backdrop';
+        backdrop.style.display = 'none';
+        backdrop.style.position = 'fixed';
+        backdrop.style.top = '0';
+        backdrop.style.left = '0';
+        backdrop.style.width = '100%';
+        backdrop.style.height = '100%';
+        backdrop.style.background = 'rgba(0, 0, 0, 0.5)';
+        backdrop.style.zIndex = '999';
+        backdrop.addEventListener('click', () => {
+            detailsPanel.style.display = 'none';
+            backdrop.style.display = 'none';
+        });
+        
+        // Add to document body instead of section to prevent layout interference
+        document.body.appendChild(backdrop);
+        document.body.appendChild(detailsPanel);
 
         return section;
     }
@@ -1777,7 +1811,8 @@ export const ReportsView = () => {
         section.style.borderRadius = 'var(--radius-lg)';
         section.style.border = `1px solid ${COLORS.BORDER}`;
         section.style.padding = SPACING.LG;
-        section.style.marginBottom = SPACING.XL; // Add explicit bottom margin
+        section.style.marginBottom = `calc(${SPACING.XL} * 2)`; // Add extra bottom margin for tooltips
+        section.style.paddingBottom = `calc(${SPACING.LG} * 2)`; // Extra padding at bottom
         section.style.position = 'relative'; // Ensure proper positioning
         section.style.zIndex = '2'; // Ensure it's above category selector
         // Force block behavior and proper containment
@@ -1785,6 +1820,7 @@ export const ReportsView = () => {
         section.style.width = '100%';
         section.style.boxSizing = 'border-box';
         section.style.contain = 'layout';
+        section.style.overflow = 'visible'; // Allow tooltips but ensure they don't overlap
 
         const title = document.createElement('h3');
         title.textContent = 'Income vs Expenses';
@@ -1796,10 +1832,11 @@ export const ReportsView = () => {
         chartDiv.style.position = 'relative';
         chartDiv.style.height = '400px'; // Increase height to properly fit the chart
         chartDiv.style.width = '100%';
-        chartDiv.style.marginBottom = SPACING.MD;
+        chartDiv.style.marginBottom = `calc(${SPACING.XL} + 60px)`; // Extra margin for tooltips (60px for tooltip height)
         chartDiv.style.padding = SPACING.SM; // Add padding inside chart container
+        chartDiv.style.paddingBottom = `calc(${SPACING.SM} + 60px)`; // Extra bottom padding for tooltips
         chartDiv.style.boxSizing = 'border-box';
-        chartDiv.style.overflow = 'hidden'; // Contain the chart properly
+        chartDiv.style.overflow = 'visible'; // Allow tooltips to show but they should be positioned correctly
 
         const canvas = document.createElement('canvas');
         canvas.id = 'income-expense-chart';
@@ -1841,7 +1878,19 @@ export const ReportsView = () => {
 
         await chartRenderer.createBarChart(canvas, chartData, {
             responsive: true,
-            maintainAspectRatio: false
+            maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    position: 'nearest',
+                    // Use auto positioning to let Chart.js choose best position
+                    yAlign: 'auto',
+                    // Add extra padding to prevent overlap
+                    padding: 20,
+                    // Ensure tooltips don't extend beyond viewport
+                    caretSize: 8,
+                    caretPadding: 10
+                }
+            }
         });
 
         return section;
@@ -1928,14 +1977,8 @@ export const ReportsView = () => {
         section.style.borderRadius = 'var(--radius-lg)';
         section.style.border = `1px solid ${COLORS.BORDER}`;
         section.style.padding = SPACING.LG;
-        section.style.marginTop = SPACING.XL; // Add explicit top margin to prevent overlap
-        section.style.position = 'relative'; // Ensure proper positioning
-        section.style.zIndex = '1'; // Ensure it's above other elements
-        // Force proper block separation
-        section.style.display = 'block';
-        section.style.width = '100%';
-        section.style.clear = 'both';
-        section.style.isolation = 'isolate';
+        section.style.marginTop = SPACING.XL;
+        section.style.marginBottom = SPACING.XL;
 
         const title = document.createElement('h3');
         title.textContent = 'Explore Categories';
@@ -1955,7 +1998,7 @@ export const ReportsView = () => {
         categoryGrid.style.display = 'grid';
         categoryGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(200px, 1fr))';
         categoryGrid.style.gap = SPACING.MD;
-        categoryGrid.style.marginTop = SPACING.MD; // Add margin to separate from description
+        categoryGrid.style.marginTop = SPACING.MD;
 
         currentData.categoryBreakdown.categories.forEach((category, index) => {
             const categoryCard = createCategoryCard(category, index);
@@ -2054,7 +2097,8 @@ export const ReportsView = () => {
      */
     function showCategoryDetails(categoryName, amount, percentage) {
         const detailsPanel = document.getElementById('category-details-panel');
-        if (!detailsPanel) return;
+        const backdrop = document.getElementById('category-details-backdrop');
+        if (!detailsPanel || !backdrop) return;
 
         // Get transactions for this category
         const categoryTransactions = currentData.transactions.filter(t => 
@@ -2064,7 +2108,7 @@ export const ReportsView = () => {
         detailsPanel.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: ${SPACING.MD};">
                 <h4 style="margin: 0; color: ${COLORS.TEXT_MAIN};">${categoryName} Details</h4>
-                <button onclick="this.parentElement.parentElement.style.display='none'" 
+                <button onclick="document.getElementById('category-details-panel').style.display='none'; document.getElementById('category-details-backdrop').style.display='none';" 
                         style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: ${COLORS.TEXT_MUTED};">×</button>
             </div>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: ${SPACING.MD}; margin-bottom: ${SPACING.MD};">
@@ -2098,6 +2142,8 @@ export const ReportsView = () => {
             </div>
         `;
 
+        // Show both backdrop and panel
+        backdrop.style.display = 'block';
         detailsPanel.style.display = 'block';
     }
 
@@ -2379,10 +2425,15 @@ export const ReportsView = () => {
     function getCategoryColors(categories) {
         // Generate colors for all categories if not already mapped
         if (categoryColorMap.size === 0 || categoryColorMap.size < categories.length) {
-            const colors = getChartColors(categories.length);
+            // Get more colors than needed to ensure good distribution and avoid overlaps
+            const totalColors = Math.max(categories.length, 12);
+            const colors = getChartColors(totalColors);
+            
             categories.forEach((category, index) => {
                 if (!categoryColorMap.has(category.name)) {
-                    categoryColorMap.set(category.name, colors[index]);
+                    // Use modulo to cycle through colors if we have more categories than colors
+                    const colorIndex = index % colors.length;
+                    categoryColorMap.set(category.name, colors[colorIndex]);
                 }
             });
         }
