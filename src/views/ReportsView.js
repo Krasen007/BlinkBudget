@@ -58,6 +58,9 @@ export const ReportsView = () => {
     container.style.width = '100%';
     container.style.maxWidth = DIMENSIONS.CONTAINER_MAX_WIDTH;
     container.style.display = 'flex';
+
+    // Store scroll handler reference for proper cleanup
+    let scrollHandler = null;
     container.style.flexDirection = 'column';
     container.style.padding = `0 ${SPACING.MD}`;
 
@@ -302,7 +305,8 @@ export const ReportsView = () => {
             }
         };
         
-        window.addEventListener('scroll', toggleFloatingButton, { passive: true });
+        scrollHandler = toggleFloatingButton;
+        window.addEventListener('scroll', scrollHandler, { passive: true });
         
         return floatingBackButton;
     }
@@ -975,7 +979,10 @@ export const ReportsView = () => {
         window.onerror = originalOnError;
         window.onunhandledrejection = originalOnUnhandledRejection;
         
-        window.removeEventListener('scroll', () => {});
+        if (scrollHandler) {
+            window.removeEventListener('scroll', scrollHandler);
+            scrollHandler = null;
+        }
         
         console.log('[ReportsView] Cleanup completed');
     };

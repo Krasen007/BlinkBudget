@@ -180,12 +180,6 @@
   gap: var(--spacing-lg);
 }
 
-.view-reports .loading-state[aria-live="polite"],
-.view-reports .error-state[role="alert"],
-.view-reports .empty-state[role="status"] {
-  /* Ensure proper ARIA roles for state announcements */
-}
-
 /* Enhanced keyboard navigation indicators */
 .view-reports .keyboard-navigation-hint {
   position: absolute;
@@ -206,7 +200,7 @@
   opacity: 1;
 }
 
-/* Text scaling support */
+/* High-DPI display font smoothing */
 @media (min-resolution: 2dppx) {
   .view-reports {
     -webkit-font-smoothing: antialiased;
@@ -238,7 +232,6 @@
 @supports (-webkit-touch-callout: none) {
   .view-reports canvas {
     -webkit-touch-callout: none;
-    -webkit-user-select: none;
   }
   
   .view-reports .btn,
@@ -315,19 +308,6 @@
 
 .view-reports .modal-content:focus {
   outline: none;
-}
-
-/* Landmark roles for better navigation */
-.view-reports .reports-header {
-  /* Should have role="banner" or be in a <header> */
-}
-
-.view-reports .reports-content {
-  /* Should have role="main" or be in a <main> */
-}
-
-.view-reports .time-period-selector {
-  /* Should have role="navigation" for time period selection */
 }
 
 /* Status indicators with proper semantics */
