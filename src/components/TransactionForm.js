@@ -268,10 +268,21 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     // 10. Keyboard handling
     setupFormKeyboardHandling(form, [amountInput, accSelect]);
 
-    // 11. Initial focus
-    setTimeout(() => {
-        amountInput.focus();
-    }, TIMING.INITIAL_LOAD_DELAY);
+    // 11. Initial focus strategy for mobile keyboard
+    const focusInput = () => {
+        amountInput.focus({ preventScroll: true });
+        // Click is sometimes needed on iOS to trigger keyboard if focus() is blocked
+        // amountInput.click(); 
+    };
+
+    // Try immediately
+    focusInput();
+
+    // Try after short delay (render cycle)
+    setTimeout(focusInput, 150);
+
+    // Try one more time for slower devices
+    setTimeout(focusInput, 450);
 
     return form;
 };

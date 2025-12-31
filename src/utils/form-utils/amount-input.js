@@ -34,7 +34,8 @@ export const createAmountInput = (options = {}) => {
 
     // Mobile-specific optimizations
     input.inputMode = 'decimal'; // Show numeric keypad on mobile
-    input.pattern = '[0-9]*[.,]?[0-9]*'; // Allow both dot and comma
+    input.pattern = '[0-9]*'; // Fallback for older devices to trigger numpad
+    input.setAttribute('autofocus', 'true'); // Hint to browser related to focus
 
     // Keyboard-aware viewport adjustments
     input.addEventListener('focus', () => {

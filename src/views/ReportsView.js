@@ -70,7 +70,7 @@ export const ReportsView = () => {
         console.error(`[ReportsView] Global error in ${context}:`, error);
         hasGlobalError = true;
         showErrorState(errorState, `Something went wrong while ${context.toLowerCase()}. Please try refreshing the page.`, () => loadReportData());
-        
+
         if (typeof window.gtag === 'function') {
             window.gtag('event', 'exception', {
                 description: `ReportsView: ${context} - ${error.message}`,
@@ -82,7 +82,7 @@ export const ReportsView = () => {
     // Set up global error handlers
     const originalOnError = window.onerror;
     const originalOnUnhandledRejection = window.onunhandledrejection;
-    
+
     window.onerror = (message, source, lineno, colno, error) => {
         if (source && source.includes('ReportsView')) {
             handleGlobalError(error || new Error(message), 'JavaScript execution');
@@ -90,7 +90,7 @@ export const ReportsView = () => {
         }
         return originalOnError ? originalOnError(message, source, lineno, colno, error) : false;
     };
-    
+
     window.onunhandledrejection = (event) => {
         if (event.reason && event.reason.stack && event.reason.stack.includes('ReportsView')) {
             handleGlobalError(event.reason, 'Promise rejection');
@@ -166,7 +166,7 @@ export const ReportsView = () => {
      */
     function handleTimePeriodChange(newTimePeriod) {
         console.log('[ReportsView] Time period changed:', newTimePeriod);
-        
+
         if (!newTimePeriod || !newTimePeriod.startDate || !newTimePeriod.endDate) {
             console.error('Invalid time period provided:', newTimePeriod);
             return;
@@ -233,7 +233,7 @@ export const ReportsView = () => {
         rightSide.style.display = 'flex';
         rightSide.style.alignItems = 'center';
         rightSide.style.gap = SPACING.SM;
-        
+
         if (window.innerWidth >= BREAKPOINTS.MOBILE) {
             const shortcutsInfo = document.createElement('div');
             shortcutsInfo.className = 'keyboard-shortcuts-info';
@@ -247,7 +247,7 @@ export const ReportsView = () => {
             `;
             rightSide.appendChild(shortcutsInfo);
         }
-        
+
         headerEl.appendChild(leftSide);
         headerEl.appendChild(rightSide);
 
@@ -279,13 +279,13 @@ export const ReportsView = () => {
         floatingBackButton.style.transition = 'all 0.3s ease';
         floatingBackButton.style.opacity = '0';
         floatingBackButton.style.transform = 'scale(0.8)';
-        
+
         floatingBackButton.addEventListener('click', () => Router.navigate('dashboard'));
-        
+
         let isFloatingButtonVisible = false;
         const toggleFloatingButton = () => {
             const shouldShow = window.scrollY > 100;
-            
+
             if (shouldShow && !isFloatingButtonVisible) {
                 floatingBackButton.style.display = 'flex';
                 floatingBackButton.style.alignItems = 'center';
@@ -304,10 +304,10 @@ export const ReportsView = () => {
                 isFloatingButtonVisible = false;
             }
         };
-        
+
         scrollHandler = toggleFloatingButton;
         window.addEventListener('scroll', scrollHandler, { passive: true });
-        
+
         return floatingBackButton;
     }
 
@@ -348,20 +348,20 @@ export const ReportsView = () => {
             showLoadingState();
 
             const startTime = Date.now();
-            
+
             let transactions;
             try {
                 transactions = StorageService.getAll();
-                
+
                 if (!Array.isArray(transactions)) {
                     throw new Error('Invalid transaction data format - expected array');
                 }
 
                 console.log(`[ReportsView] Loading ${transactions.length} transactions`);
-                
+
             } catch (storageError) {
                 console.error('Storage access error:', storageError);
-                
+
                 try {
                     console.warn('[ReportsView] Attempting storage recovery...');
                     localStorage.removeItem('blinkbudget_transactions');
@@ -375,7 +375,7 @@ export const ReportsView = () => {
             let analyticsData;
             try {
                 analyticsData = await progressiveLoader.loadTransactionData(
-                    transactions, 
+                    transactions,
                     currentTimePeriod,
                     {
                         onProgress: (progress, message) => {
@@ -391,18 +391,18 @@ export const ReportsView = () => {
                 );
 
                 console.log(`[ReportsView] Data processing completed in ${analyticsData.processingTime?.toFixed(2) || 0}ms`);
-                
+
             } catch (analyticsError) {
                 console.error('Progressive data loading error:', analyticsError);
-                
+
                 console.warn('[ReportsView] Attempting fallback strategies...');
-                
+
                 try {
                     analyticsData = progressiveLoader.processDataDirectly(transactions, currentTimePeriod);
                     console.log('[ReportsView] Fallback to direct processing successful');
                 } catch (directProcessingError) {
                     console.error('Direct processing fallback failed:', directProcessingError);
-                    
+
                     try {
                         analyticsData = createMinimalAnalyticsData(transactions, currentTimePeriod);
                         console.log('[ReportsView] Fallback to minimal processing successful');
@@ -417,9 +417,9 @@ export const ReportsView = () => {
                 validateAnalyticsData(analyticsData);
             } catch (validationError) {
                 console.error('Analytics data validation failed:', validationError);
-                
+
                 analyticsData = sanitizeAnalyticsData(analyticsData);
-                
+
                 try {
                     validateAnalyticsData(analyticsData);
                 } catch (secondValidationError) {
@@ -429,6 +429,11 @@ export const ReportsView = () => {
             }
 
             if (!analyticsData.transactions || analyticsData.transactions.length === 0) {
+                // Ensure loading state is removed
+                if (container.contains(loadingState)) {
+                    container.removeChild(loadingState);
+                }
+
                 if (transactions.length === 0) {
                     showEmptyState(emptyState, 'no-transactions', currentTimePeriod, formatTimePeriod);
                     if (!container.contains(emptyState)) container.appendChild(emptyState);
@@ -473,7 +478,7 @@ export const ReportsView = () => {
 
             const elapsedTime = Date.now() - startTime;
             const remainingTime = Math.max(0, Math.min(500 - elapsedTime, 2000 - elapsedTime));
-            
+
             setTimeout(() => {
                 renderReports();
                 isLoading = false;
@@ -482,9 +487,9 @@ export const ReportsView = () => {
 
         } catch (error) {
             console.error('Error loading report data:', error);
-            
+
             let userMessage = 'An unexpected error occurred while loading your reports.';
-            
+
             if (error.message.includes('storage')) {
                 userMessage = 'There was a problem accessing your stored data. Please check your browser settings and try again.';
             } else if (error.message.includes('browser')) {
@@ -494,13 +499,13 @@ export const ReportsView = () => {
             } else if (error.message.includes('memory')) {
                 userMessage = 'Your device may be running low on memory. Please close other tabs and try again.';
             }
-            
+
             showErrorState(errorState, userMessage, () => loadReportData());
             if (!container.contains(errorState)) container.appendChild(errorState);
             errorState.style.display = 'flex';
             isLoading = false;
             loadingProgress = 0;
-            
+
             if (typeof window.gtag === 'function') {
                 window.gtag('event', 'exception', {
                     description: `ReportsView loadReportData: ${error.message}`,
@@ -516,7 +521,7 @@ export const ReportsView = () => {
     async function renderReports() {
         try {
             content.innerHTML = '';
-            
+
             cleanupCharts();
 
             if (!currentData) {
@@ -626,10 +631,10 @@ export const ReportsView = () => {
                 const incomeExpenseContainer = document.createElement('div');
                 incomeExpenseContainer.className = 'income-expense-container';
                 incomeExpenseContainer.style.setProperty('margin-top', SPACING.XL, 'important');
-                incomeExpenseContainer.style.setProperty('margin-bottom', SPACING.LG, 'important');                incomeExpenseContainer.style.position = 'relative';
+                incomeExpenseContainer.style.setProperty('margin-bottom', SPACING.SM, 'important'); incomeExpenseContainer.style.position = 'relative';
                 incomeExpenseContainer.style.zIndex = '1';
                 incomeExpenseContainer.style.clear = 'both';
-                
+
                 const incomeResult = await createIncomeExpenseChart(chartRenderer, currentData);
                 incomeExpenseContainer.appendChild(incomeResult.section);
                 chartsSection.appendChild(incomeExpenseContainer);
@@ -675,14 +680,14 @@ export const ReportsView = () => {
 
         } catch (error) {
             console.error('Error rendering charts:', error);
-            
+
             const fallback = document.createElement('div');
             fallback.style.padding = SPACING.LG;
             fallback.style.textAlign = 'center';
             fallback.style.background = COLORS.SURFACE;
             fallback.style.borderRadius = 'var(--radius-lg)';
             fallback.style.border = `1px solid ${COLORS.BORDER}`;
-            
+
             fallback.innerHTML = `
                 <div style="margin-bottom: ${SPACING.LG};">
                     <h3 style="color: ${COLORS.ERROR}; margin-bottom: ${SPACING.MD};">⚠️ Chart Rendering Failed</h3>
@@ -772,7 +777,7 @@ export const ReportsView = () => {
         const isDesktop = window.innerWidth >= 1024;
         const isLandscape = window.innerHeight < window.innerWidth;
         const isShortLandscape = isLandscape && window.innerHeight < 500;
-        
+
         const title = header.querySelector('h1');
         if (title) {
             if (isMobile) {
@@ -785,8 +790,8 @@ export const ReportsView = () => {
         }
 
         if (isMobile) {
-            container.style.padding = isShortLandscape ? 
-                `${SPACING.XS} ${SPACING.SM}` : 
+            container.style.padding = isShortLandscape ?
+                `${SPACING.XS} ${SPACING.SM}` :
                 `${SPACING.SM} ${SPACING.SM}`;
         } else if (isTablet) {
             container.style.padding = `${SPACING.MD} ${SPACING.LG}`;
@@ -829,7 +834,7 @@ export const ReportsView = () => {
     const handleOrientationChange = debounce(() => {
         setTimeout(() => {
             updateResponsiveLayout();
-            
+
             activeCharts.forEach((chart) => {
                 if (chart && typeof chart.resize === 'function') {
                     chart.resize();
@@ -841,7 +846,7 @@ export const ReportsView = () => {
     // Event listeners
     window.addEventListener('resize', updateResponsiveLayout);
     window.addEventListener('orientationchange', handleOrientationChange);
-    
+
     if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', updateVisualViewportHeight);
     }
@@ -854,7 +859,7 @@ export const ReportsView = () => {
         console.log(`[ReportsView] Storage updated (${e.detail.key}), refreshing data...`);
         if (e.detail.key === 'blinkbudget_transactions' || e.detail.key === 'blinkbudget_accounts') {
             analyticsEngine.invalidateCacheOnDataUpdate();
-            
+
             clearTimeout(container._refreshTimeout);
             container._refreshTimeout = setTimeout(() => {
                 loadReportData();
@@ -872,17 +877,17 @@ export const ReportsView = () => {
     // Navigation state change handler
     const handleNavigationStateChange = (e) => {
         console.log(`[ReportsView] Navigation state changed:`, e.detail);
-        
+
         if (e.detail.key === NavigationState.STATE_KEYS.REPORTS_TIME_PERIOD) {
             const restoredTimePeriod = NavigationState.restoreTimePeriod();
             if (restoredTimePeriod && restoredTimePeriod !== currentTimePeriod) {
                 console.log('[ReportsView] Syncing time period from another tab');
                 currentTimePeriod = restoredTimePeriod;
-                
+
                 if (timePeriodSelectorComponent && timePeriodSelectorComponent.updatePeriod) {
                     timePeriodSelectorComponent.updatePeriod(restoredTimePeriod);
                 }
-                
+
                 loadReportData();
             }
         }
@@ -894,7 +899,7 @@ export const ReportsView = () => {
             e.preventDefault();
             Router.navigate('dashboard');
         }
-        
+
         if (e.ctrlKey && e.key === 'r') {
             e.preventDefault();
             refreshData();
@@ -921,9 +926,9 @@ export const ReportsView = () => {
         try {
             const transactions = StorageService.getAll();
             const accounts = StorageService.getAccounts();
-            
+
             const accountIds = new Set(accounts.map(acc => acc.id));
-            const orphanedTransactions = transactions.filter(t => 
+            const orphanedTransactions = transactions.filter(t =>
                 t.accountId && !accountIds.has(t.accountId)
             );
 
@@ -958,32 +963,32 @@ export const ReportsView = () => {
         window.removeEventListener('auth-state-changed', handleAuthChange);
         window.removeEventListener('navigation-state-changed', handleNavigationStateChange);
         window.removeEventListener('keydown', handleKeyboardShortcuts);
-        
+
         if (window.visualViewport) {
             window.visualViewport.removeEventListener('resize', updateVisualViewportHeight);
         }
-        
+
         if (container._refreshTimeout) {
             clearTimeout(container._refreshTimeout);
         }
-        
+
         if (timePeriodSelectorComponent && timePeriodSelectorComponent.cleanup) {
             timePeriodSelectorComponent.cleanup();
         }
-        
+
         cleanupCharts();
         analyticsEngine.clearCache();
-        
+
         document.documentElement.style.removeProperty('--visual-viewport-height');
-        
+
         window.onerror = originalOnError;
         window.onunhandledrejection = originalOnUnhandledRejection;
-        
+
         if (scrollHandler) {
             window.removeEventListener('scroll', scrollHandler);
             scrollHandler = null;
         }
-        
+
         console.log('[ReportsView] Cleanup completed');
     };
 
