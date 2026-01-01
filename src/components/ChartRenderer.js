@@ -35,19 +35,19 @@ export class ChartRenderer {
     try {
       console.log('[ChartRenderer] Loading Chart.js...');
       const startTime = performance.now();
-      
+
       this._initPromise = initializeChartJS();
       this.chartJSModules = await this._initPromise;
       this.isInitialized = true;
-      
+
       const loadTime = performance.now() - startTime;
       console.log(`[ChartRenderer] Chart.js initialized in ${loadTime.toFixed(2)}ms`);
-      
+
       return this.chartJSModules;
     } catch (error) {
       this._initPromise = null; // Allow retry on failure
       console.error('[ChartRenderer] Failed to initialize Chart.js:', error);
-      
+
       // Enhanced error handling with specific error types
       let errorMessage = 'Chart rendering unavailable';
       if (error.message.includes('network')) {
@@ -57,7 +57,7 @@ export class ChartRenderer {
       } else if (error.message.includes('browser')) {
         errorMessage = 'Browser compatibility issue with chart library';
       }
-      
+
       throw new Error(`${errorMessage}: ${error.message}`);
     }
   }
@@ -89,7 +89,7 @@ export class ChartRenderer {
       data.datasets[0].borderWidth = 3;
       data.datasets[0].hoverBorderWidth = 4;
       data.datasets[0].hoverBorderColor = 'hsl(250, 84%, 60%)'; // Primary color
-      
+
       // Add subtle hover effects
       data.datasets[0].hoverBackgroundColor = colors.map(color => {
         // Lighten colors on hover
@@ -111,10 +111,10 @@ export class ChartRenderer {
 
       // Add keyboard navigation for accessibility
       this.addKeyboardNavigation(chart);
-      
+
       // Add chart title styling
       this.addChartTitle(canvasElement, options.title || 'Expense Breakdown');
-      
+
       // Add entrance animation
       this.addEntranceAnimation(chart, 'pie');
 
@@ -162,8 +162,8 @@ export class ChartRenderer {
           });
           dataset.borderWidth = 2;
           dataset.borderRadius = 8; // Rounded corners
-          dataset.borderSkipped = false; 
-          
+          dataset.borderSkipped = false;
+
           // Enhanced hover effects
           dataset.hoverBackgroundColor = colors.map(color => {
             const hslMatch = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
@@ -187,12 +187,12 @@ export class ChartRenderer {
 
       // Add keyboard navigation for accessibility
       this.addKeyboardNavigation(chart);
-      
+
       // Add chart title styling (only if title is explicitly provided, not default)
       if (options.title !== undefined) {
         this.addChartTitle(canvasElement, options.title);
       }
-      
+
       // Add entrance animation
       this.addEntranceAnimation(chart, 'bar');
 
@@ -222,7 +222,7 @@ export class ChartRenderer {
             color: 'rgba(0, 0, 0, 0.1)'
           },
           ticks: {
-            callback: function(value) {
+            callback: function (value) {
               return new Intl.NumberFormat('en-US', {
                 style: 'currency',
                 currency: 'USD',
@@ -258,7 +258,7 @@ export class ChartRenderer {
                 style: 'currency',
                 currency: 'USD'
               }).format(value);
-              
+
               return `${label}: ${formattedValue}`;
             }
           }
@@ -288,7 +288,8 @@ export class ChartRenderer {
           }
           dataset.borderWidth = 3;
           dataset.fill = false;
-        }      });
+        }
+      });
     }
 
     try {
@@ -319,7 +320,7 @@ export class ChartRenderer {
 
     // Update data
     chartInstance.data = newData;
-    
+
     // Trigger re-render with animation
     chartInstance.update('active');
   }
@@ -330,7 +331,7 @@ export class ChartRenderer {
    */
   destroyChart(chartInstanceOrId) {
     let chart;
-    
+
     if (typeof chartInstanceOrId === 'string') {
       chart = this.activeCharts.get(chartInstanceOrId);
       this.activeCharts.delete(chartInstanceOrId);
@@ -347,21 +348,21 @@ export class ChartRenderer {
 
     if (chart && chart.canvas) {
       const canvas = chart.canvas;
-      
+
       // Clean up keyboard event handlers
       if (canvas._keyboardHandlers) {
         canvas.removeEventListener('keydown', canvas._keyboardHandlers.keydown);
         canvas.removeEventListener('focus', canvas._keyboardHandlers.focus);
         canvas.removeEventListener('blur', canvas._keyboardHandlers.blur);
-        
+
         // Remove description element
         if (canvas._keyboardHandlers.descriptionElement) {
           canvas._keyboardHandlers.descriptionElement.remove();
         }
-        
+
         delete canvas._keyboardHandlers;
       }
-      
+
       // Clean up touch event handlers
       if (canvas._touchHandlers) {
         canvas.removeEventListener('touchstart', canvas._touchHandlers.touchstart);
@@ -369,13 +370,13 @@ export class ChartRenderer {
         canvas.removeEventListener('touchend', canvas._touchHandlers.touchend);
         delete canvas._touchHandlers;
       }
-      
+
       // Remove accessibility attributes
       canvas.removeAttribute('aria-describedby');
       canvas.removeAttribute('aria-label');
       canvas.removeAttribute('role');
       canvas.removeAttribute('tabindex');
-      
+
       // Reset touch styles
       canvas.style.touchAction = '';
       canvas.style.opacity = '';
@@ -407,7 +408,7 @@ export class ChartRenderer {
     const isSmallMobile = window.innerWidth < 480;
     const isLandscape = window.innerHeight < window.innerWidth;
     const isShortLandscape = isLandscape && window.innerHeight < 500;
-    
+
     if (isMobile) {
       // Mobile-specific chart options
       const mobileOptions = {
@@ -442,18 +443,18 @@ export class ChartRenderer {
             yAlign: 'top'
           }
         },
-        
+
         // Optimize animations for mobile performance
         animation: {
           duration: isSmallMobile ? 300 : 400 // Faster animations on slower devices
         },
-        
+
         // Enhanced interaction for touch
         interaction: {
           intersect: false,
           mode: 'index'
         },
-        
+
         // Mobile-specific scales
         scales: chartInstance.config.type !== 'pie' ? {
           x: {
@@ -473,7 +474,7 @@ export class ChartRenderer {
                 size: isSmallMobile ? 10 : 11
               },
               // Shorter number formatting on mobile
-              callback: function(value) {
+              callback: function (value) {
                 if (value >= 1000000) {
                   return '$' + (value / 1000000).toFixed(1) + 'M';
                 } else if (value >= 1000) {
@@ -486,7 +487,7 @@ export class ChartRenderer {
           }
         } : undefined
       };
-      
+
       // Apply mobile optimizations
       if (chartInstance.options.plugins?.legend) {
         Object.assign(chartInstance.options.plugins.legend, mobileOptions.plugins.legend);
@@ -498,13 +499,13 @@ export class ChartRenderer {
         chartInstance.options.animation.duration = mobileOptions.animation.duration;
       }
       chartInstance.options.interaction = mobileOptions.interaction;
-      
+
       if (mobileOptions.scales) {
         Object.assign(chartInstance.options.scales, mobileOptions.scales);
-      }      
+      }
       // Update the chart with mobile optimizations
       chartInstance.update('none'); // No animation for performance
-      
+
       // Add touch-specific event handlers
       this.addTouchOptimizations(chartInstance);
     }
@@ -520,28 +521,34 @@ export class ChartRenderer {
 
     // Allow scrolling while preventing zoom and other gestures that interfere with chart interaction
     canvas.style.touchAction = 'pan-y';
-    
+
     // Add touch feedback
     let touchStartTime = 0;
     let touchMoved = false;
-    
+
     const touchStartHandler = (event) => {
       touchStartTime = Date.now();
       touchMoved = false;
-      
+
       // Add visual feedback for touch
       canvas.style.opacity = '0.9';
     };
-    
+
     const touchMoveHandler = (event) => {
       touchMoved = true;
       canvas.style.opacity = '1';
+
+      // Clear tooltips immediately when scrolling/moving interaction starts
+      if (chartInstance) {
+        chartInstance.setActiveElements([]);
+        chartInstance.update('none');
+      }
     };
-    
+
     const touchEndHandler = (event) => {
       const touchDuration = Date.now() - touchStartTime;
       canvas.style.opacity = '1';
-      
+
       // Only trigger chart interaction for quick taps (not scrolls)
       if (!touchMoved && touchDuration < 300) {
         // Get touch position relative to canvas
@@ -549,25 +556,25 @@ export class ChartRenderer {
         const touch = event.changedTouches[0];
         const x = touch.clientX - rect.left;
         const y = touch.clientY - rect.top;
-        
+
         // Create synthetic mouse event for Chart.js
         const syntheticEvent = {
           type: 'click',
           clientX: touch.clientX,
           clientY: touch.clientY,
           target: canvas,
-          preventDefault: () => {},
-          stopPropagation: () => {}
+          preventDefault: () => { },
+          stopPropagation: () => { }
         };
-        
+
         // Get elements at touch position
         const elements = chartInstance.getElementsAtEventForMode(
-          syntheticEvent, 
-          'nearest', 
-          { intersect: true }, 
+          syntheticEvent,
+          'nearest',
+          { intersect: true },
           false
         );
-        
+
         if (elements.length > 0) {
           // Trigger click handler
           if (chartInstance.options.onClick) {
@@ -576,7 +583,7 @@ export class ChartRenderer {
         }
       }
     };
-    
+
     // Add touch event listeners
     // Remove existing handlers first to prevent duplicates
     if (canvas._touchHandlers) {
@@ -584,17 +591,18 @@ export class ChartRenderer {
       canvas.removeEventListener('touchmove', canvas._touchHandlers.touchmove);
       canvas.removeEventListener('touchend', canvas._touchHandlers.touchend);
     }
-    
+
     canvas.addEventListener('touchstart', touchStartHandler, { passive: true });
     canvas.addEventListener('touchmove', touchMoveHandler, { passive: true });
     canvas.addEventListener('touchend', touchEndHandler, { passive: true });
-    
+
     // Store handlers for cleanup
     canvas._touchHandlers = {
       touchstart: touchStartHandler,
       touchmove: touchMoveHandler,
       touchend: touchEndHandler
-    };  }
+    };
+  }
 
   /**
    * Handle chart hover interactions with simplified micro-interactions
@@ -604,28 +612,28 @@ export class ChartRenderer {
    */
   handleChartHover(event, activeElements, chart) {
     const canvas = chart.canvas;
-    
+
     if (activeElements && activeElements.length > 0) {
       // Change cursor
       canvas.style.cursor = 'pointer';
-      
+
       // Simple hover effect for pie charts
       if (chart.config.type === 'pie') {
         const activeElement = activeElements[0];
         const dataset = chart.data.datasets[activeElement.datasetIndex];
-        
+
         if (!dataset._originalHoverOffset) {
           dataset._originalHoverOffset = dataset.hoverOffset || 0;
         }
         dataset.hoverOffset = 8; // Subtle separation
-        
+
         chart.setActiveElements(activeElements);
         chart.update('active');
       }
-      
+
     } else {
       canvas.style.cursor = 'default';
-      
+
       // Reset hover effects
       if (chart.config.type === 'pie') {
         chart.data.datasets.forEach(dataset => {
@@ -634,11 +642,11 @@ export class ChartRenderer {
           }
         });
       }
-      
+
       chart.setActiveElements([]);
       chart.update('active');
     }
-    
+
     // Simplified canvas hover animation
     this.addSimpleCanvasHoverAnimation(canvas, activeElements.length > 0);
   }
@@ -656,12 +664,12 @@ export class ChartRenderer {
     const activeElement = activeElements[0];
     const datasetIndex = activeElement.datasetIndex;
     const index = activeElement.index;
-    
+
     // Get the clicked data
     const dataset = chart.data.datasets[datasetIndex];
     const label = chart.data.labels[index];
     const value = dataset.data[index];
-    
+
     // Create click event data
     const clickData = {
       chartType,
@@ -684,7 +692,7 @@ export class ChartRenderer {
 
     // Add enhanced click animations
     this.addClickAnimation(chart, activeElement, chartType);
-    
+
     // Add haptic feedback for mobile devices
     this.addHapticFeedback();
 
@@ -693,7 +701,7 @@ export class ChartRenderer {
       detail: clickData,
       bubbles: true
     });
-    
+
     chart.canvas.dispatchEvent(customEvent);
 
     // Optional: Log click for debugging
@@ -708,22 +716,22 @@ export class ChartRenderer {
    */
   addClickAnimation(chart, activeElement, chartType) {
     const canvas = chart.canvas;
-    
+
     // Simple pulse animation for the entire canvas
     canvas.style.transform = 'scale(0.99)';
     canvas.style.transition = 'transform 0.1s ease-out';
-    
+
     setTimeout(() => {
       canvas.style.transform = 'scale(1)';
       canvas.style.transition = 'transform 0.15s ease-out';
     }, 100);
-    
+
     // Simplified chart-specific animations
     if (chartType === 'pie') {
       this.addSimplePieClickAnimation(chart, activeElement);
     }
   }
-  
+
   /**
    * Add simplified pie chart click animation
    * @param {Chart} chart - Chart.js instance
@@ -732,17 +740,17 @@ export class ChartRenderer {
   addSimplePieClickAnimation(chart, activeElement) {
     const dataset = chart.data.datasets[activeElement.datasetIndex];
     const originalOffset = dataset.hoverOffset || 0;
-    
+
     // Brief segment separation
     dataset.hoverOffset = 10;
     chart.update('active');
-    
+
     setTimeout(() => {
       dataset.hoverOffset = originalOffset;
       chart.update('active');
     }, 200);
   }
-  
+
   /**
    * Add simplified canvas hover animation
    * @param {HTMLCanvasElement} canvas - Canvas element
@@ -752,7 +760,7 @@ export class ChartRenderer {
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return; // Skip animations for users who prefer reduced motion
     }
-    
+
     if (isHovering) {
       canvas.style.opacity = '0.95';
       canvas.style.transition = 'opacity 0.2s ease-out';
@@ -761,7 +769,7 @@ export class ChartRenderer {
       canvas.style.transition = 'opacity 0.2s ease-out';
     }
   }
-  
+
   /**
    * Add haptic feedback for mobile devices
    */
@@ -770,7 +778,7 @@ export class ChartRenderer {
       navigator.vibrate(50); // Short vibration
     }
   }
-  
+
   /**
    * Provide visual feedback when a chart segment is clicked (legacy method, enhanced)
    * @param {Chart} chart - Chart.js instance
@@ -779,15 +787,15 @@ export class ChartRenderer {
    */
   highlightSegment(chart, activeElement, chartType) {
     const originalBorderWidth = chart.data.datasets[activeElement.datasetIndex].borderWidth;
-    
+
     // Temporarily increase border width for visual feedback
-    chart.data.datasets[activeElement.datasetIndex].borderWidth = 
-      Array.isArray(originalBorderWidth) 
+    chart.data.datasets[activeElement.datasetIndex].borderWidth =
+      Array.isArray(originalBorderWidth)
         ? originalBorderWidth.map((width, i) => i === activeElement.index ? width + 2 : width)
         : originalBorderWidth + 2;
-    
+
     chart.update('none');
-    
+
     // Reset after a short delay
     setTimeout(() => {
       chart.data.datasets[activeElement.datasetIndex].borderWidth = originalBorderWidth;
@@ -801,38 +809,38 @@ export class ChartRenderer {
    */
   addKeyboardNavigation(chart) {
     const canvas = chart.canvas;
-    
+
     // Guard against null canvas (e.g., in test environments)
     if (!canvas) return;
-    
+
     // Make canvas focusable and add accessibility attributes
     canvas.setAttribute('tabindex', '0');
     canvas.setAttribute('role', 'img');
-    
+
     // Generate comprehensive aria-label based on chart data
     const ariaLabel = this.generateChartAriaLabel(chart);
     canvas.setAttribute('aria-label', ariaLabel);
-    
+
     // Add detailed description for screen readers
     const description = this.generateChartDescription(chart);
     const descriptionId = `chart-desc-${Date.now()}`;
-    
+
     // Create description element
     const descElement = document.createElement('div');
     descElement.id = descriptionId;
     descElement.className = 'sr-only';
     descElement.textContent = description;
     document.body.appendChild(descElement);
-    
+
     canvas.setAttribute('aria-describedby', descriptionId);
-    
+
     let currentIndex = 0;
     const maxIndex = chart.data.labels.length - 1;
-    
+
     // Enhanced keyboard event handling
     const keydownHandler = (event) => {
       let handled = false;
-      
+
       switch (event.key) {
         case 'ArrowRight':
         case 'ArrowDown':
@@ -841,7 +849,7 @@ export class ChartRenderer {
           this.focusSegment(chart, currentIndex);
           handled = true;
           break;
-          
+
         case 'ArrowLeft':
         case 'ArrowUp':
           event.preventDefault();
@@ -849,21 +857,21 @@ export class ChartRenderer {
           this.focusSegment(chart, currentIndex);
           handled = true;
           break;
-          
+
         case 'Home':
           event.preventDefault();
           currentIndex = 0;
           this.focusSegment(chart, currentIndex);
           handled = true;
           break;
-          
+
         case 'End':
           event.preventDefault();
           currentIndex = maxIndex;
           this.focusSegment(chart, currentIndex);
           handled = true;
           break;
-          
+
         case 'Enter':
         case ' ':
           event.preventDefault();
@@ -875,42 +883,42 @@ export class ChartRenderer {
           this.handleChartClick(event, activeElements, chart, chart.config.type);
           handled = true;
           break;
-          
+
         case 'Escape':
           event.preventDefault();
           canvas.blur();
           handled = true;
           break;
       }
-      
+
       if (handled) {
         // Announce keyboard navigation instructions
         this.announceKeyboardInstructions(chart, currentIndex);
       }
     };
-    
+
     canvas.addEventListener('keydown', keydownHandler);
-    
+
     // Enhanced focus/blur handlers
     const focusHandler = () => {
       canvas.style.outline = '3px solid var(--color-primary)';
-      canvas.style.outlineOffset = '2px';
+      canvas.style.outlineOffset = '0px'; // Changed from 2px to 0px to prevent overlap with text
       this.focusSegment(chart, currentIndex);
-      
+
       // Announce chart entry
       this.announceChartEntry(chart);
     };
-    
+
     const blurHandler = () => {
       canvas.style.outline = 'none';
       canvas.style.outlineOffset = '0';
       chart.setActiveElements([]);
       chart.update('none');
     };
-    
+
     canvas.addEventListener('focus', focusHandler);
     canvas.addEventListener('blur', blurHandler);
-    
+
     // Store event handlers for cleanup
     canvas._keyboardHandlers = {
       keydown: keydownHandler,
@@ -930,10 +938,10 @@ export class ChartRenderer {
       datasetIndex: 0,
       index: index
     }];
-    
+
     chart.setActiveElements(activeElements);
     chart.update('none');
-    
+
     // Announce to screen readers with enhanced information
     const label = chart.data.labels[index];
     const value = chart.data.datasets[0].data[index];
@@ -941,20 +949,20 @@ export class ChartRenderer {
       style: 'currency',
       currency: 'USD'
     }).format(value);
-    
+
     let announcement = `${label}: ${formattedValue}`;
-    
+
     // Add percentage for pie charts
     if (chart.config.type === 'pie') {
       const total = chart.data.datasets[0].data.reduce((sum, val) => sum + val, 0);
       const percentage = ((value / total) * 100).toFixed(1);
       announcement += ` (${percentage}% of total)`;
     }
-    
+
     // Add position information
     const totalItems = chart.data.labels.length;
     announcement += `. Item ${index + 1} of ${totalItems}`;
-    
+
     // Create temporary element for screen reader announcement
     this.announceToScreenReader(announcement, 'polite');
   }
@@ -968,15 +976,15 @@ export class ChartRenderer {
     const chartType = chart.config.type;
     const datasetCount = chart.data.datasets.length;
     const itemCount = chart.data.labels.length;
-    
+
     let label = `${chartType} chart with ${itemCount} data point${itemCount !== 1 ? 's' : ''}`;
-    
+
     if (datasetCount > 1) {
       label += ` across ${datasetCount} datasets`;
     }
-    
+
     label += '. Use arrow keys to navigate, Enter to select, Escape to exit.';
-    
+
     return label;
   }
 
@@ -989,29 +997,29 @@ export class ChartRenderer {
     const chartType = chart.config.type;
     const labels = chart.data.labels;
     const dataset = chart.data.datasets[0];
-    
+
     if (!dataset || !labels) return 'Chart data unavailable';
-    
+
     let description = `This ${chartType} chart shows `;
-    
+
     // Add summary based on chart type
     if (chartType === 'pie') {
       const total = dataset.data.reduce((sum, val) => sum + val, 0);
       description += `spending breakdown across ${labels.length} categories. `;
-      
+
       // Add top categories
       const sortedData = labels.map((label, index) => ({
         label,
         value: dataset.data[index],
         percentage: ((dataset.data[index] / total) * 100).toFixed(1)
       })).sort((a, b) => b.value - a.value);
-      
+
       description += `Top categories: `;
       sortedData.slice(0, 3).forEach((item, index) => {
         if (index > 0) description += ', ';
         description += `${item.label} at ${item.percentage}%`;
       });
-      
+
     } else if (chartType === 'bar') {
       description += `comparison across ${labels.length} categories. `;
       const maxValue = Math.max(...dataset.data);
@@ -1020,7 +1028,7 @@ export class ChartRenderer {
         style: 'currency',
         currency: 'USD'
       }).format(maxValue)}.`;
-      
+
     } else if (chartType === 'line') {
       description += `trends over ${labels.length} time periods. `;
       const firstValue = dataset.data[0];
@@ -1028,7 +1036,7 @@ export class ChartRenderer {
       const trend = lastValue > firstValue ? 'increasing' : lastValue < firstValue ? 'decreasing' : 'stable';
       description += `Overall trend is ${trend}.`;
     }
-    
+
     return description;
   }
 
@@ -1060,7 +1068,7 @@ export class ChartRenderer {
   announceToScreenReader(text, priority = 'polite') {
     const liveRegionId = `chart-live-region-${priority}`;
     let liveRegion = document.getElementById(liveRegionId);
-    
+
     if (!liveRegion) {
       liveRegion = document.createElement('div');
       liveRegion.id = liveRegionId;
@@ -1069,7 +1077,7 @@ export class ChartRenderer {
       liveRegion.className = 'sr-only';
       document.body.appendChild(liveRegion);
     }
-    
+
     // Clear and set new text
     liveRegion.textContent = '';
     setTimeout(() => {
@@ -1085,24 +1093,24 @@ export class ChartRenderer {
   addChartTitle(canvasElement, title) {
     // Skip if no title provided or canvas has no parent
     if (!title || !canvasElement.parentElement) return;
-    
+
     // Check if title already exists
     const existingTitle = canvasElement.parentElement.querySelector('.chart-title');
     if (existingTitle) {
       existingTitle.textContent = title;
       return;
     }
-    
+
     const titleElement = document.createElement('h3');
     titleElement.className = 'chart-title';
     titleElement.textContent = title;
     titleElement.setAttribute('id', `chart-title-${canvasElement.id}`);
     titleElement.style.marginTop = '0';
     titleElement.style.marginBottom = 'var(--spacing-md)';
-    
+
     // Insert title before canvas
     canvasElement.parentElement.insertBefore(titleElement, canvasElement);
-    
+
     // Update canvas aria-labelledby
     canvasElement.setAttribute('aria-labelledby', titleElement.id);
   }
@@ -1114,23 +1122,23 @@ export class ChartRenderer {
    */
   addLoadingAnimation(container, message = 'Loading chart...') {
     if (!container) return;
-    
+
     // Add loading class for CSS animations
     container.classList.add('loading');
-    
+
     return null; // Simplified - no overlay needed
   }
-  
+
   /**
    * Remove loading animation from chart container
    * @param {HTMLElement} container - Chart container element
    */
   removeLoadingAnimation(container) {
     if (!container) return;
-    
+
     container.classList.remove('loading');
   }
-  
+
   /**
    * Add simplified entrance animation to newly created charts
    * @param {Chart} chart - Chart.js instance
@@ -1138,10 +1146,10 @@ export class ChartRenderer {
    */
   addEntranceAnimation(chart, chartType) {
     if (!chart.canvas) return;
-    
+
     const canvas = chart.canvas;
     const container = canvas.parentElement;
-    
+
     // Set chart type data attribute for CSS animations
     if (container) {
       container.setAttribute('data-chart-type', chartType);
@@ -1157,7 +1165,7 @@ export class ChartRenderer {
       this.destroyChart(chart);
     }
     this.activeCharts.clear();
-    
+
     // Clean up any remaining ARIA live regions
     const liveRegions = document.querySelectorAll('[id^="chart-live-region"]');
     liveRegions.forEach(region => {

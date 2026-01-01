@@ -5,8 +5,6 @@
  * browser support checks, and data validation.
  */
 
-import { COLORS, SPACING } from './constants.js';
-
 /**
  * Get current week time period
  */
@@ -15,11 +13,11 @@ export function getCurrentWeekPeriod() {
     const startOfWeek = new Date(now);
     startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
     startOfWeek.setHours(0, 0, 0, 0);
-    
+
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday
     endOfWeek.setHours(23, 59, 59, 999);
-    
+
     return {
         type: 'weekly',
         startDate: startOfWeek,
@@ -36,7 +34,7 @@ export function getCurrentMonthPeriod() {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     endOfMonth.setHours(23, 59, 59, 999);
-    
+
     return {
         type: 'monthly',
         startDate: startOfMonth,
@@ -54,7 +52,7 @@ export function getCurrentQuarterPeriod() {
     const startOfQuarter = new Date(now.getFullYear(), quarter * 3, 1);
     const endOfQuarter = new Date(now.getFullYear(), quarter * 3 + 3, 0);
     endOfQuarter.setHours(23, 59, 59, 999);
-    
+
     return {
         type: 'quarterly',
         startDate: startOfQuarter,
@@ -71,7 +69,7 @@ export function getCurrentYearPeriod() {
     const startOfYear = new Date(now.getFullYear(), 0, 1);
     const endOfYear = new Date(now.getFullYear(), 11, 31);
     endOfYear.setHours(23, 59, 59, 999);
-    
+
     return {
         type: 'yearly',
         startDate: startOfYear,
@@ -100,7 +98,7 @@ export function checkBrowserSupport() {
         'ES6 Classes': () => {
             try {
                 // Test ES6 class support without eval
-                return typeof class {} === 'function';
+                return typeof class { } === 'function';
             } catch (e) {
                 return false;
             }
@@ -217,7 +215,7 @@ export function sanitizeAnalyticsData(data) {
         sanitized.categoryBreakdown.categories = [];
     }
 
-    sanitized.categoryBreakdown.categories = sanitized.categoryBreakdown.categories.filter(cat => 
+    sanitized.categoryBreakdown.categories = sanitized.categoryBreakdown.categories.filter(cat =>
         cat && typeof cat.amount === 'number' && !isNaN(cat.amount)
     );
 
@@ -343,7 +341,7 @@ export function validateAndCleanTransactions(transactions) {
 export function generateMonthlyTrendData(transactions, topCategories) {
     const months = [];
     const categoryData = {};
-    
+
     // Initialize category data
     topCategories.forEach(cat => {
         categoryData[cat.name] = [];
@@ -364,12 +362,12 @@ export function generateMonthlyTrendData(transactions, topCategories) {
             const monthlySpending = transactions
                 .filter(t => {
                     const tDate = new Date(t.date || t.timestamp);
-                    return tDate >= monthStart && tDate <= monthEnd && 
-                           (t.category || 'Uncategorized') === category.name &&
-                           t.type === 'expense';
+                    return tDate >= monthStart && tDate <= monthEnd &&
+                        (t.category || 'Uncategorized') === category.name &&
+                        t.type === 'expense';
                 })
                 .reduce((sum, t) => sum + (t.amount || 0), 0);
-            
+
             categoryData[category.name].push(monthlySpending);
         });
     }

@@ -13,54 +13,58 @@ import { generateMonthlyTrendData } from './reports-utils.js';
 /**
  * Create tooltip configuration for category charts
  */
-function createCategoryTooltipConfig() {
+/**
+ * Create tooltip configuration for category charts
+ */
+function createCategoryTooltipConfig(detailsContainer) {
     return {
         enabled: false, // Disable default tooltip
-        external: function(context) {
+        external: function (context) {
             const tooltip = context.tooltip;
-            const chartElement = context.chart.canvas;
-            
-            // Get or create tooltip element
-            let tooltipEl = document.getElementById('category-chart-tooltip');
-            if (!tooltipEl) {
-                tooltipEl = document.createElement('div');
-                tooltipEl.id = 'category-chart-tooltip';
-                tooltipEl.style.cssText = `
-                    position: absolute;
-                    background: rgba(0, 0, 0, 0.9);
-                    color: white;
-                    border: 1px solid hsl(250, 84%, 60%);
-                    border-radius: 8px;
-                    padding: 12px;
-                    pointer-events: none;
-                    z-index: 1000;
-                    font-size: 13px;
-                    display: none;
-                `;
-                document.body.appendChild(tooltipEl);
-            }
-            
+
+            if (!detailsContainer) return;
+
+            // Handle opacity = 0 (tooltip hidden/mouseout)
             if (tooltip.opacity === 0) {
-                tooltipEl.style.display = 'none';
+                const actionText = window.innerWidth < 768 ? 'Tap' : 'Hover';
+                detailsContainer.innerHTML = `
+                    <div style="text-align: center; color: var(--color-text-muted); font-size: 0.9em;">
+                        ${actionText} on a category slice to see details
+                    </div>
+                `;
                 return;
             }
-            
-            // Position tooltip below the chart
-            const chartRect = chartElement.getBoundingClientRect();
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            
-            tooltipEl.style.left = chartRect.left + (chartRect.width / 2) - 100 + 'px';
-            tooltipEl.style.top = chartRect.bottom + scrollTop + 10 + 'px';
-            
-            // Update tooltip content
+
+            // Show details in fixed container
             if (tooltip.body && tooltip.body.length > 0) {
-                const bodyLines = tooltip.body.map(b => b.lines);
-                tooltipEl.innerHTML = bodyLines[0][0];
-                tooltipEl.style.display = 'block';
+                // Parse the label and value from the data
+                const dataPoint = context.chart.data.datasets[tooltip.dataPoints[0].datasetIndex];
+                const index = tooltip.dataPoints[0].dataIndex;
+                const value = dataPoint.data[index];
+                const label = context.chart.data.labels[index];
+                const total = dataPoint.data.reduce((sum, val) => sum + val, 0);
+                const percentage = ((value / total) * 100).toFixed(1);
+
+                const formattedValue = new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                }).format(value);
+
+                // Create structured HTML for the details container
+                detailsContainer.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight: 600; color: var(--color-text-main);">${label}</span>
+                            <span style="font-weight: bold; color: var(--color-primary);">${formattedValue}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; font-size: 0.85em; color: var(--color-text-muted);">
+                            <span>Percentage</span>
+                            <span>${percentage}%</span>
+                        </div>
+                    `;
             }
         },
         callbacks: {
-            label: function(context) {
+            label: function (context) {
                 const label = context.label || '';
                 const value = context.parsed;
                 const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
@@ -69,7 +73,7 @@ function createCategoryTooltipConfig() {
                     style: 'currency',
                     currency: 'USD'
                 }).format(value);
-                
+
                 return `${label}: ${formattedValue} (${percentage}%)`;
             }
         }
@@ -125,12 +129,33 @@ export async function createCategoryBreakdownChart(chartRenderer, currentData, c
 
     section.appendChild(chartDiv);
 
+    // Mobile details container (fixed text below chart)
+    const detailsContainer = document.createElement('div');
+    detailsContainer.className = 'chart-mobile-details';
+    detailsContainer.style.background = 'var(--color-background)';
+    detailsContainer.style.borderRadius = 'var(--radius-md)';
+    detailsContainer.style.padding = SPACING.MD;
+    detailsContainer.style.marginTop = SPACING.SM;
+    detailsContainer.style.border = '1px solid var(--color-border)';
+    detailsContainer.style.display = 'block'; // Always visible
+    detailsContainer.style.minHeight = '60px'; // Prevent jumping
+
+    // Add default instruction text
+    const initialAction = window.innerWidth < 768 ? 'Tap' : 'Hover';
+    detailsContainer.innerHTML = `
+        <div style="text-align: center; color: var(--color-text-muted); font-size: 0.9em;">
+            ${initialAction} on a category slice to see details
+        </div>
+    `;
+
+    section.appendChild(detailsContainer);
+
     // Prepare chart data
     const categoryData = currentData.categoryBreakdown;
-    
+
     // Get consistent colors for all categories
     const categoryColors = getCategoryColors(categoryData.categories, categoryColorMap);
-    
+
     const chartData = {
         labels: categoryData.categories.map(cat => cat.name),
         datasets: [{
@@ -149,7 +174,7 @@ export async function createCategoryBreakdownChart(chartRenderer, currentData, c
             legend: {
                 position: window.innerWidth < 768 ? 'bottom' : 'right'
             },
-            tooltip: createCategoryTooltipConfig()
+            tooltip: createCategoryTooltipConfig(detailsContainer)
         }
     });
 
@@ -227,14 +252,14 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
             backgroundColor: [
                 'rgba(34, 197, 94, 0.8)',
                 'rgba(239, 68, 68, 0.8)',
-                incomeExpenseData.netBalance >= 0 
+                incomeExpenseData.netBalance >= 0
                     ? 'rgba(34, 197, 94, 0.6)'
                     : 'rgba(239, 68, 68, 0.6)'
             ],
             borderColor: [
                 'rgba(34, 197, 94, 1)',
                 'rgba(239, 68, 68, 1)',
-                incomeExpenseData.netBalance >= 0 
+                incomeExpenseData.netBalance >= 0
                     ? 'rgba(34, 197, 94, 1)'
                     : 'rgba(239, 68, 68, 1)'
             ],
@@ -266,7 +291,7 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
 export async function createCategoryTrendsChart(chartRenderer, currentData, categoryColorMap) {
     // Get historical data for trends
     const allTransactions = StorageService.getAll();
-    
+
     // Check if we have enough historical data (at least 3 months)
     const oldestTransaction = allTransactions.reduce((oldest, transaction) => {
         const transactionDate = new Date(transaction.date || transaction.timestamp);
@@ -274,7 +299,7 @@ export async function createCategoryTrendsChart(chartRenderer, currentData, cate
     }, new Date());
 
     const monthsOfData = Math.floor((new Date() - oldestTransaction) / (1000 * 60 * 60 * 24 * 30));
-    
+
     if (monthsOfData < 3) {
         return null; // Not enough data for trends
     }
@@ -466,7 +491,7 @@ export function showCategoryDetails(categoryName, amount, percentage, currentDat
     const detailsSection = document.getElementById('category-details-section');
     if (!detailsSection) return;
 
-    const categoryTransactions = currentData.transactions.filter(t => 
+    const categoryTransactions = currentData.transactions.filter(t =>
         (t.category || 'Uncategorized') === categoryName && t.type === 'expense'
     );
 
@@ -660,8 +685,9 @@ function createPredictionsSection(currentData) {
     predictionsGrid.style.gap = SPACING.MD;
 
     const predictions = currentData.predictions?.predictions || [];
-    
-    predictions.forEach(prediction => {        const predictionCard = document.createElement('div');
+
+    predictions.forEach(prediction => {
+        const predictionCard = document.createElement('div');
         predictionCard.style.background = 'rgba(59, 130, 246, 0.05)';
         predictionCard.style.border = '1px solid rgba(59, 130, 246, 0.2)';
         predictionCard.style.borderRadius = 'var(--radius-md)';
@@ -750,7 +776,7 @@ function createToggleButton(text, active = false) {
     button.style.cursor = 'pointer';
     button.style.fontSize = '0.875rem';
     button.style.transition = 'all 0.2s ease';
-    
+
     if (active) {
         button.classList.add('active');
     }
@@ -771,7 +797,7 @@ export function getCategoryColors(categories, categoryColorMap) {
     if (categoryColorMap.size === 0 || categoryColorMap.size < categories.length) {
         const totalColors = Math.max(categories.length, 12);
         const colors = getChartColors(totalColors);
-        
+
         categories.forEach((category, index) => {
             if (!categoryColorMap.has(category.name)) {
                 const colorIndex = index % colors.length;
@@ -779,7 +805,7 @@ export function getCategoryColors(categories, categoryColorMap) {
             }
         });
     }
-    
+
     return categories.map(category => categoryColorMap.get(category.name));
 }
 
