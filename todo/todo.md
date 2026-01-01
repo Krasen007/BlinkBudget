@@ -6,6 +6,15 @@ DO NOT IMPLEMENT: Client-side session timeout (30 minutes of inactivity; monitor
 DO NOT IMPLEMENT: Local data encryption for sensitive information in localStorage (encryptData/decryptData)
 DO NOT IMPLEMENT: Mask technical error messages from Firestore operations
 DO NOT IMPLEMENT: Implement an audit logging mechanism for sensitive user actions (account changes, data export)
+DO NOT IMPLEMENT: Add password reset option in the login if user forgets it
+DO NOT IMPLEMENT: make security.md following all the security best practices 
+DO NOT IMPLEMENT: add possibility to import transactions from a csv file
+DO NOT IMPLEMENT: Forecast: Estimate future income and expenses based on your past spending, Preview how your account balances will change over time, Avoid low account balances, overdraft fees, and going over your credit card limit.
+DO NOT IMPLEMENT: See all your investments at one place, View allocation across asset classes, sectors and countries, Monitor investment performance in the near and long term.
+DO NOT IMPLEMENT: Plan for long term goals like retirement, buying a house, kid's education, Preview a long term financial forecast to see if you can reach your goals.
+DO NOT IMPLEMENT: Insights: Top Movers 1 Jan 2026 vs Dec 2025
+DO NOT IMPLEMENT: Insights: Timeline Jan vs Dec 2025
+***
 [x] fix wrong amount display -$-6.00
 [x] add refund option
 [x] add hover effect when the mouse is going over the items in the dashboard
@@ -21,18 +30,17 @@ DO NOT IMPLEMENT: Implement an audit logging mechanism for sensitive user action
 [x] Simplify date handling - Remove duplicate date input (keep only top)
 [x] Adjust spacing - tighter compact layout
 [x] Reorder elements - Different sequence (e.g., Amount first, then Type at the bottom)
-[ ] Begin work on sorting and filtering by month and year, seeing old transactions and being able to filter them
-[ ] Implement category-based filtering
+[x] Begin work on sorting and filtering by month and year, seeing old transactions and being able to filter them
+[x] Implement category-based filtering
 [x] begin work on PWA
-[ ] make security.md following all the security best practices 
 [x] when editing transactions the original selected category should be shown in the first position
 [x] when adding new transaction the selected account should be the account when adding the transaction
 [x] when editing a trasaction the selected categorie should show at the first position in the list to make it easier to select it
 [x] change the name of the date format to remove the iso / us etc. just leave the format.
 [x] on mobile, the accounts in the settings view, the name and type should be shown on a single row to save space
-[ ] add possibility to import transactions from a csv file
 [x] when oppening the PWA app, the text blinking your transctions should is good but in reality the app should load the transactions from the local storage and after that it should sync the latest transactions from the server 
 [x] on mobile when scrolling the transactions a hover effect should removed
 [x] change the $ in the transactions to €
 [x] add install PWA button in the settings
 [x] add refresh button in the settings
+[ ] add option to double tap on a transaction to split it in half

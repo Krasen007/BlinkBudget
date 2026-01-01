@@ -184,9 +184,13 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
         okBtn.style.fontWeight = '600';
         okBtn.style.borderRadius = 'var(--radius-md)';
 
-        // Hide OK button on mobile devices
+        // Adjust OK button for mobile devices
         if (isMobile) {
-            okBtn.style.display = 'none';
+            okBtn.style.marginTop = '0';
+            okBtn.style.padding = 'var(--spacing-sm)';
+            okBtn.style.fontSize = FONT_SIZES.BASE;
+            okBtn.style.height = 'auto';
+            okBtn.style.minHeight = '30px'; // Compact but clickable
         }
 
         okBtn.addEventListener('click', () => {
@@ -244,6 +248,14 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
             deleteBtn.style.color = COLORS.ERROR;
             deleteBtn.style.border = `1px solid ${COLORS.ERROR}`;
             deleteBtn.style.transition = 'all 0.2s ease';
+
+            if (isMobile) {
+                deleteBtn.style.marginTop = '0';
+                deleteBtn.style.padding = 'var(--spacing-sm)';
+                deleteBtn.style.fontSize = FONT_SIZES.BASE;
+                deleteBtn.style.height = 'auto';
+                deleteBtn.style.minHeight = '30px'; // Compact but clickable
+            }
 
             // Add hover effects
             deleteBtn.addEventListener('mouseenter', () => {

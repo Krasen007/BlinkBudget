@@ -167,4 +167,29 @@ describe('TransactionForm', () => {
         expect(chipLabels).toContain('Main Account');
         expect(chipLabels).not.toContain('Savings');
     });
+
+    it('should show OK button on mobile when editing an existing transaction', () => {
+        const mockSubmit = vi.fn();
+        const initialValues = {
+            id: '123',
+            amount: 50,
+            type: 'expense',
+            category: 'Food',
+            accountId: 'main',
+            timestamp: Date.now()
+        };
+
+        const form = TransactionForm({
+            onSubmit: mockSubmit,
+            initialValues
+        });
+        document.body.appendChild(form);
+
+        // Find OK button
+        const buttons = form.querySelectorAll('button');
+        const okButton = Array.from(buttons).find(btn => btn.textContent === 'OK');
+
+        expect(okButton).toBeTruthy();
+        expect(okButton.style.display).not.toBe('none');
+    });
 });
