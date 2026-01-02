@@ -20,11 +20,32 @@ export const SyncService = {
         AuthService.init(async (user) => {
             if (user) {
                 await this.pullFromCloud(user.uid);
-                this.startRealtimeSync(user.uid);
+                // Only start real-time sync if the page is visible
+                if (!document.hidden) {
+                    this.startRealtimeSync(user.uid);
+                }
             } else {
                 this.stopSync();
             }
         });
+
+        // handle visibility change to pause/resume sync
+        document.addEventListener('visibilitychange', () => {
+            this.handleVisibilityChange();
+        });
+    },
+
+    handleVisibilityChange() {
+        if (document.hidden) {
+            console.log("[Sync] App hidden, pausing real-time sync...");
+            this.stopSync();
+        } else {
+            const userId = AuthService.getUserId();
+            if (userId) {
+                console.log("[Sync] App visible, resuming real-time sync...");
+                this.startRealtimeSync(userId);
+            }
+        }
     },
 
     stopSync() {

@@ -29,7 +29,7 @@ export const DashboardView = () => {
     const updateTitle = (userObj) => {
         const u = userObj || AuthService.user;
         const uName = u ? (u.displayName || u.email) : '';
-    title.textContent = `Dashboard 1.10 ${uName ? (u.displayName || u.email) : ''}`;
+        title.textContent = `Dashboard 1.11 ${uName ? (u.displayName || u.email) : ''}`;
     };
     updateTitle();
     title.style.margin = '0';
@@ -245,7 +245,7 @@ export const DashboardView = () => {
         if (!statsContainer) return;
         const isMobileNow = window.innerWidth < BREAKPOINTS.MOBILE;
         statsContainer.style.gridTemplateColumns = isMobileNow ? '1fr 1fr' : 'repeat(auto-fit, minmax(250px, 1fr))';
-        
+
         // Update charts button visibility
         updateChartsButtonVisibility();
     }, TIMING.DEBOUNCE_RESIZE);
