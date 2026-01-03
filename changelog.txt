@@ -1,7 +1,8 @@
-**Key Updates and Improvements:**
+# Changelog - BlinkBudget
 
-*   **Reporting & Analytics:** Significant progress was made on the reporting features, including the implementation of advanced analytics, insights generation, chart rendering, and the Reports View.
-*   **User Experience & Design:** Visual design and styling were implemented, alongside accessibility improvements, responsive design, and corrected UI elements like tooltips and navigation.      
-*   **Performance:** Optimizations were introduced through lazy loading, code splitting, and refactoring.
-*   **Bug Fixes:** Several issues were addressed, including CSS problems, overlap issues, and general bug fixes.
-*   **Project Foundation:** Initial setup for Chart.js integration and core engine functionalities were established.
+## Highlights
+- **New Feature: Split Transactions** - You can now split a transaction into two by using a long-press on the dashboard.
+- **UI Refinement** - Major overhaul of the Reports UI for better clarity. Optimized charts, tooltips, and mobile button layouts for a smoother experience.
+- **Performance Boost** - Optimized PWA background behavior and reduced transaction handling delays for a more responsive feel.
+- **Architecture Cleanup** - Improved codebase maintainability by separating storage logic, decomposing the analytics engine, and optimizing routing.
+- **General Polish** - Fixed various CSS issues, resolved test failures, and performed a final codebase audit for production readiness.

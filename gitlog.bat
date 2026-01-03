@@ -1,0 +1,1 @@
+git log v1.10..HEAD --oneline > changelog.txt
