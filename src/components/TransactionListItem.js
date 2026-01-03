@@ -24,9 +24,9 @@ export const TransactionListItem = ({ transaction, currentFilter, accounts, shou
     });
 
 
-    // Split transaction on double-click
-    let clickTimer = null;
-    let clickCount = 0;
+    // Long press to split, instant click to edit
+    let pressTimer = null;
+    let longPressed = false;
 
     const handleSplitTransaction = () => {
         const originalAmount = transaction.amount;
@@ -67,21 +67,40 @@ export const TransactionListItem = ({ transaction, currentFilter, accounts, shou
         }));
     };
 
-    item.addEventListener('click', (e) => {
-        clickCount++;
-
-        if (clickCount === 1) {
-            clickTimer = setTimeout(() => {
-                // Single click - navigate to edit
-                Router.navigate('edit-expense', { id: transaction.id });
-                clickCount = 0;
-            }, 180); // Reduced delay for faster navigation while still allowing double-click
-        } else if (clickCount === 2) {
-            // Double click - split transaction
-            clearTimeout(clickTimer);
-            clickCount = 0;
-            e.stopPropagation();
+    const startPress = () => {
+        longPressed = false;
+        pressTimer = setTimeout(() => {
+            longPressed = true;
+            // Provide haptic feedback for the long press
+            if (window.mobileUtils && window.mobileUtils.supportsHaptic()) {
+                window.mobileUtils.hapticFeedback([25]); // Strong vibration
+            }
             handleSplitTransaction();
+        }, 500); // 500ms for long press
+    };
+
+    const cancelPress = () => {
+        clearTimeout(pressTimer);
+    };
+
+    // Bind events for long press detection
+    item.addEventListener('mousedown', startPress);
+    item.addEventListener('touchstart', startPress, { passive: true });
+
+    item.addEventListener('mouseup', cancelPress);
+    item.addEventListener('mouseleave', cancelPress);
+    item.addEventListener('touchend', cancelPress);
+    item.addEventListener('touchcancel', cancelPress);
+
+    // Prevent context menu during long press
+    item.addEventListener('contextmenu', (e) => {
+        if (longPressed) e.preventDefault();
+    });
+
+    // Instant click for navigation
+    item.addEventListener('click', (e) => {
+        if (!longPressed) {
+            Router.navigate('edit-expense', { id: transaction.id });
         }
     });
 
