@@ -46,11 +46,13 @@ import {
     createCategoryBreakdownChart,
     createIncomeExpenseChart,
     createCategoryTrendsChart,
-    createCategorySelector,
-    showCategoryDetails,
-    createInsightsSection,
     getCategoryColors
 } from '../utils/reports-charts.js';
+import { CategorySelector } from '../components/CategorySelector.js';
+import { showCategoryDetails } from '../components/CategoryDetails.js';
+import { InsightsSection } from '../components/InsightsSection.js';
+import { ReportsHeader } from '../components/ReportsHeader.js';
+import { FloatingBackButton } from '../components/FloatingBackButton.js';
 
 export const ReportsView = () => {
     const container = document.createElement('div');
@@ -59,8 +61,6 @@ export const ReportsView = () => {
     container.style.maxWidth = DIMENSIONS.CONTAINER_MAX_WIDTH;
     container.style.display = 'flex';
 
-    // Store scroll handler reference for proper cleanup
-    let scrollHandler = null;
     container.style.flexDirection = 'column';
     container.style.padding = `0 ${SPACING.MD}`;
 
@@ -131,12 +131,12 @@ export const ReportsView = () => {
     let categoryColorMap = new Map();
 
     // Create header
-    const header = createHeader();
+    const header = ReportsHeader();
     container.appendChild(header);
 
     // Floating back button for mobile
-    const floatingBackButton = createFloatingBackButton();
-    container.appendChild(floatingBackButton);
+    const floatingBackButtonObj = FloatingBackButton();
+    container.appendChild(floatingBackButtonObj.element);
 
     // Time period selector
     timePeriodSelectorComponent = TimePeriodSelector({
@@ -186,130 +186,6 @@ export const ReportsView = () => {
         console.log(`[ReportsView] Time period updated from ${previousPeriod.label || 'Unknown'} to ${newTimePeriod.label || 'Unknown'}`);
     }
 
-    /**
-     * Create header with title and navigation
-     */
-    function createHeader() {
-        const headerEl = document.createElement('header');
-        headerEl.className = 'reports-header';
-        headerEl.setAttribute('role', 'banner');
-        headerEl.style.display = 'flex';
-        headerEl.style.justifyContent = 'space-between';
-        headerEl.style.alignItems = 'center';
-        headerEl.style.marginBottom = SPACING.MD;
-        headerEl.style.flexShrink = '0';
-        headerEl.style.position = 'sticky';
-        headerEl.style.top = '0';
-        headerEl.style.background = COLORS.BACKGROUND;
-        headerEl.style.zIndex = '10';
-        headerEl.style.padding = `${SPACING.SM} 0`;
-
-        const leftSide = document.createElement('div');
-        leftSide.style.display = 'flex';
-        leftSide.style.alignItems = 'center';
-        leftSide.style.gap = SPACING.MD;
-
-        const backButton = Button({
-            text: '← Back',
-            onClick: () => Router.navigate('dashboard'),
-            variant: 'ghost'
-        });
-        backButton.style.padding = `${SPACING.XS} ${SPACING.SM}`;
-        backButton.style.fontSize = '0.875rem';
-        backButton.style.flexShrink = '0';
-        backButton.title = 'Back to Dashboard (Esc)';
-
-        const title = document.createElement('h1');
-        title.textContent = 'Reports & Insights';
-        title.style.margin = '0';
-        title.style.color = COLORS.TEXT_MAIN;
-        title.style.fontSize = window.innerWidth < BREAKPOINTS.MOBILE ? '1.25rem' : '1.5rem';
-        title.id = 'reports-title';
-
-        leftSide.appendChild(backButton);
-        leftSide.appendChild(title);
-
-        const rightSide = document.createElement('div');
-        rightSide.style.display = 'flex';
-        rightSide.style.alignItems = 'center';
-        rightSide.style.gap = SPACING.SM;
-
-        if (window.innerWidth >= BREAKPOINTS.MOBILE) {
-            const shortcutsInfo = document.createElement('div');
-            shortcutsInfo.className = 'keyboard-shortcuts-info';
-            shortcutsInfo.style.fontSize = '0.75rem';
-            shortcutsInfo.style.color = COLORS.TEXT_MUTED;
-            shortcutsInfo.style.textAlign = 'right';
-            shortcutsInfo.style.lineHeight = '1.2';
-            shortcutsInfo.innerHTML = `
-                <div>Press <kbd style="background: ${COLORS.SURFACE}; padding: 2px 4px; border-radius: 3px; font-size: 0.7rem;">Esc</kbd> to go back</div>
-                <div>Press <kbd style="background: ${COLORS.SURFACE}; padding: 2px 4px; border-radius: 3px; font-size: 0.7rem;">Ctrl+R</kbd> to refresh</div>
-            `;
-            rightSide.appendChild(shortcutsInfo);
-        }
-
-        headerEl.appendChild(leftSide);
-        headerEl.appendChild(rightSide);
-
-        return headerEl;
-    }
-
-    /**
-     * Create floating back button for mobile
-     */
-    function createFloatingBackButton() {
-        const floatingBackButton = document.createElement('button');
-        floatingBackButton.innerHTML = '←';
-        floatingBackButton.className = 'floating-back-btn';
-        floatingBackButton.title = 'Back to Dashboard';
-        floatingBackButton.style.position = 'fixed';
-        floatingBackButton.style.bottom = window.innerWidth < BREAKPOINTS.MOBILE ? '80px' : '20px';
-        floatingBackButton.style.left = '20px';
-        floatingBackButton.style.width = '48px';
-        floatingBackButton.style.height = '48px';
-        floatingBackButton.style.borderRadius = '50%';
-        floatingBackButton.style.background = COLORS.PRIMARY;
-        floatingBackButton.style.color = 'white';
-        floatingBackButton.style.border = 'none';
-        floatingBackButton.style.fontSize = '1.5rem';
-        floatingBackButton.style.cursor = 'pointer';
-        floatingBackButton.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-        floatingBackButton.style.zIndex = '1000';
-        floatingBackButton.style.display = 'none';
-        floatingBackButton.style.transition = 'all 0.3s ease';
-        floatingBackButton.style.opacity = '0';
-        floatingBackButton.style.transform = 'scale(0.8)';
-
-        floatingBackButton.addEventListener('click', () => Router.navigate('dashboard'));
-
-        let isFloatingButtonVisible = false;
-        const toggleFloatingButton = () => {
-            const shouldShow = window.scrollY > 100;
-
-            if (shouldShow && !isFloatingButtonVisible) {
-                floatingBackButton.style.display = 'flex';
-                floatingBackButton.style.alignItems = 'center';
-                floatingBackButton.style.justifyContent = 'center';
-                setTimeout(() => {
-                    floatingBackButton.style.opacity = '1';
-                    floatingBackButton.style.transform = 'scale(1)';
-                }, 10);
-                isFloatingButtonVisible = true;
-            } else if (!shouldShow && isFloatingButtonVisible) {
-                floatingBackButton.style.opacity = '0';
-                floatingBackButton.style.transform = 'scale(0.8)';
-                setTimeout(() => {
-                    floatingBackButton.style.display = 'none';
-                }, 300);
-                isFloatingButtonVisible = false;
-            }
-        };
-
-        scrollHandler = toggleFloatingButton;
-        window.addEventListener('scroll', scrollHandler, { passive: true });
-
-        return floatingBackButton;
-    }
 
     /**
      * Create chart container
@@ -609,7 +485,7 @@ export const ReportsView = () => {
 
             // Category Selector
             try {
-                const categorySelectorSection = createCategorySelector(
+                const categorySelectorSection = CategorySelector(
                     currentData,
                     categoryColorMap,
                     (categories) => getCategoryColors(categories, categoryColorMap),
@@ -661,7 +537,7 @@ export const ReportsView = () => {
             // Financial Insights Section
             if (currentData.insights && currentData.insights.length > 0) {
                 try {
-                    const insightsSection = createInsightsSection(currentData);
+                    const insightsSection = InsightsSection(currentData);
                     insightsSection.style.marginTop = SPACING.LG + ' !important';
                     chartsSection.appendChild(insightsSection);
                     chartRenderResults.push({ name: 'Financial Insights', success: true });
@@ -984,9 +860,8 @@ export const ReportsView = () => {
         window.onerror = originalOnError;
         window.onunhandledrejection = originalOnUnhandledRejection;
 
-        if (scrollHandler) {
-            window.removeEventListener('scroll', scrollHandler);
-            scrollHandler = null;
+        if (floatingBackButtonObj) {
+            floatingBackButtonObj.cleanup();
         }
 
         console.log('[ReportsView] Cleanup completed');
