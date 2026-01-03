@@ -6,7 +6,7 @@
 
 import { COLORS, SPACING } from './constants.js';
 import { getChartColors } from '../core/chart-config.js';
-import { StorageService } from '../core/storage.js';
+import { TransactionService } from '../core/transaction-service.js';
 import { generateMonthlyTrendData } from './reports-utils.js';
 
 /**
@@ -283,7 +283,7 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
  */
 export async function createCategoryTrendsChart(chartRenderer, currentData, categoryColorMap) {
     // Get historical data for trends
-    const allTransactions = StorageService.getAll();
+    const allTransactions = TransactionService.getAll();
 
     // Check if we have enough historical data (at least 3 months)
     const oldestTransaction = allTransactions.reduce((oldest, transaction) => {

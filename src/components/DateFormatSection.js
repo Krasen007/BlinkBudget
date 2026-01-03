@@ -2,7 +2,7 @@
  * Date Format Selection Section Component
  */
 
-import { StorageService } from '../core/storage.js';
+import { SettingsService } from '../core/settings-service.js';
 import { SPACING, TOUCH_TARGETS, FONT_SIZES, DATE_FORMATS, HAPTIC_PATTERNS } from '../utils/constants.js';
 import { addTouchFeedback } from '../utils/touch-utils.js';
 
@@ -20,7 +20,7 @@ export const DateFormatSection = ({ onFormatChange }) => {
     });
     section.appendChild(title);
 
-    const currentFormat = StorageService.getSetting('dateFormat') || DATE_FORMATS.DEFAULT;
+    const currentFormat = SettingsService.getSetting('dateFormat') || DATE_FORMATS.DEFAULT;
 
     const createOption = (label, value) => {
         const row = document.createElement('div');
@@ -58,7 +58,7 @@ export const DateFormatSection = ({ onFormatChange }) => {
         row.appendChild(check);
 
         row.addEventListener('click', () => {
-            StorageService.saveSetting('dateFormat', value);
+            SettingsService.saveSetting('dateFormat', value);
             if (window.mobileUtils?.supportsHaptic()) {
                 window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.WELCOME);
             }

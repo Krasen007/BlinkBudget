@@ -1,7 +1,8 @@
 import { Button } from '../components/Button.js';
 import { DashboardStatsCard } from '../components/DashboardStatsCard.js';
 import { TransactionList } from '../components/TransactionList.js';
-import { StorageService } from '../core/storage.js';
+import { AccountService } from '../core/account-service.js';
+import { TransactionService } from '../core/transaction-service.js';
 import { AuthService } from '../core/auth-service.js';
 import { Router } from '../core/router.js';
 import { COLORS, SPACING, BREAKPOINTS, DIMENSIONS, TIMING, STORAGE_KEYS } from '../utils/constants.js';
@@ -100,7 +101,7 @@ export const DashboardView = () => {
 
     // Account Options Logic
     let currentFilter = sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_FILTER) || 'all';
-    const accounts = StorageService.getAccounts();
+    const accounts = AccountService.getAccounts();
 
     const allOption = document.createElement('option');
     allOption.value = 'all';
@@ -121,7 +122,7 @@ export const DashboardView = () => {
     container.appendChild(header);
 
     const refreshAccountOptions = () => {
-        const accounts = StorageService.getAccounts();
+        const accounts = AccountService.getAccounts();
         const currentVal = accountSelect.value;
         accountSelect.innerHTML = '';
 
@@ -153,8 +154,8 @@ export const DashboardView = () => {
         content.innerHTML = '';
 
         // Always get fresh data
-        const allTransactions = StorageService.getAll();
-        const currentAccounts = StorageService.getAccounts();
+        const allTransactions = TransactionService.getAll();
+        const currentAccounts = AccountService.getAccounts();
 
         // Filter Transactions
         const transactions = allTransactions.filter(t => {

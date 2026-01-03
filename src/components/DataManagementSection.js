@@ -4,8 +4,8 @@
  */
 
 import { Button } from './Button.js';
-import { StorageService } from '../core/storage.js';
-import { createAlertModal } from '../utils/modal-utils.js';
+import { TransactionService } from '../core/transaction-service.js';
+import { AlertDialog } from './ConfirmDialog.js';
 import { SPACING, TOUCH_TARGETS, FONT_SIZES, HAPTIC_PATTERNS } from '../utils/constants.js';
 import { createInput } from '../utils/dom-factory.js';
 import { getFirstDayOfMonthISO, getTodayISO } from '../utils/date-utils.js';
@@ -88,13 +88,13 @@ export const DataManagementSection = () => {
             const end = new Date(endInput.input.value);
             end.setHours(23, 59, 59, 999);
 
-            const transactions = StorageService.getAll().filter(t => {
+            const transactions = TransactionService.getAll().filter(t => {
                 const tDate = new Date(t.timestamp);
                 return tDate >= start && tDate <= end;
             });
 
             if (transactions.length === 0) {
-                createAlertModal('No transactions found in this date range.');
+                AlertDialog({ message: 'No transactions found in this date range.' });
                 return;
             }
 

@@ -7,40 +7,89 @@
 
 import { COLORS, SPACING, BREAKPOINTS } from './constants.js';
 import { Router } from '../core/router.js';
+import { dom, createElement } from './dom-factory.js';
 
 /**
  * Create loading state component with progress indicator
  */
 export function createLoadingState() {
-    const loadingEl = document.createElement('div');
-    loadingEl.className = 'loading-state';
-    loadingEl.setAttribute('role', 'status');
-    loadingEl.setAttribute('aria-live', 'polite');
-    loadingEl.setAttribute('aria-label', 'Loading financial reports');
-    loadingEl.style.display = 'none';
-    loadingEl.style.flex = '1';
-    loadingEl.style.justifyContent = 'center';
-    loadingEl.style.alignItems = 'center';
-    loadingEl.style.flexDirection = 'column';
-    loadingEl.style.gap = SPACING.MD;
-    loadingEl.style.color = COLORS.TEXT_MUTED;
+    const progressBar = dom.div({
+        className: 'progress-bar',
+        style: {
+            width: '0%',
+            height: '100%',
+            background: COLORS.PRIMARY,
+            borderRadius: '2px',
+            transition: 'width 0.3s ease'
+        }
+    });
 
-    // Loading spinner with accessibility
-    const spinner = document.createElement('div');
-    spinner.className = 'loading-spinner';
-    spinner.setAttribute('aria-hidden', 'true');
-    spinner.style.width = '40px';
-    spinner.style.height = '40px';
-    spinner.style.border = `3px solid ${COLORS.BORDER}`;
-    spinner.style.borderTop = `3px solid ${COLORS.PRIMARY}`;
-    spinner.style.borderRadius = '50%';
-    
-    // Only animate if user doesn't prefer reduced motion
+    const progressContainer = dom.div({
+        className: 'progress-container',
+        style: {
+            width: '200px',
+            height: '4px',
+            background: COLORS.BORDER,
+            borderRadius: '2px',
+            overflow: 'hidden',
+            display: 'none'
+        },
+        children: [progressBar]
+    });
+
+    const progressText = dom.div({
+        className: 'progress-text',
+        style: {
+            fontSize: '0.875rem',
+            color: COLORS.TEXT_MUTED,
+            marginTop: SPACING.SM,
+            display: 'none'
+        }
+    });
+
+    const spinner = dom.div({
+        className: 'loading-spinner',
+        attributes: { 'aria-hidden': 'true' },
+        style: {
+            width: '40px',
+            height: '40px',
+            border: `3px solid ${COLORS.BORDER}`,
+            borderTop: `3px solid ${COLORS.PRIMARY}`,
+            borderRadius: '50%'
+        }
+    });
+
+    // Handle reduced motion
     if (!window.matchMedia || !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         spinner.style.animation = 'spin 1s linear infinite';
     }
 
-    // Add CSS animation for spinner
+    const loadingText = dom.p({
+        textContent: 'Loading your financial insights...',
+        style: { margin: '0', fontSize: '1rem' },
+        attributes: { 'aria-live': 'polite' }
+    });
+
+    const loadingEl = dom.div({
+        className: 'loading-state',
+        attributes: {
+            role: 'status',
+            'aria-live': 'polite',
+            'aria-label': 'Loading financial reports'
+        },
+        style: {
+            display: 'none',
+            flex: '1',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'column',
+            gap: SPACING.MD,
+            color: COLORS.TEXT_MUTED
+        },
+        children: [spinner, loadingText, progressContainer, progressText]
+    });
+
+    // Ensure style is added
     if (!document.querySelector('#loading-spinner-styles')) {
         const style = document.createElement('style');
         style.id = 'loading-spinner-styles';
@@ -49,53 +98,9 @@ export function createLoadingState() {
                 0% { transform: rotate(0deg); }
                 100% { transform: rotate(360deg); }
             }
-            @media (prefers-reduced-motion: reduce) {
-                .loading-spinner {
-                    animation: none !important;
-                }
-            }
         `;
         document.head.appendChild(style);
     }
-
-    const loadingText = document.createElement('p');
-    loadingText.textContent = 'Loading your financial insights...';
-    loadingText.style.margin = '0';
-    loadingText.style.fontSize = '1rem';
-    loadingText.setAttribute('aria-live', 'polite');
-
-    // Progress bar for large datasets
-    const progressContainer = document.createElement('div');
-    progressContainer.className = 'progress-container';
-    progressContainer.style.width = '200px';
-    progressContainer.style.height = '4px';
-    progressContainer.style.background = COLORS.BORDER;
-    progressContainer.style.borderRadius = '2px';
-    progressContainer.style.overflow = 'hidden';
-    progressContainer.style.display = 'none'; // Hidden by default
-
-    const progressBar = document.createElement('div');
-    progressBar.className = 'progress-bar';
-    progressBar.style.width = '0%';
-    progressBar.style.height = '100%';
-    progressBar.style.background = COLORS.PRIMARY;
-    progressBar.style.borderRadius = '2px';
-    progressBar.style.transition = 'width 0.3s ease';
-
-    progressContainer.appendChild(progressBar);
-
-    // Progress text
-    const progressText = document.createElement('div');
-    progressText.className = 'progress-text';
-    progressText.style.fontSize = '0.875rem';
-    progressText.style.color = COLORS.TEXT_MUTED;
-    progressText.style.marginTop = SPACING.SM;
-    progressText.style.display = 'none'; // Hidden by default
-
-    loadingEl.appendChild(spinner);
-    loadingEl.appendChild(loadingText);
-    loadingEl.appendChild(progressContainer);
-    loadingEl.appendChild(progressText);
 
     return loadingEl;
 }
@@ -113,7 +118,7 @@ export function updateLoadingProgress(loadingState, progress, message) {
         // Show progress bar for progressive loading
         progressContainer.style.display = 'block';
         progressText.style.display = 'block';
-        
+
         progressBar.style.width = `${progress}%`;
         progressText.textContent = `${progress}% - ${message}`;
         loadingText.textContent = 'Processing your financial data...';
@@ -129,21 +134,24 @@ export function updateLoadingProgress(loadingState, progress, message) {
  * Create empty state component with different scenarios
  */
 export function createEmptyState() {
-    const emptyEl = document.createElement('div');
-    emptyEl.className = 'empty-state';
-    emptyEl.setAttribute('role', 'status');
-    emptyEl.setAttribute('aria-live', 'polite');
-    emptyEl.style.display = 'none';
-    emptyEl.style.flex = '1';
-    emptyEl.style.justifyContent = 'center';
-    emptyEl.style.alignItems = 'center';
-    emptyEl.style.flexDirection = 'column';
-    emptyEl.style.gap = SPACING.LG;
-    emptyEl.style.color = COLORS.TEXT_MUTED;
-    emptyEl.style.textAlign = 'center';
-    emptyEl.style.padding = SPACING.XL;
-
-    return emptyEl;
+    return dom.div({
+        className: 'empty-state',
+        attributes: {
+            role: 'status',
+            'aria-live': 'polite'
+        },
+        style: {
+            display: 'none',
+            flex: '1',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'column',
+            gap: SPACING.LG,
+            color: COLORS.TEXT_MUTED,
+            textAlign: 'center',
+            padding: SPACING.XL
+        }
+    });
 }
 
 /**
@@ -159,7 +167,7 @@ export function showEmptyState(emptyState, scenario, currentTimePeriod, formatTi
 
     // Empty state message
     const message = document.createElement('div');
-    
+
     // Add transaction button
     const addButton = document.createElement('button');
     addButton.className = 'btn btn-primary';
@@ -213,21 +221,24 @@ export function showEmptyState(emptyState, scenario, currentTimePeriod, formatTi
  * Create error state component
  */
 export function createErrorState() {
-    const errorEl = document.createElement('div');
-    errorEl.className = 'error-state';
-    errorEl.setAttribute('role', 'alert');
-    errorEl.setAttribute('aria-live', 'assertive');
-    errorEl.style.display = 'none';
-    errorEl.style.flex = '1';
-    errorEl.style.justifyContent = 'center';
-    errorEl.style.alignItems = 'center';
-    errorEl.style.flexDirection = 'column';
-    errorEl.style.gap = SPACING.LG;
-    errorEl.style.color = COLORS.ERROR;
-    errorEl.style.textAlign = 'center';
-    errorEl.style.padding = SPACING.XL;
-
-    return errorEl;
+    return dom.div({
+        className: 'error-state',
+        attributes: {
+            role: 'alert',
+            'aria-live': 'assertive'
+        },
+        style: {
+            display: 'none',
+            flex: '1',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'column',
+            gap: SPACING.LG,
+            color: COLORS.ERROR,
+            textAlign: 'center',
+            padding: SPACING.XL
+        }
+    });
 }
 
 /**
@@ -245,7 +256,7 @@ export function showErrorState(errorState, customMessage, onRetry) {
     const message = document.createElement('div');
     const errorTitle = customMessage ? 'Error Loading Reports' : 'Unable to Load Reports';
     const errorDescription = customMessage || 'There was an error loading your financial data. Please try again.';
-    
+
     message.innerHTML = `
         <h3 style="margin: 0 0 ${SPACING.SM} 0; color: ${COLORS.ERROR};">${errorTitle}</h3>
         <p style="margin: 0; max-width: 400px; line-height: 1.5; color: ${COLORS.TEXT_MUTED};">
@@ -331,7 +342,7 @@ export function showUnsupportedBrowserError(container, missingFeatures) {
     featuresList.innerHTML = `
         <strong>Missing features:</strong><br>
         ${missingFeatures.map(f => escapeHtml(f)).join(', ')}
-    `;    message.style.color = COLORS.TEXT_MUTED;
+    `; message.style.color = COLORS.TEXT_MUTED;
     message.style.lineHeight = '1.6';
     message.style.marginBottom = SPACING.LG;
 
@@ -405,34 +416,38 @@ export function showBrowserWarning(container, limitedFeatures) {
  * Show performance warning to user
  */
 export function showPerformanceWarning(container, processingTime) {
-    const warning = document.createElement('div');
-    warning.style.background = 'rgba(251, 191, 36, 0.1)';
-    warning.style.border = '1px solid rgba(251, 191, 36, 0.3)';
-    warning.style.borderRadius = 'var(--radius-md)';
-    warning.style.padding = SPACING.MD;
-    warning.style.margin = `${SPACING.MD} 0`;
-    warning.style.fontSize = '0.875rem';
-    warning.style.color = '#92400e';
+    const closeBtn = dom.button({
+        innerHTML: '×',
+        style: {
+            float: 'right',
+            background: 'none',
+            border: 'none',
+            fontSize: '1.2rem',
+            cursor: 'pointer',
+            color: '#92400e'
+        }
+    });
 
-    warning.innerHTML = `
-        ⏱️ <strong>Performance Notice:</strong> 
-        Report loading took ${(processingTime / 1000).toFixed(1)} seconds. 
-        Consider reducing the time period or clearing old data for better performance.
-    `;
+    const warning = dom.div({
+        style: {
+            background: 'rgba(251, 191, 36, 0.1)',
+            border: '1px solid rgba(251, 191, 36, 0.3)',
+            borderRadius: 'var(--radius-md)',
+            padding: SPACING.MD,
+            margin: `${SPACING.MD} 0`,
+            fontSize: '0.875rem',
+            color: '#92400e'
+        },
+        innerHTML: `
+            ⏱️ <strong>Performance Notice:</strong> 
+            Report loading took ${(processingTime / 1000).toFixed(1)} seconds. 
+            Consider reducing the time period or clearing old data for better performance.
+        `,
+        children: [closeBtn]
+    });
 
-    // Add close button
-    const closeBtn = document.createElement('button');
-    closeBtn.innerHTML = '×';
-    closeBtn.style.float = 'right';
-    closeBtn.style.background = 'none';
-    closeBtn.style.border = 'none';
-    closeBtn.style.fontSize = '1.2rem';
-    closeBtn.style.cursor = 'pointer';
-    closeBtn.style.color = '#92400e';
     closeBtn.addEventListener('click', () => warning.remove());
 
-    warning.appendChild(closeBtn);
-    
     // Insert after header
     const header = container.querySelector('.reports-header');
     if (header && header.nextSibling) {
@@ -453,35 +468,39 @@ export function showPerformanceWarning(container, processingTime) {
  * Show warning when some charts fail to render
  */
 export function showChartRenderingWarning(container, failedCharts) {
-    const warning = document.createElement('div');
-    warning.style.background = 'rgba(239, 68, 68, 0.1)';
-    warning.style.border = '1px solid rgba(239, 68, 68, 0.3)';
-    warning.style.borderRadius = 'var(--radius-md)';
-    warning.style.padding = SPACING.MD;
-    warning.style.margin = `${SPACING.MD} 0`;
-    warning.style.fontSize = '0.875rem';
-    warning.style.color = '#dc2626';
+    const closeBtn = dom.button({
+        innerHTML: '×',
+        style: {
+            float: 'right',
+            background: 'none',
+            border: 'none',
+            fontSize: '1.2rem',
+            cursor: 'pointer',
+            color: '#dc2626'
+        }
+    });
 
     const failedChartNames = failedCharts.map(chart => chart.name).join(', ');
-    warning.innerHTML = `
-        ⚠️ <strong>Chart Rendering Issues:</strong> 
-        Some charts couldn't be displayed (${failedChartNames}). 
-        Fallback displays are shown instead. Try refreshing the page if the issue persists.
-    `;
+    const warning = dom.div({
+        style: {
+            background: 'rgba(239, 68, 68, 0.1)',
+            border: '1px solid rgba(239, 68, 68, 0.3)',
+            borderRadius: 'var(--radius-md)',
+            padding: SPACING.MD,
+            margin: `${SPACING.MD} 0`,
+            fontSize: '0.875rem',
+            color: '#dc2626'
+        },
+        innerHTML: `
+            ⚠️ <strong>Chart Rendering Issues:</strong> 
+            Some charts couldn't be displayed (${failedChartNames}). 
+            Fallback displays are shown instead. Try refreshing the page if the issue persists.
+        `,
+        children: [closeBtn]
+    });
 
-    // Add close button
-    const closeBtn = document.createElement('button');
-    closeBtn.innerHTML = '×';
-    closeBtn.style.float = 'right';
-    closeBtn.style.background = 'none';
-    closeBtn.style.border = 'none';
-    closeBtn.style.fontSize = '1.2rem';
-    closeBtn.style.cursor = 'pointer';
-    closeBtn.style.color = '#dc2626';
     closeBtn.addEventListener('click', () => warning.remove());
 
-    warning.appendChild(closeBtn);
-    
     // Insert at the top of content
     const content = container.querySelector('.reports-content');
     if (content && content.firstChild) {

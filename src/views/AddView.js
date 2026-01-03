@@ -1,6 +1,6 @@
 import { TransactionForm } from '../components/TransactionForm.js';
 import { DateInput } from '../components/DateInput.js';
-import { StorageService } from '../core/storage.js';
+import { TransactionService } from '../core/transaction-service.js';
 import { Router } from '../core/router.js';
 import { SPACING, DIMENSIONS, TOUCH_TARGETS, FONT_SIZES, COLORS, STORAGE_KEYS } from '../utils/constants.js';
 import { createButton } from '../utils/dom-factory.js';
@@ -70,7 +70,7 @@ export const AddView = ({ accountId } = {}) => {
             }
 
             // Add the transaction and get the full transaction object
-            const newTransaction = StorageService.add(data);
+            const newTransaction = TransactionService.add(data);
 
             // Mark transaction for highlighting in dashboard
             markTransactionForHighlight(newTransaction.id);

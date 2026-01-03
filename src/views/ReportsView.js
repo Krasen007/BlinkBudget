@@ -13,7 +13,8 @@ import { ProgressiveDataLoader } from '../core/progressive-data-loader.js';
 import { preloadChartJS } from '../core/chart-loader.js';
 import { TimePeriodSelector } from '../components/TimePeriodSelector.js';
 import { Button } from '../components/Button.js';
-import { StorageService } from '../core/storage.js';
+import { TransactionService } from '../core/transaction-service.js';
+import { AccountService } from '../core/account-service.js';
 import { Router } from '../core/router.js';
 import { NavigationState } from '../core/navigation-state.js';
 import { COLORS, SPACING, BREAKPOINTS, DIMENSIONS, TIMING } from '../utils/constants.js';
@@ -227,7 +228,7 @@ export const ReportsView = () => {
 
             let transactions;
             try {
-                transactions = StorageService.getAll();
+                transactions = TransactionService.getAll();
 
                 if (!Array.isArray(transactions)) {
                     throw new Error('Invalid transaction data format - expected array');
@@ -733,7 +734,7 @@ export const ReportsView = () => {
     // Storage update handler
     const handleStorageUpdate = (e) => {
         console.log(`[ReportsView] Storage updated (${e.detail.key}), refreshing data...`);
-        if (e.detail.key === 'blinkbudget_transactions' || e.detail.key === 'blinkbudget_accounts') {
+        if (e.detail.key === STORAGE_KEYS.TRANSACTIONS || e.detail.key === STORAGE_KEYS.ACCOUNTS) {
             analyticsEngine.invalidateCacheOnDataUpdate();
 
             clearTimeout(container._refreshTimeout);
@@ -800,8 +801,8 @@ export const ReportsView = () => {
      */
     function checkDataIntegrity() {
         try {
-            const transactions = StorageService.getAll();
-            const accounts = StorageService.getAccounts();
+            const transactions = TransactionService.getAll();
+            const accounts = AccountService.getAccounts();
 
             const accountIds = new Set(accounts.map(acc => acc.id));
             const orphanedTransactions = transactions.filter(t =>

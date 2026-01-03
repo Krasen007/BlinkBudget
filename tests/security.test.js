@@ -102,13 +102,13 @@ describe('Advanced Security', () => {
         expect(t1.userId).toBe('user-1');
 
         // Can access own transaction
-        expect(StorageService.get(t1.id)).not.toBeNull();
+        expect(StorageService.get(t1.id)).toBeDefined();
 
         // Switch user
         AuthService.user = { uid: 'user-2' };
 
         // Cannot access other's transaction
-        expect(StorageService.get(t1.id)).toBeNull();
+        expect(StorageService.get(t1.id)).toBeUndefined();
     });
 
     test('Strict Length Validation', () => {

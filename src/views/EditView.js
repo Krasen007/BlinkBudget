@@ -1,7 +1,7 @@
 import { TransactionForm } from '../components/TransactionForm.js';
 
 import { DateInput } from '../components/DateInput.js';
-import { StorageService } from '../core/storage.js';
+import { TransactionService } from '../core/transaction-service.js';
 import { Router } from '../core/router.js';
 import { SPACING, DIMENSIONS, TOUCH_TARGETS, FONT_SIZES, TIMING, STORAGE_KEYS } from '../utils/constants.js';
 import { createButton } from '../utils/dom-factory.js';
@@ -13,7 +13,7 @@ export const EditView = ({ id }) => {
     container.style.maxWidth = DIMENSIONS.CONTAINER_MAX_WIDTH;
     container.style.width = '100%';
 
-    const transaction = StorageService.get(id);
+    const transaction = TransactionService.get(id);
 
     if (!transaction) {
         container.textContent = 'Transaction not found';
@@ -77,7 +77,7 @@ export const EditView = ({ id }) => {
                 sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, data.accountId);
             }
 
-            StorageService.update(id, data);
+            TransactionService.update(id, data);
 
             // Mark transaction for highlighting in dashboard
             markTransactionForHighlight(id);
@@ -90,7 +90,7 @@ export const EditView = ({ id }) => {
                 ConfirmDialog({
                     message: 'Are you sure you want to delete this transaction?',
                     onConfirm: () => {
-                        StorageService.remove(id);
+                        TransactionService.remove(id);
                         Router.navigate('dashboard');
                     }
                 });

@@ -4,7 +4,6 @@
  */
 
 import { TransactionListItem } from './TransactionListItem.js';
-import { StorageService } from '../core/storage.js';
 import { formatDateForDisplay } from '../utils/date-utils.js';
 import { SPACING, DIMENSIONS, BREAKPOINTS, TIMING, FONT_SIZES } from '../utils/constants.js';
 import { debounce } from '../utils/touch-utils.js';

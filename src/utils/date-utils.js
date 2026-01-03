@@ -3,7 +3,7 @@
  * Centralizes date formatting logic to eliminate duplication
  */
 
-import { StorageService } from '../core/storage.js';
+import { SettingsService } from '../core/settings-service.js';
 import { DATE_FORMATS } from './constants.js';
 
 /**
@@ -14,10 +14,10 @@ import { DATE_FORMATS } from './constants.js';
  */
 export const formatDate = (isoDate, format = null) => {
     if (!isoDate) return '';
-    
+
     const [year, month, day] = isoDate.split('-');
-    const dateFormat = format || StorageService.getSetting('dateFormat') || DATE_FORMATS.DEFAULT;
-    
+    const dateFormat = format || SettingsService.getSetting('dateFormat') || DATE_FORMATS.DEFAULT;
+
     switch (dateFormat) {
         case DATE_FORMATS.ISO:
             return `${year}-${month}-${day}`;
@@ -37,16 +37,16 @@ export const formatDate = (isoDate, format = null) => {
  */
 export const formatDateForDisplay = (dateInput, format = null) => {
     if (!dateInput) return '';
-    
+
     let date;
     if (typeof dateInput === 'string') {
         date = new Date(dateInput);
     } else {
         date = dateInput;
     }
-    
-    const dateFormat = format || StorageService.getSetting('dateFormat') || DATE_FORMATS.DEFAULT;
-    
+
+    const dateFormat = format || SettingsService.getSetting('dateFormat') || DATE_FORMATS.DEFAULT;
+
     if (dateFormat === DATE_FORMATS.ISO) {
         return date.toISOString().split('T')[0];
     }

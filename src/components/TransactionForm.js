@@ -3,7 +3,7 @@
  * Refactored to use extracted utilities - now ~180 lines (down from 724)
  */
 
-import { StorageService } from '../core/storage.js';
+import { AccountService } from '../core/account-service.js';
 import { SPACING, DIMENSIONS, TOUCH_TARGETS, FONT_SIZES, COLORS, HAPTIC_PATTERNS, TIMING } from '../utils/constants.js';
 import { createSelect } from '../utils/dom-factory.js';
 import { createTypeToggleGroup } from '../utils/form-utils/type-toggle.js';
@@ -28,8 +28,8 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     }
 
     // 2. Account Selection (Source)
-    const accounts = StorageService.getAccounts();
-    const defaultAccount = StorageService.getDefaultAccount();
+    const accounts = AccountService.getAccounts();
+    const defaultAccount = AccountService.getDefaultAccount();
     let currentAccountId = initialValues.accountId || defaultAccount.id;
 
     const accountGroup = document.createElement('div');

@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TransactionForm } from '../src/components/TransactionForm.js';
 
-// Mock StorageService
-vi.mock('../src/core/storage.js', () => ({
-    StorageService: {
+// Mock AccountService
+vi.mock('../src/core/account-service.js', () => ({
+    AccountService: {
         getAccounts: () => [
             { id: 'main', name: 'Main Account' },
             { id: 'savings', name: 'Savings' }

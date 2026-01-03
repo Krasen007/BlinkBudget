@@ -4,7 +4,7 @@
  */
 
 import { Router } from '../core/router.js';
-import { StorageService } from '../core/storage.js';
+import { TransactionService } from '../core/transaction-service.js';
 import { formatDateForDisplay } from '../utils/date-utils.js';
 import { COLORS, FONT_SIZES, SPACING, TOUCH_TARGETS, BREAKPOINTS, CURRENCY_SYMBOL } from '../utils/constants.js';
 import { highlightTransactionSuccess } from '../utils/success-feedback.js';
@@ -29,37 +29,14 @@ export const TransactionListItem = ({ transaction, currentFilter, accounts, shou
     let longPressed = false;
 
     const handleSplitTransaction = () => {
-        const originalAmount = transaction.amount;
-        const half = originalAmount / 2;
+        const result = TransactionService.split(transaction.id);
+        if (!result) return;
 
-        // Round first part down to nearest 0.50
-        const firstAmount = Math.floor(half * 2) / 2;
-        const secondAmount = originalAmount - firstAmount;
-
-        // Create first transaction (rounded down) - keep original timestamp
-        const firstTransaction = {
-            ...transaction,
-            amount: firstAmount
-        };
-        delete firstTransaction.id; // Let StorageService generate new ID
-
-        // Create second transaction (remainder) - keep original timestamp
-        const secondTransaction = {
-            ...transaction,
-            amount: secondAmount
-        };
-        delete secondTransaction.id; // Let StorageService generate new ID
-
-        // Add both transactions and store their IDs for highlighting
-        const addedFirst = StorageService.add(firstTransaction);
-        const addedSecond = StorageService.add(secondTransaction);
+        const { first, second } = result;
 
         // Mark both transactions for highlighting
         // Store both IDs as comma-separated string
-        sessionStorage.setItem('highlightTransactionId', `${addedFirst.id},${addedSecond.id}`);
-
-        // Remove original transaction
-        StorageService.remove(transaction.id);
+        sessionStorage.setItem('highlightTransactionId', `${first.id},${second.id}`);
 
         // Trigger UI update
         window.dispatchEvent(new CustomEvent('storage-updated', {

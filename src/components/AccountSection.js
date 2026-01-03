@@ -4,8 +4,9 @@
  */
 
 import { Button } from './Button.js';
-import { StorageService } from '../core/storage.js';
-import { createAccountRenameModal, createConfirmModal, createAlertModal } from '../utils/modal-utils.js';
+import { AccountService } from '../core/account-service.js';
+import { generateId } from '../utils/id-utils.js';
+import { ConfirmDialog, AlertDialog, PromptDialog } from './ConfirmDialog.js';
 import { COLORS, SPACING, TOUCH_TARGETS, FONT_SIZES, HAPTIC_PATTERNS, ACCOUNT_TYPES } from '../utils/constants.js';
 import { createInput, createSelect, createFlexContainer } from '../utils/dom-factory.js';
 import { addTouchFeedback } from '../utils/touch-utils.js';
@@ -33,7 +34,7 @@ export const AccountSection = () => {
 
     const renderAccounts = () => {
         accountList.innerHTML = '';
-        const accounts = StorageService.getAccounts();
+        const accounts = AccountService.getAccounts();
 
         accounts.forEach(acc => {
             const item = document.createElement('div');
@@ -106,16 +107,21 @@ export const AccountSection = () => {
             });
             renameBtn.style.flex = '1';
             renameBtn.onclick = () => {
-                createAccountRenameModal(acc.name, (newName) => {
-                    if (newName && newName.trim() !== '') {
-                        const trimmedName = sanitizeInput(newName.trim(), 50); // Typical account name limit
-                        if (StorageService.isAccountDuplicate(trimmedName, acc.type, acc.id)) {
-                            createAlertModal(`An account named "${trimmedName}" of type "${acc.type}" already exists.`);
-                            return;
+                PromptDialog({
+                    title: 'Rename Account',
+                    initialValue: acc.name,
+                    placeholder: 'Account Name',
+                    onSave: (newName) => {
+                        if (newName && newName.trim() !== '') {
+                            const trimmedName = sanitizeInput(newName.trim(), 50); // Typical account name limit
+                            if (AccountService.isAccountDuplicate(trimmedName, acc.type, acc.id)) {
+                                AlertDialog({ message: `An account named "${trimmedName}" of type "${acc.type}" already exists.` });
+                                return;
+                            }
+                            acc.name = trimmedName;
+                            AccountService.saveAccount(acc);
+                            renderAccounts();
                         }
-                        acc.name = trimmedName;
-                        StorageService.saveAccount(acc);
-                        renderAccounts();
                     }
                 });
             };
@@ -136,7 +142,7 @@ export const AccountSection = () => {
                 makeDefaultBtn.style.flex = '1';
                 makeDefaultBtn.onclick = () => {
                     acc.isDefault = true;
-                    StorageService.saveAccount(acc);
+                    AccountService.saveAccount(acc);
                     renderAccounts();
                     if (window.mobileUtils?.supportsHaptic()) {
                         window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.LIGHT);
@@ -158,20 +164,20 @@ export const AccountSection = () => {
                 });
                 deleteBtn.style.flex = '1';
                 deleteBtn.onclick = () => {
-                    createConfirmModal(
-                        `Delete account "${acc.name}"?`,
-                        'Transactions will remain but might be orphaned if not handled.',
-                        () => {
-                            if (StorageService.deleteAccount(acc.id)) {
+                    ConfirmDialog({
+                        title: `Delete account "${acc.name}"?`,
+                        message: 'Transactions will remain but might be orphaned if not handled.',
+                        onConfirm: () => {
+                            if (AccountService.deleteAccount(acc.id)) {
                                 renderAccounts();
                                 if (window.mobileUtils?.supportsHaptic()) {
                                     window.mobileUtils.hapticFeedback([20, 10, 20]);
                                 }
                             } else {
-                                createAlertModal('Cannot delete the last account.');
+                                AlertDialog({ message: 'Cannot delete the last account.' });
                             }
                         }
-                    );
+                    });
                 };
                 actions.appendChild(deleteBtn);
             }
@@ -249,7 +255,7 @@ export const AccountSection = () => {
             const name = sanitizeInput(nameInput.value.trim(), 50);
             const type = typeSelect.value;
             if (name) {
-                if (StorageService.isAccountDuplicate(name, type)) {
+                if (AccountService.isAccountDuplicate(name, type)) {
                     errorMsg.textContent = `An account named "${name}" of type "${type}" already exists.`;
                     errorMsg.style.display = 'block';
                     nameInput.style.borderColor = COLORS.ERROR;
@@ -258,8 +264,8 @@ export const AccountSection = () => {
                     }
                     return;
                 }
-                StorageService.saveAccount({
-                    id: StorageService.generateId(),
+                AccountService.saveAccount({
+                    id: generateId(),
                     name: name,
                     type: type,
                     isDefault: false
