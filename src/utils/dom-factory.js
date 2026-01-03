@@ -1,248 +1,186 @@
 /**
- * DOM Factory utilities
- * Provides standardized DOM element creation to reduce duplication
+ * DOM Factory Utility
+ * Standardizes the creation of DOM elements with styles and attributes.
  */
 
-import { COLORS, FONT_SIZES, TOUCH_TARGETS, SPACING, DIMENSIONS } from './constants.js';
+export const createElement = (tag, options = {}) => {
+    const {
+        className = '',
+        style = {},
+        attributes = {},
+        textContent = '',
+        innerHTML = '',
+        children = []
+    } = options;
 
-/**
- * Create a standardized button element
- * @param {Object} options - Button configuration
- * @returns {HTMLButtonElement} Button element
- */
+    const element = document.createElement(tag);
+
+    if (className) {
+        if (Array.isArray(className)) {
+            className.forEach(c => c && element.classList.add(c));
+        } else {
+            element.className = className;
+        }
+    }
+
+    if (Object.keys(style).length > 0) {
+        Object.assign(element.style, style);
+    }
+
+    Object.entries(attributes).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+            if (key === 'selected' && value) {
+                element.selected = true;
+            } else if (key === 'value') {
+                element.value = value;
+            } else if (key === 'readOnly' && value) {
+                element.readOnly = true;
+            } else {
+                element.setAttribute(key, value);
+            }
+        }
+    });
+
+    if (textContent) {
+        element.textContent = textContent;
+    } else if (innerHTML) {
+        element.innerHTML = innerHTML;
+    }
+
+    children.forEach(child => {
+        if (child) {
+            element.appendChild(child);
+        }
+    });
+
+    return element;
+};
+
+export const createInput = (options = {}) => {
+    const {
+        type = 'text',
+        id = '',
+        name = '',
+        placeholder = '',
+        value = '',
+        className = '',
+        style = {},
+        attributes = {},
+        readOnly = false
+    } = options;
+
+    return createElement('input', {
+        className,
+        style,
+        attributes: {
+            type,
+            id,
+            name,
+            placeholder,
+            value: value || '',
+            readOnly,
+            ...attributes
+        }
+    });
+};
+
+export const createSelect = (options = {}) => {
+    const {
+        id = '',
+        name = '',
+        options: selectOptions = [],
+        className = '',
+        style = {},
+        attributes = {}
+    } = options;
+
+    const select = createElement('select', {
+        className,
+        style,
+        attributes: { id, name, ...attributes }
+    });
+
+    selectOptions.forEach(opt => {
+        const option = createElement('option', {
+            attributes: {
+                value: opt.value,
+                selected: opt.selected
+            },
+            textContent: opt.text
+        });
+        select.appendChild(option);
+    });
+
+    return select;
+};
+
+export const createFlexContainer = (options = {}) => {
+    const {
+        direction = 'row',
+        justify = 'flex-start',
+        align = 'stretch',
+        gap = '0',
+        className = '',
+        style = {},
+        children = []
+    } = options;
+
+    return createElement('div', {
+        className,
+        style: {
+            display: 'flex',
+            flexDirection: direction,
+            justifyContent: justify,
+            alignItems: align,
+            gap,
+            ...style
+        },
+        children
+    });
+};
+
 export const createButton = (options = {}) => {
     const {
         text = '',
         className = '',
         style = {},
         onClick = null,
-        type = 'button'
+        attributes = {}
     } = options;
 
-    const btn = document.createElement('button');
-    btn.type = type;
-    btn.textContent = text;
-    btn.className = className;
-
-    // Apply styles
-    Object.assign(btn.style, style);
+    const btn = createElement('button', {
+        className,
+        style,
+        textContent: text,
+        attributes
+    });
 
     if (onClick) {
-        btn.addEventListener('click', onClick);
+        btn.addEventListener('click', (e) => {
+            if (options.type !== 'submit') {
+                e.preventDefault();
+            }
+            onClick(e);
+        });
     }
 
     return btn;
 };
 
-/**
- * Create a standardized input element
- * @param {Object} options - Input configuration
- * @returns {HTMLInputElement} Input element
- */
-export const createInput = (options = {}) => {
-    const {
-        type = 'text',
-        value = '',
-        placeholder = '',
-        className = '',
-        style = {},
-        required = false,
-        readOnly = false,
-        id = '',
-        name = '',
-        autocomplete = '',
-        minHeight = TOUCH_TARGETS.MIN_HEIGHT,
-        fontSize = FONT_SIZES.PREVENT_ZOOM
-    } = options;
-
-    const input = document.createElement('input');
-    input.type = type;
-    input.value = value;
-    input.placeholder = placeholder;
-    input.className = className;
-    input.required = required;
-    input.readOnly = readOnly;
-    if (id) input.id = id;
-    if (name) input.name = name;
-    if (autocomplete) input.autocomplete = autocomplete;
-
-    // Apply default mobile-friendly styles
-    const defaultStyle = {
-        width: '100%',
-        minHeight,
-        fontSize,
-        padding: SPACING.MD,
-        borderRadius: 'var(--radius-md)',
-        border: `1px solid ${COLORS.BORDER}`,
-        background: COLORS.SURFACE,
-        color: COLORS.TEXT_MAIN,
-        ...style
-    };
-
-    Object.assign(input.style, defaultStyle);
-
-    return input;
+export const dom = {
+    div: (options) => createElement('div', options),
+    span: (options) => createElement('span', options),
+    button: (options) => createElement('button', options),
+    p: (options) => createElement('p', options),
+    h1: (options) => createElement('h1', options),
+    h2: (options) => createElement('h2', options),
+    h3: (options) => createElement('h3', options),
+    ul: (options) => createElement('ul', options),
+    li: (options) => createElement('li', options),
+    nav: (options) => createElement('nav', options),
+    input: (options) => createElement('input', options),
+    label: (options) => createElement('label', options),
+    select: (options) => createElement('select', options),
+    option: (options) => createElement('option', options),
+    canvas: (options) => createElement('canvas', options)
 };
-
-/**
- * Create a standardized select element
- * @param {Object} options - Select configuration
- * @returns {HTMLSelectElement} Select element
- */
-export const createSelect = (options = {}) => {
-    const {
-        options: selectOptions = [],
-        value = '',
-        className = '',
-        style = {},
-        onChange = null,
-        id = '',
-        name = '',
-        minHeight = TOUCH_TARGETS.MIN_HEIGHT,
-        fontSize = FONT_SIZES.PREVENT_ZOOM
-    } = options;
-
-    const select = document.createElement('select');
-    select.className = className;
-    if (id) select.id = id;
-    if (name) select.name = name;
-
-    // Apply default mobile-friendly styles
-    const defaultStyle = {
-        width: '100%',
-        minHeight,
-        fontSize,
-        padding: SPACING.MD,
-        borderRadius: 'var(--radius-md)',
-        border: `1px solid ${COLORS.BORDER}`,
-        background: COLORS.SURFACE,
-        color: COLORS.TEXT_MAIN,
-        cursor: 'pointer',
-        appearance: 'auto',
-        ...style
-    };
-
-    Object.assign(select.style, defaultStyle);
-
-    // Add options
-    selectOptions.forEach(opt => {
-        const option = document.createElement('option');
-        option.value = opt.value;
-        option.textContent = opt.text;
-        if (opt.selected) option.selected = true;
-        select.appendChild(option);
-    });
-
-    if (value) {
-        select.value = value;
-    }
-
-    if (onChange) {
-        select.addEventListener('change', onChange);
-    }
-
-    return select;
-};
-
-/**
- * Create a card container element
- * @param {Object} options - Card configuration
- * @returns {HTMLDivElement} Card element
- */
-export const createCard = (options = {}) => {
-    const {
-        className = 'card',
-        style = {},
-        children = []
-    } = options;
-
-    const card = document.createElement('div');
-    card.className = className;
-
-    const defaultStyle = {
-        padding: SPACING.LG,
-        borderRadius: 'var(--radius-md)',
-        background: COLORS.SURFACE,
-        border: `1px solid ${COLORS.BORDER}`,
-        ...style
-    };
-
-    Object.assign(card.style, defaultStyle);
-
-    children.forEach(child => {
-        if (child instanceof HTMLElement) {
-            card.appendChild(child);
-        }
-    });
-
-    return card;
-};
-
-/**
- * Create a flex container
- * @param {Object} options - Container configuration
- * @returns {HTMLDivElement} Container element
- */
-export const createFlexContainer = (options = {}) => {
-    const {
-        direction = 'row',
-        gap = SPACING.MD,
-        alignItems = 'stretch',
-        justifyContent = 'flex-start',
-        className = '',
-        style = {},
-        children = []
-    } = options;
-
-    const container = document.createElement('div');
-    container.className = className;
-
-    const defaultStyle = {
-        display: 'flex',
-        flexDirection: direction,
-        gap,
-        alignItems,
-        justifyContent,
-        ...style
-    };
-
-    Object.assign(container.style, defaultStyle);
-
-    children.forEach(child => {
-        if (child instanceof HTMLElement) {
-            container.appendChild(child);
-        }
-    });
-
-    return container;
-};
-
-/**
- * Create a text element (heading, paragraph, etc.)
- * @param {Object} options - Text element configuration
- * @returns {HTMLElement} Text element
- */
-export const createTextElement = (options = {}) => {
-    const {
-        tag = 'p',
-        text = '',
-        className = '',
-        style = {},
-        fontSize = FONT_SIZES.BASE
-    } = options;
-
-    const element = document.createElement(tag);
-    element.textContent = text;
-    element.className = className;
-
-    const defaultStyle = {
-        fontSize,
-        margin: 0,
-        ...style
-    };
-
-    Object.assign(element.style, defaultStyle);
-
-    return element;
-};
-

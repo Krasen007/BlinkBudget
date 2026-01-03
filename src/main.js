@@ -10,6 +10,7 @@ import { ReportsView } from './views/ReportsView.js';
 import { LoginView } from './views/LoginView.js';
 import { MobileNavigation, updateMobileNavigation } from './components/MobileNavigation.js';
 import { NetworkStatus } from './components/NetworkStatus.js';
+import { LoadingView } from './components/LoadingView.js';
 import './core/mobile.js'; // Initialize mobile utilities
 import './pwa.js'; // Register PWA service worker
 import { InstallService } from './core/install.js';
@@ -20,18 +21,9 @@ const initApp = () => {
     const app = document.querySelector('#app');
 
     // Clear initial content and show loading
-    app.innerHTML = `
-        <div class="loading-screen" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; gap:1rem; background-color:var(--color-background);">
-            <div class="spinner" style="width:40px; height:40px; border:4px solid var(--color-surface); border-top-color:var(--color-primary); border-radius:50%; animation: spin 1s linear infinite;"></div>
-            <p style="color:var(--color-text-muted); font-size:var(--font-size-sm);">Blinking your budget...</p>
-        </div>
-        <style>
-            @keyframes spin { to { transform: rotate(360deg); } }
-        </style>
-    `;
+    app.appendChild(LoadingView());
 
     // Initialize mobile navigation (only on mobile)
-    let mobileNav = null;
     const initMobileNav = () => {
         // Remove existing mobile nav if present
         const existingNav = document.querySelector('.mobile-nav');
@@ -41,15 +33,9 @@ const initApp = () => {
 
         // Add mobile navigation on mobile devices
         if (window.mobileUtils?.isMobile()) {
-            mobileNav = MobileNavigation({ currentRoute: getCurrentRoute() });
+            const mobileNav = MobileNavigation({ currentRoute: Router.getCurrentRoute() });
             document.body.appendChild(mobileNav);
         }
-    };
-
-    // Helper to get current route
-    const getCurrentRoute = () => {
-        const hash = window.location.hash.slice(1) || 'dashboard';
-        return hash.split('?')[0];
     };
 
     // Route Guard
@@ -145,22 +131,24 @@ const initApp = () => {
     // We don't call SyncService.init() here anymore as it's handled in AuthService.init callback
     // for better coordination of the initial data pull.
 
-    // Initialize mobile navigation
-    initMobileNav();
+    // Register mobile navigation for responsive updates
+    if (window.mobileUtils) {
+        window.mobileUtils.onResponsiveChange(() => {
+            initMobileNav();
+        });
+    } else {
+        // Fallback or early init
+        initMobileNav();
+    }
 
     // Add network status indicator
     const networkStatus = NetworkStatus();
     document.body.appendChild(networkStatus);
 
-    // Re-initialize mobile nav on resize (for responsive behavior)
-    window.addEventListener('resize', () => {
-        setTimeout(initMobileNav, 100); // Debounce
-    });
-
     // Initialize Auth in background
     AuthService.init(async (user) => {
         // Handle auth state changes and data synchronization
-        const currentRoute = getCurrentRoute();
+        const currentRoute = Router.getCurrentRoute();
 
         if (user) {
             console.log("[Main] User authenticated, starting offline-first sync...");

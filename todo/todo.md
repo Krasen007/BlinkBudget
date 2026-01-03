@@ -22,7 +22,7 @@ DO NOT IMPLEMENT: Insights: Timeline Jan vs Dec 2025
 [x] the list of transactions should be scrollable to see earlier entries
 [x] style the scroll bar to match the rest of the app feel
 [x] fix inconsistences of how the category text is displayed above the date, it seems some are few pixels apart
-[x] We should have the possibility to have multiple Accounts like checking account, savings account etc. <!-- id: 9 -->
+[x] We should have the possibility to have multiple Accounts like checking account, savings account etc.
 [x] style the cancel button and the delete confirmation window to be the same style as the rest of the app
 [x] add option to edit name of categories or add new categories
 [x] add option to add an expense in the past
@@ -43,4 +43,4 @@ DO NOT IMPLEMENT: Insights: Timeline Jan vs Dec 2025
 [x] change the $ in the transactions to €
 [x] add install PWA button in the settings
 [x] add refresh button in the settings
-[ ] add option to double tap on a transaction to split it in half
+[x] add option to double tap on a transaction to split it in half

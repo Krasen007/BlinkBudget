@@ -13,6 +13,11 @@ export const Router = {
         this.handleRoute(); // Handle initial route
     },
 
+    getCurrentRoute() {
+        const hash = window.location.hash.slice(1) || 'dashboard';
+        return hash.split('?')[0];
+    },
+
     // Navigate to a new route
     navigate(route, params = {}) {
         const urlParams = new URLSearchParams(params).toString();

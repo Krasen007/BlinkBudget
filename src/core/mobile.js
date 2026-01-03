@@ -8,17 +8,18 @@ export class MobileUtils {
     this.isInitialized = false;
     this.viewportHeight = window.innerHeight;
     this.visualViewportHeight = window.visualViewport?.height || window.innerHeight;
-    
+    this.responsiveCallbacks = [];
     this.init();
   }
 
   init() {
     if (this.isInitialized) return;
-    
+
     this.setupViewportHandling();
     this.setupOrientationHandling();
     this.updateCSSCustomProperties();
-    
+    this.addMobileClasses();
+
     this.isInitialized = true;
   }
 
@@ -30,6 +31,8 @@ export class MobileUtils {
       this.viewportHeight = window.innerHeight;
       this.visualViewportHeight = window.visualViewport?.height || window.innerHeight;
       this.updateCSSCustomProperties();
+      this.addMobileClasses();
+      this.triggerResponsiveCallbacks();
     };
 
     // Handle visual viewport changes (keyboard appearance/disappearance)
@@ -39,7 +42,7 @@ export class MobileUtils {
 
     // Fallback for browsers without visual viewport support
     window.addEventListener('resize', updateViewportHeight);
-    
+
     // Initial update
     updateViewportHeight();
   }
@@ -49,14 +52,14 @@ export class MobileUtils {
    */
   setupOrientationHandling() {
     let orientationTimeout;
-    
+
     const handleOrientationChange = () => {
       clearTimeout(orientationTimeout);
       orientationTimeout = setTimeout(() => {
         this.updateCSSCustomProperties();
         // Dispatch custom event for components to listen to
         window.dispatchEvent(new CustomEvent('mobile:orientationchange', {
-          detail: { 
+          detail: {
             orientation: this.getOrientation(),
             viewportHeight: this.viewportHeight,
             visualViewportHeight: this.visualViewportHeight
@@ -74,7 +77,7 @@ export class MobileUtils {
    */
   updateCSSCustomProperties() {
     const root = document.documentElement;
-    
+
     root.style.setProperty('--viewport-height', `${this.viewportHeight}px`);
     root.style.setProperty('--visual-viewport-height', `${this.visualViewportHeight}px`);
     root.style.setProperty('--viewport-width', `${window.innerWidth}px`);
@@ -126,10 +129,10 @@ export class MobileUtils {
    */
   preventInputZoom(inputElement) {
     if (!inputElement) return;
-    
+
     const currentFontSize = window.getComputedStyle(inputElement).fontSize;
     const fontSize = parseFloat(currentFontSize);
-    
+
     // iOS requires 16px+ to prevent zoom
     if (fontSize < 16) {
       inputElement.style.fontSize = '16px';
@@ -144,10 +147,10 @@ export class MobileUtils {
 
     const elementRect = element.getBoundingClientRect();
     const keyboardHeight = this.viewportHeight - this.visualViewportHeight;
-    
+
     if (keyboardHeight > 0) {
       const targetY = elementRect.top - keyboardHeight - offset;
-      
+
       if (targetY < 0) {
         window.scrollBy({
           top: targetY,
@@ -162,10 +165,10 @@ export class MobileUtils {
    */
   addMobileClasses() {
     const body = document.body;
-    
+
     // Remove existing mobile classes
     body.classList.remove('is-mobile', 'is-tablet', 'is-desktop', 'supports-touch', 'supports-haptic');
-    
+
     // Add current state classes
     if (this.isMobile()) body.classList.add('is-mobile');
     if (this.isTablet()) body.classList.add('is-tablet');
@@ -175,11 +178,29 @@ export class MobileUtils {
   }
 
   /**
+   * Register a callback for responsive changes
+   */
+  onResponsiveChange(callback) {
+    if (typeof callback === 'function') {
+      this.responsiveCallbacks.push(callback);
+      // Run once immediately
+      callback(this.isMobile());
+    }
+  }
+
+  /**
+   * Trigger all registered responsive callbacks
+   */
+  triggerResponsiveCallbacks() {
+    this.responsiveCallbacks.forEach(cb => cb(this.isMobile()));
+  }
+
+  /**
    * Get safe area insets (for devices with notches)
    */
   getSafeAreaInsets() {
     const computedStyle = getComputedStyle(document.documentElement);
-    
+
     return {
       top: computedStyle.getPropertyValue('--safe-area-inset-top') || '0px',
       right: computedStyle.getPropertyValue('--safe-area-inset-right') || '0px',

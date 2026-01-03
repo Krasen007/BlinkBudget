@@ -1,6 +1,7 @@
 {
   "name": "blinkbudget",
   "version": "1.11.0",
+  "type": "module",
   "description": "Making expense tracking effortless, all in 3 moves.",
   "main": "index.js",
   "directories": {
@@ -17,7 +18,6 @@
   "keywords": [],
   "author": "Krasen Ivanov",
   "license": "GPL-3.0-only",
-  "type": "commonjs",
   "devDependencies": {
     "autoprefixer": "^10.4.22",
     "jsdom": "^27.3.0",
