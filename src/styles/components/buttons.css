@@ -38,12 +38,9 @@
 .btn::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   border-radius: inherit;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgb(255, 255, 255, 0.1);
   opacity: 0;
   transition: opacity var(--transition-fast);
   pointer-events: none;
@@ -69,13 +66,13 @@
 .btn-primary {
   background-color: var(--color-primary);
   color: white;
-  box-shadow: 0 4px 14px 0 rgba(100, 108, 255, 0.39);
+  box-shadow: 0 4px 14px 0 rgb(100, 108, 255, 0.39);
 }
 
 .btn-primary:hover {
   background-color: var(--color-primary-dark);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(100, 108, 255, 0.23);
+  box-shadow: 0 6px 20px rgb(100, 108, 255, 0.23);
   filter: none;
   /* override brightness since we handle color */
 }
@@ -149,7 +146,7 @@
 }
 
 .mobile-delete-btn:hover {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgb(239, 68, 68, 0.1);
   border-color: #ef4444;
 }
 
@@ -196,7 +193,7 @@
 }
 
 .mobile-back-btn.touch-active {
-  background: hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  background: hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
 }
 
 .mobile-back-icon {
@@ -240,7 +237,7 @@
 
 .mobile-nav-item.active {
   color: var(--color-primary);
-  background: hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  background: hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
 }
 
 .mobile-nav-item.touch-active {
@@ -295,7 +292,7 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 767px) {
+@media (width <= 767px) {
   .mobile-confirm-actions {
     flex-direction: column;
   }
@@ -312,7 +309,7 @@ input:active {
 }
 
 /* Mobile-friendly focus states */
-@media (max-width: 767px) {
+@media (width <= 767px) {
   .btn:focus {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
@@ -320,20 +317,20 @@ input:active {
 }
 
 /* High DPI display optimizations */
-@media (-webkit-min-device-pixel-ratio: 2),
-(min-resolution: 192dpi) {
+@media (min-device-pixel-ratio: 2),
+(resolution >= 192dpi) {
   .btn {
     border-width: 0.5px;
   }
 }
 
 /* Accessibility improvements for mobile */
-@media (max-width: 767px) {
+@media (width <= 767px) {
 
   /* Better contrast for touch targets */
   .btn:hover,
   .btn:focus {
-    box-shadow: 0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2);
+    box-shadow: 0 0 0 3px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2);
   }
 }
 
@@ -342,7 +339,7 @@ input:active {
 
   /* Fix iOS button styling */
   .btn {
-    -webkit-appearance: none;
+    appearance: none;
     appearance: none;
   }
 }

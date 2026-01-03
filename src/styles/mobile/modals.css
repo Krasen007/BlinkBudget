@@ -7,7 +7,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgb(0, 0, 0, 0.8);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -15,7 +15,7 @@
   opacity: 0;
   transition: opacity var(--transition-normal);
   backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
 
   /* Safe area support */
   padding: var(--safe-area-inset-top) var(--safe-area-inset-right) var(--safe-area-inset-bottom) var(--safe-area-inset-left);
@@ -39,7 +39,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 20px 50px rgb(0, 0, 0, 0.6);
   transform: translateY(20px) scale(0.95);
   transition: transform var(--transition-normal);
   overflow: hidden;
@@ -150,7 +150,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgb(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: flex-end;
@@ -218,7 +218,7 @@
 /* Mobile Modal Enhancements */
 .mobile-modal-overlay {
   backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
 }
 
 .mobile-modal {
@@ -238,7 +238,7 @@
 }
 
 /* Mobile-specific modal adjustments */
-@media (max-width: 767px) {
+@media (width <= 767px) {
   .mobile-modal {
     max-width: 95vw;
     max-height: 85vh;
@@ -259,7 +259,7 @@
 }
 
 /* Landscape orientation adjustments */
-@media (orientation: landscape) and (max-height: 500px) {
+@media (orientation: landscape) and (height <= 500px) {
   .mobile-modal {
     max-height: 95vh;
   }

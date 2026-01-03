@@ -12,8 +12,6 @@
 /* Body reset and base setup */
 body {
   margin: 0;
-  min-height: 100vh;
-  max-height: 100vh;
   height: 100vh;
   min-height: var(--viewport-height);
   max-height: var(--viewport-height);
@@ -31,7 +29,7 @@ body {
   flex-direction: column;
 
   /* Mobile optimizations */
-  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   /* Prevent iOS text size adjustment */
   -webkit-tap-highlight-color: transparent;
   /* Remove tap highlight */
@@ -39,10 +37,7 @@ body {
   /* Improve touch responsiveness */
 
   /* Safe area support */
-  padding-top: var(--safe-area-inset-top);
-  padding-left: var(--safe-area-inset-left);
-  padding-right: var(--safe-area-inset-right);
-  padding-bottom: var(--safe-area-inset-bottom);
+  padding: var(--safe-area-inset-top) var(--safe-area-inset-right) var(--safe-area-inset-bottom) var(--safe-area-inset-left);
 
   /* Center application */
   align-items: center;
@@ -57,9 +52,8 @@ body {
   /* Ensure it takes available height */
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden auto;
   /* Allow #app to scroll if needed */
-  overflow-x: hidden;
   /* Prevent horizontal scroll */
   height: 100%;
   /* Fill parent height */
@@ -67,20 +61,20 @@ body {
 
 /* Remove default input styling */
 input {
-  -webkit-appearance: none;
-  -moz-appearance: none;
+  appearance: none;
+  appearance: none;
   appearance: none;
 }
 
 /* Remove arrows from number input */
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  appearance: none;
   margin: 0;
 }
 
-input[type=number] {
-  -moz-appearance: textfield;
+input[type="number"] {
+  appearance: textfield;
   appearance: textfield;
 }
 
@@ -88,7 +82,6 @@ input[type=number] {
 
 /* Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
-
   *,
   *::before,
   *::after {
@@ -101,7 +94,6 @@ input[type=number] {
 
 /* Print styles - hide mobile-specific elements */
 @media print {
-
   .mobile-only,
   .touch-target,
   .btn {

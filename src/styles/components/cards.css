@@ -24,7 +24,7 @@
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-@media (max-width: calc(var(--breakpoint-md) - 1px)) {
+@media (width <= calc(var(--breakpoint-md) - 1px)) {
   .dashboard-stat-card {
     padding: var(--spacing-md);
     min-height: 80px;
@@ -39,7 +39,7 @@
   color: var(--color-text-muted);
 }
 
-@media (max-width: calc(var(--breakpoint-md) - 1px)) {
+@media (width <= calc(var(--breakpoint-md) - 1px)) {
   .dashboard-stat-label {
     font-size: var(--font-size-sm);
   }
@@ -53,7 +53,7 @@
   color: var(--color-text-main);
 }
 
-@media (max-width: calc(var(--breakpoint-md) - 1px)) {
+@media (width <= calc(var(--breakpoint-md) - 1px)) {
   .dashboard-stat-value {
     font-size: var(--font-size-2xl);
   }
@@ -67,7 +67,7 @@
   margin-bottom: var(--spacing-xl);
 }
 
-@media (max-width: calc(var(--breakpoint-md) - 1px)) {
+@media (width <= calc(var(--breakpoint-md) - 1px)) {
   .dashboard-stats-container {
     grid-template-columns: 1fr;
     /* Single column on mobile */
@@ -168,7 +168,7 @@
   text-align: left;
 }
 
-@media (max-width: calc(var(--breakpoint-md) - 1px)) {
+@media (width <= calc(var(--breakpoint-md) - 1px)) {
   .transaction-item-info {
     gap: var(--spacing-xs);
   }
@@ -185,7 +185,7 @@
   width: 100%;
 }
 
-@media (max-width: calc(var(--breakpoint-md) - 1px)) {
+@media (width <= calc(var(--breakpoint-md) - 1px)) {
   .transaction-item-category {
     font-size: var(--font-size-base);
   }
@@ -200,7 +200,7 @@
   color: var(--color-text-muted);
 }
 
-@media (max-width: calc(var(--breakpoint-md) - 1px)) {
+@media (width <= calc(var(--breakpoint-md) - 1px)) {
   .transaction-item-date {
     font-size: var(--font-size-sm);
   }
@@ -215,7 +215,7 @@
   color: var(--color-text-main);
 }
 
-@media (max-width: calc(var(--breakpoint-md) - 1px)) {
+@media (width <= calc(var(--breakpoint-md) - 1px)) {
   .transaction-item-value {
     font-size: var(--font-size-lg);
   }
@@ -237,7 +237,7 @@
   color: var(--color-text-main);
 }
 
-@media (max-width: calc(var(--breakpoint-md) - 1px)) {
+@media (width <= calc(var(--breakpoint-md) - 1px)) {
   .dashboard-transactions-title {
     font-size: var(--font-size-xl);
   }
@@ -253,7 +253,7 @@
   /* Force hardware acceleration */
 }
 
-@media (max-width: calc(var(--breakpoint-md) - 1px)) {
+@media (width <= calc(var(--breakpoint-md) - 1px)) {
   .dashboard-transactions-list {
     max-height: 50vh;
     /* Responsive height for mobile */
@@ -268,7 +268,7 @@
 }
 
 /* Responsive adjustments for cards */
-@media (max-width: calc(var(--breakpoint-md) - 1px)) {
+@media (width <= calc(var(--breakpoint-md) - 1px)) {
   .mobile-account-actions {
     flex-direction: column;
   }

@@ -20,7 +20,7 @@
 .thumb-reach-container {
 
   /* Position critical controls in bottom 60% for thumb accessibility */
-  @media (max-width: calc(var(--breakpoint-md) - 1px)) {
+  @media (width <= calc(var(--breakpoint-md) - 1px)) {
     min-height: var(--thumb-reach-zone);
     justify-content: flex-end;
     padding-bottom: var(--spacing-xl);
@@ -61,8 +61,7 @@
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: var(--spacing-md);
   max-height: 40vh;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden auto;
   padding: var(--spacing-sm);
   border-radius: var(--radius-md);
   background: var(--color-surface);
@@ -80,7 +79,7 @@
   }
 
   /* Optimize for mobile */
-  @media (max-width: calc(var(--breakpoint-md) - 1px)) {
+  @media (width <= calc(var(--breakpoint-md) - 1px)) {
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     max-height: 35vh;
     gap: var(--spacing-sm);
@@ -127,14 +126,14 @@
 .transaction-form.mobile-optimized {
 
   /* Optimize for thumb reach on mobile */
-  @media (max-width: calc(var(--breakpoint-md) - 1px)) {
+  @media (width <= calc(var(--breakpoint-md) - 1px)) {
     min-height: calc(var(--visual-viewport-height) - 120px);
     justify-content: flex-end;
   }
 }
 
 /* Responsive adjustments for different mobile screen sizes */
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .category-chip-container {
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     gap: var(--spacing-xs);
@@ -153,7 +152,7 @@
 }
 
 /* Landscape orientation optimizations */
-@media (orientation: landscape) and (max-height: 500px) {
+@media (orientation: landscape) and (height <= 500px) {
   .category-chip-container {
     max-height: 25vh;
     grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
@@ -186,7 +185,7 @@
   /* Force hardware acceleration */
 }
 
-@media (max-width: calc(var(--breakpoint-md) - 1px)) {
+@media (width <= calc(var(--breakpoint-md) - 1px)) {
   .dashboard-transactions-list {
     max-height: 50vh;
     /* Responsive height for mobile */
@@ -194,8 +193,7 @@
 }
 
 /* Mobile-friendly focus states */
-@media (max-width: calc(var(--breakpoint-md) - 1px)) {
-
+@media (width <= calc(var(--breakpoint-md) - 1px)) {
   .btn:focus,
   input:focus {
     outline: 2px solid var(--color-primary);
@@ -204,7 +202,7 @@
 }
 
 /* Accessibility improvements for mobile */
-@media (max-width: calc(var(--breakpoint-md) - 1px)) {
+@media (width <= calc(var(--breakpoint-md) - 1px)) {
 
   /* Larger focus indicators on mobile */
   :focus-visible {
@@ -215,13 +213,13 @@
   /* Better contrast for touch targets */
   .btn:hover,
   .btn:focus {
-    box-shadow: 0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2);
+    box-shadow: 0 0 0 3px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2);
   }
 }
 
 /* High DPI display optimizations */
-@media (-webkit-min-device-pixel-ratio: 2),
-(min-resolution: 192dpi) {
+@media (min-device-pixel-ratio: 2),
+(resolution >= 192dpi) {
   .btn {
     border-width: 0.5px;
   }

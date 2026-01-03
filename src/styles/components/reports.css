@@ -5,7 +5,9 @@
     isolation: isolate !important;
     /* Add a strong visual break */
     transform: translateZ(0) !important; /* Force new layer */
-}:root {
+}
+
+:root {
     --reports-header-height: 80px;
     --reports-time-selector-height: 40px;
     --reports-content-offset: calc(var(--reports-header-height) + var(--reports-time-selector-height));
@@ -18,8 +20,7 @@
     height: 100vh;
     max-height: 100vh;
     min-height: unset;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden auto;
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
     touch-action: pan-y;
@@ -30,8 +31,7 @@
 .reports-view-container .reports-content {
     flex: 1;
     min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden auto;
     padding-bottom: var(--spacing-xl);
     display: flex;
     flex-direction: column;
@@ -50,15 +50,15 @@
     padding: var(--spacing-lg);
     margin-bottom: var(--spacing-lg);
     border: 1px solid hsl(var(--primary-hue), var(--primary-sat), calc(var(--primary-light) + 10%));
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgb(0, 0, 0, 0.15);
 }
 
 .reports-header h1 {
-    background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.9) 100%);
-    -webkit-background-clip: text;
+    background: linear-gradient(135deg, #fff 0%, rgb(255, 255, 255, 0.9) 100%);
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-shadow: 0 2px 4px rgb(0, 0, 0, 0.1);
 }
 
 /* Chart Container Styling */
@@ -71,8 +71,8 @@
     padding: var(--spacing-xl);
     margin-bottom: var(--spacing-lg);
     box-shadow: 
-        0 4px 12px rgba(0, 0, 0, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        0 4px 12px rgb(0, 0, 0, 0.15),
+        inset 0 1px 0 rgb(255, 255, 255, 0.05);
     position: relative;
     overflow: visible; /* Allow content to be visible for scrolling */
     /* Ensure charts don't interfere with scrolling */
@@ -195,15 +195,15 @@
 
 .chart-container canvas:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 24px rgb(0, 0, 0, 0.2);
 }
 
 .chart-container canvas:focus {
     outline: 3px solid hsl(var(--primary-hue), var(--primary-sat), var(--primary-light));
     outline-offset: 4px;
     box-shadow: 
-        0 0 0 4px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2),
-        0 8px 24px rgba(0, 0, 0, 0.2);
+        0 0 0 4px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2),
+        0 8px 24px rgb(0, 0, 0, 0.2);
 }
 
 /* Chart Title Styling */
@@ -253,14 +253,14 @@
     align-items: center;
     gap: var(--spacing-sm);
     padding: var(--spacing-sm) var(--spacing-md);
-    background: rgba(255, 255, 255, 0.05);
+    background: rgb(255, 255, 255, 0.05);
     border-radius: var(--radius-md);
     transition: var(--transition-fast);
     cursor: pointer;
 }
 
 .chart-container .chartjs-legend li:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgb(255, 255, 255, 0.1);
     transform: translateY(-1px);
 }
 
@@ -329,7 +329,7 @@
     height: 100%;
     background: linear-gradient(90deg, 
         transparent 0%, 
-        rgba(255, 255, 255, 0.4) 50%, 
+        rgb(255, 255, 255, 0.4) 50%, 
         transparent 100%);
     animation: shimmer 2s infinite;
 }
@@ -402,7 +402,7 @@
 
 .data-summary-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 12px 32px rgb(0, 0, 0, 0.2);
     border-color: hsl(var(--primary-hue), var(--primary-sat), calc(var(--primary-light) + 10%));
 }
 
@@ -413,8 +413,8 @@
     margin-bottom: var(--spacing-sm);
     background: linear-gradient(135deg, 
         var(--color-text-main) 0%, 
-        rgba(255, 255, 255, 0.8) 100%);
-    -webkit-background-clip: text;
+        rgb(255, 255, 255, 0.8) 100%);
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
@@ -431,14 +431,14 @@
 .keyboard-shortcuts-info {
     opacity: 0.8;
     transition: var(--transition-fast);
-    background: rgba(255, 255, 255, 0.05);
+    background: rgb(255, 255, 255, 0.05);
     padding: var(--spacing-sm);
     border-radius: var(--radius-md);
 }
 
 .keyboard-shortcuts-info:hover {
     opacity: 1;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgb(255, 255, 255, 0.1);
 }
 
 .keyboard-shortcuts-info kbd {
@@ -449,11 +449,11 @@
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     padding: 2px 6px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 2px rgb(0, 0, 0, 0.1);
 }
 
 /* Mobile optimizations */
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .reports-header {
         padding: var(--spacing-md);
         margin-bottom: var(--spacing-md);
@@ -497,7 +497,7 @@
 }
 
 /* Tablet optimizations */
-@media (min-width: 769px) and (max-width: 1023px) {
+@media (width >= 769px) and (width <= 1023px) {
     .reports-header h1 {
         font-size: var(--font-size-3xl);
     }
@@ -508,7 +508,7 @@
 }
 
 /* Desktop optimizations */
-@media (min-width: 1024px) {
+@media (width >= 1024px) {
     .reports-header {
         padding: var(--spacing-xl);
     }
@@ -520,8 +520,8 @@
     .chart-container:hover {
         transform: translateY(-2px);
         box-shadow: 
-            0 8px 32px rgba(0, 0, 0, 0.2),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            0 8px 32px rgb(0, 0, 0, 0.2),
+            inset 0 1px 0 rgb(255, 255, 255, 0.1);
     }
 }
 
@@ -571,8 +571,8 @@
     
     .chart-container {
         box-shadow: 
-            0 4px 12px rgba(0, 0, 0, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            0 4px 12px rgb(0, 0, 0, 0.3),
+            inset 0 1px 0 rgb(255, 255, 255, 0.05);
     }
 }
 
@@ -588,6 +588,7 @@
         opacity: 0;
         transform: translateY(10px);
     }
+
     100% {
         opacity: 1;
         transform: translateY(0);
@@ -598,6 +599,7 @@
     0%, 100% {
         opacity: 0.6;
     }
+
     50% {
         opacity: 1;
     }
@@ -636,7 +638,7 @@
 }
 
 .chart-container .chartjs-legend li:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgb(255, 255, 255, 0.1);
     transform: translateY(-1px);
 }
 
@@ -662,7 +664,7 @@
 
 .data-summary-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 24px rgb(0, 0, 0, 0.2);
 }
 
 /* Loading State Animations - Simplified */
@@ -694,10 +696,10 @@
 }
 
 /* Responsive animation adjustments */
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .chart-container canvas:hover {
         transform: none; /* Disable hover transforms on mobile */
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 4px 12px rgb(0, 0, 0, 0.15);
     }
     
     .data-summary-card:hover {
@@ -775,7 +777,7 @@
 .category-card:hover {
     border-color: var(--color-primary);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgb(0, 0, 0, 0.1);
 }
 
 .category-card:focus {
@@ -821,7 +823,7 @@
     /* Visual styling */
     background: linear-gradient(145deg, 
         var(--color-surface) 0%, 
-        rgba(59, 130, 246, 0.02) 100%);
+        rgb(59, 130, 246, 0.02) 100%);
     border-top: 3px solid var(--color-border);
     
     /* Layout control */
@@ -843,8 +845,8 @@
     box-sizing: border-box;
     overflow: hidden;
     border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgb(255, 255, 255, 0.02);
+    border: 1px solid rgb(255, 255, 255, 0.1);
 }
 
 .reports-view-container .income-expense-section h3 {
@@ -929,8 +931,8 @@
     clear: both;
     display: block;
     width: 100%;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgb(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgb(255, 255, 255, 0.1);
     contain: layout style;
     isolation: isolate;
     min-height: 0;

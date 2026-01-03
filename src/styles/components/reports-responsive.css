@@ -106,7 +106,7 @@
 }
 
 /* Small mobile devices (< 480px) */
-@media (max-width: 479px) {
+@media (width <= 479px) {
   .view-reports {
     padding: var(--spacing-xs);
   }
@@ -146,7 +146,7 @@
 }
 
 /* Landscape orientation on mobile */
-@media (max-width: 767px) and (orientation: landscape) {
+@media (width <= 767px) and (orientation: landscape) {
   .view-reports {
     min-height: 100vh;
     min-height: var(--visual-viewport-height);
@@ -185,7 +185,7 @@
 }
 
 /* Short landscape (phones in landscape with small height) */
-@media (max-width: 767px) and (orientation: landscape) and (max-height: 500px) {
+@media (width <= 767px) and (orientation: landscape) and (height <= 500px) {
   .view-reports .reports-header h1 {
     font-size: 1.125rem;
   }
@@ -208,7 +208,7 @@
 }
 
 /* Tablet styles (768px - 1023px) */
-@media (min-width: 768px) and (max-width: 1023px) {
+@media (width >= 768px) and (width <= 1023px) {
   .view-reports {
     padding: var(--spacing-md) var(--spacing-lg);
   }
@@ -265,7 +265,7 @@
 }
 
 /* Desktop styles (1024px+) */
-@media (min-width: 1024px) {
+@media (width >= 1024px) {
   .view-reports {
     padding: var(--spacing-lg) var(--spacing-xl);
     max-width: var(--container-max-width);
@@ -323,7 +323,7 @@
 }
 
 /* Large desktop styles (1280px+) */
-@media (min-width: 1280px) {
+@media (width >= 1280px) {
   .view-reports {
     max-width: 1200px;
   }
@@ -361,7 +361,7 @@
   .view-reports .chart-container {
     border: 1px solid black;
     margin: var(--spacing-lg) 0;
-    page-break-inside: avoid;
+    break-inside: avoid;
   }
   
   .view-reports canvas {
@@ -379,7 +379,7 @@
   .view-reports .data-summary {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-md);
-    page-break-inside: avoid;
+    break-inside: avoid;
   }
   
   .view-reports .data-summary-card {
@@ -389,7 +389,7 @@
 }
 
 /* High DPI displays */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+@media (min-device-pixel-ratio: 2), (resolution >= 192dpi) {
   .view-reports canvas {
     image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
@@ -400,12 +400,12 @@
 @media (hover: hover) and (pointer: fine) {
   .view-reports .time-period-selector button:hover {
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgb(0, 0, 0, 0.1);
   }
   
   .view-reports .data-summary-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgb(0, 0, 0, 0.1);
     transition: transform var(--transition-fast), box-shadow var(--transition-fast);
   }
 }
@@ -454,23 +454,17 @@
 
 /* Safe area support for devices with notches */
 .view-reports {
-  padding-top: max(var(--spacing-sm), var(--safe-area-inset-top));
-  padding-left: max(var(--spacing-sm), var(--safe-area-inset-left));
-  padding-right: max(var(--spacing-sm), var(--safe-area-inset-right));
-  padding-bottom: max(var(--spacing-sm), var(--safe-area-inset-bottom));
+  padding: max(var(--spacing-sm), var(--safe-area-inset-top)) max(var(--spacing-sm), var(--safe-area-inset-right)) max(var(--spacing-sm), var(--safe-area-inset-bottom)) max(var(--spacing-sm), var(--safe-area-inset-left));
 }
 
-@media (min-width: 768px) {
+@media (width >= 768px) {
   .view-reports {
-    padding-top: max(var(--spacing-md), var(--safe-area-inset-top));
-    padding-left: max(var(--spacing-lg), var(--safe-area-inset-left));
-    padding-right: max(var(--spacing-lg), var(--safe-area-inset-right));
-    padding-bottom: max(var(--spacing-md), var(--safe-area-inset-bottom));
+    padding: max(var(--spacing-md), var(--safe-area-inset-top)) max(var(--spacing-lg), var(--safe-area-inset-right)) max(var(--spacing-md), var(--safe-area-inset-bottom)) max(var(--spacing-lg), var(--safe-area-inset-left));
   }
 }
 
 /* Keyboard navigation enhancements for different screen sizes */
-@media (max-width: 767px) {
+@media (width <= 767px) {
   .view-reports *:focus,
   .view-reports *:focus-visible {
     outline-width: 3px;
@@ -478,7 +472,7 @@
   }
 }
 
-@media (min-width: 768px) {
+@media (width >= 768px) {
   .view-reports *:focus,
   .view-reports *:focus-visible {
     outline-width: 2px;

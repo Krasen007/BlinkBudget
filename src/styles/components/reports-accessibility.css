@@ -14,7 +14,7 @@
 .view-reports canvas:focus-visible {
   outline: 3px solid var(--color-primary);
   outline-offset: 4px;
-  box-shadow: 0 0 0 6px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2);
+  box-shadow: 0 0 0 6px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2);
 }
 
 /* High contrast mode support */
@@ -90,7 +90,7 @@
 }
 
 /* Enhanced touch targets for mobile accessibility */
-@media (max-width: 767px) {
+@media (width <= 767px) {
   .view-reports .btn,
   .view-reports button,
   .view-reports [role="button"] {
@@ -185,7 +185,7 @@
   position: absolute;
   bottom: var(--spacing-sm);
   right: var(--spacing-sm);
-  background: rgba(0, 0, 0, 0.8);
+  background: rgb(0, 0, 0, 0.8);
   color: white;
   padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--radius-sm);
@@ -201,7 +201,7 @@
 }
 
 /* High-DPI display font smoothing */
-@media (min-resolution: 2dppx) {
+@media (resolution >= 2dppx) {
   .view-reports {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -241,7 +241,7 @@
 }
 
 /* Android TalkBack optimizations */
-@media screen and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: .001dpcm) {
+@media screen and (min-device-pixel-ratio: 0) and (resolution >= .001dpcm) {
   .view-reports canvas:focus {
     outline: 3px solid var(--color-primary);
     outline-offset: 1px;
@@ -280,11 +280,8 @@
 /* Focus management for modal dialogs */
 .view-reports .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  inset: 0;
+  background: rgb(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;

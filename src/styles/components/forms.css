@@ -10,15 +10,14 @@ input {
   transition: border-color var(--transition-fast);
   outline: none;
   font-family: var(--font-body);
-  font-size: var(--font-size-base);
 
   /* Touch-friendly sizing - match category chips */
   min-height: var(--touch-target-standard);
   height: var(--touch-target-standard);
 
   /* Mobile input optimizations */
-  -webkit-appearance: none;
-  -moz-appearance: none;
+  appearance: none;
+  appearance: none;
   appearance: none;
 
   /* Prevent zoom on focus (iOS) */
@@ -35,7 +34,7 @@ input:hover {
 
 input:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  box-shadow: 0 0 0 3px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
 }
 
 /* Specific input types for mobile */
@@ -46,14 +45,14 @@ input[type="date"] {
 }
 
 /* Remove Arrows from Number Input */
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  appearance: none;
   margin: 0;
 }
 
-input[type=number] {
-  -moz-appearance: textfield;
+input[type="number"] {
+  appearance: textfield;
   appearance: textfield;
 }
 
@@ -78,7 +77,7 @@ select.input-select {
 /* Enhanced focus states for touch */
 select.input-select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  box-shadow: 0 0 0 3px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
   outline: none;
 }
 
@@ -100,8 +99,8 @@ select.input-select:focus {
   box-sizing: border-box;
   
   /* Mobile optimizations */
-  -webkit-appearance: none;
-  -moz-appearance: none;
+  appearance: none;
+  appearance: none;
   appearance: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -115,7 +114,7 @@ select.input-select:focus {
 .mobile-form-input:focus,
 .mobile-form-select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  box-shadow: 0 0 0 3px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
   outline: none;
 }
 
@@ -170,13 +169,13 @@ select.input-select:focus {
 .view-add .mobile-form-input[aria-label*="Transaction date"]:hover,
 .view-edit .mobile-form-input[aria-label*="Transaction date"]:hover {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  box-shadow: 0 0 0 2px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
 }
 
 .view-add .mobile-form-input[aria-label*="Transaction date"]:focus,
 .view-edit .mobile-form-input[aria-label*="Transaction date"]:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
+  box-shadow: 0 0 0 3px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
   outline: none;
 }
 
@@ -219,7 +218,7 @@ select.input-select:focus {
   width: 100%;
 
   /* Ensure form takes full width */
-  @media (max-width: 767px) {
+  @media (width <= 767px) {
     min-height: calc(var(--visual-viewport-height) - 120px);
     justify-content: flex-end;
   }
@@ -265,7 +264,7 @@ body.keyboard-visible input:focus,
 body.keyboard-visible select:focus {
   /* Stronger focus indication when keyboard is active */
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
+  box-shadow: 0 0 0 4px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
   transform: scale(1.02);
   transition: all var(--transition-fast);
 }
@@ -287,7 +286,7 @@ body.keyboard-visible select:focus {
 }
 
 /* Mobile-friendly focus states */
-@media (max-width: calc(var(--breakpoint-md) - 1px)) {
+@media (width <= calc(var(--breakpoint-md) - 1px)) {
   input:focus {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
@@ -300,7 +299,7 @@ body.keyboard-visible select:focus {
   /* iOS Safari specific styles */
   input {
     /* Fix iOS input styling */
-    -webkit-appearance: none;
+    appearance: none;
     appearance: none;
     border-radius: var(--radius-md);
   }
@@ -318,7 +317,7 @@ body.keyboard-visible select:focus {
 }
 
 /* Android specific fixes */
-@media screen and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: .001dpcm) {
+@media screen and (min-device-pixel-ratio: 0) and (resolution >= .001dpcm) {
 
   /* Android Chrome specific styles */
   input:focus {

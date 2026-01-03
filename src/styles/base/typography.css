@@ -64,7 +64,7 @@ p {
 }
 
 /* Orientation-specific styles */
-@media (orientation: landscape) and (max-height: 500px) {
+@media (orientation: landscape) and (height <= 500px) {
   h1 {
     font-size: var(--font-size-2xl);
   }

@@ -53,15 +53,15 @@
 }
 
 .focus\:ring:focus {
-  box-shadow: 0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  box-shadow: 0 0 0 3px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
 }
 
 .focus\:ring-primary:focus {
-  box-shadow: 0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2);
+  box-shadow: 0 0 0 3px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2);
 }
 
 .focus\:ring-thick:focus {
-  box-shadow: 0 0 0 4px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
+  box-shadow: 0 0 0 4px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
 }
 
 /* Focus-visible utilities (modern browsers) */
@@ -76,7 +76,7 @@
 }
 
 .focus-visible\:ring:focus-visible {
-  box-shadow: 0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2);
+  box-shadow: 0 0 0 3px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2);
 }
 
 /* Skip link utilities */
@@ -187,7 +187,7 @@
 }
 
 /* Mobile accessibility enhancements */
-@media (max-width: 767px) {
+@media (width <= 767px) {
   /* Larger focus indicators on mobile */
   .mobile-focus:focus,
   .mobile-focus:focus-visible {
@@ -212,7 +212,7 @@
 }
 
 /* Text scaling utilities for accessibility */
-@media (min-resolution: 2dppx) {
+@media (resolution >= 2dppx) {
   .high-dpi\:text-sharp {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -271,7 +271,7 @@
 }
 
 /* Android specific accessibility fixes */
-@media screen and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: .001dpcm) {
+@media screen and (min-device-pixel-ratio: 0) and (resolution >= .001dpcm) {
   .android-focus-fix:focus {
     /* Android Chrome specific focus styles */
     outline: 2px solid var(--color-primary);
