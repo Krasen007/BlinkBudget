@@ -229,12 +229,12 @@ export const DashboardView = () => {
         content.appendChild(addBtn);
 
         // Recent Transactions
-        const highlightTransactionId = getTransactionToHighlight();
+        const highlightTransactionIds = getTransactionToHighlight();
         const transactionList = TransactionList({
             transactions,
             currentFilter,
             accounts: currentAccounts,
-            highlightTransactionId
+            highlightTransactionIds
         });
         content.appendChild(transactionList);
     };

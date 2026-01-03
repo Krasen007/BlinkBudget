@@ -24,8 +24,65 @@ export const TransactionListItem = ({ transaction, currentFilter, accounts, shou
     });
 
 
-    item.addEventListener('click', () => {
-        Router.navigate('edit-expense', { id: transaction.id });
+    // Split transaction on double-click
+    let clickTimer = null;
+    let clickCount = 0;
+
+    const handleSplitTransaction = () => {
+        const originalAmount = transaction.amount;
+        const half = originalAmount / 2;
+
+        // Round first part down to nearest 0.50
+        const firstAmount = Math.floor(half * 2) / 2;
+        const secondAmount = originalAmount - firstAmount;
+
+        // Create first transaction (rounded down) - keep original timestamp
+        const firstTransaction = {
+            ...transaction,
+            amount: firstAmount
+        };
+        delete firstTransaction.id; // Let StorageService generate new ID
+
+        // Create second transaction (remainder) - keep original timestamp
+        const secondTransaction = {
+            ...transaction,
+            amount: secondAmount
+        };
+        delete secondTransaction.id; // Let StorageService generate new ID
+
+        // Add both transactions and store their IDs for highlighting
+        const addedFirst = StorageService.add(firstTransaction);
+        const addedSecond = StorageService.add(secondTransaction);
+
+        // Mark both transactions for highlighting
+        // Store both IDs as comma-separated string
+        sessionStorage.setItem('highlightTransactionId', `${addedFirst.id},${addedSecond.id}`);
+
+        // Remove original transaction
+        StorageService.remove(transaction.id);
+
+        // Trigger UI update
+        window.dispatchEvent(new CustomEvent('storage-updated', {
+            detail: { key: 'transactions' }
+        }));
+    };
+
+    item.addEventListener('click', (e) => {
+        clickCount++;
+
+        if (clickCount === 1) {
+            clickTimer = setTimeout(() => {
+                // Single click - navigate to edit
+                Router.navigate('edit-expense', { id: transaction.id });
+                clickCount = 0;
+            }, 250); // 250ms delay to detect double-click
+        } else if (clickCount === 2) {
+            // Double click - split transaction
+            clearTimeout(clickTimer);
+            clickCount = 0;
+            e.stopPropagation();
+            handleSplitTransaction();
+        }
     });
 
     const info = document.createElement('div');

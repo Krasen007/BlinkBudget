@@ -9,7 +9,7 @@ import { formatDateForDisplay } from '../utils/date-utils.js';
 import { SPACING, DIMENSIONS, BREAKPOINTS, TIMING, FONT_SIZES } from '../utils/constants.js';
 import { debounce } from '../utils/touch-utils.js';
 
-export const TransactionList = ({ transactions, currentFilter, accounts, highlightTransactionId = null }) => {
+export const TransactionList = ({ transactions, currentFilter, accounts, highlightTransactionIds = null }) => {
     const listContainer = document.createElement('div');
     listContainer.className = 'dashboard-transactions-container';
     listContainer.style.flex = '1';
@@ -17,7 +17,7 @@ export const TransactionList = ({ transactions, currentFilter, accounts, highlig
     listContainer.style.flexDirection = 'column';
     listContainer.style.minHeight = '0'; // Allow flex child to shrink
     listContainer.style.overflow = 'hidden'; // Prevent container from scrolling
-    
+
     const listTitle = document.createElement('h3');
     listTitle.textContent = 'Recent Transactions';
     listTitle.className = 'dashboard-transactions-title';
@@ -30,9 +30,9 @@ export const TransactionList = ({ transactions, currentFilter, accounts, highlig
         lineHeight: 'var(--line-height-tight)',
         fontWeight: '600'
     });
-    
+
     listContainer.appendChild(listTitle);
-    
+
     if (transactions.length === 0) {
         const emptyState = document.createElement('p');
         emptyState.textContent = 'No transactions yet.';
@@ -56,44 +56,45 @@ export const TransactionList = ({ transactions, currentFilter, accounts, highlig
             willChange: 'scroll-position',
             transform: 'translateZ(0)'
         });
-        
+
         // Dynamic height calculation - use flex instead of maxHeight
         const calculateListHeight = () => {
             // List will use flex: 1, but we can still set a min-height for small screens
             const minHeight = DIMENSIONS.MIN_LIST_HEIGHT;
             list.style.minHeight = `${minHeight}px`;
         };
-        
+
         calculateListHeight();
-        
+
         // Update height on resize (for min-height)
         const updateListHeight = debounce(() => {
             requestAnimationFrame(() => {
                 calculateListHeight();
             });
         }, TIMING.DEBOUNCE_RESIZE);
-        
+
         window.addEventListener('resize', updateListHeight);
         window.addEventListener('orientationchange', () => {
             setTimeout(updateListHeight, TIMING.DEBOUNCE_ORIENTATION);
         });
-        
+
         // Recalculate after content loads
         setTimeout(updateListHeight, TIMING.INITIAL_LOAD_DELAY);
-        
+
         transactions.forEach(transaction => {
+            const shouldHighlight = highlightTransactionIds && highlightTransactionIds.includes(transaction.id);
             const item = TransactionListItem({
                 transaction,
                 currentFilter,
                 accounts,
-                shouldHighlight: highlightTransactionId === transaction.id
+                shouldHighlight
             });
             list.appendChild(item);
         });
-        
+
         listContainer.appendChild(list);
     }
-    
+
     return listContainer;
 };
 
