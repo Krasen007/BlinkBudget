@@ -3,8 +3,8 @@ import { TransactionForm } from '../components/TransactionForm.js';
 import { DateInput } from '../components/DateInput.js';
 import { TransactionService } from '../core/transaction-service.js';
 import { Router } from '../core/router.js';
-import { SPACING, DIMENSIONS, TOUCH_TARGETS, FONT_SIZES, TIMING, STORAGE_KEYS } from '../utils/constants.js';
 import { createButton } from '../utils/dom-factory.js';
+import { SPACING, DIMENSIONS, TOUCH_TARGETS, FONT_SIZES, TIMING, STORAGE_KEYS } from '../utils/constants.js';
 import { markTransactionForHighlight } from '../utils/success-feedback.js';
 
 export const EditView = ({ id }) => {

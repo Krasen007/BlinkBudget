@@ -56,8 +56,7 @@ export class ProgressiveDataLoader {
             return this.processDataDirectly(transactions, timePeriod);
         }
 
-        console.log(`[ProgressiveLoader] Starting progressive loading for ${transactions.length} transactions`);
-        
+
         try {
             this.isLoading = true;
             this.loadingProgress = 0;
@@ -65,42 +64,42 @@ export class ProgressiveDataLoader {
 
             // Filter transactions by time period first
             const filteredTransactions = this.filterByTimePeriod(transactions, timePeriod);
-            
+
             if (filteredTransactions.length === 0) {
                 return this.createEmptyResult(timePeriod);
             }
 
             // Sort transactions for optimal processing
             const sortedTransactions = this.sortTransactionsForProcessing(
-                filteredTransactions, 
+                filteredTransactions,
                 prioritizeCategories
             );
 
             // Process data in chunks
             const result = await this.processDataInChunks(sortedTransactions, timePeriod);
-            
+
             this.isLoading = false;
             this.loadingProgress = 100;
-            
+
             if (this.onProgressCallback) {
                 this.onProgressCallback(100, 'Complete');
             }
 
-            console.log('[ProgressiveLoader] Progressive loading completed');
             return result;
 
         } catch (error) {
             this.isLoading = false;
             console.error('[ProgressiveLoader] Progressive loading failed:', error);
-            
+
             if (error.message === 'Data loading was cancelled') {
                 throw new Error('Data loading was cancelled');
             }
-            
+
             // Fallback to direct processing
             console.warn('[ProgressiveLoader] Falling back to direct processing');
             return this.processDataDirectly(transactions, timePeriod);
-        }    }
+        }
+    }
 
     /**
      * Process small datasets directly without chunking
@@ -110,7 +109,7 @@ export class ProgressiveDataLoader {
      */
     processDataDirectly(transactions, timePeriod) {
         const filteredTransactions = this.filterByTimePeriod(transactions, timePeriod);
-        
+
         if (filteredTransactions.length === 0) {
             return this.createEmptyResult(timePeriod);
         }
@@ -135,7 +134,7 @@ export class ProgressiveDataLoader {
         const startTime = performance.now();
         const totalTransactions = transactions.length;
         const chunks = this.createChunks(transactions, PROGRESSIVE_CONFIG.CHUNK_SIZE);
-        
+
         // Initialize accumulators
         const categoryTotals = new Map();
         let totalIncome = 0;
@@ -235,7 +234,7 @@ export class ProgressiveDataLoader {
                 const categoryData = categoryTotals.get(category);
                 categoryData.amount += amount;
                 categoryData.count += 1;
-                
+
                 totalExpenses(amount);
                 expenseCount();
             } else if (cleanTransaction.type === 'income') {
@@ -258,7 +257,7 @@ export class ProgressiveDataLoader {
 
         const startDate = new Date(timePeriod.startDate);
         const endDate = new Date(timePeriod.endDate);
-        
+
         startDate.setHours(0, 0, 0, 0);
         endDate.setHours(23, 59, 59, 999);
 
@@ -282,14 +281,14 @@ export class ProgressiveDataLoader {
         return transactions.sort((a, b) => {
             const aCategoryPriority = PROGRESSIVE_CONFIG.PRIORITY_CATEGORIES.indexOf(a.category || '');
             const bCategoryPriority = PROGRESSIVE_CONFIG.PRIORITY_CATEGORIES.indexOf(b.category || '');
-            
+
             // Prioritize transactions in priority categories
             if (aCategoryPriority !== -1 && bCategoryPriority === -1) return -1;
             if (bCategoryPriority !== -1 && aCategoryPriority === -1) return 1;
             if (aCategoryPriority !== -1 && bCategoryPriority !== -1) {
                 return aCategoryPriority - bCategoryPriority;
             }
-            
+
             // Then sort by date (newest first)
             const aDate = new Date(a.date || a.timestamp);
             const bDate = new Date(b.date || b.timestamp);
@@ -370,11 +369,11 @@ export class ProgressiveDataLoader {
         expenseTransactions.forEach(transaction => {
             const category = transaction.category || 'Uncategorized';
             const amount = Math.abs(transaction.amount || 0);
-            
+
             if (!categoryTotals[category]) {
                 categoryTotals[category] = { name: category, amount: 0, transactionCount: 0 };
             }
-            
+
             categoryTotals[category].amount += amount;
             categoryTotals[category].transactionCount += 1;
             totalExpenses += amount;
@@ -407,7 +406,7 @@ export class ProgressiveDataLoader {
 
         transactions.forEach(transaction => {
             const amount = Math.abs(transaction.amount || 0);
-            
+
             if (transaction.type === 'income') {
                 totalIncome += amount;
                 incomeCount += 1;
@@ -436,11 +435,11 @@ export class ProgressiveDataLoader {
      */
     calculateCostOfLiving(transactions, timePeriod) {
         const incomeVsExpenses = this.calculateIncomeVsExpenses(transactions);
-        
+
         const startDate = new Date(timePeriod.startDate);
         const endDate = new Date(timePeriod.endDate);
         const durationDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-        
+
         const dailySpending = durationDays > 0 ? incomeVsExpenses.totalExpenses / durationDays : 0;
         const monthlySpending = dailySpending * 30;
 

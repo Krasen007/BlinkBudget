@@ -29,12 +29,12 @@ export const NavigationState = {
                 console.warn('[NavigationState] Invalid timePeriod parameter');
                 return;
             }
-            
+
             if (!(timePeriod.startDate instanceof Date) || !(timePeriod.endDate instanceof Date)) {
                 console.warn('[NavigationState] startDate and endDate must be Date objects');
                 return;
             }
-            
+
             const timePeriodData = {
                 type: timePeriod.type,
                 startDate: timePeriod.startDate.toISOString(),
@@ -42,9 +42,8 @@ export const NavigationState = {
                 label: timePeriod.label,
                 savedAt: new Date().toISOString()
             };
-            
+
             sessionStorage.setItem(this.STATE_KEYS.REPORTS_TIME_PERIOD, JSON.stringify(timePeriodData));
-            console.log('[NavigationState] Time period saved:', timePeriod.label);
         } catch (error) {
             console.error('[NavigationState] Failed to save time period:', error);
         }
@@ -59,7 +58,7 @@ export const NavigationState = {
             if (!savedData) return null;
 
             const timePeriodData = JSON.parse(savedData);
-            
+
             // Validate the saved data
             if (!timePeriodData.startDate || !timePeriodData.endDate) {
                 console.warn('[NavigationState] Invalid saved time period data');
@@ -80,7 +79,6 @@ export const NavigationState = {
                 return null;
             }
 
-            console.log('[NavigationState] Time period restored:', timePeriod.label);
             return timePeriod;
         } catch (error) {
             console.error('[NavigationState] Failed to restore time period:', error);
@@ -95,7 +93,6 @@ export const NavigationState = {
     saveChartType(chartType) {
         try {
             sessionStorage.setItem(this.STATE_KEYS.REPORTS_CHART_TYPE, chartType);
-            console.log('[NavigationState] Chart type saved:', chartType);
         } catch (error) {
             console.error('[NavigationState] Failed to save chart type:', error);
         }
@@ -108,9 +105,6 @@ export const NavigationState = {
     restoreChartType() {
         try {
             const chartType = sessionStorage.getItem(this.STATE_KEYS.REPORTS_CHART_TYPE);
-            if (chartType) {
-                console.log('[NavigationState] Chart type restored:', chartType);
-            }
             return chartType;
         } catch (error) {
             console.error('[NavigationState] Failed to restore chart type:', error);
@@ -128,14 +122,13 @@ export const NavigationState = {
                 console.warn('[NavigationState] Invalid preferences parameter');
                 return;
             }
-            
+
             const preferencesData = {
                 ...preferences,
                 savedAt: new Date().toISOString()
             };
-            
+
             sessionStorage.setItem(this.STATE_KEYS.REPORTS_VIEW_PREFERENCES, JSON.stringify(preferencesData));
-            console.log('[NavigationState] View preferences saved');
         } catch (error) {
             console.error('[NavigationState] Failed to save view preferences:', error);
         }
@@ -151,7 +144,6 @@ export const NavigationState = {
             if (!savedData) return null;
 
             const preferences = JSON.parse(savedData);
-            console.log('[NavigationState] View preferences restored');
             return preferences;
         } catch (error) {
             console.error('[NavigationState] Failed to restore view preferences:', error);
@@ -169,9 +161,9 @@ export const NavigationState = {
                 view: viewName,
                 timestamp: new Date().toISOString()
             };
-            
+
             sessionStorage.setItem(this.STATE_KEYS.LAST_ACTIVE_VIEW, JSON.stringify(viewData));
-            
+
             // Also update view history
             this.addToViewHistory(viewName);
         } catch (error) {
@@ -204,19 +196,19 @@ export const NavigationState = {
         try {
             const savedHistory = sessionStorage.getItem(this.STATE_KEYS.VIEW_HISTORY);
             let history = savedHistory ? JSON.parse(savedHistory) : [];
-            
+
             // Remove existing entry for this view to avoid duplicates
             history = history.filter(entry => entry.view !== viewName);
-            
+
             // Add new entry at the beginning
             history.unshift({
                 view: viewName,
                 timestamp: new Date().toISOString()
             });
-            
+
             // Keep only last 10 entries
             history = history.slice(0, 10);
-            
+
             sessionStorage.setItem(this.STATE_KEYS.VIEW_HISTORY, JSON.stringify(history));
         } catch (error) {
             console.error('[NavigationState] Failed to add to view history:', error);
@@ -245,7 +237,6 @@ export const NavigationState = {
             Object.values(this.STATE_KEYS).forEach(key => {
                 sessionStorage.removeItem(key);
             });
-            console.log('[NavigationState] All navigation state cleared');
         } catch (error) {
             console.error('[NavigationState] Failed to clear navigation state:', error);
         }
@@ -271,6 +262,5 @@ export const NavigationState = {
      */
     init() {
         // Listen for page unload to save current state
-        console.log('[NavigationState] Navigation state management initialized');
     }
 };

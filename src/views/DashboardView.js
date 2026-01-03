@@ -6,6 +6,7 @@ import { TransactionService } from '../core/transaction-service.js';
 import { AuthService } from '../core/auth-service.js';
 import { Router } from '../core/router.js';
 import { COLORS, SPACING, BREAKPOINTS, DIMENSIONS, TIMING, STORAGE_KEYS } from '../utils/constants.js';
+
 import { debounce } from '../utils/touch-utils.js';
 import { getTransactionToHighlight } from '../utils/success-feedback.js';
 
@@ -259,7 +260,6 @@ export const DashboardView = () => {
     renderDashboard();
 
     const handleStorageUpdate = (e) => {
-        console.log(`[Dashboard] Storage updated (${e.detail.key}), re-rendering...`);
         if (e.detail.key === STORAGE_KEYS.ACCOUNTS) {
             refreshAccountOptions();
         }
@@ -267,7 +267,6 @@ export const DashboardView = () => {
     };
 
     const handleAuthChange = (e) => {
-        console.log(`[Dashboard] Auth state changed, updating title...`);
         updateTitle(e.detail.user);
     };
 

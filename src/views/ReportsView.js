@@ -12,7 +12,6 @@ import { ChartRenderer } from '../components/ChartRenderer.js';
 import { ProgressiveDataLoader } from '../core/progressive-data-loader.js';
 import { preloadChartJS } from '../core/chart-loader.js';
 import { TimePeriodSelector } from '../components/TimePeriodSelector.js';
-import { Button } from '../components/Button.js';
 import { TransactionService } from '../core/transaction-service.js';
 import { AccountService } from '../core/account-service.js';
 import { Router } from '../core/router.js';
@@ -166,7 +165,6 @@ export const ReportsView = () => {
      * Handle time period changes
      */
     function handleTimePeriodChange(newTimePeriod) {
-        console.log('[ReportsView] Time period changed:', newTimePeriod);
 
         if (!newTimePeriod || !newTimePeriod.startDate || !newTimePeriod.endDate) {
             console.error('Invalid time period provided:', newTimePeriod);
@@ -184,7 +182,6 @@ export const ReportsView = () => {
 
         loadReportData();
 
-        console.log(`[ReportsView] Time period updated from ${previousPeriod.label || 'Unknown'} to ${newTimePeriod.label || 'Unknown'}`);
     }
 
 
@@ -234,7 +231,6 @@ export const ReportsView = () => {
                     throw new Error('Invalid transaction data format - expected array');
                 }
 
-                console.log(`[ReportsView] Loading ${transactions.length} transactions`);
 
             } catch (storageError) {
                 console.error('Storage access error:', storageError);
@@ -260,14 +256,12 @@ export const ReportsView = () => {
                             updateLoadingProgress(loadingState, progress, message);
                         },
                         onChunkProcessed: (current, total, chunkSize) => {
-                            console.log(`[ReportsView] Processed chunk ${current}/${total} (${chunkSize} transactions)`);
                         },
                         prioritizeCategories: true,
                         enableCaching: true
                     }
                 );
 
-                console.log(`[ReportsView] Data processing completed in ${analyticsData.processingTime?.toFixed(2) || 0}ms`);
 
             } catch (analyticsError) {
                 console.error('Progressive data loading error:', analyticsError);
@@ -276,13 +270,11 @@ export const ReportsView = () => {
 
                 try {
                     analyticsData = progressiveLoader.processDataDirectly(transactions, currentTimePeriod);
-                    console.log('[ReportsView] Fallback to direct processing successful');
                 } catch (directProcessingError) {
                     console.error('Direct processing fallback failed:', directProcessingError);
 
                     try {
                         analyticsData = createMinimalAnalyticsData(transactions, currentTimePeriod);
-                        console.log('[ReportsView] Fallback to minimal processing successful');
                     } catch (minimalProcessingError) {
                         console.error('Minimal processing fallback failed:', minimalProcessingError);
                         throw new Error('Unable to process your financial data. This might be due to corrupted data or a browser compatibility issue.');
@@ -339,7 +331,6 @@ export const ReportsView = () => {
                         currentData.predictions = predictions;
                     }
 
-                    console.log(`[ReportsView] Generated ${insights.length} insights and predictions`);
                 }
             } catch (insightsError) {
                 console.warn('[ReportsView] Failed to generate insights:', insightsError);
@@ -350,7 +341,6 @@ export const ReportsView = () => {
                 console.warn(`Report loading took ${processingTime}ms, exceeding 2-second target`);
                 showPerformanceWarning(container, processingTime);
             } else {
-                console.log(`[ReportsView] Report loading completed in ${processingTime}ms`);
             }
 
             const elapsedTime = Date.now() - startTime;
@@ -691,7 +681,6 @@ export const ReportsView = () => {
             updateVisualViewportHeight();
         }
 
-        console.log(`[ReportsView] Layout updated for ${isMobile ? 'mobile' : isTablet ? 'tablet' : 'desktop'} view`);
     }, TIMING.DEBOUNCE_RESIZE);
 
     /**
@@ -733,7 +722,6 @@ export const ReportsView = () => {
 
     // Storage update handler
     const handleStorageUpdate = (e) => {
-        console.log(`[ReportsView] Storage updated (${e.detail.key}), refreshing data...`);
         if (e.detail.key === STORAGE_KEYS.TRANSACTIONS || e.detail.key === STORAGE_KEYS.ACCOUNTS) {
             analyticsEngine.invalidateCacheOnDataUpdate();
 
@@ -746,19 +734,16 @@ export const ReportsView = () => {
 
     // Auth change handler
     const handleAuthChange = (e) => {
-        console.log(`[ReportsView] Auth state changed, refreshing data...`);
         analyticsEngine.clearCache();
         loadReportData();
     };
 
     // Navigation state change handler
     const handleNavigationStateChange = (e) => {
-        console.log(`[ReportsView] Navigation state changed:`, e.detail);
 
         if (e.detail.key === NavigationState.STATE_KEYS.REPORTS_TIME_PERIOD) {
             const restoredTimePeriod = NavigationState.restoreTimePeriod();
             if (restoredTimePeriod && restoredTimePeriod !== currentTimePeriod) {
-                console.log('[ReportsView] Syncing time period from another tab');
                 currentTimePeriod = restoredTimePeriod;
 
                 if (timePeriodSelectorComponent && timePeriodSelectorComponent.updatePeriod) {
@@ -865,7 +850,6 @@ export const ReportsView = () => {
             floatingBackButtonObj.cleanup();
         }
 
-        console.log('[ReportsView] Cleanup completed');
     };
 
     // Expose useful methods

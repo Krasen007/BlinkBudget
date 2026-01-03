@@ -284,7 +284,6 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
     const focusInput = () => {
         amountInput.focus({ preventScroll: true });
         // Click is sometimes needed on iOS to trigger keyboard if focus() is blocked
-        // amountInput.click(); 
     };
 
     // Try immediately
