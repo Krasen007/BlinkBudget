@@ -40,7 +40,7 @@ describe('Success Feedback Integration', () => {
             transaction: mockTransaction,
             currentFilter: 'all',
             accounts: mockAccounts,
-            shouldHighlight: highlightTransactionId === mockTransaction.id
+            shouldHighlight: highlightTransactionId && highlightTransactionId.includes(mockTransaction.id)
         });
 
         document.body.appendChild(transactionItem);
@@ -114,7 +114,7 @@ describe('Success Feedback Integration', () => {
             transaction: mockTransferTransaction,
             currentFilter: 'all',
             accounts: mockAccounts,
-            shouldHighlight: highlightTransactionId === mockTransferTransaction.id
+            shouldHighlight: highlightTransactionId && highlightTransactionId.includes(mockTransferTransaction.id)
         });
 
         document.body.appendChild(transactionItem);
