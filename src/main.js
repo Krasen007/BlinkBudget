@@ -2,7 +2,12 @@ import { Router } from './core/router.js';
 import { AuthService } from './core/auth-service.js';
 import { SyncService } from './core/sync-service.js';
 import { NavigationState } from './core/navigation-state.js';
-// Views are now loaded dynamically to reduce initial bundle size
+import { DashboardView } from './views/DashboardView.js';
+import { AddView } from './views/AddView.js';
+import { EditView } from './views/EditView.js';
+import { SettingsView } from './views/SettingsView.js';
+import { ReportsView } from './views/ReportsView.js';
+import { LoginView } from './views/LoginView.js';
 import { MobileNavigation, updateMobileNavigation } from './components/MobileNavigation.js';
 import { NetworkStatus } from './components/NetworkStatus.js';
 import './core/mobile.js'; // Initialize mobile utilities
@@ -58,36 +63,29 @@ const initApp = () => {
         };
     };
 
-    // View Management with smooth transitions
+    // View Management
     let currentView = null;
-    let transitionTimeout = null;
     const setView = (view) => {
         if (currentView && typeof currentView.cleanup === 'function') {
             currentView.cleanup();
         }
-        
-        // Cancel any pending transition
-        if (transitionTimeout) {
-            clearTimeout(transitionTimeout);
-        }
-        
-        // Add smooth transition effect
-        app.style.opacity = '0';
-        app.style.transition = 'opacity 0.2s ease-in-out';
-        
-        transitionTimeout = setTimeout(() => {
-            app.innerHTML = '';
-            currentView = view;
-            app.appendChild(view);
-            
-            // Fade in the new view
-            app.style.opacity = '1';
-            transitionTimeout = null;
-        }, 100); // Short delay for smooth transition
+
+        // Remove the transition timeout and opacity hiding which causes the "black screen" flash.
+        // For a fast app, an instant swap is often better than a slow fade that reveals the background.
+        app.innerHTML = '';
+        currentView = view;
+        app.appendChild(view);
+
+        // Reset app opacity if it was previously set for any reason
+        app.style.opacity = '1';
+        app.style.transition = 'none';
+
+        // Ensure we scroll to top on view changes
+        window.scrollTo(0, 0);
     };
     // Route Handlers (with dynamic imports for code splitting)
-    // Register Global Route Guard
-    Router.before(async (route) => {
+    // Register Global Route Guard (Synchronous check for speed)
+    Router.before((route) => {
         if (route === 'login') {
             if (AuthService.isAuthenticated()) {
                 Router.navigate('dashboard');
@@ -107,45 +105,39 @@ const initApp = () => {
         return true;
     });
 
-    // Route Handlers (with dynamic imports for code splitting)
-    Router.on('dashboard', async () => {
+    // Route Handlers (using static imports for instant transitions)
+    Router.on('dashboard', () => {
         NavigationState.setLastActiveView('dashboard');
-        const { DashboardView } = await import('./views/DashboardView.js');
         setView(DashboardView());
-        updateMobileNavigation('dashboard'); // Keep dashboard for desktop, but mobile nav shows charts
+        updateMobileNavigation('dashboard');
     });
 
-    Router.on('add-expense', async (params) => {
+    Router.on('add-expense', (params) => {
         NavigationState.setLastActiveView('add-expense');
-        const { AddView } = await import('./views/AddView.js');
         setView(AddView(params));
         updateMobileNavigation('add-expense');
     });
 
-    Router.on('edit-expense', async (params) => {
+    Router.on('edit-expense', (params) => {
         NavigationState.setLastActiveView('edit-expense');
-        const { EditView } = await import('./views/EditView.js');
         setView(EditView(params));
-        updateMobileNavigation('dashboard'); // Edit doesn't have nav item, highlight dashboard
+        updateMobileNavigation('dashboard');
     });
 
-    Router.on('settings', async () => {
+    Router.on('settings', () => {
         NavigationState.setLastActiveView('settings');
-        const { SettingsView } = await import('./views/SettingsView.js');
         setView(SettingsView());
         updateMobileNavigation('settings');
     });
 
-    Router.on('reports', async () => {
+    Router.on('reports', () => {
         NavigationState.setLastActiveView('reports');
-        const { ReportsView } = await import('./views/ReportsView.js');
         setView(ReportsView());
         updateMobileNavigation('reports');
     });
 
-    Router.on('login', async () => {
+    Router.on('login', () => {
         NavigationState.setLastActiveView('login');
-        const { LoginView } = await import('./views/LoginView.js');
         setView(LoginView());
         updateMobileNavigation('login');
     });

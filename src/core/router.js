@@ -26,7 +26,7 @@ export const Router = {
     },
 
     // Internal: Handle the current hash
-    async handleRoute() {
+    handleRoute() {
         const rawHash = window.location.hash.slice(1) || 'dashboard'; // Default to dashboard
 
         // Split route and params (e.g. edit-expense?id=123)
@@ -40,21 +40,31 @@ export const Router = {
             }
         }
 
+        const executeHandler = () => {
+            const handler = this.routes[route];
+            if (handler) {
+                handler(params);
+            } else {
+                console.warn(`No handler for route: ${route}`);
+                // Redirect to default if unknown
+                if (route !== 'dashboard') {
+                    this.navigate('dashboard');
+                }
+            }
+        };
+
         // Execute global before hook if it exists
         if (this.beforeHook) {
-            const canProceed = await this.beforeHook(route, params);
-            if (canProceed === false) return;
-        }
-
-        const handler = this.routes[route];
-        if (handler) {
-            handler(params);
-        } else {
-            console.warn(`No handler for route: ${route}`);
-            // Redirect to default if unknown
-            if (route !== 'dashboard') {
-                this.navigate('dashboard');
+            const result = this.beforeHook(route, params);
+            if (result instanceof Promise) {
+                result.then(canProceed => {
+                    if (canProceed !== false) executeHandler();
+                });
+            } else if (result !== false) {
+                executeHandler();
             }
+        } else {
+            executeHandler();
         }
     }
 };

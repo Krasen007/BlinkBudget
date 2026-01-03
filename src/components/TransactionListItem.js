@@ -75,7 +75,7 @@ export const TransactionListItem = ({ transaction, currentFilter, accounts, shou
                 // Single click - navigate to edit
                 Router.navigate('edit-expense', { id: transaction.id });
                 clickCount = 0;
-            }, 250); // 250ms delay to detect double-click
+            }, 180); // Reduced delay for faster navigation while still allowing double-click
         } else if (clickCount === 2) {
             // Double click - split transaction
             clearTimeout(clickTimer);
