@@ -1,37 +1,38 @@
-export const Router = {
-    routes: {},
+export class Router {
+    static routes = {};
+    static beforeHook = null;
 
     // Register a route handler for a specific hash
-    on(route, handler) {
+    static on(route, handler) {
         this.routes[route] = handler;
-    },
+    }
 
     // Initialize the router
-    init() {
+    static init() {
         window.addEventListener('hashchange', () => this.handleRoute());
         window.addEventListener('load', () => this.handleRoute());
         this.handleRoute(); // Handle initial route
-    },
+    }
 
-    getCurrentRoute() {
+    static getCurrentRoute() {
         const hash = window.location.hash.slice(1) || 'dashboard';
         return hash.split('?')[0];
-    },
+    }
 
     // Navigate to a new route
-    navigate(route, params = {}) {
+    static navigate(route, params = {}) {
         const urlParams = new URLSearchParams(params).toString();
         const hash = urlParams ? `${route}?${urlParams}` : route;
         window.location.hash = hash;
-    },
+    }
 
     // Register a global before hook
-    before(hook) {
+    static before(hook) {
         this.beforeHook = hook;
-    },
+    }
 
     // Internal: Handle the current hash
-    handleRoute() {
+    static handleRoute() {
         const rawHash = window.location.hash.slice(1) || 'dashboard'; // Default to dashboard
 
         // Split route and params (e.g. edit-expense?id=123)
@@ -72,4 +73,4 @@ export const Router = {
             executeHandler();
         }
     }
-};
+}
