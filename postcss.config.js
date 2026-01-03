@@ -2,7 +2,10 @@ export default {
   plugins: {
     // Import resolution for @import statements
     'postcss-import': {},
-    
+
+    // Support for custom media queries (e.g., @custom-media --md (min-width: 768px))
+    'postcss-custom-media': {},
+
     // Autoprefixer for vendor prefixes
     autoprefixer: {
       overrideBrowserslist: [
@@ -12,7 +15,7 @@ export default {
         'not ie 11'
       ]
     },
-    
+
     // CSS purging for production builds (removes unused styles)
     ...(process.env.NODE_ENV === 'production' ? {
       '@fullhuman/postcss-purgecss': {
@@ -43,7 +46,7 @@ export default {
         variables: true
       }
     } : {}),
-    
+
     // CSS optimization and minification for production
     ...(process.env.NODE_ENV === 'production' ? {
       cssnano: {
