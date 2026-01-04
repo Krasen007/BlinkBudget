@@ -100,16 +100,27 @@ export const createSelect = (options = {}) => {
     attributes: { id, name, ...attributes },
   });
 
+  let selectedValue = null;
+
   selectOptions.forEach(opt => {
     const option = createElement('option', {
       attributes: {
         value: opt.value,
-        selected: opt.selected,
       },
       textContent: opt.text,
     });
+    
+    if (opt.selected) {
+      selectedValue = opt.value;
+    }
+    
     select.appendChild(option);
   });
+
+  // Set the selected value after all options are added
+  if (selectedValue !== null) {
+    select.value = selectedValue;
+  }
 
   return select;
 };
