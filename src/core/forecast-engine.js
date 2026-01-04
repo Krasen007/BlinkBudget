@@ -461,7 +461,7 @@ export class ForecastEngine {
    * @param {Date} targetDate - Target month
    * @returns {number} Expected recurring amount
    */
-  _getRecurringAmountForMonth(recurringTransactions, targetDate) {
+  _getRecurringAmountForMonth(recurringTransactions, _targetDate) {
     let totalRecurring = 0;
 
     recurringTransactions.forEach(pattern => {

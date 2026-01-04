@@ -63,7 +63,6 @@ export async function createProjectedBalanceChart(chartRenderer, balanceProjecti
   });
 
   const balanceData = balanceProjections.map(projection => projection.balance);
-  const currentBalance = balanceProjections[0]?.balance || 0;
 
   // Create datasets for current balance line and projected balance line
   const datasets = [
@@ -435,7 +434,7 @@ export async function createGoalProgressChart(chartRenderer, goals, options = {}
         },
         ticks: {
           callback: function(value) {
-            return value + '%';
+            return `${value}%`;
           },
         },
       },

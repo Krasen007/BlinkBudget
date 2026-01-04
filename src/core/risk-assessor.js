@@ -372,7 +372,7 @@ export class RiskAssessor {
     }
 
     // Check for concentration risks
-    const { assetAllocation, sectorAllocation, geographicAllocation } = portfolioAnalysis.allocations;
+    const { assetAllocation, sectorAllocation } = portfolioAnalysis.allocations;
 
     // Single asset concentration
     if (assetAllocation) {

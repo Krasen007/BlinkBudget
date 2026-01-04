@@ -104,7 +104,7 @@ export class AccountBalancePredictor {
     const riskThresholds = { ...defaultThresholds, ...thresholds };
     const risks = [];
 
-    balanceProjections.forEach((projection, index) => {
+    balanceProjections.forEach((projection) => {
       const balance = projection.projectedBalance;
       
       let riskLevel = null;

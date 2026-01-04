@@ -33,8 +33,8 @@ describe('MobileNavigation', () => {
     expect(nav.getAttribute('aria-label')).toBe('Main navigation');
 
     // Should have 4 navigation items
-    const navItems = nav.querySelectorAll('.mobile-nav-item');
-    expect(navItems.length).toBe(4);
+    const _navItems = nav.querySelectorAll('.mobile-nav-item');
+    expect(_navItems.length).toBe(4);
 
     // Check navigation item structure - first item is now Charts/Reports
     const reportsItem = nav.querySelector('[data-route="reports"]');
@@ -51,7 +51,6 @@ describe('MobileNavigation', () => {
   it('should highlight correct active route', () => {
     const nav = MobileNavigation({ currentRoute: 'add-expense' });
 
-    const navItems = nav.querySelectorAll('.mobile-nav-item');
     const reportsItem = nav.querySelector('[data-route="reports"]');
     const addItem = nav.querySelector('[data-route="add-expense"]');
 
