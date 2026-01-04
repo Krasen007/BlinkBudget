@@ -22,3 +22,10 @@
 - [x] 9. **FinancialPlanningView**: Build the new main view with tabbed/scroll-spy navigation.
 - [x] 10. **Visualizations**: Create charts for projected balances, portfolio composition, and goal progress.
 - [x] 11. **Scenario Discovery**: Add "What-If" modeling UI for testing financial changes.
+
+
+// 
+Add validation/error messages for the forms.
+Persist cache invalidation
+Add unit tests for the UI behaviors
+implement firebase to sync the investments and goals
