@@ -32,12 +32,12 @@ describe('MobileNavigation', () => {
     expect(nav.getAttribute('role')).toBe('navigation');
     expect(nav.getAttribute('aria-label')).toBe('Main navigation');
 
-    // Should have 3 navigation items
+    // Should have 4 navigation items
     const navItems = nav.querySelectorAll('.mobile-nav-item');
-    expect(navItems.length).toBe(3);
+    expect(navItems.length).toBe(4);
 
     // Check navigation item structure - first item is now Charts/Reports
-    const reportsItem = navItems[0];
+    const reportsItem = nav.querySelector('[data-route="reports"]');
     expect(reportsItem.classList.contains('active')).toBe(true);
     expect(reportsItem.getAttribute('data-route')).toBe('reports');
 
@@ -52,8 +52,8 @@ describe('MobileNavigation', () => {
     const nav = MobileNavigation({ currentRoute: 'add-expense' });
 
     const navItems = nav.querySelectorAll('.mobile-nav-item');
-    const reportsItem = navItems[0]; // First item is now reports/charts
-    const addItem = navItems[1];
+    const reportsItem = nav.querySelector('[data-route="reports"]');
+    const addItem = nav.querySelector('[data-route="add-expense"]');
 
     expect(reportsItem.classList.contains('active')).toBe(false);
     expect(addItem.classList.contains('active')).toBe(true);
@@ -66,9 +66,8 @@ describe('MobileNavigation', () => {
     // Update to settings
     updateMobileNavigation('settings');
 
-    const navItems = nav.querySelectorAll('.mobile-nav-item');
-    const reportsItem = navItems[0]; // First item is now reports/charts
-    const settingsItem = navItems[2];
+    const reportsItem = nav.querySelector('[data-route="reports"]');
+    const settingsItem = nav.querySelector('[data-route="settings"]');
 
     expect(reportsItem.classList.contains('active')).toBe(false);
     expect(settingsItem.classList.contains('active')).toBe(true);

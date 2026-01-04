@@ -29,8 +29,7 @@ describe('Mobile Navigation Integration', () => {
     const nav = MobileNavigation({ currentRoute: 'reports' });
     document.body.appendChild(nav);
 
-    const navItems = nav.querySelectorAll('.mobile-nav-item');
-    const addItem = navItems[1]; // Add expense item
+    const addItem = nav.querySelector('[data-route="add-expense"]');
 
     // Simulate click
     addItem.click();
@@ -42,9 +41,8 @@ describe('Mobile Navigation Integration', () => {
     const nav = MobileNavigation({ currentRoute: 'reports' }); // Start with reports active
     document.body.appendChild(nav);
 
-    const navItems = nav.querySelectorAll('.mobile-nav-item');
-    const reportsItem = navItems[0]; // First item is now reports/charts
-    const settingsItem = navItems[2];
+    const reportsItem = nav.querySelector('[data-route="reports"]');
+    const settingsItem = nav.querySelector('[data-route="settings"]');
 
     // Initially reports should be active
     expect(reportsItem.classList.contains('active')).toBe(true);

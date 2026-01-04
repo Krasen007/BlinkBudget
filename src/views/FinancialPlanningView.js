@@ -18,6 +18,13 @@ import { AccountService } from '../core/account-service.js';
 import { ForecastEngine } from '../core/forecast-engine.js';
 import { AccountBalancePredictor } from '../core/account-balance-predictor.js';
 import { RiskAssessor } from '../core/risk-assessor.js';
+import { ChartRenderer } from '../components/ChartRenderer.js';
+import {
+  createProjectedBalanceChart,
+  createPortfolioCompositionChart,
+  createGoalProgressChart,
+  createForecastComparisonChart,
+} from '../utils/financial-planning-charts.js';
 import {
   COLORS,
   SPACING,
@@ -47,6 +54,27 @@ export const FinancialPlanningView = () => {
   const forecastEngine = new ForecastEngine();
   const balancePredictor = new AccountBalancePredictor();
   const riskAssessor = new RiskAssessor();
+  const chartRenderer = new ChartRenderer();
+
+  // Track active charts for cleanup
+  const activeCharts = new Map();
+
+  /**
+   * Clean up chart instances created by this view
+   */
+  function cleanupCharts() {
+    activeCharts.forEach(chart => {
+      if (chart && typeof chart.destroy === 'function') {
+        try {
+          chart.destroy();
+        } catch (e) {
+          // ignore individual chart cleanup errors
+          console.warn('Error destroying chart:', e);
+        }
+      }
+    });
+    activeCharts.clear();
+  }
 
   // Create header
   const header = createHeader();
@@ -233,6 +261,9 @@ export const FinancialPlanningView = () => {
    */
   function switchSection(sectionId) {
     if (sectionId === currentSection) return;
+
+    // Clean up charts from previous section
+    cleanupCharts();
 
     currentSection = sectionId;
 
@@ -528,6 +559,37 @@ export const FinancialPlanningView = () => {
 
       section.appendChild(summaryGrid);
 
+      // Create forecast comparison chart
+      createForecastComparisonChart(chartRenderer, incomeForecasts, expenseForecasts)
+        .then(({ section: chartSection, chart }) => {
+          section.appendChild(chartSection);
+          activeCharts.set('forecast-comparison', chart);
+        })
+        .catch(error => {
+          console.error('Error creating forecast comparison chart:', error);
+        });
+
+      // Generate balance projections
+      const currentBalance = planningData.transactions
+        .reduce((balance, t) => balance + (t.type === 'income' ? t.amount : -t.amount), 0);
+      
+      const balanceProjections = balancePredictor.projectBalances(
+        currentBalance, 
+        incomeForecasts, 
+        expenseForecasts, 
+        6
+      );
+
+      // Create projected balance chart
+      createProjectedBalanceChart(chartRenderer, balanceProjections)
+        .then(({ section: chartSection, chart }) => {
+          section.appendChild(chartSection);
+          activeCharts.set('projected-balance', chart);
+        })
+        .catch(error => {
+          console.error('Error creating projected balance chart:', error);
+        });
+
       // Create detailed forecast table
       const forecastTable = createForecastTable(incomeForecasts, expenseForecasts);
       section.appendChild(forecastTable);
@@ -551,9 +613,31 @@ export const FinancialPlanningView = () => {
   function renderInvestmentsSection() {
     const section = createSectionContainer('investments', 'Investment Portfolio', '💰');
     
+    // For now, create sample portfolio data since investment tracking isn't fully implemented
+    const samplePortfolioData = {
+      totalValue: 25000,
+      assetAllocation: {
+        stocks: 15000,
+        bonds: 5000,
+        etfs: 3000,
+        cash: 2000,
+      },
+    };
+
+    // Create portfolio composition chart
+    createPortfolioCompositionChart(chartRenderer, samplePortfolioData)
+      .then(({ section: chartSection, chart }) => {
+        section.appendChild(chartSection);
+        activeCharts.set('portfolio-composition', chart);
+      })
+      .catch(error => {
+        console.error('Error creating portfolio composition chart:', error);
+      });
+
+    // Add placeholder for additional investment features
     const placeholder = createPlaceholder(
       'Investment Tracker Coming Soon',
-      'Track your investment portfolio with asset allocation analysis and performance monitoring.',
+      'Full investment tracking with real-time data integration and performance monitoring is coming soon.',
       '💰'
     );
     
@@ -567,9 +651,45 @@ export const FinancialPlanningView = () => {
   function renderGoalsSection() {
     const section = createSectionContainer('goals', 'Financial Goals', '🎯');
     
+    // For now, create sample goals data since goal planning isn't fully implemented
+    const sampleGoals = [
+      {
+        id: '1',
+        name: 'Emergency Fund',
+        targetAmount: 10000,
+        currentSavings: 7500,
+        targetDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
+      },
+      {
+        id: '2',
+        name: 'House Down Payment',
+        targetAmount: 50000,
+        currentSavings: 15000,
+        targetDate: new Date(Date.now() + 3 * 365 * 24 * 60 * 60 * 1000), // 3 years from now
+      },
+      {
+        id: '3',
+        name: 'Vacation Fund',
+        targetAmount: 5000,
+        currentSavings: 2000,
+        targetDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000), // 6 months from now
+      },
+    ];
+
+    // Create goal progress chart
+    createGoalProgressChart(chartRenderer, sampleGoals)
+      .then(({ section: chartSection, chart }) => {
+        section.appendChild(chartSection);
+        activeCharts.set('goal-progress', chart);
+      })
+      .catch(error => {
+        console.error('Error creating goal progress chart:', error);
+      });
+
+    // Add placeholder for additional goal features
     const placeholder = createPlaceholder(
       'Goal Planner Coming Soon',
-      'Set and track long-term financial goals with progress monitoring and wealth projections.',
+      'Full goal planning with custom targets, automatic progress tracking, and wealth projections is coming soon.',
       '🎯'
     );
     
