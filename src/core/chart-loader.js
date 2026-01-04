@@ -71,6 +71,8 @@ async function loadChartJSModules() {
       PieController,
       BarController,
       LineController,
+      // Fill plugin for area fills
+      Filler,
     } = chartModule;
 
     // Register Chart.js components including controllers
@@ -89,6 +91,7 @@ async function loadChartJSModules() {
       Title, // For chart titles
       Tooltip, // For hover tooltips
       Legend, // For chart legends
+      Filler, // For fill support on line/area charts
 
       // Controllers
       PieController, // For pie charts
@@ -110,6 +113,7 @@ async function loadChartJSModules() {
       Title,
       Tooltip,
       Legend,
+      Filler,
       PieController,
       BarController,
       LineController,

@@ -1,3 +1,4 @@
+// Detailed chart implementations follow below.
 /**
  * Financial Planning Chart Components
  *

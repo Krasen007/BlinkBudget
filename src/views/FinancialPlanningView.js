@@ -18,6 +18,7 @@ import { AccountService } from '../core/account-service.js';
 import { ForecastEngine } from '../core/forecast-engine.js';
 import { AccountBalancePredictor } from '../core/account-balance-predictor.js';
 import { RiskAssessor } from '../core/risk-assessor.js';
+import { GoalPlanner } from '../core/goal-planner.js';
 import { ChartRenderer } from '../components/ChartRenderer.js';
 import {
   createProjectedBalanceChart,
@@ -54,6 +55,7 @@ export const FinancialPlanningView = () => {
   const forecastEngine = new ForecastEngine();
   const balancePredictor = new AccountBalancePredictor();
   const riskAssessor = new RiskAssessor();
+  const goalPlanner = new GoalPlanner();
   const chartRenderer = new ChartRenderer();
 
   // Track active charts for cleanup
@@ -719,13 +721,99 @@ export const FinancialPlanningView = () => {
   function renderScenariosSection() {
     const section = createSectionContainer('scenarios', 'Scenario Planning', '🔄');
     
-    const placeholder = createPlaceholder(
-      'Scenario Planner Coming Soon',
-      'Model different financial scenarios and see their long-term impact on your goals.',
-      '🔄'
-    );
+    const form = document.createElement('div');
+    form.className = 'scenario-form';
+    form.style.display = 'grid';
+    form.style.gridTemplateColumns = '1fr 1fr';
+    form.style.gap = SPACING.MD;
+
+    const monthlyLabel = document.createElement('label');
+    monthlyLabel.textContent = 'Monthly Savings (€)';
+    const monthlyInput = document.createElement('input');
+    monthlyInput.type = 'number';
+    monthlyInput.value = '200';
+    monthlyInput.style.padding = SPACING.SM;
+
+    const returnLabel = document.createElement('label');
+    returnLabel.textContent = 'Annual Return (%)';
+    const returnInput = document.createElement('input');
+    returnInput.type = 'number';
+    returnInput.value = '5';
+    returnInput.style.padding = SPACING.SM;
+
+    const yearsLabel = document.createElement('label');
+    yearsLabel.textContent = 'Years';
+    const yearsInput = document.createElement('input');
+    yearsInput.type = 'number';
+    yearsInput.value = '10';
+    yearsInput.style.padding = SPACING.SM;
+
+    const initialLabel = document.createElement('label');
+    initialLabel.textContent = 'Initial Amount (€)';
+    const initialInput = document.createElement('input');
+    initialInput.type = 'number';
+    initialInput.value = '1000';
+    initialInput.style.padding = SPACING.SM;
+
+    const runBtn = document.createElement('button');
+    runBtn.textContent = 'Run Scenario';
+    runBtn.className = 'btn btn-primary';
+    runBtn.style.gridColumn = '1 / -1';
+    runBtn.style.padding = `${SPACING.SM} ${SPACING.MD}`;
+
+    form.appendChild(monthlyLabel);
+    form.appendChild(monthlyInput);
+    form.appendChild(returnLabel);
+    form.appendChild(returnInput);
+    form.appendChild(yearsLabel);
+    form.appendChild(yearsInput);
+    form.appendChild(initialLabel);
+    form.appendChild(initialInput);
+    form.appendChild(runBtn);
+
+    section.appendChild(form);
+
+    const outputContainer = document.createElement('div');
+    outputContainer.className = 'scenario-output';
+    outputContainer.style.marginTop = SPACING.LG;
+    section.appendChild(outputContainer);
+
+    runBtn.addEventListener('click', () => {
+      const monthly = Number(monthlyInput.value) || 0;
+      const yearlyReturn = (Number(returnInput.value) || 0) / 100;
+      const years = Math.max(1, Number(yearsInput.value) || 1);
+      const initial = Number(initialInput.value) || 0;
+
+      // Use GoalPlanner projection utility to generate yearly projections
+      const projections = goalPlanner.projectWealthAccumulation(monthly, yearlyReturn, years, initial);
+
+      // Convert to series for chart helper
+      const series = projections.map(p => ({ period: `Year ${p.year}`, value: p.projectedWealth }));
+
+      // Cleanup previous scenario chart
+      if (activeCharts.has('scenario-chart')) {
+        const existing = activeCharts.get('scenario-chart');
+        if (existing && typeof existing.destroy === 'function') existing.destroy();
+        activeCharts.delete('scenario-chart');
+      }
+
+      createProjectedBalanceChart(chartRenderer, series)
+        .then(({ section: chartSection, chart }) => {
+          // Replace output
+          outputContainer.innerHTML = '';
+          outputContainer.appendChild(chartSection);
+          if (chart) activeCharts.set('scenario-chart', chart);
+        })
+        .catch(err => console.error('Scenario chart error', err));
+    });
+
     
-    section.appendChild(placeholder);
+    
+    
+    
+    
+    
+    
     content.appendChild(section);
   }
 

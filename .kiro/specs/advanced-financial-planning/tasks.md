@@ -10,7 +10,7 @@
 
 - [x] 4. **Investment Tracker**: Develop `InvestmentTracker` with manual entry, asset/sector allocation, and performance monitoring.
 - [x] 5. **Goal Planner**: Create `GoalPlanner` for long-term target tracking and 30-year wealth projections.
-- [-] 6. **Insights Generator**: Implement `InsightsGenerator` for Top Movers and Timeline comparisons.
+- [ ] 6. **Insights Generator**: Implement `InsightsGenerator` for Top Movers and Timeline comparisons.
 
 ## Phase 3: Infrastructure & Data
 
