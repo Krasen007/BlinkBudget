@@ -3,11 +3,6 @@
 ## Critical Bug Fixes
 
 - [x] 1. Fix account selection bug in transaction form
-
-
-
-
-
   - Fix issue where transactions are saved to wrong account when user selects different account
   - Ensure currentAccountId is properly synchronized between form and category selector
   - Update category selector's currentSourceAccount when account select changes
@@ -17,10 +12,6 @@
 ## High Priority Tasks
 
 - [x] 2. Add success feedback after transaction submission
-
-
-
-
   - Implement visual confirmation when transaction is saved
   - Add brief green highlight to newly added transaction in dashboard
   - Fade highlight to default color after 1 second
@@ -28,11 +19,6 @@
   - _Based on: Critical Issue #1 - Missing Success Feedback_
 
 - [ ] 3. Optimize mobile keyboard interaction
-
-
-
-
-
   - Ensure form components remain visible when mobile keyboard opens
   - Adjust form layout to prevent size changes during keyboard popup
   - Test form usability with keyboard open across different mobile devices
@@ -40,11 +26,6 @@
   - _Based on: Critical Issue #4 - Immediate Keyboard Popup_
 
 - [x] 4. Improve date input visibility and context
-
-
-
-
-
   - Add label or tooltip to date input explaining it's part of transaction form
   - Consider visual connection between date input and form fields
   - Ensure users understand date input is editable and affects transaction

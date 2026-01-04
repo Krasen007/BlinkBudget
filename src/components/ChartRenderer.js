@@ -1,14 +1,20 @@
 /**
  * ChartRenderer Component
- * 
+ *
  * Handles all chart creation, updates, and interactions using lazy-loaded Chart.js library.
  * Provides a consistent interface for rendering different chart types with
  * BlinkBudget's design system and accessibility features.
- * 
+ *
  * Requirements: 9.2 - Lazy loading and performance optimization
  */
 
-import { initializeChartJS, defaultChartOptions, getChartColors, createChartOptions, createThemedChartOptions } from '../core/chart-config.js';
+import {
+  initializeChartJS,
+  defaultChartOptions,
+  getChartColors,
+  createChartOptions,
+  createThemedChartOptions,
+} from '../core/chart-config.js';
 
 export class ChartRenderer {
   constructor() {
@@ -41,7 +47,9 @@ export class ChartRenderer {
       this.isInitialized = true;
 
       const loadTime = performance.now() - startTime;
-      console.log(`[ChartRenderer] Chart.js initialized in ${loadTime.toFixed(2)}ms`);
+      console.log(
+        `[ChartRenderer] Chart.js initialized in ${loadTime.toFixed(2)}ms`
+      );
 
       return this.chartJSModules;
     } catch (error) {
@@ -78,11 +86,15 @@ export class ChartRenderer {
       },
       onClick: (event, activeElements, chart) => {
         this.handleChartClick(event, activeElements, chart, 'pie');
-      }
+      },
     });
 
     // Ensure data has proper colors with enhanced styling
-    if (data.datasets && data.datasets[0] && !data.datasets[0].backgroundColor) {
+    if (
+      data.datasets &&
+      data.datasets[0] &&
+      !data.datasets[0].backgroundColor
+    ) {
       const colors = getChartColors(data.labels.length, false, 'solid');
       data.datasets[0].backgroundColor = colors;
       data.datasets[0].borderColor = '#ffffff';
@@ -106,7 +118,7 @@ export class ChartRenderer {
       const chart = new ChartJS(canvasElement, {
         type: 'pie',
         data,
-        options: chartOptions
+        options: chartOptions,
       });
 
       // Add keyboard navigation for accessibility
@@ -142,12 +154,12 @@ export class ChartRenderer {
       },
       onClick: (event, activeElements, chart) => {
         this.handleChartClick(event, activeElements, chart, 'bar');
-      }
+      },
     });
 
     // Ensure data has proper colors with enhanced styling
     if (data.datasets) {
-      data.datasets.forEach((dataset, index) => {
+      data.datasets.forEach((dataset, _index) => {
         if (!dataset.backgroundColor) {
           const colors = getChartColors(data.labels.length, false, 'solid');
           dataset.backgroundColor = colors;
@@ -182,7 +194,7 @@ export class ChartRenderer {
       const chart = new ChartJS(canvasElement, {
         type: 'bar',
         data,
-        options: chartOptions
+        options: chartOptions,
       });
 
       // Add keyboard navigation for accessibility
@@ -219,69 +231,71 @@ export class ChartRenderer {
         y: {
           beginAtZero: true,
           grid: {
-            color: 'rgba(0, 0, 0, 0.1)'
+            color: 'rgba(0, 0, 0, 0.1)',
           },
           ticks: {
             callback: function (value) {
               return new Intl.NumberFormat('en-US', {
                 style: 'currency',
                 currency: 'USD',
-                minimumFractionDigits: 0
+                minimumFractionDigits: 0,
               }).format(value);
-            }
-          }
+            },
+          },
         },
         x: {
           grid: {
-            color: 'rgba(0, 0, 0, 0.05)'
-          }
-        }
+            color: 'rgba(0, 0, 0, 0.05)',
+          },
+        },
       },
       elements: {
         line: {
-          tension: 0.4 // Smooth curves
+          tension: 0.4, // Smooth curves
         },
         point: {
           radius: 4,
-          hoverRadius: 6
-        }
+          hoverRadius: 6,
+        },
       },
       plugins: {
         ...options.plugins,
         tooltip: {
           ...defaultChartOptions.plugins.tooltip,
           callbacks: {
-            label: (context) => {
+            label: context => {
               const label = context.dataset.label || '';
               const value = context.parsed.y;
               const formattedValue = new Intl.NumberFormat('en-US', {
                 style: 'currency',
-                currency: 'USD'
+                currency: 'USD',
               }).format(value);
 
               return `${label}: ${formattedValue}`;
-            }
-          }
-        }
+            },
+          },
+        },
       },
       onHover: (event, activeElements, chart) => {
         this.handleChartHover(event, activeElements, chart);
       },
       onClick: (event, activeElements, chart) => {
         this.handleChartClick(event, activeElements, chart, 'line');
-      }
+      },
     });
 
     // Ensure data has proper colors and styling
     if (data.datasets) {
-      data.datasets.forEach((dataset, index) => {
+      data.datasets.forEach((dataset, _index) => {
         const colors = getChartColors(data.datasets.length);
         if (!dataset.borderColor) {
-          dataset.borderColor = colors[index];
+          dataset.borderColor = colors[_index];
           // Convert to HSLA with alpha, handling HSL format
-          const color = colors[index];
+          const color = colors[_index];
           if (color.startsWith('hsl(')) {
-            dataset.backgroundColor = color.replace('hsl(', 'hsla(').replace(')', ', 0.1)');
+            dataset.backgroundColor = color
+              .replace('hsl(', 'hsla(')
+              .replace(')', ', 0.1)');
           } else {
             // Fallback for other formats - use transparent version or keep original
             dataset.backgroundColor = 'transparent';
@@ -296,7 +310,7 @@ export class ChartRenderer {
       const chart = new ChartJS(canvasElement, {
         type: 'line',
         data,
-        options: chartOptions
+        options: chartOptions,
       });
 
       // Add keyboard navigation for accessibility
@@ -365,8 +379,14 @@ export class ChartRenderer {
 
       // Clean up touch event handlers
       if (canvas._touchHandlers) {
-        canvas.removeEventListener('touchstart', canvas._touchHandlers.touchstart);
-        canvas.removeEventListener('touchmove', canvas._touchHandlers.touchmove);
+        canvas.removeEventListener(
+          'touchstart',
+          canvas._touchHandlers.touchstart
+        );
+        canvas.removeEventListener(
+          'touchmove',
+          canvas._touchHandlers.touchmove
+        );
         canvas.removeEventListener('touchend', canvas._touchHandlers.touchend);
         delete canvas._touchHandlers;
       }
@@ -419,84 +439,94 @@ export class ChartRenderer {
             labels: {
               padding: isSmallMobile ? 8 : 12,
               font: {
-                size: isSmallMobile ? 10 : 11
+                size: isSmallMobile ? 10 : 11,
               },
               boxWidth: isSmallMobile ? 12 : 15,
               boxHeight: isSmallMobile ? 12 : 15,
-              usePointStyle: true
-            }
+              usePointStyle: true,
+            },
           },
           tooltip: {
             // Larger tooltips for touch interaction
             padding: 16,
             titleFont: {
-              size: 14
+              size: 14,
             },
             bodyFont: {
-              size: 13
+              size: 13,
             },
             cornerRadius: 8,
             caretSize: 8,
             // Position tooltips to avoid screen edges
             position: 'nearest',
             xAlign: 'center',
-            yAlign: 'top'
-          }
+            yAlign: 'top',
+          },
         },
 
         // Optimize animations for mobile performance
         animation: {
-          duration: isSmallMobile ? 300 : 400 // Faster animations on slower devices
+          duration: isSmallMobile ? 300 : 400, // Faster animations on slower devices
         },
 
         // Enhanced interaction for touch
         interaction: {
           intersect: false,
-          mode: 'index'
+          mode: 'index',
         },
 
         // Mobile-specific scales
-        scales: chartInstance.config.type !== 'pie' ? {
-          x: {
-            ticks: {
-              font: {
-                size: isSmallMobile ? 10 : 11
-              },
-              maxRotation: isSmallMobile ? 45 : 30,
-              minRotation: 0,
-              // Reduce number of ticks on small screens
-              maxTicksLimit: isSmallMobile ? 5 : 8
-            }
-          },
-          y: {
-            ticks: {
-              font: {
-                size: isSmallMobile ? 10 : 11
-              },
-              // Shorter number formatting on mobile
-              callback: function (value) {
-                if (value >= 1000000) {
-                  return `$${  (value / 1000000).toFixed(1)  }M`;
-                } else if (value >= 1000) {
-                  return `$${  (value / 1000).toFixed(1)  }K`;
-                } else {
-                  return `$${  value.toFixed(0)}`;
-                }
+        scales:
+          chartInstance.config.type !== 'pie'
+            ? {
+                x: {
+                  ticks: {
+                    font: {
+                      size: isSmallMobile ? 10 : 11,
+                    },
+                    maxRotation: isSmallMobile ? 45 : 30,
+                    minRotation: 0,
+                    // Reduce number of ticks on small screens
+                    maxTicksLimit: isSmallMobile ? 5 : 8,
+                  },
+                },
+                y: {
+                  ticks: {
+                    font: {
+                      size: isSmallMobile ? 10 : 11,
+                    },
+                    // Shorter number formatting on mobile
+                    callback: function (value) {
+                      if (value >= 1000000) {
+                        return `$${(value / 1000000).toFixed(1)}M`;
+                      } else if (value >= 1000) {
+                        return `$${(value / 1000).toFixed(1)}K`;
+                      } else {
+                        return `$${value.toFixed(0)}`;
+                      }
+                    },
+                  },
+                },
               }
-            }
-          }
-        } : undefined
+            : undefined,
       };
 
       // Apply mobile optimizations
       if (chartInstance.options.plugins?.legend) {
-        Object.assign(chartInstance.options.plugins.legend, mobileOptions.plugins.legend);
+        Object.assign(
+          chartInstance.options.plugins.legend,
+          mobileOptions.plugins.legend
+        );
       }
       if (chartInstance.options.plugins?.tooltip) {
-        Object.assign(chartInstance.options.plugins.tooltip, mobileOptions.plugins.tooltip);
+        Object.assign(
+          chartInstance.options.plugins.tooltip,
+          mobileOptions.plugins.tooltip
+        );
       }
       if (chartInstance.options.animation) {
-        chartInstance.options.animation.duration = mobileOptions.animation.duration;
+        chartInstance.options.animation.duration =
+          mobileOptions.animation.duration;
       }
       chartInstance.options.interaction = mobileOptions.interaction;
 
@@ -526,7 +556,7 @@ export class ChartRenderer {
     let touchStartTime = 0;
     let touchMoved = false;
 
-    const touchStartHandler = (event) => {
+    const touchStartHandler = _event => {
       touchStartTime = Date.now();
       touchMoved = false;
 
@@ -534,7 +564,7 @@ export class ChartRenderer {
       canvas.style.opacity = '0.9';
     };
 
-    const touchMoveHandler = (event) => {
+    const touchMoveHandler = _event => {
       touchMoved = true;
       canvas.style.opacity = '1';
 
@@ -545,17 +575,14 @@ export class ChartRenderer {
       }
     };
 
-    const touchEndHandler = (event) => {
+    const touchEndHandler = event => {
       const touchDuration = Date.now() - touchStartTime;
       canvas.style.opacity = '1';
 
       // Only trigger chart interaction for quick taps (not scrolls)
       if (!touchMoved && touchDuration < 300) {
         // Get touch position relative to canvas
-        const rect = canvas.getBoundingClientRect();
         const touch = event.changedTouches[0];
-        const x = touch.clientX - rect.left;
-        const y = touch.clientY - rect.top;
 
         // Create synthetic mouse event for Chart.js
         const syntheticEvent = {
@@ -563,8 +590,8 @@ export class ChartRenderer {
           clientX: touch.clientX,
           clientY: touch.clientY,
           target: canvas,
-          preventDefault: () => { },
-          stopPropagation: () => { }
+          preventDefault: () => {},
+          stopPropagation: () => {},
         };
 
         // Get elements at touch position
@@ -578,7 +605,11 @@ export class ChartRenderer {
         if (elements.length > 0) {
           // Trigger click handler
           if (chartInstance.options.onClick) {
-            chartInstance.options.onClick(syntheticEvent, elements, chartInstance);
+            chartInstance.options.onClick(
+              syntheticEvent,
+              elements,
+              chartInstance
+            );
           }
         }
       }
@@ -587,7 +618,10 @@ export class ChartRenderer {
     // Add touch event listeners
     // Remove existing handlers first to prevent duplicates
     if (canvas._touchHandlers) {
-      canvas.removeEventListener('touchstart', canvas._touchHandlers.touchstart);
+      canvas.removeEventListener(
+        'touchstart',
+        canvas._touchHandlers.touchstart
+      );
       canvas.removeEventListener('touchmove', canvas._touchHandlers.touchmove);
       canvas.removeEventListener('touchend', canvas._touchHandlers.touchend);
     }
@@ -600,7 +634,7 @@ export class ChartRenderer {
     canvas._touchHandlers = {
       touchstart: touchStartHandler,
       touchmove: touchMoveHandler,
-      touchend: touchEndHandler
+      touchend: touchEndHandler,
     };
   }
 
@@ -630,7 +664,6 @@ export class ChartRenderer {
         chart.setActiveElements(activeElements);
         chart.update('active');
       }
-
     } else {
       canvas.style.cursor = 'default';
 
@@ -680,8 +713,8 @@ export class ChartRenderer {
       dataset: dataset.label || 'Dataset',
       formattedValue: new Intl.NumberFormat('en-US', {
         style: 'currency',
-        currency: 'USD'
-      }).format(value)
+        currency: 'USD',
+      }).format(value),
     };
 
     // For pie charts, calculate percentage
@@ -699,7 +732,7 @@ export class ChartRenderer {
     // Dispatch custom event for other components to listen to
     const customEvent = new CustomEvent('chartSegmentClick', {
       detail: clickData,
-      bubbles: true
+      bubbles: true,
     });
 
     chart.canvas.dispatchEvent(customEvent);
@@ -757,7 +790,10 @@ export class ChartRenderer {
    * @param {boolean} isHovering - Whether currently hovering
    */
   addSimpleCanvasHoverAnimation(canvas, isHovering) {
-    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (
+      window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
       return; // Skip animations for users who prefer reduced motion
     }
 
@@ -785,20 +821,25 @@ export class ChartRenderer {
    * @param {Object} activeElement - The clicked element
    * @param {string} chartType - Type of chart
    */
-  highlightSegment(chart, activeElement, chartType) {
-    const originalBorderWidth = chart.data.datasets[activeElement.datasetIndex].borderWidth;
+  highlightSegment(chart, activeElement, _chartType) {
+    const originalBorderWidth =
+      chart.data.datasets[activeElement.datasetIndex].borderWidth;
 
     // Temporarily increase border width for visual feedback
-    chart.data.datasets[activeElement.datasetIndex].borderWidth =
-      Array.isArray(originalBorderWidth)
-        ? originalBorderWidth.map((width, i) => i === activeElement.index ? width + 2 : width)
-        : originalBorderWidth + 2;
+    chart.data.datasets[activeElement.datasetIndex].borderWidth = Array.isArray(
+      originalBorderWidth
+    )
+      ? originalBorderWidth.map((width, i) =>
+          i === activeElement.index ? width + 2 : width
+        )
+      : originalBorderWidth + 2;
 
     chart.update('none');
 
     // Reset after a short delay
     setTimeout(() => {
-      chart.data.datasets[activeElement.datasetIndex].borderWidth = originalBorderWidth;
+      chart.data.datasets[activeElement.datasetIndex].borderWidth =
+        originalBorderWidth;
       chart.update('none');
     }, 200);
   }
@@ -838,7 +879,7 @@ export class ChartRenderer {
     const maxIndex = chart.data.labels.length - 1;
 
     // Enhanced keyboard event handling
-    const keydownHandler = (event) => {
+    const keydownHandler = event => {
       let handled = false;
 
       switch (event.key) {
@@ -876,11 +917,20 @@ export class ChartRenderer {
         case ' ':
           event.preventDefault();
           // Simulate click on focused segment
-          const activeElements = [{
-            datasetIndex: 0,
-            index: currentIndex
-          }];
-          this.handleChartClick(event, activeElements, chart, chart.config.type);
+          {
+            const activeElements = [
+              {
+                datasetIndex: 0,
+                index: currentIndex,
+              },
+            ];
+            this.handleChartClick(
+              event,
+              activeElements,
+              chart,
+              chart.config.type
+            );
+          }
           handled = true;
           break;
 
@@ -924,7 +974,7 @@ export class ChartRenderer {
       keydown: keydownHandler,
       focus: focusHandler,
       blur: blurHandler,
-      descriptionElement: descElement
+      descriptionElement: descElement,
     };
   }
 
@@ -934,10 +984,12 @@ export class ChartRenderer {
    * @param {number} index - Index of segment to focus
    */
   focusSegment(chart, index) {
-    const activeElements = [{
-      datasetIndex: 0,
-      index: index
-    }];
+    const activeElements = [
+      {
+        datasetIndex: 0,
+        index: index,
+      },
+    ];
 
     chart.setActiveElements(activeElements);
     chart.update('none');
@@ -947,14 +999,17 @@ export class ChartRenderer {
     const value = chart.data.datasets[0].data[index];
     const formattedValue = new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'USD',
     }).format(value);
 
     let announcement = `${label}: ${formattedValue}`;
 
     // Add percentage for pie charts
     if (chart.config.type === 'pie') {
-      const total = chart.data.datasets[0].data.reduce((sum, val) => sum + val, 0);
+      const total = chart.data.datasets[0].data.reduce(
+        (sum, val) => sum + val,
+        0
+      );
       const percentage = ((value / total) * 100).toFixed(1);
       announcement += ` (${percentage}% of total)`;
     }
@@ -1008,32 +1063,40 @@ export class ChartRenderer {
       description += `spending breakdown across ${labels.length} categories. `;
 
       // Add top categories
-      const sortedData = labels.map((label, index) => ({
-        label,
-        value: dataset.data[index],
-        percentage: ((dataset.data[index] / total) * 100).toFixed(1)
-      })).sort((a, b) => b.value - a.value);
+      const sortedData = labels
+        .map((label, index) => ({
+          label,
+          value: dataset.data[index],
+          percentage: ((dataset.data[index] / total) * 100).toFixed(1),
+        }))
+        .sort((a, b) => b.value - a.value);
 
       description += `Top categories: `;
       sortedData.slice(0, 3).forEach((item, index) => {
         if (index > 0) description += ', ';
         description += `${item.label} at ${item.percentage}%`;
       });
-
     } else if (chartType === 'bar') {
       description += `comparison across ${labels.length} categories. `;
       const maxValue = Math.max(...dataset.data);
       const maxIndex = dataset.data.indexOf(maxValue);
-      description += `Highest value is ${labels[maxIndex]} at ${new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD'
-      }).format(maxValue)}.`;
-
+      description += `Highest value is ${labels[maxIndex]} at ${new Intl.NumberFormat(
+        'en-US',
+        {
+          style: 'currency',
+          currency: 'USD',
+        }
+      ).format(maxValue)}.`;
     } else if (chartType === 'line') {
       description += `trends over ${labels.length} time periods. `;
       const firstValue = dataset.data[0];
       const lastValue = dataset.data[dataset.data.length - 1];
-      const trend = lastValue > firstValue ? 'increasing' : lastValue < firstValue ? 'decreasing' : 'stable';
+      const trend =
+        lastValue > firstValue
+          ? 'increasing'
+          : lastValue < firstValue
+            ? 'decreasing'
+            : 'stable';
       description += `Overall trend is ${trend}.`;
     }
 
@@ -1095,7 +1158,8 @@ export class ChartRenderer {
     if (!title || !canvasElement.parentElement) return;
 
     // Check if title already exists
-    const existingTitle = canvasElement.parentElement.querySelector('.chart-title');
+    const existingTitle =
+      canvasElement.parentElement.querySelector('.chart-title');
     if (existingTitle) {
       existingTitle.textContent = title;
       return;
@@ -1120,7 +1184,7 @@ export class ChartRenderer {
    * @param {HTMLElement} container - Chart container element
    * @param {string} message - Loading message
    */
-  addLoadingAnimation(container, message = 'Loading chart...') {
+  addLoadingAnimation(container, _message = 'Loading chart...') {
     if (!container) return;
 
     // Add loading class for CSS animations

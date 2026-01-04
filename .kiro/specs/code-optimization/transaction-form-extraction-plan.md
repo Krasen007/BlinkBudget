@@ -3,6 +3,7 @@
 ## Overview
 
 **Current State:**
+
 - File: `src/components/TransactionForm.js`
 - Current Lines: **724 lines**
 - Target: **<200 lines** (64% reduction needed)
@@ -18,6 +19,7 @@ Extract reusable utilities and patterns to reduce component size while maintaini
 ### 1. Type Toggle System (Lines 65-161)
 
 **Current Code:**
+
 - `createTypeBtn()` function (lines 72-144)
 - Type button creation and state management
 - Touch feedback handlers
@@ -27,6 +29,7 @@ Extract reusable utilities and patterns to reduce component size while maintaini
 **Extraction Target:** `src/utils/form-utils/type-toggle.js`
 
 **What to Extract:**
+
 ```javascript
 // Extract:
 - createTypeBtn() function → createTypeToggleButton()
@@ -38,11 +41,12 @@ Extract reusable utilities and patterns to reduce component size while maintaini
 **Estimated Lines Saved:** ~100 lines
 
 **New Utility API:**
+
 ```javascript
 // src/utils/form-utils/type-toggle.js
-export const createTypeToggleGroup = (options) => {
+export const createTypeToggleGroup = options => {
   // Returns: { container, currentType, setType(type), onTypeChange(callback) }
-}
+};
 ```
 
 ---
@@ -50,6 +54,7 @@ export const createTypeToggleGroup = (options) => {
 ### 2. Category Chip System (Lines 208-549)
 
 **Current Code:**
+
 - Category definitions and colors (lines 211-245)
 - `renderCategories()` function (lines 302-549)
 - Category chip creation (duplicated for transfers vs categories)
@@ -60,10 +65,11 @@ export const createTypeToggleGroup = (options) => {
 **Extraction Target:** `src/utils/form-utils/category-chips.js`
 
 **What to Extract:**
+
 ```javascript
 // Extract:
 - categoryDefinitions → CATEGORY_DEFINITIONS constant
-- categoryColors → CATEGORY_COLORS constant  
+- categoryColors → CATEGORY_COLORS constant
 - categoryOptions → CATEGORY_OPTIONS constant
 - createCategoryChip() → unified chip creation function
 - createTransferAccountChip() → transfer-specific chip
@@ -74,6 +80,7 @@ export const createTypeToggleGroup = (options) => {
 **Estimated Lines Saved:** ~250 lines
 
 **New Utility API:**
+
 ```javascript
 // src/utils/form-utils/category-chips.js
 export const CATEGORY_DEFINITIONS = { ... }
@@ -94,6 +101,7 @@ export const createCategoryChip = (options) => {
 ### 3. Amount Input with Validation (Lines 170-206)
 
 **Current Code:**
+
 - Amount input creation
 - Mobile optimizations (inputMode, pattern)
 - Keyboard-aware scrolling
@@ -102,6 +110,7 @@ export const createCategoryChip = (options) => {
 **Extraction Target:** `src/utils/form-utils/amount-input.js`
 
 **What to Extract:**
+
 ```javascript
 // Extract:
 - createAmountInput() → factory function
@@ -112,15 +121,16 @@ export const createCategoryChip = (options) => {
 **Estimated Lines Saved:** ~40 lines
 
 **New Utility API:**
+
 ```javascript
 // src/utils/form-utils/amount-input.js
-export const createAmountInput = (options) => {
+export const createAmountInput = options => {
   // Returns: { input, validate(), getValue(), setValue() }
-}
+};
 
-export const validateAmount = (value) => {
+export const validateAmount = value => {
   // Returns: { valid: boolean, error: string }
-}
+};
 ```
 
 ---
@@ -128,6 +138,7 @@ export const validateAmount = (value) => {
 ### 4. Account Select (Lines 20-62)
 
 **Current Code:**
+
 - Account select creation
 - Haptic feedback on change
 - Mobile zoom prevention
@@ -135,6 +146,7 @@ export const validateAmount = (value) => {
 **Extraction Target:** Use existing `dom-factory.js` + enhance
 
 **What to Extract:**
+
 ```javascript
 // Enhance dom-factory.js createSelect() to support:
 - Mobile optimizations
@@ -149,6 +161,7 @@ export const validateAmount = (value) => {
 ### 5. Keyboard Handling (Lines 652-707)
 
 **Current Code:**
+
 - `setupKeyboardHandling()` function
 - Visual viewport management
 - Form padding adjustments
@@ -157,6 +170,7 @@ export const validateAmount = (value) => {
 **Extraction Target:** `src/utils/form-utils/keyboard.js`
 
 **What to Extract:**
+
 ```javascript
 // Extract:
 - setupKeyboardHandling() → setupFormKeyboardHandling()
@@ -167,11 +181,12 @@ export const validateAmount = (value) => {
 **Estimated Lines Saved:** ~60 lines
 
 **New Utility API:**
+
 ```javascript
 // src/utils/form-utils/keyboard.js
 export const setupFormKeyboardHandling = (form, inputs) => {
   // Returns: cleanup function
-}
+};
 ```
 
 ---
@@ -179,6 +194,7 @@ export const setupFormKeyboardHandling = (form, inputs) => {
 ### 6. Form Validation (Lines 376-387, 494-507, 598-623)
 
 **Current Code:**
+
 - Amount validation (duplicated 3 times)
 - Category validation (duplicated 2 times)
 - Error feedback (haptic + visual)
@@ -186,6 +202,7 @@ export const setupFormKeyboardHandling = (form, inputs) => {
 **Extraction Target:** `src/utils/form-utils/validation.js`
 
 **What to Extract:**
+
 ```javascript
 // Extract:
 - validateAmount() → centralized validation
@@ -196,15 +213,16 @@ export const setupFormKeyboardHandling = (form, inputs) => {
 **Estimated Lines Saved:** ~50 lines
 
 **New Utility API:**
+
 ```javascript
 // src/utils/form-utils/validation.js
-export const validateTransactionForm = (data) => {
+export const validateTransactionForm = data => {
   // Returns: { valid: boolean, errors: {} }
-}
+};
 
 export const showFieldError = (element, message) => {
   // Visual + haptic error feedback
-}
+};
 ```
 
 ---
@@ -212,6 +230,7 @@ export const showFieldError = (element, message) => {
 ### 7. Category Container Height Calculation (Lines 267-297)
 
 **Current Code:**
+
 - `calculateCategoryHeight()` function
 - Visual viewport resize handling
 - Mobile-specific height logic
@@ -219,6 +238,7 @@ export const showFieldError = (element, message) => {
 **Extraction Target:** `src/utils/form-utils/category-chips.js` (part of container creation)
 
 **What to Extract:**
+
 ```javascript
 // Extract:
 - calculateCategoryHeight() → internal to createCategoryContainer()
@@ -232,6 +252,7 @@ export const showFieldError = (element, message) => {
 ### 8. Form Submission Logic (Lines 397-405, 528-545, 625-641)
 
 **Current Code:**
+
 - Auto-submit on category selection (duplicated)
 - OK button submit (edit mode)
 - Date handling
@@ -240,6 +261,7 @@ export const showFieldError = (element, message) => {
 **Extraction Target:** `src/utils/form-utils/submission.js`
 
 **What to Extract:**
+
 ```javascript
 // Extract:
 - prepareTransactionData() → normalize data before submit
@@ -250,15 +272,16 @@ export const showFieldError = (element, message) => {
 **Estimated Lines Saved:** ~40 lines
 
 **New Utility API:**
+
 ```javascript
 // src/utils/form-utils/submission.js
 export const prepareTransactionData = (formState, dateInput) => {
   // Returns: normalized transaction object
-}
+};
 
 export const handleFormSubmit = (data, onSubmit, onError) => {
   // Unified submit with error handling
-}
+};
 ```
 
 ---
@@ -300,22 +323,22 @@ import { prepareTransactionData, handleFormSubmit } from '../utils/form-utils/su
 export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInput = null }) => {
     // 1. Form setup (10 lines)
     const form = createFormContainer();
-    
+
     // 2. Account selection (15 lines)
     const { accountSelect, currentAccountId } = createAccountSelector(initialValues);
-    
+
     // 3. Type toggle (10 lines)
     const { typeGroup, currentType, setType } = createTypeToggleGroup({
         initialType: initialValues.type,
         onTypeChange: handleTypeChange
     });
-    
+
     // 4. Amount input (10 lines)
     const { amountInput, validate: validateAmountInput } = createAmountInput({
         initialValue: initialValues.amount,
         externalDateInput
     });
-    
+
     // 5. Category selector (15 lines)
     const { categoryContainer, selectedCategory, setCategory } = createCategorySelector({
         type: currentType,
@@ -324,21 +347,21 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
         initialCategory: initialValues.category,
         onSelect: handleCategorySelect
     });
-    
+
     // 6. Layout assembly (20 lines)
     assembleFormLayout(form, amountInput, accountSelect, categoryContainer, typeGroup);
-    
+
     // 7. Edit mode OK button (20 lines)
     if (initialValues.id) {
         addOkButton(form, { amountInput, categoryContainer, currentType, ... });
     }
-    
+
     // 8. Keyboard handling (5 lines)
     setupFormKeyboardHandling(form, [amountInput, accountSelect]);
-    
+
     // 9. Initial focus (5 lines)
     initializeForm(amountInput);
-    
+
     return form;
 };
 ```
@@ -348,12 +371,14 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
 ## Extraction Priority & Order
 
 ### Phase 1: Constants & Data (Low Risk)
+
 1. Extract category definitions, colors, options → `form-utils/constants.js`
 2. Extract type color mapping → `form-utils/type-toggle.js`
 
 **Impact:** ~50 lines saved, no behavior change
 
 ### Phase 2: Validation Utilities (Low Risk)
+
 3. Extract `validateAmount()` → `form-utils/validation.js`
 4. Extract `validateCategory()` → `form-utils/validation.js`
 5. Extract error feedback → `form-utils/validation.js`
@@ -361,12 +386,14 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
 **Impact:** ~50 lines saved, improves consistency
 
 ### Phase 3: Input Factories (Medium Risk)
+
 6. Extract `createAmountInput()` → `form-utils/amount-input.js`
 7. Enhance `createSelect()` in dom-factory for account selection
 
 **Impact:** ~40 lines saved, improves reusability
 
 ### Phase 4: Category System (High Impact)
+
 8. Extract `createCategoryChip()` → `form-utils/category-chips.js`
 9. Extract `createCategorySelector()` → `form-utils/category-chips.js`
 10. Extract category container setup → `form-utils/category-chips.js`
@@ -374,17 +401,20 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
 **Impact:** ~250 lines saved, major simplification
 
 ### Phase 5: Type Toggle (High Impact)
+
 11. Extract `createTypeToggleGroup()` → `form-utils/type-toggle.js`
 
 **Impact:** ~100 lines saved, improves reusability
 
 ### Phase 6: Keyboard & Submission (Medium Risk)
+
 12. Extract `setupFormKeyboardHandling()` → `form-utils/keyboard.js`
 13. Extract submission logic → `form-utils/submission.js`
 
 **Impact:** ~100 lines saved, improves maintainability
 
 ### Phase 7: Refactor TransactionForm (Final)
+
 14. Refactor TransactionForm to use all new utilities
 15. Test thoroughly
 16. Verify line count < 200
@@ -396,6 +426,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
 ## Dependencies & Interactions
 
 ### External Dependencies
+
 - `StorageService` - Account data, settings
 - `window.mobileUtils` - Mobile detection, haptic feedback, keyboard handling
 - `constants.js` - Colors, spacing, dimensions
@@ -403,6 +434,7 @@ export const TransactionForm = ({ onSubmit, initialValues = {}, externalDateInpu
 - `dom-factory.js` - Basic DOM creation
 
 ### Internal State Flow
+
 ```
 User Input → Validation → State Update → Visual Feedback → Auto-Submit (if valid)
      ↓
@@ -412,6 +444,7 @@ Account Change → Transfer Filter Update (if transfer type)
 ```
 
 ### Callback Chain
+
 ```
 Category Select → Validate Amount → Validate Category → Prepare Data → onSubmit()
 Type Change → Reset Selections → Re-render Categories
@@ -423,6 +456,7 @@ Account Change → Re-render (if transfer) → Update Filter
 ## Testing Strategy
 
 ### Unit Tests (New Utilities)
+
 - `type-toggle.test.js` - Type button creation, state management
 - `category-chips.test.js` - Chip creation, selection, rendering
 - `amount-input.test.js` - Input creation, validation
@@ -431,6 +465,7 @@ Account Change → Re-render (if transfer) → Update Filter
 - `submission.test.js` - Data preparation, error handling
 
 ### Integration Tests (TransactionForm)
+
 - Form initialization with initial values
 - Type toggle changes category display
 - Category selection triggers auto-submit
@@ -440,6 +475,7 @@ Account Change → Re-render (if transfer) → Update Filter
 - Account change updates transfer list
 
 ### Regression Tests
+
 - All existing TransactionForm tests must pass
 - Verify API compatibility (props, callbacks unchanged)
 - Verify visual appearance unchanged
@@ -450,21 +486,25 @@ Account Change → Re-render (if transfer) → Update Filter
 ## Risk Assessment
 
 ### Low Risk
+
 - Constants extraction
 - Validation utilities
 - Amount input factory
 
 ### Medium Risk
+
 - Keyboard handling (viewport API complexity)
 - Submission logic (error handling edge cases)
 - Account select enhancement
 
 ### High Risk
+
 - Category chip system (complex state, multiple code paths)
 - Type toggle (state synchronization)
 - Full form refactor (integration points)
 
 ### Mitigation
+
 1. Extract incrementally (one utility at a time)
 2. Write tests before refactoring
 3. Keep old code commented during transition
@@ -476,6 +516,7 @@ Account Change → Re-render (if transfer) → Update Filter
 ## Success Metrics
 
 ### Primary Goals
+
 - ✅ TransactionForm.js < 200 lines
 - ✅ All tests pass
 - ✅ No API changes
@@ -483,6 +524,7 @@ Account Change → Re-render (if transfer) → Update Filter
 - ✅ Bundle size ≤ current size
 
 ### Secondary Goals
+
 - ✅ Utilities reusable in other components
 - ✅ Better code organization
 - ✅ Easier to maintain and extend
@@ -522,4 +564,3 @@ Account Change → Re-render (if transfer) → Update Filter
 - Keep auto-submit behavior exactly as-is
 - Maintain edit mode OK button functionality
 - Preserve all validation error messages and feedback
-

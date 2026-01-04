@@ -16,20 +16,20 @@ graph TB
     B --> C[Report Generator]
     C --> D[Chart Renderer]
     D --> E[Visualization Library]
-    
+
     F[Navigation Controller] --> G[Reports View]
     G --> C
-    
+
     H[Storage Service] --> A
     I[Time Period Selector] --> B
-    
+
     subgraph "Core Components"
         B
         C
         D
         F
     end
-    
+
     subgraph "External Dependencies"
         E
         H
@@ -46,7 +46,7 @@ sequenceDiagram
     participant A as Analytics Engine
     participant C as Chart Renderer
     participant S as Storage Service
-    
+
     U->>N: Click Reports Button
     N->>R: Navigate to Reports
     R->>S: Fetch Transaction Data
@@ -64,6 +64,7 @@ sequenceDiagram
 **Purpose:** Processes raw transaction data to generate insights, calculations, and predictions.
 
 **Key Methods:**
+
 ```javascript
 class AnalyticsEngine {
   // Core analysis methods
@@ -71,11 +72,11 @@ class AnalyticsEngine {
   calculateIncomeVsExpenses(transactions, timePeriod)
   generateSpendingInsights(transactions, timePeriod)
   calculateCostOfLiving(transactions, timePeriod)
-  
+
   // Predictive analytics
   predictFutureSpending(historicalData, months)
   detectSpendingPatterns(transactions)
-  
+
   // Comparison methods
   comparePeriodsSpending(currentPeriod, previousPeriod)
   identifySpendingTrends(transactions, periods)
@@ -83,6 +84,7 @@ class AnalyticsEngine {
 ```
 
 **Data Processing Pipeline:**
+
 1. **Data Validation:** Ensure transaction data integrity
 2. **Time Filtering:** Filter transactions by selected time period
 3. **Category Aggregation:** Group and sum transactions by category
@@ -95,18 +97,19 @@ class AnalyticsEngine {
 **Purpose:** Orchestrates data processing and coordinates between analytics and visualization components.
 
 **Key Methods:**
+
 ```javascript
 class ReportGenerator {
   // Main report generation
   generateSpendingReport(timePeriod)
   generateIncomeReport(timePeriod)
   generateInsightsReport(timePeriod)
-  
+
   // Data formatting for charts
   formatDataForPieChart(categoryData)
   formatDataForBarChart(timeSeriesData)
   formatDataForLineChart(trendData)
-  
+
   // Report caching and performance
   getCachedReport(reportType, timePeriod)
   invalidateCache(reportType)
@@ -118,17 +121,18 @@ class ReportGenerator {
 **Purpose:** Handles all chart creation, updates, and interactions using Chart.js library.
 
 **Key Methods:**
+
 ```javascript
 class ChartRenderer {
   // Chart creation
   createPieChart(canvasElement, data, options)
   createBarChart(canvasElement, data, options)
   createLineChart(canvasElement, data, options)
-  
+
   // Chart management
   updateChart(chartInstance, newData)
   destroyChart(chartInstance)
-  
+
   // Responsive design
   resizeChart(chartInstance)
   applyMobileOptimizations(chartInstance)
@@ -136,6 +140,7 @@ class ChartRenderer {
 ```
 
 **Chart Configuration:**
+
 - **Color Palette:** Consistent with BlinkBudget's design system
 - **Accessibility:** WCAG 2.1 AA compliant colors and patterns
 - **Responsiveness:** Adaptive sizing for mobile and desktop
@@ -146,16 +151,17 @@ class ChartRenderer {
 **Purpose:** Manages view transitions and navigation state between dashboard and reports.
 
 **Key Methods:**
+
 ```javascript
 class NavigationController {
   // View management
   navigateToReports()
   navigateBackToDashboard()
-  
+
   // State management
   setActiveView(viewName)
   getActiveView()
-  
+
   // Mobile/Desktop adaptation
   updateNavigationForMobile()
   updateNavigationForDesktop()
@@ -167,18 +173,19 @@ class NavigationController {
 **Purpose:** Main view component that renders the reports interface and coordinates user interactions.
 
 **Key Methods:**
+
 ```javascript
 class ReportsView {
   // View lifecycle
   render()
   mount()
   unmount()
-  
+
   // User interactions
   handleTimePeriodChange(newPeriod)
   handleChartTypeToggle(chartType)
   handleExportRequest()
-  
+
   // Data loading
   loadReportData(timePeriod)
   refreshData()
@@ -188,6 +195,7 @@ class ReportsView {
 ## Data Models
 
 ### Transaction Data Structure
+
 ```javascript
 // Existing transaction structure (from current BlinkBudget)
 const transaction = {
@@ -196,8 +204,8 @@ const transaction = {
   category: string,
   description: string,
   date: Date,
-  type: 'income' | 'expense'
-}
+  type: 'income' | 'expense',
+};
 ```
 
 ### Analytics Data Models
@@ -297,6 +305,7 @@ Based on research, Chart.js is the optimal choice for BlinkBudget because:
 6. **Community:** Large community, excellent documentation, and active maintenance
 
 **Alternative Considerations:**
+
 - **D3.js:** Too complex for BlinkBudget's needs, steep learning curve
 - **Recharts:** React-specific, doesn't align with vanilla JS architecture
 - **ApexCharts:** Good alternative but larger bundle size and less customizable
@@ -342,7 +351,7 @@ ChartJS.register(
 
 ## Correctness Properties
 
-*A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+_A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
 
 After analyzing the acceptance criteria, I've identified several key properties that can be validated through property-based testing. Many properties focus on calculation accuracy, data consistency, and UI behavior that should hold across all possible inputs.
 
@@ -351,93 +360,97 @@ After analyzing the acceptance criteria, I've identified several key properties 
 Before defining the final properties, I've reviewed all testable criteria to eliminate redundancy:
 
 - **Calculation Properties:** Multiple requirements test similar calculation accuracy (income, expenses, averages) - these can be consolidated into comprehensive calculation properties
-- **Chart Rendering Properties:** Several requirements test chart behavior - these can be combined into chart consistency properties  
+- **Chart Rendering Properties:** Several requirements test chart behavior - these can be combined into chart consistency properties
 - **Time Period Properties:** Multiple requirements test time period changes - these can be unified into time period consistency properties
 - **Accessibility Properties:** Several requirements test accessibility features - these can be combined into comprehensive accessibility properties
 
 ### Core Properties
 
 **Property 1: Time Period Data Consistency**
-*For any* valid time period selection, changing the time period should result in all calculations (income, expenses, averages, trends) being recalculated to match exactly the transactions within that period
+_For any_ valid time period selection, changing the time period should result in all calculations (income, expenses, averages, trends) being recalculated to match exactly the transactions within that period
 **Validates: Requirements 1.2, 2.5, 3.3**
 
 **Property 2: Calculation Accuracy**
-*For any* set of transactions, the sum of calculated income should equal the sum of all income transactions, the sum of calculated expenses should equal the sum of all expense transactions, and the net balance should equal income minus expenses
+_For any_ set of transactions, the sum of calculated income should equal the sum of all income transactions, the sum of calculated expenses should equal the sum of all expense transactions, and the net balance should equal income minus expenses
 **Validates: Requirements 2.1, 2.2, 2.3, 3.1, 3.2**
 
 **Property 3: Chart Data Consistency**
-*For any* transaction dataset, providing the same data to different chart types (pie, bar, line) should result in charts that represent the same underlying values, just with different visual presentations
+_For any_ transaction dataset, providing the same data to different chart types (pie, bar, line) should result in charts that represent the same underlying values, just with different visual presentations
 **Validates: Requirements 1.5, 5.2**
 
 **Property 4: Accessibility Compliance**
-*For any* generated chart or visual element, all colors should meet WCAG 2.1 AA contrast requirements, all interactive elements should be keyboard navigable, and all visual elements should have appropriate alternative text
+_For any_ generated chart or visual element, all colors should meet WCAG 2.1 AA contrast requirements, all interactive elements should be keyboard navigable, and all visual elements should have appropriate alternative text
 **Validates: Requirements 1.3, 8.2, 8.3, 8.4, 8.5**
 
 **Property 5: Hover Interaction Completeness**
-*For any* chart with data segments, hovering over each segment should display detailed information including the correct amount and percentage for that segment
+_For any_ chart with data segments, hovering over each segment should display detailed information including the correct amount and percentage for that segment
 **Validates: Requirements 1.4**
 
 **Property 6: Insight Generation Accuracy**
-*For any* comparison between current and previous periods, generated percentage-based insights should accurately reflect the mathematical difference between the periods
+_For any_ comparison between current and previous periods, generated percentage-based insights should accurately reflect the mathematical difference between the periods
 **Validates: Requirements 4.1, 4.2**
 
 **Property 7: Category Analysis Consistency**
-*For any* transaction dataset, the top spending categories identified should be mathematically correct (highest amounts), and category breakdowns should sum to the total expenses
+_For any_ transaction dataset, the top spending categories identified should be mathematically correct (highest amounts), and category breakdowns should sum to the total expenses
 **Validates: Requirements 4.3, 3.4**
 
 **Property 8: Navigation State Persistence**
-*For any* user navigation between views, the selected time period and view preferences should be preserved and restored when returning to the reports view
+_For any_ user navigation between views, the selected time period and view preferences should be preserved and restored when returning to the reports view
 **Validates: Requirements 7.4**
 
 **Property 9: Performance Requirements**
-*For any* dataset up to 1000 transactions, insight calculations should complete within 1 second and report loading should complete within 2 seconds
+_For any_ dataset up to 1000 transactions, insight calculations should complete within 1 second and report loading should complete within 2 seconds
 **Validates: Requirements 9.2, 7.5**
 
 **Property 10: Responsive Design Consistency**
-*For any* screen size within supported ranges, charts should maintain readability and all interactive elements should remain usable
+_For any_ screen size within supported ranges, charts should maintain readability and all interactive elements should remain usable
 **Validates: Requirements 8.6**
 
 **Property 11: Data Integrity**
-*For any* transaction processing operation, no data duplication should occur and all original transaction data should remain unchanged
+_For any_ transaction processing operation, no data duplication should occur and all original transaction data should remain unchanged
 **Validates: Requirements 9.1**
 
 **Property 12: Cache Consistency**
-*For any* cached calculation, when new transactions are added that affect the cached result, the cache should be invalidated and recalculated to reflect the new data
+_For any_ cached calculation, when new transactions are added that affect the cached result, the cache should be invalidated and recalculated to reflect the new data
 **Validates: Requirements 9.3, 9.4**
 
 **Property 13: Error Handling Robustness**
-*For any* incomplete or malformed transaction data, the system should handle it gracefully without throwing errors and provide appropriate fallback behavior
+_For any_ incomplete or malformed transaction data, the system should handle it gracefully without throwing errors and provide appropriate fallback behavior
 **Validates: Requirements 9.5**
 
 **Property 14: Prediction Reasonableness**
-*For any* historical spending pattern with sufficient data, generated predictions should fall within reasonable bounds based on the historical variance and trends
+_For any_ historical spending pattern with sufficient data, generated predictions should fall within reasonable bounds based on the historical variance and trends
 **Validates: Requirements 6.1, 6.2, 6.3, 6.4, 6.6**
 
 **Property 15: Visual Consistency**
-*For any* chart rendering, the visual style should be consistent with BlinkBudget's design language and maintain the same styling patterns across all chart types
+_For any_ chart rendering, the visual style should be consistent with BlinkBudget's design language and maintain the same styling patterns across all chart types
 **Validates: Requirements 8.1**
 
 ## Error Handling
 
 ### Data Quality Issues
+
 - **Missing Transactions:** Display appropriate empty states with helpful messaging
 - **Corrupted Data:** Graceful degradation with error logging
 - **Invalid Dates:** Date validation with user-friendly error messages
 - **Malformed Categories:** Default categorization with user notification
 
 ### Performance Issues
+
 - **Large Datasets:** Progressive loading and data pagination for >1000 transactions
 - **Memory Constraints:** Efficient chart destruction and garbage collection
 - **Slow Calculations:** Loading indicators and background processing
 - **Network Issues:** Offline capability with cached data
 
 ### User Experience Errors
+
 - **Chart Rendering Failures:** Fallback to table view with same data
 - **Browser Compatibility:** Polyfills for older browsers
 - **Mobile Performance:** Optimized rendering for lower-powered devices
 - **Accessibility Failures:** Alternative data presentation methods
 
 ### Error Recovery Strategies
+
 ```javascript
 // Example error handling pattern
 class ReportGenerator {
@@ -447,14 +460,14 @@ class ReportGenerator {
       return this.formatReport(data);
     } catch (error) {
       console.error('Report generation failed:', error);
-      
+
       // Attempt fallback with cached data
       const cachedData = this.getCachedReport(timePeriod);
       if (cachedData) {
         this.showWarning('Using cached data due to processing error');
         return cachedData;
       }
-      
+
       // Final fallback to basic summary
       return this.generateBasicSummary(timePeriod);
     }

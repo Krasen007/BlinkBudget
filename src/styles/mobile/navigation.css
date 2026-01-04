@@ -55,7 +55,12 @@
 
 .mobile-nav-item.active {
   color: var(--color-primary);
-  background: hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  background: hsl(
+    var(--primary-hue),
+    var(--primary-sat),
+    var(--primary-light),
+    0.1
+  );
 }
 
 .mobile-nav-item.touch-active {
@@ -104,7 +109,12 @@
 }
 
 .mobile-back-btn.touch-active {
-  background: hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  background: hsl(
+    var(--primary-hue),
+    var(--primary-sat),
+    var(--primary-light),
+    0.1
+  );
 }
 
 .mobile-back-icon {

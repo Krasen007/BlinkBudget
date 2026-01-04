@@ -13,6 +13,7 @@ After reviewing the codebase, I've identified several UX issues and opportunitie
 **Issue:** When a transaction is submitted (auto-submit on category selection), the app immediately navigates to dashboard with no visual confirmation. Users don't get feedback that their action succeeded.
 
 **Current Flow:**
+
 ```
 User selects category → Auto-submit → Immediate navigation → Dashboard
 ```
@@ -22,13 +23,17 @@ User selects category → Auto-submit → Immediate navigation → Dashboard
 **Impact:** Users may be uncertain if their transaction was saved, especially if navigation is fast.
 
 **Recommendation:**
+
 - Briefly color the last transaction green to visually appear that is new, after 1 second fade to default color.
 
 ---
-### 2. 
+
+### 2.
+
 Skip
 
-### 3. 
+### 3.
+
 Skip
 
 ---
@@ -38,15 +43,17 @@ Skip
 **Issue:** TransactionForm auto-focuses the amount input on load, which immediately opens the mobile keyboard. This can be jarring and covers the form.
 
 **Current Code:**
+
 ```javascript
 setTimeout(() => {
-    amountInput.focus(); // Opens keyboard immediately
+  amountInput.focus(); // Opens keyboard immediately
 }, 100);
 ```
 
 **Problem:** Users might want to see the form layout first before entering data.
 
 **Recommendation:**
+
 - Optimize the form so all components are visible when the mobile keyboard opens and the form should not change it's size or feel, so it is natural when the mobile keyboard opens
 
 ---
@@ -56,6 +63,7 @@ setTimeout(() => {
 **Issue:** Date input is in the header, separate from the form. Users might not realize it's part of the transaction form.
 
 **Current Layout:**
+
 ```
 Header: [Title] [Date Input] [Back Button]
 Form: [Amount] [Account] [Categories] [Type Toggle]
@@ -64,6 +72,7 @@ Form: [Amount] [Account] [Categories] [Type Toggle]
 **Problem:** Date is visually disconnected from the form fields.
 
 **Recommendation:**
+
 - add label/tooltip explaining it's part of the transaction
 
 ---
@@ -75,6 +84,7 @@ Form: [Amount] [Account] [Categories] [Type Toggle]
 **Issue:** Dashboard doesn't show an empty state when there are no transactions. Users see a blank list.
 
 **Recommendation:**
+
 - Add friendly empty state with illustration/icon
 - Show "Add your first transaction" CTA
 - Provide helpful tips or onboarding
@@ -87,29 +97,34 @@ Skips
 
 ---
 
-### 8. 
+### 8.
+
 Skip
 
 ---
 
-### 9. 
+### 9.
+
 Skip
 
 ---
 
-### 10. 
+### 10.
+
 Skip
 
 ---
 
 ## Nice-to-Have Improvements
 
-### 11. 
+### 11.
+
 Skip
 
 ---
 
-### 12. 
+### 12.
+
 Skip
 
 ---
@@ -119,41 +134,48 @@ Skip
 **Issue:** Errors show as alerts (browser default). Not polished.
 
 **Recommendation:**
+
 - Create custom error toast notifications
 - Better error messages with actionable guidance
 
 ---
 
-### 14. 
+### 14.
+
 Skip
 
 ---
 
-### 15. 
+### 15.
+
 Skip
 
 ---
 
 ## Mobile-Specific Improvements
 
-### 16. 
+### 16.
+
 Skip
 
 ---
 
-### 17. 
+### 17.
+
 Skip
 
 ---
 
-### 18. 
+### 18.
+
 Skip
 
 ---
 
 ## Visual Polish Improvements
 
-### 19. 
+### 19.
+
 Skip
 
 ---
@@ -163,6 +185,7 @@ Skip
 **Issue:** Some colors are hardcoded, some use CSS variables.
 
 **Recommendation:**
+
 - Ensure all colors use constants
 - Add semantic color tokens
 
@@ -175,6 +198,7 @@ Skip
 **Issue:** Some interactive elements lack proper ARIA labels.
 
 **Recommendation:**
+
 - Add ARIA labels to all buttons
 - Add ARIA descriptions for complex interactions
 
@@ -185,6 +209,7 @@ Skip
 **Issue:** Focus management could be improved for keyboard navigation.
 
 **Recommendation:**
+
 - Ensure logical tab order
 - Add visible focus indicators
 - Trap focus in modals
@@ -199,6 +224,7 @@ Skip
 **Issue:** Transactions are saved synchronously, which can feel slow.
 
 **Recommendation:**
+
 - Add optimistic UI updates (show transaction immediately)
 - Sync in background
 - Show success state immediately
@@ -210,6 +236,7 @@ Skip
 **Issue:** No loading states, just blank screens.
 
 **Recommendation:**
+
 - Progressive loading of transactions
 
 ---

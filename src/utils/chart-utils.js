@@ -1,6 +1,6 @@
 /**
  * Chart Utilities
- * 
+ *
  * Helper functions for chart data preparation, formatting, and manipulation.
  * These utilities support the ChartRenderer component and ensure consistent
  * data formatting across all chart types.
@@ -17,7 +17,7 @@ export function formatCurrency(value, currency = 'USD') {
     style: 'currency',
     currency: currency,
     minimumFractionDigits: 0,
-    maximumFractionDigits: 2
+    maximumFractionDigits: 2,
   }).format(value);
 }
 
@@ -40,12 +40,14 @@ export function preparePieChartData(categoryData) {
   if (!categoryData || categoryData.length === 0) {
     return {
       labels: ['No data'],
-      datasets: [{
-        data: [1],
-        backgroundColor: ['#e0e0e0'],
-        borderColor: ['#ffffff'],
-        borderWidth: 2
-      }]
+      datasets: [
+        {
+          data: [1],
+          backgroundColor: ['#e0e0e0'],
+          borderColor: ['#ffffff'],
+          borderWidth: 2,
+        },
+      ],
     };
   }
 
@@ -54,11 +56,13 @@ export function preparePieChartData(categoryData) {
 
   return {
     labels,
-    datasets: [{
-      data,
-      borderWidth: 2
-      // Colors will be added by ChartRenderer
-    }]
+    datasets: [
+      {
+        data,
+        borderWidth: 2,
+        // Colors will be added by ChartRenderer
+      },
+    ],
   };
 }
 
@@ -70,15 +74,22 @@ export function preparePieChartData(categoryData) {
  * @param {string} datasetLabel - Label for the dataset
  * @returns {Object} Chart.js compatible data structure
  */
-export function prepareBarChartData(data, labelKey, valueKey, datasetLabel = 'Amount') {
+export function prepareBarChartData(
+  data,
+  labelKey,
+  valueKey,
+  datasetLabel = 'Amount'
+) {
   if (!data || data.length === 0) {
     return {
       labels: ['No data'],
-      datasets: [{
-        label: datasetLabel,
-        data: [0],
-        backgroundColor: ['#e0e0e0']
-      }]
+      datasets: [
+        {
+          label: datasetLabel,
+          data: [0],
+          backgroundColor: ['#e0e0e0'],
+        },
+      ],
     };
   }
 
@@ -89,11 +100,13 @@ export function prepareBarChartData(data, labelKey, valueKey, datasetLabel = 'Am
   });
   return {
     labels,
-    datasets: [{
-      label: datasetLabel,
-      data: values
-      // Colors will be added by ChartRenderer
-    }]
+    datasets: [
+      {
+        label: datasetLabel,
+        data: values,
+        // Colors will be added by ChartRenderer
+      },
+    ],
   };
 }
 
@@ -107,32 +120,36 @@ export function prepareLineChartData(timeSeriesData, label = 'Amount') {
   if (!timeSeriesData || timeSeriesData.length === 0) {
     return {
       labels: ['No data'],
-      datasets: [{
-        label,
-        data: [0],
-        fill: false
-      }]
+      datasets: [
+        {
+          label,
+          data: [0],
+          fill: false,
+        },
+      ],
     };
   }
 
   const labels = timeSeriesData.map(item => {
     const date = new Date(item.date);
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
     });
   });
-  
+
   const data = timeSeriesData.map(item => item.value || 0);
 
   return {
     labels,
-    datasets: [{
-      label,
-      data,
-      fill: false
-      // Colors and styling will be added by ChartRenderer
-    }]
+    datasets: [
+      {
+        label,
+        data,
+        fill: false,
+        // Colors and styling will be added by ChartRenderer
+      },
+    ],
   };
 }
 
@@ -146,18 +163,21 @@ export function calculatePercentages(categoryData) {
     return [];
   }
 
-  const total = categoryData.reduce((sum, item) => sum + Math.abs(item.amount || 0), 0);
-  
+  const total = categoryData.reduce(
+    (sum, item) => sum + Math.abs(item.amount || 0),
+    0
+  );
+
   if (total === 0) {
     return categoryData.map(item => ({
       ...item,
-      percentage: 0
+      percentage: 0,
     }));
   }
 
   return categoryData.map(item => ({
     ...item,
-    percentage: Math.abs(item.amount || 0) / total
+    percentage: Math.abs(item.amount || 0) / total,
   }));
 }
 
@@ -171,7 +191,9 @@ export function sortByAmount(categoryData) {
     return [];
   }
 
-  return [...categoryData].sort((a, b) => Math.abs(b.amount || 0) - Math.abs(a.amount || 0));
+  return [...categoryData].sort(
+    (a, b) => Math.abs(b.amount || 0) - Math.abs(a.amount || 0)
+  );
 }
 
 /**
@@ -235,12 +257,14 @@ export function groupSmallCategories(categoryData, threshold = 0.05, maxCategori
 export function createEmptyStateData(message = 'No data available') {
   return {
     labels: [message],
-    datasets: [{
-      data: [1],
-      backgroundColor: ['#f0f0f0'],
-      borderColor: ['#d0d0d0'],
-      borderWidth: 1
-    }]
+    datasets: [
+      {
+        data: [1],
+        backgroundColor: ['#f0f0f0'],
+        borderColor: ['#d0d0d0'],
+        borderWidth: 1,
+      },
+    ],
   };
 }
 
@@ -263,7 +287,7 @@ export function validateChartData(data) {
   }
 
   // Check that each dataset has data array
-  return data.datasets.every(dataset => 
-    dataset && Array.isArray(dataset.data) && dataset.data.length > 0
+  return data.datasets.every(
+    dataset => dataset && Array.isArray(dataset.data) && dataset.data.length > 0
   );
 }

@@ -1,11 +1,17 @@
 /**
  * Lazy Loading Tests
- * 
+ *
  * Tests for Chart.js lazy loading and progressive data loading functionality
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { loadChartJS, isChartJSReady, getChartJSModules, resetChartLoader, preloadChartJS } from '../src/core/chart-loader.js';
+import {
+  loadChartJS,
+  isChartJSReady,
+  getChartJSModules,
+  resetChartLoader,
+  preloadChartJS,
+} from '../src/core/chart-loader.js';
 import { ProgressiveDataLoader } from '../src/core/progressive-data-loader.js';
 
 describe('Chart.js Lazy Loading', () => {
@@ -24,9 +30,9 @@ describe('Chart.js Lazy Loading', () => {
 
   it('should load Chart.js on demand', async () => {
     expect(isChartJSReady()).toBe(false);
-    
+
     const modules = await loadChartJS();
-    
+
     expect(isChartJSReady()).toBe(true);
     expect(modules).toBeDefined();
     expect(modules.ChartJS).toBeDefined();
@@ -36,25 +42,25 @@ describe('Chart.js Lazy Loading', () => {
   it('should return cached modules on subsequent calls', async () => {
     const modules1 = await loadChartJS();
     const modules2 = await loadChartJS();
-    
+
     expect(modules1).toBe(modules2);
     expect(isChartJSReady()).toBe(true);
   });
 
   it('should handle preloading', async () => {
     expect(isChartJSReady()).toBe(false);
-    
+
     await preloadChartJS();
-    
+
     expect(isChartJSReady()).toBe(true);
   });
 
   it('should reset loader state', async () => {
     await loadChartJS();
     expect(isChartJSReady()).toBe(true);
-    
+
     resetChartLoader();
-    
+
     expect(isChartJSReady()).toBe(false);
     expect(getChartJSModules()).toBe(null);
   });
@@ -66,22 +72,31 @@ describe('Progressive Data Loading', () => {
 
   beforeEach(() => {
     progressiveLoader = new ProgressiveDataLoader();
-    
+
     // Create mock transaction data with dates in the test period
     mockTransactions = [];
     const testStartDate = new Date('2024-01-01');
     const testEndDate = new Date('2024-12-31');
-    
+
     for (let i = 0; i < 1000; i++) {
-      const randomDate = new Date(testStartDate.getTime() + Math.random() * (testEndDate.getTime() - testStartDate.getTime()));
+      const randomDate = new Date(
+        testStartDate.getTime() +
+          Math.random() * (testEndDate.getTime() - testStartDate.getTime())
+      );
       mockTransactions.push({
         id: `transaction-${i}`,
         amount: Math.random() * 100,
         type: Math.random() > 0.8 ? 'income' : 'expense',
-        category: ['Food', 'Transportation', 'Shopping', 'Bills', 'Entertainment'][Math.floor(Math.random() * 5)],
+        category: [
+          'Food',
+          'Transportation',
+          'Shopping',
+          'Bills',
+          'Entertainment',
+        ][Math.floor(Math.random() * 5)],
         description: `Transaction ${i}`,
         date: randomDate.toISOString(),
-        accountId: 'main'
+        accountId: 'main',
       });
     }
   });
@@ -103,10 +118,13 @@ describe('Progressive Data Loading', () => {
     const timePeriod = {
       startDate: new Date('2024-01-01'),
       endDate: new Date('2024-12-31'),
-      type: 'yearly'
+      type: 'yearly',
     };
 
-    const result = await progressiveLoader.loadTransactionData(smallDataset, timePeriod);
+    const result = await progressiveLoader.loadTransactionData(
+      smallDataset,
+      timePeriod
+    );
 
     expect(result).toBeDefined();
     expect(result.isProgressive).toBe(false);
@@ -120,15 +138,19 @@ describe('Progressive Data Loading', () => {
     const timePeriod = {
       startDate: new Date('2024-01-01'),
       endDate: new Date('2024-12-31'),
-      type: 'yearly'
+      type: 'yearly',
     };
 
     const progressUpdates = [];
-    const result = await progressiveLoader.loadTransactionData(mockTransactions, timePeriod, {
-      onProgress: (progress, message) => {
-        progressUpdates.push({ progress, message });
+    const result = await progressiveLoader.loadTransactionData(
+      mockTransactions,
+      timePeriod,
+      {
+        onProgress: (progress, message) => {
+          progressUpdates.push({ progress, message });
+        },
       }
-    });
+    );
 
     expect(result).toBeDefined();
     expect(result.isProgressive).toBe(true);
@@ -142,7 +164,7 @@ describe('Progressive Data Loading', () => {
     const timePeriod = {
       startDate: new Date('2024-01-01'),
       endDate: new Date('2024-12-31'),
-      type: 'yearly'
+      type: 'yearly',
     };
 
     const result = await progressiveLoader.loadTransactionData([], timePeriod);
@@ -158,7 +180,7 @@ describe('Progressive Data Loading', () => {
     const timePeriod = {
       startDate: new Date('2024-06-01'),
       endDate: new Date('2024-06-30'),
-      type: 'monthly'
+      type: 'monthly',
     };
 
     // Add some transactions in the time period
@@ -169,7 +191,7 @@ describe('Progressive Data Loading', () => {
         type: 'expense',
         category: 'Food',
         date: '2024-06-15',
-        accountId: 'main'
+        accountId: 'main',
       },
       {
         id: 'june-2',
@@ -177,11 +199,14 @@ describe('Progressive Data Loading', () => {
         type: 'income',
         category: 'Salary',
         date: '2024-06-20',
-        accountId: 'main'
-      }
+        accountId: 'main',
+      },
     ];
 
-    const result = await progressiveLoader.loadTransactionData(juneTransactions, timePeriod);
+    const result = await progressiveLoader.loadTransactionData(
+      juneTransactions,
+      timePeriod
+    );
 
     expect(result.transactions).toHaveLength(2);
     expect(result.incomeVsExpenses.totalIncome).toBe(100);
@@ -192,12 +217,15 @@ describe('Progressive Data Loading', () => {
     const timePeriod = {
       startDate: new Date('2024-01-01'),
       endDate: new Date('2024-12-31'),
-      type: 'yearly'
+      type: 'yearly',
     };
 
     // Start loading
-    const loadingPromise = progressiveLoader.loadTransactionData(mockTransactions, timePeriod);
-    
+    const loadingPromise = progressiveLoader.loadTransactionData(
+      mockTransactions,
+      timePeriod
+    );
+
     // Cancel after a short delay to allow loading to start
     setTimeout(() => {
       progressiveLoader.cancelLoading();
@@ -221,13 +249,13 @@ describe('Progressive Data Loading', () => {
       type: 'expense',
       category: 'Food',
       date: '2024-01-01',
-      accountId: 'main'
+      accountId: 'main',
     };
 
     const invalidTransaction = {
       // Missing id and amount
       type: 'expense',
-      category: 'Food'
+      category: 'Food',
     };
 
     const result1 = progressiveLoader.validateTransaction(validTransaction);
@@ -245,14 +273,14 @@ describe('Progressive Data Loading', () => {
       { id: '1', amount: 50, type: 'expense', category: 'Food' },
       { id: '2', amount: 30, type: 'expense', category: 'Food' },
       { id: '3', amount: 20, type: 'expense', category: 'Transport' },
-      { id: '4', amount: 100, type: 'income', category: 'Salary' }
+      { id: '4', amount: 100, type: 'income', category: 'Salary' },
     ];
 
     const result = progressiveLoader.calculateCategoryBreakdown(transactions);
 
     expect(result.categories).toHaveLength(2);
     expect(result.totalAmount).toBe(100); // Only expenses
-    
+
     const foodCategory = result.categories.find(cat => cat.name === 'Food');
     expect(foodCategory.amount).toBe(80);
     expect(foodCategory.percentage).toBe(80);
@@ -264,7 +292,7 @@ describe('Progressive Data Loading', () => {
       { id: '1', amount: 50, type: 'expense', category: 'Food' },
       { id: '2', amount: 30, type: 'expense', category: 'Transport' },
       { id: '3', amount: 200, type: 'income', category: 'Salary' },
-      { id: '4', amount: 100, type: 'income', category: 'Freelance' }
+      { id: '4', amount: 100, type: 'income', category: 'Freelance' },
     ];
 
     const result = progressiveLoader.calculateIncomeVsExpenses(transactions);

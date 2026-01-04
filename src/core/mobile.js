@@ -7,7 +7,8 @@ export class MobileUtils {
   constructor() {
     this.isInitialized = false;
     this.viewportHeight = window.innerHeight;
-    this.visualViewportHeight = window.visualViewport?.height || window.innerHeight;
+    this.visualViewportHeight =
+      window.visualViewport?.height || window.innerHeight;
     this.responsiveCallbacks = [];
     this.init();
   }
@@ -29,7 +30,8 @@ export class MobileUtils {
   setupViewportHandling() {
     const updateViewportHeight = () => {
       this.viewportHeight = window.innerHeight;
-      this.visualViewportHeight = window.visualViewport?.height || window.innerHeight;
+      this.visualViewportHeight =
+        window.visualViewport?.height || window.innerHeight;
       this.updateCSSCustomProperties();
       this.addMobileClasses();
       this.triggerResponsiveCallbacks();
@@ -58,13 +60,15 @@ export class MobileUtils {
       orientationTimeout = setTimeout(() => {
         this.updateCSSCustomProperties();
         // Dispatch custom event for components to listen to
-        window.dispatchEvent(new CustomEvent('mobile:orientationchange', {
-          detail: {
-            orientation: this.getOrientation(),
-            viewportHeight: this.viewportHeight,
-            visualViewportHeight: this.visualViewportHeight
-          }
-        }));
+        window.dispatchEvent(
+          new CustomEvent('mobile:orientationchange', {
+            detail: {
+              orientation: this.getOrientation(),
+              viewportHeight: this.viewportHeight,
+              visualViewportHeight: this.visualViewportHeight,
+            },
+          })
+        );
       }, 100); // 100ms debounce
     };
 
@@ -79,7 +83,10 @@ export class MobileUtils {
     const root = document.documentElement;
 
     root.style.setProperty('--viewport-height', `${this.viewportHeight}px`);
-    root.style.setProperty('--visual-viewport-height', `${this.visualViewportHeight}px`);
+    root.style.setProperty(
+      '--visual-viewport-height',
+      `${this.visualViewportHeight}px`
+    );
     root.style.setProperty('--viewport-width', `${window.innerWidth}px`);
   }
 
@@ -154,7 +161,7 @@ export class MobileUtils {
       if (targetY < 0) {
         window.scrollBy({
           top: targetY,
-          behavior: 'smooth'
+          behavior: 'smooth',
         });
       }
     }
@@ -167,7 +174,13 @@ export class MobileUtils {
     const body = document.body;
 
     // Remove existing mobile classes
-    body.classList.remove('is-mobile', 'is-tablet', 'is-desktop', 'supports-touch', 'supports-haptic');
+    body.classList.remove(
+      'is-mobile',
+      'is-tablet',
+      'is-desktop',
+      'supports-touch',
+      'supports-haptic'
+    );
 
     // Add current state classes
     if (this.isMobile()) body.classList.add('is-mobile');
@@ -204,8 +217,9 @@ export class MobileUtils {
     return {
       top: computedStyle.getPropertyValue('--safe-area-inset-top') || '0px',
       right: computedStyle.getPropertyValue('--safe-area-inset-right') || '0px',
-      bottom: computedStyle.getPropertyValue('--safe-area-inset-bottom') || '0px',
-      left: computedStyle.getPropertyValue('--safe-area-inset-left') || '0px'
+      bottom:
+        computedStyle.getPropertyValue('--safe-area-inset-bottom') || '0px',
+      left: computedStyle.getPropertyValue('--safe-area-inset-left') || '0px',
     };
   }
 

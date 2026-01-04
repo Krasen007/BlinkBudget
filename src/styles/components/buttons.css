@@ -123,7 +123,9 @@
   margin: calc(var(--touch-spacing-min) / 2);
 
   /* Enhanced visual feedback */
-  transition: all var(--transition-fast), transform 0.1s ease;
+  transition:
+    all var(--transition-fast),
+    transform 0.1s ease;
 }
 
 .type-toggle-btn:active {
@@ -193,7 +195,12 @@
 }
 
 .mobile-back-btn.touch-active {
-  background: hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  background: hsl(
+    var(--primary-hue),
+    var(--primary-sat),
+    var(--primary-light),
+    0.1
+  );
 }
 
 .mobile-back-icon {
@@ -237,7 +244,12 @@
 
 .mobile-nav-item.active {
   color: var(--color-primary);
-  background: hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  background: hsl(
+    var(--primary-hue),
+    var(--primary-sat),
+    var(--primary-light),
+    0.1
+  );
 }
 
 .mobile-nav-item.touch-active {
@@ -317,8 +329,7 @@ input:active {
 }
 
 /* High DPI display optimizations */
-@media (min-device-pixel-ratio: 2),
-(resolution >= 192dpi) {
+@media (min-device-pixel-ratio: 2), (resolution >= 192dpi) {
   .btn {
     border-width: 0.5px;
   }
@@ -326,17 +337,16 @@ input:active {
 
 /* Accessibility improvements for mobile */
 @media (width <= 767px) {
-
   /* Better contrast for touch targets */
   .btn:hover,
   .btn:focus {
-    box-shadow: 0 0 0 3px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2);
+    box-shadow: 0 0 0 3px
+      hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2);
   }
 }
 
 /* iOS specific fixes */
 @supports (-webkit-touch-callout: none) {
-
   /* Fix iOS button styling */
   .btn {
     appearance: none;

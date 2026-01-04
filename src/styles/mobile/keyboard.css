@@ -38,7 +38,8 @@ body.keyboard-visible input:focus,
 body.keyboard-visible select:focus {
   /* Stronger focus indication when keyboard is active */
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
+  box-shadow: 0 0 0 4px
+    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
   transform: scale(1.02);
   transition: all var(--transition-fast);
 }

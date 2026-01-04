@@ -10,24 +10,24 @@ import { COLORS, HAPTIC_PATTERNS, TIMING } from '../constants.js';
  * @param {string|number} value - Amount value to validate
  * @returns {Object} Validation result with valid flag and value/error
  */
-export const validateAmount = (value) => {
-    // Support both comma and dot by normalizing
-    const normalized = String(value).replace(/,/g, '.');
-    const amount = parseFloat(normalized);
+export const validateAmount = value => {
+  // Support both comma and dot by normalizing
+  const normalized = String(value).replace(/,/g, '.');
+  const amount = parseFloat(normalized);
 
-    if (isNaN(amount) || amount === 0) {
-        return {
-            valid: false,
-            error: 'Amount is required and must be greater than 0',
-            value: null
-        };
-    }
-
+  if (isNaN(amount) || amount === 0) {
     return {
-        valid: true,
-        value: Math.abs(amount),
-        error: null
+      valid: false,
+      error: 'Amount is required and must be greater than 0',
+      value: null,
     };
+  }
+
+  return {
+    valid: true,
+    value: Math.abs(amount),
+    error: null,
+  };
 };
 
 /**
@@ -37,19 +37,19 @@ export const validateAmount = (value) => {
  * @returns {Object} Validation result
  */
 export const validateCategory = (category, type) => {
-    if (type === 'transfer') {
-        // Transfers don't require category (they use toAccountId)
-        return { valid: true, error: null };
-    }
-
-    if (!category || category.trim() === '') {
-        return {
-            valid: false,
-            error: 'Please select a category'
-        };
-    }
-
+  if (type === 'transfer') {
+    // Transfers don't require category (they use toAccountId)
     return { valid: true, error: null };
+  }
+
+  if (!category || category.trim() === '') {
+    return {
+      valid: false,
+      error: 'Please select a category',
+    };
+  }
+
+  return { valid: true, error: null };
 };
 
 /**
@@ -57,15 +57,15 @@ export const validateCategory = (category, type) => {
  * @param {string|null} toAccountId - Destination account ID
  * @returns {Object} Validation result
  */
-export const validateTransferAccount = (toAccountId) => {
-    if (!toAccountId || toAccountId.trim() === '') {
-        return {
-            valid: false,
-            error: 'Please select a destination account'
-        };
-    }
+export const validateTransferAccount = toAccountId => {
+  if (!toAccountId || toAccountId.trim() === '') {
+    return {
+      valid: false,
+      error: 'Please select a destination account',
+    };
+  }
 
-    return { valid: true, error: null };
+  return { valid: true, error: null };
 };
 
 /**
@@ -73,40 +73,40 @@ export const validateTransferAccount = (toAccountId) => {
  * @param {HTMLElement} element - Element to show error on
  * @param {string} errorMessage - Error message (optional)
  */
-export const showFieldError = (element, errorMessage = null) => {
-    // Visual error feedback
-    element.style.border = `1px solid ${COLORS.ERROR}`;
+export const showFieldError = (element, _errorMessage = null) => {
+  // Visual error feedback
+  element.style.border = `1px solid ${COLORS.ERROR}`;
 
-    // Auto-clear error after timeout
-    setTimeout(() => {
-        element.style.border = '1px solid var(--color-border)';
-    }, TIMING.ANIMATION_NORMAL * 10); // 2 seconds
+  // Auto-clear error after timeout
+  setTimeout(() => {
+    element.style.border = '1px solid var(--color-border)';
+  }, TIMING.ANIMATION_NORMAL * 10); // 2 seconds
 
-    // Haptic error feedback
-    if (window.mobileUtils?.supportsHaptic()) {
-        window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.ERROR);
-    }
+  // Haptic error feedback
+  if (window.mobileUtils?.supportsHaptic()) {
+    window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.ERROR);
+  }
 
-    // Focus the element
-    if (element.focus) {
-        element.focus();
-    }
+  // Focus the element
+  if (element.focus) {
+    element.focus();
+  }
 };
 
 /**
  * Show validation error on container (for category selector)
  * @param {HTMLElement} container - Container to show error on
  */
-export const showContainerError = (container) => {
-    container.style.border = `1px solid ${COLORS.ERROR}`;
+export const showContainerError = container => {
+  container.style.border = `1px solid ${COLORS.ERROR}`;
 
-    setTimeout(() => {
-        container.style.border = '1px solid var(--color-border)';
-    }, TIMING.ANIMATION_NORMAL * 10);
+  setTimeout(() => {
+    container.style.border = '1px solid var(--color-border)';
+  }, TIMING.ANIMATION_NORMAL * 10);
 
-    if (window.mobileUtils?.supportsHaptic()) {
-        window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.ERROR);
-    }
+  if (window.mobileUtils?.supportsHaptic()) {
+    window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.ERROR);
+  }
 };
 
 /**
@@ -117,13 +117,13 @@ export const showContainerError = (container) => {
  * @returns {Object} Validation result
  */
 export const validateLength = (value, max, fieldName) => {
-    if (value && value.length > max) {
-        return {
-            valid: false,
-            error: `${fieldName} is too long (max ${max} characters)`
-        };
-    }
-    return { valid: true, error: null };
+  if (value && value.length > max) {
+    return {
+      valid: false,
+      error: `${fieldName} is too long (max ${max} characters)`,
+    };
+  }
+  return { valid: true, error: null };
 };
 
 /**
@@ -131,39 +131,38 @@ export const validateLength = (value, max, fieldName) => {
  * @param {Object} data - Transaction data
  * @returns {Object} Validation result with errors object
  */
-export const validateTransactionForm = (data) => {
-    const errors = {};
+export const validateTransactionForm = data => {
+  const errors = {};
 
-    // Validate amount
-    const amountValidation = validateAmount(data.amount);
-    if (!amountValidation.valid) {
-        errors.amount = amountValidation.error;
+  // Validate amount
+  const amountValidation = validateAmount(data.amount);
+  if (!amountValidation.valid) {
+    errors.amount = amountValidation.error;
+  }
+
+  // Validate category/transfer account
+  if (data.type === 'transfer') {
+    const transferValidation = validateTransferAccount(data.toAccountId);
+    if (!transferValidation.valid) {
+      errors.toAccountId = transferValidation.error;
     }
-
-    // Validate category/transfer account
-    if (data.type === 'transfer') {
-        const transferValidation = validateTransferAccount(data.toAccountId);
-        if (!transferValidation.valid) {
-            errors.toAccountId = transferValidation.error;
-        }
-    } else {
-        const categoryValidation = validateCategory(data.category, data.type);
-        if (!categoryValidation.valid) {
-            errors.category = categoryValidation.error;
-        }
+  } else {
+    const categoryValidation = validateCategory(data.category, data.type);
+    if (!categoryValidation.valid) {
+      errors.category = categoryValidation.error;
     }
+  }
 
-    // Validate note length if present
-    if (data.note) {
-        const noteValidation = validateLength(data.note, 255, 'Note');
-        if (!noteValidation.valid) {
-            errors.note = noteValidation.error;
-        }
+  // Validate note length if present
+  if (data.note) {
+    const noteValidation = validateLength(data.note, 255, 'Note');
+    if (!noteValidation.valid) {
+      errors.note = noteValidation.error;
     }
+  }
 
-    return {
-        valid: Object.keys(errors).length === 0,
-        errors
-    };
+  return {
+    valid: Object.keys(errors).length === 0,
+    errors,
+  };
 };
-

@@ -13,17 +13,24 @@ import { COLORS, SPACING } from '../utils/constants.js';
  * @param {Object} currentData - Full analytics data
  * @returns {void}
  */
-export const showCategoryDetails = (categoryName, amount, percentage, currentData) => {
-    const detailsSection = document.getElementById('category-details-section');
-    if (!detailsSection) return;
+export const showCategoryDetails = (
+  categoryName,
+  amount,
+  percentage,
+  currentData
+) => {
+  const detailsSection = document.getElementById('category-details-section');
+  if (!detailsSection) return;
 
-    const categoryTransactions = currentData.transactions.filter(t =>
-        (t.category || 'Uncategorized') === categoryName && t.type === 'expense'
-    );
+  const categoryTransactions = currentData.transactions.filter(
+    t =>
+      (t.category || 'Uncategorized') === categoryName && t.type === 'expense'
+  );
 
-    const averageAmount = categoryTransactions.length > 0 ? (amount / categoryTransactions.length) : 0;
+  const averageAmount =
+    categoryTransactions.length > 0 ? amount / categoryTransactions.length : 0;
 
-    detailsSection.innerHTML = `
+  detailsSection.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: ${SPACING.MD};">
             <h4 style="margin: 0; color: ${COLORS.TEXT_MAIN};">${categoryName} Details</h4>
             <button id="close-category-details" 
@@ -50,24 +57,33 @@ export const showCategoryDetails = (categoryName, amount, percentage, currentDat
         <div style="margin-top: ${SPACING.MD};">
             <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED}; margin-bottom: ${SPACING.SM};">Recent Transactions:</div>
             <div style="max-height: 200px; overflow-y: auto;">
-                ${categoryTransactions.length > 0 ? categoryTransactions.slice(0, 10).map(t => `
+                ${
+                  categoryTransactions.length > 0
+                    ? categoryTransactions
+                        .slice(0, 10)
+                        .map(
+                          t => `
                     <div style="display: flex; justify-content: space-between; padding: ${SPACING.XS} 0; border-bottom: 1px solid ${COLORS.BORDER};">
                         <span style="color: ${COLORS.TEXT_MAIN};">${t.description || 'No description'}</span>
                         <span style="font-weight: 600; color: ${COLORS.ERROR};">€${Math.abs(t.amount).toFixed(2)}</span>
                     </div>
-                `).join('') : `<div style="color: ${  COLORS.TEXT_MUTED  };">No transactions found</div>`}
+                `
+                        )
+                        .join('')
+                    : `<div style="color: ${COLORS.TEXT_MUTED};">No transactions found</div>`
+                }
             </div>
         </div>
     `;
 
-    detailsSection.style.display = 'block';
+  detailsSection.style.display = 'block';
 
-    const closeBtn = detailsSection.querySelector('#close-category-details');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            detailsSection.style.display = 'none';
-        });
-    }
+  const closeBtn = detailsSection.querySelector('#close-category-details');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      detailsSection.style.display = 'none';
+    });
+  }
 
-    detailsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  detailsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 };

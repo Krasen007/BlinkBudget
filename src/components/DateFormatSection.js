@@ -3,77 +3,81 @@
  */
 
 import { SettingsService } from '../core/settings-service.js';
-import { SPACING, TOUCH_TARGETS, FONT_SIZES, DATE_FORMATS, HAPTIC_PATTERNS } from '../utils/constants.js';
-import { addTouchFeedback } from '../utils/touch-utils.js';
+import {
+  SPACING,
+  TOUCH_TARGETS,
+  FONT_SIZES,
+  DATE_FORMATS,
+  HAPTIC_PATTERNS,
+} from '../utils/constants.js';
 
 export const DateFormatSection = ({ onFormatChange }) => {
-    const section = document.createElement('div');
-    section.className = 'card mobile-settings-card';
-    section.style.marginBottom = SPACING.LG;
+  const section = document.createElement('div');
+  section.className = 'card mobile-settings-card';
+  section.style.marginBottom = SPACING.LG;
 
-    const title = document.createElement('h3');
-    title.textContent = 'Date Format';
-    title.className = 'mobile-settings-title';
-    Object.assign(title.style, {
-        marginBottom: SPACING.MD,
-        fontSize: FONT_SIZES.XL
+  const title = document.createElement('h3');
+  title.textContent = 'Date Format';
+  title.className = 'mobile-settings-title';
+  Object.assign(title.style, {
+    marginBottom: SPACING.MD,
+    fontSize: FONT_SIZES.XL,
+  });
+  section.appendChild(title);
+
+  const currentFormat =
+    SettingsService.getSetting('dateFormat') || DATE_FORMATS.DEFAULT;
+
+  const createOption = (label, value) => {
+    const row = document.createElement('div');
+    row.className = 'mobile-settings-option touch-target';
+    Object.assign(row.style, {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: SPACING.LG,
+      cursor: 'pointer',
+      minHeight: TOUCH_TARGETS.MIN_HEIGHT,
+      borderRadius: 'var(--radius-md)',
+      transition: 'background-color var(--transition-fast)',
+      marginBottom: SPACING.SM,
+      border: '1px solid var(--color-border)',
     });
-    section.appendChild(title);
 
-    const currentFormat = SettingsService.getSetting('dateFormat') || DATE_FORMATS.DEFAULT;
+    const lbl = document.createElement('span');
+    lbl.textContent = label;
+    Object.assign(lbl.style, {
+      fontSize: FONT_SIZES.BASE,
+      fontWeight: '500',
+    });
 
-    const createOption = (label, value) => {
-        const row = document.createElement('div');
-        row.className = 'mobile-settings-option touch-target';
-        Object.assign(row.style, {
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: SPACING.LG,
-            cursor: 'pointer',
-            minHeight: TOUCH_TARGETS.MIN_HEIGHT,
-            borderRadius: 'var(--radius-md)',
-            transition: 'background-color var(--transition-fast)',
-            marginBottom: SPACING.SM,
-            border: '1px solid var(--color-border)'
-        });
+    const check = document.createElement('span');
+    check.textContent = currentFormat === value ? '✓' : '';
+    Object.assign(check.style, {
+      color: 'var(--color-primary)',
+      fontWeight: 'bold',
+      fontSize: FONT_SIZES.LG,
+    });
 
+    row.appendChild(lbl);
+    row.appendChild(check);
 
-        const lbl = document.createElement('span');
-        lbl.textContent = label;
-        Object.assign(lbl.style, {
-            fontSize: FONT_SIZES.BASE,
-            fontWeight: '500'
-        });
+    row.addEventListener('click', () => {
+      SettingsService.saveSetting('dateFormat', value);
+      if (window.mobileUtils?.supportsHaptic()) {
+        window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.WELCOME);
+      }
+      if (onFormatChange) {
+        onFormatChange();
+      }
+    });
 
-        const check = document.createElement('span');
-        check.textContent = currentFormat === value ? '✓' : '';
-        Object.assign(check.style, {
-            color: 'var(--color-primary)',
-            fontWeight: 'bold',
-            fontSize: FONT_SIZES.LG
-        });
+    return row;
+  };
 
-        row.appendChild(lbl);
-        row.appendChild(check);
+  section.appendChild(createOption('MM/DD/YYYY', DATE_FORMATS.US));
+  section.appendChild(createOption('YYYY-MM-DD', DATE_FORMATS.ISO));
+  section.appendChild(createOption('DD/MM/YYYY', DATE_FORMATS.EU));
 
-        row.addEventListener('click', () => {
-            SettingsService.saveSetting('dateFormat', value);
-            if (window.mobileUtils?.supportsHaptic()) {
-                window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.WELCOME);
-            }
-            if (onFormatChange) {
-                onFormatChange();
-            }
-        });
-
-        return row;
-    };
-
-    section.appendChild(createOption('MM/DD/YYYY', DATE_FORMATS.US));
-    section.appendChild(createOption('YYYY-MM-DD', DATE_FORMATS.ISO));
-    section.appendChild(createOption('DD/MM/YYYY', DATE_FORMATS.EU));
-
-    return section;
+  return section;
 };
-

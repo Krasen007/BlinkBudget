@@ -10,8 +10,8 @@ export default [
       '*.config.js',
       'vite.config.js',
       'postcss.config.js',
-      'vite.config.lightning.js'
-    ]
+      'vite.config.lightning.js',
+    ],
   },
   js.configs.recommended,
   prettier,
@@ -69,30 +69,30 @@ export default [
         DOMException: 'readonly',
         MessageChannel: 'readonly',
         Image: 'readonly',
-        scheduler: 'readonly'
-      }
+        scheduler: 'readonly',
+      },
     },
     rules: {
       // Code quality
       'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      'no-console': 'warn',
+      // disabled for dev: 'no-console': 'warn',
       'no-debugger': 'error',
       'no-alert': 'warn',
-      
+
       // Best practices for vanilla JS
       'prefer-const': 'error',
       'no-var': 'error',
       'prefer-arrow-callback': 'error',
       'prefer-template': 'error',
-      
+
       // DOM manipulation best practices
       'no-implied-eval': 'error',
       'no-script-url': 'error',
-      
+
       // Performance considerations
       'no-loop-func': 'error',
-      'no-new-func': 'error'
-    }
+      'no-new-func': 'error',
+    },
   },
   {
     files: ['**/*.config.js', 'scripts/**/*.js', '.stylelintrc.js'],
@@ -105,12 +105,12 @@ export default [
         __filename: 'readonly',
         module: 'readonly',
         require: 'readonly',
-        exports: 'readonly'
-      }
+        exports: 'readonly',
+      },
     },
     rules: {
-      'no-console': 'off'
-    }
+      'no-console': 'off',
+    },
   },
   {
     files: ['**/*.test.js', 'tests/**/*.js'],
@@ -125,8 +125,8 @@ export default [
         beforeAll: 'readonly',
         afterAll: 'readonly',
         vi: 'readonly',
-        global: 'readonly'
-      }
-    }
-  }
+        global: 'readonly',
+      },
+    },
+  },
 ];

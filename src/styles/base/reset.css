@@ -37,7 +37,8 @@ body {
   /* Improve touch responsiveness */
 
   /* Safe area support */
-  padding: var(--safe-area-inset-top) var(--safe-area-inset-right) var(--safe-area-inset-bottom) var(--safe-area-inset-left);
+  padding: var(--safe-area-inset-top) var(--safe-area-inset-right)
+    var(--safe-area-inset-bottom) var(--safe-area-inset-left);
 
   /* Center application */
   align-items: center;
@@ -67,13 +68,13 @@ input {
 }
 
 /* Remove arrows from number input */
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
   appearance: none;
   margin: 0;
 }
 
-input[type="number"] {
+input[type='number'] {
   appearance: textfield;
   appearance: textfield;
 }

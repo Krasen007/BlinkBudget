@@ -1,21 +1,16 @@
 # Implementation Plan
 
 - [x] 1. Extend TransactionForm component with refund type support
-
-
-
-
-
   - Add refund type button to existing type toggle group
   - Update category options to include refund type with expense categories
   - Implement refund-specific styling and visual distinction
   - _Requirements: 1.1, 2.1, 2.2_
 
-- [ ]* 1.1 Write property test for refund category display consistency
+- [ ]\* 1.1 Write property test for refund category display consistency
   - **Property 1: Refund category display consistency**
   - **Validates: Requirements 1.1**
 
-- [ ]* 1.2 Write property test for category auto-submit behavior
+- [ ]\* 1.2 Write property test for category auto-submit behavior
   - **Property 5: Category auto-submit behavior**
   - **Validates: Requirements 2.3**
 
@@ -25,15 +20,15 @@
   - Implement balance calculation logic for refund transactions
   - _Requirements: 1.2, 1.3, 3.2_
 
-- [ ]* 2.1 Write property test for refund balance impact
+- [ ]\* 2.1 Write property test for refund balance impact
   - **Property 2: Refund balance impact**
   - **Validates: Requirements 1.2**
 
-- [ ]* 2.2 Write property test for refund transaction persistence
+- [ ]\* 2.2 Write property test for refund transaction persistence
   - **Property 3: Refund transaction persistence**
   - **Validates: Requirements 1.3**
 
-- [ ]* 2.3 Write property test for balance calculation correctness
+- [ ]\* 2.3 Write property test for balance calculation correctness
   - **Property 8: Balance calculation correctness**
   - **Validates: Requirements 3.2**
 
@@ -43,11 +38,11 @@
   - Ensure mobile optimizations work with refund type
   - _Requirements: 2.4, 2.5_
 
-- [ ]* 3.1 Write property test for mobile interaction consistency
+- [ ]\* 3.1 Write property test for mobile interaction consistency
   - **Property 6: Mobile interaction consistency**
   - **Validates: Requirements 2.4**
 
-- [ ]* 3.2 Write property test for form state preservation
+- [ ]\* 3.2 Write property test for form state preservation
   - **Property 7: Form state preservation**
   - **Validates: Requirements 2.5**
 
@@ -57,7 +52,7 @@
   - Update transaction amount display for refunds
   - _Requirements: 3.1, 3.3, 3.5_
 
-- [ ]* 4.1 Write property test for category filter inclusion
+- [ ]\* 4.1 Write property test for category filter inclusion
   - **Property 9: Category filter inclusion**
   - **Validates: Requirements 3.3**
 
@@ -67,33 +62,33 @@
   - Ensure data persistence during refund transaction edits
   - _Requirements: 4.2, 4.3, 4.4_
 
-- [ ]* 5.1 Write property test for edit form initialization
+- [ ]\* 5.1 Write property test for edit form initialization
   - **Property 10: Edit form initialization**
   - **Validates: Requirements 4.2**
 
-- [ ]* 5.2 Write property test for edit type switching
+- [ ]\* 5.2 Write property test for edit type switching
   - **Property 11: Edit type switching**
   - **Validates: Requirements 4.3**
 
-- [ ]* 5.3 Write property test for edit data persistence
+- [ ]\* 5.3 Write property test for edit data persistence
   - **Property 12: Edit data persistence**
   - **Validates: Requirements 4.4**
 
 - [ ] 6. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ]* 6.1 Write unit tests for refund type button creation
+- [ ]\* 6.1 Write unit tests for refund type button creation
   - Test refund button styling and integration with existing type toggles
   - Test refund button click behavior and state updates
   - _Requirements: 2.1_
 
-- [ ]* 6.2 Write unit tests for refund transaction workflows
+- [ ]\* 6.2 Write unit tests for refund transaction workflows
   - Test complete refund transaction creation from AddView
   - Test refund transaction editing from EditView
   - Test error handling for invalid refund transactions
   - _Requirements: 1.4, 4.1_
 
-- [ ]* 6.3 Write integration tests for refund display
+- [ ]\* 6.3 Write integration tests for refund display
   - Test refund transaction display in transaction lists
   - Test visual distinction of refund transactions
   - Test refund impact on account balance displays

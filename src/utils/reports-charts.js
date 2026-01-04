@@ -1,6 +1,6 @@
 /**
  * Reports Chart Components
- * 
+ *
  * Chart creation and rendering functions for reports view.
  */
 
@@ -13,41 +13,42 @@ import { generateMonthlyTrendData } from './reports-utils.js';
  * Create tooltip configuration for category charts
  */
 function createCategoryTooltipConfig(detailsContainer) {
-    return {
-        enabled: false, // Disable default tooltip
-        external: function (context) {
-            const tooltip = context.tooltip;
+  return {
+    enabled: false, // Disable default tooltip
+    external: function (context) {
+      const tooltip = context.tooltip;
 
-            if (!detailsContainer) return;
+      if (!detailsContainer) return;
 
-            // Handle opacity = 0 (tooltip hidden/mouseout)
-            if (tooltip.opacity === 0) {
-                const actionText = window.innerWidth < 768 ? 'Tap' : 'Hover';
-                detailsContainer.innerHTML = `
+      // Handle opacity = 0 (tooltip hidden/mouseout)
+      if (tooltip.opacity === 0) {
+        const actionText = window.innerWidth < 768 ? 'Tap' : 'Hover';
+        detailsContainer.innerHTML = `
                     <div style="text-align: center; color: var(--color-text-muted); font-size: 0.9em;">
                         ${actionText} on a category slice to see details
                     </div>
                 `;
-                return;
-            }
+        return;
+      }
 
-            // Show details in fixed container
-            if (tooltip.body && tooltip.body.length > 0) {
-                // Parse the label and value from the data
-                const dataPoint = context.chart.data.datasets[tooltip.dataPoints[0].datasetIndex];
-                const index = tooltip.dataPoints[0].dataIndex;
-                const value = dataPoint.data[index];
-                const label = context.chart.data.labels[index];
-                const total = dataPoint.data.reduce((sum, val) => sum + val, 0);
-                const percentage = ((value / total) * 100).toFixed(1);
+      // Show details in fixed container
+      if (tooltip.body && tooltip.body.length > 0) {
+        // Parse the label and value from the data
+        const dataPoint =
+          context.chart.data.datasets[tooltip.dataPoints[0].datasetIndex];
+        const index = tooltip.dataPoints[0].dataIndex;
+        const value = dataPoint.data[index];
+        const label = context.chart.data.labels[index];
+        const total = dataPoint.data.reduce((sum, val) => sum + val, 0);
+        const percentage = ((value / total) * 100).toFixed(1);
 
-                const formattedValue = new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: 'USD'
-                }).format(value);
+        const formattedValue = new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',
+        }).format(value);
 
-                // Create structured HTML for the details container
-                detailsContainer.innerHTML = `
+        // Create structured HTML for the details container
+        detailsContainer.innerHTML = `
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <span style="font-weight: 600; color: var(--color-text-main);">${label}</span>
                             <span style="font-weight: bold; color: var(--color-primary);">${formattedValue}</span>
@@ -57,335 +58,364 @@ function createCategoryTooltipConfig(detailsContainer) {
                             <span>${percentage}%</span>
                         </div>
                     `;
-            }
-        },
-        callbacks: {
-            label: function (context) {
-                const label = context.label || '';
-                const value = context.parsed;
-                const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
-                const percentage = ((value / total) * 100).toFixed(1);
-                const formattedValue = new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: 'USD'
-                }).format(value);
+      }
+    },
+    callbacks: {
+      label: function (context) {
+        const label = context.label || '';
+        const value = context.parsed;
+        const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
+        const percentage = ((value / total) * 100).toFixed(1);
+        const formattedValue = new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',
+        }).format(value);
 
-                return `${label}: ${formattedValue} (${percentage}%)`;
-            }
-        }
-    };
+        return `${label}: ${formattedValue} (${percentage}%)`;
+      },
+    },
+  };
 }
 
 /**
  * Create interactive category breakdown pie chart
  */
-export async function createCategoryBreakdownChart(chartRenderer, currentData, categoryColorMap, getCategoryColors, onCategoryClick) {
-    const section = document.createElement('div');
-    section.className = 'chart-section category-breakdown-section';
-    section.setAttribute('data-chart-type', 'category-breakdown');
-    section.style.background = COLORS.SURFACE;
-    section.style.borderRadius = 'var(--radius-lg)';
-    section.style.border = `1px solid ${COLORS.BORDER}`;
-    section.style.padding = SPACING.LG;
+export async function createCategoryBreakdownChart(
+  chartRenderer,
+  currentData,
+  categoryColorMap,
+  getCategoryColors,
+  onCategoryClick
+) {
+  const section = document.createElement('div');
+  section.className = 'chart-section category-breakdown-section';
+  section.setAttribute('data-chart-type', 'category-breakdown');
+  section.style.background = COLORS.SURFACE;
+  section.style.borderRadius = 'var(--radius-lg)';
+  section.style.border = `1px solid ${COLORS.BORDER}`;
+  section.style.padding = SPACING.LG;
 
-    // Section header
-    const header = document.createElement('div');
-    header.style.display = 'flex';
-    header.style.justifyContent = 'space-between';
-    header.style.alignItems = 'center';
-    header.style.marginBottom = SPACING.MD;
+  // Section header
+  const header = document.createElement('div');
+  header.style.display = 'flex';
+  header.style.justifyContent = 'space-between';
+  header.style.alignItems = 'center';
+  header.style.marginBottom = SPACING.MD;
 
-    const title = document.createElement('h3');
-    title.textContent = 'Spending by Category';
-    title.style.margin = '0';
-    title.style.color = COLORS.TEXT_MAIN;
+  const title = document.createElement('h3');
+  title.textContent = 'Spending by Category';
+  title.style.margin = '0';
+  title.style.color = COLORS.TEXT_MAIN;
 
-    // Chart type toggle (pie chart only)
-    const chartTypeToggle = document.createElement('div');
-    chartTypeToggle.style.display = 'flex';
-    chartTypeToggle.style.gap = SPACING.XS;
+  // Chart type toggle (pie chart only)
+  const chartTypeToggle = document.createElement('div');
+  chartTypeToggle.style.display = 'flex';
+  chartTypeToggle.style.gap = SPACING.XS;
 
-    const pieBtn = createToggleButton('Pie', true);
-    chartTypeToggle.appendChild(pieBtn);
+  const pieBtn = createToggleButton('Pie', true);
+  chartTypeToggle.appendChild(pieBtn);
 
-    header.appendChild(title);
-    header.appendChild(chartTypeToggle);
-    section.appendChild(header);
+  header.appendChild(title);
+  header.appendChild(chartTypeToggle);
+  section.appendChild(header);
 
-    // Chart container
-    const chartDiv = document.createElement('div');
-    chartDiv.style.position = 'relative';
-    chartDiv.style.height = '400px';
-    chartDiv.style.marginBottom = SPACING.MD;
+  // Chart container
+  const chartDiv = document.createElement('div');
+  chartDiv.style.position = 'relative';
+  chartDiv.style.height = '400px';
+  chartDiv.style.marginBottom = SPACING.MD;
 
-    const canvas = document.createElement('canvas');
-    canvas.id = 'category-breakdown-chart';
-    canvas.style.maxHeight = '100%';
-    chartDiv.appendChild(canvas);
+  const canvas = document.createElement('canvas');
+  canvas.id = 'category-breakdown-chart';
+  canvas.style.maxHeight = '100%';
+  chartDiv.appendChild(canvas);
 
-    section.appendChild(chartDiv);
+  section.appendChild(chartDiv);
 
-    // Mobile details container (fixed text below chart)
-    const detailsContainer = document.createElement('div');
-    detailsContainer.className = 'chart-mobile-details';
-    detailsContainer.style.background = 'var(--color-background)';
-    detailsContainer.style.borderRadius = 'var(--radius-md)';
-    detailsContainer.style.padding = SPACING.MD;
-    detailsContainer.style.marginTop = SPACING.SM;
-    detailsContainer.style.border = '1px solid var(--color-border)';
-    detailsContainer.style.display = 'block'; // Always visible
-    detailsContainer.style.minHeight = '60px'; // Prevent jumping
+  // Mobile details container (fixed text below chart)
+  const detailsContainer = document.createElement('div');
+  detailsContainer.className = 'chart-mobile-details';
+  detailsContainer.style.background = 'var(--color-background)';
+  detailsContainer.style.borderRadius = 'var(--radius-md)';
+  detailsContainer.style.padding = SPACING.MD;
+  detailsContainer.style.marginTop = SPACING.SM;
+  detailsContainer.style.border = '1px solid var(--color-border)';
+  detailsContainer.style.display = 'block'; // Always visible
+  detailsContainer.style.minHeight = '60px'; // Prevent jumping
 
-    // Add default instruction text
-    const initialAction = window.innerWidth < 768 ? 'Tap' : 'Hover';
-    detailsContainer.innerHTML = `
+  // Add default instruction text
+  const initialAction = window.innerWidth < 768 ? 'Tap' : 'Hover';
+  detailsContainer.innerHTML = `
         <div style="text-align: center; color: var(--color-text-muted); font-size: 0.9em;">
             ${initialAction} on a category slice to see details
         </div>
     `;
 
-    section.appendChild(detailsContainer);
+  section.appendChild(detailsContainer);
 
-    // Prepare chart data
-    const categoryData = currentData.categoryBreakdown;
+  // Prepare chart data
+  const categoryData = currentData.categoryBreakdown;
 
-    // Get consistent colors for all categories
-    const categoryColors = getCategoryColors(categoryData.categories, categoryColorMap);
+  // Get consistent colors for all categories
+  const categoryColors = getCategoryColors(
+    categoryData.categories,
+    categoryColorMap
+  );
 
-    const chartData = {
-        labels: categoryData.categories.map(cat => cat.name),
-        datasets: [{
-            data: categoryData.categories.map(cat => cat.amount),
-            backgroundColor: categoryColors,
-            borderColor: '#ffffff',
-            borderWidth: 2
-        }]
-    };
+  const chartData = {
+    labels: categoryData.categories.map(cat => cat.name),
+    datasets: [
+      {
+        data: categoryData.categories.map(cat => cat.amount),
+        backgroundColor: categoryColors,
+        borderColor: '#ffffff',
+        borderWidth: 2,
+      },
+    ],
+  };
 
-    // Create initial pie chart
-    const currentChart = await chartRenderer.createPieChart(canvas, chartData, {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: window.innerWidth < 768 ? 'bottom' : 'right'
-            },
-            tooltip: createCategoryTooltipConfig(detailsContainer)
-        }
-    });
+  // Create initial pie chart
+  const currentChart = await chartRenderer.createPieChart(canvas, chartData, {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: window.innerWidth < 768 ? 'bottom' : 'right',
+      },
+      tooltip: createCategoryTooltipConfig(detailsContainer),
+    },
+  });
 
-    // Add click handler for category selection
-    canvas.addEventListener('chartSegmentClick', (event) => {
-        const clickData = event.detail;
-        if (onCategoryClick) {
-            onCategoryClick(clickData.label, clickData.value, clickData.percentage);
-        }
-    });
+  // Add click handler for category selection
+  canvas.addEventListener('chartSegmentClick', event => {
+    const clickData = event.detail;
+    if (onCategoryClick) {
+      onCategoryClick(clickData.label, clickData.value, clickData.percentage);
+    }
+  });
 
-    return { section, chart: currentChart };
+  return { section, chart: currentChart };
 }
 
 /**
  * Create income vs expenses bar chart
  */
 export async function createIncomeExpenseChart(chartRenderer, currentData) {
-    const section = document.createElement('div');
-    section.className = 'chart-section income-expense-section';
-    section.setAttribute('data-chart-type', 'income-expense');
-    section.style.background = COLORS.SURFACE;
-    section.style.borderRadius = 'var(--radius-lg)';
-    section.style.border = `1px solid ${COLORS.BORDER}`;
-    section.style.padding = SPACING.LG;
-    section.style.marginBottom = '0 !important';
-    section.style.paddingBottom = `calc(${SPACING.MD}) !important`;
-    section.style.position = 'relative';
-    section.style.zIndex = '2';
-    section.style.display = 'block';
-    section.style.width = '100%';
-    section.style.boxSizing = 'border-box';
-    section.style.contain = 'layout';
-    section.style.overflow = 'visible';
+  const section = document.createElement('div');
+  section.className = 'chart-section income-expense-section';
+  section.setAttribute('data-chart-type', 'income-expense');
+  section.style.background = COLORS.SURFACE;
+  section.style.borderRadius = 'var(--radius-lg)';
+  section.style.border = `1px solid ${COLORS.BORDER}`;
+  section.style.padding = SPACING.LG;
+  section.style.marginBottom = '0 !important';
+  section.style.paddingBottom = `calc(${SPACING.MD}) !important`;
+  section.style.position = 'relative';
+  section.style.zIndex = '2';
+  section.style.display = 'block';
+  section.style.width = '100%';
+  section.style.boxSizing = 'border-box';
+  section.style.contain = 'layout';
+  section.style.overflow = 'visible';
 
-    const title = document.createElement('h3');
-    title.textContent = 'Income vs Expenses';
-    title.style.margin = `0 0 ${SPACING.MD} 0`;
-    title.style.color = COLORS.TEXT_MAIN;
-    section.appendChild(title);
+  const title = document.createElement('h3');
+  title.textContent = 'Income vs Expenses';
+  title.style.margin = `0 0 ${SPACING.MD} 0`;
+  title.style.color = COLORS.TEXT_MAIN;
+  section.appendChild(title);
 
-    // Chart container
-    const chartDiv = document.createElement('div');
-    chartDiv.style.position = 'relative';
-    chartDiv.style.width = '100%';
-    chartDiv.style.height = '400px';
-    chartDiv.style.marginBottom = '0';
-    chartDiv.style.padding = SPACING.SM;
-    chartDiv.style.paddingBottom = `calc(${SPACING.SM} + 20px)`;
-    chartDiv.style.boxSizing = 'border-box';
-    chartDiv.style.overflow = 'visible';
+  // Chart container
+  const chartDiv = document.createElement('div');
+  chartDiv.style.position = 'relative';
+  chartDiv.style.width = '100%';
+  chartDiv.style.height = '400px';
+  chartDiv.style.marginBottom = '0';
+  chartDiv.style.padding = SPACING.SM;
+  chartDiv.style.paddingBottom = `calc(${SPACING.SM} + 20px)`;
+  chartDiv.style.boxSizing = 'border-box';
+  chartDiv.style.overflow = 'visible';
 
-    const canvas = document.createElement('canvas');
-    canvas.id = 'income-expense-chart';
-    canvas.style.width = '100%';
-    canvas.style.height = '400px';
-    canvas.style.maxWidth = '100%';
-    canvas.style.display = 'block';
-    chartDiv.appendChild(canvas);
-    section.appendChild(chartDiv);
+  const canvas = document.createElement('canvas');
+  canvas.id = 'income-expense-chart';
+  canvas.style.width = '100%';
+  canvas.style.height = '400px';
+  canvas.style.maxWidth = '100%';
+  canvas.style.display = 'block';
+  chartDiv.appendChild(canvas);
+  section.appendChild(chartDiv);
 
-    // Prepare chart data
-    const incomeExpenseData = currentData.incomeVsExpenses;
-    const chartData = {
-        labels: ['Income', 'Expenses', 'Net Balance'],
-        datasets: [{
-            label: 'Amount (€)',
-            data: [
-                incomeExpenseData.totalIncome,
-                incomeExpenseData.totalExpenses,
-                Math.abs(incomeExpenseData.netBalance)
-            ],
-            backgroundColor: [
-                'rgba(34, 197, 94, 0.8)',
-                'rgba(239, 68, 68, 0.8)',
-                incomeExpenseData.netBalance >= 0
-                    ? 'rgba(34, 197, 94, 0.6)'
-                    : 'rgba(239, 68, 68, 0.6)'
-            ],
-            borderColor: [
-                'rgba(34, 197, 94, 1)',
-                'rgba(239, 68, 68, 1)',
-                incomeExpenseData.netBalance >= 0
-                    ? 'rgba(34, 197, 94, 1)'
-                    : 'rgba(239, 68, 68, 1)'
-            ],
-            borderWidth: 1
-        }]
-    };
+  // Prepare chart data
+  const incomeExpenseData = currentData.incomeVsExpenses;
+  const chartData = {
+    labels: ['Income', 'Expenses', 'Net Balance'],
+    datasets: [
+      {
+        label: 'Amount (€)',
+        data: [
+          incomeExpenseData.totalIncome,
+          incomeExpenseData.totalExpenses,
+          Math.abs(incomeExpenseData.netBalance),
+        ],
+        backgroundColor: [
+          'rgba(34, 197, 94, 0.8)',
+          'rgba(239, 68, 68, 0.8)',
+          incomeExpenseData.netBalance >= 0
+            ? 'rgba(34, 197, 94, 0.6)'
+            : 'rgba(239, 68, 68, 0.6)',
+        ],
+        borderColor: [
+          'rgba(34, 197, 94, 1)',
+          'rgba(239, 68, 68, 1)',
+          incomeExpenseData.netBalance >= 0
+            ? 'rgba(34, 197, 94, 1)'
+            : 'rgba(239, 68, 68, 1)',
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
 
-    const chart = await chartRenderer.createBarChart(canvas, chartData, {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            tooltip: {
-                position: 'nearest',
-                yAlign: 'auto',
-                padding: 20,
-                caretSize: 8,
-                caretPadding: 10
-            }
-        }
-    });
+  const chart = await chartRenderer.createBarChart(canvas, chartData, {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      tooltip: {
+        position: 'nearest',
+        yAlign: 'auto',
+        padding: 20,
+        caretSize: 8,
+        caretPadding: 10,
+      },
+    },
+  });
 
-    return { section, chart };
+  return { section, chart };
 }
 
 /**
  * Create category trends over time chart
  */
-export async function createCategoryTrendsChart(chartRenderer, currentData, categoryColorMap) {
-    // Get historical data for trends
-    const allTransactions = TransactionService.getAll();
+export async function createCategoryTrendsChart(
+  chartRenderer,
+  currentData,
+  categoryColorMap
+) {
+  // Get historical data for trends
+  const allTransactions = TransactionService.getAll();
 
-    // Check if we have enough historical data (at least 3 months)
-    const oldestTransaction = allTransactions.reduce((oldest, transaction) => {
-        const transactionDate = new Date(transaction.date || transaction.timestamp);
-        return transactionDate < oldest ? transactionDate : oldest;
-    }, new Date());
+  // Check if we have enough historical data (at least 3 months)
+  const oldestTransaction = allTransactions.reduce((oldest, transaction) => {
+    const transactionDate = new Date(transaction.date || transaction.timestamp);
+    return transactionDate < oldest ? transactionDate : oldest;
+  }, new Date());
 
-    const monthsOfData = Math.floor((new Date() - oldestTransaction) / (1000 * 60 * 60 * 24 * 30));
+  const monthsOfData = Math.floor(
+    (new Date() - oldestTransaction) / (1000 * 60 * 60 * 24 * 30)
+  );
 
-    if (monthsOfData < 3) {
-        return null; // Not enough data for trends
-    }
+  if (monthsOfData < 3) {
+    return null; // Not enough data for trends
+  }
 
-    const section = document.createElement('div');
-    section.className = 'chart-section';
-    section.style.background = COLORS.SURFACE;
-    section.style.borderRadius = 'var(--radius-lg)';
-    section.style.border = `1px solid ${COLORS.BORDER}`;
-    section.style.padding = SPACING.LG;
+  const section = document.createElement('div');
+  section.className = 'chart-section';
+  section.style.background = COLORS.SURFACE;
+  section.style.borderRadius = 'var(--radius-lg)';
+  section.style.border = `1px solid ${COLORS.BORDER}`;
+  section.style.padding = SPACING.LG;
 
-    const title = document.createElement('h3');
-    title.textContent = 'Category Trends Over Time';
-    title.style.margin = `0 0 ${SPACING.MD} 0`;
-    title.style.color = COLORS.TEXT_MAIN;
-    section.appendChild(title);
+  const title = document.createElement('h3');
+  title.textContent = 'Category Trends Over Time';
+  title.style.margin = `0 0 ${SPACING.MD} 0`;
+  title.style.color = COLORS.TEXT_MAIN;
+  section.appendChild(title);
 
-    const chartDiv = document.createElement('div');
-    chartDiv.style.position = 'relative';
-    chartDiv.style.height = '350px';
+  const chartDiv = document.createElement('div');
+  chartDiv.style.position = 'relative';
+  chartDiv.style.height = '350px';
 
-    const canvas = document.createElement('canvas');
-    canvas.id = 'category-trends-chart';
-    chartDiv.appendChild(canvas);
-    section.appendChild(chartDiv);
+  const canvas = document.createElement('canvas');
+  canvas.id = 'category-trends-chart';
+  chartDiv.appendChild(canvas);
+  section.appendChild(chartDiv);
 
-    // Generate monthly data for top 3 categories
-    const topCategories = currentData.categoryBreakdown.categories.slice(0, 3);
-    const monthlyData = generateMonthlyTrendData(allTransactions, topCategories);
+  // Generate monthly data for top 3 categories
+  const topCategories = currentData.categoryBreakdown.categories.slice(0, 3);
+  const monthlyData = generateMonthlyTrendData(allTransactions, topCategories);
 
-    const chartData = {
-        labels: monthlyData.months,
-        datasets: topCategories.map((category, index) => ({
-            label: category.name,
-            data: monthlyData.categoryData[category.name] || [],
-            borderColor: categoryColorMap.get(category.name) || getChartColors(topCategories.length)[index],
-            backgroundColor: (categoryColorMap.get(category.name) || getChartColors(topCategories.length)[index]).replace(')', ', 0.1)').replace('hsl', 'hsla'),
-            borderWidth: 3,
-            fill: false,
-            tension: 0.4
-        }))
-    };
+  const chartData = {
+    labels: monthlyData.months,
+    datasets: topCategories.map((category, index) => ({
+      label: category.name,
+      data: monthlyData.categoryData[category.name] || [],
+      borderColor:
+        categoryColorMap.get(category.name) ||
+        getChartColors(topCategories.length)[index],
+      backgroundColor: (
+        categoryColorMap.get(category.name) ||
+        getChartColors(topCategories.length)[index]
+      )
+        .replace(')', ', 0.1)')
+        .replace('hsl', 'hsla'),
+      borderWidth: 3,
+      fill: false,
+      tension: 0.4,
+    })),
+  };
 
-    const chart = await chartRenderer.createLineChart(canvas, chartData, {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'top'
-            }
-        }
-    });
+  const chart = await chartRenderer.createLineChart(canvas, chartData, {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+    },
+  });
 
-    return { section, chart };
+  return { section, chart };
 }
 
 /**
  * Helper functions for chart creation
  */
 function createToggleButton(text, active = false) {
-    const button = document.createElement('button');
-    button.textContent = text;
-    button.style.padding = `${SPACING.XS} ${SPACING.SM}`;
-    button.style.border = `1px solid ${COLORS.BORDER}`;
-    button.style.borderRadius = 'var(--radius-sm)';
-    button.style.background = active ? COLORS.PRIMARY : 'transparent';
-    button.style.color = active ? 'white' : COLORS.TEXT_MAIN;
-    button.style.cursor = 'pointer';
-    button.style.fontSize = '0.875rem';
-    button.style.transition = 'all 0.2s ease';
+  const button = document.createElement('button');
+  button.textContent = text;
+  button.style.padding = `${SPACING.XS} ${SPACING.SM}`;
+  button.style.border = `1px solid ${COLORS.BORDER}`;
+  button.style.borderRadius = 'var(--radius-sm)';
+  button.style.background = active ? COLORS.PRIMARY : 'transparent';
+  button.style.color = active ? 'white' : COLORS.TEXT_MAIN;
+  button.style.cursor = 'pointer';
+  button.style.fontSize = '0.875rem';
+  button.style.transition = 'all 0.2s ease';
 
-    if (active) {
-        button.classList.add('active');
-    }
+  if (active) {
+    button.classList.add('active');
+  }
 
-    return button;
+  return button;
 }
 
 /**
  * Get consistent colors for categories across all charts and UI elements
  */
 export function getCategoryColors(categories, categoryColorMap) {
-    if (categoryColorMap.size === 0 || categoryColorMap.size < categories.length) {
-        const totalColors = Math.max(categories.length, 12);
-        const colors = getChartColors(totalColors);
+  if (
+    categoryColorMap.size === 0 ||
+    categoryColorMap.size < categories.length
+  ) {
+    const totalColors = Math.max(categories.length, 12);
+    const colors = getChartColors(totalColors);
 
-        categories.forEach((category, index) => {
-            if (!categoryColorMap.has(category.name)) {
-                const colorIndex = index % colors.length;
-                categoryColorMap.set(category.name, colors[colorIndex]);
-            }
-        });
-    }
+    categories.forEach((category, index) => {
+      if (!categoryColorMap.has(category.name)) {
+        const colorIndex = index % colors.length;
+        categoryColorMap.set(category.name, colors[colorIndex]);
+      }
+    });
+  }
 
-    return categories.map(category => categoryColorMap.get(category.name));
+  return categories.map(category => categoryColorMap.get(category.name));
 }

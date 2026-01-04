@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   extends: ['stylelint-config-standard'],
   rules: {
     // Enforce consistent custom property naming
@@ -8,8 +8,9 @@ module.exports = {
     'selector-class-pattern': [
       '^([a-z0-9-]+:)*[a-z0-9\\\\/\\._-]+$',
       {
-        message: 'Selector should be kebab-case, BEM-style, or a utility-style class like "md:w-1/2" or "focus-visible:outline-none"'
-      }
+        message:
+          'Selector should be kebab-case, BEM-style, or a utility-style class like "md:w-1/2" or "focus-visible:outline-none"',
+      },
     ],
 
     // Disable descending specificity as it is common in utility-first approaches
@@ -19,16 +20,23 @@ module.exports = {
     'declaration-block-no-duplicate-properties': [
       true,
       {
-        ignoreProperties: ['appearance', 'backdrop-filter', 'background-clip', 'height', 'min-height', 'image-rendering']
-      }
+        ignoreProperties: [
+          'appearance',
+          'backdrop-filter',
+          'background-clip',
+          'height',
+          'min-height',
+          'image-rendering',
+        ],
+      },
     ],
 
     // Allow vendor-specific and legacy media features/values
     'media-feature-name-no-unknown': [
       true,
       {
-        ignoreMediaFeatureNames: ['min-device-pixel-ratio', 'prefers-contrast']
-      }
+        ignoreMediaFeatureNames: ['min-device-pixel-ratio', 'prefers-contrast'],
+      },
     ],
     'media-feature-name-value-no-unknown': null,
 
@@ -36,8 +44,8 @@ module.exports = {
     'property-no-deprecated': [
       true,
       {
-        ignoreProperties: ['clip']
-      }
+        ignoreProperties: ['clip'],
+      },
     ],
 
     // Allow camelCase for keyframes (e.g., modalSlideIn)
@@ -65,8 +73,8 @@ module.exports = {
     'at-rule-no-unknown': [
       true,
       {
-        ignoreAtRules: ['import']
-      }
+        ignoreAtRules: ['import'],
+      },
     ],
 
     // Relax import notation requirements for CSS imports
@@ -87,6 +95,6 @@ module.exports = {
     'selector-id-pattern': null,
 
     // Allow optimizeSpeed value
-    'value-keyword-case': null
-  }
+    'value-keyword-case': null,
+  },
 };

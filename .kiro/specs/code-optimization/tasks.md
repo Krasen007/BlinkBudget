@@ -6,7 +6,7 @@
   - Establish consistent patterns for utility module exports
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
-- [ ]* 1.1 Write property test for constants usage consistency
+- [ ]\* 1.1 Write property test for constants usage consistency
   - **Property 4: Constants usage consistency**
   - **Validates: Requirements 2.1, 2.2, 2.3, 2.4, 2.5**
 
@@ -16,7 +16,7 @@
   - Build container and card creation utilities for consistent layouts
   - _Requirements: 3.1, 3.2, 3.3_
 
-- [ ]* 2.1 Write property test for DOM factory standardization
+- [ ]\* 2.1 Write property test for DOM factory standardization
   - **Property 5: DOM factory standardization**
   - **Validates: Requirements 3.1, 3.2, 3.3**
 
@@ -27,7 +27,7 @@
   - Implement responsive behavior utilities
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-- [ ]* 3.1 Write property test for mobile interaction consistency
+- [ ]\* 3.1 Write property test for mobile interaction consistency
   - **Property 6: Mobile interaction consistency**
   - **Validates: Requirements 4.1, 4.3, 4.5**
 
@@ -38,7 +38,7 @@
   - Implement form validation utilities
   - _Requirements: 1.2, 3.2_
 
-- [ ]* 4.1 Write unit tests for form utilities
+- [ ]\* 4.1 Write unit tests for form utilities
   - Create unit tests for date input utility
   - Write unit tests for category chip creation
   - Test form validation functions
@@ -51,11 +51,11 @@
   - Reduce component size to under 200 lines
   - _Requirements: 1.1, 1.4_
 
-- [ ]* 5.1 Write property test for component size compliance
+- [ ]\* 5.1 Write property test for component size compliance
   - **Property 1: Component size compliance**
   - **Validates: Requirements 1.1**
 
-- [ ]* 5.2 Write property test for API compatibility preservation
+- [ ]\* 5.2 Write property test for API compatibility preservation
   - **Property 3: API compatibility preservation**
   - **Validates: Requirements 1.5**
 
@@ -66,7 +66,7 @@
   - Reduce code duplication between the two views
   - _Requirements: 1.2, 2.1, 3.1_
 
-- [ ]* 6.1 Write property test for code duplication elimination
+- [ ]\* 6.1 Write property test for code duplication elimination
   - **Property 2: Code duplication elimination**
   - **Validates: Requirements 1.2**
 
@@ -77,7 +77,7 @@
   - Replace magic variables throughout codebase with constants
   - _Requirements: 2.1, 3.1, 4.1_
 
-- [ ]* 7.1 Write unit tests for updated components
+- [ ]\* 7.1 Write unit tests for updated components
   - Test Button component with new constants
   - Validate DashboardView DOM factory usage
   - Test mobile utility integration
@@ -86,19 +86,19 @@
 - [ ] 8. Checkpoint - Ensure all tests pass and validate optimizations
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ]* 8.1 Write property test for bundle size optimization
+- [ ]\* 8.1 Write property test for bundle size optimization
   - **Property 7: Bundle size optimization**
   - **Validates: Requirements 5.2**
 
-- [ ]* 8.2 Write property test for performance preservation
+- [ ]\* 8.2 Write property test for performance preservation
   - **Property 8: Performance preservation**
   - **Validates: Requirements 5.3**
 
-- [ ]* 8.3 Write property test for comprehensive test coverage
+- [ ]\* 8.3 Write property test for comprehensive test coverage
   - **Property 9: Comprehensive test coverage**
   - **Validates: Requirements 6.1, 6.2, 6.3**
 
-- [ ]* 8.4 Write property test for regression prevention
+- [ ]\* 8.4 Write property test for regression prevention
   - **Property 10: Regression prevention**
   - **Validates: Requirements 6.5**
 

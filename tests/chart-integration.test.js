@@ -1,19 +1,22 @@
 /**
  * Chart Integration Tests
- * 
+ *
  * Tests to verify Chart.js integration and basic chart rendering infrastructure
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { ChartRenderer } from '../src/components/ChartRenderer.js';
-import { 
-  formatCurrency, 
-  formatPercentage, 
+import {
+  formatCurrency,
+  formatPercentage,
   preparePieChartData,
   prepareBarChartData,
-  validateChartData 
+  validateChartData,
 } from '../src/utils/chart-utils.js';
-import { getChartColors, createChartOptions } from '../src/core/chart-config.js';
+import {
+  getChartColors,
+  createChartOptions,
+} from '../src/core/chart-config.js';
 
 describe('Chart.js Integration', () => {
   let chartRenderer;
@@ -21,7 +24,7 @@ describe('Chart.js Integration', () => {
 
   beforeEach(() => {
     chartRenderer = new ChartRenderer();
-    
+
     // Create a mock canvas element
     mockCanvas = document.createElement('canvas');
     mockCanvas.id = 'test-chart';
@@ -58,11 +61,11 @@ describe('Chart.js Integration', () => {
         plugins: {
           title: {
             display: true,
-            text: 'Test Chart'
-          }
-        }
+            text: 'Test Chart',
+          },
+        },
       };
-      
+
       const options = createChartOptions(customOptions);
       expect(options.responsive).toBe(false);
       expect(options.plugins.title.text).toBe('Test Chart');
@@ -88,7 +91,7 @@ describe('Chart.js Integration', () => {
       const categoryData = [
         { category: 'Food', amount: 500 },
         { category: 'Transport', amount: 200 },
-        { category: 'Entertainment', amount: 100 }
+        { category: 'Entertainment', amount: 100 },
       ];
 
       const chartData = preparePieChartData(categoryData);
@@ -106,10 +109,15 @@ describe('Chart.js Integration', () => {
       const data = [
         { month: 'Jan', total: 1000 },
         { month: 'Feb', total: 1200 },
-        { month: 'Mar', total: 800 }
+        { month: 'Mar', total: 800 },
       ];
 
-      const chartData = prepareBarChartData(data, 'month', 'total', 'Monthly Spending');
+      const chartData = prepareBarChartData(
+        data,
+        'month',
+        'total',
+        'Monthly Spending'
+      );
       expect(chartData.labels).toEqual(['Jan', 'Feb', 'Mar']);
       expect(chartData.datasets[0].data).toEqual([1000, 1200, 800]);
       expect(chartData.datasets[0].label).toBe('Monthly Spending');
@@ -118,13 +126,13 @@ describe('Chart.js Integration', () => {
     it('should validate chart data structure', () => {
       const validData = {
         labels: ['A', 'B'],
-        datasets: [{ data: [1, 2] }]
+        datasets: [{ data: [1, 2] }],
       };
       expect(validateChartData(validData)).toBe(true);
 
       const invalidData = {
         labels: [],
-        datasets: []
+        datasets: [],
       };
       expect(validateChartData(invalidData)).toBe(false);
 
@@ -142,11 +150,11 @@ describe('Chart.js Integration', () => {
     it('should track active charts', async () => {
       const testData = {
         labels: ['Test'],
-        datasets: [{ data: [100] }]
+        datasets: [{ data: [100] }],
       };
 
       const chart = await chartRenderer.createPieChart(mockCanvas, testData);
-      
+
       // In test environment, chart creation may fail due to canvas context issues
       if (chart) {
         expect(chart).toBeDefined();
@@ -162,13 +170,15 @@ describe('Chart.js Integration', () => {
       // Check if canvas context is available
       const ctx = mockCanvas.getContext('2d');
       if (!ctx) {
-        console.warn('Canvas context not available, skipping chart cleanup test');
+        console.warn(
+          'Canvas context not available, skipping chart cleanup test'
+        );
         return;
       }
 
       const testData = {
         labels: ['Test'],
-        datasets: [{ data: [100] }]
+        datasets: [{ data: [100] }],
       };
 
       await chartRenderer.createPieChart(mockCanvas, testData);
@@ -183,12 +193,12 @@ describe('Chart.js Integration', () => {
     it('should destroy all charts', async () => {
       const testData = {
         labels: ['Test'],
-        datasets: [{ data: [100] }]
+        datasets: [{ data: [100] }],
       };
 
       // Create multiple charts
       const chart1 = await chartRenderer.createPieChart(mockCanvas, testData);
-      
+
       const canvas2 = document.createElement('canvas');
       canvas2.id = 'test-chart-2';
       document.body.appendChild(canvas2);

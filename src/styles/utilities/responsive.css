@@ -542,8 +542,7 @@
 }
 
 /* High DPI display utilities */
-@media (min-device-pixel-ratio: 2),
-(resolution >=192dpi) {
+@media (min-device-pixel-ratio: 2), (resolution >=192dpi) {
   .retina\:border-thin {
     border-width: 0.5px;
   }

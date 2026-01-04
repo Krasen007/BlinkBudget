@@ -1,133 +1,141 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TransactionListItem } from '../src/components/TransactionListItem.js';
-import { markTransactionForHighlight, getTransactionToHighlight } from '../src/utils/success-feedback.js';
+import {
+  markTransactionForHighlight,
+  getTransactionToHighlight,
+} from '../src/utils/success-feedback.js';
 
 // Mock mobile utils
 global.window.mobileUtils = {
-    supportsHaptic: () => true,
-    hapticFeedback: vi.fn()
+  supportsHaptic: () => true,
+  hapticFeedback: vi.fn(),
 };
 
 describe('Success Feedback Integration', () => {
-    beforeEach(() => {
-        document.body.innerHTML = '';
-        vi.clearAllMocks();
-        sessionStorage.clear();
+  beforeEach(() => {
+    document.body.innerHTML = '';
+    vi.clearAllMocks();
+    sessionStorage.clear();
+  });
+
+  it('should highlight newly added transaction in dashboard', async () => {
+    const mockTransaction = {
+      id: 'test-transaction-123',
+      amount: 25.5,
+      category: 'Food & Groceries',
+      type: 'expense',
+      accountId: 'main',
+      timestamp: new Date().toISOString(),
+    };
+
+    const mockAccounts = [{ id: 'main', name: 'Main Account' }];
+
+    // Simulate marking transaction for highlight (what happens in AddView)
+    markTransactionForHighlight(mockTransaction.id);
+
+    // Simulate dashboard rendering (what happens in DashboardView)
+    const highlightTransactionId = getTransactionToHighlight();
+
+    // Create transaction list item with highlight flag
+    const transactionItem = TransactionListItem({
+      transaction: mockTransaction,
+      currentFilter: 'all',
+      accounts: mockAccounts,
+      shouldHighlight:
+        highlightTransactionId &&
+        highlightTransactionId.includes(mockTransaction.id),
     });
 
-    it('should highlight newly added transaction in dashboard', async () => {
-        const mockTransaction = {
-            id: 'test-transaction-123',
-            amount: 25.50,
-            category: 'Food & Groceries',
-            type: 'expense',
-            accountId: 'main',
-            timestamp: new Date().toISOString()
-        };
+    document.body.appendChild(transactionItem);
 
-        const mockAccounts = [
-            { id: 'main', name: 'Main Account' }
-        ];
+    // Verify the transaction item was created
+    expect(transactionItem).toBeTruthy();
+    expect(
+      transactionItem.querySelector('.transaction-item-category').textContent
+    ).toBe('Food & Groceries');
+    expect(
+      transactionItem.querySelector('.transaction-item-value').textContent
+    ).toBe('-€25.50');
 
-        // Simulate marking transaction for highlight (what happens in AddView)
-        markTransactionForHighlight(mockTransaction.id);
+    // Wait for highlight animation to be applied
+    await new Promise(resolve => setTimeout(resolve, 150));
 
-        // Simulate dashboard rendering (what happens in DashboardView)
-        const highlightTransactionId = getTransactionToHighlight();
+    // Verify highlight was applied (background color should be set)
+    expect(transactionItem.style.backgroundColor).toBeTruthy();
+    expect(transactionItem.style.transition).toContain('background-color');
 
-        // Create transaction list item with highlight flag
-        const transactionItem = TransactionListItem({
-            transaction: mockTransaction,
-            currentFilter: 'all',
-            accounts: mockAccounts,
-            shouldHighlight: highlightTransactionId && highlightTransactionId.includes(mockTransaction.id)
-        });
+    // Verify haptic feedback was triggered
+    expect(window.mobileUtils.hapticFeedback).toHaveBeenCalledWith([10]); // LIGHT pattern
+  });
 
-        document.body.appendChild(transactionItem);
+  it('should not highlight transaction when no highlight ID is set', () => {
+    const mockTransaction = {
+      id: 'test-transaction-456',
+      amount: 15.75,
+      category: 'Coffee',
+      type: 'expense',
+      accountId: 'main',
+      timestamp: new Date().toISOString(),
+    };
 
-        // Verify the transaction item was created
-        expect(transactionItem).toBeTruthy();
-        expect(transactionItem.querySelector('.transaction-item-category').textContent).toBe('Food & Groceries');
-        expect(transactionItem.querySelector('.transaction-item-value').textContent).toBe('-€25.50');
+    const mockAccounts = [{ id: 'main', name: 'Main Account' }];
 
-        // Wait for highlight animation to be applied
-        await new Promise(resolve => setTimeout(resolve, 150));
-
-        // Verify highlight was applied (background color should be set)
-        expect(transactionItem.style.backgroundColor).toBeTruthy();
-        expect(transactionItem.style.transition).toContain('background-color');
-
-        // Verify haptic feedback was triggered
-        expect(window.mobileUtils.hapticFeedback).toHaveBeenCalledWith([10]); // LIGHT pattern
+    // Create transaction list item without highlight flag
+    const transactionItem = TransactionListItem({
+      transaction: mockTransaction,
+      currentFilter: 'all',
+      accounts: mockAccounts,
+      shouldHighlight: false,
     });
 
-    it('should not highlight transaction when no highlight ID is set', () => {
-        const mockTransaction = {
-            id: 'test-transaction-456',
-            amount: 15.75,
-            category: 'Coffee',
-            type: 'expense',
-            accountId: 'main',
-            timestamp: new Date().toISOString()
-        };
+    document.body.appendChild(transactionItem);
 
-        const mockAccounts = [
-            { id: 'main', name: 'Main Account' }
-        ];
+    // Verify no highlight styles are applied
+    expect(transactionItem.style.backgroundColor).toBeFalsy();
+    expect(window.mobileUtils.hapticFeedback).not.toHaveBeenCalled();
+  });
 
-        // Create transaction list item without highlight flag
-        const transactionItem = TransactionListItem({
-            transaction: mockTransaction,
-            currentFilter: 'all',
-            accounts: mockAccounts,
-            shouldHighlight: false
-        });
+  it('should handle transfer transactions with highlighting', async () => {
+    const mockTransferTransaction = {
+      id: 'transfer-123',
+      amount: 100.0,
+      category: 'Transfer',
+      type: 'transfer',
+      accountId: 'main',
+      toAccountId: 'savings',
+      timestamp: new Date().toISOString(),
+    };
 
-        document.body.appendChild(transactionItem);
+    const mockAccounts = [
+      { id: 'main', name: 'Main Account' },
+      { id: 'savings', name: 'Savings Account' },
+    ];
 
-        // Verify no highlight styles are applied
-        expect(transactionItem.style.backgroundColor).toBeFalsy();
-        expect(window.mobileUtils.hapticFeedback).not.toHaveBeenCalled();
+    // Mark for highlighting
+    markTransactionForHighlight(mockTransferTransaction.id);
+    const highlightTransactionId = getTransactionToHighlight();
+
+    const transactionItem = TransactionListItem({
+      transaction: mockTransferTransaction,
+      currentFilter: 'all',
+      accounts: mockAccounts,
+      shouldHighlight:
+        highlightTransactionId &&
+        highlightTransactionId.includes(mockTransferTransaction.id),
     });
 
-    it('should handle transfer transactions with highlighting', async () => {
-        const mockTransferTransaction = {
-            id: 'transfer-123',
-            amount: 100.00,
-            category: 'Transfer',
-            type: 'transfer',
-            accountId: 'main',
-            toAccountId: 'savings',
-            timestamp: new Date().toISOString()
-        };
+    document.body.appendChild(transactionItem);
 
-        const mockAccounts = [
-            { id: 'main', name: 'Main Account' },
-            { id: 'savings', name: 'Savings Account' }
-        ];
+    // Verify transfer display
+    expect(
+      transactionItem.querySelector('.transaction-item-category').textContent
+    ).toBe('Transfer: Main Account → Savings Account');
 
-        // Mark for highlighting
-        markTransactionForHighlight(mockTransferTransaction.id);
-        const highlightTransactionId = getTransactionToHighlight();
+    // Wait for highlight animation
+    await new Promise(resolve => setTimeout(resolve, 150));
 
-        const transactionItem = TransactionListItem({
-            transaction: mockTransferTransaction,
-            currentFilter: 'all',
-            accounts: mockAccounts,
-            shouldHighlight: highlightTransactionId && highlightTransactionId.includes(mockTransferTransaction.id)
-        });
-
-        document.body.appendChild(transactionItem);
-
-        // Verify transfer display
-        expect(transactionItem.querySelector('.transaction-item-category').textContent)
-            .toBe('Transfer: Main Account → Savings Account');
-
-        // Wait for highlight animation
-        await new Promise(resolve => setTimeout(resolve, 150));
-
-        // Verify highlight was applied
-        expect(transactionItem.style.backgroundColor).toBeTruthy();
-        expect(window.mobileUtils.hapticFeedback).toHaveBeenCalled();
-    });
+    // Verify highlight was applied
+    expect(transactionItem.style.backgroundColor).toBeTruthy();
+    expect(window.mobileUtils.hapticFeedback).toHaveBeenCalled();
+  });
 });

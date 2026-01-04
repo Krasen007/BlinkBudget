@@ -31,14 +31,14 @@ export default defineConfig({
             src: 'favicon.png',
             sizes: '1024x1024',
             type: 'image/png',
-            purpose: 'any'
+            purpose: 'any',
           },
           {
             src: 'favicon.png',
             sizes: '1024x1024',
             type: 'image/png',
-            purpose: 'maskable'
-          }
+            purpose: 'maskable',
+          },
         ],
         shortcuts: [
           {
@@ -46,8 +46,8 @@ export default defineConfig({
             short_name: 'Add',
             description: 'Quickly add a new expense or income',
             url: '/#add-expense',
-            icons: [{ src: 'favicon.png', sizes: '1024x1024' }]
-          }
+            icons: [{ src: 'favicon.png', sizes: '1024x1024' }],
+          },
         ],
         screenshots: [
           {
@@ -55,17 +55,17 @@ export default defineConfig({
             sizes: '1264x705',
             type: 'image/png',
             form_factor: 'wide',
-            label: 'Desktop Dashboard'
+            label: 'Desktop Dashboard',
           },
           {
             src: 'screenshot-mobile.png',
             sizes: '500x749',
             type: 'image/png',
-            label: 'Mobile Dashboard'
-          }
-        ]
-      }
-    })
+            label: 'Mobile Dashboard',
+          },
+        ],
+      },
+    }),
   ],
   build: {
     outDir: 'dist',
@@ -74,9 +74,12 @@ export default defineConfig({
     rollupOptions: {
       output: {
         // Manual chunking for better optimization
-        manualChunks: (id) => {
+        manualChunks: id => {
           // Firebase gets its own chunk (largest dependency)
-          if (id.includes('node_modules/firebase') || id.includes('node_modules/@firebase')) {
+          if (
+            id.includes('node_modules/firebase') ||
+            id.includes('node_modules/@firebase')
+          ) {
             return 'firebase';
           }
           // Chart.js gets its own chunk for reports feature
@@ -89,14 +92,14 @@ export default defineConfig({
           }
         },
         // Ensure CSS is properly chunked
-        assetFileNames: (assetInfo) => {
+        assetFileNames: assetInfo => {
           if (assetInfo.name && assetInfo.name.endsWith('.css')) {
             return 'assets/style.[hash].css';
           }
           return 'assets/[name].[hash].[ext]';
-        }
-      }
-    }
+        },
+      },
+    },
   },
   server: {
     port: 3000,
@@ -110,7 +113,7 @@ export default defineConfig({
     // PostCSS configuration will be loaded from postcss.config.js
     postcss: {},
     // Enable CSS source maps in development
-    devSourcemap: true
+    devSourcemap: true,
   },
   test: {
     environment: 'jsdom',

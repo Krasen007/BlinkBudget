@@ -3,6 +3,7 @@
 ## Current State → Target State
 
 ### Before (724 lines)
+
 ```
 TransactionForm.js
 ├── Form setup (20 lines)
@@ -18,6 +19,7 @@ TransactionForm.js
 ```
 
 ### After (~150 lines)
+
 ```
 TransactionForm.js (Orchestration)
 ├── Form setup (10 lines)
@@ -45,18 +47,18 @@ New Utilities:
 
 ## Extraction Breakdown
 
-| Component | Current Lines | Extracted To | New Lines | Savings |
-|-----------|--------------|--------------|-----------|---------|
-| Type Toggle | 100 | `type-toggle.js` | 80 | 20 |
-| Category System | 290 | `category-chips.js` | 200 | 90 |
-| Amount Input | 40 | `amount-input.js` | 60 | -20* |
-| Validation | 50 | `validation.js` | 80 | -30* |
-| Keyboard | 60 | `keyboard.js` | 70 | -10* |
-| Submission | 40 | `submission.js` | 60 | -20* |
-| Constants | 40 | `constants.js` | 50 | -10* |
-| **Total** | **620** | **7 files** | **600** | **20** |
+| Component       | Current Lines | Extracted To        | New Lines | Savings |
+| --------------- | ------------- | ------------------- | --------- | ------- |
+| Type Toggle     | 100           | `type-toggle.js`    | 80        | 20      |
+| Category System | 290           | `category-chips.js` | 200       | 90      |
+| Amount Input    | 40            | `amount-input.js`   | 60        | -20\*   |
+| Validation      | 50            | `validation.js`     | 80        | -30\*   |
+| Keyboard        | 60            | `keyboard.js`       | 70        | -10\*   |
+| Submission      | 40            | `submission.js`     | 60        | -20\*   |
+| Constants       | 40            | `constants.js`      | 50        | -10\*   |
+| **Total**       | **620**       | **7 files**         | **600**   | **20**  |
 
-*Negative savings are expected - we're adding structure, error handling, and reusability. The benefit is in organization and reusability, not line count reduction of utilities.
+\*Negative savings are expected - we're adding structure, error handling, and reusability. The benefit is in organization and reusability, not line count reduction of utilities.
 
 **Net Result:** TransactionForm goes from 724 → ~150 lines (79% reduction)
 
@@ -65,6 +67,7 @@ New Utilities:
 ## Key Extraction Functions
 
 ### 1. Type Toggle
+
 ```javascript
 // FROM: createTypeBtn() inside TransactionForm
 // TO: form-utils/type-toggle.js
@@ -77,6 +80,7 @@ createTypeToggleGroup({
 ```
 
 ### 2. Category Selector
+
 ```javascript
 // FROM: renderCategories() + chip creation inside TransactionForm
 // TO: form-utils/category-chips.js
@@ -91,18 +95,20 @@ createCategorySelector({
 ```
 
 ### 3. Amount Input
+
 ```javascript
 // FROM: amountInput creation + handlers inside TransactionForm
 // TO: form-utils/amount-input.js
 
 createAmountInput({
   initialValue: 0,
-  externalDateInput: dateInput
-})
+  externalDateInput: dateInput,
+});
 // Returns: { input, validate(), getValue(), setValue() }
 ```
 
 ### 4. Validation
+
 ```javascript
 // FROM: Duplicated validation in 3 places
 // TO: form-utils/validation.js
@@ -110,8 +116,8 @@ createAmountInput({
 validateTransactionForm({
   amount: 100,
   category: 'Food',
-  type: 'expense'
-})
+  type: 'expense',
+});
 // Returns: { valid: true, errors: {} }
 ```
 
@@ -120,6 +126,7 @@ validateTransactionForm({
 ## State Management Flow
 
 ### Current (Scattered)
+
 ```
 TransactionForm
 ├── let currentType = 'expense'
@@ -130,6 +137,7 @@ TransactionForm
 ```
 
 ### After (Centralized)
+
 ```
 TransactionForm
 ├── const typeState = createTypeToggleGroup(...)
@@ -143,13 +151,14 @@ TransactionForm
 ## Code Duplication Elimination
 
 ### Before: Validation Logic (3 copies)
+
 ```javascript
 // Line 377-387: Transfer chip click
 const amountVal = parseFloat(amountInput.value);
 if (isNaN(amountVal) || amountVal === 0) {
-    amountInput.focus();
-    amountInput.style.border = `1px solid ${COLORS.ERROR}`;
-    // ...
+  amountInput.focus();
+  amountInput.style.border = `1px solid ${COLORS.ERROR}`;
+  // ...
 }
 
 // Line 496-507: Category chip click (same code)
@@ -157,15 +166,16 @@ if (isNaN(amountVal) || amountVal === 0) {
 ```
 
 ### After: Single Utility
+
 ```javascript
 // form-utils/validation.js
-export const validateAmount = (value) => {
+export const validateAmount = value => {
   const amount = parseFloat(value);
   if (isNaN(amount) || amount === 0) {
     return { valid: false, error: 'Amount required' };
   }
   return { valid: true, value: Math.abs(amount) };
-}
+};
 
 // Used in 3 places:
 const validation = validateAmount(amountInput.value);
@@ -180,18 +190,20 @@ if (!validation.valid) {
 ## Touch Feedback Consolidation
 
 ### Before: Duplicated in 3 places
+
 - Type toggle buttons (lines 111-125)
 - Transfer account chips (lines 349-370)
 - Category chips (lines 452-473)
 
 ### After: Single Utility
+
 ```javascript
 // All use touch-utils.js
 import { addTouchFeedback } from '../utils/touch-utils.js';
 
 addTouchFeedback(chip, {
   hapticPattern: HAPTIC_PATTERNS.LIGHT,
-  scale: 0.96
+  scale: 0.96,
 });
 ```
 
@@ -200,11 +212,13 @@ addTouchFeedback(chip, {
 ## Category Chip Creation Consolidation
 
 ### Before: Two Separate Implementations
+
 - Transfer chips (lines 318-409): 92 lines
 - Category chips (lines 415-547): 133 lines
 - **Total: 225 lines of similar code**
 
 ### After: Single Factory Function
+
 ```javascript
 // form-utils/category-chips.js
 createCategoryChip({
@@ -222,6 +236,7 @@ createCategoryChip({
 ## Mobile Optimizations Preserved
 
 All mobile-specific code will be preserved:
+
 - ✅ Haptic feedback patterns
 - ✅ Keyboard-aware scrolling
 - ✅ Visual viewport handling
@@ -236,10 +251,12 @@ These will be integrated into utilities rather than duplicated.
 ## Testing Coverage
 
 ### Before Extraction
+
 - TransactionForm tests: ~10 test cases
 - Coverage: Component-level only
 
 ### After Extraction
+
 - TransactionForm tests: ~10 test cases (same)
 - Type toggle tests: ~5 test cases (new)
 - Category chips tests: ~8 test cases (new)
@@ -253,15 +270,18 @@ These will be integrated into utilities rather than duplicated.
 ## Bundle Size Impact
 
 ### Current
+
 - TransactionForm.js: ~724 lines
 - No utilities extracted
 
 ### After
+
 - TransactionForm.js: ~150 lines (-574 lines)
-- form-utils/*: ~600 lines (new, but reusable)
+- form-utils/\*: ~600 lines (new, but reusable)
 - **Net: +26 lines** (but much better organized)
 
 ### Tree-Shaking Benefit
+
 - Other components can import only what they need
 - Example: `import { validateAmount } from './form-utils/validation.js'`
 - Only validation code included, not entire form utilities
@@ -271,6 +291,7 @@ These will be integrated into utilities rather than duplicated.
 ## Migration Path
 
 ### Step-by-Step
+
 1. ✅ Create utility file structure
 2. ✅ Extract constants (no behavior change)
 3. ✅ Extract validation (replace 3 copies with 1)
@@ -284,6 +305,7 @@ These will be integrated into utilities rather than duplicated.
 11. ✅ Verify line count < 200
 
 ### Rollback Strategy
+
 - Each utility is independent
 - Can revert one utility without affecting others
 - Keep old code commented during transition
@@ -332,4 +354,3 @@ These will be integrated into utilities rather than duplicated.
 3. Begin Phase 1 (Constants extraction)
 4. Test incrementally
 5. Complete full refactor
-

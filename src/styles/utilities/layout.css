@@ -420,8 +420,8 @@
 }
 
 /* View container layout - prevents main scrolling on mobile */
-[class^="view-"],
-[class*=" view-"] {
+[class^='view-'],
+[class*=' view-'] {
   padding: var(--spacing-md);
   height: 100%;
   overflow: hidden auto;

@@ -55,9 +55,10 @@
   transition: opacity var(--transition-normal);
   backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
-  
+
   /* Safe area support */
-  padding: var(--safe-area-inset-top) var(--safe-area-inset-right) var(--safe-area-inset-bottom) var(--safe-area-inset-left);
+  padding: var(--safe-area-inset-top) var(--safe-area-inset-right)
+    var(--safe-area-inset-bottom) var(--safe-area-inset-left);
 }
 
 .mobile-modal-overlay.visible {
@@ -196,7 +197,7 @@
   flex-direction: column;
   transform: translateY(100%);
   transition: transform var(--transition-normal);
-  
+
   /* Safe area support */
   padding-bottom: var(--safe-area-inset-bottom);
 }
@@ -250,7 +251,7 @@
   z-index: 100;
   backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  
+
   /* Hide on desktop */
   display: none;
 }
@@ -259,7 +260,7 @@
   .mobile-nav {
     display: flex;
   }
-  
+
   /* Add bottom padding to body to account for fixed nav */
   body {
     padding-bottom: calc(80px + var(--safe-area-inset-bottom));
@@ -283,7 +284,7 @@
     max-height: 85vh;
     margin: var(--spacing-md);
   }
-  
+
   .mobile-modal-full {
     margin: 0;
   }
@@ -301,15 +302,15 @@
   .mobile-modal {
     max-height: 95vh;
   }
-  
+
   .mobile-bottom-sheet {
     max-height: 90vh;
   }
-  
+
   .thumb-reach-container {
     min-height: 50vh; /* Adjust for landscape */
   }
-  
+
   .transaction-form.mobile-optimized {
     min-height: calc(var(--visual-viewport-height) - 80px);
   }

@@ -18,7 +18,6 @@
 
 /* Thumb reach container for important controls */
 .thumb-reach-container {
-
   /* Position critical controls in bottom 60% for thumb accessibility */
   @media (width <= calc(var(--breakpoint-md) - 1px)) {
     min-height: var(--thumb-reach-zone);
@@ -52,7 +51,6 @@
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
-
 
 /* Category chip container - Scrollable grid layout */
 .category-chip-container {
@@ -103,7 +101,9 @@
   margin: calc(var(--touch-spacing-min) / 2);
 
   /* Enhanced visual feedback */
-  transition: all var(--transition-fast), transform 0.1s ease;
+  transition:
+    all var(--transition-fast),
+    transform 0.1s ease;
 }
 
 .type-toggle-btn:active {
@@ -120,11 +120,8 @@
   touch-action: manipulation;
 }
 
-
-
 /* Mobile-optimized transaction form layout */
 .transaction-form.mobile-optimized {
-
   /* Optimize for thumb reach on mobile */
   @media (width <= calc(var(--breakpoint-md) - 1px)) {
     min-height: calc(var(--visual-viewport-height) - 120px);
@@ -203,7 +200,6 @@
 
 /* Accessibility improvements for mobile */
 @media (width <= calc(var(--breakpoint-md) - 1px)) {
-
   /* Larger focus indicators on mobile */
   :focus-visible {
     outline: 3px solid var(--color-primary);
@@ -213,13 +209,13 @@
   /* Better contrast for touch targets */
   .btn:hover,
   .btn:focus {
-    box-shadow: 0 0 0 3px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2);
+    box-shadow: 0 0 0 3px
+      hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2);
   }
 }
 
 /* High DPI display optimizations */
-@media (min-device-pixel-ratio: 2),
-(resolution >= 192dpi) {
+@media (min-device-pixel-ratio: 2), (resolution >= 192dpi) {
   .btn {
     border-width: 0.5px;
   }

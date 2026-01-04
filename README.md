@@ -7,20 +7,24 @@
 ## Screenshots
 
 ### Desktop View
+
 ![Desktop Screenshot](public/screenshot-desktop.png)
 
 ### Mobile View
+
 ![Mobile Screenshot](public/screenshot-mobile.png)
 
 ## Key Features
 
 ### Lightning Fast Entry
+
 - **3-click expense logging** - Amount -> Category -> Done
 - **Auto-submit on category selection** - No save buttons needed
 - **Mobile-optimized interface** with haptic feedback
 - **Offline-capable** with localStorage and Service Worker persistence
 
 ### Transaction Management
+
 - **Multiple transaction types**: Expenses, Income, Transfers, Refunds
 - **Smart categorization** with visual category chips:
   - Food & Groceries, Dining & Coffee, Housing & Bills
@@ -29,6 +33,7 @@
 - **Account-to-account transfers** with automatic balance updates
 
 ### Dashboard & Analytics
+
 - **Real-time balance calculations** across all accounts
 - **Account filtering** - View transactions by specific account or all accounts
 - **Transaction history** with edit/delete capabilities
@@ -36,6 +41,7 @@
 - **Fixed Dashboard layout** with improved spacing and non-clipping action buttons
 
 ### Mobile-First Design
+
 - **Responsive layout** optimized for mobile devices
 - **Touch-friendly interface** with proper touch targets (56px minimum)
 - **Mobile navigation** with bottom tab bar
@@ -44,6 +50,7 @@
 - **PWA support** - Installable as a standalone app with offline support
 
 ### Settings & Customization
+
 - **General Settings section** - Unified Refresh App, Install App, and Logout actions
 - **Account management** - Add, edit, delete accounts
 - **Date format preferences** (US, ISO, EU formats)
@@ -62,10 +69,12 @@
 ## Quick Start
 
 ### Prerequisites
+
 - Node.js (v16 or higher)
 - npm or yarn
 
 ### Installation
+
 ```bash
 # Clone the repository
 git clone <repository-url>
@@ -79,6 +88,7 @@ npm run dev
 ```
 
 ### Available Scripts
+
 ```bash
 npm run dev        # Start development server
 npm run build      # Build for production
@@ -89,16 +99,19 @@ npm test           # Run unit tests
 ## Usage
 
 ### Adding a Transaction (3 clicks)
+
 1. **Click** "Add Transaction" button
 2. **Enter amount** and select account
 3. **Click category** - Transaction automatically saves!
 
 ### Managing Accounts
+
 - Go to Settings -> Account Management
 - Add new accounts (Checking, Savings, Credit Card, Cash)
 - Set default account for quick entry
 
 ### Transfers Between Accounts
+
 - Select "Transfer" type in transaction form
 - Choose source and destination accounts
 - Amount is automatically debited/credited
@@ -106,11 +119,13 @@ npm test           # Run unit tests
 ## Architecture
 
 ### Component Structure
+
 - **Functional Components** returning native HTMLElements
 - **Props-based** configuration with closure-based state
 - **Modular design** with single responsibility principle
 
 ### File Organization
+
 ```
 src/
 ├── components/     # Reusable UI components
@@ -121,6 +136,7 @@ src/
 ```
 
 ### Key Components
+
 - **TransactionForm** - Smart form with auto-submit
 - **DashboardView** - Main screen with stats and transaction list
 - **GeneralSection** - Centralized settings for app maintenance and installation
@@ -129,11 +145,13 @@ src/
 ## Design System
 
 ### Colors & Theming
+
 - **HSL color space** for consistent theming
 - **CSS Custom Properties** for maintainable styles
 - **Semantic color tokens** (primary, surface, error, success)
 
 ### Responsive Design
+
 - **Mobile-first** approach with 768px breakpoint
 - **Touch-friendly** 56px minimum touch targets
 - **Adaptive layouts** for different screen sizes
@@ -141,6 +159,7 @@ src/
 ## Testing
 
 Comprehensive test suite covering:
+
 - Component functionality
 - Form validation and submission
 - Mobile-specific features
@@ -154,6 +173,7 @@ npm test -- --watch # Run tests in watch mode
 ## Production Build
 
 Optimized production builds include:
+
 - **CSS purging** to remove unused styles
 - **Autoprefixer** for browser compatibility
 - **CSS minification** with cssnano
@@ -163,6 +183,7 @@ Optimized production builds include:
 ## Contributing
 
 This project follows strict coding standards:
+
 - Vanilla JavaScript ES6+ modules
 - Functional component patterns
 - Semantic HTML with accessibility focus

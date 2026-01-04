@@ -1,12 +1,11 @@
-
-import { initializeApp } from "firebase/app";
-import { getAnalytics, isSupported } from "firebase/analytics";
-import { getAuth } from "firebase/auth";
+import { initializeApp } from 'firebase/app';
+import { getAnalytics, isSupported } from 'firebase/analytics';
+import { getAuth } from 'firebase/auth';
 import {
   initializeFirestore,
   persistentLocalCache,
-  persistentMultipleTabManager
-} from "firebase/firestore";
+  persistentMultipleTabManager,
+} from 'firebase/firestore';
 
 // Your web app's Firebase configuration
 // Credentials are loaded from environment variables (.env file)
@@ -18,7 +17,7 @@ const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
@@ -31,10 +30,12 @@ export const getDb = () => {
   if (!dbInstance) {
     dbInstance = initializeFirestore(app, {
       localCache: persistentLocalCache({
-        tabManager: persistentMultipleTabManager()
-      })
+        tabManager: persistentMultipleTabManager(),
+      }),
     });
-    console.log("Firestore initialized with persistent cache and multi-tab support.");
+    console.log(
+      'Firestore initialized with persistent cache and multi-tab support.'
+    );
   }
   return dbInstance;
 };
@@ -42,13 +43,14 @@ export const getDb = () => {
 // Initialize Analytics conditionally
 let analytics = null;
 
-
-isSupported().then(supported => {
-  if (supported) {
-    analytics = getAnalytics(app);
-  }
-}).catch(e => {
-  console.warn("Analytics not supported in this environment:", e.message);
-});
+isSupported()
+  .then(supported => {
+    if (supported) {
+      analytics = getAnalytics(app);
+    }
+  })
+  .catch(e => {
+    console.warn('Analytics not supported in this environment:', e.message);
+  });
 
 export { app, analytics, auth };

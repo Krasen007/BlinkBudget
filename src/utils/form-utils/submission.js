@@ -12,15 +12,15 @@ import { sanitizeInput } from '../security-utils.js';
  * @returns {HTMLInputElement} Date input element with value
  */
 export const getDateSource = (externalDateInput = null) => {
-    if (externalDateInput) {
-        return externalDateInput;
-    }
+  if (externalDateInput) {
+    return externalDateInput;
+  }
 
-    // Create fallback date input with today's date
-    const fallback = document.createElement('input');
-    fallback.type = 'date';
-    fallback.value = getTodayISO();
-    return fallback;
+  // Create fallback date input with today's date
+  const fallback = document.createElement('input');
+  fallback.type = 'date';
+  fallback.value = getTodayISO();
+  return fallback;
 };
 
 /**
@@ -34,34 +34,34 @@ export const getDateSource = (externalDateInput = null) => {
  * @param {HTMLInputElement|null} externalDateInput - External date input
  * @returns {Object} Prepared transaction data
  */
-export const prepareTransactionData = (formState) => {
-    const {
-        amount,
-        type,
-        category,
-        accountId,
-        toAccountId = null,
-        externalDateInput = null
-    } = formState;
+export const prepareTransactionData = formState => {
+  const {
+    amount,
+    type,
+    category,
+    accountId,
+    toAccountId = null,
+    externalDateInput = null,
+  } = formState;
 
-    const dateSource = getDateSource(externalDateInput);
-    const dateValue = dateSource.value || getTodayISO();
+  const dateSource = getDateSource(externalDateInput);
+  const dateValue = dateSource.value || getTodayISO();
 
-    const transactionData = {
-        amount: Math.abs(amount),
-        type,
-        accountId,
-        timestamp: new Date(dateValue).toISOString()
-    };
+  const transactionData = {
+    amount: Math.abs(amount),
+    type,
+    accountId,
+    timestamp: new Date(dateValue).toISOString(),
+  };
 
-    if (type === 'transfer') {
-        transactionData.category = 'Transfer';
-        transactionData.toAccountId = toAccountId;
-    } else {
-        transactionData.category = sanitizeInput(category || '');
-    }
+  if (type === 'transfer') {
+    transactionData.category = 'Transfer';
+    transactionData.toAccountId = toAccountId;
+  } else {
+    transactionData.category = sanitizeInput(category || '');
+  }
 
-    return transactionData;
+  return transactionData;
 };
 
 /**
@@ -71,17 +71,23 @@ export const prepareTransactionData = (formState) => {
  * @param {Function} onError - Error callback (optional)
  */
 export const handleFormSubmit = (transactionData, onSubmit, onError = null) => {
-    try {
-        onSubmit(transactionData);
-    } catch (e) {
-        console.error('Submit failed:', e);
-        const errorMessage = `Error submitting transaction: ${  e.message}`;
+  try {
+    onSubmit(transactionData);
+  } catch (e) {
+    console.error('Submit failed:', e);
+    const errorMessage = `Error submitting transaction: ${e.message}`;
 
-        if (onError) {
-            onError(e, errorMessage);
-        } else {
-            alert(errorMessage);
-        }
+    if (onError) {
+      onError(e, errorMessage);
+    } else {
+      // Import MobileAlert dynamically to avoid circular dependencies
+      import('../../components/MobileModal.js').then(({ MobileAlert }) => {
+        MobileAlert({
+          title: 'Transaction Error',
+          message: errorMessage,
+          buttonText: 'OK',
+        });
+      });
     }
+  }
 };
-

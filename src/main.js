@@ -15,65 +15,69 @@ import { InstallService } from './core/install.js';
 InstallService.init();
 
 const initApp = () => {
-    const app = document.querySelector('#app');
-    ViewManager.init(app);
+  const app = document.querySelector('#app');
+  ViewManager.init(app);
 
-    // Initial loading state
-    app.appendChild(LoadingView());
+  // Initial loading state
+  app.appendChild(LoadingView());
 
-    // Initialize mobile navigation
-    const initMobileNav = () => {
-        const existingNav = document.querySelector('.mobile-nav');
-        if (existingNav) existingNav.remove();
+  // Initialize mobile navigation
+  const initMobileNav = () => {
+    const existingNav = document.querySelector('.mobile-nav');
+    if (existingNav) existingNav.remove();
 
-        if (window.mobileUtils?.isMobile()) {
-            const mobileNav = MobileNavigation({ currentRoute: Router.getCurrentRoute() });
-            document.body.appendChild(mobileNav);
-        }
-    };
+    if (window.mobileUtils?.isMobile()) {
+      const mobileNav = MobileNavigation({
+        currentRoute: Router.getCurrentRoute(),
+      });
+      document.body.appendChild(mobileNav);
+    }
+  };
 
-    // Register Routes
-    Object.entries(routes).forEach(([path, handler]) => {
-        Router.on(path, handler);
-    });
+  // Register Routes
+  Object.entries(routes).forEach(([path, handler]) => {
+    Router.on(path, handler);
+  });
 
-    // Register Route Guard
-    Router.before(routeGuard);
+  // Register Route Guard
+  Router.before(routeGuard);
 
-    // Mobile Responsive updates
-    if (window.mobileUtils) {
-        window.mobileUtils.onResponsiveChange(() => initMobileNav());
+  // Mobile Responsive updates
+  if (window.mobileUtils) {
+    window.mobileUtils.onResponsiveChange(() => initMobileNav());
+  } else {
+    initMobileNav();
+  }
+
+  // Network status
+  document.body.appendChild(NetworkStatus());
+
+  // Auth Initialization
+  AuthService.init(async user => {
+    const currentRoute = Router.getCurrentRoute();
+
+    if (user) {
+      console.log('[Main] User authenticated, starting sync...');
+      localStorage.setItem('auth_hint', 'true');
+      SyncService.startRealtimeSync(user.uid);
+      if (currentRoute === 'login') Router.navigate('dashboard');
     } else {
-        initMobileNav();
+      console.log('[Main] No user, stopping sync.');
+      localStorage.removeItem('auth_hint');
+      SyncService.stopSync();
+      NavigationState.clearState();
+      if (currentRoute !== 'login') Router.navigate('login');
     }
 
-    // Network status
-    document.body.appendChild(NetworkStatus());
+    initMobileNav();
+    window.dispatchEvent(
+      new CustomEvent('auth-state-changed', { detail: { user } })
+    );
+  });
 
-    // Auth Initialization
-    AuthService.init(async (user) => {
-        const currentRoute = Router.getCurrentRoute();
-
-        if (user) {
-            console.log("[Main] User authenticated, starting sync...");
-            localStorage.setItem('auth_hint', 'true');
-            SyncService.startRealtimeSync(user.uid);
-            if (currentRoute === 'login') Router.navigate('dashboard');
-        } else {
-            console.log("[Main] No user, stopping sync.");
-            localStorage.removeItem('auth_hint');
-            SyncService.stopSync();
-            NavigationState.clearState();
-            if (currentRoute !== 'login') Router.navigate('login');
-        }
-
-        initMobileNav();
-        window.dispatchEvent(new CustomEvent('auth-state-changed', { detail: { user } }));
-    });
-
-    NavigationState.init();
-    console.log("[Main] App initialized, starting router.");
-    Router.init();
+  NavigationState.init();
+  console.log('[Main] App initialized, starting router.');
+  Router.init();
 };
 
 initApp();

@@ -6,7 +6,11 @@
   --primary-light: 60%;
 
   /* Primary color variants */
-  --color-primary: hsl(var(--primary-hue), var(--primary-sat), var(--primary-light));
+  --color-primary: hsl(
+    var(--primary-hue),
+    var(--primary-sat),
+    var(--primary-light)
+  );
   --color-primary-dark: hsl(var(--primary-hue), var(--primary-sat), 50%);
   --color-primary-light: hsl(var(--primary-hue), var(--primary-sat), 75%);
 
@@ -18,7 +22,7 @@
   /* Text colors */
   --color-text-main: hsl(0, 0%, 100%);
   --color-text-muted: hsl(240, 5%, 65%);
-  
+
   /* Border colors */
   --color-border: hsl(240, 5%, 20%);
 }
