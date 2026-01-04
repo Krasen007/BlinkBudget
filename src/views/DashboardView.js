@@ -38,7 +38,7 @@ export const DashboardView = () => {
   const updateTitle = userObj => {
     const u = userObj || AuthService.user;
     const uName = u ? u.displayName || u.email : '';
-    title.textContent = `Dashboard 1.11 ${uName ? u.displayName || u.email : ''}`;
+    title.textContent = `Dashboard 1.12 ${uName ? u.displayName || u.email : ''}`;
   };
   updateTitle();
   title.style.margin = '0';
@@ -65,12 +65,24 @@ export const DashboardView = () => {
   chartsBtn.title = 'Charts & Reports';
   chartsBtn.addEventListener('click', () => Router.navigate('reports'));
 
-  // Hide charts button on mobile (mobile uses navigation bar)
-  const updateChartsButtonVisibility = () => {
+  // Financial Planning Button (Desktop only - positioned left of charts)
+  const planningBtn = document.createElement('button');
+  planningBtn.innerHTML = '🎯';
+  planningBtn.className = 'btn btn-ghost';
+  planningBtn.style.fontSize = '1.5rem';
+  planningBtn.style.padding = SPACING.XS;
+  planningBtn.style.border = 'none';
+  planningBtn.style.marginRight = SPACING.SM;
+  planningBtn.title = 'Financial Planning';
+  planningBtn.addEventListener('click', () => Router.navigate('financial-planning'));
+
+  // Hide charts and planning buttons on mobile (mobile uses navigation bar)
+  const updateButtonVisibility = () => {
     const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
     chartsBtn.style.display = isMobile ? 'none' : 'inline-block';
+    planningBtn.style.display = isMobile ? 'none' : 'inline-block';
   };
-  updateChartsButtonVisibility();
+  updateButtonVisibility();
 
   // Group Title and Selector for easier layout
   header.innerHTML = '';
@@ -84,6 +96,7 @@ export const DashboardView = () => {
   topRow.style.alignItems = 'center';
 
   topRow.appendChild(title);
+  topRow.appendChild(planningBtn);
   topRow.appendChild(chartsBtn);
   topRow.appendChild(settingsBtn);
 
@@ -269,8 +282,8 @@ export const DashboardView = () => {
       ? '1fr 1fr'
       : 'repeat(auto-fit, minmax(250px, 1fr))';
 
-    // Update charts button visibility
-    updateChartsButtonVisibility();
+    // Update button visibility
+    updateButtonVisibility();
   }, TIMING.DEBOUNCE_RESIZE);
 
   window.addEventListener('resize', updateResponsiveLayout);

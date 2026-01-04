@@ -109,11 +109,11 @@ export const createSelect = (options = {}) => {
       },
       textContent: opt.text,
     });
-    
+
     if (opt.selected) {
       selectedValue = opt.value;
     }
-    
+
     select.appendChild(option);
   });
 

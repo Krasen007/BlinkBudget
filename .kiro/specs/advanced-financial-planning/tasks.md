@@ -2,9 +2,9 @@
 
 ## Phase 1: Core Calculation Engines
 
-- [ ] 1. **Forecast Engine**: Implement `ForecastEngine` with Exponential Smoothing and seasonal patterns.
-- [ ] 2. **Balance Predictor**: Create `AccountBalancePredictor` for 6-month projections and risk alerting.
-- [ ] 3. **Risk Assessor**: Implement `RiskAssessor` for emergency fund and debt-to-income analysis.
+- [x] 1. **Forecast Engine**: Implement `ForecastEngine` with Exponential Smoothing and seasonal patterns.
+- [x] 2. **Balance Predictor**: Create `AccountBalancePredictor` for 6-month projections and risk alerting.
+- [x] 3. **Risk Assessor**: Implement `RiskAssessor` for emergency fund and debt-to-income analysis.
 
 ## Phase 2: Feature Specific Logic
 
@@ -19,6 +19,6 @@
 
 ## Phase 4: UI & Integration
 
-- [ ] 9. **FinancialPlanningView**: Build the new main view with tabbed/scroll-spy navigation.
+- [x] 9. **FinancialPlanningView**: Build the new main view with tabbed/scroll-spy navigation.
 - [ ] 10. **Visualizations**: Create charts for projected balances, portfolio composition, and goal progress.
 - [ ] 11. **Scenario Discovery**: Add "What-If" modeling UI for testing financial changes.

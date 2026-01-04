@@ -38,7 +38,7 @@ The project is a web (browser) application, leveraging a modern, lightweight sta
   - Clean, semantic CSS without heavy framework overhead.
 - **Deployment**: Netlify + Firebase for Auth and Database.
 - **Data Persistence**: `localStorage` (via `StorageService`) for instant, offline-capable data storage. Also Firebase for cloud sync.
-- **System**: Use Windows commands when developing locally on Windows for the terminal, do not try to use Linux tools and commands.
+- **System**: Use Windows and Powershell commands when developing locally on Windows for the terminal, do not try to use Linux tools and commands.
 
 ---
 
@@ -79,7 +79,7 @@ Adherence to these standards is crucial for maintaining code quality, consistenc
   - **State**: Managed via DOM manipulation or simple event listeners within the closure.
   - Components should be modular, reusable, and focused on single responsibilities.
 - **Styling**:
-  - Use **Vanilla CSS** in `style.css`.
+  - Use **Vanilla CSS, postcss** in `style.css`.
   - leverage **CSS Variables** defined in `:root` for colors, spacing, and typography.
   - Avoid inline styles for static values; use classes.
 - **Accessibility (a11y)**:
@@ -88,6 +88,8 @@ Adherence to these standards is crucial for maintaining code quality, consistenc
   - All interactive elements must be keyboard-navigable.
 - **Code Quality**:
   - Maintain clean, readable, and well-structured code.
+  - Follow **best practices** for code organization and maintainability.
+  - Files should strive to not exceed 500 lines of code.
   - Minimize complexity; favor simple, direct DOM manipulation where straightforward.
 - **Performance**:
   - Optimize for fast loading times and smooth interactions (3 clicks rule).

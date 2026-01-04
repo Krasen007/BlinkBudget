@@ -22,6 +22,13 @@ export const MobileNavigation = ({ currentRoute = 'dashboard' }) => {
       ariaLabel: 'Go to Charts and Reports',
     },
     {
+      id: 'financial-planning',
+      label: 'Planning',
+      icon: '🎯',
+      route: 'financial-planning',
+      ariaLabel: 'Go to Financial Planning',
+    },
+    {
       id: 'add-expense',
       label: 'Add',
       icon: '➕',

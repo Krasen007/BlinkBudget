@@ -38,6 +38,12 @@ export const routes = {
     ViewManager.setView(ReportsView());
     updateMobileNavigation('reports');
   },
+  'financial-planning': async () => {
+    const { FinancialPlanningView } = await import('../views/FinancialPlanningView.js');
+    NavigationState.setLastActiveView('financial-planning');
+    ViewManager.setView(FinancialPlanningView());
+    updateMobileNavigation('financial-planning');
+  },
   login: async () => {
     const { LoginView } = await import('../views/LoginView.js');
     NavigationState.setLastActiveView('login');
