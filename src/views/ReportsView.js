@@ -20,7 +20,6 @@ import {
   COLORS,
   SPACING,
   BREAKPOINTS,
-  DIMENSIONS,
   TIMING,
   STORAGE_KEYS,
 } from '../utils/constants.js';

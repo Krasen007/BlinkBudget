@@ -5,7 +5,6 @@ import { DateFormatSection } from '../components/DateFormatSection.js';
 import { DataManagementSection } from '../components/DataManagementSection.js';
 import { GeneralSection } from '../components/GeneralSection.js';
 import {
-  DIMENSIONS,
   SPACING,
   TOUCH_TARGETS,
   FONT_SIZES,

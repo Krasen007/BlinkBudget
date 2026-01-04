@@ -6,7 +6,6 @@ import { Router } from '../core/router.js';
 import { createButton } from '../utils/dom-factory.js';
 import {
   SPACING,
-  DIMENSIONS,
   TOUCH_TARGETS,
   FONT_SIZES,
   TIMING,

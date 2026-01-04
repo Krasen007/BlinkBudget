@@ -4,7 +4,6 @@ import { TransactionService } from '../core/transaction-service.js';
 import { Router } from '../core/router.js';
 import {
   SPACING,
-  DIMENSIONS,
   TOUCH_TARGETS,
   FONT_SIZES,
   STORAGE_KEYS,
