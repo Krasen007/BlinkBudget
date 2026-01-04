@@ -10,7 +10,7 @@
 
 - [x] 4. **Investment Tracker**: Develop `InvestmentTracker` with manual entry, asset/sector allocation, and performance monitoring.
 - [x] 5. **Goal Planner**: Create `GoalPlanner` for long-term target tracking and 30-year wealth projections.
-- [ ] 6. **Insights Generator**: Implement `InsightsGenerator` for Top Movers and Timeline comparisons.
+- [x] 6. **Insights Generator**: Implement `InsightsGenerator` for Top Movers and Timeline comparisons.
 
 ## Phase 3: Infrastructure & Data
 
@@ -20,5 +20,5 @@
 ## Phase 4: UI & Integration
 
 - [x] 9. **FinancialPlanningView**: Build the new main view with tabbed/scroll-spy navigation.
-- [ ] 10. **Visualizations**: Create charts for projected balances, portfolio composition, and goal progress.
-- [ ] 11. **Scenario Discovery**: Add "What-If" modeling UI for testing financial changes.
+- [x] 10. **Visualizations**: Create charts for projected balances, portfolio composition, and goal progress.
+- [x] 11. **Scenario Discovery**: Add "What-If" modeling UI for testing financial changes.

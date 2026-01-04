@@ -20,6 +20,7 @@ import { AccountBalancePredictor } from '../core/account-balance-predictor.js';
 import { RiskAssessor } from '../core/risk-assessor.js';
 import { GoalPlanner } from '../core/goal-planner.js';
 import { ChartRenderer } from '../components/ChartRenderer.js';
+import { InsightsGenerator } from '../core/insights-generator.js';
 import {
   createProjectedBalanceChart,
   createPortfolioCompositionChart,
@@ -704,14 +705,157 @@ export const FinancialPlanningView = () => {
    */
   function renderInsightsSection() {
     const section = createSectionContainer('insights', 'Financial Insights', '💡');
-    
-    const placeholder = createPlaceholder(
-      'Advanced Insights Coming Soon',
-      'Discover spending patterns, top movers analysis, and timeline comparisons.',
-      '💡'
-    );
-    
-    section.appendChild(placeholder);
+
+    if (!planningData || !planningData.transactions || planningData.transactions.length === 0) {
+      const placeholder = createPlaceholder(
+        'Advanced Insights Coming Soon',
+        'Discover spending patterns, top movers analysis, and timeline comparisons.',
+        '💡'
+      );
+      section.appendChild(placeholder);
+      content.appendChild(section);
+      return;
+    }
+
+    const transactions = planningData.transactions;
+
+    // Top Movers (by absolute spend/amount per category)
+    const topMovers = InsightsGenerator.topMovers(transactions, 6);
+
+    const topContainer = document.createElement('div');
+    topContainer.className = 'insights-top-movers';
+    topContainer.style.display = 'flex';
+    topContainer.style.flexDirection = 'column';
+    topContainer.style.gap = SPACING.MD;
+
+    const topTitle = document.createElement('h3');
+    topTitle.textContent = 'Top Movers';
+    topTitle.style.margin = '0';
+    topTitle.style.fontSize = '1rem';
+    topTitle.style.fontWeight = '600';
+    topContainer.appendChild(topTitle);
+
+    const list = document.createElement('ul');
+    list.style.listStyle = 'none';
+    list.style.padding = '0';
+    list.style.margin = '0';
+    list.style.display = 'grid';
+    list.style.gridTemplateColumns = '1fr auto';
+    list.style.gap = SPACING.SM;
+
+    const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' });
+
+    topMovers.forEach(item => {
+      const liLabel = document.createElement('li');
+      liLabel.textContent = item.category;
+      liLabel.style.fontWeight = '600';
+      liLabel.style.color = COLORS.TEXT_MAIN;
+
+      const liValue = document.createElement('li');
+      liValue.textContent = currency.format(Math.abs(item.total));
+      liValue.style.textAlign = 'right';
+      liValue.style.color = COLORS.TEXT_MUTED;
+
+      list.appendChild(liLabel);
+      list.appendChild(liValue);
+    });
+
+    topContainer.appendChild(list);
+
+    // Chart for Top Movers
+    const topChartDiv = document.createElement('div');
+    topChartDiv.style.marginTop = SPACING.MD;
+    topChartDiv.style.position = 'relative';
+    topChartDiv.style.height = '220px';
+    const topCanvas = document.createElement('canvas');
+    topCanvas.id = `insights-top-movers-${Date.now()}`;
+    topCanvas.style.width = '100%';
+    topCanvas.style.maxHeight = '100%';
+    topChartDiv.appendChild(topCanvas);
+    topContainer.appendChild(topChartDiv);
+
+    section.appendChild(topContainer);
+
+    // Render bar chart for top movers
+    const topLabels = topMovers.map(t => t.category);
+    const topData = topMovers.map(t => Math.abs(t.total));
+
+    chartRenderer.createBarChart(topCanvas, {
+      labels: topLabels,
+      datasets: [{ label: 'Amount', data: topData }]
+    }, { title: 'Top Movers' })
+      .then(chart => { if (chart) activeCharts.set('insights-top-movers', chart); })
+      .catch(err => console.error('Top movers chart error', err));
+
+    // Timeline comparison: monthly expenses this period vs previous period
+    const monthsBack = 6;
+    const now = new Date();
+    const monthKeys = [];
+    for (let i = monthsBack - 1; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      monthKeys.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    }
+
+    function sumForMonth(key, txs) {
+      const [y, m] = key.split('-').map(Number);
+      const start = new Date(y, m - 1, 1);
+      const end = new Date(y, m, 1);
+      return txs.reduce((sum, t) => {
+        const ts = new Date(t.timestamp);
+        if (ts >= start && ts < end && t.type === 'expense') {
+          return sum + (typeof t.amount === 'number' ? t.amount : Number(t.amount) || 0);
+        }
+        return sum;
+      }, 0);
+    }
+
+    const currentSeries = monthKeys.map(k => ({ period: k, value: sumForMonth(k, transactions) }));
+    const previousSeries = monthKeys.map(k => {
+      const [y, m] = k.split('-').map(Number);
+      const prevKey = `${y - 1}-${String(m).padStart(2, '0')}`;
+      return { period: prevKey, value: sumForMonth(prevKey, transactions) };
+    });
+
+    const timelineLabels = monthKeys.map(k => {
+      const [y, m] = k.split('-').map(Number);
+      const d = new Date(y, m - 1, 1);
+      return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    });
+
+    const currentData = currentSeries.map(s => s.value);
+    const previousData = previousSeries.map(s => s.value);
+
+    const timelineDiv = document.createElement('div');
+    timelineDiv.style.marginTop = SPACING.LG;
+    const timelineTitle = document.createElement('h3');
+    timelineTitle.textContent = 'Monthly Expenses: This Period vs Previous Year';
+    timelineTitle.style.margin = '0';
+    timelineTitle.style.fontSize = '1rem';
+    timelineTitle.style.fontWeight = '600';
+    timelineDiv.appendChild(timelineTitle);
+
+    const timelineChartWrapper = document.createElement('div');
+    timelineChartWrapper.style.position = 'relative';
+    timelineChartWrapper.style.height = '300px';
+    const timelineCanvas = document.createElement('canvas');
+    timelineCanvas.id = `insights-timeline-${Date.now()}`;
+    timelineCanvas.style.width = '100%';
+    timelineCanvas.style.maxHeight = '100%';
+    timelineChartWrapper.appendChild(timelineCanvas);
+    timelineDiv.appendChild(timelineChartWrapper);
+
+    section.appendChild(timelineDiv);
+
+    chartRenderer.createLineChart(timelineCanvas, {
+      labels: timelineLabels,
+      datasets: [
+        { label: 'This Period', data: currentData },
+        { label: 'Previous Year', data: previousData }
+      ]
+    }, { title: 'Expenses Timeline' })
+      .then(chart => { if (chart) activeCharts.set('insights-timeline', chart); })
+      .catch(err => console.error('Timeline chart error', err));
+
     content.appendChild(section);
   }
 
