@@ -1,0 +1,234 @@
+/* View Container Utilities - Standardized Styles for All Views */
+
+/* Standard View Container - Consistent width and padding */
+.view-container {
+  width: 100%;
+  max-width: var(--container-max-width);
+  padding: 0 var(--spacing-md);
+  height: 100%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* View container with fixed content (no scrolling) */
+.view-container.view-fixed {
+  overflow: hidden;
+}
+
+/* View Header - Consistent header styling */
+.view-header {
+  margin-bottom: var(--spacing-md);
+  flex-shrink: 0;
+}
+
+/* View Content - Main content area */
+.view-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  gap: var(--spacing-lg);
+}
+
+/* Scrollable Content - For views that need scrollable content */
+.view-scrollable {
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Fixed Container - For views that should not scroll */
+.view-fixed {
+  overflow: hidden;
+}
+
+/* Mobile-specific padding adjustments */
+@media (--sm) {
+  .view-container {
+    padding: 0 var(--spacing-sm);
+  }
+  
+  .view-header {
+    margin-bottom: var(--spacing-sm);
+  }
+}
+
+/* Compact view for smaller screens */
+.view-compact {
+  padding: 0 var(--spacing-xs);
+}
+
+/* View Navigation - For views with tab navigation */
+.view-navigation {
+  margin-bottom: var(--spacing-lg);
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.view-navigation::-webkit-scrollbar {
+  display: none;
+}
+
+/* View Section - For sectioned content within views */
+.view-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+/* Responsive adjustments for different screen sizes */
+@media (--md) {
+  .view-container {
+    padding: 0 var(--spacing-md);
+  }
+  
+  .view-header {
+    margin-bottom: var(--spacing-md);
+  }
+}
+
+@media (--lg) {
+  .view-container {
+    padding: 0 var(--spacing-lg);
+  }
+  
+  .view-header {
+    margin-bottom: var(--spacing-lg);
+  }
+}
+
+/* View Grid - For grid layouts within views */
+.view-grid {
+  display: grid;
+  gap: var(--spacing-md);
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+/* View Card - Standard card styling for view content */
+.view-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+}
+
+/* View Action Button - Standard action buttons */
+.view-action-btn {
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-lg);
+  margin-top: var(--spacing-sm);
+  min-height: var(--touch-target-standard);
+}
+
+/* View Stats Container - For dashboard-style statistics */
+.view-stats-container {
+  display: grid;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+@media (--sm) {
+  .view-stats-container {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (--md) {
+  .view-stats-container {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+/* View Form Container - For form-based views */
+.view-form-container {
+  width: 100%;
+  padding: 0;
+}
+
+/* View Top Row - Header top row layout */
+.view-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+/* View Back Button - Standard back button styling */
+.view-back-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-main);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: var(--touch-target-min);
+}
+
+.view-back-btn:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-primary);
+}
+
+/* View Title - Standard title styling */
+.view-title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--color-text-main);
+}
+
+@media (--sm) {
+  .view-title {
+    font-size: 1.5rem;
+  }
+}
+
+/* View Subtitle - Standard subtitle styling */
+.view-subtitle {
+  margin: var(--spacing-xs) 0 var(--spacing-sm) 0;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+/* View Navigation Tabs - For tabbed interfaces */
+.view-tabs {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+  flex-shrink: 0;
+}
+
+.view-tab {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-main);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  min-width: fit-content;
+}
+
+.view-tab[aria-selected='true'] {
+  background: var(--color-primary);
+  color: white;
+}
+
+.view-tab:hover:not([aria-selected='true']) {
+  background: var(--color-surface-hover);
+}

@@ -116,6 +116,33 @@ export class InvestmentTracker {
   }
 
   /**
+   * Update an existing investment's fields
+   * @param {string} id - Investment id
+   * @param {Object} updates - Fields to update (shares, purchasePrice, currentPrice, name, assetClass, sector, region)
+   * @returns {Object|null} Updated investment or null if not found
+   */
+  updateInvestment(id, updates = {}) {
+    try {
+      const investment = this.investments.find(inv => inv.id === id || inv.symbol === id);
+      if (!investment) return null;
+
+      const allowed = ['shares', 'purchasePrice', 'currentPrice', 'name', 'assetClass', 'sector', 'region', 'currency'];
+      allowed.forEach(key => {
+        if (updates[key] !== undefined) {
+          investment[key] = updates[key];
+        }
+      });
+
+      investment.updatedAt = new Date();
+      this._saveInvestments();
+      return investment;
+    } catch (error) {
+      console.error('Error updating investment:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Get all investments
    * @returns {Array} Array of investment objects
    */

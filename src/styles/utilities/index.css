@@ -14,3 +14,6 @@
 
 /* Responsive utilities - breakpoints, display, containers */
 @import './responsive.css';
+
+/* View utilities - standardized view container styles */
+@import './view-styles.css';

@@ -19,6 +19,7 @@ import { ForecastEngine } from '../core/forecast-engine.js';
 import { AccountBalancePredictor } from '../core/account-balance-predictor.js';
 import { RiskAssessor } from '../core/risk-assessor.js';
 import { GoalPlanner } from '../core/goal-planner.js';
+import { StorageService } from '../core/storage.js';
 import { ChartRenderer } from '../components/ChartRenderer.js';
 import { InsightsGenerator } from '../core/insights-generator.js';
 import {
@@ -39,13 +40,7 @@ import { debounce } from '../utils/touch-utils.js';
 
 export const FinancialPlanningView = () => {
   const container = document.createElement('div');
-  container.className = 'view-financial-planning';
-  container.style.width = '100%';
-  container.style.maxWidth = DIMENSIONS.CONTAINER_MAX_WIDTH;
-  container.style.display = 'flex';
-  container.style.flexDirection = 'column';
-  container.style.padding = `0 ${SPACING.MD}`;
-  container.style.overflow = 'hidden';
+  container.className = 'view-financial-planning view-container view-fixed';
 
   // State management
   let currentSection = 'overview';
@@ -627,8 +622,20 @@ export const FinancialPlanningView = () => {
       },
     };
 
+    // Try to load real portfolio summary from StorageService
+    let portfolioData;
+    try {
+      portfolioData = StorageService.calculatePortfolioSummary();
+    } catch (err) {
+      console.warn('Error fetching portfolio summary from StorageService:', err);
+      portfolioData = null;
+    }
+
+    const useMockPortfolio = !portfolioData || !portfolioData.totalValue;
+    const portfolioToRender = useMockPortfolio ? samplePortfolioData : portfolioData;
+
     // Create portfolio composition chart
-    createPortfolioCompositionChart(chartRenderer, samplePortfolioData)
+    createPortfolioCompositionChart(chartRenderer, portfolioToRender)
       .then(({ section: chartSection, chart }) => {
         section.appendChild(chartSection);
         activeCharts.set('portfolio-composition', chart);
@@ -637,14 +644,249 @@ export const FinancialPlanningView = () => {
         console.error('Error creating portfolio composition chart:', error);
       });
 
-    // Add placeholder for additional investment features
-    const placeholder = createPlaceholder(
-      'Investment Tracker Coming Soon',
-      'Full investment tracking with real-time data integration and performance monitoring is coming soon.',
-      '💰'
-    );
+    // Add simple add-investment UI and placeholder when no real portfolio data
+    const controls = document.createElement('div');
+    controls.style.display = 'flex';
+    controls.style.gap = SPACING.SM;
+    controls.style.alignItems = 'center';
+    controls.style.marginTop = SPACING.MD;
+
+    const addInvBtn = document.createElement('button');
+    addInvBtn.textContent = 'Add Investment';
+    addInvBtn.className = 'btn btn-secondary';
+
+    const invForm = document.createElement('div');
+    invForm.style.display = 'none';
+    invForm.style.gap = SPACING.SM;
+    invForm.style.marginTop = SPACING.SM;
+
+    const symInput = document.createElement('input');
+    symInput.placeholder = 'Symbol (e.g. AAPL)';
+    const sharesInput = document.createElement('input');
+    sharesInput.type = 'number';
+    sharesInput.placeholder = 'Shares';
+    const priceInput = document.createElement('input');
+    priceInput.type = 'number';
+    priceInput.placeholder = 'Purchase Price';
+    const dateInput = document.createElement('input');
+    dateInput.type = 'date';
+
+    const saveInvBtn = document.createElement('button');
+    saveInvBtn.textContent = 'Save';
+    saveInvBtn.className = 'btn btn-primary';
+
+    invForm.appendChild(symInput);
+    invForm.appendChild(sharesInput);
+    invForm.appendChild(priceInput);
+    invForm.appendChild(dateInput);
+    invForm.appendChild(saveInvBtn);
+
+    addInvBtn.addEventListener('click', () => {
+      invForm.style.display = invForm.style.display === 'none' ? 'flex' : 'none';
+      invForm.style.flexWrap = 'wrap';
+    });
+
+    saveInvBtn.addEventListener('click', () => {
+      const symbol = symInput.value.trim();
+      const shares = Number(sharesInput.value) || 0;
+      const purchasePrice = Number(priceInput.value) || 0;
+      const purchaseDate = dateInput.value ? new Date(dateInput.value) : new Date();
+
+      try {
+        StorageService.addInvestment(symbol, shares, purchasePrice, purchaseDate, {});
+        // Refresh portfolio chart
+        const updated = StorageService.calculatePortfolioSummary();
+        createPortfolioCompositionChart(chartRenderer, updated)
+          .then(({ section: chartSection, chart }) => {
+            // Replace existing chart section
+            const existing = section.querySelector('[data-chart-type="portfolio-composition"]');
+            if (existing) existing.replaceWith(chartSection);
+            activeCharts.set('portfolio-composition', chart);
+          })
+          .catch(err => console.error('Error refreshing portfolio chart:', err));
+
+        invForm.style.display = 'none';
+        symInput.value = '';
+        sharesInput.value = '';
+        priceInput.value = '';
+        dateInput.value = '';
+      } catch (err) {
+        console.error('Failed to save investment', err);
+      }
+    });
+
+    controls.appendChild(addInvBtn);
+    controls.appendChild(invForm);
+    section.appendChild(controls);
     
-    section.appendChild(placeholder);
+    // Investments list (editable)
+    const investmentsList = document.createElement('div');
+    investmentsList.className = 'investments-list';
+    investmentsList.style.marginTop = SPACING.MD;
+    section.appendChild(investmentsList);
+
+    function refreshInvestmentsList() {
+      investmentsList.innerHTML = '';
+      let items = [];
+      try {
+        items = StorageService.getInvestments() || [];
+      } catch (err) {
+        console.warn('Error loading investments for list:', err);
+        items = [];
+      }
+
+      if (!items.length) {
+        const empty = document.createElement('div');
+        empty.textContent = 'No investments yet.';
+        empty.style.color = COLORS.TEXT_MUTED;
+        investmentsList.appendChild(empty);
+        return;
+      }
+
+      const ul = document.createElement('ul');
+      ul.style.listStyle = 'none';
+      ul.style.padding = '0';
+      ul.style.margin = '0';
+      ul.style.display = 'grid';
+      ul.style.gap = SPACING.SM;
+
+      items.forEach(inv => {
+        const li = document.createElement('li');
+        li.style.display = 'flex';
+        li.style.justifyContent = 'space-between';
+        li.style.alignItems = 'center';
+
+        const left = document.createElement('div');
+        left.style.display = 'flex';
+        left.style.flexDirection = 'column';
+
+        const title = document.createElement('div');
+        title.textContent = `${inv.symbol} · ${inv.name}`;
+        title.style.fontWeight = '600';
+
+        const meta = document.createElement('div');
+        meta.style.fontSize = '0.9rem';
+        meta.style.color = COLORS.TEXT_MUTED;
+        meta.textContent = `${inv.shares} shares @ ${new Intl.NumberFormat('en-US', {style:'currency',currency:'EUR'}).format(inv.currentPrice)}`;
+
+        left.appendChild(title);
+        left.appendChild(meta);
+
+        const actions = document.createElement('div');
+        actions.style.display = 'flex';
+        actions.style.gap = SPACING.SM;
+
+        const editBtn = document.createElement('button');
+        editBtn.textContent = 'Edit';
+        editBtn.className = 'btn btn-secondary';
+
+        const delBtn = document.createElement('button');
+        delBtn.textContent = 'Delete';
+        delBtn.className = 'btn btn-ghost';
+
+        actions.appendChild(editBtn);
+        actions.appendChild(delBtn);
+
+        li.appendChild(left);
+        li.appendChild(actions);
+
+        ul.appendChild(li);
+
+        // Edit handler - toggle inline edit
+        editBtn.addEventListener('click', () => {
+          if (li._editing) return;
+          li._editing = true;
+          const form = document.createElement('div');
+          form.style.display = 'flex';
+          form.style.gap = SPACING.SM;
+
+          const sharesFld = document.createElement('input');
+          sharesFld.type = 'number';
+          sharesFld.value = inv.shares;
+          sharesFld.style.width = '80px';
+
+          const priceFld = document.createElement('input');
+          priceFld.type = 'number';
+          priceFld.value = inv.purchasePrice || inv.currentPrice || 0;
+          priceFld.style.width = '120px';
+
+          const saveBtn = document.createElement('button');
+          saveBtn.textContent = 'Save';
+          saveBtn.className = 'btn btn-primary';
+
+          const cancelBtn = document.createElement('button');
+          cancelBtn.textContent = 'Cancel';
+          cancelBtn.className = 'btn btn-ghost';
+
+          form.appendChild(sharesFld);
+          form.appendChild(priceFld);
+          form.appendChild(saveBtn);
+          form.appendChild(cancelBtn);
+
+          li.appendChild(form);
+
+          cancelBtn.addEventListener('click', () => {
+            li._editing = false;
+            form.remove();
+          });
+
+          saveBtn.addEventListener('click', () => {
+            const newShares = Number(sharesFld.value) || 0;
+            const newPrice = Number(priceFld.value) || 0;
+            try {
+              StorageService.updateInvestment(inv.id, { shares: newShares, purchasePrice: newPrice, currentPrice: newPrice });
+              // refresh chart and list
+              const updated = StorageService.calculatePortfolioSummary();
+              createPortfolioCompositionChart(chartRenderer, updated)
+                .then(({ section: chartSection, chart }) => {
+                  const existing = section.querySelector('[data-chart-type="portfolio-composition"]');
+                  if (existing) existing.replaceWith(chartSection);
+                  activeCharts.set('portfolio-composition', chart);
+                })
+                .catch(err => console.error('Error refreshing portfolio chart:', err));
+
+              li._editing = false;
+              refreshInvestmentsList();
+            } catch (err) {
+              console.error('Failed to update investment', err);
+            }
+          });
+        });
+
+        delBtn.addEventListener('click', () => {
+          try {
+            StorageService.removeInvestment(inv.symbol);
+            // refresh chart
+            const updated = StorageService.calculatePortfolioSummary();
+            createPortfolioCompositionChart(chartRenderer, updated)
+              .then(({ section: chartSection, chart }) => {
+                const existing = section.querySelector('[data-chart-type="portfolio-composition"]');
+                if (existing) existing.replaceWith(chartSection);
+                activeCharts.set('portfolio-composition', chart);
+              })
+              .catch(err => console.error('Error refreshing portfolio chart:', err));
+
+            refreshInvestmentsList();
+          } catch (err) {
+            console.error('Failed to remove investment', err);
+          }
+        });
+      });
+
+      investmentsList.appendChild(ul);
+    }
+
+    // Initial population
+    refreshInvestmentsList();
+
+    if (useMockPortfolio) {
+      const placeholder = createPlaceholder(
+        'Investment Tracker Coming Soon',
+        'Full investment tracking with real-time data integration and performance monitoring is coming soon.',
+        '💰'
+      );
+      section.appendChild(placeholder);
+    }
     content.appendChild(section);
   }
 
@@ -654,7 +896,15 @@ export const FinancialPlanningView = () => {
   function renderGoalsSection() {
     const section = createSectionContainer('goals', 'Financial Goals', '🎯');
     
-    // For now, create sample goals data since goal planning isn't fully implemented
+    // Try to load goals from StorageService; fallback to sample goals
+    let goalsFromStorage = [];
+    try {
+      goalsFromStorage = StorageService.getGoals() || [];
+    } catch (err) {
+      console.warn('Error fetching goals from StorageService:', err);
+      goalsFromStorage = [];
+    }
+
     const sampleGoals = [
       {
         id: '1',
@@ -679,8 +929,11 @@ export const FinancialPlanningView = () => {
       },
     ];
 
+    const hasRealGoals = Array.isArray(goalsFromStorage) && goalsFromStorage.length > 0;
+    const goalsToRender = hasRealGoals ? goalsFromStorage : sampleGoals;
+
     // Create goal progress chart
-    createGoalProgressChart(chartRenderer, sampleGoals)
+    createGoalProgressChart(chartRenderer, goalsToRender)
       .then(({ section: chartSection, chart }) => {
         section.appendChild(chartSection);
         activeCharts.set('goal-progress', chart);
@@ -689,14 +942,253 @@ export const FinancialPlanningView = () => {
         console.error('Error creating goal progress chart:', error);
       });
 
-    // Add placeholder for additional goal features
-    const placeholder = createPlaceholder(
-      'Goal Planner Coming Soon',
-      'Full goal planning with custom targets, automatic progress tracking, and wealth projections is coming soon.',
-      '🎯'
-    );
-    
-    section.appendChild(placeholder);
+    // Add simple add-goal UI so users can create goals
+    const goalControls = document.createElement('div');
+    goalControls.style.display = 'flex';
+    goalControls.style.gap = SPACING.SM;
+    goalControls.style.alignItems = 'center';
+    goalControls.style.marginTop = SPACING.MD;
+
+    const addGoalBtn = document.createElement('button');
+    addGoalBtn.textContent = 'Add Goal';
+    addGoalBtn.className = 'btn btn-secondary';
+
+    const goalForm = document.createElement('div');
+    goalForm.style.display = 'none';
+    goalForm.style.gap = SPACING.SM;
+    goalForm.style.marginTop = SPACING.SM;
+
+    const goalName = document.createElement('input');
+    goalName.placeholder = 'Goal name';
+    const goalTarget = document.createElement('input');
+    goalTarget.type = 'number';
+    goalTarget.placeholder = 'Target amount';
+    const goalDate = document.createElement('input');
+    goalDate.type = 'date';
+    const goalCurrent = document.createElement('input');
+    goalCurrent.type = 'number';
+    goalCurrent.placeholder = 'Current savings';
+
+    const saveGoalBtn = document.createElement('button');
+    saveGoalBtn.textContent = 'Save Goal';
+    saveGoalBtn.className = 'btn btn-primary';
+
+    goalForm.appendChild(goalName);
+    goalForm.appendChild(goalTarget);
+    goalForm.appendChild(goalDate);
+    goalForm.appendChild(goalCurrent);
+    goalForm.appendChild(saveGoalBtn);
+
+    addGoalBtn.addEventListener('click', () => {
+      goalForm.style.display = goalForm.style.display === 'none' ? 'flex' : 'none';
+      goalForm.style.flexWrap = 'wrap';
+    });
+
+    saveGoalBtn.addEventListener('click', () => {
+      const name = goalName.value.trim();
+      const target = Number(goalTarget.value) || 0;
+      const tdate = goalDate.value ? new Date(goalDate.value) : null;
+      const current = Number(goalCurrent.value) || 0;
+
+      try {
+        StorageService.createGoal(name, target, tdate, current, {});
+        // Refresh goals chart
+        const updatedGoals = StorageService.getGoals();
+        createGoalProgressChart(chartRenderer, updatedGoals)
+          .then(({ section: chartSection, chart }) => {
+            const existing = section.querySelector('[data-chart-type="goal-progress"]');
+            if (existing) existing.replaceWith(chartSection);
+            activeCharts.set('goal-progress', chart);
+          })
+          .catch(err => console.error('Error refreshing goals chart:', err));
+
+        goalForm.style.display = 'none';
+        goalName.value = '';
+        goalTarget.value = '';
+        goalDate.value = '';
+        goalCurrent.value = '';
+      } catch (err) {
+        console.error('Failed to save goal', err);
+      }
+    });
+
+    goalControls.appendChild(addGoalBtn);
+    goalControls.appendChild(goalForm);
+    section.appendChild(goalControls);
+    // Goals list (editable)
+    const goalsList = document.createElement('div');
+    goalsList.className = 'goals-list';
+    goalsList.style.marginTop = SPACING.MD;
+    section.appendChild(goalsList);
+
+    function refreshGoalsList() {
+      goalsList.innerHTML = '';
+      let items = [];
+      try {
+        items = StorageService.getGoals() || [];
+      } catch (err) {
+        console.warn('Error loading goals for list:', err);
+        items = [];
+      }
+
+      if (!items.length) {
+        const empty = document.createElement('div');
+        empty.textContent = 'No goals yet.';
+        empty.style.color = COLORS.TEXT_MUTED;
+        goalsList.appendChild(empty);
+        return;
+      }
+
+      const ul = document.createElement('ul');
+      ul.style.listStyle = 'none';
+      ul.style.padding = '0';
+      ul.style.margin = '0';
+      ul.style.display = 'grid';
+      ul.style.gap = SPACING.SM;
+
+      items.forEach(goal => {
+        const li = document.createElement('li');
+        li.style.display = 'flex';
+        li.style.justifyContent = 'space-between';
+        li.style.alignItems = 'center';
+
+        const left = document.createElement('div');
+        left.style.display = 'flex';
+        left.style.flexDirection = 'column';
+
+        const title = document.createElement('div');
+        title.textContent = `${goal.name}`;
+        title.style.fontWeight = '600';
+
+        const meta = document.createElement('div');
+        meta.style.fontSize = '0.9rem';
+        meta.style.color = COLORS.TEXT_MUTED;
+        meta.textContent = `${new Intl.NumberFormat('en-US', {style:'currency',currency:'EUR'}).format(goal.currentSavings)} of ${new Intl.NumberFormat('en-US', {style:'currency',currency:'EUR'}).format(goal.targetAmount)} by ${new Date(goal.targetDate).toLocaleDateString()}`;
+
+        left.appendChild(title);
+        left.appendChild(meta);
+
+        const actions = document.createElement('div');
+        actions.style.display = 'flex';
+        actions.style.gap = SPACING.SM;
+
+        const editBtn = document.createElement('button');
+        editBtn.textContent = 'Edit';
+        editBtn.className = 'btn btn-secondary';
+
+        const delBtn = document.createElement('button');
+        delBtn.textContent = 'Delete';
+        delBtn.className = 'btn btn-ghost';
+
+        actions.appendChild(editBtn);
+        actions.appendChild(delBtn);
+
+        li.appendChild(left);
+        li.appendChild(actions);
+
+        ul.appendChild(li);
+
+        editBtn.addEventListener('click', () => {
+          if (li._editing) return;
+          li._editing = true;
+          const form = document.createElement('div');
+          form.style.display = 'flex';
+          form.style.gap = SPACING.SM;
+
+          const nameFld = document.createElement('input');
+          nameFld.value = goal.name;
+          const targetFld = document.createElement('input');
+          targetFld.type = 'number';
+          targetFld.value = goal.targetAmount;
+          const dateFld = document.createElement('input');
+          dateFld.type = 'date';
+          dateFld.value = new Date(goal.targetDate).toISOString().slice(0,10);
+          const currentFld = document.createElement('input');
+          currentFld.type = 'number';
+          currentFld.value = goal.currentSavings;
+
+          const saveBtn = document.createElement('button');
+          saveBtn.textContent = 'Save';
+          saveBtn.className = 'btn btn-primary';
+
+          const cancelBtn = document.createElement('button');
+          cancelBtn.textContent = 'Cancel';
+          cancelBtn.className = 'btn btn-ghost';
+
+          form.appendChild(nameFld);
+          form.appendChild(targetFld);
+          form.appendChild(dateFld);
+          form.appendChild(currentFld);
+          form.appendChild(saveBtn);
+          form.appendChild(cancelBtn);
+
+          li.appendChild(form);
+
+          cancelBtn.addEventListener('click', () => {
+            li._editing = false;
+            form.remove();
+          });
+
+          saveBtn.addEventListener('click', () => {
+            try {
+              const updates = {
+                name: nameFld.value.trim(),
+                targetAmount: Number(targetFld.value) || 0,
+                targetDate: dateFld.value ? new Date(dateFld.value) : new Date(goal.targetDate),
+                currentSavings: Number(currentFld.value) || 0
+              };
+              StorageService.updateGoal(goal.id, updates);
+              // refresh chart
+              const updatedGoals = StorageService.getGoals();
+              createGoalProgressChart(chartRenderer, updatedGoals)
+                .then(({ section: chartSection, chart }) => {
+                  const existing = section.querySelector('[data-chart-type="goal-progress"]');
+                  if (existing) existing.replaceWith(chartSection);
+                  activeCharts.set('goal-progress', chart);
+                })
+                .catch(err => console.error('Error refreshing goals chart:', err));
+
+              li._editing = false;
+              refreshGoalsList();
+            } catch (err) {
+              console.error('Failed to update goal', err);
+            }
+          });
+        });
+
+        delBtn.addEventListener('click', () => {
+          try {
+            StorageService.deleteGoal(goal.id);
+            const updatedGoals = StorageService.getGoals();
+            createGoalProgressChart(chartRenderer, updatedGoals)
+              .then(({ section: chartSection, chart }) => {
+                const existing = section.querySelector('[data-chart-type="goal-progress"]');
+                if (existing) existing.replaceWith(chartSection);
+                activeCharts.set('goal-progress', chart);
+              })
+              .catch(err => console.error('Error refreshing goals chart:', err));
+
+            refreshGoalsList();
+          } catch (err) {
+            console.error('Failed to delete goal', err);
+          }
+        });
+      });
+
+      goalsList.appendChild(ul);
+    }
+
+    refreshGoalsList();
+
+    // Add placeholder only when goals are not managed yet
+    if (!hasRealGoals) {
+      const placeholder = createPlaceholder(
+        'Goal Planner Coming Soon',
+        'Full goal planning with custom targets, automatic progress tracking, and wealth projections is coming soon.',
+        '🎯'
+      );
+      section.appendChild(placeholder);
+    }
     content.appendChild(section);
   }
 

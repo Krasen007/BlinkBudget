@@ -156,6 +156,41 @@ export class GoalPlanner {
   }
 
   /**
+   * Update goal properties
+   * @param {string} goalId
+   * @param {Object} updates - fields to update (name, targetAmount, targetDate, currentSavings, monthlyContribution, priority, expectedReturn, inflationRate, description)
+   * @returns {Object|null} Updated goal or null if not found
+   */
+  updateGoal(goalId, updates = {}) {
+    try {
+      const goal = this.goals.find(g => g.id === goalId);
+      if (!goal) return null;
+
+      const allowed = ['name', 'targetAmount', 'targetDate', 'currentSavings', 'monthlyContribution', 'priority', 'expectedReturn', 'inflationRate', 'description'];
+      allowed.forEach(key => {
+        if (updates[key] !== undefined) {
+          if (key === 'targetDate') {
+            goal[key] = new Date(updates[key]);
+          } else if (typeof updates[key] === 'number') {
+            goal[key] = Math.round(updates[key] * 100) / 100;
+          } else {
+            goal[key] = updates[key];
+          }
+        }
+      });
+
+      // Recalculate derived fields
+      goal.requiredMonthlySavings = this.calculateRequiredMonthlySavings(goal);
+      goal.updatedDate = new Date();
+      this._saveGoals();
+      return goal;
+    } catch (error) {
+      console.error('Error updating goal:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Get all goals
    * @returns {Array} Array of goal objects
    */

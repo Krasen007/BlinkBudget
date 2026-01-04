@@ -63,13 +63,7 @@ import { FloatingBackButton } from '../components/FloatingBackButton.js';
 
 export const ReportsView = () => {
   const container = document.createElement('div');
-  container.className = 'view-reports';
-  container.style.width = '100%';
-  container.style.maxWidth = DIMENSIONS.CONTAINER_MAX_WIDTH;
-  container.style.display = 'flex';
-
-  container.style.flexDirection = 'column';
-  container.style.padding = `0 ${SPACING.MD}`;
+  container.className = 'view-reports view-container';
 
   // Global error boundary
   const handleGlobalError = (error, context = 'Unknown') => {

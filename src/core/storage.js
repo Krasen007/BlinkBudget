@@ -55,6 +55,11 @@ export const StorageService = {
     CacheService.del('portfolioSummary');
     return res;
   },
+  updateInvestment: function(id, updates) {
+    const res = this._investmentTracker.updateInvestment(id, updates);
+    CacheService.del('portfolioSummary');
+    return res;
+  },
   getInvestment: function(symbol) { return this._investmentTracker.getInvestment(symbol); },
   calculatePortfolioSummary: function() {
     const cached = CacheService.get('portfolioSummary');
@@ -80,6 +85,11 @@ export const StorageService = {
   },
   deleteGoal: function(goalId) {
     const res = this._goalPlanner.deleteGoal(goalId);
+    CacheService.del('goalsSummary');
+    return res;
+  },
+  updateGoal: function(goalId, updates) {
+    const res = this._goalPlanner.updateGoal(goalId, updates);
     CacheService.del('goalsSummary');
     return res;
   },

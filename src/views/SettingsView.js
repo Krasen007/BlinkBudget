@@ -14,9 +14,7 @@ import { createButton } from '../utils/dom-factory.js';
 
 export const SettingsView = () => {
   const container = document.createElement('div');
-  container.className = 'view-settings mobile-settings-layout';
-  container.style.maxWidth = DIMENSIONS.CONTAINER_MAX_WIDTH;
-  container.style.width = '100%';
+  container.className = 'view-settings view-container';
 
   // Header - compact like DashboardView
   const header = document.createElement('div');

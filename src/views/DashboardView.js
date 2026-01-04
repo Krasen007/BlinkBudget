@@ -19,14 +19,7 @@ import { getTransactionToHighlight } from '../utils/success-feedback.js';
 
 export const DashboardView = () => {
   const container = document.createElement('div');
-  container.className = 'view-dashboard';
-  container.style.width = '100%';
-  container.style.maxWidth = DIMENSIONS.CONTAINER_MAX_WIDTH;
-  container.style.height = '100%';
-  container.style.display = 'flex';
-  container.style.flexDirection = 'column';
-  container.style.padding = `0 ${SPACING.MD}`;
-  container.style.overflow = 'hidden'; // Prevent dashboard from scrolling
+  container.className = 'view-dashboard view-container view-fixed';
 
   // Header (Account Selector & Settings)
   const header = document.createElement('div');

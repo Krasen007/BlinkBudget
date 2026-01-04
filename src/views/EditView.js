@@ -16,9 +16,7 @@ import { markTransactionForHighlight } from '../utils/success-feedback.js';
 
 export const EditView = ({ id }) => {
   const container = document.createElement('div');
-  container.className = 'view-edit';
-  container.style.maxWidth = DIMENSIONS.CONTAINER_MAX_WIDTH;
-  container.style.width = '100%';
+  container.className = 'view-edit view-container';
 
   const transaction = TransactionService.get(id);
 
