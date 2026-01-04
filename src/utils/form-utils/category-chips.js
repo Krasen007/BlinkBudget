@@ -398,7 +398,7 @@ export const createCategorySelector = (options = {}) => {
                                     });
                                 } catch (e) {
                                     console.error('Submit failed:', e);
-                                    alert('Error submitting transaction: ' + e.message);
+                                    alert(`Error submitting transaction: ${  e.message}`);
                                 }
                             }
 

@@ -55,7 +55,7 @@ export const showCategoryDetails = (categoryName, amount, percentage, currentDat
                         <span style="color: ${COLORS.TEXT_MAIN};">${t.description || 'No description'}</span>
                         <span style="font-weight: 600; color: ${COLORS.ERROR};">€${Math.abs(t.amount).toFixed(2)}</span>
                     </div>
-                `).join('') : '<div style="color: ' + COLORS.TEXT_MUTED + ';">No transactions found</div>'}
+                `).join('') : `<div style="color: ${  COLORS.TEXT_MUTED  };">No transactions found</div>`}
             </div>
         </div>
     `;

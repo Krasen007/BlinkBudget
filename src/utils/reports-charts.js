@@ -163,7 +163,7 @@ export async function createCategoryBreakdownChart(chartRenderer, currentData, c
     };
 
     // Create initial pie chart
-    let currentChart = await chartRenderer.createPieChart(canvas, chartData, {
+    const currentChart = await chartRenderer.createPieChart(canvas, chartData, {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {

@@ -476,11 +476,11 @@ export class ChartRenderer {
               // Shorter number formatting on mobile
               callback: function (value) {
                 if (value >= 1000000) {
-                  return '$' + (value / 1000000).toFixed(1) + 'M';
+                  return `$${  (value / 1000000).toFixed(1)  }M`;
                 } else if (value >= 1000) {
-                  return '$' + (value / 1000).toFixed(1) + 'K';
+                  return `$${  (value / 1000).toFixed(1)  }K`;
                 } else {
-                  return '$' + value.toFixed(0);
+                  return `$${  value.toFixed(0)}`;
                 }
               }
             }

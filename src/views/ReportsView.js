@@ -125,10 +125,10 @@ export const ReportsView = () => {
     let currentTimePeriod = NavigationState.restoreTimePeriod() || getCurrentMonthPeriod();
     let isLoading = false;
     let currentData = null;
-    let activeCharts = new Map();
+    const activeCharts = new Map();
     let timePeriodSelectorComponent = null;
     let loadingProgress = 0;
-    let categoryColorMap = new Map();
+    const categoryColorMap = new Map();
 
     // Create header
     const header = ReportsHeader();
@@ -529,7 +529,7 @@ export const ReportsView = () => {
             if (currentData.insights && currentData.insights.length > 0) {
                 try {
                     const insightsSection = InsightsSection(currentData);
-                    insightsSection.style.marginTop = SPACING.LG + ' !important';
+                    insightsSection.style.marginTop = `${SPACING.LG  } !important`;
                     chartsSection.appendChild(insightsSection);
                     chartRenderResults.push({ name: 'Financial Insights', success: true });
                 } catch (insightsError) {

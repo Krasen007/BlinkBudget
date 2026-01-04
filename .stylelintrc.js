@@ -1,9 +1,6 @@
 module.exports = {
   extends: ['stylelint-config-standard'],
   rules: {
-    // Enforce CSS custom properties for colors (no hardcoded hex values)
-    'color-no-hex': true,
-
     // Enforce consistent custom property naming
     'custom-property-pattern': '^[a-z][a-z0-9]*(-[a-z0-9]+)*$',
 

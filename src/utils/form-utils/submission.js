@@ -75,7 +75,7 @@ export const handleFormSubmit = (transactionData, onSubmit, onError = null) => {
         onSubmit(transactionData);
     } catch (e) {
         console.error('Submit failed:', e);
-        const errorMessage = 'Error submitting transaction: ' + e.message;
+        const errorMessage = `Error submitting transaction: ${  e.message}`;
 
         if (onError) {
             onError(e, errorMessage);

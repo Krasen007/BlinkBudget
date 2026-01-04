@@ -123,7 +123,7 @@ describe('Progressive Data Loading', () => {
       type: 'yearly'
     };
 
-    let progressUpdates = [];
+    const progressUpdates = [];
     const result = await progressiveLoader.loadTransactionData(mockTransactions, timePeriod, {
       onProgress: (progress, message) => {
         progressUpdates.push({ progress, message });
