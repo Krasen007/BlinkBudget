@@ -5,9 +5,9 @@
  * loading states, error states, empty states, and browser warnings.
  */
 
-import { COLORS, SPACING, BREAKPOINTS } from './constants.js';
+import { COLORS, SPACING } from './constants.js';
 import { Router } from '../core/router.js';
-import { dom, createElement } from './dom-factory.js';
+import { dom } from './dom-factory.js';
 
 /**
  * Create loading state component with progress indicator
@@ -332,24 +332,22 @@ export function showUnsupportedBrowserError(container, missingFeatures) {
     title.style.color = COLORS.ERROR;
     title.style.marginBottom = SPACING.MD;
 
+    const message = document.createElement('div');
+    message.textContent = 'Your browser doesn\'t support some features required for BlinkBudget to work properly.';
+    message.style.color = COLORS.TEXT_MUTED;
+    message.style.lineHeight = '1.6';
+    message.style.marginBottom = SPACING.LG;
+
     function escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
 
-    featuresList = document.createElement('div');
+    const featuresList = document.createElement('div');
     featuresList.innerHTML = `
         <strong>Missing features:</strong><br>
         ${missingFeatures.map(f => escapeHtml(f)).join(', ')}
-    `; message.style.color = COLORS.TEXT_MUTED;
-    message.style.lineHeight = '1.6';
-    message.style.marginBottom = SPACING.LG;
-
-    featuresList = document.createElement('div');
-    featuresList.innerHTML = `
-        <strong>Missing features:</strong><br>
-        ${missingFeatures.join(', ')}
     `;
     featuresList.style.fontSize = '0.875rem';
     featuresList.style.color = COLORS.TEXT_MUTED;

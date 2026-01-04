@@ -42,8 +42,7 @@ export class ProgressiveDataLoader {
         const {
             onProgress = null,
             onChunkProcessed = null,
-            prioritizeCategories = true,
-            enableCaching = true
+            prioritizeCategories = true
         } = options;
 
         // Set callbacks

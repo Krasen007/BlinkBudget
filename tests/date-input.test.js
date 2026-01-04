@@ -88,7 +88,6 @@ describe('DateInput Component', () => {
 
         // Initial state
         const initialBorderColor = displayInput.style.borderColor;
-        const initialTransform = displayInput.style.transform;
 
         // Test hover
         displayInput.dispatchEvent(new Event('mouseenter'));

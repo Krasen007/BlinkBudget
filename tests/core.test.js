@@ -1,5 +1,5 @@
 // tests/core.test.js
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { StorageService } from '../src/core/storage';
 import { Router } from '../src/core/router';
 

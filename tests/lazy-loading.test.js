@@ -4,7 +4,7 @@
  * Tests for Chart.js lazy loading and progressive data loading functionality
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { loadChartJS, isChartJSReady, getChartJSModules, resetChartLoader, preloadChartJS } from '../src/core/chart-loader.js';
 import { ProgressiveDataLoader } from '../src/core/progressive-data-loader.js';
 

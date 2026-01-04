@@ -10,17 +10,17 @@ export const Button = ({ text, onClick, variant = 'primary', type = 'button', cl
     }
 
     // Touch event handlers for mobile optimization
-    btn.addEventListener('touchstart', (e) => {
+    btn.addEventListener('touchstart', () => {
         if (!btn.disabled) {
             btn.classList.add('btn-touch-active');
         }
     }, { passive: true });
 
-    btn.addEventListener('touchend', (e) => {
+    btn.addEventListener('touchend', () => {
         btn.classList.remove('btn-touch-active');
     }, { passive: true });
 
-    btn.addEventListener('touchcancel', (e) => {
+    btn.addEventListener('touchcancel', () => {
         btn.classList.remove('btn-touch-active');
     }, { passive: true });
     return btn;

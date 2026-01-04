@@ -4,8 +4,7 @@
  */
 
 import { TYPE_COLORS } from './constants.js';
-import { COLORS, HAPTIC_PATTERNS } from '../constants.js';
-import { addTouchFeedback } from '../touch-utils.js';
+import { HAPTIC_PATTERNS } from '../constants.js';
 
 /**
  * Create a type toggle button
@@ -18,7 +17,7 @@ import { addTouchFeedback } from '../touch-utils.js';
  * @returns {HTMLButtonElement} Type toggle button
  */
 const createTypeButton = (options) => {
-    const { type, label, onClick, updateState, currentType } = options;
+    const { type, label, onClick, currentType } = options;
     
     const btn = document.createElement('button');
     btn.type = 'button';

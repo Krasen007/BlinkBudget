@@ -5,9 +5,7 @@ import {
     setDoc,
     onSnapshot,
     collection,
-    query,
-    getDocs,
-    writeBatch
+    getDocs
 } from "firebase/firestore";
 import { STORAGE_KEYS } from '../utils/constants.js';
 

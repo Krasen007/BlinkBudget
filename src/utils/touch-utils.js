@@ -22,7 +22,7 @@ export const addTouchFeedback = (element, options = {}) => {
     const originalBackground = element.style.backgroundColor;
     const originalTransform = element.style.transform;
     
-    element.addEventListener('touchstart', (e) => {
+    element.addEventListener('touchstart', () => {
         element.style.backgroundColor = backgroundColor;
         element.style.transform = transform;
         

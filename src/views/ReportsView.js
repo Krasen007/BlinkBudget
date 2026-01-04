@@ -16,7 +16,7 @@ import { TransactionService } from '../core/transaction-service.js';
 import { AccountService } from '../core/account-service.js';
 import { Router } from '../core/router.js';
 import { NavigationState } from '../core/navigation-state.js';
-import { COLORS, SPACING, BREAKPOINTS, DIMENSIONS, TIMING } from '../utils/constants.js';
+import { COLORS, SPACING, BREAKPOINTS, DIMENSIONS, TIMING, STORAGE_KEYS } from '../utils/constants.js';
 import { debounce } from '../utils/touch-utils.js';
 
 // Import utility modules
@@ -65,10 +65,8 @@ export const ReportsView = () => {
     container.style.padding = `0 ${SPACING.MD}`;
 
     // Global error boundary
-    let hasGlobalError = false;
     const handleGlobalError = (error, context = 'Unknown') => {
         console.error(`[ReportsView] Global error in ${context}:`, error);
-        hasGlobalError = true;
         showErrorState(errorState, `Something went wrong while ${context.toLowerCase()}. Please try refreshing the page.`, () => loadReportData());
 
         if (typeof window.gtag === 'function') {
@@ -127,7 +125,7 @@ export const ReportsView = () => {
     let currentData = null;
     const activeCharts = new Map();
     let timePeriodSelectorComponent = null;
-    let loadingProgress = 0;
+    let loadingProgress;
     const categoryColorMap = new Map();
 
     // Create header
@@ -171,7 +169,6 @@ export const ReportsView = () => {
             return;
         }
 
-        const previousPeriod = currentTimePeriod;
         currentTimePeriod = newTimePeriod;
 
         NavigationState.saveTimePeriod(newTimePeriod);
@@ -252,10 +249,10 @@ export const ReportsView = () => {
                     currentTimePeriod,
                     {
                         onProgress: (progress, message) => {
-                            loadingProgress = progress;
                             updateLoadingProgress(loadingState, progress, message);
                         },
-                        onChunkProcessed: (current, total, chunkSize) => {
+                        onChunkProcessed: () => {
+                            // Chunk processed callback - currently unused
                         },
                         prioritizeCategories: true,
                         enableCaching: true
@@ -340,7 +337,6 @@ export const ReportsView = () => {
             if (processingTime > 2000) {
                 console.warn(`Report loading took ${processingTime}ms, exceeding 2-second target`);
                 showPerformanceWarning(container, processingTime);
-            } else {
             }
 
             const elapsedTime = Date.now() - startTime;
@@ -641,7 +637,6 @@ export const ReportsView = () => {
     const updateResponsiveLayout = debounce(() => {
         const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
         const isTablet = window.innerWidth >= BREAKPOINTS.MOBILE && window.innerWidth < 1024;
-        const isDesktop = window.innerWidth >= 1024;
         const isLandscape = window.innerHeight < window.innerWidth;
         const isShortLandscape = isLandscape && window.innerHeight < 500;
 
@@ -733,7 +728,7 @@ export const ReportsView = () => {
     };
 
     // Auth change handler
-    const handleAuthChange = (e) => {
+    const handleAuthChange = () => {
         analyticsEngine.clearCache();
         loadReportData();
     };

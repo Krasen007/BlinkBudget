@@ -4,8 +4,7 @@
  */
 
 import { CATEGORY_DEFINITIONS, CATEGORY_COLORS, CATEGORY_OPTIONS } from './constants.js';
-import { SPACING, DIMENSIONS, HAPTIC_PATTERNS, FONT_SIZES, TOUCH_TARGETS } from '../constants.js';
-import { COLORS } from '../constants.js';
+import { SPACING, HAPTIC_PATTERNS, FONT_SIZES, TOUCH_TARGETS } from '../constants.js';
 import { validateAmount, showFieldError } from './validation.js';
 
 /**

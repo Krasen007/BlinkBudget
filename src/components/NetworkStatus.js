@@ -1,4 +1,4 @@
-import { COLORS, SPACING } from '../utils/constants.js';
+import { SPACING } from '../utils/constants.js';
 
 /**
  * NetworkStatus - A subtle indicator showing offline/online status

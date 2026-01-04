@@ -1,6 +1,6 @@
 import { registerSW } from 'virtual:pwa-register'
 
-const updateSW = registerSW({
+registerSW({
     onNeedRefresh() {
         // Show a prompt to user to refresh, or just refresh automatically
         // For now, let's just log it. A proper UI would be better.

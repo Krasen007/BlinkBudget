@@ -171,7 +171,7 @@ describe('Chart.js Integration', () => {
         datasets: [{ data: [100] }]
       };
 
-      const chart = await chartRenderer.createPieChart(mockCanvas, testData);
+      await chartRenderer.createPieChart(mockCanvas, testData);
       expect(chartRenderer.getActiveCharts().size).toBe(1);
       chartRenderer.destroyChart('test-chart');
       expect(chartRenderer.getActiveCharts().size).toBe(0);
