@@ -81,6 +81,18 @@ export const FinancialPlanningView = () => {
   const navigation = createNavigation();
   container.appendChild(navigation);
 
+  // Small helper to show a short usage note under section headers
+  function createUsageNote(text) {
+    const note = document.createElement('div');
+    note.className = 'section-usage-note';
+    note.style.fontSize = '0.95rem';
+    note.style.color = COLORS.TEXT_MUTED;
+    note.style.marginBottom = SPACING.MD;
+    note.style.lineHeight = '1.4';
+    note.textContent = text;
+    return note;
+  }
+
   // Main content area
   const content = document.createElement('main');
   content.className = 'financial-planning-content';
@@ -327,6 +339,7 @@ export const FinancialPlanningView = () => {
    */
   function renderOverviewSection() {
     const section = createSectionContainer('overview', 'Financial Overview', '📊');
+    section.appendChild(createUsageNote('At-a-glance health summary: shows current balance, monthly expense averages, savings rate and emergency fund advice. Use the quick actions to jump to Forecasts, Investments, Goals or run scenarios.'));
     
     if (!planningData) {
       const placeholder = createPlaceholder(
@@ -495,6 +508,7 @@ export const FinancialPlanningView = () => {
    */
   function renderForecastsSection() {
     const section = createSectionContainer('forecasts', 'Financial Forecasts', '🔮');
+    section.appendChild(createUsageNote('Forecasts use your past 3+ months of transactions to predict income and expenses. Adjust assumptions in the scenario tab to see how changes affect future balances.'));
     
     if (!planningData || !planningData.transactions || planningData.transactions.length < 3) {
       const placeholder = createPlaceholder(
@@ -619,6 +633,7 @@ export const FinancialPlanningView = () => {
    */
   function renderInvestmentsSection() {
     const section = createSectionContainer('investments', 'Investment Portfolio', '💰');
+    section.appendChild(createUsageNote('Track manual investments here. Add holdings with symbol, shares, and purchase price. Edits sync to cloud; deletions remove from cloud. Charts update automatically.'));
     
     // For now, create sample portfolio data since investment tracking isn't fully implemented
     const samplePortfolioData = {
@@ -945,6 +960,7 @@ export const FinancialPlanningView = () => {
    */
   function renderGoalsSection() {
     const section = createSectionContainer('goals', 'Financial Goals', '🎯');
+    section.appendChild(createUsageNote('Create and track goals (target amount, date, current savings). The planner calculates required monthly savings and progress. Use scenarios to model different savings rates.'));
     
     // Try to load goals from StorageService; fallback to sample goals
     let goalsFromStorage = [];
@@ -1270,6 +1286,7 @@ export const FinancialPlanningView = () => {
    */
   function renderInsightsSection() {
     const section = createSectionContainer('insights', 'Financial Insights', '💡');
+    section.appendChild(createUsageNote('Insights highlight Top Movers and timeline comparisons. Use these to find categories driving changes and drill into transactions for details.'));
 
     if (!planningData || !planningData.transactions || planningData.transactions.length === 0) {
       const placeholder = createPlaceholder(
@@ -1429,6 +1446,7 @@ export const FinancialPlanningView = () => {
    */
   function renderScenariosSection() {
     const section = createSectionContainer('scenarios', 'Scenario Planning', '🔄');
+    section.appendChild(createUsageNote('Run what-if scenarios by adjusting savings, income or expenses. Compare scenarios side-by-side to see impact on goals and projected balances.'));
     
     const form = document.createElement('div');
     form.className = 'scenario-form';
