@@ -21,8 +21,6 @@ export const SectionContainer = ({ id, title, icon, usageNote }) => {
   header.style.display = 'flex';
   header.style.alignItems = 'center';
   header.style.gap = SPACING.MD;
-  header.style.marginBottom = SPACING.MD;
-
   const headerTitle = document.createElement('h2');
   headerTitle.textContent = `${icon} ${title}`;
   headerTitle.style.margin = '0';
@@ -39,11 +37,9 @@ export const SectionContainer = ({ id, title, icon, usageNote }) => {
     note.className = 'section-usage-note';
     note.style.fontSize = '0.95rem';
     note.style.color = COLORS.TEXT_MUTED;
-    note.style.marginBottom = SPACING.MD;
     note.style.lineHeight = '1.4';
     note.textContent = usageNote;
     section.appendChild(note);
   }
-
   return section;
 };

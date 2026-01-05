@@ -63,16 +63,18 @@ export class PlanningDataManager {
       const investments = StorageService.getInvestments ? StorageService.getInvestments() : [];
       const goals = StorageService.getGoals ? StorageService.getGoals() : [];
 
+      const timestamp = new Date();
+
       this.data = {
         transactions,
         accounts,
         investments,
         goals,
-        lastUpdated: new Date(),
+        lastUpdated: timestamp,
       };
 
-      this.lastUpdated = new Date();
-      this.notifyListeners();
+      this.lastUpdated = timestamp;
+      this.notifyListeners();      this.notifyListeners();
 
       return this.data;
     } catch (error) {

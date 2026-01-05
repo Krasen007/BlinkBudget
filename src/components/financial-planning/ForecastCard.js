@@ -45,14 +45,15 @@ export const ForecastCard = ({ label, value, color, icon, subtitle }) => {
   valueSpan.style.fontWeight = 'bold';
   valueSpan.style.color = color;
 
-  const subtitleSpan = document.createElement('span');
-  subtitleSpan.textContent = subtitle;
-  subtitleSpan.style.fontSize = '0.75rem';
-  subtitleSpan.style.color = COLORS.TEXT_MUTED;
-
   card.appendChild(header);
   card.appendChild(valueSpan);
-  card.appendChild(subtitleSpan);
 
+  if (subtitle) {
+    const subtitleSpan = document.createElement('span');
+    subtitleSpan.textContent = subtitle;
+    subtitleSpan.style.fontSize = '0.75rem';
+    subtitleSpan.style.color = COLORS.TEXT_MUTED;
+    card.appendChild(subtitleSpan);
+  }
   return card;
 };

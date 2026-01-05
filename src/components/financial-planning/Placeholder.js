@@ -23,10 +23,10 @@ export const Placeholder = ({ title, description, icon }) => {
   placeholder.style.minHeight = '300px';
 
   const iconDiv = document.createElement('div');
+  iconDiv.setAttribute('aria-hidden', 'true');
   iconDiv.textContent = icon;
   iconDiv.style.fontSize = '3rem';
   iconDiv.style.marginBottom = SPACING.MD;
-
   const titleDiv = document.createElement('h3');
   titleDiv.textContent = title;
   titleDiv.style.margin = '0';

@@ -37,11 +37,6 @@ import {
 } from '../utils/constants.js';
 import { debounce } from '../utils/touch-utils.js';
 
-// Refactored components
-import { OverviewSection } from '../components/financial-planning/OverviewSection.js';
-import { ForecastsSection } from '../components/financial-planning/ForecastsSection.js';
-import { planningDataManager } from '../core/financial-planning/PlanningDataManager.js';
-
 export const FinancialPlanningView = () => {
   const container = document.createElement('div');
   container.className = 'view-financial-planning view-container view-fixed';
@@ -343,10 +338,168 @@ export const FinancialPlanningView = () => {
    * Render Overview section - Financial health summary
    */
   function renderOverviewSection() {
-    const section = OverviewSection({
-      planningData,
-      onSectionSwitch: switchSection
+    const section = createSectionContainer('overview', 'Financial Overview', '📊');
+    section.appendChild(createUsageNote('At-a-glance health summary: shows current balance, monthly expense averages, savings rate and emergency fund advice. Use the quick actions to jump to Forecasts, Investments, Goals or run scenarios.'));
+    
+    if (!planningData) {
+      const placeholder = createPlaceholder(
+        'Loading Financial Data',
+        'Please wait while we analyze your financial information.',
+        '⏳'
+      );
+      section.appendChild(placeholder);
+      content.appendChild(section);
+      return;
+    }
+
+    // Quick stats cards
+    const statsGrid = document.createElement('div');
+    statsGrid.className = 'stats-grid';
+    statsGrid.style.display = 'grid';
+    statsGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
+    statsGrid.style.gap = SPACING.MD;
+    statsGrid.style.marginBottom = SPACING.XL;
+
+    // Calculate real stats from transaction data
+    const { transactions } = planningData;
+    let totalIncome = 0;
+    let totalExpenses = 0;
+    let monthlyExpenses = 0;
+
+    // Calculate totals and monthly averages
+    const now = new Date();
+    const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+    const recentTransactions = transactions.filter(t => new Date(t.timestamp) >= threeMonthsAgo);
+
+    transactions.forEach(transaction => {
+      if (transaction.type === 'income') {
+        totalIncome += transaction.amount;
+      } else if (transaction.type === 'expense') {
+        totalExpenses += transaction.amount;
+      }
     });
+
+    // Calculate monthly expenses from recent data
+    if (recentTransactions.length > 0) {
+      const recentExpenses = recentTransactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + t.amount, 0);
+      const monthsOfData = Math.max(1, (now - threeMonthsAgo) / (1000 * 60 * 60 * 24 * 30));
+      monthlyExpenses = recentExpenses / monthsOfData;
+    }
+
+    const currentBalance = totalIncome - totalExpenses;
+    const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome * 100) : 0;
+
+    // Generate risk assessments
+    let emergencyFundAssessment = null;
+    let riskScore = null;
+
+    try {
+      // Assume emergency fund is current balance (simplified)
+      emergencyFundAssessment = riskAssessor.assessEmergencyFundAdequacy(monthlyExpenses, Math.max(0, currentBalance));
+      
+      // Calculate overall risk score
+      const riskFactors = [
+        {
+          category: 'Emergency Fund',
+          riskLevel: emergencyFundAssessment.riskLevel,
+          message: emergencyFundAssessment.message
+        }
+      ];
+      
+      riskScore = riskAssessor.calculateOverallRiskScore(riskFactors);
+    } catch (error) {
+      console.error('Error calculating risk assessments:', error);
+    }
+
+    const stats = [
+      { 
+        label: 'Current Balance', 
+        value: `€${currentBalance.toFixed(2)}`, 
+        color: currentBalance >= 0 ? COLORS.SUCCESS : COLORS.ERROR, 
+        icon: '💰',
+        subtitle: currentBalance >= 0 ? 'Positive balance' : 'Negative balance'
+      },
+      { 
+        label: 'Monthly Expenses', 
+        value: `€${monthlyExpenses.toFixed(2)}`, 
+        color: COLORS.ERROR, 
+        icon: '📉',
+        subtitle: 'Average last 3 months'
+      },
+      { 
+        label: 'Savings Rate', 
+        value: `${savingsRate.toFixed(1)}%`, 
+        color: savingsRate > 20 ? COLORS.SUCCESS : savingsRate > 10 ? COLORS.WARNING : COLORS.ERROR, 
+        icon: '🎯',
+        subtitle: savingsRate > 20 ? 'Excellent' : savingsRate > 10 ? 'Good' : 'Needs improvement'
+      },
+      { 
+        label: 'Risk Level', 
+        value: riskScore ? riskScore.level.charAt(0).toUpperCase() + riskScore.level.slice(1) : 'Unknown', 
+        color: riskScore ? (riskScore.level === 'low' ? COLORS.SUCCESS : riskScore.level === 'moderate' ? COLORS.WARNING : COLORS.ERROR) : COLORS.TEXT_MUTED, 
+        icon: riskScore ? (riskScore.level === 'low' ? '✅' : riskScore.level === 'moderate' ? '⚠️' : '🚨') : '❓',
+        subtitle: riskScore ? riskScore.message : 'Calculating...'
+      },
+    ];
+
+    stats.forEach(stat => {
+      const card = createStatsCard(stat);
+      statsGrid.appendChild(card);
+    });
+
+    section.appendChild(statsGrid);
+
+    // Emergency Fund Status (if available)
+    if (emergencyFundAssessment && emergencyFundAssessment.status !== 'error') {
+      const emergencyFundCard = createEmergencyFundCard(emergencyFundAssessment);
+      section.appendChild(emergencyFundCard);
+    }
+
+    // Quick actions
+    const actionsContainer = document.createElement('div');
+    actionsContainer.className = 'quick-actions';
+    actionsContainer.style.display = 'flex';
+    actionsContainer.style.gap = SPACING.MD;
+    actionsContainer.style.flexWrap = 'wrap';
+    actionsContainer.style.marginTop = SPACING.XL;
+
+    const actions = [
+      { label: 'View Forecasts', icon: '🔮', action: () => switchSection('forecasts') },
+      { label: 'Add Investment', icon: '💰', action: () => switchSection('investments') },
+      { label: 'Set Goal', icon: '🎯', action: () => switchSection('goals') },
+      { label: 'Run Scenario', icon: '🔄', action: () => switchSection('scenarios') },
+    ];
+
+    actions.forEach(action => {
+      const button = document.createElement('button');
+      button.className = 'action-button';
+      button.innerHTML = `${action.icon} ${action.label}`;
+      button.style.padding = `${SPACING.MD} ${SPACING.LG}`;
+      button.style.border = `1px solid ${COLORS.BORDER}`;
+      button.style.borderRadius = 'var(--radius-md)';
+      button.style.background = COLORS.SURFACE;
+      button.style.color = COLORS.TEXT_MAIN;
+      button.style.cursor = 'pointer';
+      button.style.fontSize = '0.875rem';
+      button.style.fontWeight = '500';
+      button.style.transition = 'all 0.2s ease';
+      
+      button.addEventListener('click', action.action);
+      button.addEventListener('mouseenter', () => {
+        button.style.background = COLORS.SURFACE_HOVER;
+        button.style.borderColor = COLORS.PRIMARY;
+      });
+      button.addEventListener('mouseleave', () => {
+        button.style.background = COLORS.SURFACE;
+        button.style.borderColor = COLORS.BORDER;
+      });
+
+      actionsContainer.appendChild(button);
+    });
+
+    section.appendChild(actionsContainer);
     content.appendChild(section);
   }
 
@@ -354,11 +507,124 @@ export const FinancialPlanningView = () => {
    * Render Forecasts section - Income/expense predictions
    */
   function renderForecastsSection() {
-    const section = ForecastsSection({
-      planningData,
-      chartRenderer,
-      onChartCreate: (chartId, chart) => activeCharts.set(chartId, chart)
-    });
+    const section = createSectionContainer('forecasts', 'Financial Forecasts', '🔮');
+    section.appendChild(createUsageNote('Forecasts use your past 3+ months of transactions to predict income and expenses. Adjust assumptions in the scenario tab to see how changes affect future balances.'));
+    
+    if (!planningData || !planningData.transactions || planningData.transactions.length < 3) {
+      const placeholder = createPlaceholder(
+        'Insufficient Data for Forecasting',
+        'Add at least 3 months of transaction history to generate accurate financial forecasts.',
+        '📊'
+      );
+      section.appendChild(placeholder);
+      content.appendChild(section);
+      return;
+    }
+
+    try {
+      // Generate forecasts
+      const incomeForecasts = forecastEngine.generateIncomeForecasts(planningData.transactions, 6);
+      const expenseForecasts = forecastEngine.generateExpenseForecasts(planningData.transactions, 6);
+
+      // Create forecast summary cards
+      const summaryGrid = document.createElement('div');
+      summaryGrid.className = 'forecast-summary-grid';
+      summaryGrid.style.display = 'grid';
+      summaryGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
+      summaryGrid.style.gap = SPACING.MD;
+      summaryGrid.style.marginBottom = SPACING.XL;
+
+      // Calculate totals for next 6 months
+      const totalIncomeForecasted = incomeForecasts.reduce((sum, f) => sum + f.predictedAmount, 0);
+      const totalExpensesForecasted = expenseForecasts.reduce((sum, f) => sum + f.predictedAmount, 0);
+      const netForecast = totalIncomeForecasted - totalExpensesForecasted;
+      const avgConfidence = (incomeForecasts.reduce((sum, f) => sum + f.confidence, 0) + 
+                           expenseForecasts.reduce((sum, f) => sum + f.confidence, 0)) / 
+                           (incomeForecasts.length + expenseForecasts.length);
+
+      const summaryCards = [
+        { 
+          label: 'Forecasted Income (6mo)', 
+          value: `€${totalIncomeForecasted.toFixed(2)}`, 
+          color: COLORS.SUCCESS, 
+          icon: '📈',
+          subtitle: `Avg: €${(totalIncomeForecasted / 6).toFixed(2)}/month`
+        },
+        { 
+          label: 'Forecasted Expenses (6mo)', 
+          value: `€${totalExpensesForecasted.toFixed(2)}`, 
+          color: COLORS.ERROR, 
+          icon: '📉',
+          subtitle: `Avg: €${(totalExpensesForecasted / 6).toFixed(2)}/month`
+        },
+        { 
+          label: 'Net Forecast (6mo)', 
+          value: `€${netForecast.toFixed(2)}`, 
+          color: netForecast >= 0 ? COLORS.SUCCESS : COLORS.ERROR, 
+          icon: netForecast >= 0 ? '💰' : '⚠️',
+          subtitle: `Avg: €${(netForecast / 6).toFixed(2)}/month`
+        },
+        { 
+          label: 'Forecast Confidence', 
+          value: `${(avgConfidence * 100).toFixed(0)}%`, 
+          color: avgConfidence > 0.7 ? COLORS.SUCCESS : avgConfidence > 0.4 ? COLORS.WARNING : COLORS.ERROR, 
+          icon: '🎯',
+          subtitle: avgConfidence > 0.7 ? 'High confidence' : avgConfidence > 0.4 ? 'Moderate confidence' : 'Low confidence'
+        },
+      ];
+
+      summaryCards.forEach(card => {
+        const cardElement = createForecastCard(card);
+        summaryGrid.appendChild(cardElement);
+      });
+
+      section.appendChild(summaryGrid);
+
+      // Create forecast comparison chart
+      createForecastComparisonChart(chartRenderer, incomeForecasts, expenseForecasts)
+        .then(({ section: chartSection, chart }) => {
+          section.appendChild(chartSection);
+          activeCharts.set('forecast-comparison', chart);
+        })
+        .catch(error => {
+          console.error('Error creating forecast comparison chart:', error);
+        });
+
+      // Generate balance projections
+      const currentBalance = planningData.transactions
+        .reduce((balance, t) => balance + (t.type === 'income' ? t.amount : -t.amount), 0);
+      
+      const balanceProjections = balancePredictor.projectBalances(
+        currentBalance, 
+        incomeForecasts, 
+        expenseForecasts, 
+        6
+      );
+
+      // Create projected balance chart
+      createProjectedBalanceChart(chartRenderer, balanceProjections)
+        .then(({ section: chartSection, chart }) => {
+          section.appendChild(chartSection);
+          activeCharts.set('projected-balance', chart);
+        })
+        .catch(error => {
+          console.error('Error creating projected balance chart:', error);
+        });
+
+      // Create detailed forecast table
+      const forecastTable = createForecastTable(incomeForecasts, expenseForecasts);
+      section.appendChild(forecastTable);
+
+    } catch (error) {
+      console.error('Error rendering forecasts:', error);
+      const errorPlaceholder = createPlaceholder(
+        'Error Generating Forecasts',
+        'There was an error processing your transaction data. Please try refreshing the page.',
+        '⚠️'
+      );
+      section.appendChild(errorPlaceholder);
+    }
+    
     content.appendChild(section);
   }
 
@@ -598,10 +864,6 @@ export const FinancialPlanningView = () => {
           const form = document.createElement('div');
           form.style.display = 'flex';
           form.style.gap = SPACING.SM;
-          form.style.flexWrap = 'wrap';
-          form.style.alignItems = 'center';
-          form.style.maxWidth = '100%';
-          form.style.boxSizing = 'border-box';
           form.style.flexWrap = 'wrap';
           form.style.alignItems = 'center';
           form.style.maxWidth = '100%';
@@ -1790,23 +2052,11 @@ export const FinancialPlanningView = () => {
     window.removeEventListener('sync-state', handleSyncState);
     window.removeEventListener('forecast-invalidate', handleForecastInvalidate);
     window.removeEventListener('keydown', handleKeyboardShortcuts);
-    unsubscribeData();
   };
-
-  // Initialize data manager and subscribe to updates
-  const unsubscribeData = planningDataManager.subscribe((data) => {
-    planningData = data;
-    if (currentSection === 'overview') {
-      renderSection(currentSection);
-    }
-  });
 
   // Initialize
   updateResponsiveLayout();
-  planningDataManager.loadData().then(data => {
-    planningData = data;
-    renderSection(currentSection);
-  });
+  loadPlanningData();
   renderSection(currentSection);
 
   return container;

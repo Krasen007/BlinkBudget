@@ -203,14 +203,18 @@ export const FinancialPlanningView = () => {
     nav.style.msOverflowStyle = 'none';
 
     // Hide scrollbar for webkit browsers
-    const style = document.createElement('style');
-    style.textContent = `
-      .financial-planning-nav::-webkit-scrollbar {
-        display: none;
-      }
-    `;
-    document.head.appendChild(style);
-
+    // Hide scrollbar for webkit browsers (only add once)
+    const styleId = 'financial-planning-nav-style';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = `
+        .financial-planning-nav::-webkit-scrollbar {
+          display: none;
+        }
+      `;
+      document.head.appendChild(style);
+    }
     const sections = [
       { id: 'overview', label: 'Overview', icon: '📊' },
       { id: 'forecasts', label: 'Forecasts', icon: '🔮' },
@@ -868,11 +872,6 @@ export const FinancialPlanningView = () => {
           form.style.alignItems = 'center';
           form.style.maxWidth = '100%';
           form.style.boxSizing = 'border-box';
-          form.style.flexWrap = 'wrap';
-          form.style.alignItems = 'center';
-          form.style.maxWidth = '100%';
-          form.style.boxSizing = 'border-box';
-
           const sharesFld = document.createElement('input');
           sharesFld.type = 'number';
           sharesFld.value = inv.shares;
@@ -2051,13 +2050,13 @@ export const FinancialPlanningView = () => {
 
   // Cleanup function
   container.cleanup = () => {
+    cleanupCharts();
     window.removeEventListener('resize', updateResponsiveLayout);
     window.removeEventListener('storage-updated', handleStorageUpdate);
     window.removeEventListener('sync-state', handleSyncState);
     window.removeEventListener('forecast-invalidate', handleForecastInvalidate);
     window.removeEventListener('keydown', handleKeyboardShortcuts);
   };
-
   // Initialize
   updateResponsiveLayout();
   loadPlanningData();

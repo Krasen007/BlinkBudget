@@ -10,6 +10,10 @@ import { COLORS, SPACING } from '../../utils/constants.js';
  * @returns {HTMLElement} The emergency fund card element
  */
 export const EmergencyFundCard = (assessment) => {
+  if (!assessment || !assessment.riskLevel || !assessment.status || !assessment.message || !assessment.recommendation) {
+    throw new Error('Invalid assessment: missing required properties');
+  }
+
   const card = document.createElement('div');
   card.className = 'emergency-fund-card';
   card.style.padding = SPACING.LG;
@@ -17,7 +21,6 @@ export const EmergencyFundCard = (assessment) => {
   card.style.border = `2px solid ${assessment.riskLevel === 'low' ? COLORS.SUCCESS : assessment.riskLevel === 'moderate' ? COLORS.WARNING : COLORS.ERROR}`;
   card.style.borderRadius = 'var(--radius-lg)';
   card.style.marginBottom = SPACING.LG;
-
   const header = document.createElement('div');
   header.style.display = 'flex';
   header.style.alignItems = 'center';
@@ -28,15 +31,15 @@ export const EmergencyFundCard = (assessment) => {
   title.textContent = '🛡️ Emergency Fund Status';
   title.style.margin = '0';
   title.style.fontSize = '1.125rem';
-  title.style.fontWeight = '600';
-  title.style.color = COLORS.TEXT_MAIN;
-
   const status = document.createElement('span');
   status.textContent = assessment.status.charAt(0).toUpperCase() + assessment.status.slice(1);
+  status.setAttribute('aria-label', `Risk level: ${assessment.riskLevel}, Status: ${assessment.status}`);
   status.style.padding = `${SPACING.XS} ${SPACING.SM}`;
   status.style.borderRadius = 'var(--radius-sm)';
   status.style.fontSize = '0.75rem';
   status.style.fontWeight = '600';
+  status.style.background = assessment.riskLevel === 'low' ? COLORS.SUCCESS : assessment.riskLevel === 'moderate' ? COLORS.WARNING : COLORS.ERROR;
+  status.style.color = 'white';  status.style.fontWeight = '600';
   status.style.background = assessment.riskLevel === 'low' ? COLORS.SUCCESS : assessment.riskLevel === 'moderate' ? COLORS.WARNING : COLORS.ERROR;
   status.style.color = 'white';
 
