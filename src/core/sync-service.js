@@ -9,10 +9,31 @@ import {
 } from 'firebase/firestore';
 import { STORAGE_KEYS } from '../utils/constants.js';
 
+// Sanitize helper: convert Dates to ISO, recursively sanitize objects/arrays,
+// and protect against circular references using a WeakSet.
+const sanitize = (value, seen = new WeakSet()) => {
+  if (value instanceof Date) {
+    if (isNaN(value.getTime())) return null;
+    return value.toISOString();
+  }
+  if (Array.isArray(value)) return value.map(v => sanitize(v, seen));
+  if (value && typeof value === 'object') {
+    if (seen.has(value)) return null; // break cycles
+    seen.add(value);
+    const out = {};
+    Object.keys(value).forEach(k => {
+      out[k] = sanitize(value[k], seen);
+    });
+    return out;
+  }
+  return value;
+};
+
 export const SyncService = {
   unsubscribes: [],
   pendingWrites: new Map(), // Track pending writes to avoid race conditions
   lastPushTimes: new Map(), // Track last push time per dataType for rate limiting
+  _conflictResolutionHandler: null,
 
   async init() {
     AuthService.init(async user => {
@@ -27,15 +48,21 @@ export const SyncService = {
       }
     });
 
+    // Remove existing listener if any to avoid duplicates when `init()` is called multiple times
+    if (this._conflictResolutionHandler) {
+      window.removeEventListener('sync-conflict-resolution', this._conflictResolutionHandler);
+    }
+
     // Listen for user-driven conflict resolutions from the UI
-    window.addEventListener('sync-conflict-resolution', (e) => {
+    this._conflictResolutionHandler = (e) => {
       try {
         const detail = e.detail || {};
         this.handleConflictResolution(detail);
       } catch (err) {
         console.warn('[Sync] Error handling conflict resolution event:', err);
       }
-    });
+    };
+    window.addEventListener('sync-conflict-resolution', this._conflictResolutionHandler);
 
     // handle visibility change to pause/resume sync
     document.addEventListener('visibilitychange', () => {
@@ -84,23 +111,7 @@ export const SyncService = {
       // Wrap arrays in { items: data } for consistent storage, objects stay as they are
       const payload = Array.isArray(data) ? { items: data } : data;
 
-      // Sanitize payload: convert Date objects to ISO strings and remove invalid dates
-      const sanitize = (value) => {
-        if (value instanceof Date) {
-          if (isNaN(value.getTime())) return null;
-          return value.toISOString();
-        }
-        if (Array.isArray(value)) return value.map(sanitize);
-        if (value && typeof value === 'object') {
-          const out = {};
-          Object.keys(value).forEach(k => {
-            out[k] = sanitize(value[k]);
-          });
-          return out;
-        }
-        return value;
-      };
-
+      // Sanitize payload (module-level helper handles cycles)
       const safePayload = sanitize(payload);
 
       console.log(`[Sync] Pushing ${dataType} to cloud...`);
@@ -294,12 +305,9 @@ export const SyncService = {
     // Items still in localById but not in cloud => cloud deletion (authoritative), so skip them
     // If you want to resurrect local items, change behavior here.
 
-    // For items that had no id, append unique ones from cloud and local
-    const localNoId = (localArray || []).filter(i => !i || !i.id);
-    const cloudNoId = (cloudArray || []).filter(i => !i || !i.id);
+    // For items without id, use cloud-authoritative approach (only include cloud items)
+    const cloudNoId = (cloudArray || []).filter(i => i && !i.id);
     merged.push(...cloudNoId);
-    merged.push(...localNoId);
-
     return merged;
   },
 
@@ -315,7 +323,7 @@ export const SyncService = {
 
       // Load current local array
       const localRaw = localStorage.getItem(key) || '[]';
-      let localArray = JSON.parse(localRaw);
+      const localArray = JSON.parse(localRaw);
 
       if (resolution === 'local') {
         // Push local state to cloud (authoritative single-doc pattern)
@@ -328,7 +336,12 @@ export const SyncService = {
         // Replace local item with cloud item
         const cloudItem = conflict.cloudItem;
         if (!cloudItem) return;
-        localArray = (localArray || []).map(item => (item && item.id === cloudItem.id ? cloudItem : item));
+        const idx = (localArray || []).findIndex(item => item && item.id === cloudItem.id);
+        if (idx >= 0) {
+          localArray[idx] = cloudItem;
+        } else {
+          localArray.push(cloudItem); // Item was deleted locally, restore from cloud
+        }
         localStorage.setItem(key, JSON.stringify(localArray));
         window.dispatchEvent(new CustomEvent('storage-updated', { detail: { key } }));
         console.log(`[Sync] Conflict resolved: kept cloud for ${key}/${cloudItem.id}`);

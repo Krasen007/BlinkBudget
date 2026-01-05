@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { SyncService } from '../src/core/sync-service.js';
 
 describe('SyncService.mergeArraysById', () => {

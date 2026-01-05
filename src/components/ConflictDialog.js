@@ -16,6 +16,10 @@ export function ConflictDialog() {
 
   const dialog = document.createElement('div');
   dialog.className = 'conflict-dialog';
+  dialog.setAttribute('role', 'dialog');
+  dialog.setAttribute('aria-modal', 'true');
+  dialog.setAttribute('aria-labelledby', 'conflict-dialog-title');
+  dialog.setAttribute('aria-describedby', 'conflict-dialog-message');
   dialog.style.background = 'white';
   dialog.style.padding = '16px';
   dialog.style.borderRadius = '8px';
@@ -23,10 +27,12 @@ export function ConflictDialog() {
   dialog.style.boxShadow = '0 6px 20px rgba(0,0,0,0.2)';
 
   const title = document.createElement('h3');
+  title.id = 'conflict-dialog-title';
   title.textContent = 'Sync Conflict Detected';
   title.style.marginTop = '0';
 
   const message = document.createElement('p');
+  message.id = 'conflict-dialog-message';
   message.textContent = 'A conflict was detected between local and cloud versions. Choose which version to keep.';
 
   const btns = document.createElement('div');
@@ -55,8 +61,15 @@ export function ConflictDialog() {
   dialog.appendChild(message);
   dialog.appendChild(btns);
   overlay.appendChild(dialog);
-  document.body.appendChild(overlay);
-
+  // Attach overlay when DOM is ready. If body exists, append immediately,
+  // otherwise wait for DOMContentLoaded.
+  if (document.body) {
+    document.body.appendChild(overlay);
+  } else {
+    document.addEventListener('DOMContentLoaded', () => {
+      document.body.appendChild(overlay);
+    });
+  }
   let currentConflict = null;
 
   function show(conflict) {
@@ -83,8 +96,12 @@ export function ConflictDialog() {
     hide();
   });
 
-  cancel.addEventListener('click', hide);
-
+  cancel.addEventListener('click', () => {
+    window.dispatchEvent(new CustomEvent('sync-conflict-resolution', { 
+      detail: { resolution: 'cancel', conflict: currentConflict } 
+    }));
+    hide();
+  });
   // Listen for conflict events
   const handler = (e) => show(e.detail);
   window.addEventListener('sync-conflict', handler);

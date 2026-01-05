@@ -864,6 +864,14 @@ export const FinancialPlanningView = () => {
           const form = document.createElement('div');
           form.style.display = 'flex';
           form.style.gap = SPACING.SM;
+          form.style.flexWrap = 'wrap';
+          form.style.alignItems = 'center';
+          form.style.maxWidth = '100%';
+          form.style.boxSizing = 'border-box';
+          form.style.flexWrap = 'wrap';
+          form.style.alignItems = 'center';
+          form.style.maxWidth = '100%';
+          form.style.boxSizing = 'border-box';
 
           const sharesFld = document.createElement('input');
           sharesFld.type = 'number';
@@ -1170,15 +1178,31 @@ export const FinancialPlanningView = () => {
 
           const nameFld = document.createElement('input');
           nameFld.value = goal.name;
+          nameFld.style.minWidth = '160px';
+          nameFld.style.flex = '1 1 160px';
           const targetFld = document.createElement('input');
           targetFld.type = 'number';
           targetFld.value = goal.targetAmount;
+          targetFld.style.flex = '0 0 120px';
+          targetFld.style.minWidth = '100px';
           const dateFld = document.createElement('input');
           dateFld.type = 'date';
-          dateFld.value = new Date(goal.targetDate).toISOString().slice(0,10);
+          dateFld.style.flex = '0 0 160px';
+          dateFld.style.minWidth = '140px';
+          // Safely parse targetDate; if invalid or missing, leave empty to avoid RangeError
+          let isoDate = '';
+          if (goal && goal.targetDate) {
+            const d = new Date(goal.targetDate);
+            if (!isNaN(d.getTime())) {
+              isoDate = d.toISOString().slice(0, 10);
+            }
+          }
+          dateFld.value = isoDate;
           const currentFld = document.createElement('input');
           currentFld.type = 'number';
           currentFld.value = goal.currentSavings;
+          currentFld.style.flex = '0 0 120px';
+          currentFld.style.minWidth = '100px';
 
           const saveBtn = document.createElement('button');
           saveBtn.textContent = 'Save';
@@ -1978,7 +2002,7 @@ export const FinancialPlanningView = () => {
   };
 
   // Listen for forecast invalidation requests from CacheInvalidator
-  const handleForecastInvalidate = (e) => {
+  const handleForecastInvalidate = (_e) => {
     try {
       if (forecastEngine && typeof forecastEngine.clearCache === 'function') {
         forecastEngine.clearCache();

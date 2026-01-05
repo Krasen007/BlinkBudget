@@ -448,19 +448,26 @@ export class InvestmentTracker {
       const investments = JSON.parse(stored);
       
       // Convert date strings back to Date objects (with validation)
-      return investments.map(investment => {
-        const pd = investment.purchaseDate ? new Date(investment.purchaseDate) : null;
-        const ca = investment.createdAt ? new Date(investment.createdAt) : null;
-        const ua = investment.updatedAt ? new Date(investment.updatedAt) : null;
+      return investments
+        .map(investment => {
+          const pd = investment.purchaseDate ? new Date(investment.purchaseDate) : null;
+          const ca = investment.createdAt ? new Date(investment.createdAt) : null;
+          const ua = investment.updatedAt ? new Date(investment.updatedAt) : null;
 
-        return {
-          ...investment,
-          purchaseDate: pd && !isNaN(pd.getTime()) ? pd : null,
-          createdAt: ca && !isNaN(ca.getTime()) ? ca : new Date(),
-          updatedAt: ua && !isNaN(ua.getTime()) ? ua : new Date()
-        };
-      });
-    } catch (error) {
+          return {
+            ...investment,
+            purchaseDate: pd && !isNaN(pd.getTime()) ? pd : null,
+            createdAt: ca && !isNaN(ca.getTime()) ? ca : new Date(),
+            updatedAt: ua && !isNaN(ua.getTime()) ? ua : new Date()
+          };
+        })
+        .filter(investment => {
+          if (!investment.purchaseDate) {
+            console.warn(`Skipping investment ${investment.symbol} due to invalid purchaseDate`);
+            return false;
+          }
+          return true;
+        });    } catch (error) {
       console.error('Error loading investments:', error);
       return [];
     }

@@ -3,9 +3,23 @@ import { STORAGE_KEYS } from '../utils/constants.js';
 
 // Central cache invalidator
 export const CacheInvalidator = {
+  _initialized: false,
+  _boundHandler: null,
   init() {
-    // Listen for storage updates and perform targeted invalidation
-    window.addEventListener('storage-updated', this.handleStorageUpdate.bind(this));
+    if (this._initialized) return;
+    // Bind once and keep reference so we can avoid duplicate listeners and remove later
+    this._boundHandler = this.handleStorageUpdate.bind(this);
+    window.addEventListener('storage-updated', this._boundHandler);
+    this._initialized = true;
+  },
+
+  // Optional: remove listeners and reset state
+  destroy() {
+    if (this._boundHandler) {
+      window.removeEventListener('storage-updated', this._boundHandler);
+      this._boundHandler = null;
+    }
+    this._initialized = false;
   },
 
   handleStorageUpdate(e) {
