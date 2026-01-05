@@ -34,9 +34,26 @@ export class RiskAssessor {
 
   /**
    * Assess emergency fund adequacy
-   * @param {number} monthlyExpenses - Average monthly expenses
-   * @param {number} emergencyFund - Current emergency fund amount
-   * @returns {Object} Emergency fund assessment
+   *
+   * Calculates emergency fund coverage based on the ratio of emergency fund to monthly expenses.
+   * The emergency fund is measured in months of expenses covered, providing a standardized
+   * way to evaluate financial preparedness for unexpected events.
+   *
+   * Calculation Formula:
+   * - Months Covered = Emergency Fund Amount ÷ Average Monthly Expenses
+   *
+   * Threshold Guidelines (based on financial planning best practices):
+   * - Minimum (3 months): Basic protection against short-term disruptions like job loss or medical emergencies
+   * - Recommended (6 months): Moderate security for most households, covering extended unemployment or major repairs
+   * - Optimal (12 months): Comprehensive protection for high-risk situations, career transitions, or economic uncertainty
+   *
+   * These thresholds align with recommendations from financial experts and organizations like the Consumer
+   * Financial Protection Bureau (CFPB) and certified financial planners, who suggest 3-12 months of expenses
+   * depending on individual circumstances, risk tolerance, and income stability.
+   *
+   * @param {number} monthlyExpenses - Average monthly expenses (must be > 0 for valid assessment)
+   * @param {number} emergencyFund - Current emergency fund amount (savings designated for emergencies)
+   * @returns {Object} Emergency fund assessment with status, risk level, recommendations, and coverage details
    */
   assessEmergencyFundAdequacy(monthlyExpenses, emergencyFund) {
     try {

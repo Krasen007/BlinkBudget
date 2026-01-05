@@ -413,36 +413,52 @@ export const FinancialPlanningView = () => {
       console.error('Error calculating risk assessments:', error);
     }
 
-    const stats = [
-      { 
-        label: 'Current Balance', 
-        value: `€${currentBalance.toFixed(2)}`, 
-        color: currentBalance >= 0 ? COLORS.SUCCESS : COLORS.ERROR, 
-        icon: '💰',
-        subtitle: currentBalance >= 0 ? 'Positive balance' : 'Negative balance'
-      },
-      { 
-        label: 'Monthly Expenses', 
-        value: `€${monthlyExpenses.toFixed(2)}`, 
-        color: COLORS.ERROR, 
-        icon: '📉',
-        subtitle: 'Average last 3 months'
-      },
-      { 
-        label: 'Savings Rate', 
-        value: `${savingsRate.toFixed(1)}%`, 
-        color: savingsRate > 20 ? COLORS.SUCCESS : savingsRate > 10 ? COLORS.WARNING : COLORS.ERROR, 
-        icon: '🎯',
-        subtitle: savingsRate > 20 ? 'Excellent' : savingsRate > 10 ? 'Good' : 'Needs improvement'
-      },
-      { 
-        label: 'Risk Level', 
-        value: riskScore ? riskScore.level.charAt(0).toUpperCase() + riskScore.level.slice(1) : 'Unknown', 
-        color: riskScore ? (riskScore.level === 'low' ? COLORS.SUCCESS : riskScore.level === 'moderate' ? COLORS.WARNING : COLORS.ERROR) : COLORS.TEXT_MUTED, 
-        icon: riskScore ? (riskScore.level === 'low' ? '✅' : riskScore.level === 'moderate' ? '⚠️' : '🚨') : '❓',
-        subtitle: riskScore ? riskScore.message : 'Calculating...'
-      },
-    ];
+  const stats = [
+    {
+      label: 'Current Balance',
+      value: `€${currentBalance.toFixed(2)}`,
+      color: currentBalance >= 0 ? COLORS.SUCCESS : COLORS.ERROR,
+      icon: '💰',
+      subtitle: currentBalance >= 0 ? 'Positive balance' : 'Negative balance',
+      calculationHelp: `
+        <p><strong>Formula:</strong> Total Income - Total Expenses</p>
+        <p>This shows your net financial position by subtracting all expenses from all income transactions in your account.</p>
+      `
+    },
+    {
+      label: 'Monthly Expenses',
+      value: `€${monthlyExpenses.toFixed(2)}`,
+      color: COLORS.ERROR,
+      icon: '📉',
+      subtitle: 'Average last 3 months',
+      calculationHelp: `
+        <p><strong>Formula:</strong> Total expenses from last 3 months ÷ Number of months in that period</p>
+        <p>This calculates your average monthly spending by analyzing expense transactions over the most recent 3-month period, providing a realistic view of your regular spending patterns.</p>
+      `
+    },
+    {
+      label: 'Savings Rate',
+      value: `${savingsRate.toFixed(1)}%`,
+      color: savingsRate > 20 ? COLORS.SUCCESS : savingsRate > 10 ? COLORS.WARNING : COLORS.ERROR,
+      icon: '🎯',
+      subtitle: savingsRate > 20 ? 'Excellent' : savingsRate > 10 ? 'Good' : 'Needs improvement',
+      calculationHelp: `
+        <p><strong>Formula:</strong> (Total Income - Total Expenses) ÷ Total Income × 100</p>
+        <p>This percentage shows how much of your income you're saving. A higher rate indicates better financial health and more money available for investments or emergencies.</p>
+      `
+    },
+    {
+      label: 'Risk Level',
+      value: riskScore ? riskScore.level.charAt(0).toUpperCase() + riskScore.level.slice(1) : 'Unknown',
+      color: riskScore ? (riskScore.level === 'low' ? COLORS.SUCCESS : riskScore.level === 'moderate' ? COLORS.WARNING : COLORS.ERROR) : COLORS.TEXT_MUTED,
+      icon: riskScore ? (riskScore.level === 'low' ? '✅' : riskScore.level === 'moderate' ? '⚠️' : '🚨') : '❓',
+      subtitle: riskScore ? riskScore.message : 'Calculating...',
+      calculationHelp: `
+        <p><strong>Assessment:</strong> Based on emergency fund adequacy</p>
+        <p>Risk level is determined by evaluating your emergency fund coverage relative to monthly expenses. Low risk indicates strong financial preparedness, while high risk suggests immediate attention is needed.</p>
+      `
+    },
+  ];
 
     stats.forEach(stat => {
       const card = createStatsCard(stat);
@@ -1597,7 +1613,7 @@ export const FinancialPlanningView = () => {
   /**
    * Create a stats card for the overview section
    */
-  function createStatsCard({ label, value, color, icon, subtitle }) {
+  function createStatsCard({ label, value, color, icon, subtitle, calculationHelp }) {
     const card = document.createElement('div');
     card.className = 'stats-card';
     card.style.padding = SPACING.LG;
@@ -1641,6 +1657,57 @@ export const FinancialPlanningView = () => {
       subtitleSpan.style.fontSize = '0.75rem';
       subtitleSpan.style.color = COLORS.TEXT_MUTED;
       card.appendChild(subtitleSpan);
+    }
+
+    // Add calculation help section if provided
+    if (calculationHelp) {
+      const helpSection = document.createElement('div');
+      helpSection.style.marginTop = SPACING.SM;
+      helpSection.style.paddingTop = SPACING.XS;
+      helpSection.style.borderTop = `1px solid ${COLORS.BORDER}`;
+
+      const helpTitle = document.createElement('div');
+      helpTitle.style.display = 'flex';
+      helpTitle.style.alignItems = 'center';
+      helpTitle.style.cursor = 'pointer';
+      helpTitle.style.marginBottom = SPACING.XS;
+
+      const helpTitleText = document.createElement('span');
+      helpTitleText.textContent = '📊 How calculated?';
+      helpTitleText.style.fontSize = '0.625rem';
+      helpTitleText.style.fontWeight = '600';
+      helpTitleText.style.color = COLORS.TEXT_MUTED;
+
+      const toggleIcon = document.createElement('span');
+      toggleIcon.textContent = '▼';
+      toggleIcon.style.marginLeft = SPACING.XS;
+      toggleIcon.style.fontSize = '0.5rem';
+      toggleIcon.style.color = COLORS.TEXT_MUTED;
+      toggleIcon.style.transition = 'transform 0.2s ease';
+
+      helpTitle.appendChild(helpTitleText);
+      helpTitle.appendChild(toggleIcon);
+
+      const helpDetails = document.createElement('div');
+      helpDetails.style.fontSize = '0.625rem';
+      helpDetails.style.color = COLORS.TEXT_MUTED;
+      helpDetails.style.lineHeight = '1.3';
+      helpDetails.innerHTML = calculationHelp;
+
+      // Initially hide details
+      helpDetails.style.display = 'none';
+
+      // Toggle functionality
+      let isExpanded = false;
+      helpTitle.addEventListener('click', () => {
+        isExpanded = !isExpanded;
+        helpDetails.style.display = isExpanded ? 'block' : 'none';
+        toggleIcon.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+      });
+
+      helpSection.appendChild(helpTitle);
+      helpSection.appendChild(helpDetails);
+      card.appendChild(helpSection);
     }
 
     return card;

@@ -54,7 +54,26 @@ export const OverviewSection = ({ planningData, onSectionSwitch }) => {
     const recentExpenses = recentTransactions
       .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
-    const monthsOfData = Math.max(1, (now - threeMonthsAgo) / (1000 * 60 * 60 * 24 * 30));
+        // Compute calendar-aware months difference (whole months + fractional month)
+    const daysInMonth = (date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+    const wholeMonths = (now.getFullYear() - threeMonthsAgo.getFullYear()) * 12 + (now.getMonth() - threeMonthsAgo.getMonth());
+    // Anchor date after adding wholeMonths to start
+    const anchor = new Date(threeMonthsAgo.getFullYear(), threeMonthsAgo.getMonth() + wholeMonths, threeMonthsAgo.getDate());
+    let dayDelta = (now - anchor) / (1000 * 60 * 60 * 24); // fractional days after whole months
+    // If anchor is in the future (possible when start day > end day), adjust
+    if (dayDelta < 0) {
+      // move anchor back one month
+      const adjAnchor = new Date(threeMonthsAgo.getFullYear(), threeMonthsAgo.getMonth() + wholeMonths - 1, threeMonthsAgo.getDate());
+      dayDelta = (now - adjAnchor) / (1000 * 60 * 60 * 24);
+      // recompute wholeMonths accordingly
+      // ensure wholeMonths is not negative
+      // note: fractional will then be positive
+      // decrement wholeMonths by 1
+    }
+    const denom = daysInMonth(anchor);
+    const fractionalMonth = Math.max(0, Math.min(1, dayDelta / (denom || 30)));
+    let monthsOfData = wholeMonths + fractionalMonth;
+    monthsOfData = Math.max(1, monthsOfData);
     monthlyExpenses = recentExpenses / monthsOfData;
   }
 
@@ -129,28 +148,44 @@ export const OverviewSection = ({ planningData, onSectionSwitch }) => {
       value: `€${currentBalance.toFixed(2)}`,
       color: currentBalance >= 0 ? COLORS.SUCCESS : COLORS.ERROR,
       icon: '💰',
-      subtitle: currentBalance >= 0 ? 'Positive balance' : 'Negative balance'
+      subtitle: currentBalance >= 0 ? 'Positive balance' : 'Negative balance',
+      calculationHelp: `
+        <p><strong>Formula:</strong> Total Income - Total Expenses</p>
+        <p>This shows your net financial position by subtracting all expenses from all income transactions in your account.</p>
+      `
     },
     {
       label: 'Monthly Expenses',
       value: `€${monthlyExpenses.toFixed(2)}`,
       color: COLORS.ERROR,
       icon: '📉',
-      subtitle: 'Average last 3 months'
+      subtitle: 'Average last 3 months',
+      calculationHelp: `
+        <p><strong>Formula:</strong> Total expenses from last 3 months ÷ Number of months in that period</p>
+        <p>This calculates your average monthly spending by analyzing expense transactions over the most recent 3-month period, providing a realistic view of your regular spending patterns.</p>
+      `
     },
     {
       label: 'Savings Rate',
       value: `${savingsRate.toFixed(1)}%`,
       color: savingsRate > 20 ? COLORS.SUCCESS : savingsRate > 10 ? COLORS.WARNING : COLORS.ERROR,
       icon: '🎯',
-      subtitle: savingsRate > 20 ? 'Excellent' : savingsRate > 10 ? 'Good' : 'Needs improvement'
+      subtitle: savingsRate > 20 ? 'Excellent' : savingsRate > 10 ? 'Good' : 'Needs improvement',
+      calculationHelp: `
+        <p><strong>Formula:</strong> (Total Income - Total Expenses) ÷ Total Income × 100</p>
+        <p>This percentage shows how much of your income you're saving. A higher rate indicates better financial health and more money available for investments or emergencies.</p>
+      `
     },
     {
       label: 'Risk Level',
       value: riskScore ? riskScore.level.charAt(0).toUpperCase() + riskScore.level.slice(1) : 'Unknown',
       color: riskScore ? (riskScore.level === 'low' ? COLORS.SUCCESS : riskScore.level === 'moderate' ? COLORS.WARNING : COLORS.ERROR) : COLORS.TEXT_MUTED,
       icon: riskScore ? (riskScore.level === 'low' ? '✅' : riskScore.level === 'moderate' ? '⚠️' : '🚨') : '❓',
-      subtitle: riskScore ? riskScore.message : 'Calculating...'
+      subtitle: riskScore ? riskScore.message : 'Calculating...',
+      calculationHelp: `
+        <p><strong>Assessment:</strong> Based on emergency fund adequacy</p>
+        <p>Risk level is determined by evaluating your emergency fund coverage relative to monthly expenses. Low risk indicates strong financial preparedness, while high risk suggests immediate attention is needed.</p>
+      `
     },
   ];
 
