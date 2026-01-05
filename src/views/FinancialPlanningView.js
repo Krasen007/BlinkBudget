@@ -153,11 +153,21 @@ export const FinancialPlanningView = () => {
     leftSide.appendChild(backButton);
     leftSide.appendChild(title);
 
-    // Right side (empty for now, could add actions later)
+    // Right side: add sync status indicator
     const rightSide = document.createElement('div');
     rightSide.style.display = 'flex';
     rightSide.style.alignItems = 'center';
     rightSide.style.gap = SPACING.SM;
+
+    const syncStatus = document.createElement('div');
+    syncStatus.className = 'sync-status';
+    syncStatus.style.padding = `${SPACING.XS} ${SPACING.SM}`;
+    syncStatus.style.borderRadius = 'var(--radius-sm)';
+    syncStatus.style.background = COLORS.SURFACE;
+    syncStatus.style.color = COLORS.TEXT_MUTED;
+    syncStatus.style.fontSize = '0.875rem';
+    syncStatus.textContent = navigator.onLine ? 'Sync: online' : 'Sync: offline';
+    rightSide.appendChild(syncStatus);
 
     header.appendChild(leftSide);
     header.appendChild(rightSide);
@@ -661,22 +671,44 @@ export const FinancialPlanningView = () => {
 
     const symInput = document.createElement('input');
     symInput.placeholder = 'Symbol (e.g. AAPL)';
+    symInput.required = true;
+    symInput.setAttribute('aria-label', 'Investment symbol');
+    const symError = document.createElement('div');
+    symError.style.color = COLORS.ERROR;
+    symError.style.fontSize = '0.85rem';
+    symError.style.display = 'none';
     const sharesInput = document.createElement('input');
     sharesInput.type = 'number';
     sharesInput.placeholder = 'Shares';
+    sharesInput.required = true;
+    sharesInput.setAttribute('aria-label', 'Shares');
+    const sharesError = document.createElement('div');
+    sharesError.style.color = COLORS.ERROR;
+    sharesError.style.fontSize = '0.85rem';
+    sharesError.style.display = 'none';
     const priceInput = document.createElement('input');
     priceInput.type = 'number';
     priceInput.placeholder = 'Purchase Price';
+    priceInput.required = true;
+    priceInput.setAttribute('aria-label', 'Purchase Price');
+    const priceError = document.createElement('div');
+    priceError.style.color = COLORS.ERROR;
+    priceError.style.fontSize = '0.85rem';
+    priceError.style.display = 'none';
     const dateInput = document.createElement('input');
     dateInput.type = 'date';
 
     const saveInvBtn = document.createElement('button');
     saveInvBtn.textContent = 'Save';
     saveInvBtn.className = 'btn btn-primary';
+    saveInvBtn.disabled = true;
 
     invForm.appendChild(symInput);
+    invForm.appendChild(symError);
     invForm.appendChild(sharesInput);
+    invForm.appendChild(sharesError);
     invForm.appendChild(priceInput);
+    invForm.appendChild(priceError);
     invForm.appendChild(dateInput);
     invForm.appendChild(saveInvBtn);
 
@@ -690,6 +722,13 @@ export const FinancialPlanningView = () => {
       const shares = Number(sharesInput.value) || 0;
       const purchasePrice = Number(priceInput.value) || 0;
       const purchaseDate = dateInput.value ? new Date(dateInput.value) : new Date();
+
+      // Basic validation
+      let valid = true;
+      if (!symbol) { symError.textContent = 'Symbol is required.'; symError.style.display = 'block'; valid = false; } else { symError.style.display = 'none'; }
+      if (!(shares > 0)) { sharesError.textContent = 'Shares must be greater than 0.'; sharesError.style.display = 'block'; valid = false; } else { sharesError.style.display = 'none'; }
+      if (!(purchasePrice >= 0)) { priceError.textContent = 'Price must be 0 or greater.'; priceError.style.display = 'block'; valid = false; } else { priceError.style.display = 'none'; }
+      if (!valid) return;
 
       try {
         StorageService.addInvestment(symbol, shares, purchasePrice, purchaseDate, {});
@@ -713,6 +752,18 @@ export const FinancialPlanningView = () => {
         console.error('Failed to save investment', err);
       }
     });
+
+    // Enable Save only when basic fields are valid
+    function validateInvForm() {
+      const symbol = symInput.value.trim();
+      const shares = Number(sharesInput.value) || 0;
+      const price = Number(priceInput.value) || -1;
+      saveInvBtn.disabled = !(symbol && shares > 0 && price >= 0);
+    }
+
+    symInput.addEventListener('input', validateInvForm);
+    sharesInput.addEventListener('input', validateInvForm);
+    priceInput.addEventListener('input', validateInvForm);
 
     controls.appendChild(addInvBtn);
     controls.appendChild(invForm);
@@ -989,6 +1040,13 @@ export const FinancialPlanningView = () => {
       const tdate = goalDate.value ? new Date(goalDate.value) : null;
       const current = Number(goalCurrent.value) || 0;
 
+      // Basic validation
+      let valid = true;
+      if (!name) { alert('Goal name is required.'); valid = false; }
+      if (!(target > 0)) { alert('Target amount must be greater than 0.'); valid = false; }
+      if (!tdate || isNaN(tdate.getTime())) { alert('Please choose a valid target date.'); valid = false; }
+      if (!valid) return;
+
       try {
         StorageService.createGoal(name, target, tdate, current, {});
         // Refresh goals chart
@@ -1178,6 +1236,22 @@ export const FinancialPlanningView = () => {
     }
 
     refreshGoalsList();
+
+    // Ensure ConflictDialog is present to handle any sync conflicts
+    import('../components/ConflictDialog.js')
+      .then(mod => {
+        try {
+          if (mod && typeof mod.ConflictDialog === 'function') {
+            mod.ConflictDialog();
+          }
+        } catch (err) {
+          console.warn('ConflictDialog init failed:', err);
+        }
+      })
+      .catch(e => {
+        // dynamic import may fail in older environments; ignore
+        console.warn('ConflictDialog not available:', e);
+      });
 
     // Add placeholder only when goals are not managed yet
     if (!hasRealGoals) {
@@ -1794,10 +1868,23 @@ export const FinancialPlanningView = () => {
       const transactions = TransactionService.getAll();
       const accounts = AccountService.getAccounts();
 
-      // TODO: Load investment data, goals, etc. when those services are implemented
+      // Load investment data and goals (prefer local cache first)
+      const investmentsKey = STORAGE_KEYS.INVESTMENTS;
+      const goalsKey = STORAGE_KEYS.GOALS;
+
+      const investmentsCacheRaw = localStorage.getItem(investmentsKey);
+      if (investmentsCacheRaw) console.log(`[Sync] ${investmentsKey} loaded from cache`);
+      const goalsCacheRaw = localStorage.getItem(goalsKey);
+      if (goalsCacheRaw) console.log(`[Sync] ${goalsKey} loaded from cache`);
+
+      const investments = StorageService.getInvestments ? StorageService.getInvestments() : [];
+      const goals = StorageService.getGoals ? StorageService.getGoals() : [];
+
       planningData = {
         transactions,
         accounts,
+        investments,
+        goals,
         lastUpdated: new Date(),
       };
 
@@ -1862,8 +1949,48 @@ export const FinancialPlanningView = () => {
 
   // Storage update handler
   const handleStorageUpdate = (e) => {
-    if (e.detail.key === STORAGE_KEYS.TRANSACTIONS || e.detail.key === STORAGE_KEYS.ACCOUNTS) {
+    if (
+      e.detail.key === STORAGE_KEYS.TRANSACTIONS ||
+      e.detail.key === STORAGE_KEYS.ACCOUNTS ||
+      e.detail.key === STORAGE_KEYS.INVESTMENTS ||
+      e.detail.key === STORAGE_KEYS.GOALS
+    ) {
       loadPlanningData();
+    }
+  };
+
+  // Listen for forecast invalidation requests from CacheInvalidator
+  const handleForecastInvalidate = (e) => {
+    try {
+      if (forecastEngine && typeof forecastEngine.clearCache === 'function') {
+        forecastEngine.clearCache();
+        // Also re-render current section if forecasts are visible
+        if (currentSection === 'forecasts' || currentSection === 'overview') {
+          renderSection(currentSection);
+        }
+      }
+    } catch (error) {
+      console.warn('Error clearing forecast cache:', error);
+    }
+  };
+
+  // Sync state handler for UI
+  const handleSyncState = (e) => {
+    const detail = e.detail || {};
+    const right = container.querySelector('.sync-status');
+    if (!right) return;
+    if (detail.state === 'syncing') {
+      right.textContent = `Syncing ${detail.dataType}...`;
+      right.style.background = COLORS.SURFACE_HOVER;
+      right.style.color = COLORS.TEXT_MAIN;
+    } else if (detail.state === 'synced') {
+      right.textContent = `Synced ${detail.dataType} ${new Date(detail.timestamp).toLocaleTimeString()}`;
+      right.style.background = COLORS.SURFACE;
+      right.style.color = COLORS.TEXT_MUTED;
+    } else if (detail.state === 'error') {
+      right.textContent = `Sync error (${detail.dataType})`;
+      right.style.background = COLORS.ERROR;
+      right.style.color = 'white';
     }
   };
 
@@ -1876,12 +2003,16 @@ export const FinancialPlanningView = () => {
   };
 
   window.addEventListener('storage-updated', handleStorageUpdate);
+  window.addEventListener('sync-state', handleSyncState);
+  window.addEventListener('forecast-invalidate', handleForecastInvalidate);
   window.addEventListener('keydown', handleKeyboardShortcuts);
 
   // Cleanup function
   container.cleanup = () => {
     window.removeEventListener('resize', updateResponsiveLayout);
     window.removeEventListener('storage-updated', handleStorageUpdate);
+    window.removeEventListener('sync-state', handleSyncState);
+    window.removeEventListener('forecast-invalidate', handleForecastInvalidate);
     window.removeEventListener('keydown', handleKeyboardShortcuts);
   };
 

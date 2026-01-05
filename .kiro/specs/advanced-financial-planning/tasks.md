@@ -29,3 +29,20 @@ Add validation/error messages for the forms.
 Persist cache invalidation
 Add unit tests for the UI behaviors
 implement firebase to sync the investments and goals
+
+//
+Plan: Firebase sync + caching & UI integration for Investments and Goals
+TL;DR — Add Investments and Goals to the existing SyncService and StorageService flow, implement per-item merge + cache invalidation, add small sync UI (status + conflict dialog) and inline form validation. This preserves offline-first behavior and provides deterministic LWW merging with a conflict hook for UX resolution.
+
+Steps
+Update src/core/sync-service.js: add INVESTMENTS and GOALS keys, implement mergeArraysById(localArray, cloudArray) and emit sync-conflict events for near-simultaneous edits.
+Update src/core/storage.js: after investment/goal CRUD methods call SyncService.pushToCloud(STORAGE_KEYS.INVESTMENTS|GOALS, ...) and keep CacheService.del('portfolioSummary'|'goalsSummary').
+Add invalidateCache() to src/core/forecast-engine.js and create src/core/cache-invalidator.js to centrally listen for storage-updated events and clear relevant cache keys. Import it in src/main.js.
+Update src/views/FinancialPlanningView.js: load investments/goals in loadPlanningData, listen for storage updates for these keys, re-render charts, and surface a SyncStatus area. Add inline validation/error messages to investment and goal forms.
+Add UI components: src/components/SyncStatus.js (sync indicator) and src/components/ConflictDialog.js (conflict resolution modal). Wire sync-conflict events from SyncService to open the dialog.
+Tests & rollout: add tests/sync-service.test.js for merge behavior and update relevant cache/invalidation tests. Deploy behind a feature flag.
+Further Considerations
+Keep current single-document pattern
+Unify timestamp fields (updatedAt vs updatedDate) across models to simplify merges.
+Decide delete semantics: cloud-authoritative delete.
+Pause for review — I will not start code changes until you confirm this plan or request edits.

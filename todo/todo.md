@@ -9,11 +9,6 @@ DO NOT IMPLEMENT: Implement an audit logging mechanism for sensitive user action
 DO NOT IMPLEMENT: Add password reset option in the login if user forgets it
 DO NOT IMPLEMENT: make security.md following all the security best practices
 DO NOT IMPLEMENT: add possibility to import transactions from a csv file
-DO NOT IMPLEMENT: Forecast: Estimate future income and expenses based on your past spending, Preview how your account balances will change over time, Avoid low account balances, overdraft fees, and going over your credit card limit.
-DO NOT IMPLEMENT: See all your investments at one place, View allocation across asset classes, sectors and countries, Monitor investment performance in the near and long term.
-DO NOT IMPLEMENT: Plan for long term goals like retirement, buying a house, kid's education, Preview a long term financial forecast to see if you can reach your goals.
-DO NOT IMPLEMENT: Insights: Top Movers 1 Jan 2026 vs Dec 2025
-DO NOT IMPLEMENT: Insights: Timeline Jan vs Dec 2025
 
 ---
 
@@ -46,3 +41,8 @@ DO NOT IMPLEMENT: Insights: Timeline Jan vs Dec 2025
 [x] add install PWA button in the settings
 [x] add refresh button in the settings
 [x] add option to double tap on a transaction to split it in half
+[x] Forecast: Estimate future income and expenses based on your past spending, Preview how your account balances will change over time, Avoid low account balances, overdraft fees, and going over your credit card limit.
+[x] See all your investments at one place, View allocation across asset classes, sectors and countries, Monitor investment performance in the near and long term.
+[x] Plan for long term goals like retirement, buying a house, kid's education, Preview a long term financial forecast to see if you can reach your goals.
+[x] Insights: Top Movers 1 Jan 2026 vs Dec 2025
+[x] Insights: Timeline Jan vs Dec 2025

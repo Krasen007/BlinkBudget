@@ -3,6 +3,8 @@ import { TransactionService } from './transaction-service.js';
 import { SettingsService } from './settings-service.js';
 import { InvestmentTracker } from './investment-tracker.js';
 import { GoalPlanner } from './goal-planner.js';
+import { SyncService } from './sync-service.js';
+import { STORAGE_KEYS } from '../utils/constants.js';
 import { CacheService } from './cache-service.js';
 import { generateId } from '../utils/id-utils.js';
 
@@ -43,21 +45,42 @@ export const StorageService = {
     const res = this._investmentTracker.addInvestment(symbol, shares, purchasePrice, purchaseDate, metadata);
     // Invalidate related caches
     CacheService.del('portfolioSummary');
+    // Push updated investments to cloud (authoritative single-doc pattern)
+    try {
+      SyncService.pushToCloud(STORAGE_KEYS.INVESTMENTS, this._investmentTracker.getAllInvestments());
+    } catch (e) {
+      console.warn('[Storage] Failed to push investments after add:', e);
+    }
     return res;
   },
   updateInvestmentValue: function(symbol, currentPrice) {
     const res = this._investmentTracker.updateInvestmentValue(symbol, currentPrice);
     CacheService.del('portfolioSummary');
+    try {
+      SyncService.pushToCloud(STORAGE_KEYS.INVESTMENTS, this._investmentTracker.getAllInvestments());
+    } catch (e) {
+      console.warn('[Storage] Failed to push investments after value update:', e);
+    }
     return res;
   },
   removeInvestment: function(symbol) {
     const res = this._investmentTracker.removeInvestment(symbol);
     CacheService.del('portfolioSummary');
+    try {
+      SyncService.pushToCloud(STORAGE_KEYS.INVESTMENTS, this._investmentTracker.getAllInvestments());
+    } catch (e) {
+      console.warn('[Storage] Failed to push investments after remove:', e);
+    }
     return res;
   },
   updateInvestment: function(id, updates) {
     const res = this._investmentTracker.updateInvestment(id, updates);
     CacheService.del('portfolioSummary');
+    try {
+      SyncService.pushToCloud(STORAGE_KEYS.INVESTMENTS, this._investmentTracker.getAllInvestments());
+    } catch (e) {
+      console.warn('[Storage] Failed to push investments after update:', e);
+    }
     return res;
   },
   getInvestment: function(symbol) { return this._investmentTracker.getInvestment(symbol); },
@@ -76,21 +99,41 @@ export const StorageService = {
   createGoal: function(name, targetAmount, targetDate, currentSavings = 0, options = {}) {
     const res = this._goalPlanner.createGoal(name, targetAmount, targetDate, currentSavings, options);
     CacheService.del('goalsSummary');
+    try {
+      SyncService.pushToCloud(STORAGE_KEYS.GOALS, this._goalPlanner.getAllGoals());
+    } catch (e) {
+      console.warn('[Storage] Failed to push goals after create:', e);
+    }
     return res;
   },
   updateGoalProgress: function(goalId, newSavings) {
     const res = this._goalPlanner.updateGoalProgress(goalId, newSavings);
     CacheService.del('goalsSummary');
+    try {
+      SyncService.pushToCloud(STORAGE_KEYS.GOALS, this._goalPlanner.getAllGoals());
+    } catch (e) {
+      console.warn('[Storage] Failed to push goals after progress update:', e);
+    }
     return res;
   },
   deleteGoal: function(goalId) {
     const res = this._goalPlanner.deleteGoal(goalId);
     CacheService.del('goalsSummary');
+    try {
+      SyncService.pushToCloud(STORAGE_KEYS.GOALS, this._goalPlanner.getAllGoals());
+    } catch (e) {
+      console.warn('[Storage] Failed to push goals after delete:', e);
+    }
     return res;
   },
   updateGoal: function(goalId, updates) {
     const res = this._goalPlanner.updateGoal(goalId, updates);
     CacheService.del('goalsSummary');
+    try {
+      SyncService.pushToCloud(STORAGE_KEYS.GOALS, this._goalPlanner.getAllGoals());
+    } catch (e) {
+      console.warn('[Storage] Failed to push goals after update:', e);
+    }
     return res;
   },
   getGoalsSummary: function() {

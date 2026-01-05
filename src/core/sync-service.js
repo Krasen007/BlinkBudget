@@ -27,6 +27,16 @@ export const SyncService = {
       }
     });
 
+    // Listen for user-driven conflict resolutions from the UI
+    window.addEventListener('sync-conflict-resolution', (e) => {
+      try {
+        const detail = e.detail || {};
+        this.handleConflictResolution(detail);
+      } catch (err) {
+        console.warn('[Sync] Error handling conflict resolution event:', err);
+      }
+    });
+
     // handle visibility change to pause/resume sync
     document.addEventListener('visibilitychange', () => {
       this.handleVisibilityChange();
@@ -74,8 +84,31 @@ export const SyncService = {
       // Wrap arrays in { items: data } for consistent storage, objects stay as they are
       const payload = Array.isArray(data) ? { items: data } : data;
 
+      // Sanitize payload: convert Date objects to ISO strings and remove invalid dates
+      const sanitize = (value) => {
+        if (value instanceof Date) {
+          if (isNaN(value.getTime())) return null;
+          return value.toISOString();
+        }
+        if (Array.isArray(value)) return value.map(sanitize);
+        if (value && typeof value === 'object') {
+          const out = {};
+          Object.keys(value).forEach(k => {
+            out[k] = sanitize(value[k]);
+          });
+          return out;
+        }
+        return value;
+      };
+
+      const safePayload = sanitize(payload);
+
       console.log(`[Sync] Pushing ${dataType} to cloud...`);
-      await setDoc(doc(userDocRef, dataType, 'data'), payload, { merge: true });
+      // Notify UI that a push is starting
+      window.dispatchEvent(new CustomEvent('sync-state', { detail: { dataType, state: 'syncing', timestamp: Date.now() } }));
+      await setDoc(doc(userDocRef, dataType, 'data'), safePayload, { merge: true });
+      // Notify UI that push completed
+      window.dispatchEvent(new CustomEvent('sync-state', { detail: { dataType, state: 'synced', timestamp: Date.now() } }));
 
       // Keep the write lock for a brief moment to allow Firebase to propagate
       setTimeout(() => {
@@ -86,6 +119,8 @@ export const SyncService = {
       }, 1000); // 1 second should be enough for Firebase to process
     } catch (error) {
       console.error(`[Sync] Failed to push ${dataType} to cloud:`, error);
+      // Emit sync error for UI
+      window.dispatchEvent(new CustomEvent('sync-state', { detail: { dataType, state: 'error', error: String(error), timestamp: Date.now() } }));
       this.pendingWrites.delete(dataType);
     }
   },
@@ -97,6 +132,8 @@ export const SyncService = {
       STORAGE_KEYS.TRANSACTIONS,
       STORAGE_KEYS.ACCOUNTS,
       STORAGE_KEYS.SETTINGS,
+      STORAGE_KEYS.INVESTMENTS,
+      STORAGE_KEYS.GOALS,
     ];
 
     for (const key of keys) {
@@ -126,6 +163,8 @@ export const SyncService = {
       STORAGE_KEYS.TRANSACTIONS,
       STORAGE_KEYS.ACCOUNTS,
       STORAGE_KEYS.SETTINGS,
+      STORAGE_KEYS.INVESTMENTS,
+      STORAGE_KEYS.GOALS,
     ];
 
     keys.forEach(key => {
@@ -165,19 +204,18 @@ export const SyncService = {
     }
 
     const localRaw = localStorage.getItem(key);
-
     if (Array.isArray(cloudData)) {
-      // For simple lists, we trust the cloud data to support deletions and renames correctly.
-      // Additive merging was causing deleted items to be resurrected and renames to be reverted.
       const localData = JSON.parse(localRaw || '[]');
 
-      // Deduplicate incoming cloud data just in case of server-side duplicates
+      // Deduplicate cloud data
       const cleanedCloudData = this.uniqueById(cloudData, key);
 
-      // Only update and dispatch if there's an actual change to avoid infinite loops or unnecessary re-renders
-      if (JSON.stringify(cleanedCloudData) !== JSON.stringify(localData)) {
-        console.log(`[Sync] Updating local ${key} from cloud (Authoritative).`);
-        localStorage.setItem(key, JSON.stringify(cleanedCloudData));
+      // Merge per-item using Last-Write-Wins strategy and emit conflicts when near-simultaneous edits occur
+      const merged = this.mergeArraysById(localData, cleanedCloudData, { key });
+
+      if (JSON.stringify(merged) !== JSON.stringify(localData)) {
+        console.log(`[Sync] Merging local ${key} with cloud data (per-item LWW).`);
+        localStorage.setItem(key, JSON.stringify(merged));
         window.dispatchEvent(
           new CustomEvent('storage-updated', { detail: { key } })
         );
@@ -194,6 +232,110 @@ export const SyncService = {
           new CustomEvent('storage-updated', { detail: { key } })
         );
       }
+    }
+  },
+
+  /**
+   * Merge two arrays of objects by `id` using Last-Write-Wins (LWW).
+   * Emits `sync-conflict` events when timestamps are nearly equal and payloads differ.
+   * Cloud-authoritative deletion: items missing from cloud are removed locally.
+   */
+  mergeArraysById(localArray = [], cloudArray = [], opts = {}) {
+    const key = opts.key || 'unknown';
+    const localById = new Map();
+    (localArray || []).forEach(item => { if (item && item.id) localById.set(item.id, item); });
+    const cloudById = new Map();
+    (cloudArray || []).forEach(item => { if (item && item.id) cloudById.set(item.id, item); });
+
+    const merged = [];
+
+    // Normalize helper for timestamp (ms)
+    const ts = (item) => {
+      if (!item) return 0;
+      const v = item.updatedAt || item.updatedDate || item.updated || item.ts || item.lastModified;
+      const n = v ? (typeof v === 'number' ? v : Date.parse(v)) : 0;
+      return isNaN(n) ? 0 : n;
+    };
+
+    // Include items present in cloud (authoritative for existing items)
+    cloudById.forEach((cloudItem, id) => {
+      const localItem = localById.get(id);
+      if (!localItem) {
+        // New item from cloud
+        merged.push(cloudItem);
+        return;
+      }
+
+      const localTs = ts(localItem);
+      const cloudTs = ts(cloudItem);
+
+      // If timestamps are very close and payload differs, emit conflict for UI resolution
+      const timeDiff = Math.abs(localTs - cloudTs);
+      const localJson = JSON.stringify(localItem);
+      const cloudJson = JSON.stringify(cloudItem);
+      if (timeDiff <= 1000 && localJson !== cloudJson) {
+        console.log(`[Sync] Detected near-simultaneous edit for id=${id} on ${key}`);
+        window.dispatchEvent(new CustomEvent('sync-conflict', { detail: { key, id, localItem, cloudItem } }));
+        // Prefer cloud version (cloud-authoritative) but UI may later request resolution
+        merged.push(cloudItem);
+        return;
+      }
+
+      // Last write wins
+      if (cloudTs >= localTs) {
+        merged.push(cloudItem);
+      } else {
+        merged.push(localItem);
+      }
+      // Remove processed local item from the map
+      localById.delete(id);
+    });
+
+    // Items still in localById but not in cloud => cloud deletion (authoritative), so skip them
+    // If you want to resurrect local items, change behavior here.
+
+    // For items that had no id, append unique ones from cloud and local
+    const localNoId = (localArray || []).filter(i => !i || !i.id);
+    const cloudNoId = (cloudArray || []).filter(i => !i || !i.id);
+    merged.push(...cloudNoId);
+    merged.push(...localNoId);
+
+    return merged;
+  },
+
+  /**
+   * Handle conflict resolution choices from the UI.
+   * detail: { resolution: 'local'|'cloud', conflict: { key, id, localItem, cloudItem } }
+   */
+  async handleConflictResolution(detail = {}) {
+    try {
+      const { resolution, conflict } = detail;
+      if (!conflict || !conflict.key || !conflict.id) return;
+      const key = conflict.key;
+
+      // Load current local array
+      const localRaw = localStorage.getItem(key) || '[]';
+      let localArray = JSON.parse(localRaw);
+
+      if (resolution === 'local') {
+        // Push local state to cloud (authoritative single-doc pattern)
+        await this.pushToCloud(key, localArray);
+        console.log(`[Sync] Conflict resolved: kept local for ${key}/${conflict.id}`);
+        return;
+      }
+
+      if (resolution === 'cloud') {
+        // Replace local item with cloud item
+        const cloudItem = conflict.cloudItem;
+        if (!cloudItem) return;
+        localArray = (localArray || []).map(item => (item && item.id === cloudItem.id ? cloudItem : item));
+        localStorage.setItem(key, JSON.stringify(localArray));
+        window.dispatchEvent(new CustomEvent('storage-updated', { detail: { key } }));
+        console.log(`[Sync] Conflict resolved: kept cloud for ${key}/${cloudItem.id}`);
+        return;
+      }
+    } catch (error) {
+      console.error('[Sync] Error in handleConflictResolution:', error);
     }
   },
 

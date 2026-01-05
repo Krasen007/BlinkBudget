@@ -11,6 +11,7 @@ import { LoadingView } from './components/LoadingView.js';
 import './core/mobile.js'; // Initialize mobile utilities
 import './pwa.js'; // Register PWA service worker
 import { InstallService } from './core/install.js';
+import { CacheInvalidator } from './core/cache-invalidator.js';
 
 InstallService.init();
 
@@ -76,6 +77,8 @@ const initApp = () => {
   });
 
   NavigationState.init();
+  // Initialize centralized cache invalidator
+  CacheInvalidator.init();
   console.log('[Main] App initialized, starting router.');
   Router.init();
 };
