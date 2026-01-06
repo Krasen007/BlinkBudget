@@ -46,3 +46,4 @@ DO NOT IMPLEMENT: add possibility to import transactions from a csv file
 [x] Plan for long term goals like retirement, buying a house, kid's education, Preview a long term financial forecast to see if you can reach your goals.
 [x] Insights: Top Movers 1 Jan 2026 vs Dec 2025
 [x] Insights: Timeline Jan vs Dec 2025
+[ ] Add pre-selected categories when amount matches some amount, example: if user writes 25 assume it is GAS, 10 assume Food, Option 1 highlith the category it to be more visible for the user to click.

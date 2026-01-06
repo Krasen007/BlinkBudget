@@ -1,5 +1,8 @@
 /* Color System - Design Tokens */
 :root {
+  /* Force dark color scheme for PWA */
+  color-scheme: dark;
+
   /* Base color palette - HSL for premium feel and easy adjustment */
   --primary-hue: 250;
   --primary-sat: 84%;
