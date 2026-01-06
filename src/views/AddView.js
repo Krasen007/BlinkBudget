@@ -13,7 +13,7 @@ import { markTransactionForHighlight } from '../utils/success-feedback.js';
 
 export const AddView = ({ accountId } = {}) => {
   const container = document.createElement('div');
-  container.className = 'view-add';
+  container.className = 'view-add view-container';
 
   const header = document.createElement('div');
   header.style.marginBottom = SPACING.MD;

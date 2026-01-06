@@ -9,18 +9,15 @@ import {
 
 export const LoginView = () => {
   const container = document.createElement('div');
-  container.className = 'view-login';
+  container.className = 'view-login view-container';
   Object.assign(container.style, {
-    width: '100%',
-    maxWidth: DIMENSIONS.CONTAINER_MAX_WIDTH,
-    margin: '0 auto',
-    padding: SPACING.XL,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'stretch',
     gap: SPACING.LG,
     minHeight: '80vh',
     justifyContent: 'center',
+    padding: SPACING.XL, // Override view-container padding for centered layout
   });
 
   const title = document.createElement('h1');

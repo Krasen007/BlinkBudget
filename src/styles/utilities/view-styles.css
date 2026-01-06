@@ -99,12 +99,12 @@
   position: relative;
 }
 
-/* Mobile-specific padding adjustments */
+/* Mobile-specific padding adjustments (<=768px) */
 @media (--sm) {
   .view-container {
     padding: 0 var(--spacing-sm);
   }
-  
+
   .view-header {
     margin-bottom: var(--spacing-sm);
   }
