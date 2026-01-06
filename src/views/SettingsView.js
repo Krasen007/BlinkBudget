@@ -106,10 +106,19 @@ export const SettingsView = () => {
     }
   };
 
+  const handleKeyDown = e => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      Router.navigate('dashboard');
+    }
+  };
+
   window.addEventListener('storage-updated', handleStorageUpdate);
+  window.addEventListener('keydown', handleKeyDown);
 
   container.cleanup = () => {
     window.removeEventListener('storage-updated', handleStorageUpdate);
+    window.removeEventListener('keydown', handleKeyDown);
     if (dataSection && typeof dataSection.cleanup === 'function') {
       dataSection.cleanup();
     }
