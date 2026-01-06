@@ -1,7 +1,7 @@
 import { AuthService } from '../core/auth-service.js';
 import { Router } from '../core/router.js';
 import { Button } from '../components/Button.js';
-import { COLORS, SPACING, DIMENSIONS, FONT_SIZES } from '../utils/constants.js';
+import { COLORS, SPACING, FONT_SIZES } from '../utils/constants.js';
 import {
   validatePasswordStrength,
   validateEmail,

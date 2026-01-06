@@ -90,7 +90,7 @@ describe('Date Input Integration', () => {
     container.appendChild(addView);
 
     // Check that the view has the proper class for CSS targeting
-    expect(addView.className).toBe('view-add');
+    expect(addView.className).toBe('view-add view-container');
 
     // Check that date input has the expected styling class
     const displayInput = addView.querySelector(

@@ -33,7 +33,11 @@ export class InvestmentTracker {
       if (!shares || typeof shares !== 'number' || shares <= 0) {
         throw new Error('Shares must be a positive number');
       }
-      if (!purchasePrice || typeof purchasePrice !== 'number' || purchasePrice <= 0) {
+      if (
+        !purchasePrice ||
+        typeof purchasePrice !== 'number' ||
+        purchasePrice <= 0
+      ) {
         throw new Error('Purchase price must be a positive number');
       }
       if (!purchaseDate || !(purchaseDate instanceof Date)) {
@@ -53,7 +57,7 @@ export class InvestmentTracker {
         region: metadata.region || 'Unknown',
         currency: metadata.currency || 'EUR',
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       this.investments.push(investment);
@@ -78,7 +82,9 @@ export class InvestmentTracker {
         throw new Error('Current price must be a positive number');
       }
 
-      const investment = this.investments.find(inv => inv.symbol === symbol.toUpperCase());
+      const investment = this.investments.find(
+        inv => inv.symbol === symbol.toUpperCase()
+      );
       if (!investment) {
         return null;
       }
@@ -101,7 +107,9 @@ export class InvestmentTracker {
    */
   removeInvestment(symbol) {
     try {
-      const index = this.investments.findIndex(inv => inv.symbol === symbol.toUpperCase());
+      const index = this.investments.findIndex(
+        inv => inv.symbol === symbol.toUpperCase()
+      );
       if (index === -1) {
         return false;
       }
@@ -123,10 +131,21 @@ export class InvestmentTracker {
    */
   updateInvestment(id, updates = {}) {
     try {
-      const investment = this.investments.find(inv => inv.id === id || inv.symbol === id);
+      const investment = this.investments.find(
+        inv => inv.id === id || inv.symbol === id
+      );
       if (!investment) return null;
 
-      const allowed = ['shares', 'purchasePrice', 'currentPrice', 'name', 'assetClass', 'sector', 'region', 'currency'];
+      const allowed = [
+        'shares',
+        'purchasePrice',
+        'currentPrice',
+        'name',
+        'assetClass',
+        'sector',
+        'region',
+        'currency',
+      ];
       allowed.forEach(key => {
         if (updates[key] !== undefined) {
           investment[key] = updates[key];
@@ -156,7 +175,9 @@ export class InvestmentTracker {
    * @returns {Object|null} Investment object or null if not found
    */
   getInvestment(symbol) {
-    return this.investments.find(inv => inv.symbol === symbol.toUpperCase()) || null;
+    return (
+      this.investments.find(inv => inv.symbol === symbol.toUpperCase()) || null
+    );
   }
 
   /**
@@ -167,7 +188,7 @@ export class InvestmentTracker {
   calculatePortfolioValue(investments = null) {
     const investmentList = investments || this.investments;
     return investmentList.reduce((total, investment) => {
-      return total + (investment.shares * investment.currentPrice);
+      return total + investment.shares * investment.currentPrice;
     }, 0);
   }
 
@@ -178,7 +199,7 @@ export class InvestmentTracker {
    */
   calculateGainsLosses(investments = null) {
     const investmentList = investments || this.investments;
-    
+
     let totalCurrentValue = 0;
     let totalPurchaseValue = 0;
     const individualGains = [];
@@ -187,7 +208,8 @@ export class InvestmentTracker {
       const currentValue = investment.shares * investment.currentPrice;
       const purchaseValue = investment.shares * investment.purchasePrice;
       const gainLoss = currentValue - purchaseValue;
-      const gainLossPercentage = purchaseValue > 0 ? (gainLoss / purchaseValue) * 100 : 0;
+      const gainLossPercentage =
+        purchaseValue > 0 ? (gainLoss / purchaseValue) * 100 : 0;
 
       totalCurrentValue += currentValue;
       totalPurchaseValue += purchaseValue;
@@ -199,19 +221,20 @@ export class InvestmentTracker {
         purchaseValue: Math.round(purchaseValue * 100) / 100,
         gainLoss: Math.round(gainLoss * 100) / 100,
         gainLossPercentage: Math.round(gainLossPercentage * 100) / 100,
-        shares: investment.shares
+        shares: investment.shares,
       });
     });
 
     const totalGainLoss = totalCurrentValue - totalPurchaseValue;
-    const totalGainLossPercentage = totalPurchaseValue > 0 ? (totalGainLoss / totalPurchaseValue) * 100 : 0;
+    const totalGainLossPercentage =
+      totalPurchaseValue > 0 ? (totalGainLoss / totalPurchaseValue) * 100 : 0;
 
     return {
       totalCurrentValue: Math.round(totalCurrentValue * 100) / 100,
       totalPurchaseValue: Math.round(totalPurchaseValue * 100) / 100,
       totalGainLoss: Math.round(totalGainLoss * 100) / 100,
       totalGainLossPercentage: Math.round(totalGainLossPercentage * 100) / 100,
-      individualGains
+      individualGains,
     };
   }
 
@@ -223,7 +246,7 @@ export class InvestmentTracker {
    */
   calculateReturns(investments = null, timePeriod = 'all-time') {
     const investmentList = investments || this.investments;
-    
+
     // For now, we'll calculate based on purchase date
     // In a real implementation, you'd have historical price data
     const now = new Date();
@@ -231,13 +254,25 @@ export class InvestmentTracker {
 
     switch (timePeriod) {
       case '1month':
-        cutoffDate = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+        cutoffDate = new Date(
+          now.getFullYear(),
+          now.getMonth() - 1,
+          now.getDate()
+        );
         break;
       case '3months':
-        cutoffDate = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+        cutoffDate = new Date(
+          now.getFullYear(),
+          now.getMonth() - 3,
+          now.getDate()
+        );
         break;
       case '1year':
-        cutoffDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+        cutoffDate = new Date(
+          now.getFullYear() - 1,
+          now.getMonth(),
+          now.getDate()
+        );
         break;
       case 'all-time':
       default:
@@ -245,25 +280,34 @@ export class InvestmentTracker {
         break;
     }
 
-    const relevantInvestments = investmentList.filter(inv => inv.purchaseDate >= cutoffDate);
+    const relevantInvestments = investmentList.filter(
+      inv => inv.purchaseDate >= cutoffDate
+    );
     const gainsLosses = this.calculateGainsLosses(relevantInvestments);
 
     // Calculate annualized return for investments older than 1 year
     const returnsWithAnnualized = gainsLosses.individualGains.map(gain => {
       const investment = investmentList.find(inv => inv.symbol === gain.symbol);
-      const daysSincePurchase = (now - investment.purchaseDate) / (1000 * 60 * 60 * 24);
+      const daysSincePurchase =
+        (now - investment.purchaseDate) / (1000 * 60 * 60 * 24);
       const yearsSincePurchase = daysSincePurchase / 365.25;
 
       let annualizedReturn = 0;
       if (yearsSincePurchase > 0 && gain.purchaseValue > 0) {
-        annualizedReturn = (Math.pow(gain.currentValue / gain.purchaseValue, 1 / yearsSincePurchase) - 1) * 100;
+        annualizedReturn =
+          (Math.pow(
+            gain.currentValue / gain.purchaseValue,
+            1 / yearsSincePurchase
+          ) -
+            1) *
+          100;
       }
 
       return {
         ...gain,
         daysSincePurchase: Math.round(daysSincePurchase),
         yearsSincePurchase: Math.round(yearsSincePurchase * 100) / 100,
-        annualizedReturn: Math.round(annualizedReturn * 100) / 100
+        annualizedReturn: Math.round(annualizedReturn * 100) / 100,
       };
     });
 
@@ -272,7 +316,7 @@ export class InvestmentTracker {
       cutoffDate,
       investmentCount: relevantInvestments.length,
       ...gainsLosses,
-      individualReturns: returnsWithAnnualized
+      individualReturns: returnsWithAnnualized,
     };
   }
 
@@ -289,7 +333,7 @@ export class InvestmentTracker {
       return {
         totalValue: 0,
         allocations: {},
-        percentages: {}
+        percentages: {},
       };
     }
 
@@ -305,14 +349,15 @@ export class InvestmentTracker {
 
     // Calculate percentages
     Object.keys(allocations).forEach(assetClass => {
-      percentages[assetClass] = Math.round((allocations[assetClass] / totalValue) * 10000) / 100; // 2 decimal places
+      percentages[assetClass] =
+        Math.round((allocations[assetClass] / totalValue) * 10000) / 100; // 2 decimal places
       allocations[assetClass] = Math.round(allocations[assetClass] * 100) / 100;
     });
 
     return {
       totalValue: Math.round(totalValue * 100) / 100,
       allocations,
-      percentages
+      percentages,
     };
   }
 
@@ -329,7 +374,7 @@ export class InvestmentTracker {
       return {
         totalValue: 0,
         allocations: {},
-        percentages: {}
+        percentages: {},
       };
     }
 
@@ -345,14 +390,15 @@ export class InvestmentTracker {
 
     // Calculate percentages
     Object.keys(allocations).forEach(sector => {
-      percentages[sector] = Math.round((allocations[sector] / totalValue) * 10000) / 100;
+      percentages[sector] =
+        Math.round((allocations[sector] / totalValue) * 10000) / 100;
       allocations[sector] = Math.round(allocations[sector] * 100) / 100;
     });
 
     return {
       totalValue: Math.round(totalValue * 100) / 100,
       allocations,
-      percentages
+      percentages,
     };
   }
 
@@ -369,7 +415,7 @@ export class InvestmentTracker {
       return {
         totalValue: 0,
         allocations: {},
-        percentages: {}
+        percentages: {},
       };
     }
 
@@ -385,14 +431,15 @@ export class InvestmentTracker {
 
     // Calculate percentages
     Object.keys(allocations).forEach(region => {
-      percentages[region] = Math.round((allocations[region] / totalValue) * 10000) / 100;
+      percentages[region] =
+        Math.round((allocations[region] / totalValue) * 10000) / 100;
       allocations[region] = Math.round(allocations[region] * 100) / 100;
     });
 
     return {
       totalValue: Math.round(totalValue * 100) / 100,
       allocations,
-      percentages
+      percentages,
     };
   }
 
@@ -403,12 +450,14 @@ export class InvestmentTracker {
    */
   getTopPerformers(count = 5) {
     const gainsLosses = this.calculateGainsLosses();
-    const sorted = [...gainsLosses.individualGains].sort((a, b) => b.gainLossPercentage - a.gainLossPercentage);
+    const sorted = [...gainsLosses.individualGains].sort(
+      (a, b) => b.gainLossPercentage - a.gainLossPercentage
+    );
 
     return {
       topPerformers: sorted.slice(0, count),
       bottomPerformers: sorted.slice(-count).reverse(),
-      totalInvestments: sorted.length
+      totalInvestments: sorted.length,
     };
   }
 
@@ -432,7 +481,7 @@ export class InvestmentTracker {
       sectorAllocation,
       geographicAllocation,
       topPerformers,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
   }
 
@@ -446,28 +495,37 @@ export class InvestmentTracker {
       if (!stored) return [];
 
       const investments = JSON.parse(stored);
-      
+
       // Convert date strings back to Date objects (with validation)
       return investments
         .map(investment => {
-          const pd = investment.purchaseDate ? new Date(investment.purchaseDate) : null;
-          const ca = investment.createdAt ? new Date(investment.createdAt) : null;
-          const ua = investment.updatedAt ? new Date(investment.updatedAt) : null;
+          const pd = investment.purchaseDate
+            ? new Date(investment.purchaseDate)
+            : null;
+          const ca = investment.createdAt
+            ? new Date(investment.createdAt)
+            : null;
+          const ua = investment.updatedAt
+            ? new Date(investment.updatedAt)
+            : null;
 
           return {
             ...investment,
             purchaseDate: pd && !isNaN(pd.getTime()) ? pd : null,
             createdAt: ca && !isNaN(ca.getTime()) ? ca : new Date(),
-            updatedAt: ua && !isNaN(ua.getTime()) ? ua : new Date()
+            updatedAt: ua && !isNaN(ua.getTime()) ? ua : new Date(),
           };
         })
         .filter(investment => {
           if (!investment.purchaseDate) {
-            console.warn(`Skipping investment ${investment.symbol} due to invalid purchaseDate`);
+            console.warn(
+              `Skipping investment ${investment.symbol} due to invalid purchaseDate`
+            );
             return false;
           }
           return true;
-        });    } catch (error) {
+        });
+    } catch (error) {
       console.error('Error loading investments:', error);
       return [];
     }
@@ -479,11 +537,13 @@ export class InvestmentTracker {
   _saveInvestments() {
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(this.investments));
-      
+
       // Dispatch storage update event
-      window.dispatchEvent(new CustomEvent('storage-updated', {
-        detail: { key: this.storageKey, data: this.investments }
-      }));
+      window.dispatchEvent(
+        new CustomEvent('storage-updated', {
+          detail: { key: this.storageKey, data: this.investments },
+        })
+      );
     } catch (error) {
       console.error('Error saving investments:', error);
       throw error;

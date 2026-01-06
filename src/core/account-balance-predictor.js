@@ -23,16 +23,28 @@ export class AccountBalancePredictor {
    * @param {number} months - Number of months to project (default: 6)
    * @returns {Array} Array of balance projections
    */
-  projectBalances(currentBalance, incomeForecasts, expenseForecasts, months = 6) {
+  projectBalances(
+    currentBalance,
+    incomeForecasts,
+    expenseForecasts,
+    months = 6
+  ) {
     try {
       const projections = [];
       let runningBalance = currentBalance;
 
       for (let i = 0; i < months; i++) {
-        const incomeForcast = incomeForecasts[i] || { predictedAmount: 0, confidence: 0 };
-        const expenseForcast = expenseForecasts[i] || { predictedAmount: 0, confidence: 0 };
+        const incomeForcast = incomeForecasts[i] || {
+          predictedAmount: 0,
+          confidence: 0,
+        };
+        const expenseForcast = expenseForecasts[i] || {
+          predictedAmount: 0,
+          confidence: 0,
+        };
 
-        const netCashFlow = incomeForcast.predictedAmount - expenseForcast.predictedAmount;
+        const netCashFlow =
+          incomeForcast.predictedAmount - expenseForcast.predictedAmount;
         runningBalance += netCashFlow;
 
         const projection = {
@@ -42,8 +54,11 @@ export class AccountBalancePredictor {
           netCashFlow: Math.round(netCashFlow * 100) / 100,
           income: incomeForcast.predictedAmount,
           expenses: expenseForcast.predictedAmount,
-          confidence: Math.min(incomeForcast.confidence, expenseForcast.confidence),
-          balanceChange: Math.round(netCashFlow * 100) / 100
+          confidence: Math.min(
+            incomeForcast.confidence,
+            expenseForcast.confidence
+          ),
+          balanceChange: Math.round(netCashFlow * 100) / 100,
         };
 
         projections.push(projection);
@@ -65,7 +80,10 @@ export class AccountBalancePredictor {
   calculateCashFlow(incomeForecasts, expenseForecasts) {
     try {
       const cashFlows = [];
-      const maxLength = Math.max(incomeForecasts.length, expenseForecasts.length);
+      const maxLength = Math.max(
+        incomeForecasts.length,
+        expenseForecasts.length
+      );
 
       for (let i = 0; i < maxLength; i++) {
         const income = incomeForecasts[i]?.predictedAmount || 0;
@@ -73,11 +91,14 @@ export class AccountBalancePredictor {
         const netFlow = income - expenses;
 
         cashFlows.push({
-          period: incomeForecasts[i]?.period || expenseForecasts[i]?.period || this._getFutureDate(i + 1),
+          period:
+            incomeForecasts[i]?.period ||
+            expenseForecasts[i]?.period ||
+            this._getFutureDate(i + 1),
           income,
           expenses,
           netCashFlow: Math.round(netFlow * 100) / 100,
-          isPositive: netFlow >= 0
+          isPositive: netFlow >= 0,
         });
       }
 
@@ -96,17 +117,17 @@ export class AccountBalancePredictor {
    */
   identifyLowBalanceRisks(balanceProjections, thresholds = {}) {
     const defaultThresholds = {
-      critical: 0,      // Balance at or below zero
-      warning: 100,     // Balance below €100
-      caution: 500      // Balance below €500
+      critical: 0, // Balance at or below zero
+      warning: 100, // Balance below €100
+      caution: 500, // Balance below €500
     };
 
     const riskThresholds = { ...defaultThresholds, ...thresholds };
     const risks = [];
 
-    balanceProjections.forEach((projection) => {
+    balanceProjections.forEach(projection => {
       const balance = projection.projectedBalance;
-      
+
       let riskLevel = null;
       let message = '';
       let recommendation = '';
@@ -114,15 +135,18 @@ export class AccountBalancePredictor {
       if (balance <= riskThresholds.critical) {
         riskLevel = 'critical';
         message = `Account balance projected to reach €${balance.toFixed(2)} in ${projection.period.toLocaleDateString()}`;
-        recommendation = 'Immediate action required: Reduce expenses or increase income to avoid overdraft';
+        recommendation =
+          'Immediate action required: Reduce expenses or increase income to avoid overdraft';
       } else if (balance <= riskThresholds.warning) {
         riskLevel = 'warning';
         message = `Low balance warning: €${balance.toFixed(2)} projected for ${projection.period.toLocaleDateString()}`;
-        recommendation = 'Consider reducing non-essential expenses or finding additional income sources';
+        recommendation =
+          'Consider reducing non-essential expenses or finding additional income sources';
       } else if (balance <= riskThresholds.caution) {
         riskLevel = 'caution';
         message = `Balance approaching low levels: €${balance.toFixed(2)} in ${projection.period.toLocaleDateString()}`;
-        recommendation = 'Monitor spending closely and consider building emergency reserves';
+        recommendation =
+          'Monitor spending closely and consider building emergency reserves';
       }
 
       if (riskLevel) {
@@ -134,7 +158,7 @@ export class AccountBalancePredictor {
           message,
           recommendation,
           daysUntil: this._calculateDaysUntil(projection.period),
-          confidence: projection.confidence
+          confidence: projection.confidence,
         });
       }
     });
@@ -153,17 +177,23 @@ export class AccountBalancePredictor {
     balanceProjections.forEach(projection => {
       if (projection.projectedBalance < 0) {
         const overdraftAmount = Math.abs(projection.projectedBalance);
-        
+
         overdraftRisks.push({
           month: projection.month,
           period: projection.period,
           overdraftAmount: Math.round(overdraftAmount * 100) / 100,
           projectedBalance: projection.projectedBalance,
           message: `Overdraft risk: Account projected to be €${overdraftAmount.toFixed(2)} overdrawn`,
-          recommendation: 'Urgent: Adjust spending or arrange additional funds to prevent overdraft fees',
-          severity: overdraftAmount > 500 ? 'high' : overdraftAmount > 100 ? 'medium' : 'low',
+          recommendation:
+            'Urgent: Adjust spending or arrange additional funds to prevent overdraft fees',
+          severity:
+            overdraftAmount > 500
+              ? 'high'
+              : overdraftAmount > 100
+                ? 'medium'
+                : 'low',
           daysUntil: this._calculateDaysUntil(projection.period),
-          confidence: projection.confidence
+          confidence: projection.confidence,
         });
       }
     });
@@ -196,11 +226,13 @@ export class AccountBalancePredictor {
       if (debtAmount >= criticalThreshold) {
         riskLevel = 'critical';
         message = `Credit utilization projected at ${(utilizationRate * 100).toFixed(1)}% (€${debtAmount.toFixed(2)} of €${creditLimit})`;
-        recommendation = 'Critical: Reduce spending immediately to avoid exceeding credit limit';
+        recommendation =
+          'Critical: Reduce spending immediately to avoid exceeding credit limit';
       } else if (debtAmount >= warningThreshold) {
         riskLevel = 'warning';
         message = `High credit utilization: ${(utilizationRate * 100).toFixed(1)}% projected`;
-        recommendation = 'Consider paying down balance or reducing credit card usage';
+        recommendation =
+          'Consider paying down balance or reducing credit card usage';
       }
 
       if (riskLevel) {
@@ -214,7 +246,7 @@ export class AccountBalancePredictor {
           message,
           recommendation,
           daysUntil: this._calculateDaysUntil(projection.period),
-          confidence: projection.confidence
+          confidence: projection.confidence,
         });
       }
     });
@@ -231,11 +263,11 @@ export class AccountBalancePredictor {
   modelWhatIfScenarios(baseProjections, scenarioAdjustments) {
     try {
       const {
-        incomeChange = 0,      // Monthly income change
-        expenseChange = 0,     // Monthly expense change
-        oneTimeIncome = 0,     // One-time income (month 1)
-        oneTimeExpense = 0,    // One-time expense (month 1)
-        startMonth = 1         // When changes take effect
+        incomeChange = 0, // Monthly income change
+        expenseChange = 0, // Monthly expense change
+        oneTimeIncome = 0, // One-time income (month 1)
+        oneTimeExpense = 0, // One-time expense (month 1)
+        startMonth = 1, // When changes take effect
       } = scenarioAdjustments;
 
       const adjustedProjections = baseProjections.map((projection, index) => {
@@ -256,13 +288,14 @@ export class AccountBalancePredictor {
         }
 
         const adjustedNetFlow = adjustedIncome - adjustedExpenses;
-        
+
         // Recalculate running balance
         let adjustedBalance = projection.projectedBalance;
         if (index === 0) {
           // First month: start with original balance and apply changes
           const originalNetFlow = projection.income - projection.expenses;
-          adjustedBalance = projection.projectedBalance - originalNetFlow + adjustedNetFlow;
+          adjustedBalance =
+            projection.projectedBalance - originalNetFlow + adjustedNetFlow;
         } else {
           // Subsequent months: use previous adjusted balance
           const previousAdjusted = adjustedProjections[index - 1];
@@ -281,8 +314,8 @@ export class AccountBalancePredictor {
             incomeChange: month >= startMonth ? incomeChange : 0,
             expenseChange: month >= startMonth ? expenseChange : 0,
             oneTimeIncome: month === 1 ? oneTimeIncome : 0,
-            oneTimeExpense: month === 1 ? oneTimeExpense : 0
-          }
+            oneTimeExpense: month === 1 ? oneTimeExpense : 0,
+          },
         };
       });
 
@@ -304,7 +337,9 @@ export class AccountBalancePredictor {
         return [];
       }
 
-      const maxMonths = Math.max(...accountProjections.map(acc => acc.projections.length));
+      const maxMonths = Math.max(
+        ...accountProjections.map(acc => acc.projections.length)
+      );
       const consolidated = [];
 
       for (let month = 0; month < maxMonths; month++) {
@@ -336,7 +371,7 @@ export class AccountBalancePredictor {
           expenses: Math.round(totalExpenses * 100) / 100,
           confidence: minConfidence,
           balanceChange: Math.round(totalNetFlow * 100) / 100,
-          accountCount: accountProjections.length
+          accountCount: accountProjections.length,
         });
       }
 
@@ -377,7 +412,7 @@ export class AccountBalancePredictor {
    */
   _generateFallbackProjections(currentBalance, months) {
     const projections = [];
-    
+
     for (let i = 0; i < months; i++) {
       projections.push({
         month: i + 1,
@@ -388,7 +423,7 @@ export class AccountBalancePredictor {
         expenses: 0,
         confidence: 0.1,
         balanceChange: 0,
-        isFallback: true
+        isFallback: true,
       });
     }
 

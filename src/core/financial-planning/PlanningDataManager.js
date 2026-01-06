@@ -56,11 +56,14 @@ export class PlanningDataManager {
       const goalsKey = STORAGE_KEYS.GOALS;
 
       const investmentsCacheRaw = localStorage.getItem(investmentsKey);
-      if (investmentsCacheRaw) console.log(`[Sync] ${investmentsKey} loaded from cache`);
+      if (investmentsCacheRaw)
+        console.log(`[Sync] ${investmentsKey} loaded from cache`);
       const goalsCacheRaw = localStorage.getItem(goalsKey);
       if (goalsCacheRaw) console.log(`[Sync] ${goalsKey} loaded from cache`);
 
-      const investments = StorageService.getInvestments ? StorageService.getInvestments() : [];
+      const investments = StorageService.getInvestments
+        ? StorageService.getInvestments()
+        : [];
       const goals = StorageService.getGoals ? StorageService.getGoals() : [];
 
       const timestamp = new Date();
@@ -74,7 +77,8 @@ export class PlanningDataManager {
       };
 
       this.lastUpdated = timestamp;
-      this.notifyListeners();      this.notifyListeners();
+      this.notifyListeners();
+      this.notifyListeners();
 
       return this.data;
     } catch (error) {
@@ -100,7 +104,7 @@ export class PlanningDataManager {
    */
   needsRefresh(maxAge = 5 * 60 * 1000) {
     if (!this.lastUpdated) return true;
-    return (Date.now() - this.lastUpdated.getTime()) > maxAge;
+    return Date.now() - this.lastUpdated.getTime() > maxAge;
   }
 
   /**

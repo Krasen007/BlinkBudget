@@ -27,35 +27,50 @@ export class ForecastEngine {
         return this._generateBasicForecast('income', 0, months);
       }
 
-      const incomeTransactions = transactions.filter(t => 
-        t && t.type === 'income' && typeof t.amount === 'number' && t.timestamp
+      const incomeTransactions = transactions.filter(
+        t =>
+          t &&
+          t.type === 'income' &&
+          typeof t.amount === 'number' &&
+          t.timestamp
       );
-      
+
       if (incomeTransactions.length < this.minDataPoints) {
         return this._generateBasicForecast('income', 0, months);
       }
 
       const monthlyData = this._aggregateByMonth(incomeTransactions);
       const seasonalPatterns = this.detectSeasonalPatterns(incomeTransactions);
-      const recurringTransactions = this.identifyRecurringTransactions(incomeTransactions);
+      const recurringTransactions =
+        this.identifyRecurringTransactions(incomeTransactions);
 
       const forecasts = [];
-      const baseForecasts = this.exponentialSmoothing(monthlyData.values, this.defaultAlpha);
+      const baseForecasts = this.exponentialSmoothing(
+        monthlyData.values,
+        this.defaultAlpha
+      );
       const lastValue = baseForecasts[baseForecasts.length - 1] || 0;
 
       for (let i = 0; i < months; i++) {
         const futureDate = new Date();
         futureDate.setMonth(futureDate.getMonth() + i + 1);
-        
+
         const monthIndex = futureDate.getMonth();
         const seasonalMultiplier = seasonalPatterns.income?.[monthIndex] || 1;
-        const recurringAmount = this._getRecurringAmountForMonth(recurringTransactions, futureDate);
-        
+        const recurringAmount = this._getRecurringAmountForMonth(
+          recurringTransactions,
+          futureDate
+        );
+
         const baseAmount = lastValue * seasonalMultiplier;
         const predictedAmount = Math.max(0, baseAmount + recurringAmount);
-        
+
         const confidence = this._calculateConfidence(monthlyData.values, i);
-        const confidenceInterval = this._calculateConfidenceInterval(predictedAmount, monthlyData.variance, i);
+        const confidenceInterval = this._calculateConfidenceInterval(
+          predictedAmount,
+          monthlyData.variance,
+          i
+        );
 
         forecasts.push({
           period: new Date(futureDate),
@@ -63,7 +78,7 @@ export class ForecastEngine {
           confidenceInterval,
           confidence,
           method: recurringAmount > 0 ? 'recurring' : 'exponential_smoothing',
-          seasonalFactor: seasonalMultiplier
+          seasonalFactor: seasonalMultiplier,
         });
       }
 
@@ -87,35 +102,50 @@ export class ForecastEngine {
         return this._generateBasicForecast('expense', 0, months);
       }
 
-      const expenseTransactions = transactions.filter(t => 
-        t && t.type === 'expense' && typeof t.amount === 'number' && t.timestamp
+      const expenseTransactions = transactions.filter(
+        t =>
+          t &&
+          t.type === 'expense' &&
+          typeof t.amount === 'number' &&
+          t.timestamp
       );
-      
+
       if (expenseTransactions.length < this.minDataPoints) {
         return this._generateBasicForecast('expense', 0, months);
       }
 
       const monthlyData = this._aggregateByMonth(expenseTransactions);
       const seasonalPatterns = this.detectSeasonalPatterns(expenseTransactions);
-      const recurringTransactions = this.identifyRecurringTransactions(expenseTransactions);
+      const recurringTransactions =
+        this.identifyRecurringTransactions(expenseTransactions);
 
       const forecasts = [];
-      const baseForecasts = this.exponentialSmoothing(monthlyData.values, this.defaultAlpha);
+      const baseForecasts = this.exponentialSmoothing(
+        monthlyData.values,
+        this.defaultAlpha
+      );
       const lastValue = baseForecasts[baseForecasts.length - 1] || 0;
 
       for (let i = 0; i < months; i++) {
         const futureDate = new Date();
         futureDate.setMonth(futureDate.getMonth() + i + 1);
-        
+
         const monthIndex = futureDate.getMonth();
         const seasonalMultiplier = seasonalPatterns.expense?.[monthIndex] || 1;
-        const recurringAmount = this._getRecurringAmountForMonth(recurringTransactions, futureDate);
-        
+        const recurringAmount = this._getRecurringAmountForMonth(
+          recurringTransactions,
+          futureDate
+        );
+
         const baseAmount = lastValue * seasonalMultiplier;
         const predictedAmount = Math.max(0, baseAmount + recurringAmount);
-        
+
         const confidence = this._calculateConfidence(monthlyData.values, i);
-        const confidenceInterval = this._calculateConfidenceInterval(predictedAmount, monthlyData.variance, i);
+        const confidenceInterval = this._calculateConfidenceInterval(
+          predictedAmount,
+          monthlyData.variance,
+          i
+        );
 
         forecasts.push({
           period: new Date(futureDate),
@@ -123,7 +153,7 @@ export class ForecastEngine {
           confidenceInterval,
           confidence,
           method: recurringAmount > 0 ? 'recurring' : 'exponential_smoothing',
-          seasonalFactor: seasonalMultiplier
+          seasonalFactor: seasonalMultiplier,
         });
       }
 
@@ -141,22 +171,32 @@ export class ForecastEngine {
    */
   detectSeasonalPatterns(transactions) {
     try {
-      const patterns = { income: new Array(12).fill(1), expense: new Array(12).fill(1) };
-      
+      const patterns = {
+        income: new Array(12).fill(1),
+        expense: new Array(12).fill(1),
+      };
+
       // Filter valid transactions
-      const validTransactions = transactions.filter(transaction => 
-        transaction && 
-        typeof transaction.amount === 'number' && 
-        transaction.timestamp &&
-        transaction.type
+      const validTransactions = transactions.filter(
+        transaction =>
+          transaction &&
+          typeof transaction.amount === 'number' &&
+          transaction.timestamp &&
+          transaction.type
       );
 
       if (validTransactions.length < 12) {
         return patterns; // Not enough data for seasonal analysis
       }
 
-      const monthlyTotals = { income: new Array(12).fill(0), expense: new Array(12).fill(0) };
-      const monthlyCounts = { income: new Array(12).fill(0), expense: new Array(12).fill(0) };
+      const monthlyTotals = {
+        income: new Array(12).fill(0),
+        expense: new Array(12).fill(0),
+      };
+      const monthlyCounts = {
+        income: new Array(12).fill(0),
+        expense: new Array(12).fill(0),
+      };
 
       validTransactions.forEach(transaction => {
         try {
@@ -167,11 +207,15 @@ export class ForecastEngine {
 
           const month = date.getMonth();
           const type = transaction.type === 'income' ? 'income' : 'expense';
-          
+
           monthlyTotals[type][month] += transaction.amount;
           monthlyCounts[type][month]++;
         } catch (error) {
-          console.warn('Error processing transaction for seasonal analysis:', transaction, error);
+          console.warn(
+            'Error processing transaction for seasonal analysis:',
+            transaction,
+            error
+          );
         }
       });
 
@@ -179,22 +223,28 @@ export class ForecastEngine {
       const monthlyAverages = { income: [], expense: [] };
       ['income', 'expense'].forEach(type => {
         for (let month = 0; month < 12; month++) {
-          const avg = monthlyCounts[type][month] > 0 
-            ? monthlyTotals[type][month] / monthlyCounts[type][month]
-            : 0;
+          const avg =
+            monthlyCounts[type][month] > 0
+              ? monthlyTotals[type][month] / monthlyCounts[type][month]
+              : 0;
           monthlyAverages[type][month] = avg;
         }
       });
 
       // Calculate seasonal multipliers
       ['income', 'expense'].forEach(type => {
-        const yearlyAverage = monthlyAverages[type].reduce((sum, val) => sum + val, 0) / 12;
-        
+        const yearlyAverage =
+          monthlyAverages[type].reduce((sum, val) => sum + val, 0) / 12;
+
         if (yearlyAverage > 0) {
           for (let month = 0; month < 12; month++) {
-            patterns[type][month] = monthlyAverages[type][month] / yearlyAverage;
+            patterns[type][month] =
+              monthlyAverages[type][month] / yearlyAverage;
             // Cap extreme values
-            patterns[type][month] = Math.max(0.5, Math.min(2.0, patterns[type][month]));
+            patterns[type][month] = Math.max(
+              0.5,
+              Math.min(2.0, patterns[type][month])
+            );
           }
         }
       });
@@ -216,7 +266,7 @@ export class ForecastEngine {
     if (!data || data.length === 0) return [];
 
     const smoothed = [data[0]];
-    
+
     for (let i = 1; i < data.length; i++) {
       const smoothedValue = alpha * data[i] + (1 - alpha) * smoothed[i - 1];
       smoothed.push(smoothedValue);
@@ -235,7 +285,7 @@ export class ForecastEngine {
     if (!data || data.length < windowSize) return data || [];
 
     const movingAverages = [];
-    
+
     for (let i = windowSize - 1; i < data.length; i++) {
       const window = data.slice(i - windowSize + 1, i + 1);
       const average = window.reduce((sum, val) => sum + val, 0) / windowSize;
@@ -256,11 +306,12 @@ export class ForecastEngine {
       const transactionGroups = new Map();
 
       // Filter out transactions without required properties
-      const validTransactions = transactions.filter(transaction => 
-        transaction && 
-        typeof transaction.amount === 'number' && 
-        transaction.timestamp &&
-        (transaction.description || transaction.category)
+      const validTransactions = transactions.filter(
+        transaction =>
+          transaction &&
+          typeof transaction.amount === 'number' &&
+          transaction.timestamp &&
+          (transaction.description || transaction.category)
       );
 
       // Group transactions by description and amount (with tolerance)
@@ -274,16 +325,20 @@ export class ForecastEngine {
 
       // Analyze each group for recurring patterns
       transactionGroups.forEach((group, key) => {
-        if (group.length >= 3) { // Need at least 3 occurrences
+        if (group.length >= 3) {
+          // Need at least 3 occurrences
           const pattern = this._analyzeRecurringPattern(group);
           if (pattern.isRecurring) {
             recurringPatterns.push({
               key,
-              description: group[0].description || group[0].category || 'Unknown',
+              description:
+                group[0].description || group[0].category || 'Unknown',
               averageAmount: pattern.averageAmount,
               frequency: pattern.frequency, // 'monthly', 'weekly', etc.
               confidence: pattern.confidence,
-              lastOccurrence: new Date(Math.max(...group.map(t => new Date(t.timestamp))))
+              lastOccurrence: new Date(
+                Math.max(...group.map(t => new Date(t.timestamp)))
+              ),
             });
           }
         }
@@ -309,7 +364,7 @@ export class ForecastEngine {
 
     return {
       lower: Math.max(0, forecast - margin),
-      upper: forecast + margin
+      upper: forecast + margin,
     };
   }
 
@@ -322,9 +377,9 @@ export class ForecastEngine {
   _calculateConfidence(historicalData, horizon) {
     const dataPoints = historicalData.length;
     const baseConfidence = Math.min(1, dataPoints / 12); // More data = higher confidence
-    const horizonPenalty = Math.max(0, 1 - (horizon * 0.05)); // Confidence decreases with horizon
-    
-    return Math.round((baseConfidence * horizonPenalty) * 100) / 100;
+    const horizonPenalty = Math.max(0, 1 - horizon * 0.05); // Confidence decreases with horizon
+
+    return Math.round(baseConfidence * horizonPenalty * 100) / 100;
   }
 
   /**
@@ -334,12 +389,13 @@ export class ForecastEngine {
    */
   _aggregateByMonth(transactions) {
     const monthlyTotals = new Map();
-    
+
     // Filter out invalid transactions
-    const validTransactions = transactions.filter(transaction => 
-      transaction && 
-      typeof transaction.amount === 'number' && 
-      transaction.timestamp
+    const validTransactions = transactions.filter(
+      transaction =>
+        transaction &&
+        typeof transaction.amount === 'number' &&
+        transaction.timestamp
     );
 
     validTransactions.forEach(transaction => {
@@ -350,26 +406,35 @@ export class ForecastEngine {
           console.warn('Invalid timestamp in transaction:', transaction);
           return;
         }
-        
+
         const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
-        
+
         if (!monthlyTotals.has(monthKey)) {
           monthlyTotals.set(monthKey, 0);
         }
-        monthlyTotals.set(monthKey, monthlyTotals.get(monthKey) + transaction.amount);
+        monthlyTotals.set(
+          monthKey,
+          monthlyTotals.get(monthKey) + transaction.amount
+        );
       } catch (error) {
-        console.warn('Error processing transaction for aggregation:', transaction, error);
+        console.warn(
+          'Error processing transaction for aggregation:',
+          transaction,
+          error
+        );
       }
     });
 
     const values = Array.from(monthlyTotals.values());
-    
+
     if (values.length === 0) {
       return { values: [0], mean: 0, variance: 0 };
     }
 
     const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
-    const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+    const variance =
+      values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
+      values.length;
 
     return { values, mean, variance };
   }
@@ -383,18 +448,18 @@ export class ForecastEngine {
    */
   _generateBasicForecast(type, baseAmount, months) {
     const forecasts = [];
-    
+
     for (let i = 0; i < months; i++) {
       const futureDate = new Date();
       futureDate.setMonth(futureDate.getMonth() + i + 1);
-      
+
       forecasts.push({
         period: new Date(futureDate),
         predictedAmount: baseAmount,
         confidenceInterval: { lower: 0, upper: baseAmount * 1.5 },
         confidence: 0.1, // Very low confidence
         method: 'insufficient_data',
-        seasonalFactor: 1
+        seasonalFactor: 1,
       });
     }
 
@@ -407,7 +472,13 @@ export class ForecastEngine {
    * @returns {string} Grouping key
    */
   _generateRecurringKey(transaction) {
-    const description = (transaction.description || transaction.category || 'unknown').toLowerCase().trim();
+    const description = (
+      transaction.description ||
+      transaction.category ||
+      'unknown'
+    )
+      .toLowerCase()
+      .trim();
     const roundedAmount = Math.round(transaction.amount / 10) * 10; // Group similar amounts
     return `${description}-${roundedAmount}`;
   }
@@ -418,9 +489,11 @@ export class ForecastEngine {
    * @returns {Object} Pattern analysis result
    */
   _analyzeRecurringPattern(transactions) {
-    const dates = transactions.map(t => new Date(t.timestamp)).sort((a, b) => a - b);
+    const dates = transactions
+      .map(t => new Date(t.timestamp))
+      .sort((a, b) => a - b);
     const amounts = transactions.map(t => t.amount);
-    
+
     // Calculate intervals between transactions (in days)
     const intervals = [];
     for (let i = 1; i < dates.length; i++) {
@@ -429,13 +502,16 @@ export class ForecastEngine {
     }
 
     // Determine if pattern is recurring
-    const avgInterval = intervals.reduce((sum, val) => sum + val, 0) / intervals.length;
-    const intervalVariance = intervals.reduce((sum, val) => sum + Math.pow(val - avgInterval, 2), 0) / intervals.length;
+    const avgInterval =
+      intervals.reduce((sum, val) => sum + val, 0) / intervals.length;
+    const intervalVariance =
+      intervals.reduce((sum, val) => sum + Math.pow(val - avgInterval, 2), 0) /
+      intervals.length;
     const intervalStdDev = Math.sqrt(intervalVariance);
-    
+
     // Consider recurring if intervals are consistent
-    const isRecurring = intervalStdDev < (avgInterval * 0.3); // 30% tolerance
-    
+    const isRecurring = intervalStdDev < avgInterval * 0.3; // 30% tolerance
+
     let frequency = 'irregular';
     if (isRecurring) {
       if (avgInterval >= 25 && avgInterval <= 35) frequency = 'monthly';
@@ -443,7 +519,8 @@ export class ForecastEngine {
       else if (avgInterval >= 13 && avgInterval <= 15) frequency = 'biweekly';
     }
 
-    const averageAmount = amounts.reduce((sum, val) => sum + val, 0) / amounts.length;
+    const averageAmount =
+      amounts.reduce((sum, val) => sum + val, 0) / amounts.length;
     const confidence = isRecurring ? Math.min(1, transactions.length / 6) : 0;
 
     return {
@@ -451,7 +528,7 @@ export class ForecastEngine {
       frequency,
       averageAmount,
       confidence,
-      intervalDays: avgInterval
+      intervalDays: avgInterval,
     };
   }
 

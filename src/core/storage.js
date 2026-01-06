@@ -34,7 +34,11 @@ export const StorageService = {
           attempt += 1;
           if (attempt > retries) {
             console.error(`[Storage] pushToCloud failed for ${key}:`, err);
-            window.dispatchEvent(new CustomEvent('sync-error', { detail: { key, error: String(err) } }));
+            window.dispatchEvent(
+              new CustomEvent('sync-error', {
+                detail: { key, error: String(err) },
+              })
+            );
             return;
           }
           // exponential backoff with jitter
@@ -49,7 +53,10 @@ export const StorageService = {
     const chain = this._pushChains.get(key) || Promise.resolve();
     const newChain = chain.then(() => attemptPush());
     // keep chain but swallow final rejection so it doesn't break subsequent chains
-    this._pushChains.set(key, newChain.catch(() => {}));
+    this._pushChains.set(
+      key,
+      newChain.catch(() => {})
+    );
     return newChain;
   },
 
@@ -72,39 +79,70 @@ export const StorageService = {
   // --- Settings (delegated to SettingsService) ---
   getSetting: key => SettingsService.getSetting(key),
   saveSetting: (key, value) => SettingsService.saveSetting(key, value),
-  
+
   // --- Investments (delegated to InvestmentTracker) ---
   _investmentTracker: new InvestmentTracker(),
-  getInvestments: function() { return this._investmentTracker.getAllInvestments(); },
-  addInvestment: function(symbol, shares, purchasePrice, purchaseDate, metadata) {
-    const res = this._investmentTracker.addInvestment(symbol, shares, purchasePrice, purchaseDate, metadata);
+  getInvestments: function () {
+    return this._investmentTracker.getAllInvestments();
+  },
+  addInvestment: function (
+    symbol,
+    shares,
+    purchasePrice,
+    purchaseDate,
+    metadata
+  ) {
+    const res = this._investmentTracker.addInvestment(
+      symbol,
+      shares,
+      purchasePrice,
+      purchaseDate,
+      metadata
+    );
     // Invalidate related caches
     CacheService.del('portfolioSummary');
     // Push updated investments to cloud (authoritative single-doc pattern)
     // Use safe, serialized push with retries (non-blocking)
-    this._pushToCloudSafe(STORAGE_KEYS.INVESTMENTS, this._investmentTracker.getAllInvestments());
+    this._pushToCloudSafe(
+      STORAGE_KEYS.INVESTMENTS,
+      this._investmentTracker.getAllInvestments()
+    );
     return res;
   },
-  updateInvestmentValue: function(symbol, currentPrice) {
-    const res = this._investmentTracker.updateInvestmentValue(symbol, currentPrice);
+  updateInvestmentValue: function (symbol, currentPrice) {
+    const res = this._investmentTracker.updateInvestmentValue(
+      symbol,
+      currentPrice
+    );
     CacheService.del('portfolioSummary');
-    this._pushToCloudSafe(STORAGE_KEYS.INVESTMENTS, this._investmentTracker.getAllInvestments());
+    this._pushToCloudSafe(
+      STORAGE_KEYS.INVESTMENTS,
+      this._investmentTracker.getAllInvestments()
+    );
     return res;
   },
-  removeInvestment: function(symbol) {
+  removeInvestment: function (symbol) {
     const res = this._investmentTracker.removeInvestment(symbol);
     CacheService.del('portfolioSummary');
-    this._pushToCloudSafe(STORAGE_KEYS.INVESTMENTS, this._investmentTracker.getAllInvestments());
+    this._pushToCloudSafe(
+      STORAGE_KEYS.INVESTMENTS,
+      this._investmentTracker.getAllInvestments()
+    );
     return res;
   },
-  updateInvestment: function(id, updates) {
+  updateInvestment: function (id, updates) {
     const res = this._investmentTracker.updateInvestment(id, updates);
     CacheService.del('portfolioSummary');
-    this._pushToCloudSafe(STORAGE_KEYS.INVESTMENTS, this._investmentTracker.getAllInvestments());
+    this._pushToCloudSafe(
+      STORAGE_KEYS.INVESTMENTS,
+      this._investmentTracker.getAllInvestments()
+    );
     return res;
   },
-  getInvestment: function(symbol) { return this._investmentTracker.getInvestment(symbol); },
-  calculatePortfolioSummary: function() {
+  getInvestment: function (symbol) {
+    return this._investmentTracker.getInvestment(symbol);
+  },
+  calculatePortfolioSummary: function () {
     const cached = CacheService.get('portfolioSummary');
     if (cached) return cached;
     const summary = this._investmentTracker.getPortfolioSummary();
@@ -115,32 +153,46 @@ export const StorageService = {
 
   // --- Goals (delegated to GoalPlanner) ---
   _goalPlanner: new GoalPlanner(),
-  getGoals: function() { return this._goalPlanner.getAllGoals(); },
-  createGoal: function(name, targetAmount, targetDate, currentSavings = 0, options = {}) {
-    const res = this._goalPlanner.createGoal(name, targetAmount, targetDate, currentSavings, options);
+  getGoals: function () {
+    return this._goalPlanner.getAllGoals();
+  },
+  createGoal: function (
+    name,
+    targetAmount,
+    targetDate,
+    currentSavings = 0,
+    options = {}
+  ) {
+    const res = this._goalPlanner.createGoal(
+      name,
+      targetAmount,
+      targetDate,
+      currentSavings,
+      options
+    );
     CacheService.del('goalsSummary');
     this._pushToCloudSafe(STORAGE_KEYS.GOALS, this._goalPlanner.getAllGoals());
     return res;
   },
-  updateGoalProgress: function(goalId, newSavings) {
+  updateGoalProgress: function (goalId, newSavings) {
     const res = this._goalPlanner.updateGoalProgress(goalId, newSavings);
     CacheService.del('goalsSummary');
     this._pushToCloudSafe(STORAGE_KEYS.GOALS, this._goalPlanner.getAllGoals());
     return res;
   },
-  deleteGoal: function(goalId) {
+  deleteGoal: function (goalId) {
     const res = this._goalPlanner.deleteGoal(goalId);
     CacheService.del('goalsSummary');
     this._pushToCloudSafe(STORAGE_KEYS.GOALS, this._goalPlanner.getAllGoals());
     return res;
   },
-  updateGoal: function(goalId, updates) {
+  updateGoal: function (goalId, updates) {
     const res = this._goalPlanner.updateGoal(goalId, updates);
     CacheService.del('goalsSummary');
     this._pushToCloudSafe(STORAGE_KEYS.GOALS, this._goalPlanner.getAllGoals());
     return res;
   },
-  getGoalsSummary: function() {
+  getGoalsSummary: function () {
     const cached = CacheService.get('goalsSummary');
     if (cached) return cached;
     const summary = this._goalPlanner.getGoalsSummary();

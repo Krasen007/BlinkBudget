@@ -39,7 +39,8 @@ export const routes = {
     updateMobileNavigation('reports');
   },
   'financial-planning': async () => {
-    const { FinancialPlanningView } = await import('../views/FinancialPlanningView.js');
+    const { FinancialPlanningView } =
+      await import('../views/FinancialPlanningView.js');
     NavigationState.setLastActiveView('financial-planning');
     ViewManager.setView(FinancialPlanningView());
     updateMobileNavigation('financial-planning');

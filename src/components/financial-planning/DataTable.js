@@ -10,7 +10,13 @@ import { COLORS, SPACING } from '../../utils/constants.js';
  * @param {Array<Array<string>>} [props.cellStyles] - Optional styles for cells
  * @returns {HTMLElement} The data table element
  */
-export const DataTable = ({ title, headers, rows, headerStyles = [], cellStyles = [] }) => {
+export const DataTable = ({
+  title,
+  headers,
+  rows,
+  headerStyles = [],
+  cellStyles = [],
+}) => {
   const container = document.createElement('div');
   container.className = 'forecast-table-container';
   container.style.background = COLORS.SURFACE;

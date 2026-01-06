@@ -66,7 +66,9 @@ export const DashboardView = () => {
   planningBtn.style.border = 'none';
   planningBtn.style.marginRight = SPACING.SM;
   planningBtn.title = 'Financial Planning';
-  planningBtn.addEventListener('click', () => Router.navigate('financial-planning'));
+  planningBtn.addEventListener('click', () =>
+    Router.navigate('financial-planning')
+  );
 
   // Hide charts and planning buttons on mobile (mobile uses navigation bar)
   const updateButtonVisibility = () => {

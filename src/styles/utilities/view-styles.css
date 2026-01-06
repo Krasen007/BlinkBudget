@@ -89,10 +89,7 @@
 /* Enhanced fixed container variants */
 .view-fixed.view-absolute {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
 }
 
 .view-fixed.view-relative {
@@ -121,66 +118,66 @@
   .view-header {
     margin-bottom: var(--spacing-sm);
   }
-  
+
   /* Mobile content spacing */
   .view-content {
     gap: var(--spacing-md);
   }
-  
+
   /* Mobile stats container */
   .view-stats-container {
     grid-template-columns: 1fr 1fr;
   }
-  
+
   /* Mobile form adjustments */
   .view-form-container {
     padding: 0 var(--spacing-xs);
   }
-  
+
   /* Mobile action buttons */
   .view-action-btn {
     width: 100%;
     margin-top: var(--spacing-sm);
   }
-  
+
   /* Mobile navigation */
   .view-navigation {
     margin-bottom: var(--spacing-md);
   }
-  
+
   /* Mobile sections */
   .view-section {
     gap: var(--spacing-md);
     margin-bottom: var(--spacing-lg);
   }
-  
+
   /* Mobile cards */
   .view-card {
     padding: var(--spacing-md);
   }
-  
+
   /* Mobile grid adjustments */
   .view-grid {
     grid-template-columns: 1fr;
     gap: var(--spacing-sm);
   }
-  
+
   /* Mobile touch targets */
   .view-back-btn {
     padding: var(--spacing-xs) var(--spacing-sm);
     font-size: 0.875rem;
   }
-  
+
   /* Mobile titles */
   .view-title {
     font-size: 1.5rem;
   }
-  
+
   /* Mobile tabs */
   .view-tabs {
     margin-bottom: var(--spacing-md);
   }
-  
+
   .view-tab {
     padding: var(--spacing-xs) var(--spacing-sm);
     font-size: 0.75rem;
@@ -192,15 +189,15 @@
   .view-container {
     padding: 0 var(--spacing-md);
   }
-  
+
   .view-header {
     margin-bottom: var(--spacing-md);
   }
-  
+
   .view-stats-container {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .view-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -211,15 +208,15 @@
   .view-container {
     padding: 0 var(--spacing-lg);
   }
-  
+
   .view-header {
     margin-bottom: var(--spacing-lg);
   }
-  
+
   .view-stats-container {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   }
-  
+
   .view-grid {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   }
@@ -417,7 +414,9 @@
 
 /* Mobile keyboard handling */
 .view-keyboard-safe {
-  padding-bottom: calc(var(--visual-viewport-height) - 100vh + var(--spacing-lg));
+  padding-bottom: calc(
+    var(--visual-viewport-height) - 100vh + var(--spacing-lg)
+  );
 }
 
 /* Mobile content adjustments */
@@ -508,21 +507,21 @@
   .view-responsive-full {
     width: 100%;
   }
-  
+
   .view-responsive-centered {
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  
+
   .view-responsive-stacked {
     flex-direction: column;
   }
-  
+
   .view-responsive-spaced {
     gap: var(--spacing-md);
   }
-  
+
   .view-responsive-tight {
     gap: var(--spacing-xs);
   }
@@ -532,20 +531,20 @@
   .view-responsive-full {
     width: auto;
   }
-  
+
   .view-responsive-centered {
     display: block;
     text-align: left;
   }
-  
+
   .view-responsive-stacked {
     flex-direction: row;
   }
-  
+
   .view-responsive-spaced {
     gap: var(--spacing-lg);
   }
-  
+
   .view-responsive-tight {
     gap: var(--spacing-sm);
   }
@@ -717,19 +716,25 @@
 
 /* Shadow utilities */
 .view-shadow-sm {
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 2px rgb(0, 0, 0, 0.05);
 }
 
 .view-shadow-md {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 4px 6px -1px rgb(0, 0, 0, 0.1),
+    0 2px 4px -1px rgb(0, 0, 0, 0.06);
 }
 
 .view-shadow-lg {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgb(0, 0, 0, 0.1),
+    0 4px 6px -2px rgb(0, 0, 0, 0.05);
 }
 
 .view-shadow-xl {
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 20px 25px -5px rgb(0, 0, 0, 0.1),
+    0 10px 10px -5px rgb(0, 0, 0, 0.04);
 }
 
 /* Transition utilities */
@@ -767,23 +772,43 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 @keyframes slideUp {
-  from { transform: translateY(10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes slideDown {
-  from { transform: translateY(-10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* Focus utilities for accessibility */
@@ -845,7 +870,7 @@
 .view-form-input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px rgb(59, 130, 246, 0.1);
 }
 
 .view-form-error {

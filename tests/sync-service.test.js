@@ -25,7 +25,7 @@ describe('SyncService.mergeArraysById', () => {
       const local = [{ id: '2', val: 1, updatedAt: t1 }];
       const cloud = [{ id: '2', val: 99, updatedAt: t2 }];
 
-      const handler = (e) => {
+      const handler = e => {
         try {
           expect(e.detail).toBeDefined();
           expect(e.detail.key).toBe('test');
@@ -48,12 +48,17 @@ describe('SyncService.handleConflictResolution', () => {
 
   it('keeps cloud item when resolution=cloud', async () => {
     const key = 'blinkbudget_investments';
-    const localArray = [{ id: 'a', val: 1, updatedAt: '2020-01-01T00:00:00.000Z' }];
+    const localArray = [
+      { id: 'a', val: 1, updatedAt: '2020-01-01T00:00:00.000Z' },
+    ];
     localStorage.setItem(key, JSON.stringify(localArray));
 
     const cloudItem = { id: 'a', val: 42, updatedAt: new Date().toISOString() };
 
-    await SyncService.handleConflictResolution({ resolution: 'cloud', conflict: { key, id: 'a', cloudItem } });
+    await SyncService.handleConflictResolution({
+      resolution: 'cloud',
+      conflict: { key, id: 'a', cloudItem },
+    });
 
     const nowLocal = JSON.parse(localStorage.getItem(key));
     expect(nowLocal[0].val).toBe(42);

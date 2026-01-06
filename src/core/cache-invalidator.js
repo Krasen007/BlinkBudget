@@ -28,10 +28,7 @@ export const CacheInvalidator = {
       if (!key) return;
 
       // Always clear related summary caches for planning data
-      if (
-        key === STORAGE_KEYS.INVESTMENTS ||
-        key === STORAGE_KEYS.GOALS
-      ) {
+      if (key === STORAGE_KEYS.INVESTMENTS || key === STORAGE_KEYS.GOALS) {
         CacheService.del('portfolioSummary');
         CacheService.del('goalsSummary');
       }
@@ -41,16 +38,24 @@ export const CacheInvalidator = {
         CacheService.del('analytics_*');
         CacheService.del('forecast_*');
         // Notify instances to clear their in-memory caches
-        window.dispatchEvent(new CustomEvent('forecast-invalidate', { detail: { reason: 'transactions-updated', timestamp: Date.now() } }));
+        window.dispatchEvent(
+          new CustomEvent('forecast-invalidate', {
+            detail: { reason: 'transactions-updated', timestamp: Date.now() },
+          })
+        );
       }
 
       // When accounts change, forecasts may be affected too
       if (key === STORAGE_KEYS.ACCOUNTS) {
         CacheService.del('forecast_*');
-        window.dispatchEvent(new CustomEvent('forecast-invalidate', { detail: { reason: 'accounts-updated', timestamp: Date.now() } }));
+        window.dispatchEvent(
+          new CustomEvent('forecast-invalidate', {
+            detail: { reason: 'accounts-updated', timestamp: Date.now() },
+          })
+        );
       }
     } catch (error) {
       console.warn('[CacheInvalidator] Error handling storage update:', error);
     }
-  }
+  },
 };

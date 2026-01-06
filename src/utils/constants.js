@@ -143,8 +143,8 @@ export const STORAGE_KEYS = {
   TRANSACTIONS: 'blinkbudget_transactions',
   ACCOUNTS: 'blinkbudget_accounts',
   SETTINGS: 'blink_settings',
-    INVESTMENTS: 'blinkbudget_investments',
-    GOALS: 'blinkbudget_goals',
+  INVESTMENTS: 'blinkbudget_investments',
+  GOALS: 'blinkbudget_goals',
   DASHBOARD_FILTER: 'dashboard_filter',
 };
 

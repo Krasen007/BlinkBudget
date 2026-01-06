@@ -14,7 +14,9 @@ describe('GoalPlanner', () => {
     const targetDate = new Date();
     targetDate.setFullYear(targetDate.getFullYear() + 2); // 2 years from now
 
-    const goal = planner.createGoal('Test Goal', 12000, targetDate, 2000, { expectedReturn: 0.05 });
+    const goal = planner.createGoal('Test Goal', 12000, targetDate, 2000, {
+      expectedReturn: 0.05,
+    });
 
     // Required monthly savings is stored on the created goal
     expect(typeof goal.requiredMonthlySavings).toBe('number');
@@ -27,7 +29,9 @@ describe('GoalPlanner', () => {
     expect(projections.length).toBe(5);
     // Projections should be increasing
     for (let i = 1; i < projections.length; i++) {
-      expect(projections[i].projectedWealth).toBeGreaterThanOrEqual(projections[i - 1].projectedWealth);
+      expect(projections[i].projectedWealth).toBeGreaterThanOrEqual(
+        projections[i - 1].projectedWealth
+      );
     }
   });
 
@@ -35,12 +39,20 @@ describe('GoalPlanner', () => {
     const targetDate = new Date();
     targetDate.setFullYear(targetDate.getFullYear() + 3);
 
-    const goal = planner.createGoal('House', 50000, targetDate, 10000, { expectedReturn: 0.04 });
+    const goal = planner.createGoal('House', 50000, targetDate, 10000, {
+      expectedReturn: 0.04,
+    });
 
     // Feasible scenario: income exceeds expenses comfortably
     const feasible = planner.assessGoalFeasibility(goal, 4000, 2000);
     expect(feasible).toHaveProperty('feasibility');
-    expect(['achieved', 'easily_achievable', 'achievable', 'challenging', 'not_feasible']).toContain(feasible.feasibility);
+    expect([
+      'achieved',
+      'easily_achievable',
+      'achievable',
+      'challenging',
+      'not_feasible',
+    ]).toContain(feasible.feasibility);
 
     // Not feasible scenario: expenses >= income
     const notFeasible = planner.assessGoalFeasibility(goal, 2000, 2500);

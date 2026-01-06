@@ -28,8 +28,6 @@
   touch-action: pan-y;
 }
 
-
-
 /* Reports Content Area - Match financial planning view */
 .reports-view-container .reports-content {
   flex: 1;

@@ -16,7 +16,11 @@ import { getChartColors } from '../core/chart-config.js';
  * @param {Object} options - Chart configuration options
  * @returns {Promise<Object>} Chart section and instance
  */
-export async function createProjectedBalanceChart(chartRenderer, balanceProjections, options = {}) {
+export async function createProjectedBalanceChart(
+  chartRenderer,
+  balanceProjections,
+  options = {}
+) {
   const section = document.createElement('div');
   section.className = 'chart-section projected-balance-section';
   section.setAttribute('data-chart-type', 'projected-balance');
@@ -59,7 +63,10 @@ export async function createProjectedBalanceChart(chartRenderer, balanceProjecti
   // Prepare chart data
   const labels = balanceProjections.map(projection => {
     const date = new Date(projection.date);
-    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      year: 'numeric',
+    });
   });
 
   const balanceData = balanceProjections.map(projection => projection.balance);
@@ -70,7 +77,10 @@ export async function createProjectedBalanceChart(chartRenderer, balanceProjecti
       label: 'Projected Balance',
       data: balanceData,
       borderColor: COLORS.PRIMARY,
-      backgroundColor: COLORS.PRIMARY.replace(')', ', 0.1)').replace('hsl', 'hsla'),
+      backgroundColor: COLORS.PRIMARY.replace(')', ', 0.1)').replace(
+        'hsl',
+        'hsla'
+      ),
       borderWidth: 3,
       fill: true,
       tension: 0.4,
@@ -79,7 +89,7 @@ export async function createProjectedBalanceChart(chartRenderer, balanceProjecti
       pointBackgroundColor: COLORS.PRIMARY,
       pointBorderColor: '#ffffff',
       pointBorderWidth: 2,
-    }
+    },
   ];
 
   // Add warning line if balance goes negative
@@ -119,7 +129,7 @@ export async function createProjectedBalanceChart(chartRenderer, balanceProjecti
         mode: 'index',
         intersect: false,
         callbacks: {
-          label: function(context) {
+          label: function (context) {
             const value = context.parsed.y;
             const formattedValue = new Intl.NumberFormat('en-US', {
               style: 'currency',
@@ -137,7 +147,7 @@ export async function createProjectedBalanceChart(chartRenderer, balanceProjecti
           color: 'rgba(0, 0, 0, 0.1)',
         },
         ticks: {
-          callback: function(value) {
+          callback: function (value) {
             return new Intl.NumberFormat('en-US', {
               style: 'currency',
               currency: 'EUR',
@@ -173,7 +183,11 @@ export async function createProjectedBalanceChart(chartRenderer, balanceProjecti
  * @param {Object} options - Chart configuration options
  * @returns {Promise<Object>} Chart section and instance
  */
-export async function createPortfolioCompositionChart(chartRenderer, portfolioData, options = {}) {
+export async function createPortfolioCompositionChart(
+  chartRenderer,
+  portfolioData,
+  options = {}
+) {
   const section = document.createElement('div');
   section.className = 'chart-section portfolio-composition-section';
   section.setAttribute('data-chart-type', 'portfolio-composition');
@@ -238,7 +252,9 @@ export async function createPortfolioCompositionChart(chartRenderer, portfolioDa
   const colors = getChartColors(assetClasses.length, false, 'solid');
 
   const chartData = {
-    labels: assetClasses.map(asset => asset.charAt(0).toUpperCase() + asset.slice(1)),
+    labels: assetClasses.map(
+      asset => asset.charAt(0).toUpperCase() + asset.slice(1)
+    ),
     datasets: [
       {
         data: values,
@@ -265,7 +281,7 @@ export async function createPortfolioCompositionChart(chartRenderer, portfolioDa
       },
       tooltip: {
         enabled: false, // Use custom tooltip
-        external: function(context) {
+        external: function (context) {
           const tooltip = context.tooltip;
 
           if (tooltip.opacity === 0) {
@@ -279,7 +295,8 @@ export async function createPortfolioCompositionChart(chartRenderer, portfolioDa
           }
 
           if (tooltip.body && tooltip.body.length > 0) {
-            const dataPoint = context.chart.data.datasets[tooltip.dataPoints[0].datasetIndex];
+            const dataPoint =
+              context.chart.data.datasets[tooltip.dataPoints[0].datasetIndex];
             const index = tooltip.dataPoints[0].dataIndex;
             const value = dataPoint.data[index];
             const label = context.chart.data.labels[index];
@@ -324,7 +341,11 @@ export async function createPortfolioCompositionChart(chartRenderer, portfolioDa
  * @param {Object} options - Chart configuration options
  * @returns {Promise<Object>} Chart section and instance
  */
-export async function createGoalProgressChart(chartRenderer, goals, options = {}) {
+export async function createGoalProgressChart(
+  chartRenderer,
+  goals,
+  options = {}
+) {
   const section = document.createElement('div');
   section.className = 'chart-section goal-progress-section';
   section.setAttribute('data-chart-type', 'goal-progress');
@@ -384,7 +405,9 @@ export async function createGoalProgressChart(chartRenderer, goals, options = {}
         label: 'Progress (%)',
         data: progressPercentages,
         backgroundColor: colors,
-        borderColor: colors.map(color => color.replace(')', ', 0.8)').replace('hsl', 'hsla')),
+        borderColor: colors.map(color =>
+          color.replace(')', ', 0.8)').replace('hsl', 'hsla')
+        ),
         borderWidth: 2,
         borderRadius: 6,
         borderSkipped: false,
@@ -403,7 +426,7 @@ export async function createGoalProgressChart(chartRenderer, goals, options = {}
       },
       tooltip: {
         callbacks: {
-          label: function(context) {
+          label: function (context) {
             const goalIndex = context.dataIndex;
             const goal = goals[goalIndex];
             const progress = context.parsed.x;
@@ -415,7 +438,7 @@ export async function createGoalProgressChart(chartRenderer, goals, options = {}
               style: 'currency',
               currency: 'EUR',
             }).format(goal.targetAmount);
-            
+
             return [
               `Progress: ${progress.toFixed(1)}%`,
               `Current: ${currentAmount}`,
@@ -433,7 +456,7 @@ export async function createGoalProgressChart(chartRenderer, goals, options = {}
           color: 'rgba(0, 0, 0, 0.1)',
         },
         ticks: {
-          callback: function(value) {
+          callback: function (value) {
             return `${value}%`;
           },
         },
@@ -461,7 +484,12 @@ export async function createGoalProgressChart(chartRenderer, goals, options = {}
  * @param {Object} options - Chart configuration options
  * @returns {Promise<Object>} Chart section and instance
  */
-export async function createForecastComparisonChart(chartRenderer, incomeForecasts, expenseForecasts, options = {}) {
+export async function createForecastComparisonChart(
+  chartRenderer,
+  incomeForecasts,
+  expenseForecasts,
+  options = {}
+) {
   const section = document.createElement('div');
   section.className = 'chart-section forecast-comparison-section';
   section.setAttribute('data-chart-type', 'forecast-comparison');
@@ -504,11 +532,16 @@ export async function createForecastComparisonChart(chartRenderer, incomeForecas
   // Prepare chart data
   const maxLength = Math.max(incomeForecasts.length, expenseForecasts.length);
   const labels = [];
-  
+
   for (let i = 0; i < maxLength; i++) {
     const forecast = incomeForecasts[i] || expenseForecasts[i];
     if (forecast && forecast.period) {
-      labels.push(forecast.period.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }));
+      labels.push(
+        forecast.period.toLocaleDateString('en-US', {
+          month: 'short',
+          year: 'numeric',
+        })
+      );
     } else {
       labels.push(`Month ${i + 1}`);
     }
@@ -521,7 +554,10 @@ export async function createForecastComparisonChart(chartRenderer, incomeForecas
         label: 'Forecasted Income',
         data: incomeForecasts.map(f => f.predictedAmount),
         borderColor: COLORS.SUCCESS,
-        backgroundColor: COLORS.SUCCESS.replace(')', ', 0.1)').replace('hsl', 'hsla'),
+        backgroundColor: COLORS.SUCCESS.replace(')', ', 0.1)').replace(
+          'hsl',
+          'hsla'
+        ),
         borderWidth: 3,
         fill: false,
         tension: 0.4,
@@ -532,7 +568,10 @@ export async function createForecastComparisonChart(chartRenderer, incomeForecas
         label: 'Forecasted Expenses',
         data: expenseForecasts.map(f => f.predictedAmount),
         borderColor: COLORS.ERROR,
-        backgroundColor: COLORS.ERROR.replace(')', ', 0.1)').replace('hsl', 'hsla'),
+        backgroundColor: COLORS.ERROR.replace(')', ', 0.1)').replace(
+          'hsl',
+          'hsla'
+        ),
         borderWidth: 3,
         fill: false,
         tension: 0.4,
@@ -558,7 +597,7 @@ export async function createForecastComparisonChart(chartRenderer, incomeForecas
         mode: 'index',
         intersect: false,
         callbacks: {
-          label: function(context) {
+          label: function (context) {
             const value = context.parsed.y;
             const formattedValue = new Intl.NumberFormat('en-US', {
               style: 'currency',
@@ -576,7 +615,7 @@ export async function createForecastComparisonChart(chartRenderer, incomeForecas
           color: 'rgba(0, 0, 0, 0.1)',
         },
         ticks: {
-          callback: function(value) {
+          callback: function (value) {
             return new Intl.NumberFormat('en-US', {
               style: 'currency',
               currency: 'EUR',
@@ -618,24 +657,34 @@ function createBalanceSummary(balanceProjections) {
   container.style.border = '1px solid var(--color-border)';
 
   const currentBalance = balanceProjections[0]?.balance || 0;
-  const finalBalance = balanceProjections[balanceProjections.length - 1]?.balance || 0;
+  const finalBalance =
+    balanceProjections[balanceProjections.length - 1]?.balance || 0;
   const change = finalBalance - currentBalance;
   const lowestBalance = Math.min(...balanceProjections.map(p => p.balance));
 
   const stats = [
     {
       label: 'Current Balance',
-      value: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(currentBalance),
+      value: new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'EUR',
+      }).format(currentBalance),
       color: currentBalance >= 0 ? COLORS.SUCCESS : COLORS.ERROR,
     },
     {
       label: 'Projected Change',
-      value: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(change),
+      value: new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'EUR',
+      }).format(change),
       color: change >= 0 ? COLORS.SUCCESS : COLORS.ERROR,
     },
     {
       label: 'Lowest Point',
-      value: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(lowestBalance),
+      value: new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'EUR',
+      }).format(lowestBalance),
       color: lowestBalance >= 0 ? COLORS.SUCCESS : COLORS.ERROR,
     },
   ];
@@ -690,7 +739,7 @@ function createGoalDetails(goals) {
     goalDiv.style.borderRadius = 'var(--radius-sm)';
 
     const leftSide = document.createElement('div');
-    
+
     const goalName = document.createElement('div');
     goalName.textContent = goal.name;
     goalName.style.fontWeight = '600';
@@ -712,12 +761,23 @@ function createGoalDetails(goals) {
     const progressText = document.createElement('div');
     progressText.textContent = `${progress.toFixed(1)}%`;
     progressText.style.fontWeight = '600';
-    progressText.style.color = progress >= 80 ? COLORS.SUCCESS : progress >= 50 ? COLORS.WARNING : COLORS.ERROR;
+    progressText.style.color =
+      progress >= 80
+        ? COLORS.SUCCESS
+        : progress >= 50
+          ? COLORS.WARNING
+          : COLORS.ERROR;
     progressText.style.marginBottom = '2px';
 
     const amounts = document.createElement('div');
-    const currentFormatted = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(goal.currentSavings);
-    const targetFormatted = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(goal.targetAmount);
+    const currentFormatted = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'EUR',
+    }).format(goal.currentSavings);
+    const targetFormatted = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'EUR',
+    }).format(goal.targetAmount);
     amounts.textContent = `${currentFormatted} / ${targetFormatted}`;
     amounts.style.fontSize = '0.75rem';
     amounts.style.color = COLORS.TEXT_MUTED;

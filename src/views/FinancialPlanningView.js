@@ -139,18 +139,18 @@ export const FinancialPlanningView = () => {
     backButton.style.fontWeight = '500';
     backButton.style.transition = 'all 0.2s ease';
     backButton.title = 'Back to Dashboard';
-    
+
     // Hover effects
     backButton.addEventListener('mouseenter', () => {
       backButton.style.background = COLORS.SURFACE_HOVER;
       backButton.style.borderColor = COLORS.PRIMARY;
     });
-    
+
     backButton.addEventListener('mouseleave', () => {
       backButton.style.background = COLORS.SURFACE;
       backButton.style.borderColor = COLORS.BORDER;
     });
-    
+
     backButton.addEventListener('click', () => Router.navigate('dashboard'));
 
     // Title
@@ -178,7 +178,9 @@ export const FinancialPlanningView = () => {
     syncStatus.style.background = COLORS.SURFACE;
     syncStatus.style.color = COLORS.TEXT_MUTED;
     syncStatus.style.fontSize = '0.875rem';
-    syncStatus.textContent = navigator.onLine ? 'Sync: online' : 'Sync: offline';
+    syncStatus.textContent = navigator.onLine
+      ? 'Sync: online'
+      : 'Sync: offline';
     rightSide.appendChild(syncStatus);
 
     header.appendChild(leftSide);
@@ -224,15 +226,18 @@ export const FinancialPlanningView = () => {
       const tab = document.createElement('button');
       tab.className = 'financial-planning-tab';
       tab.setAttribute('role', 'tab');
-      tab.setAttribute('aria-selected', section.id === currentSection ? 'true' : 'false');
+      tab.setAttribute(
+        'aria-selected',
+        section.id === currentSection ? 'true' : 'false'
+      );
       tab.setAttribute('aria-controls', `${section.id}-panel`);
       tab.id = `${section.id}-tab`;
-      
+
       tab.innerHTML = `
         <span class="tab-icon">${section.icon}</span>
         <span class="tab-label">${section.label}</span>
       `;
-      
+
       // Tab styling
       Object.assign(tab.style, {
         display: 'flex',
@@ -241,7 +246,8 @@ export const FinancialPlanningView = () => {
         padding: `${SPACING.SM} ${SPACING.MD}`,
         border: 'none',
         borderRadius: 'var(--radius-md)',
-        background: section.id === currentSection ? COLORS.PRIMARY : COLORS.SURFACE,
+        background:
+          section.id === currentSection ? COLORS.PRIMARY : COLORS.SURFACE,
         color: section.id === currentSection ? 'white' : COLORS.TEXT_MAIN,
         cursor: 'pointer',
         fontSize: '0.875rem',
@@ -338,9 +344,17 @@ export const FinancialPlanningView = () => {
    * Render Overview section - Financial health summary
    */
   function renderOverviewSection() {
-    const section = createSectionContainer('overview', 'Financial Overview', '📊');
-    section.appendChild(createUsageNote('At-a-glance health summary: shows current balance, monthly expense averages, savings rate and emergency fund advice. Use the quick actions to jump to Forecasts, Investments, Goals or run scenarios.'));
-    
+    const section = createSectionContainer(
+      'overview',
+      'Financial Overview',
+      '📊'
+    );
+    section.appendChild(
+      createUsageNote(
+        'At-a-glance health summary: shows current balance, monthly expense averages, savings rate and emergency fund advice. Use the quick actions to jump to Forecasts, Investments, Goals or run scenarios.'
+      )
+    );
+
     if (!planningData) {
       const placeholder = createPlaceholder(
         'Loading Financial Data',
@@ -356,7 +370,8 @@ export const FinancialPlanningView = () => {
     const statsGrid = document.createElement('div');
     statsGrid.className = 'stats-grid';
     statsGrid.style.display = 'grid';
-    statsGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
+    statsGrid.style.gridTemplateColumns =
+      'repeat(auto-fit, minmax(250px, 1fr))';
     statsGrid.style.gap = SPACING.MD;
     statsGrid.style.marginBottom = SPACING.XL;
 
@@ -369,7 +384,9 @@ export const FinancialPlanningView = () => {
     // Calculate totals and monthly averages
     const now = new Date();
     const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
-    const recentTransactions = transactions.filter(t => new Date(t.timestamp) >= threeMonthsAgo);
+    const recentTransactions = transactions.filter(
+      t => new Date(t.timestamp) >= threeMonthsAgo
+    );
 
     transactions.forEach(transaction => {
       if (transaction.type === 'income') {
@@ -384,12 +401,16 @@ export const FinancialPlanningView = () => {
       const recentExpenses = recentTransactions
         .filter(t => t.type === 'expense')
         .reduce((sum, t) => sum + t.amount, 0);
-      const monthsOfData = Math.max(1, (now - threeMonthsAgo) / (1000 * 60 * 60 * 24 * 30));
+      const monthsOfData = Math.max(
+        1,
+        (now - threeMonthsAgo) / (1000 * 60 * 60 * 24 * 30)
+      );
       monthlyExpenses = recentExpenses / monthsOfData;
     }
 
     const currentBalance = totalIncome - totalExpenses;
-    const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome * 100) : 0;
+    const savingsRate =
+      totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0;
 
     // Generate risk assessments
     let emergencyFundAssessment = null;
@@ -397,68 +418,95 @@ export const FinancialPlanningView = () => {
 
     try {
       // Assume emergency fund is current balance (simplified)
-      emergencyFundAssessment = riskAssessor.assessEmergencyFundAdequacy(monthlyExpenses, Math.max(0, currentBalance));
-      
+      emergencyFundAssessment = riskAssessor.assessEmergencyFundAdequacy(
+        monthlyExpenses,
+        Math.max(0, currentBalance)
+      );
+
       // Calculate overall risk score
       const riskFactors = [
         {
           category: 'Emergency Fund',
           riskLevel: emergencyFundAssessment.riskLevel,
-          message: emergencyFundAssessment.message
-        }
+          message: emergencyFundAssessment.message,
+        },
       ];
-      
+
       riskScore = riskAssessor.calculateOverallRiskScore(riskFactors);
     } catch (error) {
       console.error('Error calculating risk assessments:', error);
     }
 
-  const stats = [
-    {
-      label: 'Current Balance',
-      value: `€${currentBalance.toFixed(2)}`,
-      color: currentBalance >= 0 ? COLORS.SUCCESS : COLORS.ERROR,
-      icon: '💰',
-      subtitle: currentBalance >= 0 ? 'Positive balance' : 'Negative balance',
-      calculationHelp: `
+    const stats = [
+      {
+        label: 'Current Balance',
+        value: `€${currentBalance.toFixed(2)}`,
+        color: currentBalance >= 0 ? COLORS.SUCCESS : COLORS.ERROR,
+        icon: '💰',
+        subtitle: currentBalance >= 0 ? 'Positive balance' : 'Negative balance',
+        calculationHelp: `
         <p><strong>Formula:</strong> Total Income - Total Expenses</p>
         <p>This shows your net financial position by subtracting all expenses from all income transactions in your account.</p>
-      `
-    },
-    {
-      label: 'Monthly Expenses',
-      value: `€${monthlyExpenses.toFixed(2)}`,
-      color: COLORS.ERROR,
-      icon: '📉',
-      subtitle: 'Average last 3 months',
-      calculationHelp: `
+      `,
+      },
+      {
+        label: 'Monthly Expenses',
+        value: `€${monthlyExpenses.toFixed(2)}`,
+        color: COLORS.ERROR,
+        icon: '📉',
+        subtitle: 'Average last 3 months',
+        calculationHelp: `
         <p><strong>Formula:</strong> Total expenses from last 3 months ÷ Number of months in that period</p>
         <p>This calculates your average monthly spending by analyzing expense transactions over the most recent 3-month period, providing a realistic view of your regular spending patterns.</p>
-      `
-    },
-    {
-      label: 'Savings Rate',
-      value: `${savingsRate.toFixed(1)}%`,
-      color: savingsRate > 20 ? COLORS.SUCCESS : savingsRate > 10 ? COLORS.WARNING : COLORS.ERROR,
-      icon: '🎯',
-      subtitle: savingsRate > 20 ? 'Excellent' : savingsRate > 10 ? 'Good' : 'Needs improvement',
-      calculationHelp: `
+      `,
+      },
+      {
+        label: 'Savings Rate',
+        value: `${savingsRate.toFixed(1)}%`,
+        color:
+          savingsRate > 20
+            ? COLORS.SUCCESS
+            : savingsRate > 10
+              ? COLORS.WARNING
+              : COLORS.ERROR,
+        icon: '🎯',
+        subtitle:
+          savingsRate > 20
+            ? 'Excellent'
+            : savingsRate > 10
+              ? 'Good'
+              : 'Needs improvement',
+        calculationHelp: `
         <p><strong>Formula:</strong> (Total Income - Total Expenses) ÷ Total Income × 100</p>
         <p>This percentage shows how much of your income you're saving. A higher rate indicates better financial health and more money available for investments or emergencies.</p>
-      `
-    },
-    {
-      label: 'Risk Level',
-      value: riskScore ? riskScore.level.charAt(0).toUpperCase() + riskScore.level.slice(1) : 'Unknown',
-      color: riskScore ? (riskScore.level === 'low' ? COLORS.SUCCESS : riskScore.level === 'moderate' ? COLORS.WARNING : COLORS.ERROR) : COLORS.TEXT_MUTED,
-      icon: riskScore ? (riskScore.level === 'low' ? '✅' : riskScore.level === 'moderate' ? '⚠️' : '🚨') : '❓',
-      subtitle: riskScore ? riskScore.message : 'Calculating...',
-      calculationHelp: `
+      `,
+      },
+      {
+        label: 'Risk Level',
+        value: riskScore
+          ? riskScore.level.charAt(0).toUpperCase() + riskScore.level.slice(1)
+          : 'Unknown',
+        color: riskScore
+          ? riskScore.level === 'low'
+            ? COLORS.SUCCESS
+            : riskScore.level === 'moderate'
+              ? COLORS.WARNING
+              : COLORS.ERROR
+          : COLORS.TEXT_MUTED,
+        icon: riskScore
+          ? riskScore.level === 'low'
+            ? '✅'
+            : riskScore.level === 'moderate'
+              ? '⚠️'
+              : '🚨'
+          : '❓',
+        subtitle: riskScore ? riskScore.message : 'Calculating...',
+        calculationHelp: `
         <p><strong>Assessment:</strong> Based on emergency fund adequacy</p>
         <p>Risk level is determined by evaluating your emergency fund coverage relative to monthly expenses. Low risk indicates strong financial preparedness, while high risk suggests immediate attention is needed.</p>
-      `
-    },
-  ];
+      `,
+      },
+    ];
 
     stats.forEach(stat => {
       const card = createStatsCard(stat);
@@ -469,7 +517,9 @@ export const FinancialPlanningView = () => {
 
     // Emergency Fund Status (if available)
     if (emergencyFundAssessment && emergencyFundAssessment.status !== 'error') {
-      const emergencyFundCard = createEmergencyFundCard(emergencyFundAssessment);
+      const emergencyFundCard = createEmergencyFundCard(
+        emergencyFundAssessment
+      );
       section.appendChild(emergencyFundCard);
     }
 
@@ -482,10 +532,22 @@ export const FinancialPlanningView = () => {
     actionsContainer.style.marginTop = SPACING.XL;
 
     const actions = [
-      { label: 'View Forecasts', icon: '🔮', action: () => switchSection('forecasts') },
-      { label: 'Add Investment', icon: '💰', action: () => switchSection('investments') },
+      {
+        label: 'View Forecasts',
+        icon: '🔮',
+        action: () => switchSection('forecasts'),
+      },
+      {
+        label: 'Add Investment',
+        icon: '💰',
+        action: () => switchSection('investments'),
+      },
       { label: 'Set Goal', icon: '🎯', action: () => switchSection('goals') },
-      { label: 'Run Scenario', icon: '🔄', action: () => switchSection('scenarios') },
+      {
+        label: 'Run Scenario',
+        icon: '🔄',
+        action: () => switchSection('scenarios'),
+      },
     ];
 
     actions.forEach(action => {
@@ -501,7 +563,7 @@ export const FinancialPlanningView = () => {
       button.style.fontSize = '0.875rem';
       button.style.fontWeight = '500';
       button.style.transition = 'all 0.2s ease';
-      
+
       button.addEventListener('click', action.action);
       button.addEventListener('mouseenter', () => {
         button.style.background = COLORS.SURFACE_HOVER;
@@ -523,10 +585,22 @@ export const FinancialPlanningView = () => {
    * Render Forecasts section - Income/expense predictions
    */
   function renderForecastsSection() {
-    const section = createSectionContainer('forecasts', 'Financial Forecasts', '🔮');
-    section.appendChild(createUsageNote('Forecasts use your past 3+ months of transactions to predict income and expenses. Adjust assumptions in the scenario tab to see how changes affect future balances.'));
-    
-    if (!planningData || !planningData.transactions || planningData.transactions.length < 3) {
+    const section = createSectionContainer(
+      'forecasts',
+      'Financial Forecasts',
+      '🔮'
+    );
+    section.appendChild(
+      createUsageNote(
+        'Forecasts use your past 3+ months of transactions to predict income and expenses. Adjust assumptions in the scenario tab to see how changes affect future balances.'
+      )
+    );
+
+    if (
+      !planningData ||
+      !planningData.transactions ||
+      planningData.transactions.length < 3
+    ) {
       const placeholder = createPlaceholder(
         'Insufficient Data for Forecasting',
         'Add at least 3 months of transaction history to generate accurate financial forecasts.',
@@ -539,53 +613,77 @@ export const FinancialPlanningView = () => {
 
     try {
       // Generate forecasts
-      const incomeForecasts = forecastEngine.generateIncomeForecasts(planningData.transactions, 6);
-      const expenseForecasts = forecastEngine.generateExpenseForecasts(planningData.transactions, 6);
+      const incomeForecasts = forecastEngine.generateIncomeForecasts(
+        planningData.transactions,
+        6
+      );
+      const expenseForecasts = forecastEngine.generateExpenseForecasts(
+        planningData.transactions,
+        6
+      );
 
       // Create forecast summary cards
       const summaryGrid = document.createElement('div');
       summaryGrid.className = 'forecast-summary-grid';
       summaryGrid.style.display = 'grid';
-      summaryGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
+      summaryGrid.style.gridTemplateColumns =
+        'repeat(auto-fit, minmax(250px, 1fr))';
       summaryGrid.style.gap = SPACING.MD;
       summaryGrid.style.marginBottom = SPACING.XL;
 
       // Calculate totals for next 6 months
-      const totalIncomeForecasted = incomeForecasts.reduce((sum, f) => sum + f.predictedAmount, 0);
-      const totalExpensesForecasted = expenseForecasts.reduce((sum, f) => sum + f.predictedAmount, 0);
+      const totalIncomeForecasted = incomeForecasts.reduce(
+        (sum, f) => sum + f.predictedAmount,
+        0
+      );
+      const totalExpensesForecasted = expenseForecasts.reduce(
+        (sum, f) => sum + f.predictedAmount,
+        0
+      );
       const netForecast = totalIncomeForecasted - totalExpensesForecasted;
-      const avgConfidence = (incomeForecasts.reduce((sum, f) => sum + f.confidence, 0) + 
-                           expenseForecasts.reduce((sum, f) => sum + f.confidence, 0)) / 
-                           (incomeForecasts.length + expenseForecasts.length);
+      const avgConfidence =
+        (incomeForecasts.reduce((sum, f) => sum + f.confidence, 0) +
+          expenseForecasts.reduce((sum, f) => sum + f.confidence, 0)) /
+        (incomeForecasts.length + expenseForecasts.length);
 
       const summaryCards = [
-        { 
-          label: 'Forecasted Income (6mo)', 
-          value: `€${totalIncomeForecasted.toFixed(2)}`, 
-          color: COLORS.SUCCESS, 
+        {
+          label: 'Forecasted Income (6mo)',
+          value: `€${totalIncomeForecasted.toFixed(2)}`,
+          color: COLORS.SUCCESS,
           icon: '📈',
-          subtitle: `Avg: €${(totalIncomeForecasted / 6).toFixed(2)}/month`
+          subtitle: `Avg: €${(totalIncomeForecasted / 6).toFixed(2)}/month`,
         },
-        { 
-          label: 'Forecasted Expenses (6mo)', 
-          value: `€${totalExpensesForecasted.toFixed(2)}`, 
-          color: COLORS.ERROR, 
+        {
+          label: 'Forecasted Expenses (6mo)',
+          value: `€${totalExpensesForecasted.toFixed(2)}`,
+          color: COLORS.ERROR,
           icon: '📉',
-          subtitle: `Avg: €${(totalExpensesForecasted / 6).toFixed(2)}/month`
+          subtitle: `Avg: €${(totalExpensesForecasted / 6).toFixed(2)}/month`,
         },
-        { 
-          label: 'Net Forecast (6mo)', 
-          value: `€${netForecast.toFixed(2)}`, 
-          color: netForecast >= 0 ? COLORS.SUCCESS : COLORS.ERROR, 
+        {
+          label: 'Net Forecast (6mo)',
+          value: `€${netForecast.toFixed(2)}`,
+          color: netForecast >= 0 ? COLORS.SUCCESS : COLORS.ERROR,
           icon: netForecast >= 0 ? '💰' : '⚠️',
-          subtitle: `Avg: €${(netForecast / 6).toFixed(2)}/month`
+          subtitle: `Avg: €${(netForecast / 6).toFixed(2)}/month`,
         },
-        { 
-          label: 'Forecast Confidence', 
-          value: `${(avgConfidence * 100).toFixed(0)}%`, 
-          color: avgConfidence > 0.7 ? COLORS.SUCCESS : avgConfidence > 0.4 ? COLORS.WARNING : COLORS.ERROR, 
+        {
+          label: 'Forecast Confidence',
+          value: `${(avgConfidence * 100).toFixed(0)}%`,
+          color:
+            avgConfidence > 0.7
+              ? COLORS.SUCCESS
+              : avgConfidence > 0.4
+                ? COLORS.WARNING
+                : COLORS.ERROR,
           icon: '🎯',
-          subtitle: avgConfidence > 0.7 ? 'High confidence' : avgConfidence > 0.4 ? 'Moderate confidence' : 'Low confidence'
+          subtitle:
+            avgConfidence > 0.7
+              ? 'High confidence'
+              : avgConfidence > 0.4
+                ? 'Moderate confidence'
+                : 'Low confidence',
         },
       ];
 
@@ -597,7 +695,11 @@ export const FinancialPlanningView = () => {
       section.appendChild(summaryGrid);
 
       // Create forecast comparison chart
-      createForecastComparisonChart(chartRenderer, incomeForecasts, expenseForecasts)
+      createForecastComparisonChart(
+        chartRenderer,
+        incomeForecasts,
+        expenseForecasts
+      )
         .then(({ section: chartSection, chart }) => {
           section.appendChild(chartSection);
           activeCharts.set('forecast-comparison', chart);
@@ -607,13 +709,15 @@ export const FinancialPlanningView = () => {
         });
 
       // Generate balance projections
-      const currentBalance = planningData.transactions
-        .reduce((balance, t) => balance + (t.type === 'income' ? t.amount : -t.amount), 0);
-      
+      const currentBalance = planningData.transactions.reduce(
+        (balance, t) => balance + (t.type === 'income' ? t.amount : -t.amount),
+        0
+      );
+
       const balanceProjections = balancePredictor.projectBalances(
-        currentBalance, 
-        incomeForecasts, 
-        expenseForecasts, 
+        currentBalance,
+        incomeForecasts,
+        expenseForecasts,
         6
       );
 
@@ -628,9 +732,11 @@ export const FinancialPlanningView = () => {
         });
 
       // Create detailed forecast table
-      const forecastTable = createForecastTable(incomeForecasts, expenseForecasts);
+      const forecastTable = createForecastTable(
+        incomeForecasts,
+        expenseForecasts
+      );
       section.appendChild(forecastTable);
-
     } catch (error) {
       console.error('Error rendering forecasts:', error);
       const errorPlaceholder = createPlaceholder(
@@ -640,7 +746,7 @@ export const FinancialPlanningView = () => {
       );
       section.appendChild(errorPlaceholder);
     }
-    
+
     content.appendChild(section);
   }
 
@@ -648,9 +754,17 @@ export const FinancialPlanningView = () => {
    * Render Investments section - Portfolio tracking
    */
   function renderInvestmentsSection() {
-    const section = createSectionContainer('investments', 'Investment Portfolio', '💰');
-    section.appendChild(createUsageNote('Track manual investments here. Add holdings with symbol, shares, and purchase price. Edits sync to cloud; deletions remove from cloud. Charts update automatically.'));
-    
+    const section = createSectionContainer(
+      'investments',
+      'Investment Portfolio',
+      '💰'
+    );
+    section.appendChild(
+      createUsageNote(
+        'Track manual investments here. Add holdings with symbol, shares, and purchase price. Edits sync to cloud; deletions remove from cloud. Charts update automatically.'
+      )
+    );
+
     // For now, create sample portfolio data since investment tracking isn't fully implemented
     const samplePortfolioData = {
       totalValue: 25000,
@@ -667,12 +781,17 @@ export const FinancialPlanningView = () => {
     try {
       portfolioData = StorageService.calculatePortfolioSummary();
     } catch (err) {
-      console.warn('Error fetching portfolio summary from StorageService:', err);
+      console.warn(
+        'Error fetching portfolio summary from StorageService:',
+        err
+      );
       portfolioData = null;
     }
 
     const useMockPortfolio = !portfolioData || !portfolioData.totalValue;
-    const portfolioToRender = useMockPortfolio ? samplePortfolioData : portfolioData;
+    const portfolioToRender = useMockPortfolio
+      ? samplePortfolioData
+      : portfolioData;
 
     // Create portfolio composition chart
     createPortfolioCompositionChart(chartRenderer, portfolioToRender)
@@ -744,7 +863,8 @@ export const FinancialPlanningView = () => {
     invForm.appendChild(saveInvBtn);
 
     addInvBtn.addEventListener('click', () => {
-      invForm.style.display = invForm.style.display === 'none' ? 'flex' : 'none';
+      invForm.style.display =
+        invForm.style.display === 'none' ? 'flex' : 'none';
       invForm.style.flexWrap = 'wrap';
     });
 
@@ -752,27 +872,57 @@ export const FinancialPlanningView = () => {
       const symbol = symInput.value.trim();
       const shares = Number(sharesInput.value) || 0;
       const purchasePrice = Number(priceInput.value) || 0;
-      const purchaseDate = dateInput.value ? new Date(dateInput.value) : new Date();
+      const purchaseDate = dateInput.value
+        ? new Date(dateInput.value)
+        : new Date();
 
       // Basic validation
       let valid = true;
-      if (!symbol) { symError.textContent = 'Symbol is required.'; symError.style.display = 'block'; valid = false; } else { symError.style.display = 'none'; }
-      if (!(shares > 0)) { sharesError.textContent = 'Shares must be greater than 0.'; sharesError.style.display = 'block'; valid = false; } else { sharesError.style.display = 'none'; }
-      if (!(purchasePrice >= 0)) { priceError.textContent = 'Price must be 0 or greater.'; priceError.style.display = 'block'; valid = false; } else { priceError.style.display = 'none'; }
+      if (!symbol) {
+        symError.textContent = 'Symbol is required.';
+        symError.style.display = 'block';
+        valid = false;
+      } else {
+        symError.style.display = 'none';
+      }
+      if (!(shares > 0)) {
+        sharesError.textContent = 'Shares must be greater than 0.';
+        sharesError.style.display = 'block';
+        valid = false;
+      } else {
+        sharesError.style.display = 'none';
+      }
+      if (!(purchasePrice >= 0)) {
+        priceError.textContent = 'Price must be 0 or greater.';
+        priceError.style.display = 'block';
+        valid = false;
+      } else {
+        priceError.style.display = 'none';
+      }
       if (!valid) return;
 
       try {
-        StorageService.addInvestment(symbol, shares, purchasePrice, purchaseDate, {});
+        StorageService.addInvestment(
+          symbol,
+          shares,
+          purchasePrice,
+          purchaseDate,
+          {}
+        );
         // Refresh portfolio chart
         const updated = StorageService.calculatePortfolioSummary();
         createPortfolioCompositionChart(chartRenderer, updated)
           .then(({ section: chartSection, chart }) => {
             // Replace existing chart section
-            const existing = section.querySelector('[data-chart-type="portfolio-composition"]');
+            const existing = section.querySelector(
+              '[data-chart-type="portfolio-composition"]'
+            );
             if (existing) existing.replaceWith(chartSection);
             activeCharts.set('portfolio-composition', chart);
           })
-          .catch(err => console.error('Error refreshing portfolio chart:', err));
+          .catch(err =>
+            console.error('Error refreshing portfolio chart:', err)
+          );
 
         invForm.style.display = 'none';
         symInput.value = '';
@@ -799,7 +949,7 @@ export const FinancialPlanningView = () => {
     controls.appendChild(addInvBtn);
     controls.appendChild(invForm);
     section.appendChild(controls);
-    
+
     // Investments list (editable)
     const investmentsList = document.createElement('div');
     investmentsList.className = 'investments-list';
@@ -848,7 +998,7 @@ export const FinancialPlanningView = () => {
         const meta = document.createElement('div');
         meta.style.fontSize = '0.9rem';
         meta.style.color = COLORS.TEXT_MUTED;
-        meta.textContent = `${inv.shares} shares @ ${new Intl.NumberFormat('en-US', {style:'currency',currency:'EUR'}).format(inv.currentPrice)}`;
+        meta.textContent = `${inv.shares} shares @ ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(inv.currentPrice)}`;
 
         left.appendChild(title);
         left.appendChild(meta);
@@ -919,16 +1069,24 @@ export const FinancialPlanningView = () => {
             const newShares = Number(sharesFld.value) || 0;
             const newPrice = Number(priceFld.value) || 0;
             try {
-              StorageService.updateInvestment(inv.id, { shares: newShares, purchasePrice: newPrice, currentPrice: newPrice });
+              StorageService.updateInvestment(inv.id, {
+                shares: newShares,
+                purchasePrice: newPrice,
+                currentPrice: newPrice,
+              });
               // refresh chart and list
               const updated = StorageService.calculatePortfolioSummary();
               createPortfolioCompositionChart(chartRenderer, updated)
                 .then(({ section: chartSection, chart }) => {
-                  const existing = section.querySelector('[data-chart-type="portfolio-composition"]');
+                  const existing = section.querySelector(
+                    '[data-chart-type="portfolio-composition"]'
+                  );
                   if (existing) existing.replaceWith(chartSection);
                   activeCharts.set('portfolio-composition', chart);
                 })
-                .catch(err => console.error('Error refreshing portfolio chart:', err));
+                .catch(err =>
+                  console.error('Error refreshing portfolio chart:', err)
+                );
 
               li._editing = false;
               refreshInvestmentsList();
@@ -945,11 +1103,15 @@ export const FinancialPlanningView = () => {
             const updated = StorageService.calculatePortfolioSummary();
             createPortfolioCompositionChart(chartRenderer, updated)
               .then(({ section: chartSection, chart }) => {
-                const existing = section.querySelector('[data-chart-type="portfolio-composition"]');
+                const existing = section.querySelector(
+                  '[data-chart-type="portfolio-composition"]'
+                );
                 if (existing) existing.replaceWith(chartSection);
                 activeCharts.set('portfolio-composition', chart);
               })
-              .catch(err => console.error('Error refreshing portfolio chart:', err));
+              .catch(err =>
+                console.error('Error refreshing portfolio chart:', err)
+              );
 
             refreshInvestmentsList();
           } catch (err) {
@@ -980,8 +1142,12 @@ export const FinancialPlanningView = () => {
    */
   function renderGoalsSection() {
     const section = createSectionContainer('goals', 'Financial Goals', '🎯');
-    section.appendChild(createUsageNote('Create and track goals (target amount, date, current savings). The planner calculates required monthly savings and progress. Use scenarios to model different savings rates.'));
-    
+    section.appendChild(
+      createUsageNote(
+        'Create and track goals (target amount, date, current savings). The planner calculates required monthly savings and progress. Use scenarios to model different savings rates.'
+      )
+    );
+
     // Try to load goals from StorageService; fallback to sample goals
     let goalsFromStorage = [];
     try {
@@ -1015,7 +1181,8 @@ export const FinancialPlanningView = () => {
       },
     ];
 
-    const hasRealGoals = Array.isArray(goalsFromStorage) && goalsFromStorage.length > 0;
+    const hasRealGoals =
+      Array.isArray(goalsFromStorage) && goalsFromStorage.length > 0;
     const goalsToRender = hasRealGoals ? goalsFromStorage : sampleGoals;
 
     // Create goal progress chart
@@ -1066,7 +1233,8 @@ export const FinancialPlanningView = () => {
     goalForm.appendChild(saveGoalBtn);
 
     addGoalBtn.addEventListener('click', () => {
-      goalForm.style.display = goalForm.style.display === 'none' ? 'flex' : 'none';
+      goalForm.style.display =
+        goalForm.style.display === 'none' ? 'flex' : 'none';
       goalForm.style.flexWrap = 'wrap';
     });
 
@@ -1078,9 +1246,18 @@ export const FinancialPlanningView = () => {
 
       // Basic validation
       let valid = true;
-      if (!name) { alert('Goal name is required.'); valid = false; }
-      if (!(target > 0)) { alert('Target amount must be greater than 0.'); valid = false; }
-      if (!tdate || isNaN(tdate.getTime())) { alert('Please choose a valid target date.'); valid = false; }
+      if (!name) {
+        alert('Goal name is required.');
+        valid = false;
+      }
+      if (!(target > 0)) {
+        alert('Target amount must be greater than 0.');
+        valid = false;
+      }
+      if (!tdate || isNaN(tdate.getTime())) {
+        alert('Please choose a valid target date.');
+        valid = false;
+      }
       if (!valid) return;
 
       try {
@@ -1089,7 +1266,9 @@ export const FinancialPlanningView = () => {
         const updatedGoals = StorageService.getGoals();
         createGoalProgressChart(chartRenderer, updatedGoals)
           .then(({ section: chartSection, chart }) => {
-            const existing = section.querySelector('[data-chart-type="goal-progress"]');
+            const existing = section.querySelector(
+              '[data-chart-type="goal-progress"]'
+            );
             if (existing) existing.replaceWith(chartSection);
             activeCharts.set('goal-progress', chart);
           })
@@ -1156,7 +1335,7 @@ export const FinancialPlanningView = () => {
         const meta = document.createElement('div');
         meta.style.fontSize = '0.9rem';
         meta.style.color = COLORS.TEXT_MUTED;
-        meta.textContent = `${new Intl.NumberFormat('en-US', {style:'currency',currency:'EUR'}).format(goal.currentSavings)} of ${new Intl.NumberFormat('en-US', {style:'currency',currency:'EUR'}).format(goal.targetAmount)} by ${new Date(goal.targetDate).toLocaleDateString()}`;
+        meta.textContent = `${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(goal.currentSavings)} of ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(goal.targetAmount)} by ${new Date(goal.targetDate).toLocaleDateString()}`;
 
         left.appendChild(title);
         left.appendChild(meta);
@@ -1243,19 +1422,25 @@ export const FinancialPlanningView = () => {
               const updates = {
                 name: nameFld.value.trim(),
                 targetAmount: Number(targetFld.value) || 0,
-                targetDate: dateFld.value ? new Date(dateFld.value) : new Date(goal.targetDate),
-                currentSavings: Number(currentFld.value) || 0
+                targetDate: dateFld.value
+                  ? new Date(dateFld.value)
+                  : new Date(goal.targetDate),
+                currentSavings: Number(currentFld.value) || 0,
               };
               StorageService.updateGoal(goal.id, updates);
               // refresh chart
               const updatedGoals = StorageService.getGoals();
               createGoalProgressChart(chartRenderer, updatedGoals)
                 .then(({ section: chartSection, chart }) => {
-                  const existing = section.querySelector('[data-chart-type="goal-progress"]');
+                  const existing = section.querySelector(
+                    '[data-chart-type="goal-progress"]'
+                  );
                   if (existing) existing.replaceWith(chartSection);
                   activeCharts.set('goal-progress', chart);
                 })
-                .catch(err => console.error('Error refreshing goals chart:', err));
+                .catch(err =>
+                  console.error('Error refreshing goals chart:', err)
+                );
 
               li._editing = false;
               refreshGoalsList();
@@ -1271,11 +1456,15 @@ export const FinancialPlanningView = () => {
             const updatedGoals = StorageService.getGoals();
             createGoalProgressChart(chartRenderer, updatedGoals)
               .then(({ section: chartSection, chart }) => {
-                const existing = section.querySelector('[data-chart-type="goal-progress"]');
+                const existing = section.querySelector(
+                  '[data-chart-type="goal-progress"]'
+                );
                 if (existing) existing.replaceWith(chartSection);
                 activeCharts.set('goal-progress', chart);
               })
-              .catch(err => console.error('Error refreshing goals chart:', err));
+              .catch(err =>
+                console.error('Error refreshing goals chart:', err)
+              );
 
             refreshGoalsList();
           } catch (err) {
@@ -1321,10 +1510,22 @@ export const FinancialPlanningView = () => {
    * Render Insights section - Advanced analytics
    */
   function renderInsightsSection() {
-    const section = createSectionContainer('insights', 'Financial Insights', '💡');
-    section.appendChild(createUsageNote('Insights highlight Top Movers and timeline comparisons. Use these to find categories driving changes and drill into transactions for details.'));
+    const section = createSectionContainer(
+      'insights',
+      'Financial Insights',
+      '💡'
+    );
+    section.appendChild(
+      createUsageNote(
+        'Insights highlight Top Movers and timeline comparisons. Use these to find categories driving changes and drill into transactions for details.'
+      )
+    );
 
-    if (!planningData || !planningData.transactions || planningData.transactions.length === 0) {
+    if (
+      !planningData ||
+      !planningData.transactions ||
+      planningData.transactions.length === 0
+    ) {
       const placeholder = createPlaceholder(
         'Advanced Insights Coming Soon',
         'Discover spending patterns, top movers analysis, and timeline comparisons.',
@@ -1361,7 +1562,10 @@ export const FinancialPlanningView = () => {
     list.style.gridTemplateColumns = '1fr auto';
     list.style.gap = SPACING.SM;
 
-    const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' });
+    const currency = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'EUR',
+    });
 
     topMovers.forEach(item => {
       const liLabel = document.createElement('li');
@@ -1398,11 +1602,18 @@ export const FinancialPlanningView = () => {
     const topLabels = topMovers.map(t => t.category);
     const topData = topMovers.map(t => Math.abs(t.total));
 
-    chartRenderer.createBarChart(topCanvas, {
-      labels: topLabels,
-      datasets: [{ label: 'Amount', data: topData }]
-    }, { title: 'Top Movers' })
-      .then(chart => { if (chart) activeCharts.set('insights-top-movers', chart); })
+    chartRenderer
+      .createBarChart(
+        topCanvas,
+        {
+          labels: topLabels,
+          datasets: [{ label: 'Amount', data: topData }],
+        },
+        { title: 'Top Movers' }
+      )
+      .then(chart => {
+        if (chart) activeCharts.set('insights-top-movers', chart);
+      })
       .catch(err => console.error('Top movers chart error', err));
 
     // Timeline comparison: monthly expenses this period vs previous period
@@ -1411,7 +1622,9 @@ export const FinancialPlanningView = () => {
     const monthKeys = [];
     for (let i = monthsBack - 1; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      monthKeys.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+      monthKeys.push(
+        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+      );
     }
 
     function sumForMonth(key, txs) {
@@ -1421,13 +1634,19 @@ export const FinancialPlanningView = () => {
       return txs.reduce((sum, t) => {
         const ts = new Date(t.timestamp);
         if (ts >= start && ts < end && t.type === 'expense') {
-          return sum + (typeof t.amount === 'number' ? t.amount : Number(t.amount) || 0);
+          return (
+            sum +
+            (typeof t.amount === 'number' ? t.amount : Number(t.amount) || 0)
+          );
         }
         return sum;
       }, 0);
     }
 
-    const currentSeries = monthKeys.map(k => ({ period: k, value: sumForMonth(k, transactions) }));
+    const currentSeries = monthKeys.map(k => ({
+      period: k,
+      value: sumForMonth(k, transactions),
+    }));
     const previousSeries = monthKeys.map(k => {
       const [y, m] = k.split('-').map(Number);
       const prevKey = `${y - 1}-${String(m).padStart(2, '0')}`;
@@ -1446,7 +1665,8 @@ export const FinancialPlanningView = () => {
     const timelineDiv = document.createElement('div');
     timelineDiv.style.marginTop = SPACING.LG;
     const timelineTitle = document.createElement('h3');
-    timelineTitle.textContent = 'Monthly Expenses: This Period vs Previous Year';
+    timelineTitle.textContent =
+      'Monthly Expenses: This Period vs Previous Year';
     timelineTitle.style.margin = '0';
     timelineTitle.style.fontSize = '1rem';
     timelineTitle.style.fontWeight = '600';
@@ -1464,14 +1684,21 @@ export const FinancialPlanningView = () => {
 
     section.appendChild(timelineDiv);
 
-    chartRenderer.createLineChart(timelineCanvas, {
-      labels: timelineLabels,
-      datasets: [
-        { label: 'This Period', data: currentData },
-        { label: 'Previous Year', data: previousData }
-      ]
-    }, { title: 'Expenses Timeline' })
-      .then(chart => { if (chart) activeCharts.set('insights-timeline', chart); })
+    chartRenderer
+      .createLineChart(
+        timelineCanvas,
+        {
+          labels: timelineLabels,
+          datasets: [
+            { label: 'This Period', data: currentData },
+            { label: 'Previous Year', data: previousData },
+          ],
+        },
+        { title: 'Expenses Timeline' }
+      )
+      .then(chart => {
+        if (chart) activeCharts.set('insights-timeline', chart);
+      })
       .catch(err => console.error('Timeline chart error', err));
 
     content.appendChild(section);
@@ -1481,9 +1708,17 @@ export const FinancialPlanningView = () => {
    * Render Scenarios section - What-if modeling
    */
   function renderScenariosSection() {
-    const section = createSectionContainer('scenarios', 'Scenario Planning', '🔄');
-    section.appendChild(createUsageNote('Run what-if scenarios by adjusting savings, income or expenses. Compare scenarios side-by-side to see impact on goals and projected balances.'));
-    
+    const section = createSectionContainer(
+      'scenarios',
+      'Scenario Planning',
+      '🔄'
+    );
+    section.appendChild(
+      createUsageNote(
+        'Run what-if scenarios by adjusting savings, income or expenses. Compare scenarios side-by-side to see impact on goals and projected balances.'
+      )
+    );
+
     const form = document.createElement('div');
     form.className = 'scenario-form';
     form.style.display = 'grid';
@@ -1548,15 +1783,24 @@ export const FinancialPlanningView = () => {
       const initial = Number(initialInput.value) || 0;
 
       // Use GoalPlanner projection utility to generate yearly projections
-      const projections = goalPlanner.projectWealthAccumulation(monthly, yearlyReturn, years, initial);
+      const projections = goalPlanner.projectWealthAccumulation(
+        monthly,
+        yearlyReturn,
+        years,
+        initial
+      );
 
       // Convert to series for chart helper
-      const series = projections.map(p => ({ period: `Year ${p.year}`, value: p.projectedWealth }));
+      const series = projections.map(p => ({
+        period: `Year ${p.year}`,
+        value: p.projectedWealth,
+      }));
 
       // Cleanup previous scenario chart
       if (activeCharts.has('scenario-chart')) {
         const existing = activeCharts.get('scenario-chart');
-        if (existing && typeof existing.destroy === 'function') existing.destroy();
+        if (existing && typeof existing.destroy === 'function')
+          existing.destroy();
         activeCharts.delete('scenario-chart');
       }
 
@@ -1570,13 +1814,6 @@ export const FinancialPlanningView = () => {
         .catch(err => console.error('Scenario chart error', err));
     });
 
-    
-    
-    
-    
-    
-    
-    
     content.appendChild(section);
   }
 
@@ -1613,7 +1850,14 @@ export const FinancialPlanningView = () => {
   /**
    * Create a stats card for the overview section
    */
-  function createStatsCard({ label, value, color, icon, subtitle, calculationHelp }) {
+  function createStatsCard({
+    label,
+    value,
+    color,
+    icon,
+    subtitle,
+    calculationHelp,
+  }) {
     const card = document.createElement('div');
     card.className = 'stats-card';
     card.style.padding = SPACING.LG;
@@ -1702,7 +1946,9 @@ export const FinancialPlanningView = () => {
       helpTitle.addEventListener('click', () => {
         isExpanded = !isExpanded;
         helpDetails.style.display = isExpanded ? 'block' : 'none';
-        toggleIcon.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+        toggleIcon.style.transform = isExpanded
+          ? 'rotate(180deg)'
+          : 'rotate(0deg)';
       });
 
       helpSection.appendChild(helpTitle);
@@ -1739,12 +1985,18 @@ export const FinancialPlanningView = () => {
     title.style.color = COLORS.TEXT_MAIN;
 
     const status = document.createElement('span');
-    status.textContent = assessment.status.charAt(0).toUpperCase() + assessment.status.slice(1);
+    status.textContent =
+      assessment.status.charAt(0).toUpperCase() + assessment.status.slice(1);
     status.style.padding = `${SPACING.XS} ${SPACING.SM}`;
     status.style.borderRadius = 'var(--radius-sm)';
     status.style.fontSize = '0.75rem';
     status.style.fontWeight = '600';
-    status.style.background = assessment.riskLevel === 'low' ? COLORS.SUCCESS : assessment.riskLevel === 'moderate' ? COLORS.WARNING : COLORS.ERROR;
+    status.style.background =
+      assessment.riskLevel === 'low'
+        ? COLORS.SUCCESS
+        : assessment.riskLevel === 'moderate'
+          ? COLORS.WARNING
+          : COLORS.ERROR;
     status.style.color = 'white';
 
     header.appendChild(title);
@@ -1862,14 +2114,25 @@ export const FinancialPlanningView = () => {
     // Data rows
     const maxRows = Math.max(incomeForecasts.length, expenseForecasts.length);
     for (let i = 0; i < maxRows; i++) {
-      const income = incomeForecasts[i] || { predictedAmount: 0, confidence: 0 };
-      const expense = expenseForecasts[i] || { predictedAmount: 0, confidence: 0 };
+      const income = incomeForecasts[i] || {
+        predictedAmount: 0,
+        confidence: 0,
+      };
+      const expense = expenseForecasts[i] || {
+        predictedAmount: 0,
+        confidence: 0,
+      };
       const net = income.predictedAmount - expense.predictedAmount;
       const confidence = Math.min(income.confidence, expense.confidence);
 
       // Month
       const monthCell = document.createElement('div');
-      monthCell.textContent = income.period ? income.period.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : `Month ${i + 1}`;
+      monthCell.textContent = income.period
+        ? income.period.toLocaleDateString('en-US', {
+            month: 'short',
+            year: 'numeric',
+          })
+        : `Month ${i + 1}`;
       monthCell.style.paddingTop = SPACING.SM;
       table.appendChild(monthCell);
 
@@ -1903,7 +2166,12 @@ export const FinancialPlanningView = () => {
       // Confidence
       const confidenceCell = document.createElement('div');
       confidenceCell.textContent = `${(confidence * 100).toFixed(0)}%`;
-      confidenceCell.style.color = confidence > 0.7 ? COLORS.SUCCESS : confidence > 0.4 ? COLORS.WARNING : COLORS.ERROR;
+      confidenceCell.style.color =
+        confidence > 0.7
+          ? COLORS.SUCCESS
+          : confidence > 0.4
+            ? COLORS.WARNING
+            : COLORS.ERROR;
       confidenceCell.style.paddingTop = SPACING.SM;
       confidenceCell.style.textAlign = 'right';
       table.appendChild(confidenceCell);
@@ -1978,11 +2246,14 @@ export const FinancialPlanningView = () => {
       const goalsKey = STORAGE_KEYS.GOALS;
 
       const investmentsCacheRaw = localStorage.getItem(investmentsKey);
-      if (investmentsCacheRaw) console.log(`[Sync] ${investmentsKey} loaded from cache`);
+      if (investmentsCacheRaw)
+        console.log(`[Sync] ${investmentsKey} loaded from cache`);
       const goalsCacheRaw = localStorage.getItem(goalsKey);
       if (goalsCacheRaw) console.log(`[Sync] ${goalsKey} loaded from cache`);
 
-      const investments = StorageService.getInvestments ? StorageService.getInvestments() : [];
+      const investments = StorageService.getInvestments
+        ? StorageService.getInvestments()
+        : [];
       const goals = StorageService.getGoals ? StorageService.getGoals() : [];
 
       planningData = {
@@ -1995,7 +2266,6 @@ export const FinancialPlanningView = () => {
 
       // Re-render current section with new data
       renderSection(currentSection);
-
     } catch (error) {
       console.error('Error loading planning data:', error);
     } finally {
@@ -2004,17 +2274,17 @@ export const FinancialPlanningView = () => {
   }
   const updateResponsiveLayout = debounce(() => {
     const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
-    
+
     // Update container padding
     container.style.padding = isMobile ? `0 ${SPACING.SM}` : `0 ${SPACING.MD}`;
-    
+
     // Update header layout for mobile
     const header = container.querySelector('.financial-planning-header');
     if (header) {
       const leftSide = header.querySelector('div:first-child');
       const title = header.querySelector('h1');
       const backButton = header.querySelector('.financial-planning-back-btn');
-      
+
       if (isMobile) {
         // Mobile: smaller title, more compact back button
         if (title) title.style.fontSize = '1.5rem';
@@ -2033,12 +2303,12 @@ export const FinancialPlanningView = () => {
         if (leftSide) leftSide.style.gap = SPACING.MD;
       }
     }
-    
+
     // Update stats grid for mobile
     const statsGrid = content.querySelector('.stats-grid');
     if (statsGrid) {
-      statsGrid.style.gridTemplateColumns = isMobile 
-        ? 'repeat(2, 1fr)' 
+      statsGrid.style.gridTemplateColumns = isMobile
+        ? 'repeat(2, 1fr)'
         : 'repeat(auto-fit, minmax(250px, 1fr))';
     }
 
@@ -2053,7 +2323,7 @@ export const FinancialPlanningView = () => {
   window.addEventListener('resize', updateResponsiveLayout);
 
   // Storage update handler
-  const handleStorageUpdate = (e) => {
+  const handleStorageUpdate = e => {
     if (
       e.detail.key === STORAGE_KEYS.TRANSACTIONS ||
       e.detail.key === STORAGE_KEYS.ACCOUNTS ||
@@ -2065,7 +2335,7 @@ export const FinancialPlanningView = () => {
   };
 
   // Listen for forecast invalidation requests from CacheInvalidator
-  const handleForecastInvalidate = (_e) => {
+  const handleForecastInvalidate = _e => {
     try {
       if (forecastEngine && typeof forecastEngine.clearCache === 'function') {
         forecastEngine.clearCache();
@@ -2080,7 +2350,7 @@ export const FinancialPlanningView = () => {
   };
 
   // Sync state handler for UI
-  const handleSyncState = (e) => {
+  const handleSyncState = e => {
     const detail = e.detail || {};
     const right = container.querySelector('.sync-status');
     if (!right) return;
@@ -2100,7 +2370,7 @@ export const FinancialPlanningView = () => {
   };
 
   // Keyboard shortcuts
-  const handleKeyboardShortcuts = (e) => {
+  const handleKeyboardShortcuts = e => {
     if (e.key === 'Escape') {
       e.preventDefault();
       Router.navigate('dashboard');

@@ -13,33 +13,33 @@ export class GoalPlanner {
   constructor() {
     this.storageKey = 'blinkbudget_goals';
     this.goals = this._loadGoals();
-    
+
     // Default assumptions for different goal types
     this.goalDefaults = {
       retirement: {
         expectedReturn: 0.07, // 7% annual return
-        inflationRate: 0.03,  // 3% inflation
-        withdrawalRate: 0.04  // 4% safe withdrawal rate
+        inflationRate: 0.03, // 3% inflation
+        withdrawalRate: 0.04, // 4% safe withdrawal rate
       },
       house: {
         expectedReturn: 0.05, // 5% annual return (conservative)
         inflationRate: 0.03,
-        downPaymentPercent: 0.20 // 20% down payment
+        downPaymentPercent: 0.2, // 20% down payment
       },
       education: {
         expectedReturn: 0.06, // 6% annual return
-        inflationRate: 0.05,  // Higher inflation for education costs
-        costGrowthRate: 0.06  // Education costs grow faster than general inflation
+        inflationRate: 0.05, // Higher inflation for education costs
+        costGrowthRate: 0.06, // Education costs grow faster than general inflation
       },
       emergency_fund: {
         expectedReturn: 0.02, // 2% annual return (high-yield savings)
         inflationRate: 0.03,
-        monthsOfExpenses: 6    // 6 months of expenses
+        monthsOfExpenses: 6, // 6 months of expenses
       },
       custom: {
         expectedReturn: 0.06, // 6% annual return
-        inflationRate: 0.03
-      }
+        inflationRate: 0.03,
+      },
     };
   }
 
@@ -58,7 +58,11 @@ export class GoalPlanner {
       if (!name || typeof name !== 'string') {
         throw new Error('Goal name is required and must be a string');
       }
-      if (!targetAmount || typeof targetAmount !== 'number' || targetAmount <= 0) {
+      if (
+        !targetAmount ||
+        typeof targetAmount !== 'number' ||
+        targetAmount <= 0
+      ) {
         throw new Error('Target amount must be a positive number');
       }
       if (!targetDate || !(targetDate instanceof Date)) {
@@ -87,7 +91,7 @@ export class GoalPlanner {
         inflationRate: options.inflationRate || defaults.inflationRate,
         description: options.description || '',
         createdDate: new Date(),
-        updatedDate: new Date()
+        updatedDate: new Date(),
       };
 
       // Calculate required monthly savings
@@ -166,7 +170,17 @@ export class GoalPlanner {
       const goal = this.goals.find(g => g.id === goalId);
       if (!goal) return null;
 
-      const allowed = ['name', 'targetAmount', 'targetDate', 'currentSavings', 'monthlyContribution', 'priority', 'expectedReturn', 'inflationRate', 'description'];
+      const allowed = [
+        'name',
+        'targetAmount',
+        'targetDate',
+        'currentSavings',
+        'monthlyContribution',
+        'priority',
+        'expectedReturn',
+        'inflationRate',
+        'description',
+      ];
       allowed.forEach(key => {
         if (updates[key] !== undefined) {
           if (key === 'targetDate') {
@@ -215,14 +229,17 @@ export class GoalPlanner {
   calculateRequiredMonthlySavings(goal) {
     try {
       const now = new Date();
-      const monthsRemaining = this._calculateMonthsRemaining(now, goal.targetDate);
-      
+      const monthsRemaining = this._calculateMonthsRemaining(
+        now,
+        goal.targetDate
+      );
+
       if (monthsRemaining <= 0) {
         return 0; // Goal date has passed
       }
 
       const remainingAmount = goal.targetAmount - goal.currentSavings;
-      
+
       if (remainingAmount <= 0) {
         return 0; // Goal already achieved
       }
@@ -234,7 +251,8 @@ export class GoalPlanner {
 
       // Calculate with compound interest
       const monthlyReturn = goal.expectedReturn / 12;
-      const futureValueOfCurrentSavings = goal.currentSavings * Math.pow(1 + monthlyReturn, monthsRemaining);
+      const futureValueOfCurrentSavings =
+        goal.currentSavings * Math.pow(1 + monthlyReturn, monthsRemaining);
       const adjustedTarget = goal.targetAmount - futureValueOfCurrentSavings;
 
       if (adjustedTarget <= 0) {
@@ -242,7 +260,9 @@ export class GoalPlanner {
       }
 
       // Calculate required monthly payment using future value of annuity formula
-      const monthlyPayment = adjustedTarget / (((Math.pow(1 + monthlyReturn, monthsRemaining) - 1) / monthlyReturn));
+      const monthlyPayment =
+        adjustedTarget /
+        ((Math.pow(1 + monthlyReturn, monthsRemaining) - 1) / monthlyReturn);
 
       return Math.round(Math.max(0, monthlyPayment) * 100) / 100;
     } catch (error) {
@@ -269,38 +289,53 @@ export class GoalPlanner {
    * @param {number} projectedMonthlyExpenses - Projected monthly expenses
    * @returns {Object} Feasibility assessment
    */
-  assessGoalFeasibility(goal, projectedMonthlyIncome, projectedMonthlyExpenses) {
+  assessGoalFeasibility(
+    goal,
+    projectedMonthlyIncome,
+    projectedMonthlyExpenses
+  ) {
     try {
-      const availableMonthlyIncome = projectedMonthlyIncome - projectedMonthlyExpenses;
+      const availableMonthlyIncome =
+        projectedMonthlyIncome - projectedMonthlyExpenses;
       const requiredMonthlySavings = this.calculateRequiredMonthlySavings(goal);
-      const savingsRate = projectedMonthlyIncome > 0 ? (requiredMonthlySavings / projectedMonthlyIncome) * 100 : 0;
+      const savingsRate =
+        projectedMonthlyIncome > 0
+          ? (requiredMonthlySavings / projectedMonthlyIncome) * 100
+          : 0;
 
       let feasibility, message, recommendation;
 
       if (requiredMonthlySavings <= 0) {
         feasibility = 'achieved';
-        message = 'Goal is already achieved or will be met with current savings growth';
+        message =
+          'Goal is already achieved or will be met with current savings growth';
         recommendation = 'Consider setting a new, more ambitious goal';
       } else if (availableMonthlyIncome <= 0) {
         feasibility = 'not_feasible';
-        message = 'Current expenses exceed income - goal cannot be achieved without changes';
-        recommendation = 'Reduce expenses or increase income before pursuing this goal';
+        message =
+          'Current expenses exceed income - goal cannot be achieved without changes';
+        recommendation =
+          'Reduce expenses or increase income before pursuing this goal';
       } else if (requiredMonthlySavings <= availableMonthlyIncome * 0.5) {
         feasibility = 'easily_achievable';
         message = `Goal requires ${savingsRate.toFixed(1)}% of income - very achievable`;
-        recommendation = 'Consider increasing the goal amount or setting additional goals';
+        recommendation =
+          'Consider increasing the goal amount or setting additional goals';
       } else if (requiredMonthlySavings <= availableMonthlyIncome * 0.8) {
         feasibility = 'achievable';
         message = `Goal requires ${savingsRate.toFixed(1)}% of income - achievable with discipline`;
-        recommendation = 'Create a detailed budget to ensure consistent savings';
+        recommendation =
+          'Create a detailed budget to ensure consistent savings';
       } else if (requiredMonthlySavings <= availableMonthlyIncome) {
         feasibility = 'challenging';
         message = `Goal requires ${savingsRate.toFixed(1)}% of income - very challenging`;
-        recommendation = 'Consider extending the timeline or reducing the target amount';
+        recommendation =
+          'Consider extending the timeline or reducing the target amount';
       } else {
         feasibility = 'not_feasible';
         message = `Goal requires more than available income (${savingsRate.toFixed(1)}% of income)`;
-        recommendation = 'Extend the timeline, reduce the target, or increase income';
+        recommendation =
+          'Extend the timeline, reduce the target, or increase income';
       }
 
       return {
@@ -310,7 +345,10 @@ export class GoalPlanner {
         requiredMonthlySavings,
         availableMonthlyIncome,
         savingsRate: Math.round(savingsRate * 100) / 100,
-        monthsRemaining: this._calculateMonthsRemaining(new Date(), goal.targetDate)
+        monthsRemaining: this._calculateMonthsRemaining(
+          new Date(),
+          goal.targetDate
+        ),
       };
     } catch (error) {
       console.error('Error assessing goal feasibility:', error);
@@ -321,7 +359,7 @@ export class GoalPlanner {
         requiredMonthlySavings: 0,
         availableMonthlyIncome: 0,
         savingsRate: 0,
-        monthsRemaining: 0
+        monthsRemaining: 0,
       };
     }
   }
@@ -334,7 +372,12 @@ export class GoalPlanner {
    * @param {number} initialAmount - Starting amount (default: 0)
    * @returns {Array} Array of yearly wealth projections
    */
-  projectWealthAccumulation(monthlySavingsRate, annualInvestmentReturn, years, initialAmount = 0) {
+  projectWealthAccumulation(
+    monthlySavingsRate,
+    annualInvestmentReturn,
+    years,
+    initialAmount = 0
+  ) {
     try {
       const projections = [];
       const monthlyReturn = annualInvestmentReturn / 12;
@@ -346,18 +389,20 @@ export class GoalPlanner {
           // Add monthly savings
           currentWealth += monthlySavingsRate;
           // Apply monthly return
-          currentWealth *= (1 + monthlyReturn);
+          currentWealth *= 1 + monthlyReturn;
         }
 
         const yearlyContribution = monthlySavingsRate * 12;
-        const investmentGrowth = currentWealth - (initialAmount + (yearlyContribution * year));
+        const investmentGrowth =
+          currentWealth - (initialAmount + yearlyContribution * year);
 
         projections.push({
           year,
           projectedWealth: Math.round(currentWealth * 100) / 100,
-          totalContributions: Math.round((initialAmount + (yearlyContribution * year)) * 100) / 100,
+          totalContributions:
+            Math.round((initialAmount + yearlyContribution * year) * 100) / 100,
           investmentGrowth: Math.round(investmentGrowth * 100) / 100,
-          annualContribution: yearlyContribution
+          annualContribution: yearlyContribution,
         });
       }
 
@@ -376,20 +421,29 @@ export class GoalPlanner {
    * @param {Object} options - Additional options
    * @returns {Object} Retirement planning analysis
    */
-  modelRetirementNeeds(currentAge, retirementAge, desiredMonthlyIncome, options = {}) {
+  modelRetirementNeeds(
+    currentAge,
+    retirementAge,
+    desiredMonthlyIncome,
+    options = {}
+  ) {
     try {
       if (currentAge >= retirementAge) {
         throw new Error('Retirement age must be greater than current age');
       }
 
       const yearsToRetirement = retirementAge - currentAge;
-      const retirementYears = options.retirementYears || (85 - retirementAge); // Assume living to 85
-      const inflationRate = options.inflationRate || this.goalDefaults.retirement.inflationRate;
-      const expectedReturn = options.expectedReturn || this.goalDefaults.retirement.expectedReturn;
-      const withdrawalRate = options.withdrawalRate || this.goalDefaults.retirement.withdrawalRate;
+      const retirementYears = options.retirementYears || 85 - retirementAge; // Assume living to 85
+      const inflationRate =
+        options.inflationRate || this.goalDefaults.retirement.inflationRate;
+      const expectedReturn =
+        options.expectedReturn || this.goalDefaults.retirement.expectedReturn;
+      const withdrawalRate =
+        options.withdrawalRate || this.goalDefaults.retirement.withdrawalRate;
 
       // Adjust desired income for inflation
-      const inflationAdjustedIncome = desiredMonthlyIncome * Math.pow(1 + inflationRate, yearsToRetirement);
+      const inflationAdjustedIncome =
+        desiredMonthlyIncome * Math.pow(1 + inflationRate, yearsToRetirement);
       const annualIncomeNeeded = inflationAdjustedIncome * 12;
 
       // Calculate required retirement fund using withdrawal rate
@@ -398,7 +452,9 @@ export class GoalPlanner {
       // Calculate required monthly savings
       const monthlyReturn = expectedReturn / 12;
       const monthsToRetirement = yearsToRetirement * 12;
-      const requiredMonthlySavings = requiredRetirementFund / (((Math.pow(1 + monthlyReturn, monthsToRetirement) - 1) / monthlyReturn));
+      const requiredMonthlySavings =
+        requiredRetirementFund /
+        ((Math.pow(1 + monthlyReturn, monthsToRetirement) - 1) / monthlyReturn);
 
       return {
         currentAge,
@@ -406,15 +462,16 @@ export class GoalPlanner {
         yearsToRetirement,
         retirementYears,
         desiredMonthlyIncome,
-        inflationAdjustedIncome: Math.round(inflationAdjustedIncome * 100) / 100,
+        inflationAdjustedIncome:
+          Math.round(inflationAdjustedIncome * 100) / 100,
         annualIncomeNeeded: Math.round(annualIncomeNeeded * 100) / 100,
         requiredRetirementFund: Math.round(requiredRetirementFund * 100) / 100,
         requiredMonthlySavings: Math.round(requiredMonthlySavings * 100) / 100,
         assumptions: {
           inflationRate: inflationRate * 100,
           expectedReturn: expectedReturn * 100,
-          withdrawalRate: withdrawalRate * 100
-        }
+          withdrawalRate: withdrawalRate * 100,
+        },
       };
     } catch (error) {
       console.error('Error modeling retirement needs:', error);
@@ -428,15 +485,26 @@ export class GoalPlanner {
    */
   getGoalsSummary() {
     const totalGoals = this.goals.length;
-    const completedGoals = this.goals.filter(g => this.calculateGoalProgress(g) >= 100).length;
-    const totalTargetAmount = this.goals.reduce((sum, g) => sum + g.targetAmount, 0);
-    const totalCurrentSavings = this.goals.reduce((sum, g) => sum + g.currentSavings, 0);
-    const totalRequiredMonthlySavings = this.goals.reduce((sum, g) => sum + g.requiredMonthlySavings, 0);
+    const completedGoals = this.goals.filter(
+      g => this.calculateGoalProgress(g) >= 100
+    ).length;
+    const totalTargetAmount = this.goals.reduce(
+      (sum, g) => sum + g.targetAmount,
+      0
+    );
+    const totalCurrentSavings = this.goals.reduce(
+      (sum, g) => sum + g.currentSavings,
+      0
+    );
+    const totalRequiredMonthlySavings = this.goals.reduce(
+      (sum, g) => sum + g.requiredMonthlySavings,
+      0
+    );
 
     const goalsByPriority = {
       high: this.goals.filter(g => g.priority === 'high').length,
       medium: this.goals.filter(g => g.priority === 'medium').length,
-      low: this.goals.filter(g => g.priority === 'low').length
+      low: this.goals.filter(g => g.priority === 'low').length,
     };
 
     const goalsByType = {};
@@ -450,10 +518,14 @@ export class GoalPlanner {
       activeGoals: totalGoals - completedGoals,
       totalTargetAmount: Math.round(totalTargetAmount * 100) / 100,
       totalCurrentSavings: Math.round(totalCurrentSavings * 100) / 100,
-      totalRequiredMonthlySavings: Math.round(totalRequiredMonthlySavings * 100) / 100,
-      overallProgress: totalTargetAmount > 0 ? Math.round((totalCurrentSavings / totalTargetAmount) * 10000) / 100 : 0,
+      totalRequiredMonthlySavings:
+        Math.round(totalRequiredMonthlySavings * 100) / 100,
+      overallProgress:
+        totalTargetAmount > 0
+          ? Math.round((totalCurrentSavings / totalTargetAmount) * 10000) / 100
+          : 0,
       goalsByPriority,
-      goalsByType
+      goalsByType,
     };
   }
 
@@ -479,13 +551,13 @@ export class GoalPlanner {
       if (!stored) return [];
 
       const goals = JSON.parse(stored);
-      
+
       // Convert date strings back to Date objects
       return goals.map(goal => ({
         ...goal,
         targetDate: new Date(goal.targetDate),
         createdDate: new Date(goal.createdDate),
-        updatedDate: new Date(goal.updatedDate)
+        updatedDate: new Date(goal.updatedDate),
       }));
     } catch (error) {
       console.error('Error loading goals:', error);
@@ -499,11 +571,13 @@ export class GoalPlanner {
   _saveGoals() {
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(this.goals));
-      
+
       // Dispatch storage update event
-      window.dispatchEvent(new CustomEvent('storage-updated', {
-        detail: { key: this.storageKey, data: this.goals }
-      }));
+      window.dispatchEvent(
+        new CustomEvent('storage-updated', {
+          detail: { key: this.storageKey, data: this.goals },
+        })
+      );
     } catch (error) {
       console.error('Error saving goals:', error);
       throw error;

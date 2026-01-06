@@ -21,7 +21,7 @@ export function SyncStatus() {
   el.style.color = COLORS.TEXT_MUTED;
   el.style.fontSize = '0.9rem';
   el.textContent = navigator.onLine ? 'Synced' : 'Offline';
-  const handle = (e) => {
+  const handle = e => {
     const d = e.detail || {};
     const dataType = d.dataType || 'data';
     if (d.state === 'syncing') {
@@ -52,7 +52,11 @@ export function SyncStatus() {
       return;
     }
     if (seenConnected && !currentlyConnected) {
-      try { el.cleanup(); } catch { /* noop */ }
+      try {
+        el.cleanup();
+      } catch {
+        /* noop */
+      }
       observer.disconnect();
     }
   });
@@ -61,8 +65,16 @@ export function SyncStatus() {
   // Ensure cleanup also disconnects the observer
   const originalCleanup = el.cleanup;
   el.cleanup = () => {
-    try { originalCleanup(); } catch { /* noop */ }
-    try { observer.disconnect(); } catch { /* noop */ }
+    try {
+      originalCleanup();
+    } catch {
+      /* noop */
+    }
+    try {
+      observer.disconnect();
+    } catch {
+      /* noop */
+    }
   };
 
   return el;

@@ -9,8 +9,14 @@ import { COLORS, SPACING } from '../../utils/constants.js';
  * @param {string} assessment.riskLevel - Risk level ('low', 'moderate', 'high')
  * @returns {HTMLElement} The emergency fund card element
  */
-export const EmergencyFundCard = (assessment) => {
-  if (!assessment || !assessment.riskLevel || !assessment.status || !assessment.message || !assessment.recommendation) {
+export const EmergencyFundCard = assessment => {
+  if (
+    !assessment ||
+    !assessment.riskLevel ||
+    !assessment.status ||
+    !assessment.message ||
+    !assessment.recommendation
+  ) {
     throw new Error('Invalid assessment: missing required properties');
   }
 
@@ -32,15 +38,30 @@ export const EmergencyFundCard = (assessment) => {
   title.style.margin = '0';
   title.style.fontSize = '1.125rem';
   const status = document.createElement('span');
-  status.textContent = assessment.status.charAt(0).toUpperCase() + assessment.status.slice(1);
-  status.setAttribute('aria-label', `Risk level: ${assessment.riskLevel}, Status: ${assessment.status}`);
+  status.textContent =
+    assessment.status.charAt(0).toUpperCase() + assessment.status.slice(1);
+  status.setAttribute(
+    'aria-label',
+    `Risk level: ${assessment.riskLevel}, Status: ${assessment.status}`
+  );
   status.style.padding = `${SPACING.XS} ${SPACING.SM}`;
   status.style.borderRadius = 'var(--radius-sm)';
   status.style.fontSize = '0.75rem';
   status.style.fontWeight = '600';
-  status.style.background = assessment.riskLevel === 'low' ? COLORS.SUCCESS : assessment.riskLevel === 'moderate' ? COLORS.WARNING : COLORS.ERROR;
-  status.style.color = 'white';  status.style.fontWeight = '600';
-  status.style.background = assessment.riskLevel === 'low' ? COLORS.SUCCESS : assessment.riskLevel === 'moderate' ? COLORS.WARNING : COLORS.ERROR;
+  status.style.background =
+    assessment.riskLevel === 'low'
+      ? COLORS.SUCCESS
+      : assessment.riskLevel === 'moderate'
+        ? COLORS.WARNING
+        : COLORS.ERROR;
+  status.style.color = 'white';
+  status.style.fontWeight = '600';
+  status.style.background =
+    assessment.riskLevel === 'low'
+      ? COLORS.SUCCESS
+      : assessment.riskLevel === 'moderate'
+        ? COLORS.WARNING
+        : COLORS.ERROR;
   status.style.color = 'white';
 
   header.appendChild(title);

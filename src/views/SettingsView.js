@@ -4,11 +4,7 @@ import { AccountSection } from '../components/AccountSection.js';
 import { DateFormatSection } from '../components/DateFormatSection.js';
 import { DataManagementSection } from '../components/DataManagementSection.js';
 import { GeneralSection } from '../components/GeneralSection.js';
-import {
-  SPACING,
-  TOUCH_TARGETS,
-  FONT_SIZES,
-} from '../utils/constants.js';
+import { SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
 import { createButton } from '../utils/dom-factory.js';
 
 export const SettingsView = () => {

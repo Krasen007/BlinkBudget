@@ -33,7 +33,8 @@ export function ConflictDialog() {
 
   const message = document.createElement('p');
   message.id = 'conflict-dialog-message';
-  message.textContent = 'A conflict was detected between local and cloud versions. Choose which version to keep.';
+  message.textContent =
+    'A conflict was detected between local and cloud versions. Choose which version to keep.';
 
   const btns = document.createElement('div');
   btns.style.display = 'flex';
@@ -87,23 +88,33 @@ export function ConflictDialog() {
   }
 
   keepLocal.addEventListener('click', () => {
-    window.dispatchEvent(new CustomEvent('sync-conflict-resolution', { detail: { resolution: 'local', conflict: currentConflict } }));
+    window.dispatchEvent(
+      new CustomEvent('sync-conflict-resolution', {
+        detail: { resolution: 'local', conflict: currentConflict },
+      })
+    );
     hide();
   });
 
   keepCloud.addEventListener('click', () => {
-    window.dispatchEvent(new CustomEvent('sync-conflict-resolution', { detail: { resolution: 'cloud', conflict: currentConflict } }));
+    window.dispatchEvent(
+      new CustomEvent('sync-conflict-resolution', {
+        detail: { resolution: 'cloud', conflict: currentConflict },
+      })
+    );
     hide();
   });
 
   cancel.addEventListener('click', () => {
-    window.dispatchEvent(new CustomEvent('sync-conflict-resolution', { 
-      detail: { resolution: 'cancel', conflict: currentConflict } 
-    }));
+    window.dispatchEvent(
+      new CustomEvent('sync-conflict-resolution', {
+        detail: { resolution: 'cancel', conflict: currentConflict },
+      })
+    );
     hide();
   });
   // Listen for conflict events
-  const handler = (e) => show(e.detail);
+  const handler = e => show(e.detail);
   window.addEventListener('sync-conflict', handler);
 
   overlay.cleanup = () => {

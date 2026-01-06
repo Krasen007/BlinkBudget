@@ -11,7 +11,14 @@ import { COLORS, SPACING } from '../../utils/constants.js';
  * @param {string} [props.calculationHelp] - Optional calculation explanation
  * @returns {HTMLElement} The stats card element
  */
-export const StatsCard = ({ label, value, color, icon, subtitle, calculationHelp }) => {
+export const StatsCard = ({
+  label,
+  value,
+  color,
+  icon,
+  subtitle,
+  calculationHelp,
+}) => {
   const card = document.createElement('div');
   card.className = 'stats-card';
   card.style.padding = SPACING.LG;
@@ -100,7 +107,9 @@ export const StatsCard = ({ label, value, color, icon, subtitle, calculationHelp
     helpTitle.addEventListener('click', () => {
       isExpanded = !isExpanded;
       helpDetails.style.display = isExpanded ? 'block' : 'none';
-      toggleIcon.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+      toggleIcon.style.transform = isExpanded
+        ? 'rotate(180deg)'
+        : 'rotate(0deg)';
     });
 
     helpSection.appendChild(helpTitle);
