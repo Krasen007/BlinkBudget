@@ -286,6 +286,22 @@ export const TimePeriodSelector = (options = {}) => {
   }
 
   /**
+   * Check if two time periods are the same
+   */
+  function isSamePeriod(period1, period2) {
+    if (!period1 || !period2) return false;
+    if (period1.type !== period2.type) return false;
+
+    // For predefined periods, compare start and end dates
+    const start1 = new Date(period1.startDate).getTime();
+    const end1 = new Date(period1.endDate).getTime();
+    const start2 = new Date(period2.startDate).getTime();
+    const end2 = new Date(period2.endDate).getTime();
+
+    return start1 === start2 && end1 === end2;
+  }
+
+  /**
    * Handle predefined period selection
    */
   function handlePredefinedPeriodSelection(period) {
@@ -295,6 +311,14 @@ export const TimePeriodSelector = (options = {}) => {
       // Validate the period
       if (!validateTimePeriod(newPeriod)) {
         showValidationError('Invalid time period selected');
+        return;
+      }
+
+      // Check if the selected period is the same as current period
+      if (isSamePeriod(currentPeriod, newPeriod)) {
+        // Same period selected, just ensure UI is correct but don't trigger change
+        setActiveButton(periodButtons.get(period.key));
+        hideCustomRangeSelector();
         return;
       }
 
