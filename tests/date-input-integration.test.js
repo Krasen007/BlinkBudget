@@ -39,14 +39,7 @@ describe('Date Input Integration', () => {
     expect(label.style.display).toBe('block');
 
     // Should have accessibility attributes
-    const displayInput = addView.querySelector(
-      'input[aria-label*="Transaction date"]'
-    );
-    expect(displayInput).toBeTruthy();
-    expect(displayInput.getAttribute('aria-label')).toBe(
-      'Transaction date - click to change'
-    );
-    expect(displayInput.title).toBe('Click to change transaction date');
+    expect(dateInput.getAttribute('aria-label')).toBe('Transaction date');
   });
 
   it('should show date input with label in EditView', () => {
@@ -76,13 +69,7 @@ describe('Date Input Integration', () => {
     expect(label.style.display).toBe('block');
 
     // Should have accessibility attributes
-    const displayInput = editView.querySelector(
-      'input[aria-label*="Transaction date"]'
-    );
-    expect(displayInput).toBeTruthy();
-    expect(displayInput.getAttribute('aria-label')).toBe(
-      'Transaction date - click to change'
-    );
+    expect(dateInput.getAttribute('aria-label')).toBe('Transaction date');
   });
 
   it('should have proper visual connection to form in AddView', () => {

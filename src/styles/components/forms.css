@@ -15,7 +15,7 @@ input {
   min-height: var(--touch-target-standard);
   height: var(--touch-target-standard);
 
-  /* Mobile input optimizations */
+  /* Mobile input optimizations - but not for date inputs */
   appearance: none;
   appearance: none;
   appearance: none;
@@ -28,21 +28,62 @@ input {
   touch-action: manipulation;
 }
 
+/* Date inputs should not have appearance: none to preserve native functionality */
+input[type='date'] {
+  appearance: auto !important;
+  -webkit-appearance: auto !important;
+  -moz-appearance: auto !important;
+}
+
 input:hover {
   border-color: var(--color-text-muted);
 }
 
 input:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px
-    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  box-shadow: 0 0 0 3px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
 }
 
 /* Specific input types for mobile */
-input[type='date'] {
+input[type='date'],
+input[type='date'].mobile-form-input,
+.date-input-field {
+  /* Reset all inherited styles for date inputs */
+  appearance: auto !important;
+  -webkit-appearance: auto !important;
+  -moz-appearance: auto !important;
+  /* Restore native functionality */
   color-scheme: dark;
   min-height: var(--touch-target-standard);
   height: var(--touch-target-standard);
+  cursor: pointer;
+  position: relative;
+  pointer-events: auto !important;
+  z-index: 1;
+  /* Override any inherited styling */
+  background-color: var(--color-surface) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text-main) !important;
+  border-radius: var(--radius-md) !important;
+  padding: var(--spacing-md) var(--spacing-lg) !important;
+  font-family: var(--font-body) !important;
+  font-size: max(var(--font-size-prevent-zoom), var(--font-size-base)) !important;
+  transition: border-color var(--transition-fast) !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+}
+
+/* Make the whole date input trigger the picker */
+input[type='date']::-webkit-calendar-picker-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
 }
 
 /* Remove Arrows from Number Input */
@@ -59,10 +100,10 @@ input[type='number'] {
 
 /* Select elements - Touch-optimized */
 select.input-select {
-  min-height: var(--touch-target-standard); /* Match category chip height */
-  height: var(
-    --touch-target-standard
-  ); /* Fixed height to match category chips exactly */
+  min-height: var(--touch-target-standard);
+  /* Match category chip height */
+  height: var(--touch-target-standard);
+  /* Fixed height to match category chips exactly */
 
   padding: var(--spacing-md);
   font-size: max(var(--font-size-prevent-zoom), var(--font-size-base));
@@ -81,8 +122,7 @@ select.input-select {
 /* Enhanced focus states for touch */
 select.input-select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px
-    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  box-shadow: 0 0 0 3px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
   outline: none;
 }
 
@@ -90,15 +130,14 @@ select.input-select:focus {
 .mobile-form-input,
 .mobile-form-select {
   width: 100%;
-  min-height: var(--touch-target-standard); /* Match category chip height */
-  height: var(
-    --touch-target-standard
-  ); /* Fixed height to match category chips exactly */
+  min-height: var(--touch-target-standard);
+  /* Match category chip height */
+  height: var(--touch-target-standard);
+  /* Fixed height to match category chips exactly */
 
-  font-size: max(
-    var(--font-size-prevent-zoom),
-    var(--font-size-base)
-  ); /* Prevent zoom on iOS */
+  font-size: max(var(--font-size-prevent-zoom),
+      var(--font-size-base));
+  /* Prevent zoom on iOS */
 
   padding: var(--spacing-md);
   border-radius: var(--radius-md);
@@ -126,8 +165,7 @@ select.input-select:focus {
 .mobile-form-input:focus,
 .mobile-form-select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px
-    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  box-shadow: 0 0 0 3px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
   outline: none;
 }
 
@@ -138,7 +176,8 @@ select.input-select:focus {
   background-repeat: no-repeat;
   background-position: right var(--spacing-md) center;
   background-size: 16px;
-  padding-right: calc(var(--spacing-md) + 24px); /* Make room for arrow */
+  padding-right: calc(var(--spacing-md) + 24px);
+  /* Make room for arrow */
 }
 
 /* Mobile add account form */
@@ -171,26 +210,27 @@ select.input-select:focus {
 }
 
 /* Transaction Date Input Enhancements */
-.view-add .mobile-form-input[aria-label*='Transaction date'],
-.view-edit .mobile-form-input[aria-label*='Transaction date'] {
+.view-add .mobile-form-input[type='date'],
+.view-edit .mobile-form-input[type='date'],
+.view-settings .mobile-form-input[type='date'] {
   /* Subtle visual connection to form */
   border-color: var(--color-primary-light);
   background: var(--color-surface);
   position: relative;
 }
 
-.view-add .mobile-form-input[aria-label*='Transaction date']:hover,
-.view-edit .mobile-form-input[aria-label*='Transaction date']:hover {
+.view-add .mobile-form-input[type='date']:hover,
+.view-edit .mobile-form-input[type='date']:hover,
+.view-settings .mobile-form-input[type='date']:hover {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px
-    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  box-shadow: 0 0 0 2px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
 }
 
-.view-add .mobile-form-input[aria-label*='Transaction date']:focus,
-.view-edit .mobile-form-input[aria-label*='Transaction date']:focus {
+.view-add .mobile-form-input[type='date']:focus,
+.view-edit .mobile-form-input[type='date']:focus,
+.view-settings .mobile-form-input[type='date']:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px
-    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
+  box-shadow: 0 0 0 3px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
   outline: none;
 }
 
@@ -233,7 +273,7 @@ select.input-select:focus {
   width: 100%;
 
   /* Ensure form takes full width */
-  @media (width <= 767px) {
+  @media (width <=767px) {
     min-height: calc(var(--visual-viewport-height) - 120px);
     justify-content: flex-end;
   }
@@ -279,8 +319,7 @@ body.keyboard-visible input:focus,
 body.keyboard-visible select:focus {
   /* Stronger focus indication when keyboard is active */
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px
-    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
+  box-shadow: 0 0 0 4px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
   transform: scale(1.02);
   transition: all var(--transition-fast);
 }
@@ -302,7 +341,7 @@ body.keyboard-visible select:focus {
 }
 
 /* Mobile-friendly focus states */
-@media (width <= calc(var(--breakpoint-md) - 1px)) {
+@media (width <=calc(var(--breakpoint-md) - 1px)) {
   input:focus {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
@@ -311,6 +350,7 @@ body.keyboard-visible select:focus {
 
 /* iOS specific fixes */
 @supports (-webkit-touch-callout: none) {
+
   /* iOS Safari specific styles */
   input {
     /* Fix iOS input styling */
@@ -332,7 +372,8 @@ body.keyboard-visible select:focus {
 }
 
 /* Android specific fixes */
-@media screen and (min-device-pixel-ratio: 0) and (resolution >= .001dpcm) {
+@media screen and (min-device-pixel-ratio: 0) and (resolution >=.001dpcm) {
+
   /* Android Chrome specific styles */
   input:focus {
     /* Prevent Android zoom */
@@ -342,6 +383,7 @@ body.keyboard-visible select:focus {
 
 /* Dark mode optimizations for mobile */
 @media (prefers-color-scheme: dark) {
+
   /* Already using dark theme, but ensure mobile-specific adjustments */
   input[type='date']::-webkit-calendar-picker-indicator {
     filter: invert(1);

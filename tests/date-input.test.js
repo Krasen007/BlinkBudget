@@ -42,73 +42,43 @@ describe('DateInput Component', () => {
     const dateInput = DateInput();
     container.appendChild(dateInput);
 
-    const displayInput = dateInput.querySelector('input[type="text"]');
     const realInput = dateInput.querySelector('input[type="date"]');
     const label = dateInput.querySelector('label');
 
-    // Display input should have accessibility attributes
-    expect(displayInput.getAttribute('aria-label')).toBe(
-      'Transaction date - click to change'
-    );
-    expect(displayInput.getAttribute('role')).toBe('button');
-    expect(displayInput.getAttribute('tabindex')).toBe('0');
-    expect(displayInput.title).toBe('Click to change transaction date');
-
-    // Label should be connected to real input
-    expect(label.getAttribute('for')).toBe(realInput.id);
+    // Date input should have accessibility attributes
+    expect(realInput.getAttribute('aria-label')).toBe('Transaction date');
     expect(realInput.id).toBeTruthy();
+
+    // Label should be connected to date input
+    expect(label.getAttribute('for')).toBe(realInput.id);
   });
 
-  it('should respond to keyboard interaction', () => {
+  it('should respond to click interaction', () => {
     const dateInput = DateInput();
     container.appendChild(dateInput);
 
-    const displayInput = dateInput.querySelector('input[type="text"]');
     const realInput = dateInput.querySelector('input[type="date"]');
 
-    // Mock the click method
-    let clicked = false;
-    realInput.click = () => {
-      clicked = true;
+    // Mock the showPicker method
+    let showPickerCalled = false;
+    realInput.showPicker = () => {
+      showPickerCalled = true;
     };
 
-    // Test Enter key
-    const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
-    displayInput.dispatchEvent(enterEvent);
-    expect(clicked).toBe(true);
-
-    // Reset and test Space key
-    clicked = false;
-    const spaceEvent = new KeyboardEvent('keydown', { key: ' ' });
-    displayInput.dispatchEvent(spaceEvent);
-    expect(clicked).toBe(true);
+    // Test click
+    realInput.dispatchEvent(new Event('click'));
+    expect(showPickerCalled).toBe(true);
   });
 
-  it('should provide visual feedback on hover and focus', () => {
+  it('should have proper CSS classes for styling', () => {
     const dateInput = DateInput();
     container.appendChild(dateInput);
 
-    const displayInput = dateInput.querySelector('input[type="text"]');
+    const realInput = dateInput.querySelector('input[type="date"]');
 
-    // Initial state
-    const initialBorderColor = displayInput.style.borderColor;
-
-    // Test hover
-    displayInput.dispatchEvent(new Event('mouseenter'));
-    expect(displayInput.style.borderColor).not.toBe(initialBorderColor);
-    expect(displayInput.style.transform).toBe('scale(1.02)');
-
-    // Test mouse leave
-    displayInput.dispatchEvent(new Event('mouseleave'));
-    expect(displayInput.style.transform).toBe('scale(1)');
-
-    // Test focus
-    displayInput.dispatchEvent(new Event('focus'));
-    expect(displayInput.style.transform).toBe('scale(1.02)');
-
-    // Test blur
-    displayInput.dispatchEvent(new Event('blur'));
-    expect(displayInput.style.transform).toBe('scale(1)');
+    // Should have the expected CSS classes
+    expect(realInput.className).toContain('mobile-form-input');
+    expect(realInput.className).toContain('date-input-field');
   });
 
   it('should initialize with provided value', () => {
