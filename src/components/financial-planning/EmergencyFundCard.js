@@ -55,14 +55,6 @@ export const EmergencyFundCard = assessment => {
         ? COLORS.WARNING
         : COLORS.ERROR;
   status.style.color = 'white';
-  status.style.fontWeight = '600';
-  status.style.background =
-    assessment.riskLevel === 'low'
-      ? COLORS.SUCCESS
-      : assessment.riskLevel === 'moderate'
-        ? COLORS.WARNING
-        : COLORS.ERROR;
-  status.style.color = 'white';
 
   header.appendChild(title);
   header.appendChild(status);

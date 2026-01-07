@@ -78,7 +78,8 @@ export class PlanningDataManager {
 
       this.lastUpdated = timestamp;
       this.notifyListeners();
-      this.notifyListeners();
+
+      return this.data;
 
       return this.data;
     } catch (error) {

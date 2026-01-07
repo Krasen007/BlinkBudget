@@ -87,7 +87,8 @@ export const TransactionListItem = ({
 
   // Cancel on scroll
   item.addEventListener('touchmove', cancelPress, { passive: true });
-  window.addEventListener('scroll', cancelPress, { passive: true });
+  /// seems to be only for windows where we do not have this problem
+  // window.addEventListener('scroll', cancelPress, { passive: true });
 
   // Prevent context menu during long press
   item.addEventListener('contextmenu', e => {

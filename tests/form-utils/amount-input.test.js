@@ -166,7 +166,7 @@ describe('Amount Input Factory', () => {
       expect(validation.error).toContain('required');
     });
 
-    test('rejects negative amounts (converts to positive)', () => {
+    test('converts negative amounts to positive', () => {
       const result = createAmountInput();
       result.input.value = '-50';
 
@@ -268,7 +268,7 @@ describe('Amount Input Factory', () => {
       expect(result.input.placeholder).toBe('0.00');
     });
 
-    test('sets id when provided', () => {
+    test('sets id attribute internally', () => {
       // Note: createAmountInput doesn't take id as parameter, it sets it internally
       const result = createAmountInput();
 

@@ -206,17 +206,6 @@ describe('Category Chips', () => {
     });
   });
 
-  describe('auto-submit functionality', () => {
-    test('calls onSubmit for valid expense transaction', () => {
-      // This would require mocking the chip click event
-      // The auto-submit logic is tested through integration tests
-    });
-
-    test('calls onSubmit for valid transfer transaction', () => {
-      // Transfer auto-submit logic would be tested here
-    });
-  });
-
   describe('container styling', () => {
     test('creates container with proper grid layout', () => {
       const result = createCategorySelector();
@@ -297,11 +286,6 @@ describe('Category Chips', () => {
   });
 
   describe('error handling', () => {
-    test('handles submit errors gracefully', () => {
-      // This would test the error handling in the submit callback
-      // Requires complex mocking of the submit function throwing errors
-    });
-
     test('handles missing mobileUtils gracefully', () => {
       const originalMobileUtils = window.mobileUtils;
       delete window.mobileUtils;

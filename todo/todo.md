@@ -47,7 +47,8 @@ DO NOT IMPLEMENT: Add pre-selected categories when amount matches some amount, e
 [x] Plan for long term goals like retirement, buying a house, kid's education, Preview a long term financial forecast to see if you can reach your goals.
 [x] Insights: Top Movers 1 Jan 2026 vs Dec 2025
 [x] Insights: Timeline Jan vs Dec 2025
-[ ] add ability to show transactions by date if i want to see only specific date in the dashboard, perhaps if i click on the date i will [ ] show all transactions for this date release as  windows store app https://learn.microsoft.com/en-us/microsoft-edge/progressive-web-apps/how-to/microsoft-store
+[ ] add ability to show transactions by date if i want to see only specific date in the dashboard, perhaps if i click on the date i will 
+[ ] show all transactions for this date release as  windows store app https://learn.microsoft.com/en-us/microsoft-edge/progressive-web-apps/how-to/microsoft-store
 [ ] use Ionic's Capacitor or Cordova to make android app
 [ ] there is a white bar when using the PWA in light mode i must check how it is on the browser
 [ ] Chrome browser detects the app core and switches to dark or white molds but when I use the PWA it detects that I'm using light theme and it makes my bar white
