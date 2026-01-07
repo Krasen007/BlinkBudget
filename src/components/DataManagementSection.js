@@ -8,7 +8,6 @@ import { DateInput } from './DateInput.js';
 import { TransactionService } from '../core/transaction-service.js';
 import { AlertDialog } from './ConfirmDialog.js';
 import { SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
-import { createInput } from '../utils/dom-factory.js';
 import { getFirstDayOfMonthISO, getTodayISO } from '../utils/date-utils.js';
 
 export const DataManagementSection = () => {

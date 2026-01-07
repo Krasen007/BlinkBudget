@@ -51,42 +51,21 @@ export const DateInput = (options = {}) => {
 
   // Initialize with today's date or provided value
   const initialDate = value ? dateToISO(new Date(value)) : getTodayISO();
-  console.log('DateInput: Setting initial value to:', initialDate);
   realDate.value = initialDate;
 
   // Connect label to input
   label.setAttribute('for', inputId);
 
-  // Check if readonly gets set after initialization
-  setTimeout(() => {
-    console.log('DateInput: After timeout - readonly:', realDate.readOnly, 'disabled:', realDate.disabled);
-  }, 100);
-
   // Handle value changes
   realDate.addEventListener('change', e => {
-    console.log('DateInput: Date changed to:', e.target.value);
     if (onChange) {
       onChange(e.target.value);
     }
   });
 
   // Handle click to show picker (fixes issues where appearance:none hides the trigger)
-  realDate.addEventListener('click', (e) => {
-    console.log('DateInput: Click detected');
-    console.log('DateInput: Input is readonly:', realDate.readOnly);
-    console.log('DateInput: Input is disabled:', realDate.disabled);
-    console.log('DateInput: Input value:', realDate.value);
-    console.log('DateInput: showPicker available:', typeof realDate.showPicker === 'function');
+  realDate.addEventListener('click', () => {
     // Let the native behavior handle the click - don't interfere
-  });
-
-  // Add focus and blur logging
-  realDate.addEventListener('focus', () => {
-    console.log('DateInput: Input focused');
-  });
-
-  realDate.addEventListener('blur', () => {
-    console.log('DateInput: Input blurred');
   });
 
   // Build the component structure

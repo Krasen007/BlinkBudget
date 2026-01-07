@@ -15,7 +15,7 @@ export const validateAmount = value => {
   const normalized = String(value).replace(/,/g, '.');
   const amount = parseFloat(normalized);
 
-  if (isNaN(amount) || amount <= 0) {
+  if (isNaN(amount) || amount === 0) {
     return {
       valid: false,
       error: 'Amount is required and must be greater than 0',
