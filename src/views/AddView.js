@@ -64,7 +64,7 @@ export const AddView = ({ accountId } = {}) => {
 
   const form = TransactionForm({
     initialValues: { accountId },
-    externalDateInput: dateInput.querySelector('input[type="date"]'),
+    externalDateInput: dateInput,
     showCancelButton: true, // Add cancel button to the form
     onSubmit: data => {
       // Update dashboard filter to show the account used for this transaction

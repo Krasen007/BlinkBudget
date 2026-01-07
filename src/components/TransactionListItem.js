@@ -85,6 +85,10 @@ export const TransactionListItem = ({
   item.addEventListener('touchend', cancelPress);
   item.addEventListener('touchcancel', cancelPress);
 
+  // Cancel on scroll
+  item.addEventListener('touchmove', cancelPress, { passive: true });
+  window.addEventListener('scroll', cancelPress, { passive: true });
+
   // Prevent context menu during long press
   item.addEventListener('contextmenu', e => {
     if (longPressed) e.preventDefault();

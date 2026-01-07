@@ -13,6 +13,13 @@ import { sanitizeInput } from '../security-utils.js';
  */
 export const getDateSource = (externalDateInput = null) => {
   if (externalDateInput) {
+    if (externalDateInput.getDate) {
+      // Handle DateInput component interface
+      // We create a dummy input-like object that has a value property getter
+      return {
+        get value() { return externalDateInput.getDate(); }
+      };
+    }
     return externalDateInput;
   }
 

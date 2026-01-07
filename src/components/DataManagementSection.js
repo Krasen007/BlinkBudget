@@ -4,6 +4,7 @@
  */
 
 import { Button } from './Button.js';
+import { DateInput } from './DateInput.js';
 import { TransactionService } from '../core/transaction-service.js';
 import { AlertDialog } from './ConfirmDialog.js';
 import { SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
@@ -34,13 +35,27 @@ export const DataManagementSection = () => {
     marginBottom: SPACING.LG,
   });
 
-  const createDateInput = (label, id) => {
+  // Helper to create date input with label
+  const createDateField = (labelText, initialValue, id) => {
     const wrapper = document.createElement('div');
     wrapper.className = 'mobile-date-input-wrapper';
     wrapper.style.flex = '1';
 
+    const dateComp = DateInput({
+      value: initialValue,
+      showLabel: false // We render our own label above
+    });
+    // Override width to fill container
+    Object.assign(dateComp.style, {
+      width: '100%',
+      marginRight: '0'
+    });
+
+    const input = dateComp.querySelector('input[type="date"]'); // Get internal input for value access
+    if (input) input.id = id; // Set ID for tracking
+
     const lbl = document.createElement('label');
-    lbl.textContent = label;
+    lbl.textContent = labelText;
     lbl.htmlFor = id;
     Object.assign(lbl.style, {
       display: 'block',
@@ -50,31 +65,14 @@ export const DataManagementSection = () => {
       marginBottom: SPACING.XS,
     });
 
-    const input = createInput({
-      type: 'date',
-      id,
-      className: 'touch-target mobile-form-input',
-      fontSize: FONT_SIZES.PREVENT_ZOOM,
-    });
-
-    input.addEventListener('focus', () => {
-      if (window.mobileUtils?.isMobile()) {
-        window.mobileUtils.preventInputZoom(input);
-        window.mobileUtils.scrollIntoViewAboveKeyboard(input);
-      }
-    });
-
     wrapper.appendChild(lbl);
-    wrapper.appendChild(input);
-    return { wrapper, input };
+    wrapper.appendChild(dateComp);
+
+    return { wrapper, input: dateComp }; // Return component as input interface
   };
 
-  const startInput = createDateInput('Start Date', 'export-start');
-  const endInput = createDateInput('End Date', 'export-end');
-
-  // Default: Start of current month to Today
-  startInput.input.value = getFirstDayOfMonthISO();
-  endInput.input.value = getTodayISO();
+  const startInput = createDateField('Start Date', getFirstDayOfMonthISO(), 'export-start');
+  const endInput = createDateField('End Date', getTodayISO(), 'export-end');
 
   dateRangeContainer.appendChild(startInput.wrapper);
   dateRangeContainer.appendChild(endInput.wrapper);
@@ -83,8 +81,8 @@ export const DataManagementSection = () => {
     text: 'Export Transactions (CSV)',
     variant: 'primary',
     onClick: () => {
-      const start = new Date(startInput.input.value);
-      const end = new Date(endInput.input.value);
+      const start = new Date(startInput.input.getDate());
+      const end = new Date(endInput.input.getDate());
       end.setHours(23, 59, 59, 999);
 
       const transactions = TransactionService.getAll().filter(t => {
@@ -115,7 +113,7 @@ export const DataManagementSection = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `blinkbudget_export_${startInput.input.value}_to_${endInput.input.value}.csv`;
+      a.download = `blinkbudget_export_${startInput.input.getDate()}_to_${endInput.input.getDate()}.csv`;
       a.click();
       window.URL.revokeObjectURL(url);
 

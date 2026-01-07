@@ -89,15 +89,19 @@ export const createAmountInput = (options = {}) => {
    * @returns {HTMLInputElement} Date input element
    */
   const getDateSource = () => {
-    return (
-      externalDateInput ||
-      (() => {
-        const fallback = document.createElement('input');
-        fallback.type = 'date';
-        fallback.value = new Date().toISOString().split('T')[0];
-        return fallback;
-      })()
-    );
+    const source = externalDateInput || (() => {
+      const fallback = document.createElement('input');
+      fallback.type = 'date';
+      fallback.value = new Date().toISOString().split('T')[0];
+      return fallback;
+    })();
+
+    if (source.getDate) {
+      return {
+        get value() { return source.getDate(); }
+      };
+    }
+    return source;
   };
 
   return {

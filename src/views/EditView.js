@@ -77,7 +77,7 @@ export const EditView = ({ id }) => {
 
   const form = TransactionForm({
     initialValues: transaction,
-    externalDateInput: dateInput.querySelector('input[type="date"]'),
+    externalDateInput: dateInput,
     onSubmit: data => {
       // Update dashboard filter to show the account used for this transaction
       if (data.accountId) {
