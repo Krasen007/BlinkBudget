@@ -62,14 +62,14 @@ export async function createProjectedBalanceChart(
 
   // Prepare chart data
   const labels = balanceProjections.map(projection => {
-    const date = new Date(projection.date);
+    const date = new Date(projection.period);
     return date.toLocaleDateString('en-US', {
       month: 'short',
       year: 'numeric',
     });
   });
 
-  const balanceData = balanceProjections.map(projection => projection.balance);
+  const balanceData = balanceProjections.map(projection => projection.projectedBalance);
 
   // Create datasets for current balance line and projected balance line
   const datasets = [
@@ -656,11 +656,11 @@ function createBalanceSummary(balanceProjections) {
   container.style.borderRadius = 'var(--radius-md)';
   container.style.border = '1px solid var(--color-border)';
 
-  const currentBalance = balanceProjections[0]?.balance || 0;
+  const currentBalance = balanceProjections[0]?.projectedBalance || 0;
   const finalBalance =
-    balanceProjections[balanceProjections.length - 1]?.balance || 0;
+    balanceProjections[balanceProjections.length - 1]?.projectedBalance || 0;
   const change = finalBalance - currentBalance;
-  const lowestBalance = Math.min(...balanceProjections.map(p => p.balance));
+  const lowestBalance = Math.min(...balanceProjections.map(p => p.projectedBalance));
 
   const stats = [
     {

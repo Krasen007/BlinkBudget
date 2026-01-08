@@ -1,7 +1,7 @@
 DO NOT IMPLEMENT: when you start the app the default view should be to add new entry
 DO NOT IMPLEMENT: add option to reorder categories or auto sort them by most common, it may also be learning from the user behavior and predict the category based on the amount
 DO NOT IMPLEMENT: Add visual indicators for refund transactions in lists
-DO NOT IMPLEMENT: when deleting a transaction create animation of the row dissapearing
+DO NOT IMPLEMENT: when deleting a transaction create animation of the row dissapearing / when splitting a transaction create animation of the row duplicating
 DO NOT IMPLEMENT: Client-side session timeout (30 minutes of inactivity; monitor clicks/keypresses, auto logout)
 DO NOT IMPLEMENT: Local data encryption for sensitive information in localStorage (encryptData/decryptData)
 DO NOT IMPLEMENT: Mask technical error messages from Firestore operations
@@ -47,7 +47,7 @@ DO NOT IMPLEMENT: Add pre-selected categories when amount matches some amount, e
 [x] Plan for long term goals like retirement, buying a house, kid's education, Preview a long term financial forecast to see if you can reach your goals.
 [x] Insights: Top Movers 1 Jan 2026 vs Dec 2025
 [x] Insights: Timeline Jan vs Dec 2025
-[ ] add ability to show transactions by date if i want to see only specific date in the dashboard, perhaps if i click on the date in the dashboard it will show all transactions for this date
+[x] add ability to show transactions by date if i want to see only specific date in the dashboard, perhaps if i click on the date in the dashboard it will show all transactions for this date
 [ ] show all transactions for this date release as  windows store app https://learn.microsoft.com/en-us/microsoft-edge/progressive-web-apps/how-to/microsoft-store
 [ ] use Ionic's Capacitor or Cordova to make android app
 [ ] there is a white bar when using the PWA in light mode i must check how it is on the browser
