@@ -196,7 +196,7 @@ export const FinancialPlanningView = () => {
     const nav = document.createElement('nav');
     nav.className = 'financial-planning-nav';
     nav.setAttribute('role', 'tablist');
-    nav.style.display = 'flex';
+      nav.style.display = 'flex';
     nav.style.gap = SPACING.SM;
     nav.style.marginBottom = SPACING.LG;
     nav.style.flexWrap = 'wrap'; // Allow wrapping
@@ -212,12 +212,12 @@ export const FinancialPlanningView = () => {
     document.head.appendChild(style);
 
     const sections = [
+      { id: 'overview', label: 'Overview', icon: '📊' },
       { id: 'forecasts', label: 'Forecasts', icon: '🔮' },
       { id: 'investments', label: 'Investments', icon: '💰' },
       { id: 'goals', label: 'Goals', icon: '🎯' },
       { id: 'insights', label: 'Insights', icon: '💡' },
       { id: 'scenarios', label: 'Scenarios', icon: '🔄' },
-      { id: 'overview', label: 'Overview', icon: '📊' },
     ];
 
     sections.forEach(section => {
@@ -236,19 +236,22 @@ export const FinancialPlanningView = () => {
         <span class="tab-label">${section.label}</span>
       `;
 
-      // Tab styling
+      // Tab styling - use btn-primary sized padding
       Object.assign(tab.style, {
         display: 'flex',
         alignItems: 'center',
+        justifyContent: 'center',
         gap: SPACING.XS,
-        padding: `${SPACING.SM} ${SPACING.MD}`,
+        padding: `${SPACING.MD} ${SPACING.XL}`,
+        minHeight: 'var(--touch-target-min)',
+        minWidth: 'var(--touch-target-min)',
         border: 'none',
         borderRadius: 'var(--radius-md)',
         background:
           section.id === currentSection ? COLORS.PRIMARY : COLORS.SURFACE,
         color: section.id === currentSection ? 'white' : COLORS.TEXT_MAIN,
         cursor: 'pointer',
-        fontSize: '0.875rem',
+        fontSize: 'var(--font-size-md)',
         fontWeight: '500',
         whiteSpace: 'nowrap',
         transition: 'all 0.2s ease',
@@ -759,7 +762,7 @@ export const FinancialPlanningView = () => {
 
     const addInvBtn = document.createElement('button');
     addInvBtn.textContent = 'Add Investment';
-    addInvBtn.className = 'btn btn-secondary';
+    addInvBtn.className = 'btn btn-primary';
 
     const invForm = document.createElement('div');
     invForm.style.display = 'none';
@@ -956,7 +959,7 @@ export const FinancialPlanningView = () => {
 
         const editBtn = document.createElement('button');
         editBtn.textContent = 'Edit';
-        editBtn.className = 'btn btn-secondary';
+        editBtn.className = 'btn btn-ghost';
 
         const delBtn = document.createElement('button');
         delBtn.textContent = 'Delete';
@@ -1168,7 +1171,7 @@ export const FinancialPlanningView = () => {
 
     const addGoalBtn = document.createElement('button');
     addGoalBtn.textContent = 'Add Goal';
-    addGoalBtn.className = 'btn btn-secondary';
+    addGoalBtn.className = 'btn btn-primary';
 
     const goalForm = document.createElement('div');
     goalForm.style.display = 'none';
@@ -1310,7 +1313,7 @@ export const FinancialPlanningView = () => {
 
         const editBtn = document.createElement('button');
         editBtn.textContent = 'Edit';
-        editBtn.className = 'btn btn-secondary';
+        editBtn.className = 'btn btn-ghost';
 
         const delBtn = document.createElement('button');
         delBtn.textContent = 'Delete';
