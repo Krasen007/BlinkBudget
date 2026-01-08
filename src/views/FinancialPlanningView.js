@@ -1941,10 +1941,15 @@ export const FinancialPlanningView = () => {
       );
 
       // Convert to series for chart helper
-      const series = projections.map(p => ({
-        period: `Year ${p.year}`,
-        value: p.projectedWealth,
-      }));
+      const now = new Date();
+      const series = projections.map(p => {
+        const d = new Date(now);
+        d.setFullYear(d.getFullYear() + p.year);
+        return {
+          period: d,
+          projectedBalance: p.projectedWealth,
+        };
+      });
 
       // Cleanup previous scenario chart
       if (activeCharts.has('scenario-chart')) {
