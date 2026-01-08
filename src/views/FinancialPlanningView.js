@@ -1645,61 +1645,69 @@ export const FinancialPlanningView = () => {
       })
       .catch(err => console.error('Top movers chart error', err));
 
-    // Timeline comparison: monthly expenses this period vs previous period
-    const monthsBack = 6;
-    const now = new Date();
-    const monthKeys = [];
-    for (let i = monthsBack - 1; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      monthKeys.push(
-        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-      );
-    }
-
-    function sumForMonth(key, txs) {
-      const [y, m] = key.split('-').map(Number);
-      const start = new Date(y, m - 1, 1);
-      const end = new Date(y, m, 1);
-      return txs.reduce((sum, t) => {
-        const ts = new Date(t.timestamp);
-        if (ts >= start && ts < end && t.type === 'expense') {
-          return (
-            sum +
-            (typeof t.amount === 'number' ? t.amount : Number(t.amount) || 0)
-          );
-        }
-        return sum;
-      }, 0);
-    }
-
-    const currentSeries = monthKeys.map(k => ({
-      period: k,
-      value: sumForMonth(k, transactions),
-    }));
-    const previousSeries = monthKeys.map(k => {
-      const [y, m] = k.split('-').map(Number);
-      const prevKey = `${y - 1}-${String(m).padStart(2, '0')}`;
-      return { period: prevKey, value: sumForMonth(prevKey, transactions) };
-    });
-
-    const timelineLabels = monthKeys.map(k => {
-      const [y, m] = k.split('-').map(Number);
-      const d = new Date(y, m - 1, 1);
-      return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-    });
-
-    const currentData = currentSeries.map(s => s.value);
-    const previousData = previousSeries.map(s => s.value);
-
+    // Timeline comparison: monthly/daily expenses
     const timelineDiv = document.createElement('div');
     timelineDiv.style.marginTop = SPACING.LG;
+
+    const timelineHeader = document.createElement('div');
+    timelineHeader.style.display = 'flex';
+    timelineHeader.style.justifyContent = 'space-between';
+    timelineHeader.style.alignItems = 'center';
+    timelineHeader.style.marginBottom = SPACING.MD;
+
     const timelineTitle = document.createElement('h3');
-    timelineTitle.textContent =
-      'Monthly Expenses: This Period vs Previous Year';
+    timelineTitle.textContent = 'Expenses Timeline';
     timelineTitle.style.margin = '0';
     timelineTitle.style.fontSize = '1rem';
     timelineTitle.style.fontWeight = '600';
-    timelineDiv.appendChild(timelineTitle);
+    timelineHeader.appendChild(timelineTitle);
+
+    // Toggle control
+    const toggleContainer = document.createElement('div');
+    toggleContainer.style.display = 'flex';
+    toggleContainer.style.gap = '2px';
+    toggleContainer.style.background = COLORS.BORDER;
+    toggleContainer.style.padding = '2px';
+    toggleContainer.style.borderRadius = 'var(--radius-sm)';
+
+    const createToggleBtn = (text, mode, initialActive) => {
+      const btn = document.createElement('button');
+      btn.textContent = text;
+      btn.style.border = 'none';
+      btn.style.background = initialActive ? COLORS.SURFACE : 'transparent';
+      btn.style.color = initialActive ? COLORS.PRIMARY : COLORS.TEXT_MUTED;
+      btn.style.fontWeight = initialActive ? '600' : 'normal';
+      btn.style.padding = '4px 12px';
+      btn.style.fontSize = '0.85rem';
+      btn.style.borderRadius = 'var(--radius-sm)';
+      btn.style.cursor = 'pointer';
+      btn.style.transition = 'all 0.2s ease';
+
+      btn.addEventListener('click', () => {
+        // Update UI
+        Array.from(toggleContainer.children).forEach(b => {
+          b.style.background = 'transparent';
+          b.style.color = COLORS.TEXT_MUTED;
+          b.style.fontWeight = 'normal';
+        });
+        btn.style.background = COLORS.SURFACE;
+        btn.style.color = COLORS.PRIMARY;
+        btn.style.fontWeight = '600';
+
+        // Render chart
+        renderTimelineChart(mode);
+      });
+
+      return btn;
+    };
+
+    const monthlyBtn = createToggleBtn('Monthly', 'monthly', true);
+    const dailyBtn = createToggleBtn('Daily', 'daily', false);
+
+    toggleContainer.appendChild(monthlyBtn);
+    toggleContainer.appendChild(dailyBtn);
+    timelineHeader.appendChild(toggleContainer);
+    timelineDiv.appendChild(timelineHeader);
 
     const timelineChartWrapper = document.createElement('div');
     timelineChartWrapper.style.position = 'relative';
@@ -1713,22 +1721,135 @@ export const FinancialPlanningView = () => {
 
     section.appendChild(timelineDiv);
 
-    chartRenderer
-      .createLineChart(
-        timelineCanvas,
-        {
-          labels: timelineLabels,
-          datasets: [
-            { label: 'This Period', data: currentData },
-            { label: 'Previous Year', data: previousData },
-          ],
-        },
-        { title: 'Expenses Timeline' }
-      )
-      .then(chart => {
-        if (chart) activeCharts.set('insights-timeline', chart);
-      })
-      .catch(err => console.error('Timeline chart error', err));
+    let currentTimelineChart = null;
+
+    function renderTimelineChart(mode) {
+      if (currentTimelineChart) {
+        currentTimelineChart.destroy();
+        currentTimelineChart = null;
+      }
+
+      const now = new Date();
+      let keys = [];
+      let labelFormat = {};
+      let title = '';
+      let sumFunction = null;
+
+      if (mode === 'monthly') {
+        title = 'Monthly Expenses: This Period vs Previous Year';
+        labelFormat = { month: 'short', year: 'numeric' };
+        const monthsBack = 6;
+        for (let i = monthsBack - 1; i >= 0; i--) {
+          const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          keys.push(
+            `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+          );
+        }
+
+        sumFunction = (key, txs) => {
+          const [y, m] = key.split('-').map(Number);
+          const start = new Date(y, m - 1, 1);
+          const end = new Date(y, m, 1); // First day of next month
+          return txs.reduce((sum, t) => {
+            const ts = new Date(t.timestamp);
+            if (ts >= start && ts < end && t.type === 'expense') {
+              return sum + (typeof t.amount === 'number' ? t.amount : Number(t.amount) || 0);
+            }
+            return sum;
+          }, 0);
+        };
+      } else {
+        // Daily mode
+        title = 'Daily Expenses: Last 30 Days vs Previous Year';
+        labelFormat = { month: 'short', day: 'numeric' };
+        const daysBack = 30;
+        for (let i = daysBack - 1; i >= 0; i--) {
+          const d = new Date(now);
+          d.setDate(d.getDate() - i);
+          keys.push(
+            `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+          );
+        }
+
+        sumFunction = (key, txs) => {
+          // key format YYYY-MM-DD
+          return txs.reduce((sum, t) => {
+            const dateStr = t.timestamp.split('T')[0];
+            if (dateStr === key && t.type === 'expense') {
+              return sum + (typeof t.amount === 'number' ? t.amount : Number(t.amount) || 0);
+            }
+            return sum;
+          }, 0);
+        };
+      }
+
+      timelineTitle.textContent = title;
+
+      // Generate data series
+      const currentSeries = keys.map(k => ({
+        period: k,
+        value: sumFunction(k, transactions),
+      }));
+
+      const previousSeries = keys.map(k => {
+        // Shift year back by 1
+        const parts = k.split('-').map(Number); // [y, m, d?]
+        const y = parts[0];
+        const m = parts[1];
+        const d = parts[2]; // undefined if monthly
+
+        let prevKey = '';
+        if (mode === 'monthly') {
+          prevKey = `${y - 1}-${String(m).padStart(2, '0')}`;
+        } else {
+          // Handle leap years etc by using Date logic if needed, but simple subtraction works for display alignment
+          // Actually, exact date matching for year-over-year:
+          // If today is 2024-02-28, prev year is 2023-02-28.
+          prevKey = `${y - 1}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        }
+        return { period: prevKey, value: sumFunction(prevKey, transactions) };
+      });
+
+      const chartLabels = keys.map(k => {
+        const parts = k.split('-').map(Number);
+        // For monthly: parts=[y, m]. For daily: parts=[y, m, d]
+        // Note: Date constructor uses 0-indexed months
+        const d = parts.length === 3
+          ? new Date(parts[0], parts[1] - 1, parts[2])
+          : new Date(parts[0], parts[1] - 1, 1);
+        return d.toLocaleDateString('en-US', labelFormat);
+      });
+
+      const currentData = currentSeries.map(s => s.value);
+      const previousData = previousSeries.map(s => s.value);
+
+      chartRenderer
+        .createLineChart(
+          timelineCanvas,
+          {
+            labels: chartLabels,
+            datasets: [
+              { label: 'This Period', data: currentData },
+              { label: 'Previous Year', data: previousData },
+            ],
+          },
+          {
+            title: mode === 'monthly' ? 'Monthly Trend' : 'Daily Trend',
+            responsive: true,
+            maintainAspectRatio: false,
+          }
+        )
+        .then(chart => {
+          if (chart) {
+            currentTimelineChart = chart;
+            activeCharts.set('insights-timeline', chart);
+          }
+        })
+        .catch(err => console.error('Timeline chart error', err));
+    }
+
+    // Initial render
+    renderTimelineChart('monthly');
 
     content.appendChild(section);
   }
