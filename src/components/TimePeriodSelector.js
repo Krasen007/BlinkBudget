@@ -192,7 +192,8 @@ export const TimePeriodSelector = (options = {}) => {
     });
 
     // Get the input ID for label association
-    const startInputElement = startDateInput.querySelector('input[type="date"]');
+    const startInputElement =
+      startDateInput.querySelector('input[type="date"]');
     if (startInputElement && startLabel) {
       startLabel.setAttribute('for', startInputElement.id);
     }

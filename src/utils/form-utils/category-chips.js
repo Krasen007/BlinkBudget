@@ -284,14 +284,18 @@ export const createCategorySelector = (options = {}) => {
 
             // Auto-submit for Transfer
             if (onSubmit && amountInput) {
-              const dateSource = externalDateInput || (() => {
-                const fallback = document.createElement('input');
-                fallback.type = 'date';
-                fallback.value = new Date().toISOString().split('T')[0];
-                return fallback;
-              })();
+              const dateSource =
+                externalDateInput ||
+                (() => {
+                  const fallback = document.createElement('input');
+                  fallback.type = 'date';
+                  fallback.value = new Date().toISOString().split('T')[0];
+                  return fallback;
+                })();
 
-              const dateValue = dateSource.getDate ? dateSource.getDate() : (dateSource.value || new Date().toISOString().split('T')[0]);
+              const dateValue = dateSource.getDate
+                ? dateSource.getDate()
+                : dateSource.value || new Date().toISOString().split('T')[0];
 
               onSubmit({
                 amount: amountValidation.value,
@@ -414,14 +418,19 @@ export const createCategorySelector = (options = {}) => {
               // Auto-submit
               if (onSubmit && amountInput) {
                 try {
-                  const dateSource = externalDateInput || (() => {
-                    const fallback = document.createElement('input');
-                    fallback.type = 'date';
-                    fallback.value = new Date().toISOString().split('T')[0];
-                    return fallback;
-                  })();
+                  const dateSource =
+                    externalDateInput ||
+                    (() => {
+                      const fallback = document.createElement('input');
+                      fallback.type = 'date';
+                      fallback.value = new Date().toISOString().split('T')[0];
+                      return fallback;
+                    })();
 
-                  const dateValue = dateSource.getDate ? dateSource.getDate() : (dateSource.value || new Date().toISOString().split('T')[0]);
+                  const dateValue = dateSource.getDate
+                    ? dateSource.getDate()
+                    : dateSource.value ||
+                      new Date().toISOString().split('T')[0];
 
                   onSubmit({
                     amount: amountValidation.value,

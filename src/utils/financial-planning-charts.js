@@ -69,7 +69,9 @@ export async function createProjectedBalanceChart(
     });
   });
 
-  const balanceData = balanceProjections.map(projection => projection.projectedBalance);
+  const balanceData = balanceProjections.map(
+    projection => projection.projectedBalance
+  );
 
   // Create datasets for current balance line and projected balance line
   const datasets = [
@@ -660,7 +662,9 @@ function createBalanceSummary(balanceProjections) {
   const finalBalance =
     balanceProjections[balanceProjections.length - 1]?.projectedBalance || 0;
   const change = finalBalance - currentBalance;
-  const lowestBalance = Math.min(...balanceProjections.map(p => p.projectedBalance));
+  const lowestBalance = Math.min(
+    ...balanceProjections.map(p => p.projectedBalance)
+  );
 
   const stats = [
     {

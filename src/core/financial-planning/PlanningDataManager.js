@@ -80,8 +80,6 @@ export class PlanningDataManager {
       this.notifyListeners();
 
       return this.data;
-
-      return this.data;
     } catch (error) {
       console.error('Error loading planning data:', error);
       throw error;

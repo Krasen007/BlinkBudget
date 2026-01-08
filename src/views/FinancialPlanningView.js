@@ -22,6 +22,7 @@ import { GoalPlanner } from '../core/goal-planner.js';
 import { StorageService } from '../core/storage.js';
 import { ChartRenderer } from '../components/ChartRenderer.js';
 import { InsightsGenerator } from '../core/insights-generator.js';
+import { AlertDialog } from '../components/ConfirmDialog.js';
 import {
   createProjectedBalanceChart,
   createPortfolioCompositionChart,
@@ -196,7 +197,7 @@ export const FinancialPlanningView = () => {
     const nav = document.createElement('nav');
     nav.className = 'financial-planning-nav';
     nav.setAttribute('role', 'tablist');
-      nav.style.display = 'flex';
+    nav.style.display = 'flex';
     nav.style.gap = SPACING.SM;
     nav.style.marginBottom = SPACING.LG;
     nav.style.flexWrap = 'wrap'; // Allow wrapping
@@ -255,9 +256,7 @@ export const FinancialPlanningView = () => {
         fontWeight: '500',
         whiteSpace: 'nowrap',
         transition: 'all 0.2s ease',
-        minWidth: 'fit-content',
         flex: '1 0 auto', // Grow to fill space, but respect content size
-        justifyContent: 'center', // Center text
       });
 
       // Hover effects
@@ -526,8 +525,6 @@ export const FinancialPlanningView = () => {
       );
       section.appendChild(emergencyFundCard);
     }
-
-
   }
 
   /**
@@ -1235,15 +1232,15 @@ export const FinancialPlanningView = () => {
       // Basic validation
       let valid = true;
       if (!name) {
-        alert('Goal name is required.');
+        AlertDialog({ message: 'Goal name is required.' });
         valid = false;
       }
       if (!(target > 0)) {
-        alert('Target amount must be greater than 0.');
+        AlertDialog({ message: 'Target amount must be greater than 0.' });
         valid = false;
       }
       if (!tdate || isNaN(tdate.getTime())) {
-        alert('Please choose a valid target date.');
+        AlertDialog({ message: 'Please choose a valid target date.' });
         valid = false;
       }
       if (!valid) return;
@@ -1700,7 +1697,7 @@ export const FinancialPlanningView = () => {
       }
 
       const now = new Date();
-      let keys = [];
+      const keys = [];
       let labelFormat = {};
       let title = '';
       let sumFunction = null;
@@ -1723,7 +1720,12 @@ export const FinancialPlanningView = () => {
           return txs.reduce((sum, t) => {
             const ts = new Date(t.timestamp);
             if (ts >= start && ts < end && t.type === 'expense') {
-              return sum + (typeof t.amount === 'number' ? t.amount : Number(t.amount) || 0);
+              return (
+                sum +
+                (typeof t.amount === 'number'
+                  ? t.amount
+                  : Number(t.amount) || 0)
+              );
             }
             return sum;
           }, 0);
@@ -1746,7 +1748,12 @@ export const FinancialPlanningView = () => {
           return txs.reduce((sum, t) => {
             const dateStr = t.timestamp.split('T')[0];
             if (dateStr === key && t.type === 'expense') {
-              return sum + (typeof t.amount === 'number' ? t.amount : Number(t.amount) || 0);
+              return (
+                sum +
+                (typeof t.amount === 'number'
+                  ? t.amount
+                  : Number(t.amount) || 0)
+              );
             }
             return sum;
           }, 0);
@@ -1784,9 +1791,10 @@ export const FinancialPlanningView = () => {
         const parts = k.split('-').map(Number);
         // For monthly: parts=[y, m]. For daily: parts=[y, m, d]
         // Note: Date constructor uses 0-indexed months
-        const d = parts.length === 3
-          ? new Date(parts[0], parts[1] - 1, parts[2])
-          : new Date(parts[0], parts[1] - 1, 1);
+        const d =
+          parts.length === 3
+            ? new Date(parts[0], parts[1] - 1, parts[2])
+            : new Date(parts[0], parts[1] - 1, 1);
         return d.toLocaleDateString('en-US', labelFormat);
       });
 
@@ -2266,9 +2274,9 @@ export const FinancialPlanningView = () => {
       const monthCell = document.createElement('div');
       monthCell.textContent = income.period
         ? income.period.toLocaleDateString('en-US', {
-          month: 'short',
-          year: 'numeric',
-        })
+            month: 'short',
+            year: 'numeric',
+          })
         : `Month ${i + 1}`;
       monthCell.style.paddingTop = SPACING.SM;
       table.appendChild(monthCell);

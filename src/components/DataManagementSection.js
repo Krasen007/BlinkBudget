@@ -42,12 +42,12 @@ export const DataManagementSection = () => {
 
     const dateComp = DateInput({
       value: initialValue,
-      showLabel: false // We render our own label above
+      showLabel: false, // We render our own label above
     });
     // Override width to fill container
     Object.assign(dateComp.style, {
       width: '100%',
-      marginRight: '0'
+      marginRight: '0',
     });
 
     const input = dateComp.querySelector('input[type="date"]'); // Get internal input for value access
@@ -70,7 +70,11 @@ export const DataManagementSection = () => {
     return { wrapper, input: dateComp }; // Return component as input interface
   };
 
-  const startInput = createDateField('Start Date', getFirstDayOfMonthISO(), 'export-start');
+  const startInput = createDateField(
+    'Start Date',
+    getFirstDayOfMonthISO(),
+    'export-start'
+  );
   const endInput = createDateField('End Date', getTodayISO(), 'export-end');
 
   dateRangeContainer.appendChild(startInput.wrapper);

@@ -5,12 +5,7 @@
 
 import { getTodayISO, dateToISO } from '../utils/date-utils.js';
 import { createInput } from '../utils/dom-factory.js';
-import {
-  DIMENSIONS,
-  SPACING,
-  COLORS,
-  FONT_SIZES,
-} from '../utils/constants.js';
+import { DIMENSIONS, SPACING, COLORS, FONT_SIZES } from '../utils/constants.js';
 
 export const DateInput = (options = {}) => {
   const { value = null, onChange = null, showLabel = true } = options;

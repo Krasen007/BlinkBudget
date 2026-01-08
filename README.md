@@ -31,6 +31,8 @@
   - Transportation, Leisure & Shopping, Personal Care
 - **Multi-account support** (Checking, Savings, Credit Card, Cash)
 - **Account-to-account transfers** with automatic balance updates
+- **Filter transactions by category** tap on the name to show
+- **Date filtering functionality** tap on the name to show
 
 ### Dashboard & Analytics
 
@@ -40,7 +42,18 @@
 - **Visual feedback** for recently added transactions
 - **Fixed Dashboard layout** with improved spacing and non-clipping action buttons
 
-### Mobile-First Design
+### Financial Planning & Insights
+
+- **Advanced Financial Planning** with forecasting and predictions
+- **Investment portfolio tracking** with manual entry support
+- **Long-term goal planning** with progress tracking
+- **Comprehensive insights and analytics**
+- **Risk assessment and warnings**
+- **Scenario planning and modeling** for what-if analysis
+- **Daily/monthly expense toggles** in Financial Insights
+- **Projected Account Balance chart**
+
+### User Experience & UI
 
 - **Responsive layout** optimized for mobile devices
 - **Touch-friendly interface** with proper touch targets (56px minimum)
@@ -48,6 +61,8 @@
 - **Keyboard-aware UI** that adapts to virtual keyboard
 - **Haptic feedback** for enhanced user experience
 - **PWA support** - Installable as a standalone app with offline support
+- **Keyboard shortcut (Escape key)** to exit Settings and return to dashboard
+- **Helpful tips on each section**
 
 ### Settings & Customization
 
@@ -139,6 +154,7 @@ src/
 
 - **TransactionForm** - Smart form with auto-submit
 - **DashboardView** - Main screen with stats and transaction list
+- **FinancialPlanningView** - Advanced financial planning and forecasting
 - **GeneralSection** - Centralized settings for app maintenance and installation
 - **MobileNavigation** - Bottom tab navigation for mobile
 

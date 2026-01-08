@@ -117,8 +117,10 @@ export const DashboardView = () => {
   // Account Options Logic
   let currentFilter =
     sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_FILTER) || 'all';
-  let currentDateFilter = sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_DATE_FILTER) || null;
-  let currentCategoryFilter = sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER) || null;
+  let currentDateFilter =
+    sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_DATE_FILTER) || null;
+  let currentCategoryFilter =
+    sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER) || null;
 
   const accounts = AccountService.getAccounts();
 
@@ -180,7 +182,11 @@ export const DashboardView = () => {
     const transactions = allTransactions
       .filter(t => {
         // Account Filter
-        if (currentFilter !== 'all' && t.accountId !== currentFilter && t.toAccountId !== currentFilter) {
+        if (
+          currentFilter !== 'all' &&
+          t.accountId !== currentFilter &&
+          t.toAccountId !== currentFilter
+        ) {
           return false;
         }
 
@@ -281,7 +287,7 @@ export const DashboardView = () => {
       highlightTransactionIds,
       // Pass date filter props
       currentDateFilter,
-      onDateClick: (date) => {
+      onDateClick: date => {
         // Toggle filter: if clicking same date, clear it. Otherwise set it.
         const newDate = currentDateFilter === date ? null : date;
         currentDateFilter = newDate;
@@ -296,18 +302,22 @@ export const DashboardView = () => {
       },
       // Pass category filter props
       currentCategoryFilter,
-      onCategoryClick: (category) => {
-        const newCategory = currentCategoryFilter === category ? null : category;
+      onCategoryClick: category => {
+        const newCategory =
+          currentCategoryFilter === category ? null : category;
         currentCategoryFilter = newCategory;
 
         if (newCategory) {
-          sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER, newCategory);
+          sessionStorage.setItem(
+            STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER,
+            newCategory
+          );
         } else {
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER);
         }
 
         renderDashboard();
-      }
+      },
     });
     content.appendChild(transactionList);
   };

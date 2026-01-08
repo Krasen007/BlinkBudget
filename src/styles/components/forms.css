@@ -31,8 +31,6 @@ input {
 /* Date inputs should not have appearance: none to preserve native functionality */
 input[type='date'] {
   appearance: auto !important;
-  -webkit-appearance: auto !important;
-  -moz-appearance: auto !important;
 }
 
 input:hover {
@@ -41,7 +39,8 @@ input:hover {
 
 input:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  box-shadow: 0 0 0 3px
+    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
 }
 
 /* Specific input types for mobile */
@@ -50,8 +49,6 @@ input[type='date'].mobile-form-input,
 .date-input-field {
   /* Reset all inherited styles for date inputs */
   appearance: auto;
-  -webkit-appearance: auto;
-  -moz-appearance: auto;
   /* Restore native functionality */
   color-scheme: dark;
   cursor: pointer;
@@ -60,11 +57,13 @@ input[type='date'].mobile-form-input,
   z-index: 1;
   background-color: var(--color-surface) !important;
   border: 1px solid var(--color-border) !important;
-
   border-radius: var(--radius-md) !important;
   padding: var(--spacing-md) var(--spacing-lg) !important;
   font-family: var(--font-body) !important;
-  font-size: max(var(--font-size-prevent-zoom), var(--font-size-base)) !important;
+  font-size: max(
+    var(--font-size-prevent-zoom),
+    var(--font-size-base)
+  ) !important;
   outline: none !important;
   box-sizing: border-box !important;
 }
@@ -118,7 +117,8 @@ select.input-select {
 /* Enhanced focus states for touch */
 select.input-select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  box-shadow: 0 0 0 3px
+    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
   outline: none;
 }
 
@@ -131,8 +131,7 @@ select.input-select:focus {
   height: var(--touch-target-standard);
   /* Fixed height to match category chips exactly */
 
-  font-size: max(var(--font-size-prevent-zoom),
-      var(--font-size-base));
+  font-size: max(var(--font-size-prevent-zoom), var(--font-size-base));
   /* Prevent zoom on iOS */
 
   padding: var(--spacing-md);
@@ -161,7 +160,8 @@ select.input-select:focus {
 .mobile-form-input:focus,
 .mobile-form-select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  box-shadow: 0 0 0 3px
+    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
   outline: none;
 }
 
@@ -219,14 +219,16 @@ select.input-select:focus {
 .view-edit .mobile-form-input[type='date']:hover,
 .view-settings .mobile-form-input[type='date']:hover {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  box-shadow: 0 0 0 2px
+    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
 }
 
 .view-add .mobile-form-input[type='date']:focus,
 .view-edit .mobile-form-input[type='date']:focus,
 .view-settings .mobile-form-input[type='date']:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
+  box-shadow: 0 0 0 3px
+    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
   outline: none;
 }
 
@@ -315,7 +317,8 @@ body.keyboard-visible input:focus,
 body.keyboard-visible select:focus {
   /* Stronger focus indication when keyboard is active */
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
+  box-shadow: 0 0 0 4px
+    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
   transform: scale(1.02);
   transition: all var(--transition-fast);
 }
@@ -346,7 +349,6 @@ body.keyboard-visible select:focus {
 
 /* iOS specific fixes */
 @supports (-webkit-touch-callout: none) {
-
   /* iOS Safari specific styles */
   input {
     /* Fix iOS input styling */
@@ -369,7 +371,6 @@ body.keyboard-visible select:focus {
 
 /* Android specific fixes */
 @media screen and (min-device-pixel-ratio: 0) and (resolution >=.001dpcm) {
-
   /* Android Chrome specific styles */
   input:focus {
     /* Prevent Android zoom */
@@ -379,7 +380,6 @@ body.keyboard-visible select:focus {
 
 /* Dark mode optimizations for mobile */
 @media (prefers-color-scheme: dark) {
-
   /* Already using dark theme, but ensure mobile-specific adjustments */
   input[type='date']::-webkit-calendar-picker-indicator {
     filter: invert(1);

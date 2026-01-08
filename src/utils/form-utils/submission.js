@@ -17,7 +17,9 @@ export const getDateSource = (externalDateInput = null) => {
       // Handle DateInput component interface
       // We create a dummy input-like object that has a value property getter
       return {
-        get value() { return externalDateInput.getDate(); }
+        get value() {
+          return externalDateInput.getDate();
+        },
       };
     }
     return externalDateInput;

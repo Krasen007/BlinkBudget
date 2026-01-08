@@ -22,9 +22,9 @@ export const TransactionListItem = ({
   accounts,
   shouldHighlight = false,
   currentDateFilter = null,
-  onDateClick = () => { },
+  onDateClick = () => {},
   currentCategoryFilter = null,
-  onCategoryClick = () => { },
+  onCategoryClick = () => {},
 }) => {
   const item = document.createElement('li');
   item.className = 'transaction-item';
@@ -138,17 +138,19 @@ export const TransactionListItem = ({
 
   cat.className = 'transaction-item-category';
   Object.assign(cat.style, {
-    fontWeight: '500',
     fontSize: isMobile ? FONT_SIZES.BASE : FONT_SIZES.SM,
     lineHeight: 'var(--line-height-normal)',
     whiteSpace: 'nowrap',
     cursor: 'pointer',
-    color: currentCategoryFilter === transaction.category ? COLORS.PRIMARY : COLORS.TEXT_MAIN,
+    color:
+      currentCategoryFilter === transaction.category
+        ? COLORS.PRIMARY
+        : COLORS.TEXT_MAIN,
     fontWeight: currentCategoryFilter === transaction.category ? '700' : '500',
   });
 
   if (transaction.type !== 'transfer') {
-    cat.addEventListener('click', (e) => {
+    cat.addEventListener('click', e => {
       e.stopPropagation();
       onCategoryClick(transaction.category);
     });
@@ -159,7 +161,10 @@ export const TransactionListItem = ({
   date.className = 'transaction-item-date';
   Object.assign(date.style, {
     fontSize: isMobile ? FONT_SIZES.SM : '0.75rem',
-    color: currentDateFilter === transaction.timestamp.split('T')[0] ? COLORS.PRIMARY_LIGHT : COLORS.TEXT_MUTED,
+    color:
+      currentDateFilter === transaction.timestamp.split('T')[0]
+        ? COLORS.PRIMARY_LIGHT
+        : COLORS.TEXT_MUTED,
     display: 'flex',
     gap: SPACING.SM,
     lineHeight: 'var(--line-height-normal)',
@@ -168,7 +173,7 @@ export const TransactionListItem = ({
   });
 
   // Date click handler
-  date.addEventListener('click', (e) => {
+  date.addEventListener('click', e => {
     e.stopPropagation(); // Prevent item click
     const dateStr = transaction.timestamp.split('T')[0];
     onDateClick(dateStr);
