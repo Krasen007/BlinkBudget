@@ -182,7 +182,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  width: 100%;
+  max-width: 100%;
+  /* Allow text truncation but don't stretch to full width */
 }
 
 @media (width <= calc(var(--breakpoint-md) - 1px)) {
