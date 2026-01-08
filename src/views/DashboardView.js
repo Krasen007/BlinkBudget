@@ -118,6 +118,7 @@ export const DashboardView = () => {
   let currentFilter =
     sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_FILTER) || 'all';
   let currentDateFilter = sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_DATE_FILTER) || null;
+  let currentCategoryFilter = sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER) || null;
 
   const accounts = AccountService.getAccounts();
 
@@ -187,6 +188,11 @@ export const DashboardView = () => {
         if (currentDateFilter) {
           const tDate = t.timestamp.split('T')[0];
           if (tDate !== currentDateFilter) return false;
+        }
+
+        // Category Filter
+        if (currentCategoryFilter) {
+          if (t.category !== currentCategoryFilter) return false;
         }
 
         return true;
@@ -284,6 +290,20 @@ export const DashboardView = () => {
           sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_DATE_FILTER, newDate);
         } else {
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_DATE_FILTER);
+        }
+
+        renderDashboard();
+      },
+      // Pass category filter props
+      currentCategoryFilter,
+      onCategoryClick: (category) => {
+        const newCategory = currentCategoryFilter === category ? null : category;
+        currentCategoryFilter = newCategory;
+
+        if (newCategory) {
+          sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER, newCategory);
+        } else {
+          sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER);
         }
 
         renderDashboard();

@@ -21,7 +21,10 @@ export const TransactionListItem = ({
   currentFilter,
   accounts,
   shouldHighlight = false,
+  currentDateFilter = null,
   onDateClick = () => { },
+  currentCategoryFilter = null,
+  onCategoryClick = () => { },
 }) => {
   const item = document.createElement('li');
   item.className = 'transaction-item';
@@ -138,18 +141,25 @@ export const TransactionListItem = ({
     fontWeight: '500',
     fontSize: isMobile ? FONT_SIZES.BASE : FONT_SIZES.SM,
     lineHeight: 'var(--line-height-normal)',
-    color: COLORS.TEXT_MAIN,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
+    cursor: 'pointer',
+    color: currentCategoryFilter === transaction.category ? COLORS.PRIMARY : COLORS.TEXT_MAIN,
+    fontWeight: currentCategoryFilter === transaction.category ? '700' : '500',
   });
+
+  if (transaction.type !== 'transfer') {
+    cat.addEventListener('click', (e) => {
+      e.stopPropagation();
+      onCategoryClick(transaction.category);
+    });
+  }
 
   const date = document.createElement('div');
   date.textContent = formatDateForDisplay(transaction.timestamp);
   date.className = 'transaction-item-date';
   Object.assign(date.style, {
     fontSize: isMobile ? FONT_SIZES.SM : '0.75rem',
-    color: COLORS.TEXT_MUTED,
+    color: currentDateFilter === transaction.timestamp.split('T')[0] ? COLORS.PRIMARY_LIGHT : COLORS.TEXT_MUTED,
     display: 'flex',
     gap: SPACING.SM,
     lineHeight: 'var(--line-height-normal)',
