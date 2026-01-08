@@ -808,6 +808,7 @@ export const FinancialPlanningView = () => {
     controls.style.display = 'flex';
     controls.style.gap = SPACING.SM;
     controls.style.alignItems = 'center';
+    controls.style.flexWrap = 'wrap'; // Allow wrapping
     controls.style.marginTop = SPACING.MD;
 
     const addInvBtn = document.createElement('button');
@@ -1027,13 +1028,24 @@ export const FinancialPlanningView = () => {
         editBtn.addEventListener('click', () => {
           if (li._editing) return;
           li._editing = true;
+
+          // Hide view mode elements
+          left.style.display = 'none';
+          actions.style.display = 'none';
+
           const form = document.createElement('div');
           form.style.display = 'flex';
           form.style.gap = SPACING.SM;
           form.style.flexWrap = 'wrap';
           form.style.alignItems = 'center';
-          form.style.maxWidth = '100%';
+          form.style.width = '100%';
           form.style.boxSizing = 'border-box';
+
+          const nameDisplay = document.createElement('div');
+          nameDisplay.textContent = `${inv.symbol} · ${inv.name}`;
+          nameDisplay.style.fontWeight = '600';
+          nameDisplay.style.width = '100%'; // Full width to sit above inputs
+          nameDisplay.style.marginBottom = '4px';
 
           const sharesFld = document.createElement('input');
           sharesFld.type = 'number';
@@ -1053,6 +1065,7 @@ export const FinancialPlanningView = () => {
           cancelBtn.textContent = 'Cancel';
           cancelBtn.className = 'btn btn-ghost';
 
+          form.appendChild(nameDisplay);
           form.appendChild(sharesFld);
           form.appendChild(priceFld);
           form.appendChild(saveBtn);
@@ -1060,10 +1073,14 @@ export const FinancialPlanningView = () => {
 
           li.appendChild(form);
 
-          cancelBtn.addEventListener('click', () => {
+          const cleanupEdit = () => {
             li._editing = false;
             form.remove();
-          });
+            left.style.display = 'flex';
+            actions.style.display = 'flex';
+          };
+
+          cancelBtn.addEventListener('click', cleanupEdit);
 
           saveBtn.addEventListener('click', () => {
             const newShares = Number(sharesFld.value) || 0;
@@ -1088,7 +1105,7 @@ export const FinancialPlanningView = () => {
                   console.error('Error refreshing portfolio chart:', err)
                 );
 
-              li._editing = false;
+              cleanupEdit();
               refreshInvestmentsList();
             } catch (err) {
               console.error('Failed to update investment', err);
@@ -1200,6 +1217,7 @@ export const FinancialPlanningView = () => {
     goalControls.style.display = 'flex';
     goalControls.style.gap = SPACING.SM;
     goalControls.style.alignItems = 'center';
+    goalControls.style.flexWrap = 'wrap'; // Allow wrapping
     goalControls.style.marginTop = SPACING.MD;
 
     const addGoalBtn = document.createElement('button');
@@ -1363,9 +1381,16 @@ export const FinancialPlanningView = () => {
         editBtn.addEventListener('click', () => {
           if (li._editing) return;
           li._editing = true;
+
+          // Hide view mode elements
+          left.style.display = 'none';
+          actions.style.display = 'none';
+
           const form = document.createElement('div');
           form.style.display = 'flex';
           form.style.gap = SPACING.SM;
+          form.style.flexWrap = 'wrap';
+          form.style.width = '100%';
 
           const nameFld = document.createElement('input');
           nameFld.value = goal.name;
@@ -1412,10 +1437,14 @@ export const FinancialPlanningView = () => {
 
           li.appendChild(form);
 
-          cancelBtn.addEventListener('click', () => {
+          const cleanupEdit = () => {
             li._editing = false;
             form.remove();
-          });
+            left.style.display = 'flex';
+            actions.style.display = 'flex';
+          };
+
+          cancelBtn.addEventListener('click', cleanupEdit);
 
           saveBtn.addEventListener('click', () => {
             try {
@@ -1442,7 +1471,7 @@ export const FinancialPlanningView = () => {
                   console.error('Error refreshing goals chart:', err)
                 );
 
-              li._editing = false;
+              cleanupEdit();
               refreshGoalsList();
             } catch (err) {
               console.error('Failed to update goal', err);
@@ -2129,9 +2158,9 @@ export const FinancialPlanningView = () => {
       const monthCell = document.createElement('div');
       monthCell.textContent = income.period
         ? income.period.toLocaleDateString('en-US', {
-            month: 'short',
-            year: 'numeric',
-          })
+          month: 'short',
+          year: 'numeric',
+        })
         : `Month ${i + 1}`;
       monthCell.style.paddingTop = SPACING.SM;
       table.appendChild(monthCell);
