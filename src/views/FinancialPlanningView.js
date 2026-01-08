@@ -770,6 +770,8 @@ export const FinancialPlanningView = () => {
     invForm.style.marginTop = SPACING.SM;
 
     const symInput = document.createElement('input');
+    symInput.id = 'inv-symbol';
+    symInput.name = 'symbol';
     symInput.placeholder = 'Symbol (e.g. AAPL)';
     symInput.required = true;
     symInput.setAttribute('aria-label', 'Investment symbol');
@@ -778,6 +780,8 @@ export const FinancialPlanningView = () => {
     symError.style.fontSize = '0.85rem';
     symError.style.display = 'none';
     const sharesInput = document.createElement('input');
+    sharesInput.id = 'inv-shares';
+    sharesInput.name = 'shares';
     sharesInput.type = 'number';
     sharesInput.placeholder = 'Shares';
     sharesInput.required = true;
@@ -787,6 +791,8 @@ export const FinancialPlanningView = () => {
     sharesError.style.fontSize = '0.85rem';
     sharesError.style.display = 'none';
     const priceInput = document.createElement('input');
+    priceInput.id = 'inv-price';
+    priceInput.name = 'purchasePrice';
     priceInput.type = 'number';
     priceInput.placeholder = 'Purchase Price';
     priceInput.required = true;
@@ -796,7 +802,10 @@ export const FinancialPlanningView = () => {
     priceError.style.fontSize = '0.85rem';
     priceError.style.display = 'none';
     const dateInput = document.createElement('input');
+    dateInput.id = 'inv-date';
+    dateInput.name = 'purchaseDate';
     dateInput.type = 'date';
+    dateInput.setAttribute('aria-label', 'Purchase date');
 
     const saveInvBtn = document.createElement('button');
     saveInvBtn.textContent = 'Save';
@@ -1179,15 +1188,27 @@ export const FinancialPlanningView = () => {
     goalForm.style.marginTop = SPACING.SM;
 
     const goalName = document.createElement('input');
+    goalName.id = 'goal-name';
+    goalName.name = 'goalName';
     goalName.placeholder = 'Goal name';
+    goalName.setAttribute('aria-label', 'Goal name');
     const goalTarget = document.createElement('input');
+    goalTarget.id = 'goal-target';
+    goalTarget.name = 'goalTarget';
     goalTarget.type = 'number';
     goalTarget.placeholder = 'Target amount';
+    goalTarget.setAttribute('aria-label', 'Target amount');
     const goalDate = document.createElement('input');
+    goalDate.id = 'goal-date';
+    goalDate.name = 'goalDate';
     goalDate.type = 'date';
+    goalDate.setAttribute('aria-label', 'Target date');
     const goalCurrent = document.createElement('input');
+    goalCurrent.id = 'goal-current';
+    goalCurrent.name = 'goalCurrent';
     goalCurrent.type = 'number';
     goalCurrent.placeholder = 'Current savings';
+    goalCurrent.setAttribute('aria-label', 'Current savings');
 
     const saveGoalBtn = document.createElement('button');
     saveGoalBtn.textContent = 'Save Goal';
@@ -1826,28 +1847,40 @@ export const FinancialPlanningView = () => {
 
     const monthlyLabel = document.createElement('label');
     monthlyLabel.textContent = 'Monthly Savings (€)';
+    monthlyLabel.htmlFor = 'scenario-monthly-savings';
     const monthlyInput = document.createElement('input');
+    monthlyInput.id = 'scenario-monthly-savings';
+    monthlyInput.name = 'monthlySavings';
     monthlyInput.type = 'number';
     monthlyInput.value = '200';
     monthlyInput.style.padding = SPACING.SM;
 
     const returnLabel = document.createElement('label');
     returnLabel.textContent = 'Annual Return (%)';
+    returnLabel.htmlFor = 'scenario-annual-return';
     const returnInput = document.createElement('input');
+    returnInput.id = 'scenario-annual-return';
+    returnInput.name = 'annualReturn';
     returnInput.type = 'number';
     returnInput.value = '5';
     returnInput.style.padding = SPACING.SM;
 
     const yearsLabel = document.createElement('label');
     yearsLabel.textContent = 'Years';
+    yearsLabel.htmlFor = 'scenario-years';
     const yearsInput = document.createElement('input');
+    yearsInput.id = 'scenario-years';
+    yearsInput.name = 'years';
     yearsInput.type = 'number';
     yearsInput.value = '10';
     yearsInput.style.padding = SPACING.SM;
 
     const initialLabel = document.createElement('label');
     initialLabel.textContent = 'Initial Amount (€)';
+    initialLabel.htmlFor = 'scenario-initial-amount';
     const initialInput = document.createElement('input');
+    initialInput.id = 'scenario-initial-amount';
+    initialInput.name = 'initialAmount';
     initialInput.type = 'number';
     initialInput.value = '1000';
     initialInput.style.padding = SPACING.SM;

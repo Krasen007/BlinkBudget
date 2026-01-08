@@ -191,6 +191,12 @@ export const TimePeriodSelector = (options = {}) => {
       showLabel: false,
     });
 
+    // Get the input ID for label association
+    const startInputElement = startDateInput.querySelector('input[type="date"]');
+    if (startInputElement && startLabel) {
+      startLabel.setAttribute('for', startInputElement.id);
+    }
+
     startDateContainer.appendChild(startLabel);
     startDateContainer.appendChild(startDateInput);
 
@@ -219,6 +225,12 @@ export const TimePeriodSelector = (options = {}) => {
       onChange: handleEndDateChange,
       showLabel: false,
     });
+
+    // Get the input ID for label association
+    const endInputElement = endDateInput.querySelector('input[type="date"]');
+    if (endInputElement && endLabel) {
+      endLabel.setAttribute('for', endInputElement.id);
+    }
 
     endDateContainer.appendChild(endLabel);
     endDateContainer.appendChild(endDateInput);

@@ -1,8 +1,47 @@
-# Changelog - BlinkBudget
+## [1.12.0] - 2026-01-08
 
-## Highlights
-- **New Feature: Split Transactions** - You can now split a transaction into two by using a long-press on the dashboard.
-- **UI Refinement** - Major overhaul of the Reports UI for better clarity. Optimized charts, tooltips, and mobile button layouts for a smoother experience.
-- **Performance Boost** - Optimized PWA background behavior and reduced transaction handling delays for a more responsive feel.
-- **Architecture Cleanup** - Improved codebase maintainability by separating storage logic, decomposing the analytics engine, and optimizing routing.
-- **General Polish** - Fixed various CSS issues, resolved test failures, and performed a final codebase audit for production readiness.
+### Summary of Changes:
+*   **New Features:** Enhanced financial planning tools, introduced category filtering, date filtering, and daily/monthly expense toggles.
+*   **Improvements:** Significant bug fixes (including critical date input issues), UI/UX enhancements, improved mobile responsiveness, and code refactoring for better performance and maintainability.
+*   **Tooling & Quality:** Integrated ESLint, Prettier, and Lightning CSS for improved code quality and development workflow.
+
+### Detailed Changes:
+
+#### Financial Planning & Insights
+- Initiated Phase 1 of Advanced Financial Planning.
+- Enhanced Scenario Planning features.
+- Improved Investment Tracker and Goal Planner functionalities.
+- Added helpful tips and refactored the Financial Planning module.
+- Implemented daily/monthly expense toggles in Financial Insights.
+- Resolved errors in the Scenario Planning chart.
+- Corrected issues with the Projected Account Balance chart.
+
+#### Transaction Management
+- Enabled filtering transactions by category.
+- Added date filtering functionality.
+
+#### User Experience & UI
+- Improved button styling and added button wrapping for key sections.
+- Prevented accidental 'hold to split' action when scrolling the transaction list.
+- Added a keyboard shortcut (Escape key) to exit Settings and return to the dashboard.
+- Improved overall mobile responsiveness.
+- Updated CSS for various visual improvements.
+- Standardized view widths.
+- Added helpful notes on tabs.
+
+#### Bug Fixes
+- Addressed a critical bug in the date input component.
+- Resolved an issue with account selection.
+- Fixed an issue in the Reports view related to period selection.
+- Resolved a significant number of bugs, reducing errors by 48%.
+- Addressed all ESLint errors and warnings.
+- General bug fixes.
+
+#### Code Quality & Tooling
+- Version bump to 1.12; resolved linting issues.
+- Integrated ESLint and Prettier for code quality.
+- Switched PostCSS to Lightning CSS.
+- Enhanced CSS utility classes.
+- General code refactoring for enhanced readability and maintainability.
+- Improved accessibility and error handling within synchronization components.
+- Clarified UI elements and improved Firebase synchronization.
