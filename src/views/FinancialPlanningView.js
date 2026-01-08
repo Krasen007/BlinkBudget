@@ -199,10 +199,8 @@ export const FinancialPlanningView = () => {
     nav.style.display = 'flex';
     nav.style.gap = SPACING.SM;
     nav.style.marginBottom = SPACING.LG;
-    nav.style.flexShrink = '0';
-    nav.style.overflowX = 'auto';
-    nav.style.scrollbarWidth = 'none';
-    nav.style.msOverflowStyle = 'none';
+    nav.style.flexWrap = 'wrap'; // Allow wrapping
+    nav.style.maxWidth = '100%';
 
     // Hide scrollbar for webkit browsers
     const style = document.createElement('style');
@@ -214,12 +212,12 @@ export const FinancialPlanningView = () => {
     document.head.appendChild(style);
 
     const sections = [
-      { id: 'overview', label: 'Overview', icon: '📊' },
       { id: 'forecasts', label: 'Forecasts', icon: '🔮' },
       { id: 'investments', label: 'Investments', icon: '💰' },
       { id: 'goals', label: 'Goals', icon: '🎯' },
       { id: 'insights', label: 'Insights', icon: '💡' },
       { id: 'scenarios', label: 'Scenarios', icon: '🔄' },
+      { id: 'overview', label: 'Overview', icon: '📊' },
     ];
 
     sections.forEach(section => {
@@ -255,6 +253,8 @@ export const FinancialPlanningView = () => {
         whiteSpace: 'nowrap',
         transition: 'all 0.2s ease',
         minWidth: 'fit-content',
+        flex: '1 0 auto', // Grow to fill space, but respect content size
+        justifyContent: 'center', // Center text
       });
 
       // Hover effects
@@ -514,6 +514,7 @@ export const FinancialPlanningView = () => {
     });
 
     section.appendChild(statsGrid);
+    content.appendChild(section);
 
     // Emergency Fund Status (if available)
     if (emergencyFundAssessment && emergencyFundAssessment.status !== 'error') {
@@ -523,62 +524,7 @@ export const FinancialPlanningView = () => {
       section.appendChild(emergencyFundCard);
     }
 
-    // Quick actions
-    const actionsContainer = document.createElement('div');
-    actionsContainer.className = 'quick-actions';
-    actionsContainer.style.display = 'flex';
-    actionsContainer.style.gap = SPACING.MD;
-    actionsContainer.style.flexWrap = 'wrap';
-    actionsContainer.style.marginTop = SPACING.XL;
 
-    const actions = [
-      {
-        label: 'View Forecasts',
-        icon: '🔮',
-        action: () => switchSection('forecasts'),
-      },
-      {
-        label: 'Add Investment',
-        icon: '💰',
-        action: () => switchSection('investments'),
-      },
-      { label: 'Set Goal', icon: '🎯', action: () => switchSection('goals') },
-      {
-        label: 'Run Scenario',
-        icon: '🔄',
-        action: () => switchSection('scenarios'),
-      },
-    ];
-
-    actions.forEach(action => {
-      const button = document.createElement('button');
-      button.className = 'action-button';
-      button.innerHTML = `${action.icon} ${action.label}`;
-      button.style.padding = `${SPACING.MD} ${SPACING.LG}`;
-      button.style.border = `1px solid ${COLORS.BORDER}`;
-      button.style.borderRadius = 'var(--radius-md)';
-      button.style.background = COLORS.SURFACE;
-      button.style.color = COLORS.TEXT_MAIN;
-      button.style.cursor = 'pointer';
-      button.style.fontSize = '0.875rem';
-      button.style.fontWeight = '500';
-      button.style.transition = 'all 0.2s ease';
-
-      button.addEventListener('click', action.action);
-      button.addEventListener('mouseenter', () => {
-        button.style.background = COLORS.SURFACE_HOVER;
-        button.style.borderColor = COLORS.PRIMARY;
-      });
-      button.addEventListener('mouseleave', () => {
-        button.style.background = COLORS.SURFACE;
-        button.style.borderColor = COLORS.BORDER;
-      });
-
-      actionsContainer.appendChild(button);
-    });
-
-    section.appendChild(actionsContainer);
-    content.appendChild(section);
   }
 
   /**
