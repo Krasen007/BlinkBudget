@@ -117,6 +117,8 @@ export const DashboardView = () => {
   // Account Options Logic
   let currentFilter =
     sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_FILTER) || 'all';
+  let currentDateFilter = sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_DATE_FILTER) || null;
+
   const accounts = AccountService.getAccounts();
 
   const allOption = document.createElement('option');
@@ -176,8 +178,18 @@ export const DashboardView = () => {
     // Filter Transactions
     const transactions = allTransactions
       .filter(t => {
-        if (currentFilter === 'all') return true;
-        return t.accountId === currentFilter || t.toAccountId === currentFilter;
+        // Account Filter
+        if (currentFilter !== 'all' && t.accountId !== currentFilter && t.toAccountId !== currentFilter) {
+          return false;
+        }
+
+        // Date Filter
+        if (currentDateFilter) {
+          const tDate = t.timestamp.split('T')[0];
+          if (tDate !== currentDateFilter) return false;
+        }
+
+        return true;
       })
       .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
@@ -261,6 +273,21 @@ export const DashboardView = () => {
       currentFilter,
       accounts: currentAccounts,
       highlightTransactionIds,
+      // Pass date filter props
+      currentDateFilter,
+      onDateClick: (date) => {
+        // Toggle filter: if clicking same date, clear it. Otherwise set it.
+        const newDate = currentDateFilter === date ? null : date;
+        currentDateFilter = newDate;
+
+        if (newDate) {
+          sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_DATE_FILTER, newDate);
+        } else {
+          sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_DATE_FILTER);
+        }
+
+        renderDashboard();
+      }
     });
     content.appendChild(transactionList);
   };

@@ -21,6 +21,7 @@ export const TransactionListItem = ({
   currentFilter,
   accounts,
   shouldHighlight = false,
+  onDateClick = () => { },
 }) => {
   const item = document.createElement('li');
   item.className = 'transaction-item';
@@ -153,6 +154,14 @@ export const TransactionListItem = ({
     gap: SPACING.SM,
     lineHeight: 'var(--line-height-normal)',
     alignItems: 'center',
+    cursor: 'pointer', // Add pointer to indicate clickable
+  });
+
+  // Date click handler
+  date.addEventListener('click', (e) => {
+    e.stopPropagation(); // Prevent item click
+    const dateStr = transaction.timestamp.split('T')[0];
+    onDateClick(dateStr);
   });
 
   // Show Account Name if not transfer

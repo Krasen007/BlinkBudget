@@ -146,6 +146,7 @@ export const STORAGE_KEYS = {
   INVESTMENTS: 'blinkbudget_investments',
   GOALS: 'blinkbudget_goals',
   DASHBOARD_FILTER: 'dashboard_filter',
+  DASHBOARD_DATE_FILTER: 'dashboard_date_filter',
 };
 
 // Default values

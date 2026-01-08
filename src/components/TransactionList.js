@@ -18,6 +18,8 @@ export const TransactionList = ({
   currentFilter,
   accounts,
   highlightTransactionIds = null,
+  currentDateFilter = null,
+  onDateClick = () => { },
 }) => {
   const listContainer = document.createElement('div');
   listContainer.className = 'dashboard-transactions-container';
@@ -99,6 +101,8 @@ export const TransactionList = ({
         currentFilter,
         accounts,
         shouldHighlight,
+        currentDateFilter,
+        onDateClick,
       });
       list.appendChild(item);
     });
