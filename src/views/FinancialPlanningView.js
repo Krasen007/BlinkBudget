@@ -37,6 +37,16 @@ import {
   STORAGE_KEYS,
 } from '../utils/constants.js';
 import { debounce } from '../utils/touch-utils.js';
+import {
+  createUsageNote,
+  createPlaceholder,
+  createSectionContainer,
+  calculateCurrentBalance,
+  calculateMonthlyExpenses,
+  calculateSavingsRate,
+  formatCurrency,
+  safeParseDate,
+} from '../utils/financial-planning-helpers.js';
 
 export const FinancialPlanningView = () => {
   const container = document.createElement('div');
@@ -82,17 +92,7 @@ export const FinancialPlanningView = () => {
   const navigation = createNavigation();
   container.appendChild(navigation);
 
-  // Small helper to show a short usage note under section headers
-  function createUsageNote(text) {
-    const note = document.createElement('div');
-    note.className = 'section-usage-note';
-    note.style.fontSize = '0.95rem';
-    note.style.color = COLORS.TEXT_MUTED;
-    note.style.marginBottom = SPACING.MD;
-    note.style.lineHeight = '1.4';
-    note.textContent = text;
-    return note;
-  }
+  // Helper functions now imported from financial-planning-helpers.js
 
   // Main content area
   const content = document.createElement('main');
@@ -1372,15 +1372,8 @@ export const FinancialPlanningView = () => {
           dateFld.type = 'date';
           dateFld.style.flex = '0 0 160px';
           dateFld.style.minWidth = '140px';
-          // Safely parse targetDate; if invalid or missing, leave empty to avoid RangeError
-          let isoDate = '';
-          if (goal && goal.targetDate) {
-            const d = new Date(goal.targetDate);
-            if (!isNaN(d.getTime())) {
-              isoDate = d.toISOString().slice(0, 10);
-            }
-          }
-          dateFld.value = isoDate;
+          // Use helper to safely parse targetDate
+          dateFld.value = safeParseDate(goal.targetDate);
           const currentFld = document.createElement('input');
           currentFld.type = 'number';
           currentFld.value = goal.currentSavings;
@@ -1962,35 +1955,7 @@ export const FinancialPlanningView = () => {
     content.appendChild(section);
   }
 
-  /**
-   * Create a section container with header
-   */
-  function createSectionContainer(id, title, icon) {
-    const section = document.createElement('section');
-    section.className = `financial-planning-section ${id}-section`;
-    section.style.display = 'flex';
-    section.style.flexDirection = 'column';
-    section.style.gap = SPACING.LG;
-
-    const header = document.createElement('div');
-    header.className = 'section-header';
-    header.style.display = 'flex';
-    header.style.alignItems = 'center';
-    header.style.gap = SPACING.MD;
-    header.style.marginBottom = SPACING.MD;
-
-    const headerTitle = document.createElement('h2');
-    headerTitle.textContent = `${icon} ${title}`;
-    headerTitle.style.margin = '0';
-    headerTitle.style.fontSize = '1.5rem';
-    headerTitle.style.fontWeight = '600';
-    headerTitle.style.color = COLORS.TEXT_MAIN;
-
-    header.appendChild(headerTitle);
-    section.appendChild(header);
-
-    return section;
-  }
+  // createSectionContainer is now imported from financial-planning-helpers.js
 
   /**
    * Create a stats card for the overview section
@@ -2274,9 +2239,9 @@ export const FinancialPlanningView = () => {
       const monthCell = document.createElement('div');
       monthCell.textContent = income.period
         ? income.period.toLocaleDateString('en-US', {
-            month: 'short',
-            year: 'numeric',
-          })
+          month: 'short',
+          year: 'numeric',
+        })
         : `Month ${i + 1}`;
       monthCell.style.paddingTop = SPACING.SM;
       table.appendChild(monthCell);
@@ -2328,50 +2293,7 @@ export const FinancialPlanningView = () => {
     return container;
   }
 
-  /**
-   * Create a placeholder for sections under development
-   */
-  function createPlaceholder(title, description, icon) {
-    const placeholder = document.createElement('div');
-    placeholder.className = 'section-placeholder';
-    placeholder.style.display = 'flex';
-    placeholder.style.flexDirection = 'column';
-    placeholder.style.alignItems = 'center';
-    placeholder.style.justifyContent = 'center';
-    placeholder.style.padding = `${SPACING.XL} ${SPACING.LG}`;
-    placeholder.style.background = COLORS.SURFACE;
-    placeholder.style.border = `2px dashed ${COLORS.BORDER}`;
-    placeholder.style.borderRadius = 'var(--radius-lg)';
-    placeholder.style.textAlign = 'center';
-    placeholder.style.minHeight = '300px';
-
-    const iconDiv = document.createElement('div');
-    iconDiv.textContent = icon;
-    iconDiv.style.fontSize = '3rem';
-    iconDiv.style.marginBottom = SPACING.MD;
-
-    const titleDiv = document.createElement('h3');
-    titleDiv.textContent = title;
-    titleDiv.style.margin = '0';
-    titleDiv.style.marginBottom = SPACING.SM;
-    titleDiv.style.fontSize = '1.25rem';
-    titleDiv.style.fontWeight = '600';
-    titleDiv.style.color = COLORS.TEXT_MAIN;
-
-    const descDiv = document.createElement('p');
-    descDiv.textContent = description;
-    descDiv.style.margin = '0';
-    descDiv.style.fontSize = '0.875rem';
-    descDiv.style.color = COLORS.TEXT_MUTED;
-    descDiv.style.maxWidth = '400px';
-    descDiv.style.lineHeight = '1.5';
-
-    placeholder.appendChild(iconDiv);
-    placeholder.appendChild(titleDiv);
-    placeholder.appendChild(descDiv);
-
-    return placeholder;
-  }
+  // createPlaceholder is now imported from financial-planning-helpers.js
 
   /**
    * Load planning data from various services

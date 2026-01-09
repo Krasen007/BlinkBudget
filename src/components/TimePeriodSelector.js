@@ -502,8 +502,6 @@ export const TimePeriodSelector = (options = {}) => {
         handlePredefinedPeriodSelection(periods.find(p => p.key === 'month'));
       }
     }
-
-    // Reset to previous period if it wasn't custom
   }
 
   /**

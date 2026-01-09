@@ -10,6 +10,8 @@ DO NOT IMPLEMENT: Add password reset option in the login if user forgets it
 DO NOT IMPLEMENT: make security.md following all the security best practices
 DO NOT IMPLEMENT: add possibility to import transactions from a csv file
 DO NOT IMPLEMENT: Add pre-selected categories when amount matches some amount, example: if user writes 25 assume it is Гориво, between 15 and 35 assume Храна, 13,28 is Телефон, 204,52 - Кредит, 255,64 - Други, highlight the category so that is to be more visible for the user to click
+DO NOT IMPLEMENT: release as windows store app https://learn.microsoft.com/en-us/microsoft-edge/progressive-web-apps/how-to/microsoft-store
+DO NOT IMPLEMENT: use Ionic's Capacitor or Cordova to make android app
 
 ---
 
@@ -49,10 +51,8 @@ DO NOT IMPLEMENT: Add pre-selected categories when amount matches some amount, e
 [x] Insights: Timeline Jan vs Dec 2025
 [x] add ability to show transactions by date if i want to see only specific date in the dashboard, perhaps if i click on the date in the dashboard it will show all transactions for this date
 [x] When scrolling if a transaction is selected this triggered the hold to split action we need to stop it when scrolling
-[ ] show all transactions for this date release as windows store app https://learn.microsoft.com/en-us/microsoft-edge/progressive-web-apps/how-to/microsoft-store
-[ ] use Ionic's Capacitor or Cordova to make android app
 [ ] there is a white bar when using the PWA in light mode i must check how it is on the browser
-[ ] Chrome browser detects the app core and switches to dark or white molds but when I use the PWA it detects that I'm using light theme and it makes my bar white
+[ ] Chrome browser detects the app core and switches to dark or white mode but when I use the PWA it detects that I'm using light theme and it makes my bar white
 [ ] when splitting a transaction on long press add confirmation dialog to make sure the user did not unintentionally did it
 [ ] implement backup solution on server so if needed a user can restore their data up to the previous day, this could be added in the settings. the button will delete all the transactions after the selected date. example: if i select 2025-12-15 it will delete all the transactions after 2025-12-15 and keep the transactions before 2025-12-15, better will be to select range and the backup to restore transactions in the selected period. think of how this will be implemented on the app while keeping it offline first.
 [] lazy load older transactions, they should be kept on server and only the transactions for the last 30 days should be cached on the device / PWA
