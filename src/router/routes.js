@@ -8,6 +8,12 @@ import { NavigationState } from '../core/navigation-state.js';
 import { updateMobileNavigation } from '../components/MobileNavigation.js';
 
 export const routes = {
+  landing: async () => {
+    const { LandingView } = await import('../views/LandingView.js');
+    NavigationState.setLastActiveView('landing');
+    ViewManager.setView(LandingView());
+    updateMobileNavigation('landing');
+  },
   dashboard: async () => {
     const { DashboardView } = await import('../views/DashboardView.js');
     NavigationState.setLastActiveView('dashboard');

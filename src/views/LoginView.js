@@ -7,6 +7,165 @@ import {
   validateEmail,
 } from '../utils/security-utils.js';
 
+// Password Reset Modal Component
+const createPasswordResetModal = () => {
+  const modal = document.createElement('div');
+  modal.className = 'password-reset-modal';
+  Object.assign(modal.style, {
+    position: 'fixed',
+    top: '0',
+    left: '0',
+    right: '0',
+    bottom: '0',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    zIndex: '1000',
+    padding: SPACING.MD,
+  });
+
+  const modalContent = document.createElement('div');
+  Object.assign(modalContent.style, {
+    backgroundColor: COLORS.SURFACE,
+    borderRadius: 'var(--radius-lg)',
+    padding: SPACING.XL,
+    maxWidth: '400px',
+    width: '100%',
+    maxHeight: '90vh',
+    overflow: 'auto',
+    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+  });
+
+  const title = document.createElement('h3');
+  title.textContent = 'Reset Password';
+  Object.assign(title.style, {
+    margin: '0 0 ' + SPACING.MD + ' 0',
+    color: COLORS.TEXT_MAIN,
+    fontSize: '1.5rem',
+    fontWeight: 'bold',
+  });
+
+  const description = document.createElement('p');
+  description.textContent =
+    'Enter your email address and we\'ll send you a link to reset your password.';
+  Object.assign(description.style, {
+    margin: '0 0 ' + SPACING.LG + ' 0',
+    color: COLORS.TEXT_MUTED,
+    fontSize: FONT_SIZES.SM,
+    lineHeight: '1.5',
+  });
+
+  const emailInput = document.createElement('input');
+  emailInput.type = 'email';
+  emailInput.placeholder = 'Email address';
+  emailInput.required = true;
+  emailInput.autocomplete = 'email';
+  applyInputStyles(emailInput);
+
+  const errorMsg = document.createElement('div');
+  Object.assign(errorMsg.style, {
+    color: COLORS.ERROR,
+    fontSize: FONT_SIZES.SM,
+    minHeight: '1.2em',
+    marginTop: SPACING.SM,
+  });
+
+  const successMsg = document.createElement('div');
+  Object.assign(successMsg.style, {
+    color: COLORS.SUCCESS,
+    fontSize: FONT_SIZES.SM,
+    minHeight: '1.2em',
+    marginTop: SPACING.SM,
+    display: 'none',
+  });
+
+  const submitBtn = Button({
+    text: 'Send Reset Link',
+    variant: 'primary',
+    onClick: async e => {
+      e.preventDefault();
+      errorMsg.textContent = '';
+      successMsg.style.display = 'none';
+
+      const email = emailInput.value.trim();
+
+      if (!email) {
+        errorMsg.textContent = 'Please enter your email address.';
+        return;
+      }
+
+      if (!validateEmail(email)) {
+        errorMsg.textContent = 'Please enter a valid email address.';
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending...';
+
+      const { error } = await AuthService.resetPassword(email);
+
+      if (error) {
+        errorMsg.textContent = error;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send Reset Link';
+      } else {
+        successMsg.textContent =
+          'Password reset email sent! Check your inbox for the reset link.';
+        successMsg.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send Reset Link';
+        emailInput.value = '';
+      }
+    },
+  });
+
+  const cancelBtn = Button({
+    text: 'Cancel',
+    variant: 'ghost',
+    onClick: () => {
+      modal.remove();
+    },
+  });
+
+  const buttonContainer = document.createElement('div');
+  Object.assign(buttonContainer.style, {
+    display: 'flex',
+    gap: SPACING.SM,
+    marginTop: SPACING.MD,
+  });
+
+  buttonContainer.appendChild(submitBtn);
+  buttonContainer.appendChild(cancelBtn);
+
+  modalContent.appendChild(title);
+  modalContent.appendChild(description);
+  modalContent.appendChild(emailInput);
+  modalContent.appendChild(errorMsg);
+  modalContent.appendChild(successMsg);
+  modalContent.appendChild(buttonContainer);
+
+  modal.appendChild(modalContent);
+
+  // Close modal on backdrop click
+  modal.addEventListener('click', e => {
+    if (e.target === modal) {
+      modal.remove();
+    }
+  });
+
+  // Close modal on Escape key
+  const handleEscape = e => {
+    if (e.key === 'Escape') {
+      modal.remove();
+      document.removeEventListener('keydown', handleEscape);
+    }
+  };
+  document.addEventListener('keydown', handleEscape);
+
+  return modal;
+};
+
 export const LoginView = () => {
   const container = document.createElement('div');
   container.className = 'view-login view-container';
@@ -200,8 +359,29 @@ export const LoginView = () => {
     errorMsg.textContent = '';
   });
 
+  // Forgot Password Link
+  const forgotPasswordLink = document.createElement('button');
+  forgotPasswordLink.type = 'button';
+  forgotPasswordLink.textContent = 'Forgot Password?';
+  Object.assign(forgotPasswordLink.style, {
+    background: 'none',
+    border: 'none',
+    color: COLORS.PRIMARY,
+    cursor: 'pointer',
+    fontSize: FONT_SIZES.SM,
+    padding: '0',
+    textAlign: 'right',
+    textDecoration: 'none',
+  });
+
+  forgotPasswordLink.addEventListener('click', () => {
+    const modal = createPasswordResetModal();
+    document.body.appendChild(modal);
+  });
+
   form.appendChild(emailInput);
   form.appendChild(passwordInput);
+  form.appendChild(forgotPasswordLink);
   form.appendChild(errorMsg);
   form.appendChild(submitBtn);
 

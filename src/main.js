@@ -61,13 +61,17 @@ const initApp = () => {
       console.log('[Main] User authenticated, starting sync...');
       localStorage.setItem('auth_hint', 'true');
       SyncService.startRealtimeSync(user.uid);
-      if (currentRoute === 'login') Router.navigate('dashboard');
+      if (currentRoute === 'login' || currentRoute === 'landing') {
+        Router.navigate('dashboard');
+      }
     } else {
       console.log('[Main] No user, stopping sync.');
       localStorage.removeItem('auth_hint');
       SyncService.stopSync();
       NavigationState.clearState();
-      if (currentRoute !== 'login') Router.navigate('login');
+      if (currentRoute !== 'login' && currentRoute !== 'landing') {
+        Router.navigate('landing');
+      }
     }
 
     initMobileNav();

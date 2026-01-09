@@ -1,3 +1,4 @@
 /* Base Styles - Main Import File */
 @import './reset.css';
 @import './typography.css';
+@import './hero.css';

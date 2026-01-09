@@ -6,6 +6,7 @@ import {
   signOut,
   GoogleAuthProvider,
   signInWithPopup,
+  sendPasswordResetEmail,
 } from 'firebase/auth';
 
 export const AuthService = {
@@ -102,5 +103,22 @@ export const AuthService = {
 
   getUserId() {
     return this.user ? this.user.uid : null;
+  },
+
+  async resetPassword(email) {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      return { error: null };
+    } catch (error) {
+      let message = 'An unexpected error occurred. Please try again.';
+      if (error.code === 'auth/invalid-email') {
+        message = 'Please enter a valid email address.';
+      } else if (error.code === 'auth/user-not-found') {
+        message = 'No account found with this email address.';
+      } else if (error.code === 'auth/too-many-requests') {
+        message = 'Too many requests. Please try again later.';
+      }
+      return { error: message };
+    }
   },
 };
