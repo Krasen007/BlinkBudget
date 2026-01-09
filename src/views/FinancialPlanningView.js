@@ -46,7 +46,7 @@ import {
 import { StatsCard } from '../components/financial-planning/StatsCard.js';
 import { ForecastCard } from '../components/financial-planning/ForecastCard.js';
 import { EmergencyFundCard } from '../components/financial-planning/EmergencyFundCard.js';
-import { DataTable } from '../components/financial-planning/DataTable.js';
+import { refreshChart } from '../utils/chart-refresh-helper.js';
 
 export const FinancialPlanningView = () => {
   const container = document.createElement('div');
@@ -824,7 +824,7 @@ export const FinancialPlanningView = () => {
       invForm.style.flexWrap = 'wrap';
     });
 
-    saveInvBtn.addEventListener('click', () => {
+    saveInvBtn.addEventListener('click', async () => {
       const symbol = symInput.value.trim();
       const shares = Number(sharesInput.value) || 0;
       const purchasePrice = Number(priceInput.value) || 0;
@@ -865,20 +865,17 @@ export const FinancialPlanningView = () => {
           purchaseDate,
           {}
         );
-        // Refresh portfolio chart
+
+        // Refresh portfolio chart using helper
         const updated = StorageService.calculatePortfolioSummary();
-        createPortfolioCompositionChart(chartRenderer, updated)
-          .then(({ section: chartSection, chart }) => {
-            // Replace existing chart section
-            const existing = section.querySelector(
-              '[data-chart-type="portfolio-composition"]'
-            );
-            if (existing) existing.replaceWith(chartSection);
-            activeCharts.set('portfolio-composition', chart);
-          })
-          .catch(err =>
-            console.error('Error refreshing portfolio chart:', err)
-          );
+        await refreshChart({
+          createChartFn: createPortfolioCompositionChart,
+          chartRenderer,
+          data: updated,
+          section,
+          chartType: 'portfolio-composition',
+          activeCharts,
+        });
 
         invForm.style.display = 'none';
         symInput.value = '';
@@ -1037,7 +1034,7 @@ export const FinancialPlanningView = () => {
 
           cancelBtn.addEventListener('click', cleanupEdit);
 
-          saveBtn.addEventListener('click', () => {
+          saveBtn.addEventListener('click', async () => {
             const newShares = Number(sharesFld.value) || 0;
             const newPrice = Number(priceFld.value) || 0;
             try {
@@ -1046,19 +1043,17 @@ export const FinancialPlanningView = () => {
                 purchasePrice: newPrice,
                 currentPrice: newPrice,
               });
-              // refresh chart and list
+
+              // Refresh chart and list using helper
               const updated = StorageService.calculatePortfolioSummary();
-              createPortfolioCompositionChart(chartRenderer, updated)
-                .then(({ section: chartSection, chart }) => {
-                  const existing = section.querySelector(
-                    '[data-chart-type="portfolio-composition"]'
-                  );
-                  if (existing) existing.replaceWith(chartSection);
-                  activeCharts.set('portfolio-composition', chart);
-                })
-                .catch(err =>
-                  console.error('Error refreshing portfolio chart:', err)
-                );
+              await refreshChart({
+                createChartFn: createPortfolioCompositionChart,
+                chartRenderer,
+                data: updated,
+                section,
+                chartType: 'portfolio-composition',
+                activeCharts,
+              });
 
               cleanupEdit();
               refreshInvestmentsList();
@@ -1068,22 +1063,20 @@ export const FinancialPlanningView = () => {
           });
         });
 
-        delBtn.addEventListener('click', () => {
+        delBtn.addEventListener('click', async () => {
           try {
             StorageService.removeInvestment(inv.symbol);
-            // refresh chart
+
+            // Refresh chart using helper
             const updated = StorageService.calculatePortfolioSummary();
-            createPortfolioCompositionChart(chartRenderer, updated)
-              .then(({ section: chartSection, chart }) => {
-                const existing = section.querySelector(
-                  '[data-chart-type="portfolio-composition"]'
-                );
-                if (existing) existing.replaceWith(chartSection);
-                activeCharts.set('portfolio-composition', chart);
-              })
-              .catch(err =>
-                console.error('Error refreshing portfolio chart:', err)
-              );
+            await refreshChart({
+              createChartFn: createPortfolioCompositionChart,
+              chartRenderer,
+              data: updated,
+              section,
+              chartType: 'portfolio-composition',
+              activeCharts,
+            });
 
             refreshInvestmentsList();
           } catch (err) {
@@ -1223,7 +1216,7 @@ export const FinancialPlanningView = () => {
       goalForm.style.flexWrap = 'wrap';
     });
 
-    saveGoalBtn.addEventListener('click', () => {
+    saveGoalBtn.addEventListener('click', async () => {
       const name = goalName.value.trim();
       const target = Number(goalTarget.value) || 0;
       const tdate = goalDate.value ? new Date(goalDate.value) : null;
@@ -1247,17 +1240,17 @@ export const FinancialPlanningView = () => {
 
       try {
         StorageService.createGoal(name, target, tdate, current, {});
-        // Refresh goals chart
+
+        // Refresh goals chart using helper
         const updatedGoals = StorageService.getGoals();
-        createGoalProgressChart(chartRenderer, updatedGoals)
-          .then(({ section: chartSection, chart }) => {
-            const existing = section.querySelector(
-              '[data-chart-type="goal-progress"]'
-            );
-            if (existing) existing.replaceWith(chartSection);
-            activeCharts.set('goal-progress', chart);
-          })
-          .catch(err => console.error('Error refreshing goals chart:', err));
+        await refreshChart({
+          createChartFn: createGoalProgressChart,
+          chartRenderer,
+          data: updatedGoals,
+          section,
+          chartType: 'goal-progress',
+          activeCharts,
+        });
 
         goalForm.style.display = 'none';
         goalName.value = '';
@@ -1406,7 +1399,7 @@ export const FinancialPlanningView = () => {
 
           cancelBtn.addEventListener('click', cleanupEdit);
 
-          saveBtn.addEventListener('click', () => {
+          saveBtn.addEventListener('click', async () => {
             try {
               const updates = {
                 name: nameFld.value.trim(),
@@ -1417,19 +1410,17 @@ export const FinancialPlanningView = () => {
                 currentSavings: Number(currentFld.value) || 0,
               };
               StorageService.updateGoal(goal.id, updates);
-              // refresh chart
+
+              // Refresh chart using helper
               const updatedGoals = StorageService.getGoals();
-              createGoalProgressChart(chartRenderer, updatedGoals)
-                .then(({ section: chartSection, chart }) => {
-                  const existing = section.querySelector(
-                    '[data-chart-type="goal-progress"]'
-                  );
-                  if (existing) existing.replaceWith(chartSection);
-                  activeCharts.set('goal-progress', chart);
-                })
-                .catch(err =>
-                  console.error('Error refreshing goals chart:', err)
-                );
+              await refreshChart({
+                createChartFn: createGoalProgressChart,
+                chartRenderer,
+                data: updatedGoals,
+                section,
+                chartType: 'goal-progress',
+                activeCharts,
+              });
 
               cleanupEdit();
               refreshGoalsList();
@@ -1439,21 +1430,20 @@ export const FinancialPlanningView = () => {
           });
         });
 
-        delBtn.addEventListener('click', () => {
+        delBtn.addEventListener('click', async () => {
           try {
             StorageService.deleteGoal(goal.id);
+
+            // Refresh chart using helper
             const updatedGoals = StorageService.getGoals();
-            createGoalProgressChart(chartRenderer, updatedGoals)
-              .then(({ section: chartSection, chart }) => {
-                const existing = section.querySelector(
-                  '[data-chart-type="goal-progress"]'
-                );
-                if (existing) existing.replaceWith(chartSection);
-                activeCharts.set('goal-progress', chart);
-              })
-              .catch(err =>
-                console.error('Error refreshing goals chart:', err)
-              );
+            await refreshChart({
+              createChartFn: createGoalProgressChart,
+              chartRenderer,
+              data: updatedGoals,
+              section,
+              chartType: 'goal-progress',
+              activeCharts,
+            });
 
             refreshGoalsList();
           } catch (err) {
