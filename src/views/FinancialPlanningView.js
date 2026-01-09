@@ -41,12 +41,12 @@ import {
   createUsageNote,
   createPlaceholder,
   createSectionContainer,
-  calculateCurrentBalance,
-  calculateMonthlyExpenses,
-  calculateSavingsRate,
-  formatCurrency,
   safeParseDate,
 } from '../utils/financial-planning-helpers.js';
+import { StatsCard } from '../components/financial-planning/StatsCard.js';
+import { ForecastCard } from '../components/financial-planning/ForecastCard.js';
+import { EmergencyFundCard } from '../components/financial-planning/EmergencyFundCard.js';
+import { DataTable } from '../components/financial-planning/DataTable.js';
 
 export const FinancialPlanningView = () => {
   const container = document.createElement('div');
@@ -511,7 +511,7 @@ export const FinancialPlanningView = () => {
     ];
 
     stats.forEach(stat => {
-      const card = createStatsCard(stat);
+      const card = StatsCard(stat);
       statsGrid.appendChild(card);
     });
 
@@ -520,7 +520,7 @@ export const FinancialPlanningView = () => {
 
     // Emergency Fund Status (if available)
     if (emergencyFundAssessment && emergencyFundAssessment.status !== 'error') {
-      const emergencyFundCard = createEmergencyFundCard(
+      const emergencyFundCard = EmergencyFundCard(
         emergencyFundAssessment
       );
       section.appendChild(emergencyFundCard);
@@ -634,7 +634,7 @@ export const FinancialPlanningView = () => {
       ];
 
       summaryCards.forEach(card => {
-        const cardElement = createForecastCard(card);
+        const cardElement = ForecastCard(card);
         summaryGrid.appendChild(cardElement);
       });
 
@@ -1955,233 +1955,11 @@ export const FinancialPlanningView = () => {
     content.appendChild(section);
   }
 
-  // createSectionContainer is now imported from financial-planning-helpers.js
+  // createStatsCard is now imported from StatsCard.js component
 
-  /**
-   * Create a stats card for the overview section
-   */
-  function createStatsCard({
-    label,
-    value,
-    color,
-    icon,
-    subtitle,
-    calculationHelp,
-  }) {
-    const card = document.createElement('div');
-    card.className = 'stats-card';
-    card.style.padding = SPACING.LG;
-    card.style.background = COLORS.SURFACE;
-    card.style.border = `1px solid ${COLORS.BORDER}`;
-    card.style.borderRadius = 'var(--radius-lg)';
-    card.style.display = 'flex';
-    card.style.flexDirection = 'column';
-    card.style.gap = SPACING.SM;
+  // createEmergencyFundCard is now imported from EmergencyFundCard.js component
 
-    const header = document.createElement('div');
-    header.style.display = 'flex';
-    header.style.alignItems = 'center';
-    header.style.gap = SPACING.SM;
-
-    const iconSpan = document.createElement('span');
-    iconSpan.textContent = icon;
-    iconSpan.style.fontSize = '1.25rem';
-
-    const labelSpan = document.createElement('span');
-    labelSpan.textContent = label;
-    labelSpan.style.fontSize = '0.875rem';
-    labelSpan.style.color = COLORS.TEXT_MUTED;
-    labelSpan.style.fontWeight = '500';
-
-    header.appendChild(iconSpan);
-    header.appendChild(labelSpan);
-
-    const valueSpan = document.createElement('span');
-    valueSpan.textContent = value;
-    valueSpan.style.fontSize = '1.75rem';
-    valueSpan.style.fontWeight = 'bold';
-    valueSpan.style.color = color;
-
-    card.appendChild(header);
-    card.appendChild(valueSpan);
-
-    if (subtitle) {
-      const subtitleSpan = document.createElement('span');
-      subtitleSpan.textContent = subtitle;
-      subtitleSpan.style.fontSize = '0.75rem';
-      subtitleSpan.style.color = COLORS.TEXT_MUTED;
-      card.appendChild(subtitleSpan);
-    }
-
-    // Add calculation help section if provided
-    if (calculationHelp) {
-      const helpSection = document.createElement('div');
-      helpSection.style.marginTop = SPACING.SM;
-      helpSection.style.paddingTop = SPACING.XS;
-      helpSection.style.borderTop = `1px solid ${COLORS.BORDER}`;
-
-      const helpTitle = document.createElement('div');
-      helpTitle.style.display = 'flex';
-      helpTitle.style.alignItems = 'center';
-      helpTitle.style.cursor = 'pointer';
-      helpTitle.style.marginBottom = SPACING.XS;
-
-      const helpTitleText = document.createElement('span');
-      helpTitleText.textContent = '📊 How calculated?';
-      helpTitleText.style.fontSize = '0.625rem';
-      helpTitleText.style.fontWeight = '600';
-      helpTitleText.style.color = COLORS.TEXT_MUTED;
-
-      const toggleIcon = document.createElement('span');
-      toggleIcon.textContent = '▼';
-      toggleIcon.style.marginLeft = SPACING.XS;
-      toggleIcon.style.fontSize = '0.5rem';
-      toggleIcon.style.color = COLORS.TEXT_MUTED;
-      toggleIcon.style.transition = 'transform 0.2s ease';
-
-      helpTitle.appendChild(helpTitleText);
-      helpTitle.appendChild(toggleIcon);
-
-      const helpDetails = document.createElement('div');
-      helpDetails.style.fontSize = '0.625rem';
-      helpDetails.style.color = COLORS.TEXT_MUTED;
-      helpDetails.style.lineHeight = '1.3';
-      helpDetails.innerHTML = calculationHelp;
-
-      // Initially hide details
-      helpDetails.style.display = 'none';
-
-      // Toggle functionality
-      let isExpanded = false;
-      helpTitle.addEventListener('click', () => {
-        isExpanded = !isExpanded;
-        helpDetails.style.display = isExpanded ? 'block' : 'none';
-        toggleIcon.style.transform = isExpanded
-          ? 'rotate(180deg)'
-          : 'rotate(0deg)';
-      });
-
-      helpSection.appendChild(helpTitle);
-      helpSection.appendChild(helpDetails);
-      card.appendChild(helpSection);
-    }
-
-    return card;
-  }
-
-  /**
-   * Create emergency fund assessment card
-   */
-  function createEmergencyFundCard(assessment) {
-    const card = document.createElement('div');
-    card.className = 'emergency-fund-card';
-    card.style.padding = SPACING.LG;
-    card.style.background = COLORS.SURFACE;
-    card.style.border = `2px solid ${assessment.riskLevel === 'low' ? COLORS.SUCCESS : assessment.riskLevel === 'moderate' ? COLORS.WARNING : COLORS.ERROR}`;
-    card.style.borderRadius = 'var(--radius-lg)';
-    card.style.marginBottom = SPACING.LG;
-
-    const header = document.createElement('div');
-    header.style.display = 'flex';
-    header.style.alignItems = 'center';
-    header.style.justifyContent = 'space-between';
-    header.style.marginBottom = SPACING.MD;
-
-    const title = document.createElement('h3');
-    title.textContent = '🛡️ Emergency Fund Status';
-    title.style.margin = '0';
-    title.style.fontSize = '1.125rem';
-    title.style.fontWeight = '600';
-    title.style.color = COLORS.TEXT_MAIN;
-
-    const status = document.createElement('span');
-    status.textContent =
-      assessment.status.charAt(0).toUpperCase() + assessment.status.slice(1);
-    status.style.padding = `${SPACING.XS} ${SPACING.SM}`;
-    status.style.borderRadius = 'var(--radius-sm)';
-    status.style.fontSize = '0.75rem';
-    status.style.fontWeight = '600';
-    status.style.background =
-      assessment.riskLevel === 'low'
-        ? COLORS.SUCCESS
-        : assessment.riskLevel === 'moderate'
-          ? COLORS.WARNING
-          : COLORS.ERROR;
-    status.style.color = 'white';
-
-    header.appendChild(title);
-    header.appendChild(status);
-
-    const message = document.createElement('p');
-    message.textContent = assessment.message;
-    message.style.margin = '0';
-    message.style.marginBottom = SPACING.SM;
-    message.style.color = COLORS.TEXT_MAIN;
-    message.style.fontSize = '0.875rem';
-
-    const recommendation = document.createElement('p');
-    recommendation.textContent = assessment.recommendation;
-    recommendation.style.margin = '0';
-    recommendation.style.color = COLORS.TEXT_MUTED;
-    recommendation.style.fontSize = '0.875rem';
-    recommendation.style.fontStyle = 'italic';
-
-    card.appendChild(header);
-    card.appendChild(message);
-    card.appendChild(recommendation);
-
-    return card;
-  }
-
-  /**
-   * Create a forecast card with enhanced styling
-   */
-  function createForecastCard({ label, value, color, icon, subtitle }) {
-    const card = document.createElement('div');
-    card.className = 'forecast-card';
-    card.style.padding = SPACING.LG;
-    card.style.background = COLORS.SURFACE;
-    card.style.border = `1px solid ${COLORS.BORDER}`;
-    card.style.borderRadius = 'var(--radius-lg)';
-    card.style.display = 'flex';
-    card.style.flexDirection = 'column';
-    card.style.gap = SPACING.SM;
-
-    const header = document.createElement('div');
-    header.style.display = 'flex';
-    header.style.alignItems = 'center';
-    header.style.gap = SPACING.SM;
-
-    const iconSpan = document.createElement('span');
-    iconSpan.textContent = icon;
-    iconSpan.style.fontSize = '1.25rem';
-
-    const labelSpan = document.createElement('span');
-    labelSpan.textContent = label;
-    labelSpan.style.fontSize = '0.875rem';
-    labelSpan.style.color = COLORS.TEXT_MUTED;
-    labelSpan.style.fontWeight = '500';
-
-    header.appendChild(iconSpan);
-    header.appendChild(labelSpan);
-
-    const valueSpan = document.createElement('span');
-    valueSpan.textContent = value;
-    valueSpan.style.fontSize = '1.75rem';
-    valueSpan.style.fontWeight = 'bold';
-    valueSpan.style.color = color;
-
-    const subtitleSpan = document.createElement('span');
-    subtitleSpan.textContent = subtitle;
-    subtitleSpan.style.fontSize = '0.75rem';
-    subtitleSpan.style.color = COLORS.TEXT_MUTED;
-
-    card.appendChild(header);
-    card.appendChild(valueSpan);
-    card.appendChild(subtitleSpan);
-
-    return card;
-  }
+  // createForecastCard is now imported from ForecastCard.js component
 
   /**
    * Create a detailed forecast table
