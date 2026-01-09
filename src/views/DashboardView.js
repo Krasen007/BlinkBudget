@@ -33,7 +33,6 @@ export const DashboardView = () => {
     /// OLD kept for reference
     // title.textContent = `Dashboard 1.13 ${uName ? u.displayName || u.email : ''}`;
     title.textContent = `Dashboard 1.13 ${uName}`;
-
   };
   updateTitle();
   title.style.margin = '0';

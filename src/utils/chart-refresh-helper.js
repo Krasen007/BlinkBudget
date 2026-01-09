@@ -1,6 +1,6 @@
 /**
  * Chart Refresh Helper Utility
- * 
+ *
  * Centralizes the logic for refreshing charts in the Financial Planning view.
  * This pattern is repeated multiple times across investment and goals sections.
  */
@@ -17,34 +17,34 @@
  * @returns {Promise<void>}
  */
 export async function refreshChart({
-    createChartFn,
-    chartRenderer,
-    data,
-    section,
-    chartType,
-    activeCharts,
+  createChartFn,
+  chartRenderer,
+  data,
+  section,
+  chartType,
+  activeCharts,
 }) {
-    try {
-        const { section: chartSection, chart } = await createChartFn(
-            chartRenderer,
-            data
-        );
+  try {
+    const { section: chartSection, chart } = await createChartFn(
+      chartRenderer,
+      data
+    );
 
-        // Replace existing chart section
-        const existing = section.querySelector(`[data-chart-type="${chartType}"]`);
-        if (existing) {
-            existing.replaceWith(chartSection);
-        } else {
-            // If no existing chart, append it
-            section.appendChild(chartSection);
-        }
-
-        // Update active charts map
-        activeCharts.set(chartType, chart);
-    } catch (err) {
-        console.error(`Error refreshing ${chartType} chart:`, err);
-        throw err; // Re-throw so caller can handle if needed
+    // Replace existing chart section
+    const existing = section.querySelector(`[data-chart-type="${chartType}"]`);
+    if (existing) {
+      existing.replaceWith(chartSection);
+    } else {
+      // If no existing chart, append it
+      section.appendChild(chartSection);
     }
+
+    // Update active charts map
+    activeCharts.set(chartType, chart);
+  } catch (err) {
+    console.error(`Error refreshing ${chartType} chart:`, err);
+    throw err; // Re-throw so caller can handle if needed
+  }
 }
 
 /**
@@ -53,7 +53,7 @@ export async function refreshChart({
  * @returns {Promise<void>}
  */
 export async function refreshCharts(chartConfigs) {
-    for (const config of chartConfigs) {
-        await refreshChart(config);
-    }
+  for (const config of chartConfigs) {
+    await refreshChart(config);
+  }
 }

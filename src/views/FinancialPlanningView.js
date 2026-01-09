@@ -520,9 +520,7 @@ export const FinancialPlanningView = () => {
 
     // Emergency Fund Status (if available)
     if (emergencyFundAssessment && emergencyFundAssessment.status !== 'error') {
-      const emergencyFundCard = EmergencyFundCard(
-        emergencyFundAssessment
-      );
+      const emergencyFundCard = EmergencyFundCard(emergencyFundAssessment);
       section.appendChild(emergencyFundCard);
     }
   }
@@ -2007,9 +2005,9 @@ export const FinancialPlanningView = () => {
       const monthCell = document.createElement('div');
       monthCell.textContent = income.period
         ? income.period.toLocaleDateString('en-US', {
-          month: 'short',
-          year: 'numeric',
-        })
+            month: 'short',
+            year: 'numeric',
+          })
         : `Month ${i + 1}`;
       monthCell.style.paddingTop = SPACING.SM;
       table.appendChild(monthCell);
