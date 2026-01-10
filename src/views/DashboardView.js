@@ -20,35 +20,45 @@ export const DashboardView = () => {
   const container = document.createElement('div');
   container.className = 'view-dashboard view-container view-fixed';
 
-  // Header (Account Selector & Settings)
+  // Header with unified pattern
   const header = document.createElement('div');
   header.style.marginBottom = SPACING.MD;
-  header.style.flexShrink = '0'; // Prevent header from shrinking
+  header.style.flexShrink = '0';
+
+  const topRow = document.createElement('div');
+  topRow.style.display = 'flex';
+  topRow.style.justifyContent = 'space-between';
+  topRow.style.alignItems = 'center';
+
+  // Left side with title only
+  const leftSide = document.createElement('div');
+  leftSide.style.display = 'flex';
+  leftSide.style.alignItems = 'center';
+  leftSide.style.gap = SPACING.MD;
 
   // Title
   const title = document.createElement('h2');
   const updateTitle = userObj => {
     const u = userObj || AuthService.user;
     const uName = u ? u.displayName || u.email : '';
-    /// OLD kept for reference
-    // title.textContent = `Dashboard 1.13 ${uName ? u.displayName || u.email : ''}`;
     title.textContent = `Dashboard 1.13 ${uName}`;
   };
   updateTitle();
   title.style.margin = '0';
-  title.style.marginRight = SPACING.MD;
+  title.style.fontSize =
+    window.innerWidth < BREAKPOINTS.MOBILE ? '1.25rem' : 'h2';
+  title.style.fontWeight = 'bold';
+  title.style.color = COLORS.TEXT_MAIN;
 
-  // Settings Button
-  const settingsBtn = document.createElement('button');
-  settingsBtn.innerHTML = '⚙️';
-  settingsBtn.className = 'btn btn-ghost';
-  settingsBtn.style.fontSize = '1.5rem';
-  settingsBtn.style.padding = SPACING.XS;
-  settingsBtn.style.border = 'none';
-  settingsBtn.title = 'Settings';
-  settingsBtn.addEventListener('click', () => Router.navigate('settings'));
+  leftSide.appendChild(title);
 
-  // Charts Button (Desktop only - positioned left of settings)
+  // Right side controls
+  const rightControls = document.createElement('div');
+  rightControls.style.display = 'flex';
+  rightControls.style.alignItems = 'center';
+  rightControls.style.gap = SPACING.SM;
+
+  // Charts Button (Desktop only)
   const chartsBtn = document.createElement('button');
   chartsBtn.innerHTML = '🎯';
   chartsBtn.className = 'btn btn-ghost';
@@ -56,10 +66,10 @@ export const DashboardView = () => {
   chartsBtn.style.padding = SPACING.XS;
   chartsBtn.style.border = 'none';
   chartsBtn.style.marginRight = SPACING.SM;
-  chartsBtn.title = 'Charts & Reports';
+  chartsBtn.title = 'Charts and Reports';
   chartsBtn.addEventListener('click', () => Router.navigate('reports'));
 
-  // Financial Planning Button (Desktop only - positioned left of charts)
+  // Financial Planning Button (Desktop only)
   const planningBtn = document.createElement('button');
   planningBtn.innerHTML = '📊';
   planningBtn.className = 'btn btn-ghost';
@@ -72,29 +82,22 @@ export const DashboardView = () => {
     Router.navigate('financial-planning')
   );
 
-  // Hide charts and planning buttons on mobile (mobile uses navigation bar)
-  const updateButtonVisibility = () => {
-    const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
-    chartsBtn.style.display = isMobile ? 'none' : 'inline-block';
-    planningBtn.style.display = isMobile ? 'none' : 'inline-block';
-  };
-  updateButtonVisibility();
+  // Settings Button
+  const settingsBtn = document.createElement('button');
+  settingsBtn.innerHTML = '⚙️';
+  settingsBtn.className = 'btn btn-ghost';
+  settingsBtn.style.fontSize = '1.5rem';
+  settingsBtn.style.padding = SPACING.XS;
+  settingsBtn.style.border = 'none';
+  settingsBtn.title = 'Settings';
+  settingsBtn.addEventListener('click', () => Router.navigate('settings'));
 
-  // Group Title and Selector for easier layout
-  header.innerHTML = '';
-  header.style.flexDirection = 'column';
-  header.style.alignItems = 'stretch';
-  header.style.gap = SPACING.MD;
+  rightControls.appendChild(chartsBtn);
+  rightControls.appendChild(planningBtn);
+  rightControls.appendChild(settingsBtn);
 
-  const topRow = document.createElement('div');
-  topRow.style.display = 'flex';
-  topRow.style.justifyContent = 'space-between';
-  topRow.style.alignItems = 'center';
-
-  topRow.appendChild(title);
-  topRow.appendChild(planningBtn);
-  topRow.appendChild(chartsBtn);
-  topRow.appendChild(settingsBtn);
+  topRow.appendChild(leftSide);
+  topRow.appendChild(rightControls);
 
   header.appendChild(topRow);
 
@@ -326,17 +329,12 @@ export const DashboardView = () => {
 
   // Responsive layout updates
   const updateResponsiveLayout = debounce(() => {
-    const statsContainer = container.querySelector(
-      '.dashboard-stats-container'
-    );
+    const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
+    const statsContainer = document.querySelector('.dashboard-stats-container');
     if (!statsContainer) return;
-    const isMobileNow = window.innerWidth < BREAKPOINTS.MOBILE;
-    statsContainer.style.gridTemplateColumns = isMobileNow
+    statsContainer.style.gridTemplateColumns = isMobile
       ? '1fr 1fr'
       : 'repeat(auto-fit, minmax(250px, 1fr))';
-
-    // Update button visibility
-    updateButtonVisibility();
   }, TIMING.DEBOUNCE_RESIZE);
 
   window.addEventListener('resize', updateResponsiveLayout);

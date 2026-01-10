@@ -4,7 +4,13 @@ import { AccountSection } from '../components/AccountSection.js';
 import { DateFormatSection } from '../components/DateFormatSection.js';
 import { DataManagementSection } from '../components/DataManagementSection.js';
 import { GeneralSection } from '../components/GeneralSection.js';
-import { SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
+import {
+  SPACING,
+  TOUCH_TARGETS,
+  FONT_SIZES,
+  BREAKPOINTS,
+} from '../utils/constants.js';
+import { COLORS } from '../utils/constants.js';
 import { createButton } from '../utils/dom-factory.js';
 
 export const SettingsView = () => {
@@ -33,10 +39,10 @@ export const SettingsView = () => {
   backButton.className = 'btn btn-ghost settings-back-btn';
   backButton.style.fontSize = '1rem';
   backButton.style.padding = `${SPACING.SM} ${SPACING.MD}`;
-  backButton.style.border = `1px solid hsl(240, 5%, 20%)`;
+  backButton.style.border = `1px solid ${COLORS.BORDER}`;
   backButton.style.borderRadius = 'var(--radius-md)';
-  backButton.style.background = 'hsl(240, 10%, 10%)';
-  backButton.style.color = 'hsl(240, 5%, 65%)';
+  backButton.style.background = COLORS.SURFACE;
+  backButton.style.color = COLORS.TEXT_MAIN;
   backButton.style.cursor = 'pointer';
   backButton.style.fontWeight = '500';
   backButton.style.transition = 'all 0.2s ease';
@@ -44,13 +50,13 @@ export const SettingsView = () => {
 
   // Hover effects
   backButton.addEventListener('mouseenter', () => {
-    backButton.style.background = 'hsl(240, 10%, 15%)';
-    backButton.style.borderColor = 'hsl(250, 84%, 60%)';
+    backButton.style.background = COLORS.SURFACE_HOVER;
+    backButton.style.borderColor = COLORS.PRIMARY;
   });
 
   backButton.addEventListener('mouseleave', () => {
-    backButton.style.background = 'hsl(240, 10%, 10%)';
-    backButton.style.borderColor = 'hsl(240, 5%, 20%)';
+    backButton.style.background = COLORS.SURFACE;
+    backButton.style.borderColor = COLORS.BORDER;
   });
 
   backButton.addEventListener('click', () => Router.navigate('dashboard'));
@@ -59,9 +65,10 @@ export const SettingsView = () => {
   const title = document.createElement('h2');
   title.textContent = 'Settings';
   title.style.margin = '0';
-  // title.style.fontSize = '2rem';
-  // title.style.fontWeight = 'bold';
-  // title.style.color = 'hsl(240, 5%, 65%)';
+  title.style.fontSize =
+    window.innerWidth < BREAKPOINTS.MOBILE ? '1.25rem' : 'h2';
+  title.style.fontWeight = 'bold';
+  title.style.color = COLORS.TEXT_MAIN;
 
   leftSide.appendChild(backButton);
   leftSide.appendChild(title);

@@ -78,7 +78,6 @@ describe('Mobile Navigation Integration', () => {
     // Test updateMobileNavigation function with dashboard route
     updateMobileNavigation('dashboard');
 
-    const navItems = nav.querySelectorAll('.mobile-nav-item');
     const dashboardItem = nav.querySelector('[data-route="dashboard"]');
 
     // Dashboard route should highlight dashboard button

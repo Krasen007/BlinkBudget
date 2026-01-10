@@ -41,12 +41,12 @@ export const ReportsHeader = () => {
   backButton.style.flexShrink = '0';
   backButton.title = 'Back to Dashboard (Esc)';
 
-  const title = document.createElement('h1');
-  title.textContent = 'Reports & Insights';
+  const title = document.createElement('h2');
+  title.textContent = 'Charts and Reports';
   title.style.margin = '0';
   title.style.color = COLORS.TEXT_MAIN;
   title.style.fontSize =
-    window.innerWidth < BREAKPOINTS.MOBILE ? '1.25rem' : '1.5rem';
+    window.innerWidth < BREAKPOINTS.MOBILE ? '1.25rem' : 'h2';
   title.id = 'reports-title';
 
   leftSide.appendChild(backButton);

@@ -155,13 +155,14 @@ export const FinancialPlanningView = () => {
     backButton.addEventListener('click', () => Router.navigate('dashboard'));
 
     // Title
-    const title = document.createElement('h1');
+    const title = document.createElement('h2');
     title.id = 'financial-planning-title';
     title.textContent = 'Financial Planning';
     title.style.margin = '0';
-    // title.style.fontSize = '2rem';
-    // title.style.fontWeight = 'bold';
-    // title.style.color = COLORS.TEXT_MAIN;
+    title.style.fontSize =
+      window.innerWidth < BREAKPOINTS.MOBILE ? '1.25rem' : 'h2';
+    title.style.fontWeight = 'bold';
+    title.style.color = COLORS.TEXT_MAIN;
 
     leftSide.appendChild(backButton);
     leftSide.appendChild(title);
