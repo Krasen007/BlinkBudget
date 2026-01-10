@@ -40,7 +40,7 @@ const createPasswordResetModal = () => {
   const title = document.createElement('h3');
   title.textContent = 'Reset Password';
   Object.assign(title.style, {
-    margin: '0 0 ' + SPACING.MD + ' 0',
+    margin: `0 0 ${SPACING.MD} 0`,
     color: COLORS.TEXT_MAIN,
     fontSize: '1.5rem',
     fontWeight: 'bold',
@@ -48,9 +48,9 @@ const createPasswordResetModal = () => {
 
   const description = document.createElement('p');
   description.textContent =
-    'Enter your email address and we\'ll send you a link to reset your password.';
+    "Enter your email address and we'll send you a link to reset your password.";
   Object.assign(description.style, {
-    margin: '0 0 ' + SPACING.LG + ' 0',
+    margin: `0 0 ${SPACING.LG} 0`,
     color: COLORS.TEXT_MUTED,
     fontSize: FONT_SIZES.SM,
     lineHeight: '1.5',

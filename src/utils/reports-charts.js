@@ -107,16 +107,37 @@ export async function createCategoryBreakdownChart(
   title.style.margin = '0';
   title.style.color = COLORS.TEXT_MAIN;
 
-  // Chart type toggle (pie chart only)
-  const chartTypeToggle = document.createElement('div');
-  chartTypeToggle.style.display = 'flex';
-  chartTypeToggle.style.gap = SPACING.XS;
+  // Prepare chart data first
+  const categoryData = currentData.categoryBreakdown;
 
-  const pieBtn = createToggleButton('Pie', true);
-  chartTypeToggle.appendChild(pieBtn);
+  // Total amount display
+  const totalAmount = document.createElement('div');
+  totalAmount.style.display = 'flex';
+  totalAmount.style.flexDirection = 'column';
+  totalAmount.style.alignItems = 'flex-end';
+  totalAmount.style.textAlign = 'right';
+  
+  const totalLabel = document.createElement('span');
+  totalLabel.textContent = 'Total Spent';
+  totalLabel.style.fontSize = '0.875rem';
+  totalLabel.style.color = COLORS.TEXT_MUTED;
+  totalLabel.style.marginBottom = '2px';
+  
+  const totalValue = document.createElement('span');
+  const totalSpent = categoryData.categories.reduce((sum, cat) => sum + cat.amount, 0);
+  totalValue.textContent = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(totalSpent);
+  totalValue.style.fontSize = '1.25rem';
+  totalValue.style.fontWeight = 'bold';
+  totalValue.style.color = COLORS.PRIMARY;
+  
+  totalAmount.appendChild(totalLabel);
+  totalAmount.appendChild(totalValue);
 
   header.appendChild(title);
-  header.appendChild(chartTypeToggle);
+  header.appendChild(totalAmount);
   section.appendChild(header);
 
   // Chart container
@@ -152,9 +173,6 @@ export async function createCategoryBreakdownChart(
     `;
 
   section.appendChild(detailsContainer);
-
-  // Prepare chart data
-  const categoryData = currentData.categoryBreakdown;
 
   // Get consistent colors for all categories
   const categoryColors = getCategoryColors(
