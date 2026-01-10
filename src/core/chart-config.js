@@ -172,8 +172,10 @@ export const defaultChartOptions = {
           if (item.dataset.data && item.dataset.data.length > 1) {
             const total = item.dataset.data.reduce((sum, val) => sum + val, 0);
             // Handle both single values (pie/bar charts) and y values (line charts)
-            const value = item.parsed.y !== undefined ? item.parsed.y : item.parsed;
-            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+            const value =
+              item.parsed.y !== undefined ? item.parsed.y : item.parsed;
+            const percentage =
+              total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
             return `Percentage of total: ${percentage}%`;
           }
           return '';

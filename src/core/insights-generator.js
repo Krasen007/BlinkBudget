@@ -8,7 +8,7 @@ const InsightsGenerator = {
     for (const tx of transactions) {
       // Skip income transactions to prevent skewing the expense analysis
       if (tx.type === 'income') continue;
-      
+
       const cat = tx.category || 'Uncategorized';
       const amt =
         typeof tx.amount === 'number' ? tx.amount : Number(tx.amount) || 0;

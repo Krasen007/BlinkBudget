@@ -40,7 +40,8 @@ function createCategoryTooltipConfig(detailsContainer) {
         const value = dataPoint.data[index];
         const label = context.chart.data.labels[index];
         const total = dataPoint.data.reduce((sum, val) => sum + val, 0);
-        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+        const percentage =
+          total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
 
         const formattedValue = new Intl.NumberFormat('en-US', {
           style: 'currency',
@@ -65,7 +66,8 @@ function createCategoryTooltipConfig(detailsContainer) {
         const label = context.label || '';
         const value = context.parsed;
         const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
-        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+        const percentage =
+          total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
         const formattedValue = new Intl.NumberFormat('en-US', {
           style: 'currency',
           currency: 'USD',
@@ -116,15 +118,18 @@ export async function createCategoryBreakdownChart(
   totalAmount.style.flexDirection = 'column';
   totalAmount.style.alignItems = 'flex-end';
   totalAmount.style.textAlign = 'right';
-  
+
   const totalLabel = document.createElement('span');
   totalLabel.textContent = 'Total Spent';
   totalLabel.style.fontSize = '0.875rem';
   totalLabel.style.color = COLORS.TEXT_MUTED;
   totalLabel.style.marginBottom = '2px';
-  
+
   const totalValue = document.createElement('span');
-  const totalSpent = categoryData.categories.reduce((sum, cat) => sum + cat.amount, 0);
+  const totalSpent = categoryData.categories.reduce(
+    (sum, cat) => sum + cat.amount,
+    0
+  );
   totalValue.textContent = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -132,7 +137,7 @@ export async function createCategoryBreakdownChart(
   totalValue.style.fontSize = '1.25rem';
   totalValue.style.fontWeight = 'bold';
   totalValue.style.color = COLORS.PRIMARY;
-  
+
   totalAmount.appendChild(totalLabel);
   totalAmount.appendChild(totalValue);
 
@@ -397,24 +402,24 @@ export async function createCategoryTrendsChart(
 /**
  * Helper functions for chart creation
  */
-function createToggleButton(text, active = false) {
-  const button = document.createElement('button');
-  button.textContent = text;
-  button.style.padding = `${SPACING.XS} ${SPACING.SM}`;
-  button.style.border = `1px solid ${COLORS.BORDER}`;
-  button.style.borderRadius = 'var(--radius-sm)';
-  button.style.background = active ? COLORS.PRIMARY : 'transparent';
-  button.style.color = active ? 'white' : COLORS.TEXT_MAIN;
-  button.style.cursor = 'pointer';
-  button.style.fontSize = '0.875rem';
-  button.style.transition = 'all 0.2s ease';
+// function createToggleButton(text, active = false) {
+//   const button = document.createElement('button');
+//   button.textContent = text;
+//   button.style.padding = `${SPACING.XS} ${SPACING.SM}`;
+//   button.style.border = `1px solid ${COLORS.BORDER}`;
+//   button.style.borderRadius = 'var(--radius-sm)';
+//   button.style.background = active ? COLORS.PRIMARY : 'transparent';
+//   button.style.color = active ? 'white' : COLORS.TEXT_MAIN;
+//   button.style.cursor = 'pointer';
+//   button.style.fontSize = '0.875rem';
+//   button.style.transition = 'all 0.2s ease';
 
-  if (active) {
-    button.classList.add('active');
-  }
+//   if (active) {
+//     button.classList.add('active');
+//   }
 
-  return button;
-}
+//   return button;
+// }
 
 /**
  * Get consistent colors for categories across all charts and UI elements

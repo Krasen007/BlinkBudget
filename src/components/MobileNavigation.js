@@ -15,16 +15,23 @@ export const MobileNavigation = ({ currentRoute = 'dashboard' }) => {
   // Navigation items configuration
   const navItems = [
     {
+      id: 'dashboard',
+      label: 'Dashboard',
+      icon: '🏠',
+      route: 'dashboard',
+      ariaLabel: 'Go to Dashboard',
+    },
+    {
       id: 'reports',
       label: 'Charts',
-      icon: '📊',
+      icon: '🎯',
       route: 'reports',
       ariaLabel: 'Go to Charts and Reports',
     },
     {
       id: 'financial-planning',
       label: 'Planning',
-      icon: '🎯',
+      icon: '📊',
       route: 'financial-planning',
       ariaLabel: 'Go to Financial Planning',
     },
@@ -34,13 +41,6 @@ export const MobileNavigation = ({ currentRoute = 'dashboard' }) => {
       icon: '➕',
       route: 'add-expense',
       ariaLabel: 'Add new transaction',
-    },
-    {
-      id: 'settings',
-      label: 'Settings',
-      icon: '⚙️',
-      route: 'settings',
-      ariaLabel: 'Go to Settings',
     },
   ];
 
@@ -181,20 +181,14 @@ export const MobileBackButton = ({ onBack, label = 'Back' }) => {
 /**
  * Update navigation active state
  * Helper function to update the active navigation item
- * Handles the special case where dashboard route should highlight reports on mobile
  */
 export const updateMobileNavigation = currentRoute => {
   const nav = document.querySelector('.mobile-nav');
   if (!nav) return;
 
-  // On mobile, dashboard route should highlight the reports/charts button
-  // since we replaced Dashboard with Charts in mobile navigation
-  const routeToHighlight =
-    currentRoute === 'dashboard' ? 'reports' : currentRoute;
-
   nav.querySelectorAll('.mobile-nav-item').forEach(item => {
     const route = item.getAttribute('data-route');
-    if (route === routeToHighlight) {
+    if (route === currentRoute) {
       item.classList.add('active');
     } else {
       item.classList.remove('active');

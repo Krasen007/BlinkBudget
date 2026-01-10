@@ -42,20 +42,20 @@ describe('Mobile Navigation Integration', () => {
     document.body.appendChild(nav);
 
     const reportsItem = nav.querySelector('[data-route="reports"]');
-    const settingsItem = nav.querySelector('[data-route="settings"]');
+    const dashboardItem = nav.querySelector('[data-route="dashboard"]');
 
     // Initially reports should be active
     expect(reportsItem.classList.contains('active')).toBe(true);
-    expect(settingsItem.classList.contains('active')).toBe(false);
+    expect(dashboardItem.classList.contains('active')).toBe(false);
 
-    // Click settings
-    settingsItem.click();
+    // Click dashboard
+    dashboardItem.click();
 
     // Should update active states
     expect(reportsItem.classList.contains('active')).toBe(false);
-    expect(settingsItem.classList.contains('active')).toBe(true);
+    expect(dashboardItem.classList.contains('active')).toBe(true);
 
-    expect(Router.navigate).toHaveBeenCalledWith('settings');
+    expect(Router.navigate).toHaveBeenCalledWith('dashboard');
   });
 
   it('should provide proper accessibility attributes', () => {
@@ -71,17 +71,17 @@ describe('Mobile Navigation Integration', () => {
     });
   });
 
-  it('should handle dashboard route mapping to reports highlight', () => {
+  it('should handle dashboard route correctly', () => {
     const nav = MobileNavigation({ currentRoute: 'reports' });
     document.body.appendChild(nav);
 
-    // Test the updateMobileNavigation function with dashboard route
+    // Test updateMobileNavigation function with dashboard route
     updateMobileNavigation('dashboard');
 
     const navItems = nav.querySelectorAll('.mobile-nav-item');
-    const reportsItem = navItems[0]; // Should be highlighted when dashboard is active
+    const dashboardItem = nav.querySelector('[data-route="dashboard"]');
 
-    // Dashboard route should highlight the reports/charts button on mobile
-    expect(reportsItem.classList.contains('active')).toBe(true);
+    // Dashboard route should highlight dashboard button
+    expect(dashboardItem.classList.contains('active')).toBe(true);
   });
 });

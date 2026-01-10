@@ -62,14 +62,14 @@ describe('MobileNavigation', () => {
     const nav = MobileNavigation({ currentRoute: 'reports' });
     document.body.appendChild(nav);
 
-    // Update to settings
-    updateMobileNavigation('settings');
+    // Update to dashboard
+    updateMobileNavigation('dashboard');
 
     const reportsItem = nav.querySelector('[data-route="reports"]');
-    const settingsItem = nav.querySelector('[data-route="settings"]');
+    const dashboardItem = nav.querySelector('[data-route="dashboard"]');
 
     expect(reportsItem.classList.contains('active')).toBe(false);
-    expect(settingsItem.classList.contains('active')).toBe(true);
+    expect(dashboardItem.classList.contains('active')).toBe(true);
   });
 });
 
