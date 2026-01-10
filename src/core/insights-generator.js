@@ -1,11 +1,14 @@
 // InsightsGenerator: provides Top Movers and Timeline comparison utilities
 const InsightsGenerator = {
-  // transactions: array of {id, date, amount, category, account}
-  // Returns top N movers by absolute amount (descending).
+  // transactions: array of {id, date, amount, category, account, type}
+  // Returns top N movers by absolute amount (descending), excluding income transactions.
   topMovers(transactions, n = 5) {
     if (!Array.isArray(transactions)) return [];
     const byCategory = new Map();
     for (const tx of transactions) {
+      // Skip income transactions to prevent skewing the expense analysis
+      if (tx.type === 'income') continue;
+      
       const cat = tx.category || 'Uncategorized';
       const amt =
         typeof tx.amount === 'number' ? tx.amount : Number(tx.amount) || 0;
