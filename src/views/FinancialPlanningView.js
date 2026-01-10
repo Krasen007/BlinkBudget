@@ -159,9 +159,9 @@ export const FinancialPlanningView = () => {
     title.id = 'financial-planning-title';
     title.textContent = 'Financial Planning';
     title.style.margin = '0';
-    title.style.fontSize = '2rem';
-    title.style.fontWeight = 'bold';
-    title.style.color = COLORS.TEXT_MAIN;
+    // title.style.fontSize = '2rem';
+    // title.style.fontWeight = 'bold';
+    // title.style.color = COLORS.TEXT_MAIN;
 
     leftSide.appendChild(backButton);
     leftSide.appendChild(title);

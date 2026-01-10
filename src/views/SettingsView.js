@@ -11,7 +11,7 @@ export const SettingsView = () => {
   const container = document.createElement('div');
   container.className = 'view-settings view-container';
 
-  // Header - compact like DashboardView
+  // Header - similar to FinancialPlanningView with back button
   const header = document.createElement('div');
   header.style.marginBottom = SPACING.SM;
   header.style.flexShrink = '0';
@@ -21,10 +21,50 @@ export const SettingsView = () => {
   topRow.style.justifyContent = 'space-between';
   topRow.style.alignItems = 'center';
 
+  // Left side with back button and title
+  const leftSide = document.createElement('div');
+  leftSide.style.display = 'flex';
+  leftSide.style.alignItems = 'center';
+  leftSide.style.gap = SPACING.MD;
+
+  // Back button
+  const backButton = document.createElement('button');
+  backButton.innerHTML = '← Back';
+  backButton.className = 'btn btn-ghost settings-back-btn';
+  backButton.style.fontSize = '1rem';
+  backButton.style.padding = `${SPACING.SM} ${SPACING.MD}`;
+  backButton.style.border = `1px solid hsl(240, 5%, 20%)`;
+  backButton.style.borderRadius = 'var(--radius-md)';
+  backButton.style.background = 'hsl(240, 10%, 10%)';
+  backButton.style.color = 'hsl(240, 5%, 65%)';
+  backButton.style.cursor = 'pointer';
+  backButton.style.fontWeight = '500';
+  backButton.style.transition = 'all 0.2s ease';
+  backButton.title = 'Back to Dashboard';
+
+  // Hover effects
+  backButton.addEventListener('mouseenter', () => {
+    backButton.style.background = 'hsl(240, 10%, 15%)';
+    backButton.style.borderColor = 'hsl(250, 84%, 60%)';
+  });
+
+  backButton.addEventListener('mouseleave', () => {
+    backButton.style.background = 'hsl(240, 10%, 10%)';
+    backButton.style.borderColor = 'hsl(240, 5%, 20%)';
+  });
+
+  backButton.addEventListener('click', () => Router.navigate('dashboard'));
+
+  // Title
   const title = document.createElement('h2');
   title.textContent = 'Settings';
   title.style.margin = '0';
-  title.style.marginRight = SPACING.SM;
+  // title.style.fontSize = '2rem';
+  // title.style.fontWeight = 'bold';
+  // title.style.color = 'hsl(240, 5%, 65%)';
+
+  leftSide.appendChild(backButton);
+  leftSide.appendChild(title);
 
   // Save button in top right (same format as back button in AddView)
   const rightControls = document.createElement('div');
@@ -47,7 +87,7 @@ export const SettingsView = () => {
 
   rightControls.appendChild(saveBtn);
 
-  topRow.appendChild(title);
+  topRow.appendChild(leftSide);
   topRow.appendChild(rightControls);
   header.appendChild(topRow);
   container.appendChild(header);
