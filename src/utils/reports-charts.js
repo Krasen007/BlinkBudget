@@ -40,7 +40,7 @@ function createCategoryTooltipConfig(detailsContainer) {
         const value = dataPoint.data[index];
         const label = context.chart.data.labels[index];
         const total = dataPoint.data.reduce((sum, val) => sum + val, 0);
-        const percentage = ((value / total) * 100).toFixed(1);
+        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
 
         const formattedValue = new Intl.NumberFormat('en-US', {
           style: 'currency',
@@ -65,7 +65,7 @@ function createCategoryTooltipConfig(detailsContainer) {
         const label = context.label || '';
         const value = context.parsed;
         const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
-        const percentage = ((value / total) * 100).toFixed(1);
+        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
         const formattedValue = new Intl.NumberFormat('en-US', {
           style: 'currency',
           currency: 'USD',

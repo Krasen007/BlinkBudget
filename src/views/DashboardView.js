@@ -50,7 +50,7 @@ export const DashboardView = () => {
 
   // Charts Button (Desktop only - positioned left of settings)
   const chartsBtn = document.createElement('button');
-  chartsBtn.innerHTML = '📊';
+  chartsBtn.innerHTML = '🎯';
   chartsBtn.className = 'btn btn-ghost';
   chartsBtn.style.fontSize = '1.5rem';
   chartsBtn.style.padding = SPACING.XS;
@@ -61,7 +61,7 @@ export const DashboardView = () => {
 
   // Financial Planning Button (Desktop only - positioned left of charts)
   const planningBtn = document.createElement('button');
-  planningBtn.innerHTML = '🎯';
+  planningBtn.innerHTML = '📊';
   planningBtn.className = 'btn btn-ghost';
   planningBtn.style.fontSize = '1.5rem';
   planningBtn.style.padding = SPACING.XS;

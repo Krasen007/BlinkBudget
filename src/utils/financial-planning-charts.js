@@ -303,7 +303,7 @@ export async function createPortfolioCompositionChart(
             const value = dataPoint.data[index];
             const label = context.chart.data.labels[index];
             const total = dataPoint.data.reduce((sum, val) => sum + val, 0);
-            const percentage = ((value / total) * 100).toFixed(1);
+            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
 
             const formattedValue = new Intl.NumberFormat('en-US', {
               style: 'currency',
@@ -390,7 +390,7 @@ export async function createGoalProgressChart(
   // Prepare chart data - horizontal bar chart showing progress
   const goalNames = goals.map(goal => goal.name);
   const progressPercentages = goals.map(goal => {
-    const progress = (goal.currentSavings / goal.targetAmount) * 100;
+    const progress = goal.targetAmount > 0 ? (goal.currentSavings / goal.targetAmount) * 100 : 0;
     return Math.min(progress, 100); // Cap at 100%
   });
 
@@ -761,7 +761,7 @@ function createGoalDetails(goals) {
     const rightSide = document.createElement('div');
     rightSide.style.textAlign = 'right';
 
-    const progress = (goal.currentSavings / goal.targetAmount) * 100;
+    const progress = goal.targetAmount > 0 ? (goal.currentSavings / goal.targetAmount) * 100 : 0;
     const progressText = document.createElement('div');
     progressText.textContent = `${progress.toFixed(1)}%`;
     progressText.style.fontWeight = '600';
