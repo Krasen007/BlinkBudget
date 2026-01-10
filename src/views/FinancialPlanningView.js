@@ -354,7 +354,7 @@ export const FinancialPlanningView = () => {
     );
     section.appendChild(
       createUsageNote(
-        'At-a-glance health summary: shows current balance, monthly expense averages, savings rate and emergency fund advice. Use the quick actions to jump to Forecasts, Investments, Goals or run scenarios.'
+        'At-a-glance health summary: shows current balance, monthly expense averages, savings rate and emergency fund advice.'
       )
     );
 
