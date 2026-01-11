@@ -8,16 +8,6 @@
   min-height: var(--visual-viewport-height);
 }
 
-.view-reports .reports-header {
-  padding: var(--spacing-sm) 0;
-  margin-bottom: var(--spacing-md);
-}
-
-.view-reports .reports-header h1 {
-  font-size: 1.5rem;
-  line-height: 1.2;
-}
-
 /* Chart container mobile optimizations */
 .view-reports .chart-container {
   padding: var(--spacing-sm);
@@ -37,14 +27,7 @@
 
 /* Time period selector mobile styles */
 .view-reports .time-period-selector {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.view-reports .time-period-selector::-webkit-scrollbar {
-  display: none;
+  margin-bottom: var(--spacing-lg);
 }
 
 .view-reports .time-period-selector .period-buttons {
@@ -111,10 +94,6 @@
     padding: var(--spacing-xs);
   }
 
-  .view-reports .reports-header h1 {
-    font-size: 1.25rem;
-  }
-
   .view-reports .chart-container {
     padding: var(--spacing-xs);
     margin: 0 calc(-1 * var(--spacing-xs));
@@ -152,10 +131,6 @@
     min-height: var(--visual-viewport-height);
   }
 
-  .view-reports .reports-header {
-    margin-bottom: var(--spacing-sm);
-  }
-
   .view-reports .reports-content {
     gap: var(--spacing-md);
   }
@@ -186,10 +161,6 @@
 
 /* Short landscape (phones in landscape with small height) */
 @media (width <= 767px) and (orientation: landscape) and (height <= 500px) {
-  .view-reports .reports-header h1 {
-    font-size: 1.125rem;
-  }
-
   .view-reports .chart-container {
     padding: var(--spacing-xs);
   }
@@ -213,10 +184,6 @@
     padding: var(--spacing-md) var(--spacing-lg);
   }
 
-  .view-reports .reports-header h1 {
-    font-size: 1.75rem;
-  }
-
   .view-reports .chart-container {
     padding: var(--spacing-lg);
     margin: 0;
@@ -234,7 +201,7 @@
   }
 
   .view-reports .time-period-selector .period-buttons {
-    justify-content: center;
+    justify-content: flex-start;
     flex-wrap: wrap;
     gap: var(--spacing-sm);
   }
@@ -270,10 +237,6 @@
     padding: var(--spacing-lg) var(--spacing-xl);
     max-width: var(--container-max-width);
     margin: 0 auto;
-  }
-
-  .view-reports .reports-header h1 {
-    font-size: 2rem;
   }
 
   .view-reports .chart-container {

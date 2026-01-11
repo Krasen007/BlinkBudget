@@ -9,11 +9,6 @@
 }
 
 :root {
-  --reports-header-height: 80px;
-  --reports-time-selector-height: 40px;
-  --reports-content-offset: calc(
-    var(--reports-header-height) + var(--reports-time-selector-height)
-  );
   --tooltip-space: 100px;
   --tooltip-padding: 80px;
 }
@@ -37,40 +32,6 @@
   overflow: auto;
   gap: var(--spacing-lg);
   -webkit-overflow-scrolling: touch;
-}
-
-/* Reports Header */
-.reports-header {
-  position: relative;
-  z-index: 10;
-  background: linear-gradient(
-    135deg,
-    hsl(
-        var(--primary-hue),
-        var(--primary-sat),
-        calc(var(--primary-light) - 10%)
-      )
-      0%,
-    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light)) 100%
-  );
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
-  margin-bottom: var(--spacing-lg);
-  border: 1px solid
-    hsl(
-      var(--primary-hue),
-      var(--primary-sat),
-      calc(var(--primary-light) + 10%)
-    );
-  box-shadow: 0 4px 12px rgb(0, 0, 0, 0.15);
-}
-
-.reports-header h1 {
-  background: linear-gradient(135deg, #fff 0%, rgb(255, 255, 255, 0.9) 100%);
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 2px 4px rgb(0, 0, 0, 0.1);
 }
 
 /* Chart Container Styling - Match financial planning sections */
@@ -491,23 +452,13 @@
 
 /* Mobile optimizations */
 @media (width <= 768px) {
-  .reports-header {
+  .chart-container {
     padding: var(--spacing-md);
     margin-bottom: var(--spacing-md);
   }
 
-  .reports-header h1 {
-    font-size: var(--font-size-2xl);
-    line-height: var(--line-height-tight);
-  }
-
   .keyboard-shortcuts-info {
     display: none; /* Hide keyboard shortcuts on mobile */
-  }
-
-  .chart-container {
-    padding: var(--spacing-lg);
-    margin-bottom: var(--spacing-md);
   }
 
   .data-summary {
@@ -531,34 +482,54 @@
       var(--spacing-xl) + env(safe-area-inset-bottom, 0px)
     ) !important;
   }
+
+  /* Time period selector mobile adjustments */
+  .time-period-buttons {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xs);
+  }
+
+  .time-period-btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
+  }
 }
 
 /* Tablet optimizations */
 @media (width >= 769px) and (width <= 1023px) {
-  .reports-header h1 {
-    font-size: var(--font-size-3xl);
+  .chart-container {
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
   }
 
-  .data-summary {
+  /* Time period selector tablet adjustments */
+  .time-period-buttons {
     grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+  }
+
+  .time-period-btn {
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: var(--font-size-md);
   }
 }
 
 /* Desktop optimizations */
 @media (width >= 1024px) {
-  .reports-header {
+  .chart-container {
     padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
   }
 
-  .reports-header h1 {
-    font-size: var(--font-size-4xl);
+  /* Time period selector desktop adjustments */
+  .time-period-buttons {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-md);
   }
 
-  .chart-container:hover {
-    transform: translateY(-2px);
-    box-shadow:
-      0 8px 32px rgb(0, 0, 0, 0.2),
-      inset 0 1px 0 rgb(255, 255, 255, 0.1);
+  .time-period-btn {
+    padding: var(--spacing-md) var(--spacing-xl);
+    font-size: var(--font-size-md);
   }
 }
 

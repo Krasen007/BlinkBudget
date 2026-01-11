@@ -27,9 +27,7 @@ export const TimePeriodSelector = (options = {}) => {
   const container = document.createElement('div');
   container.className = `time-period-selector ${className}`;
   container.style.display = 'flex';
-  container.style.flexDirection = 'column';
-  container.style.gap = SPACING.MD;
-  container.style.marginBottom = SPACING.LG;
+  container.style.gap = SPACING.SM;
   container.style.flexShrink = '0';
 
   // State management
@@ -40,11 +38,11 @@ export const TimePeriodSelector = (options = {}) => {
   // Create main selector buttons container
   const buttonsContainer = document.createElement('div');
   buttonsContainer.className = 'time-period-buttons';
-  buttonsContainer.style.display = 'flex';
+  buttonsContainer.style.display = 'grid';
+  buttonsContainer.style.gridTemplateColumns =
+    'repeat(auto-fit, minmax(100px, 1fr))';
   buttonsContainer.style.gap = SPACING.SM;
-  buttonsContainer.style.flexWrap = 'wrap';
-  buttonsContainer.style.justifyContent =
-    window.innerWidth < BREAKPOINTS.MOBILE ? 'center' : 'flex-start';
+  buttonsContainer.style.justifyContent = 'flex-start';
 
   // Define available time periods
   const periods = [
@@ -85,21 +83,6 @@ export const TimePeriodSelector = (options = {}) => {
    * Create a period selection button
    */
   function createPeriodButton(period) {
-    const button = document.createElement('button');
-    button.textContent = period.label;
-    button.className = 'btn btn-outline time-period-btn';
-    button.dataset.period = period.key;
-    button.style.padding = `${SPACING.SM} ${SPACING.MD}`;
-    button.style.border = `1px solid ${COLORS.BORDER}`;
-    button.style.background = COLORS.SURFACE;
-    button.style.color = COLORS.TEXT_MAIN;
-    button.style.borderRadius = 'var(--radius-md)';
-    button.style.cursor = 'pointer';
-    button.style.transition = 'all 0.2s ease';
-    button.style.fontSize =
-      window.innerWidth < BREAKPOINTS.MOBILE ? FONT_SIZES.SM : FONT_SIZES.BASE;
-    button.style.whiteSpace = 'nowrap';
-
     // Map period types to button keys
     const typeToKeyMap = {
       daily: 'today',
@@ -112,9 +95,29 @@ export const TimePeriodSelector = (options = {}) => {
 
     // Set active state for initial period
     const initialKey = typeToKeyMap[initialPeriod.type] || 'month';
-    if (period.key === initialKey) {
-      setActiveButton(button);
-    }
+
+    const button = document.createElement('button');
+    button.textContent = period.label;
+    button.className = 'btn time-period-btn';
+    button.dataset.period = period.key;
+    button.style.display = 'flex';
+    button.style.alignItems = 'center';
+    button.style.justifyContent = 'center';
+    button.style.gap = SPACING.XS;
+    button.style.padding = `${SPACING.MD} ${SPACING.XL}`;
+    button.style.minHeight = 'var(--touch-target-min)';
+    button.style.minWidth = 'var(--touch-target-min)';
+    button.style.border = 'none';
+    button.style.borderRadius = 'var(--radius-md)';
+    button.style.background =
+      period.key === initialKey ? COLORS.PRIMARY : COLORS.SURFACE;
+    button.style.color = period.key === initialKey ? 'white' : COLORS.TEXT_MAIN;
+    button.style.cursor = 'pointer';
+    button.style.fontSize = 'var(--font-size-md)';
+    button.style.fontWeight = '500';
+    button.style.whiteSpace = 'nowrap';
+    button.style.transition = 'all 0.2s ease';
+    button.style.flex = '1 0 auto';
     button.addEventListener('click', () => {
       if (period.key === 'custom') {
         handleCustomPeriodSelection();
@@ -126,15 +129,13 @@ export const TimePeriodSelector = (options = {}) => {
     // Add hover effects
     button.addEventListener('mouseenter', () => {
       if (!button.classList.contains('active')) {
-        button.style.borderColor = COLORS.PRIMARY;
-        button.style.transform = 'translateY(-1px)';
+        button.style.background = COLORS.SURFACE_HOVER;
       }
     });
 
     button.addEventListener('mouseleave', () => {
       if (!button.classList.contains('active')) {
-        button.style.borderColor = COLORS.BORDER;
-        button.style.transform = 'translateY(0)';
+        button.style.background = COLORS.SURFACE;
       }
     });
 
@@ -542,15 +543,12 @@ export const TimePeriodSelector = (options = {}) => {
     periodButtons.forEach(button => {
       button.style.background = COLORS.SURFACE;
       button.style.color = COLORS.TEXT_MAIN;
-      button.style.borderColor = COLORS.BORDER;
-      button.style.transform = 'translateY(0)';
       button.classList.remove('active');
     });
 
     // Set active button
     activeButton.style.background = COLORS.PRIMARY;
     activeButton.style.color = 'white';
-    activeButton.style.borderColor = COLORS.PRIMARY;
     activeButton.classList.add('active');
   }
 

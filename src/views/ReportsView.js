@@ -57,12 +57,10 @@ import {
 import { CategorySelector } from '../components/CategorySelector.js';
 import { showCategoryDetails } from '../components/CategoryDetails.js';
 import { InsightsSection } from '../components/InsightsSection.js';
-import { ReportsHeader } from '../components/ReportsHeader.js';
-import { FloatingBackButton } from '../components/FloatingBackButton.js';
 
 export const ReportsView = () => {
   const container = document.createElement('div');
-  container.className = 'view-reports view-container';
+  container.className = 'view-reports view-container view-fixed';
 
   // Global error boundary
   const handleGlobalError = (error, context = 'Unknown') => {
@@ -135,32 +133,20 @@ export const ReportsView = () => {
   let isLoading = false;
   let currentData = null;
   const activeCharts = new Map();
-  let timePeriodSelectorComponent = null;
+  const timePeriodSelectorComponent = null;
   const categoryColorMap = new Map();
 
-  // Create header
-  const header = ReportsHeader();
-  container.appendChild(header);
-
-  // Floating back button for mobile
-  const floatingBackButtonObj = FloatingBackButton();
-  container.appendChild(floatingBackButtonObj.element);
-
-  // Time period selector
-  timePeriodSelectorComponent = TimePeriodSelector({
-    initialPeriod: currentTimePeriod,
-    onChange: handleTimePeriodChange,
-    showCustomRange: true,
-    className: 'reports-time-selector',
-  });
-  container.appendChild(timePeriodSelectorComponent);
-
-  // Main content area
+  // Main content area - match FinancialPlanningView structure
   const content = document.createElement('main');
   content.className = 'reports-content';
   content.id = 'reports-main-content';
   content.setAttribute('role', 'main');
   content.setAttribute('aria-labelledby', 'reports-title');
+  content.style.flex = '1';
+  content.style.display = 'flex';
+  content.style.flexDirection = 'column';
+  content.style.minHeight = '0';
+  content.style.overflow = 'auto';
   content.style.gap = SPACING.LG;
   container.appendChild(content);
 
@@ -168,6 +154,112 @@ export const ReportsView = () => {
   const loadingState = createLoadingState();
   const emptyState = createEmptyState();
   const errorState = createErrorState();
+
+  /**
+   * Create header with title, back button, and time period selector - match DashboardView
+   */
+  function createHeader() {
+    const headerContainer = document.createElement('div');
+    headerContainer.className = 'reports-header-container';
+    headerContainer.style.position = 'sticky';
+    headerContainer.style.top = '0';
+    headerContainer.style.background = COLORS.BACKGROUND;
+    headerContainer.style.zIndex = '10';
+    headerContainer.style.padding = `${SPACING.SM} 0`;
+    headerContainer.style.marginBottom = SPACING.MD;
+    headerContainer.style.flexShrink = '0';
+
+    // Main header with back button and title
+    const header = document.createElement('header');
+    header.className = 'reports-header';
+    header.style.display = 'flex';
+    header.style.justifyContent = 'space-between';
+    header.style.alignItems = 'center';
+    header.style.marginBottom = SPACING.SM;
+
+    // Left side with back button and title
+    const leftSide = document.createElement('div');
+    leftSide.style.display = 'flex';
+    leftSide.style.alignItems = 'center';
+    leftSide.style.gap = SPACING.MD;
+
+    // Back button (always visible)
+    const backButton = document.createElement('button');
+    backButton.innerHTML = '← Back';
+    backButton.className = 'btn btn-ghost reports-back-btn';
+    backButton.style.fontSize = '1rem';
+    backButton.style.padding = `${SPACING.SM} ${SPACING.MD}`;
+    backButton.style.border = `1px solid ${COLORS.BORDER}`;
+    backButton.style.borderRadius = 'var(--radius-md)';
+    backButton.style.background = COLORS.SURFACE;
+    backButton.style.color = COLORS.TEXT_MAIN;
+    backButton.style.cursor = 'pointer';
+    backButton.style.fontWeight = '500';
+    backButton.style.transition = 'all 0.2s ease';
+    backButton.title = 'Back to Dashboard';
+
+    // Hover effects
+    backButton.addEventListener('mouseenter', () => {
+      backButton.style.background = COLORS.SURFACE_HOVER;
+      backButton.style.borderColor = COLORS.PRIMARY;
+    });
+
+    backButton.addEventListener('mouseleave', () => {
+      backButton.style.background = COLORS.SURFACE;
+      backButton.style.borderColor = COLORS.BORDER;
+    });
+
+    backButton.addEventListener('click', () => Router.navigate('dashboard'));
+
+    // Title
+    const title = document.createElement('h2');
+    title.id = 'reports-title';
+    title.textContent = 'Charts and Reports';
+    title.style.margin = '0';
+    title.style.fontSize =
+      window.innerWidth < BREAKPOINTS.MOBILE ? '1.25rem' : 'h2';
+    title.style.fontWeight = 'bold';
+    title.style.color = COLORS.TEXT_MAIN;
+
+    leftSide.appendChild(backButton);
+    leftSide.appendChild(title);
+
+    // Right side: add keyboard shortcuts info
+    const rightSide = document.createElement('div');
+    rightSide.style.display = 'flex';
+    rightSide.style.alignItems = 'center';
+    rightSide.style.gap = SPACING.SM;
+
+    if (window.innerWidth >= BREAKPOINTS.MOBILE) {
+      const shortcutsInfo = document.createElement('div');
+      shortcutsInfo.className = 'keyboard-shortcuts-info';
+      shortcutsInfo.style.fontSize = '0.75rem';
+      shortcutsInfo.style.color = COLORS.TEXT_MUTED;
+      shortcutsInfo.style.textAlign = 'right';
+      shortcutsInfo.style.lineHeight = '1.2';
+      shortcutsInfo.innerHTML = `
+        <div>Press <kbd style="background: ${COLORS.SURFACE}; padding: 2px 4px; border-radius: 3px; font-size: 0.7rem;">Esc</kbd> to go back</div>
+        <div>Press <kbd style="background: ${COLORS.SURFACE}; padding: 2px 4px; border-radius: 3px; font-size: 0.7rem;">Ctrl+R</kbd> to refresh</div>
+      `;
+      rightSide.appendChild(shortcutsInfo);
+    }
+
+    header.appendChild(leftSide);
+    header.appendChild(rightSide);
+
+    // Time period selector
+    const timePeriodSelectorComponent = TimePeriodSelector({
+      initialPeriod: currentTimePeriod,
+      onChange: handleTimePeriodChange,
+      showCustomRange: true,
+      className: 'reports-time-selector',
+    });
+
+    headerContainer.appendChild(header);
+    headerContainer.appendChild(timePeriodSelectorComponent);
+
+    return headerContainer;
+  }
 
   /**
    * Handle time period changes
@@ -222,6 +314,12 @@ export const ReportsView = () => {
 
     try {
       isLoading = true;
+
+      // Add header (which now includes time period selector) to content
+      content.innerHTML = '';
+      const header = createHeader();
+      content.appendChild(header);
+
       showLoadingState();
 
       const startTime = Date.now();
@@ -433,7 +531,14 @@ export const ReportsView = () => {
    */
   async function renderReports() {
     try {
+      // Clear content but preserve header container (which includes time period selector)
+      const headerContainer = content.querySelector(
+        '.reports-header-container'
+      );
       content.innerHTML = '';
+
+      // Re-add header container
+      if (headerContainer) content.appendChild(headerContainer);
 
       cleanupCharts();
 
@@ -443,7 +548,7 @@ export const ReportsView = () => {
           'No data available to display reports.',
           () => loadReportData()
         );
-        if (!container.contains(errorState)) container.appendChild(errorState);
+        if (!content.contains(errorState)) content.appendChild(errorState);
         errorState.style.display = 'flex';
         return;
       }
@@ -455,7 +560,7 @@ export const ReportsView = () => {
           currentTimePeriod,
           formatTimePeriod
         );
-        if (!container.contains(emptyState)) container.appendChild(emptyState);
+        if (!content.contains(emptyState)) content.appendChild(emptyState);
         emptyState.style.display = 'flex';
         return;
       }
@@ -499,7 +604,7 @@ export const ReportsView = () => {
         'Unable to display reports. Please try refreshing the page.',
         () => loadReportData()
       );
-      if (!container.contains(errorState)) container.appendChild(errorState);
+      if (!content.contains(errorState)) content.appendChild(errorState);
       errorState.style.display = 'flex';
     }
   }
@@ -758,7 +863,7 @@ export const ReportsView = () => {
     const isLandscape = window.innerHeight < window.innerWidth;
     const isShortLandscape = isLandscape && window.innerHeight < 500;
 
-    const title = header.querySelector('h1');
+    const title = content.querySelector('h2');
     if (title) {
       if (isMobile) {
         title.style.fontSize = isShortLandscape ? '1.125rem' : '1.5rem';
@@ -981,10 +1086,6 @@ export const ReportsView = () => {
 
     window.onerror = originalOnError;
     window.onunhandledrejection = originalOnUnhandledRejection;
-
-    if (floatingBackButtonObj) {
-      floatingBackButtonObj.cleanup();
-    }
   };
 
   // Expose useful methods
