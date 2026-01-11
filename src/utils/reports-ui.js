@@ -179,13 +179,14 @@ export function showEmptyState(
   // Add transaction button
   const addButton = document.createElement('button');
   addButton.className = 'btn btn-primary';
-  addButton.style.padding = `${SPACING.MD} ${SPACING.LG}`;
+  addButton.style.padding = `${SPACING.MD} ${SPACING.XL}`;
   addButton.style.background = COLORS.PRIMARY;
   addButton.style.color = 'white';
   addButton.style.border = 'none';
   addButton.style.borderRadius = 'var(--radius-md)';
   addButton.style.cursor = 'pointer';
-  addButton.style.fontSize = '1rem';
+  addButton.style.fontSize = 'var(--font-size-md)';
+  addButton.style.fontWeight = '500';
   addButton.style.marginTop = SPACING.MD;
 
   if (scenario === 'no-transactions') {
@@ -288,13 +289,14 @@ export function showErrorState(errorState, customMessage, onRetry) {
   const retryButton = document.createElement('button');
   retryButton.textContent = 'Try Again';
   retryButton.className = 'btn btn-outline';
-  retryButton.style.padding = `${SPACING.MD} ${SPACING.LG}`;
+  retryButton.style.padding = `${SPACING.MD} ${SPACING.XL}`;
   retryButton.style.background = 'transparent';
   retryButton.style.color = COLORS.PRIMARY;
   retryButton.style.border = `1px solid ${COLORS.PRIMARY}`;
   retryButton.style.borderRadius = 'var(--radius-md)';
   retryButton.style.cursor = 'pointer';
-  retryButton.style.fontSize = '1rem';
+  retryButton.style.fontSize = 'var(--font-size-md)';
+  retryButton.style.fontWeight = '500';
   retryButton.addEventListener('click', () => {
     if (onRetry) onRetry();
   });
@@ -303,13 +305,14 @@ export function showErrorState(errorState, customMessage, onRetry) {
   const dashboardButton = document.createElement('button');
   dashboardButton.textContent = 'Back to Dashboard';
   dashboardButton.className = 'btn btn-ghost';
-  dashboardButton.style.padding = `${SPACING.MD} ${SPACING.LG}`;
+  dashboardButton.style.padding = `${SPACING.MD} ${SPACING.XL}`;
   dashboardButton.style.background = 'transparent';
   dashboardButton.style.color = COLORS.TEXT_MUTED;
   dashboardButton.style.border = 'none';
   dashboardButton.style.borderRadius = 'var(--radius-md)';
   dashboardButton.style.cursor = 'pointer';
-  dashboardButton.style.fontSize = '1rem';
+  dashboardButton.style.fontSize = 'var(--font-size-md)';
+  dashboardButton.style.fontWeight = '500';
   dashboardButton.addEventListener('click', () => Router.navigate('dashboard'));
 
   buttonContainer.appendChild(retryButton);

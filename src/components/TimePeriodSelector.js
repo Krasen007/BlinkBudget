@@ -27,7 +27,9 @@ export const TimePeriodSelector = (options = {}) => {
   const container = document.createElement('div');
   container.className = `time-period-selector ${className}`;
   container.style.display = 'flex';
-  container.style.gap = SPACING.SM;
+  container.style.flexDirection = 'column';
+  container.style.gap = SPACING.XS;
+  container.style.width = '100%';
   container.style.flexShrink = '0';
 
   // State management
@@ -39,10 +41,9 @@ export const TimePeriodSelector = (options = {}) => {
   const buttonsContainer = document.createElement('div');
   buttonsContainer.className = 'time-period-buttons';
   buttonsContainer.style.display = 'grid';
-  buttonsContainer.style.gridTemplateColumns =
-    'repeat(auto-fit, minmax(100px, 1fr))';
+  buttonsContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
   buttonsContainer.style.gap = SPACING.SM;
-  buttonsContainer.style.justifyContent = 'flex-start';
+  buttonsContainer.style.width = '100%';
 
   // Define available time periods
   const periods = [
@@ -104,9 +105,9 @@ export const TimePeriodSelector = (options = {}) => {
     button.style.alignItems = 'center';
     button.style.justifyContent = 'center';
     button.style.gap = SPACING.XS;
-    button.style.padding = `${SPACING.MD} ${SPACING.XL}`;
-    button.style.minHeight = 'var(--touch-target-min)';
-    button.style.minWidth = 'var(--touch-target-min)';
+    button.style.padding = `${SPACING.MD} ${SPACING.MD}`;
+    button.style.minHeight = '44px'; // More balanced for 2-row grid
+    button.style.minWidth = '0'; // Allow shrinking in grid
     button.style.border = 'none';
     button.style.borderRadius = 'var(--radius-md)';
     button.style.background =
@@ -601,11 +602,13 @@ export const TimePeriodSelector = (options = {}) => {
     const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
 
     // Update button container layout
-    buttonsContainer.style.justifyContent = isMobile ? 'center' : 'flex-start';
+    buttonsContainer.style.gridTemplateColumns = isMobile 
+      ? 'repeat(3, 1fr)' 
+      : 'repeat(auto-fit, minmax(120px, 1fr))';
 
-    // Update button font sizes
+    // Update button font sizes to match FinancialPlanningView
     periodButtons.forEach(button => {
-      button.style.fontSize = isMobile ? FONT_SIZES.SM : FONT_SIZES.BASE;
+      button.style.fontSize = 'var(--font-size-md)';
     });
   }
 

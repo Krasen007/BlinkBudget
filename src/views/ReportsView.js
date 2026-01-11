@@ -61,8 +61,9 @@ import { InsightsSection } from '../components/InsightsSection.js';
 export const ReportsView = () => {
   const container = document.createElement('div');
   container.className = 'view-reports view-container view-fixed';
-
-  // Global error boundary
+  container.style.display = 'flex';
+  container.style.flexDirection = 'column';
+  // ... remaining state logic ...
   const handleGlobalError = (error, context = 'Unknown') => {
     console.error(`[ReportsView] Global error in ${context}:`, error);
     showErrorState(
@@ -133,7 +134,7 @@ export const ReportsView = () => {
   let isLoading = false;
   let currentData = null;
   const activeCharts = new Map();
-  const timePeriodSelectorComponent = null;
+  let timePeriodSelectorComponent = null;
   const categoryColorMap = new Map();
 
   // Main content area - match FinancialPlanningView structure
@@ -146,9 +147,9 @@ export const ReportsView = () => {
   content.style.display = 'flex';
   content.style.flexDirection = 'column';
   content.style.minHeight = '0';
-  content.style.overflow = 'auto';
+  content.style.overflowY = 'auto'; // Vertical scroll for content only
   content.style.gap = SPACING.LG;
-  container.appendChild(content);
+  content.style.padding = SPACING.MD;
 
   // State components
   const loadingState = createLoadingState();
@@ -156,26 +157,18 @@ export const ReportsView = () => {
   const errorState = createErrorState();
 
   /**
-   * Create header with title, back button, and time period selector - match DashboardView
+   * Create header with title and back button - match FinancialPlanningView
    */
   function createHeader() {
-    const headerContainer = document.createElement('div');
-    headerContainer.className = 'reports-header-container';
-    headerContainer.style.position = 'sticky';
-    headerContainer.style.top = '0';
-    headerContainer.style.background = COLORS.BACKGROUND;
-    headerContainer.style.zIndex = '10';
-    headerContainer.style.padding = `${SPACING.SM} 0`;
-    headerContainer.style.marginBottom = SPACING.MD;
-    headerContainer.style.flexShrink = '0';
-
     // Main header with back button and title
     const header = document.createElement('header');
     header.className = 'reports-header';
     header.style.display = 'flex';
     header.style.justifyContent = 'space-between';
     header.style.alignItems = 'center';
-    header.style.marginBottom = SPACING.SM;
+    header.style.marginBottom = SPACING.MD;
+    header.style.flexShrink = '0';
+    header.style.padding = `${SPACING.XS} 0`;
 
     // Left side with back button and title
     const leftSide = document.createElement('div');
@@ -224,7 +217,7 @@ export const ReportsView = () => {
     leftSide.appendChild(backButton);
     leftSide.appendChild(title);
 
-    // Right side: add keyboard shortcuts info
+    // Right side: keyboard shortcuts info
     const rightSide = document.createElement('div');
     rightSide.style.display = 'flex';
     rightSide.style.alignItems = 'center';
@@ -247,13 +240,25 @@ export const ReportsView = () => {
     header.appendChild(leftSide);
     header.appendChild(rightSide);
 
-    // Time period selector
-    const timePeriodSelectorComponent = TimePeriodSelector({
+    // Time period selector below header
+    timePeriodSelectorComponent = TimePeriodSelector({
       initialPeriod: currentTimePeriod,
       onChange: handleTimePeriodChange,
       showCustomRange: true,
       className: 'reports-time-selector',
     });
+
+    // Create header container that includes both header and time period selector
+    const headerContainer = document.createElement('div');
+    headerContainer.className = 'reports-header-container';
+    headerContainer.style.background = COLORS.BACKGROUND;
+    headerContainer.style.zIndex = '10';
+    headerContainer.style.display = 'flex';
+    headerContainer.style.flexDirection = 'column';
+    headerContainer.style.gap = SPACING.SM;
+    headerContainer.style.padding = `${SPACING.SM} ${SPACING.MD}`;
+    headerContainer.style.borderBottom = `1px solid ${COLORS.BORDER}`;
+    headerContainer.style.flexShrink = '0';
 
     headerContainer.appendChild(header);
     headerContainer.appendChild(timePeriodSelectorComponent);
@@ -289,13 +294,7 @@ export const ReportsView = () => {
     chartContainer.className = 'chart-container';
     chartContainer.setAttribute('role', 'region');
     chartContainer.setAttribute('aria-labelledby', 'chart-section-title');
-    chartContainer.style.display = 'flex';
-    chartContainer.style.flexDirection = 'column';
-    chartContainer.style.gap = SPACING.LG;
-    chartContainer.style.padding = SPACING.MD;
-    chartContainer.style.background = COLORS.SURFACE;
-    chartContainer.style.borderRadius = 'var(--radius-lg)';
-    chartContainer.style.border = `1px solid ${COLORS.BORDER}`;
+    chartContainer.style.width = '100%';
 
     const sectionTitle = document.createElement('h2');
     sectionTitle.id = 'chart-section-title';
@@ -315,10 +314,11 @@ export const ReportsView = () => {
     try {
       isLoading = true;
 
-      // Add header (which now includes time period selector) to content
-      content.innerHTML = '';
+      // Add header (which now includes time period selector) to container (outside scrollable content)
+      container.innerHTML = '';
       const header = createHeader();
-      content.appendChild(header);
+      container.appendChild(header);
+      container.appendChild(content);
 
       showLoadingState();
 
@@ -531,14 +531,8 @@ export const ReportsView = () => {
    */
   async function renderReports() {
     try {
-      // Clear content but preserve header container (which includes time period selector)
-      const headerContainer = content.querySelector(
-        '.reports-header-container'
-      );
+      // Clear content
       content.innerHTML = '';
-
-      // Re-add header container
-      if (headerContainer) content.appendChild(headerContainer);
 
       cleanupCharts();
 
@@ -866,7 +860,7 @@ export const ReportsView = () => {
     const title = content.querySelector('h2');
     if (title) {
       if (isMobile) {
-        title.style.fontSize = isShortLandscape ? '1.125rem' : '1.5rem';
+        title.style.fontSize = '1.5rem';
       } else if (isTablet) {
         title.style.fontSize = '1.75rem';
       } else {
@@ -875,17 +869,55 @@ export const ReportsView = () => {
     }
 
     if (isMobile) {
-      container.style.padding = isShortLandscape
-        ? `${SPACING.XS} ${SPACING.SM}`
-        : `${SPACING.SM} ${SPACING.SM}`;
+      container.style.padding = '0'; // Header and content handle their own padding
     } else if (isTablet) {
-      container.style.padding = `${SPACING.MD} ${SPACING.LG}`;
+      container.style.padding = '0';
     } else {
-      container.style.padding = `${SPACING.LG} ${SPACING.XL}`;
+      container.style.padding = '0';
+    }
+
+    const headerContainer = container.querySelector('.reports-header-container');
+    if (headerContainer) {
+      if (isMobile) {
+        headerContainer.style.padding = isShortLandscape
+          ? `${SPACING.XS} ${SPACING.SM}`
+          : `${SPACING.SM} ${SPACING.SM}`;
+      } else if (isTablet) {
+        headerContainer.style.padding = `${SPACING.MD} ${SPACING.LG}`;
+      } else {
+        headerContainer.style.padding = `${SPACING.LG} ${SPACING.XL}`;
+      }
     }
 
     if (content) {
-      content.style.gap = isMobile ? SPACING.MD : SPACING.LG;
+      content.style.maxWidth = '100%';
+      content.style.boxSizing = 'border-box';
+      if (isMobile) {
+        content.style.padding = isShortLandscape
+          ? `${SPACING.XS} 0`
+          : `${SPACING.SM} 0`;
+        content.style.gap = SPACING.MD;
+      } else if (isTablet) {
+        content.style.padding = `${SPACING.MD} 0`;
+        content.style.gap = SPACING.LG;
+      } else {
+        content.style.padding = `${SPACING.LG} 0`;
+        content.style.gap = SPACING.LG;
+      }
+
+      // Sync chart-container horizontal padding with header
+      const chartContainers = content.querySelectorAll('.chart-container');
+      chartContainers.forEach(cc => {
+        if (isMobile) {
+          cc.style.padding = isShortLandscape
+            ? `${SPACING.XS} ${SPACING.SM}`
+            : `${SPACING.SM} ${SPACING.SM}`;
+        } else if (isTablet) {
+          cc.style.padding = `${SPACING.MD} ${SPACING.LG}`;
+        } else {
+          cc.style.padding = `${SPACING.MD} ${SPACING.XL}`;
+        }
+      });
     }
 
     activeCharts.forEach(chart => {
