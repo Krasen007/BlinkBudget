@@ -25,6 +25,7 @@ export const AccountService = {
         type: DEFAULTS.ACCOUNT_TYPE,
         isDefault: true,
         timestamp: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
       localStorage.setItem(ACCOUNTS_KEY, JSON.stringify([defaultAccount]));
       return [defaultAccount];
@@ -63,8 +64,13 @@ export const AccountService = {
     const index = accounts.findIndex(a => a.id === account.id);
 
     if (index !== -1) {
-      accounts[index] = { ...accounts[index], ...account };
+      accounts[index] = {
+        ...accounts[index],
+        ...account,
+        updatedAt: new Date().toISOString()
+      };
     } else {
+      account.updatedAt = new Date().toISOString();
       accounts.push(account);
     }
 

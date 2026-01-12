@@ -1,6 +1,6 @@
 # BlinkBudget - Fast Expense Tracking
 
-![Icon](public/favicon.png){width=256 height=256}
+<img src="public/favicon.png" alt="Icon" width="256"/>
 
 **Track your expenses in 3 clicks max.** BlinkBudget transforms expense tracking into a swift, almost unconscious habit with beautiful, actionable insights for smarter financial decisions.
 
@@ -8,11 +8,12 @@
 
 ### Desktop View
 
-![Desktop Screenshot](public/screenshot-desktop.png)
+<img src="public/screenshot-desktop.png" alt="Desktop Screenshot" width="512"/>
+
 
 ### Mobile View
 
-![Mobile Screenshot](public/screenshot-mobile.png)
+<img src="public/screenshot-mobile.png" alt="Mobile Screenshot"/>
 
 ## Key Features
 

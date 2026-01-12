@@ -320,7 +320,7 @@ export const SyncService = {
       const timeDiff = Math.abs(localTs - cloudTs);
       const localJson = JSON.stringify(localItem);
       const cloudJson = JSON.stringify(cloudItem);
-      if (timeDiff <= 1000 && localJson !== cloudJson) {
+      if (timeDiff <= 100 && localJson !== cloudJson) {
         console.log(
           `[Sync] Detected near-simultaneous edit for id=${id} on ${key}`
         );

@@ -55,6 +55,7 @@ export const TransactionService = {
     const newTransaction = {
       id: generateId(),
       timestamp: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       userId: AuthService.getUserId(),
       ...transaction,
     };
@@ -97,7 +98,11 @@ export const TransactionService = {
     const index = transactions.findIndex(t => t.id === id);
     if (index === -1) return null;
 
-    transactions[index] = { ...transactions[index], ...updates };
+    transactions[index] = {
+      ...transactions[index],
+      ...updates,
+      updatedAt: new Date().toISOString()
+    };
     this._persist(transactions);
     return transactions[index];
   },
