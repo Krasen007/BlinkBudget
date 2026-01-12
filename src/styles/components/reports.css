@@ -34,33 +34,23 @@
   -webkit-overflow-scrolling: touch;
 }
 
-/* Chart Container Styling - Match financial planning sections */
-.chart-container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
-}
-
 /* Charts Section - Match financial planning sections */
 .reports-view-container .charts-section {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-sm);
+  padding: 0;
 }
 
 /* Chart Section Base Styles - Match financial planning sections */
 .reports-view-container .chart-section {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-sm);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
+  padding: 0;
 }
 
 /* Specific styling for different chart sections */
@@ -69,26 +59,11 @@
 }
 
 .chart-section:not(:last-child) {
-  margin-bottom: calc(var(--spacing-xl) * 1.5) !important;
-}
-
-.chart-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light)) 50%,
-    transparent 100%
-  );
+  margin-bottom: var(--spacing-md) !important;
 }
 
 /* Chart Canvas Styling */
-.chart-container canvas {
+.charts-section canvas {
   border-radius: var(--radius-md);
   transition: var(--transition-normal);
   /* Ensure canvas fits properly in container */
@@ -116,35 +91,13 @@
   margin-bottom: 10px !important;
 }
 
-/* Chart container should contain tooltips */
-.chart-container {
-  position: relative !important;
-  /* Add bottom padding to accommodate tooltips */
-  padding-bottom: 80px !important;
-}
-
-/* Income expense chart container needs extra space for tooltips */
-.reports-view-container .income-expense-section .chart-container,
-.reports-view-container .income-expense-container .chart-container {
-  padding-bottom: var(--tooltip-space);
-  margin-bottom: 20px;
-}
-
-/* Specific styling for income expense chart */
-#income-expense-chart {
-  width: 100% !important;
-  height: 100% !important;
-  max-width: 100% !important;
-  max-height: 100% !important;
-  object-fit: contain !important;
-}
-
-.chart-container canvas:hover {
+/* Chart canvas should be direct child of charts-section */
+.charts-section canvas:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgb(0, 0, 0, 0.2);
 }
 
-.chart-container canvas:focus {
+.charts-section canvas:focus {
   outline: 3px solid
     hsl(var(--primary-hue), var(--primary-sat), var(--primary-light));
   outline-offset: 4px;
@@ -187,13 +140,13 @@
 }
 
 /* Chart Legend Enhancements */
-.chart-container .chartjs-legend {
-  margin-top: var(--spacing-lg);
-  padding-top: var(--spacing-lg);
+.charts-section .chartjs-legend {
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
   border-top: 1px solid var(--color-border);
 }
 
-.chart-container .chartjs-legend ul {
+.charts-section .chartjs-legend ul {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -203,7 +156,7 @@
   list-style: none;
 }
 
-.chart-container .chartjs-legend li {
+.charts-section .chartjs-legend li {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
@@ -214,12 +167,12 @@
   cursor: pointer;
 }
 
-.chart-container .chartjs-legend li:hover {
+.charts-section .chartjs-legend li:hover {
   background: rgb(255, 255, 255, 0.1);
   transform: translateY(-1px);
 }
 
-.chart-container .chartjs-legend li span {
+.charts-section .chartjs-legend li span {
   width: 12px;
   height: 12px;
   border-radius: 50%;
@@ -452,9 +405,9 @@
 
 /* Mobile optimizations */
 @media (width <= 768px) {
-  .chart-container {
+  .charts-section {
     padding: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
   }
 
   .keyboard-shortcuts-info {
@@ -485,40 +438,45 @@
 
   /* Time period selector mobile adjustments */
   .time-period-buttons {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-xs);
   }
 
   .time-period-btn {
     padding: var(--spacing-sm) var(--spacing-md);
     font-size: var(--font-size-sm);
+    white-space: normal;
+    text-align: center;
+    line-height: 1.2;
   }
 }
 
 /* Tablet optimizations */
 @media (width >= 769px) and (width <= 1023px) {
-  .chart-container {
+  .charts-section {
     padding: var(--spacing-xl);
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
   }
 
   /* Time period selector tablet adjustments */
   .time-period-buttons {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: var(--spacing-sm);
   }
 
   .time-period-btn {
     padding: var(--spacing-md) var(--spacing-lg);
     font-size: var(--font-size-md);
+    white-space: nowrap;
+    line-height: normal;
   }
 }
 
 /* Desktop optimizations */
 @media (width >= 1024px) {
-  .chart-container {
+  .charts-section {
     padding: var(--spacing-xl);
-    margin-bottom: var(--spacing-xl);
+    margin-bottom: var(--spacing-md);
   }
 
   /* Time period selector desktop adjustments */
@@ -530,12 +488,14 @@
   .time-period-btn {
     padding: var(--spacing-md) var(--spacing-xl);
     font-size: var(--font-size-md);
+    white-space: nowrap;
+    line-height: normal;
   }
 }
 
 /* High contrast mode support */
 @media (prefers-contrast: high) {
-  .chart-container {
+  .charts-section {
     border-width: 2px;
     border-color: var(--color-text-main);
   }
@@ -553,9 +513,9 @@
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   .keyboard-shortcuts-info,
-  .chart-container canvas,
+  .charts-section canvas,
   .data-summary-card,
-  .chart-container .chartjs-legend li {
+  .charts-section .chartjs-legend li {
     transition: none;
   }
 
@@ -564,7 +524,7 @@
     animation: none;
   }
 
-  .chart-container:hover,
+  .charts-section:hover,
   .data-summary-card:hover {
     transform: none;
   }
@@ -577,7 +537,7 @@
     border: 1px solid var(--color-border);
   }
 
-  .chart-container {
+  .charts-section {
     box-shadow:
       0 4px 12px rgb(0, 0, 0, 0.3),
       inset 0 1px 0 rgb(255, 255, 255, 0.05);
@@ -585,7 +545,7 @@
 }
 
 /* Focus management for accessibility */
-.chart-container:focus-within {
+.charts-section:focus-within {
   outline: 2px solid
     hsl(var(--primary-hue), var(--primary-sat), var(--primary-light));
   outline-offset: 2px;
@@ -615,39 +575,39 @@
   }
 }
 
-/* Chart Container Animations */
-.chart-container {
+/* Chart Section Animations */
+.charts-section {
   animation: chart-entrance 0.4s ease-out;
 }
 
-.chart-container.loading {
+.charts-section.loading {
   animation: loading-pulse 2s ease-in-out infinite;
 }
 
 /* Chart Canvas Interactions - Simplified */
-.chart-container canvas {
+.charts-section canvas {
   transition:
     transform 0.2s ease-out,
     opacity 0.2s ease-out;
 }
 
-.chart-container canvas:hover {
+.charts-section canvas:hover {
   transform: translateY(-1px);
 }
 
-.chart-container canvas:active {
+.charts-section canvas:active {
   transform: translateY(0) scale(0.99);
   transition: transform 0.1s ease-out;
 }
 
 /* Legend Animations - Simplified */
-.chart-container .chartjs-legend li {
+.charts-section .chartjs-legend li {
   transition:
     background-color 0.2s ease-out,
     transform 0.2s ease-out;
 }
 
-.chart-container .chartjs-legend li:hover {
+.charts-section .chartjs-legend li:hover {
   background: rgb(255, 255, 255, 0.1);
   transform: translateY(-1px);
 }
@@ -687,14 +647,14 @@
 }
 
 /* Entrance animations for chart elements - Simplified */
-.chart-container[data-chart-type='pie'] canvas,
-.chart-container[data-chart-type='bar'] canvas,
-.chart-container[data-chart-type='line'] canvas {
+.charts-section[data-chart-type='pie'] canvas,
+.charts-section[data-chart-type='bar'] canvas,
+.charts-section[data-chart-type='line'] canvas {
   animation: chart-entrance 0.4s ease-out;
 }
 
 /* Focus animations - Simplified */
-.chart-container canvas:focus {
+.charts-section canvas:focus {
   outline: 2px solid
     hsl(var(--primary-hue), var(--primary-sat), var(--primary-light));
   outline-offset: 2px;
@@ -708,7 +668,7 @@
 
 /* Responsive animation adjustments */
 @media (width <= 768px) {
-  .chart-container canvas:hover {
+  .charts-section canvas:hover {
     transform: none; /* Disable hover transforms on mobile */
     box-shadow: 0 4px 12px rgb(0, 0, 0, 0.15);
   }
@@ -720,10 +680,10 @@
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .chart-container,
-  .chart-container canvas,
+  .charts-section,
+  .charts-section canvas,
   .data-summary-card,
-  .chart-container .chartjs-legend li,
+  .charts-section .chartjs-legend li,
   .loading-spinner,
   .loading-spinner::after,
   .progress-bar::after,
@@ -732,8 +692,8 @@
     transition: none !important;
   }
 
-  .chart-container:hover,
-  .chart-container canvas:hover,
+  .charts-section:hover,
+  .charts-section canvas:hover,
   .data-summary-card:hover {
     transform: none !important;
   }
@@ -745,7 +705,7 @@
 
 /* High contrast mode adjustments */
 @media (prefers-contrast: high) {
-  .chart-container canvas:focus {
+  .charts-section canvas:focus {
     outline: 3px solid currentColor;
     outline-offset: 2px;
   }
@@ -878,16 +838,16 @@
 .chart-section[data-section='category-breakdown'],
 .chart-section.category-breakdown,
 .chart-section:first-child {
-  margin-bottom: calc(var(--spacing-xl) * 2) !important;
+  margin-bottom: var(--spacing-lg) !important;
   border-bottom: 2px solid var(--color-border) !important;
-  padding-bottom: calc(var(--spacing-lg) * 1.5) !important;
+  padding-bottom: var(--spacing-md) !important;
 }
 
 /* Category Breakdown Section - Ensure it's clearly separated and handles expansion gracefully */
 .reports-view-container .category-breakdown-section {
   border-bottom: 1px solid var(--color-border);
-  margin-bottom: calc(var(--spacing-xl) * 1.5);
-  padding-bottom: calc(var(--spacing-lg) * 1.5);
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
   overflow: visible;
   min-height: auto;
   max-height: none;

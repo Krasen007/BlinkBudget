@@ -42,7 +42,7 @@ export const TimePeriodSelector = (options = {}) => {
   buttonsContainer.className = 'time-period-buttons';
   buttonsContainer.style.display = 'grid';
   buttonsContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
-  buttonsContainer.style.gap = SPACING.SM;
+  buttonsContainer.style.gap = SPACING.XS;
   buttonsContainer.style.width = '100%';
 
   // Define available time periods
@@ -116,7 +116,7 @@ export const TimePeriodSelector = (options = {}) => {
     button.style.cursor = 'pointer';
     button.style.fontSize = 'var(--font-size-md)';
     button.style.fontWeight = '500';
-    button.style.whiteSpace = 'nowrap';
+    button.style.whiteSpace = 'normal';
     button.style.transition = 'all 0.2s ease';
     button.style.flex = '1 0 auto';
     button.addEventListener('click', () => {
@@ -602,13 +602,18 @@ export const TimePeriodSelector = (options = {}) => {
     const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
 
     // Update button container layout
-    buttonsContainer.style.gridTemplateColumns = isMobile 
-      ? 'repeat(3, 1fr)' 
-      : 'repeat(auto-fit, minmax(120px, 1fr))';
+    buttonsContainer.style.gridTemplateColumns = isMobile
+      ? 'repeat(2, 1fr)'
+      : 'repeat(3, 1fr)';
 
-    // Update button font sizes to match FinancialPlanningView
+    // Update button font sizes and text wrapping for mobile
     periodButtons.forEach(button => {
-      button.style.fontSize = 'var(--font-size-md)';
+      button.style.fontSize = isMobile
+        ? 'var(--font-size-sm)'
+        : 'var(--font-size-md)';
+      button.style.whiteSpace = isMobile ? 'normal' : 'nowrap';
+      button.style.textAlign = 'center';
+      button.style.lineHeight = isMobile ? '1.2' : 'normal';
     });
   }
 

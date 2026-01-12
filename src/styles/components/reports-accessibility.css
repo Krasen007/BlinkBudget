@@ -27,9 +27,10 @@
     --color-surface: hsl(0, 0%, 10%);
   }
 
-  .view-reports .chart-container {
+  .view-reports .charts-section {
     border: 2px solid var(--color-border);
     background: var(--color-surface);
+    padding: 0;
   }
 
   .view-reports canvas {
@@ -229,9 +230,10 @@
 
 /* Support for Windows High Contrast mode */
 @media (prefers-contrast: high) {
-  .view-reports .chart-container {
+  .view-reports .charts-section {
     border: 2px solid ButtonText;
     background: ButtonFace;
+    padding: 0;
   }
 
   .view-reports .btn {
@@ -287,12 +289,12 @@
     border: 1px solid black;
   }
 
-  .view-reports .chart-container::after {
+  .view-reports .charts-section::after {
     content: 'Chart data: ' attr(data-chart-summary);
     display: block;
     margin-top: var(--spacing-md);
     font-size: 0.875rem;
-    color: black;
+    color: var(--color-text-muted);
   }
 }
 

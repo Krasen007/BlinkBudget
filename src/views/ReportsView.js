@@ -143,13 +143,12 @@ export const ReportsView = () => {
   content.id = 'reports-main-content';
   content.setAttribute('role', 'main');
   content.setAttribute('aria-labelledby', 'reports-title');
-  content.style.flex = '1';
-  content.style.display = 'flex';
-  content.style.flexDirection = 'column';
-  content.style.minHeight = '0';
+  //content.style.flex = '1';
+  //content.style.display = 'flex';
+  //content.style.flexDirection = 'column';
+  //content.style.minHeight = '0';
   content.style.overflowY = 'auto'; // Vertical scroll for content only
-  content.style.gap = SPACING.LG;
-  content.style.padding = SPACING.MD;
+  //content.style.gap = SPACING.LG;
 
   // State components
   const loadingState = createLoadingState();
@@ -256,8 +255,6 @@ export const ReportsView = () => {
     headerContainer.style.display = 'flex';
     headerContainer.style.flexDirection = 'column';
     headerContainer.style.gap = SPACING.SM;
-    headerContainer.style.padding = `${SPACING.SM} ${SPACING.MD}`;
-    headerContainer.style.borderBottom = `1px solid ${COLORS.BORDER}`;
     headerContainer.style.flexShrink = '0';
 
     headerContainer.appendChild(header);
@@ -291,7 +288,6 @@ export const ReportsView = () => {
    */
   function createChartContainer() {
     const chartContainer = document.createElement('section');
-    chartContainer.className = 'chart-container';
     chartContainer.setAttribute('role', 'region');
     chartContainer.setAttribute('aria-labelledby', 'chart-section-title');
     chartContainer.style.width = '100%';
@@ -876,17 +872,11 @@ export const ReportsView = () => {
       container.style.padding = '0';
     }
 
-    const headerContainer = container.querySelector('.reports-header-container');
+    const headerContainer = container.querySelector(
+      '.reports-header-container'
+    );
     if (headerContainer) {
-      if (isMobile) {
-        headerContainer.style.padding = isShortLandscape
-          ? `${SPACING.XS} ${SPACING.SM}`
-          : `${SPACING.SM} ${SPACING.SM}`;
-      } else if (isTablet) {
-        headerContainer.style.padding = `${SPACING.MD} ${SPACING.LG}`;
-      } else {
-        headerContainer.style.padding = `${SPACING.LG} ${SPACING.XL}`;
-      }
+      // Padding removed - header container has no padding
     }
 
     if (content) {
@@ -905,17 +895,17 @@ export const ReportsView = () => {
         content.style.gap = SPACING.LG;
       }
 
-      // Sync chart-container horizontal padding with header
-      const chartContainers = content.querySelectorAll('.chart-container');
-      chartContainers.forEach(cc => {
+      // Sync charts-section horizontal padding with header
+      const chartsSections = content.querySelectorAll('.charts-section');
+      chartsSections.forEach(cs => {
         if (isMobile) {
-          cc.style.padding = isShortLandscape
+          cs.style.padding = isShortLandscape
             ? `${SPACING.XS} ${SPACING.SM}`
             : `${SPACING.SM} ${SPACING.SM}`;
         } else if (isTablet) {
-          cc.style.padding = `${SPACING.MD} ${SPACING.LG}`;
+          cs.style.padding = `${SPACING.MD} ${SPACING.LG}`;
         } else {
-          cc.style.padding = `${SPACING.MD} ${SPACING.XL}`;
+          cs.style.padding = `${SPACING.MD} ${SPACING.XL}`;
         }
       });
     }

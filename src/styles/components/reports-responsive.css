@@ -8,9 +8,9 @@
   min-height: var(--visual-viewport-height);
 }
 
-/* Chart container mobile optimizations */
-.view-reports .chart-container {
-  padding: var(--spacing-sm);
+/* Chart section mobile optimizations */
+.view-reports .charts-section {
+  padding: 0;
   margin: 0 calc(-1 * var(--spacing-sm));
   border-radius: 0;
   border-left: none;
@@ -27,22 +27,26 @@
 
 /* Time period selector mobile styles */
 .view-reports .time-period-selector {
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-sm);
 }
 
-.view-reports .time-period-selector .period-buttons {
-  display: flex;
+.view-reports .time-period-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--spacing-xs);
   padding: var(--spacing-xs) 0;
-  min-width: max-content;
+  width: 100%;
 }
 
-.view-reports .time-period-selector button {
+.view-reports .time-period-buttons button {
   flex-shrink: 0;
-  min-width: 80px;
+  min-width: 0;
   padding: var(--spacing-sm) var(--spacing-md);
   font-size: 0.875rem;
-  white-space: nowrap;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.2;
+  min-height: 44px;
 }
 
 /* Mobile loading and empty states */
@@ -94,8 +98,8 @@
     padding: var(--spacing-xs);
   }
 
-  .view-reports .chart-container {
-    padding: var(--spacing-xs);
+  .view-reports .charts-section {
+    padding: 0;
     margin: 0 calc(-1 * var(--spacing-xs));
   }
 
@@ -104,10 +108,16 @@
     max-height: 300px;
   }
 
-  .view-reports .time-period-selector button {
-    min-width: 70px;
+  .view-reports .time-period-buttons {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-xs);
+  }
+
+  .view-reports .time-period-buttons button {
+    min-width: 0;
     padding: var(--spacing-xs) var(--spacing-sm);
     font-size: 0.8125rem;
+    line-height: 1.1;
   }
 
   .view-reports .data-summary {
@@ -161,8 +171,8 @@
 
 /* Short landscape (phones in landscape with small height) */
 @media (width <= 767px) and (orientation: landscape) and (height <= 500px) {
-  .view-reports .chart-container {
-    padding: var(--spacing-xs);
+  .view-reports .charts-section {
+    padding: 0;
   }
 
   .view-reports canvas {
@@ -184,8 +194,8 @@
     padding: var(--spacing-md) var(--spacing-lg);
   }
 
-  .view-reports .chart-container {
-    padding: var(--spacing-lg);
+  .view-reports .charts-section {
+    padding: 0;
     margin: 0;
     border-radius: var(--radius-lg);
     border: 1px solid var(--color-border);
@@ -200,16 +210,17 @@
     overflow: visible;
   }
 
-  .view-reports .time-period-selector .period-buttons {
-    justify-content: flex-start;
-    flex-wrap: wrap;
+  .view-reports .time-period-buttons {
+    grid-template-columns: repeat(3, 1fr);
     gap: var(--spacing-sm);
   }
 
-  .view-reports .time-period-selector button {
+  .view-reports .time-period-buttons button {
     min-width: 100px;
     padding: var(--spacing-md) var(--spacing-lg);
     font-size: 0.9375rem;
+    white-space: nowrap;
+    line-height: normal;
   }
 
   .view-reports .data-summary {
@@ -239,8 +250,8 @@
     margin: 0 auto;
   }
 
-  .view-reports .chart-container {
-    padding: var(--spacing-xl);
+  .view-reports .charts-section {
+    padding: 0;
   }
 
   .view-reports canvas {
@@ -248,10 +259,17 @@
     max-height: 600px;
   }
 
-  .view-reports .time-period-selector button {
+  .view-reports .time-period-buttons {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-md);
+  }
+
+  .view-reports .time-period-buttons button {
     min-width: 120px;
     padding: var(--spacing-md) var(--spacing-xl);
     font-size: 1rem;
+    white-space: nowrap;
+    line-height: normal;
   }
 
   .view-reports .data-summary {
@@ -280,7 +298,7 @@
     margin: var(--spacing-xl) 0;
   }
 
-  .view-reports .chart-grid .chart-container {
+  .view-reports .chart-grid .charts-section {
     margin: 0;
   }
 }
@@ -295,11 +313,11 @@
     grid-template-columns: 2fr 1fr;
   }
 
-  .view-reports .chart-container.primary {
+  .view-reports .charts-section.primary {
     grid-column: 1;
   }
 
-  .view-reports .chart-container.secondary {
+  .view-reports .charts-section.secondary {
     grid-column: 2;
     display: flex;
     flex-direction: column;
@@ -321,9 +339,10 @@
     padding-bottom: var(--spacing-md);
   }
 
-  .view-reports .chart-container {
+  .view-reports .charts-section {
     border: 1px solid black;
     margin: var(--spacing-lg) 0;
+    padding: 0;
     break-inside: avoid;
   }
 
@@ -406,9 +425,10 @@
 
 /* Dark mode adjustments */
 @media (prefers-color-scheme: dark) {
-  .view-reports .chart-container {
+  .view-reports .charts-section {
     background: var(--color-surface);
     border-color: var(--color-border);
+    padding: 0;
   }
 
   .view-reports .data-summary-card {
