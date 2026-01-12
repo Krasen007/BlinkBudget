@@ -1,47 +1,21 @@
-## [1.12.0] - 2026-01-08
+# Version 1.14.0
 
-### Summary of Changes:
-*   **New Features:** Enhanced financial planning tools, introduced category filtering, date filtering, and daily/monthly expense toggles.
-*   **Improvements:** Significant bug fixes (including critical date input issues), UI/UX enhancements, improved mobile responsiveness, and code refactoring for better performance and maintainability.
-*   **Tooling & Quality:** Integrated ESLint, Prettier, and Lightning CSS for improved code quality and development workflow.
+## 🎯 New Features & Improvements
+- **Enhanced Reports View**: Updated UI components and navigation for better data visualization
+- **Mobile Navigation**: Improved mobile experience with better navigation flow
+- **Financial Planning**: Phase 1-3 refactoring completed for better component organization
+- **Basic Landing Page**: **Added** landing page with forgot password functionality
 
-### Detailed Changes:
+## 🐛 Bug Fixes
+- **Chart Accuracy**: Fixed NaN% error in charts and improved expense analysis
+- **Filter System**: Critical fix for transaction filtering functionality
+- **UI Polish**: Resolved hover effects and minor UI inconsistencies
+- **Settings Navigation**: **Added** back button for better user flow
 
-#### Financial Planning & Insights
-- Initiated Phase 1 of Advanced Financial Planning.
-- Enhanced Scenario Planning features.
-- Improved Investment Tracker and Goal Planner functionalities.
-- Added helpful tips and refactored the Financial Planning module.
-- Implemented daily/monthly expense toggles in Financial Insights.
-- Resolved errors in the Scenario Planning chart.
-- Corrected issues with the Projected Account Balance chart.
+## 📊 Analytics Enhancements
+- **Total Spent Display**: **Added** total spent amount to pie chart for better insights
+- **Income Handling**: Improved expense analysis by properly excluding income transactions
 
-#### Transaction Management
-- Enabled filtering transactions by category.
-- Added date filtering functionality.
-
-#### User Experience & UI
-- Improved button styling and added button wrapping for key sections.
-- Prevented accidental 'hold to split' action when scrolling the transaction list.
-- Added a keyboard shortcut (Escape key) to exit Settings and return to the dashboard.
-- Improved overall mobile responsiveness.
-- Updated CSS for various visual improvements.
-- Standardized view widths.
-- Added helpful notes on tabs.
-
-#### Bug Fixes
-- Addressed a critical bug in the date input component.
-- Resolved an issue with account selection.
-- Fixed an issue in the Reports view related to period selection.
-- Resolved a significant number of bugs, reducing errors by 48%.
-- Addressed all ESLint errors and warnings.
-- General bug fixes.
-
-#### Code Quality & Tooling
-- Version bump to 1.12; resolved linting issues.
-- Integrated ESLint and Prettier for code quality.
-- Switched PostCSS to Lightning CSS.
-- Enhanced CSS utility classes.
-- General code refactoring for enhanced readability and maintainability.
-- Improved accessibility and error handling within synchronization components.
-- Clarified UI elements and improved Firebase synchronization.
+## 🔧 Technical Improvements
+- **Component Extraction**: Refactored UI component builders for better maintainability
+- **Code Quality**: General linting and minor fixes across the codebase

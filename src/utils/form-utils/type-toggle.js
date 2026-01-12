@@ -94,10 +94,10 @@ const createTypeButton = options => {
     const currentTypeValue =
       typeof currentType === 'function' ? currentType() : currentType;
     if (currentTypeValue !== type) {
-      const activeColor = TYPE_COLORS[type] || TYPE_COLORS.transfer;
-      btn.style.border = `1px solid ${activeColor}`;
-      btn.style.color = activeColor;
-      btn.style.boxShadow = `0 0 8px ${activeColor}40`;
+      btn.style.border = '1px solid var(--color-text-muted)';
+      btn.style.backgroundColor = 'var(--color-surface-hover)';
+      btn.style.color = 'var(--color-text-main)';
+      btn.style.boxShadow = 'none';
     }
   });
 
