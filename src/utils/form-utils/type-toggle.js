@@ -94,8 +94,10 @@ const createTypeButton = options => {
     const currentTypeValue =
       typeof currentType === 'function' ? currentType() : currentType;
     if (currentTypeValue !== type) {
-      btn.style.border = '1px solid var(--color-text-muted)';
-      btn.style.backgroundColor = 'var(--color-surface-hover)';
+      const activeColor = TYPE_COLORS[type] || TYPE_COLORS.transfer;
+      btn.style.border = `1px solid ${activeColor}`;
+      btn.style.color = activeColor;
+      btn.style.boxShadow = `0 0 8px ${activeColor}40`;
     }
   });
 
@@ -105,6 +107,8 @@ const createTypeButton = options => {
     if (currentTypeValue !== type) {
       btn.style.border = '1px solid var(--color-border)';
       btn.style.backgroundColor = 'transparent';
+      btn.style.color = 'var(--color-text-muted)';
+      btn.style.boxShadow = 'none';
     }
   });
 

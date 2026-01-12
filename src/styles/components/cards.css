@@ -155,6 +155,10 @@
   align-items: center;
   gap: var(--spacing-md);
 }
+/* Transaction item hover effect - matching dashboard stat cards */
+.transaction-item:hover{
+  background: var(--color-surface-hover);  
+}
 
 /* Transaction item info */
 .transaction-item-info {

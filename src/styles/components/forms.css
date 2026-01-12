@@ -154,14 +154,15 @@ select.input-select:focus {
 
 .mobile-form-input:hover,
 .mobile-form-select:hover {
-  border-color: var(--color-text-muted);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 8px hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.4);
 }
 
 .mobile-form-input:focus,
 .mobile-form-select:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px
-    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
   outline: none;
 }
 
@@ -209,28 +210,13 @@ select.input-select:focus {
 .view-add .mobile-form-input[type='date'],
 .view-edit .mobile-form-input[type='date'],
 .view-settings .mobile-form-input[type='date'] {
-  /* Subtle visual connection to form */
-  border-color: var(--color-primary-light);
+  /* Match other inputs' default appearance */
+  border-color: var(--color-border);
   background: var(--color-surface);
   position: relative;
 }
 
-.view-add .mobile-form-input[type='date']:hover,
-.view-edit .mobile-form-input[type='date']:hover,
-.view-settings .mobile-form-input[type='date']:hover {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px
-    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
-}
-
-.view-add .mobile-form-input[type='date']:focus,
-.view-edit .mobile-form-input[type='date']:focus,
-.view-settings .mobile-form-input[type='date']:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px
-    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
-  outline: none;
-}
+/* Hover and focus are now handled by generic .mobile-form-input styles */
 
 /* Date input label styling */
 .view-add label[for*='date-input'],
