@@ -50,12 +50,13 @@ export class InvestmentTracker {
         name: metadata.name || symbol.toUpperCase(),
         shares: Math.round(shares * 10000) / 10000, // Round to 4 decimal places
         purchasePrice: Math.round(purchasePrice * 100) / 100, // Round to 2 decimal places
-        currentPrice: metadata.currentPrice || purchasePrice, // Default to purchase price
+        currentPrice: metadata.currentPrice || purchasePrice, // Use currentPrice from metadata or default to purchase price
         purchaseDate: new Date(purchaseDate),
-        assetClass: metadata.assetClass || 'stock',
+        assetClass: metadata.investmentType || metadata.assetClass || 'stock',
         sector: metadata.sector || 'Unknown',
         region: metadata.region || 'Unknown',
         currency: metadata.currency || 'EUR',
+        lastPriceUpdate: (metadata.currentPrice && metadata.currentPrice !== purchasePrice) ? new Date() : null,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -341,7 +342,15 @@ export class InvestmentTracker {
     const percentages = {};
 
     investmentList.forEach(investment => {
-      const value = investment.shares * investment.currentPrice;
+      // Use appropriate quantity field based on investment type
+      let quantity = investment.shares;
+      if (investment.assetClass === 'crypto' && investment.metadata?.units) {
+        quantity = investment.metadata.units;
+      } else if (investment.assetClass === 'commodities' && investment.metadata?.quantity) {
+        quantity = investment.metadata.quantity;
+      }
+
+      const value = quantity * (investment.currentPrice || investment.purchasePrice);
       const assetClass = investment.assetClass || 'Unknown';
 
       allocations[assetClass] = (allocations[assetClass] || 0) + value;
@@ -356,7 +365,7 @@ export class InvestmentTracker {
 
     return {
       totalValue: Math.round(totalValue * 100) / 100,
-      allocations,
+      assetAllocation: allocations, // Changed from 'allocations' to 'assetAllocation'
       percentages,
     };
   }
