@@ -10,7 +10,6 @@
 
 <img src="public/screenshot-desktop.png" alt="Desktop Screenshot" width="512"/>
 
-
 ### Mobile View
 
 <img src="public/screenshot-mobile.png" alt="Mobile Screenshot"/>

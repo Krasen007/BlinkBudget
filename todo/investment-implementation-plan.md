@@ -60,6 +60,7 @@ Based on the conversation history and codebase analysis, the investment tracking
 **Objective**: Improve the investment form to support different investment types with appropriate fields.
 
 #### 1.1 Dynamic Form Fields
+
 - Create type-specific form fields for each investment category:
   - **Stocks**: Symbol, shares, purchase price, purchase date
   - **Bonds**: Face value, coupon rate, maturity date, purchase price
@@ -71,12 +72,14 @@ Based on the conversation history and codebase analysis, the investment tracking
   - **Other**: Custom fields with flexible naming
 
 #### 1.2 Form Enhancement
+
 - Add current price field for manual updates
 - Implement form field validation per investment type
 - Add investment notes/description field
 - Create better visual organization with collapsible sections
 
 #### 1.3 Investment List Improvements
+
 - Show investment type prominently in list
 - Add quick edit/delete buttons
 - Display manual price update indicators
@@ -87,6 +90,7 @@ Based on the conversation history and codebase analysis, the investment tracking
 **Objective**: Implement meaningful interactions for portfolio management.
 
 #### 2.1 Detailed Investment Views
+
 - Create `src/components/investments/InvestmentDetails.js`
 - Show complete investment information in modal
 - Add edit functionality for all investment fields
@@ -94,6 +98,7 @@ Based on the conversation history and codebase analysis, the investment tracking
 - Add delete investment with confirmation
 
 #### 2.2 Manual Price Update System
+
 - Add "Update Price" button for each investment
 - Create bulk price update interface
 - Implement price change indicators (up/down arrows)
@@ -101,6 +106,7 @@ Based on the conversation history and codebase analysis, the investment tracking
 - Show percentage change since purchase
 
 #### 2.3 Enhanced Chart Features
+
 - Fix portfolio chart to reflect manual price updates correctly
 - Add visual indicators for different investment types
 - Implement chart filtering by investment type
@@ -112,6 +118,7 @@ Based on the conversation history and codebase analysis, the investment tracking
 **Objective**: Provide comprehensive portfolio analysis and management tools.
 
 #### 3.1 Rebalancing Tools
+
 - Implement manual rebalancing suggestions
 - Create target allocation setting interface
 - Add "what-if" rebalancing scenarios
@@ -119,6 +126,7 @@ Based on the conversation history and codebase analysis, the investment tracking
 - Add rebalancing history tracking
 
 #### 3.2 Portfolio Analytics
+
 - Create portfolio summary dashboard
 - Add performance metrics (total return, percentage change)
 - Implement asset allocation analysis
@@ -126,6 +134,7 @@ Based on the conversation history and codebase analysis, the investment tracking
 - Create portfolio value over time tracking
 
 #### 3.3 Data Management
+
 - Add CSV import/export functionality
 - Implement portfolio backup/restore
 - Create investment search and filtering
@@ -137,6 +146,7 @@ Based on the conversation history and codebase analysis, the investment tracking
 **Objective**: Improve usability and visual appeal.
 
 #### 4.1 Investment Dashboard
+
 - Create comprehensive investment overview
 - Add key metrics cards (total value, change, etc.)
 - Implement quick actions for common tasks
@@ -144,6 +154,7 @@ Based on the conversation history and codebase analysis, the investment tracking
 - Create portfolio health indicators
 
 #### 4.2 Mobile Optimization
+
 - Ensure all investment features work on mobile
 - Optimize form layouts for touch screens
 - Add swipe gestures for investment actions
@@ -151,6 +162,7 @@ Based on the conversation history and codebase analysis, the investment tracking
 - Create mobile-optimized investment details
 
 #### 4.3 Visual Enhancements
+
 - Add investment type icons and colors
 - Implement smooth animations for updates
 - Create loading states for operations
@@ -162,12 +174,14 @@ Based on the conversation history and codebase analysis, the investment tracking
 **Objective**: Add advanced portfolio management capabilities.
 
 #### 5.1 Goal Integration
+
 - Link investments to financial goals
 - Show goal funding progress
 - Add goal-based allocation recommendations
 - Implement goal tracking with investments
 
 #### 5.2 Reporting & Insights
+
 - Create investment performance reports
 - Add portfolio analysis insights
 - Implement tax reporting features
@@ -175,6 +189,7 @@ Based on the conversation history and codebase analysis, the investment tracking
 - Add portfolio comparison tools
 
 #### 5.3 Data Visualization
+
 - Add advanced portfolio charts
 - Create investment correlation analysis
 - Implement risk visualization
@@ -238,8 +253,8 @@ src/
   purchaseDate: Date,
   lastPriceUpdate: Date,
   priceHistory: Array<{
-    date: Date, 
-    price: number, 
+    date: Date,
+    price: number,
     source: 'manual',
     notes: string
   }>,
@@ -279,30 +294,35 @@ src/
 ## Implementation Timeline
 
 ### Week 1-2: Phase 1 - Enhanced Form & Types
+
 - Day 1-3: Implement dynamic form fields for different investment types
 - Day 4-5: Add current price field and validation
 - Day 6-7: Enhance investment list display
 - Day 8-10: Testing and bug fixes
 
 ### Week 3-4: Phase 2 - Interactive UI Components
+
 - Day 1-4: Create InvestmentDetails component with edit functionality
 - Day 5-7: Implement manual price update system
 - Day 8-10: Fix and enhance portfolio chart features
 - Day 11-14: Integration testing
 
 ### Week 5-6: Phase 3 - Portfolio Management Tools
+
 - Day 1-3: Implement rebalancing tools
 - Day 4-6: Create portfolio analytics dashboard
 - Day 7-8: Add data management features (import/export)
 - Day 9-12: Testing and optimization
 
 ### Week 7-8: Phase 4 - UX Enhancements
+
 - Day 1-3: Create investment dashboard
 - Day 4-5: Mobile optimization
 - Day 6-7: Visual enhancements and animations
 - Day 8-10: Polish and refinement
 
 ### Week 9-10: Phase 5 - Advanced Features
+
 - Day 1-3: Goal integration
 - Day 4-5: Reporting and insights
 - Day 6-7: Advanced data visualization

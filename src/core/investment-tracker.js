@@ -56,7 +56,10 @@ export class InvestmentTracker {
         sector: metadata.sector || 'Unknown',
         region: metadata.region || 'Unknown',
         currency: metadata.currency || 'EUR',
-        lastPriceUpdate: (metadata.currentPrice && metadata.currentPrice !== purchasePrice) ? new Date() : null,
+        lastPriceUpdate:
+          metadata.currentPrice && metadata.currentPrice !== purchasePrice
+            ? new Date()
+            : null,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -346,11 +349,15 @@ export class InvestmentTracker {
       let quantity = investment.shares;
       if (investment.assetClass === 'crypto' && investment.metadata?.units) {
         quantity = investment.metadata.units;
-      } else if (investment.assetClass === 'commodities' && investment.metadata?.quantity) {
+      } else if (
+        investment.assetClass === 'commodities' &&
+        investment.metadata?.quantity
+      ) {
         quantity = investment.metadata.quantity;
       }
 
-      const value = quantity * (investment.currentPrice || investment.purchasePrice);
+      const value =
+        quantity * (investment.currentPrice || investment.purchasePrice);
       const assetClass = investment.assetClass || 'Unknown';
 
       allocations[assetClass] = (allocations[assetClass] || 0) + value;

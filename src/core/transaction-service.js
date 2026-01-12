@@ -101,7 +101,7 @@ export const TransactionService = {
     transactions[index] = {
       ...transactions[index],
       ...updates,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
     this._persist(transactions);
     return transactions[index];

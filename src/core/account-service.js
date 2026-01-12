@@ -67,7 +67,7 @@ export const AccountService = {
       accounts[index] = {
         ...accounts[index],
         ...account,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
     } else {
       account.updatedAt = new Date().toISOString();

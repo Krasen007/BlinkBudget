@@ -43,10 +43,9 @@ import {
   createSectionContainer,
   safeParseDate,
 } from '../utils/financial-planning-helpers.js';
-import { StatsCard } from '../components/financial-planning/StatsCard.js';
 import { ForecastCard } from '../components/financial-planning/ForecastCard.js';
-import { EmergencyFundCard } from '../components/financial-planning/EmergencyFundCard.js';
 import { refreshChart } from '../utils/chart-refresh-helper.js';
+import { OverviewSection } from './financial-planning/OverviewSection.js';
 
 export const FinancialPlanningView = () => {
   const container = document.createElement('div');
@@ -347,183 +346,8 @@ export const FinancialPlanningView = () => {
    * Render Overview section - Financial health summary
    */
   function renderOverviewSection() {
-    const section = createSectionContainer(
-      'overview',
-      'Financial Overview',
-      '📊'
-    );
-    section.appendChild(
-      createUsageNote(
-        'At-a-glance health summary: shows current balance, monthly expense averages, savings rate and emergency fund advice.'
-      )
-    );
-
-    if (!planningData) {
-      const placeholder = createPlaceholder(
-        'Loading Financial Data',
-        'Please wait while we analyze your financial information.',
-        '⏳'
-      );
-      section.appendChild(placeholder);
-      content.appendChild(section);
-      return;
-    }
-
-    // Quick stats cards
-    const statsGrid = document.createElement('div');
-    statsGrid.className = 'stats-grid';
-    statsGrid.style.display = 'grid';
-    statsGrid.style.gridTemplateColumns =
-      'repeat(auto-fit, minmax(250px, 1fr))';
-    statsGrid.style.gap = SPACING.MD;
-    statsGrid.style.marginBottom = SPACING.XL;
-
-    // Calculate real stats from transaction data
-    const { transactions } = planningData;
-    let totalIncome = 0;
-    let totalExpenses = 0;
-    let monthlyExpenses = 0;
-
-    // Calculate totals and monthly averages
-    const now = new Date();
-    const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
-    const recentTransactions = transactions.filter(
-      t => new Date(t.timestamp) >= threeMonthsAgo
-    );
-
-    transactions.forEach(transaction => {
-      if (transaction.type === 'income') {
-        totalIncome += transaction.amount;
-      } else if (transaction.type === 'expense') {
-        totalExpenses += transaction.amount;
-      }
-    });
-
-    // Calculate monthly expenses from recent data
-    if (recentTransactions.length > 0) {
-      const recentExpenses = recentTransactions
-        .filter(t => t.type === 'expense')
-        .reduce((sum, t) => sum + t.amount, 0);
-      const monthsOfData = Math.max(
-        1,
-        (now - threeMonthsAgo) / (1000 * 60 * 60 * 24 * 30)
-      );
-      monthlyExpenses = recentExpenses / monthsOfData;
-    }
-
-    const currentBalance = totalIncome - totalExpenses;
-    const savingsRate =
-      totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0;
-
-    // Generate risk assessments
-    let emergencyFundAssessment = null;
-    let riskScore = null;
-
-    try {
-      // Assume emergency fund is current balance (simplified)
-      emergencyFundAssessment = riskAssessor.assessEmergencyFundAdequacy(
-        monthlyExpenses,
-        Math.max(0, currentBalance)
-      );
-
-      // Calculate overall risk score
-      const riskFactors = [
-        {
-          category: 'Emergency Fund',
-          riskLevel: emergencyFundAssessment.riskLevel,
-          message: emergencyFundAssessment.message,
-        },
-      ];
-
-      riskScore = riskAssessor.calculateOverallRiskScore(riskFactors);
-    } catch (error) {
-      console.error('Error calculating risk assessments:', error);
-    }
-
-    const stats = [
-      {
-        label: 'Current Balance',
-        value: `€${currentBalance.toFixed(2)}`,
-        color: currentBalance >= 0 ? COLORS.SUCCESS : COLORS.ERROR,
-        icon: '💰',
-        subtitle: currentBalance >= 0 ? 'Positive balance' : 'Negative balance',
-        calculationHelp: `
-        <p><strong>Formula:</strong> Total Income - Total Expenses</p>
-        <p>This shows your net financial position by subtracting all expenses from all income transactions in your account.</p>
-      `,
-      },
-      {
-        label: 'Monthly Expenses',
-        value: `€${monthlyExpenses.toFixed(2)}`,
-        color: COLORS.ERROR,
-        icon: '📉',
-        subtitle: 'Average last 3 months',
-        calculationHelp: `
-        <p><strong>Formula:</strong> Total expenses from last 3 months ÷ Number of months in that period</p>
-        <p>This calculates your average monthly spending by analyzing expense transactions over the most recent 3-month period, providing a realistic view of your regular spending patterns.</p>
-      `,
-      },
-      {
-        label: 'Savings Rate',
-        value: `${savingsRate.toFixed(1)}%`,
-        color:
-          savingsRate > 20
-            ? COLORS.SUCCESS
-            : savingsRate > 10
-              ? COLORS.WARNING
-              : COLORS.ERROR,
-        icon: '🎯',
-        subtitle:
-          savingsRate > 20
-            ? 'Excellent'
-            : savingsRate > 10
-              ? 'Good'
-              : 'Needs improvement',
-        calculationHelp: `
-        <p><strong>Formula:</strong> (Total Income - Total Expenses) ÷ Total Income × 100</p>
-        <p>This percentage shows how much of your income you're saving. A higher rate indicates better financial health and more money available for investments or emergencies.</p>
-      `,
-      },
-      {
-        label: 'Risk Level',
-        value: riskScore
-          ? riskScore.level.charAt(0).toUpperCase() + riskScore.level.slice(1)
-          : 'Unknown',
-        color: riskScore
-          ? riskScore.level === 'low'
-            ? COLORS.SUCCESS
-            : riskScore.level === 'moderate'
-              ? COLORS.WARNING
-              : COLORS.ERROR
-          : COLORS.TEXT_MUTED,
-        icon: riskScore
-          ? riskScore.level === 'low'
-            ? '✅'
-            : riskScore.level === 'moderate'
-              ? '⚠️'
-              : '🚨'
-          : '❓',
-        subtitle: riskScore ? riskScore.message : 'Calculating...',
-        calculationHelp: `
-        <p><strong>Assessment:</strong> Based on emergency fund adequacy</p>
-        <p>Risk level is determined by evaluating your emergency fund coverage relative to monthly expenses. Low risk indicates strong financial preparedness, while high risk suggests immediate attention is needed.</p>
-      `,
-      },
-    ];
-
-    stats.forEach(stat => {
-      const card = StatsCard(stat);
-      statsGrid.appendChild(card);
-    });
-
-    section.appendChild(statsGrid);
-    content.appendChild(section);
-
-    // Emergency Fund Status (if available)
-    if (emergencyFundAssessment && emergencyFundAssessment.status !== 'error') {
-      const emergencyFundCard = EmergencyFundCard(emergencyFundAssessment);
-      section.appendChild(emergencyFundCard);
-    }
+    const overviewElement = OverviewSection(planningData, riskAssessor);
+    content.appendChild(overviewElement);
   }
 
   /**
@@ -781,7 +605,7 @@ export const FinancialPlanningView = () => {
       { value: 'crypto', label: 'Cryptocurrency' },
       { value: 'cash', label: 'Cash' },
       { value: 'commodities', label: 'Commodities' },
-      { value: 'other', label: 'Other' }
+      { value: 'other', label: 'Other' },
     ];
 
     investmentTypes.forEach(type => {
@@ -877,64 +701,186 @@ export const FinancialPlanningView = () => {
 
       switch (investmentType) {
         case 'stocks': {
-          const symbolField = createFormField('Symbol', 'symbol', 'text', 'AAPL');
-          const sharesField = createFormField('Shares', 'shares', 'number', '100');
+          const symbolField = createFormField(
+            'Symbol',
+            'symbol',
+            'text',
+            'AAPL'
+          );
+          const sharesField = createFormField(
+            'Shares',
+            'shares',
+            'number',
+            '100'
+          );
           basicFields.push(symbolField, sharesField);
           break;
         }
         case 'bonds': {
-          const nameField = createFormField('Bond Name', 'symbol', 'text', 'US Treasury Bond');
-          const faceValueField = createFormField('Face Value', 'faceValue', 'number', '1000');
-          const couponRateField = createFormField('Coupon Rate (%)', 'couponRate', 'number', '5.5', '0.1');
-          const maturityDateField = createFormField('Maturity Date', 'maturityDate', 'date');
+          const nameField = createFormField(
+            'Bond Name',
+            'symbol',
+            'text',
+            'US Treasury Bond'
+          );
+          const faceValueField = createFormField(
+            'Face Value',
+            'faceValue',
+            'number',
+            '1000'
+          );
+          const couponRateField = createFormField(
+            'Coupon Rate (%)',
+            'couponRate',
+            'number',
+            '5.5',
+            '0.1'
+          );
+          const maturityDateField = createFormField(
+            'Maturity Date',
+            'maturityDate',
+            'date'
+          );
           basicFields.push(nameField);
           fields.push(faceValueField, couponRateField, maturityDateField);
           break;
         }
         case 'etf': {
-          const symbolField = createFormField('ETF Symbol', 'symbol', 'text', 'VOO');
-          const sharesField = createFormField('Shares', 'shares', 'number', '50');
-          const expenseRatioField = createFormField('Expense Ratio (%)', 'expenseRatio', 'number', '0.1', '0.01');
+          const symbolField = createFormField(
+            'ETF Symbol',
+            'symbol',
+            'text',
+            'VOO'
+          );
+          const sharesField = createFormField(
+            'Shares',
+            'shares',
+            'number',
+            '50'
+          );
+          const expenseRatioField = createFormField(
+            'Expense Ratio (%)',
+            'expenseRatio',
+            'number',
+            '0.1',
+            '0.01'
+          );
           basicFields.push(symbolField, sharesField);
           fields.push(expenseRatioField);
           break;
         }
         case 'realestate': {
-          const nameField = createFormField('Property Name', 'symbol', 'text', '123 Main Street');
-          const propertyTypeSelect = createSelectField('Property Type', 'propertyType', ['Residential', 'Commercial', 'Land', 'REIT']);
-          const addressField = createFormField('Address', 'address', 'text', '123 Main St');
-          const sqftField = createFormField('Square Footage', 'squareFootage', 'number', '1500');
+          const nameField = createFormField(
+            'Property Name',
+            'symbol',
+            'text',
+            '123 Main Street'
+          );
+          const propertyTypeSelect = createSelectField(
+            'Property Type',
+            'propertyType',
+            ['Residential', 'Commercial', 'Land', 'REIT']
+          );
+          const addressField = createFormField(
+            'Address',
+            'address',
+            'text',
+            '123 Main St'
+          );
+          const sqftField = createFormField(
+            'Square Footage',
+            'squareFootage',
+            'number',
+            '1500'
+          );
           basicFields.push(nameField);
           fields.push(propertyTypeSelect, addressField, sqftField);
           break;
         }
         case 'crypto': {
-          const symbolField = createFormField('Crypto Symbol', 'symbol', 'text', 'BTC');
-          const unitsField = createFormField('Units', 'units', 'number', '0.5', '0.001');
-          const exchangeSelect = createSelectField('Exchange', 'exchange', ['Binance', 'Coinbase', 'Kraken', 'Other']);
+          const symbolField = createFormField(
+            'Crypto Symbol',
+            'symbol',
+            'text',
+            'BTC'
+          );
+          const unitsField = createFormField(
+            'Units',
+            'units',
+            'number',
+            '0.5',
+            '0.001'
+          );
+          const exchangeSelect = createSelectField('Exchange', 'exchange', [
+            'Binance',
+            'Coinbase',
+            'Kraken',
+            'Other',
+          ]);
           basicFields.push(symbolField);
           fields.push(unitsField, exchangeSelect);
           break;
         }
         case 'cash': {
-          const nameField = createFormField('Account Name', 'symbol', 'text', 'Savings Account');
-          const currencySelect = createSelectField('Currency', 'currency', ['EUR', 'USD', 'GBP', 'JPY']);
-          const interestRateField = createFormField('Interest Rate (%)', 'interestRate', 'number', '2.5', '0.1');
+          const nameField = createFormField(
+            'Account Name',
+            'symbol',
+            'text',
+            'Savings Account'
+          );
+          const currencySelect = createSelectField('Currency', 'currency', [
+            'EUR',
+            'USD',
+            'GBP',
+            'JPY',
+          ]);
+          const interestRateField = createFormField(
+            'Interest Rate (%)',
+            'interestRate',
+            'number',
+            '2.5',
+            '0.1'
+          );
           basicFields.push(nameField);
           fields.push(currencySelect, interestRateField);
           break;
         }
         case 'commodities': {
-          const nameField = createFormField('Commodity Name', 'symbol', 'text', 'Gold Bars');
-          const commodityTypeSelect = createSelectField('Commodity Type', 'commodityType', ['Gold', 'Silver', 'Oil', 'Natural Gas', 'Other']);
-          const quantityField = createFormField('Quantity', 'quantity', 'number', '10', '0.1');
+          const nameField = createFormField(
+            'Commodity Name',
+            'symbol',
+            'text',
+            'Gold Bars'
+          );
+          const commodityTypeSelect = createSelectField(
+            'Commodity Type',
+            'commodityType',
+            ['Gold', 'Silver', 'Oil', 'Natural Gas', 'Other']
+          );
+          const quantityField = createFormField(
+            'Quantity',
+            'quantity',
+            'number',
+            '10',
+            '0.1'
+          );
           basicFields.push(nameField);
           fields.push(commodityTypeSelect, quantityField);
           break;
         }
         case 'other': {
-          const nameField = createFormField('Investment Name', 'symbol', 'text', 'Custom Investment');
-          const customNameField = createFormField('Custom Type Name', 'customTypeName', 'text', 'Custom Investment');
+          const nameField = createFormField(
+            'Investment Name',
+            'symbol',
+            'text',
+            'Custom Investment'
+          );
+          const customNameField = createFormField(
+            'Custom Type Name',
+            'customTypeName',
+            'text',
+            'Custom Investment'
+          );
           basicFields.push(nameField);
           fields.push(customNameField);
           break;
@@ -1039,7 +985,7 @@ export const FinancialPlanningView = () => {
     invForm.appendChild(saveInvBtn);
 
     // Add event listener for investment type changes
-    typeSelect.addEventListener('change', (e) => {
+    typeSelect.addEventListener('change', e => {
       generateTypeSpecificFields(e.target.value);
     });
 
@@ -1062,14 +1008,17 @@ export const FinancialPlanningView = () => {
       const notes = notesInput.value.trim();
 
       // Collect basic fields dynamically
-      const basicInputs = basicFieldsContainer.querySelectorAll('input, select');
-      const typeSpecificFieldsInputs = typeSpecificFields.querySelectorAll('input, select');
+      const basicInputs =
+        basicFieldsContainer.querySelectorAll('input, select');
+      const typeSpecificFieldsInputs =
+        typeSpecificFields.querySelectorAll('input, select');
       const formData = {};
 
       // Collect from both containers
       [...basicInputs, ...typeSpecificFieldsInputs].forEach(input => {
         if (input.value) {
-          formData[input.name] = input.type === 'number' ? Number(input.value) : input.value;
+          formData[input.name] =
+            input.type === 'number' ? Number(input.value) : input.value;
         }
       });
 
@@ -1082,14 +1031,17 @@ export const FinancialPlanningView = () => {
       const metadata = {
         investmentType,
         notes,
-        lastPriceUpdate: currentPrice !== purchasePrice ? new Date() : null
+        lastPriceUpdate: currentPrice !== purchasePrice ? new Date() : null,
       };
 
       // Collect type-specific fields
-      const typeSpecificFieldsData = typeSpecificFields.querySelectorAll('input, select, textarea');
+      const typeSpecificFieldsData = typeSpecificFields.querySelectorAll(
+        'input, select, textarea'
+      );
       typeSpecificFieldsData.forEach(input => {
         if (input.value && input.name) {
-          metadata[input.name] = input.type === 'number' ? Number(input.value) : input.value;
+          metadata[input.name] =
+            input.type === 'number' ? Number(input.value) : input.value;
         }
       });
 
@@ -1108,7 +1060,9 @@ export const FinancialPlanningView = () => {
         case 'stocks':
         case 'etf':
           if (!symbol) {
-            const symbolError = basicFieldsContainer.querySelector('[name="symbol"] + .field-error');
+            const symbolError = basicFieldsContainer.querySelector(
+              '[name="symbol"] + .field-error'
+            );
             if (symbolError) {
               symbolError.textContent = 'Symbol is required.';
               symbolError.style.display = 'block';
@@ -1116,7 +1070,9 @@ export const FinancialPlanningView = () => {
             valid = false;
           }
           if (!(shares > 0)) {
-            const sharesError = basicFieldsContainer.querySelector('[name="shares"] + .field-error');
+            const sharesError = basicFieldsContainer.querySelector(
+              '[name="shares"] + .field-error'
+            );
             if (sharesError) {
               sharesError.textContent = 'Shares must be greater than 0.';
               sharesError.style.display = 'block';
@@ -1126,7 +1082,9 @@ export const FinancialPlanningView = () => {
           break;
         case 'crypto':
           if (!symbol) {
-            const symbolError = basicFieldsContainer.querySelector('[name="symbol"] + .field-error');
+            const symbolError = basicFieldsContainer.querySelector(
+              '[name="symbol"] + .field-error'
+            );
             if (symbolError) {
               symbolError.textContent = 'Crypto symbol is required.';
               symbolError.style.display = 'block';
@@ -1134,7 +1092,9 @@ export const FinancialPlanningView = () => {
             valid = false;
           }
           if (!(units > 0)) {
-            const unitsError = typeSpecificFields.querySelector('[name="units"] + .field-error');
+            const unitsError = typeSpecificFields.querySelector(
+              '[name="units"] + .field-error'
+            );
             if (unitsError) {
               unitsError.textContent = 'Units must be greater than 0.';
               unitsError.style.display = 'block';
@@ -1144,7 +1104,9 @@ export const FinancialPlanningView = () => {
           break;
         case 'commodities':
           if (!(quantity > 0)) {
-            const quantityError = typeSpecificFields.querySelector('[name="quantity"] + .field-error');
+            const quantityError = typeSpecificFields.querySelector(
+              '[name="quantity"] + .field-error'
+            );
             if (quantityError) {
               quantityError.textContent = 'Quantity must be greater than 0.';
               quantityError.style.display = 'block';
@@ -1157,7 +1119,9 @@ export const FinancialPlanningView = () => {
         case 'cash':
         case 'other':
           if (!symbol) {
-            const symbolError = basicFieldsContainer.querySelector('[name="symbol"] + .field-error');
+            const symbolError = basicFieldsContainer.querySelector(
+              '[name="symbol"] + .field-error'
+            );
             if (symbolError) {
               symbolError.textContent = 'Name is required.';
               symbolError.style.display = 'block';
@@ -1225,14 +1189,17 @@ export const FinancialPlanningView = () => {
       const currentPrice = Number(currentPriceInput.value) || 0;
 
       // Get basic fields dynamically
-      const basicInputs = basicFieldsContainer.querySelectorAll('input, select');
-      const typeSpecificInputs = typeSpecificFields.querySelectorAll('input, select');
+      const basicInputs =
+        basicFieldsContainer.querySelectorAll('input, select');
+      const typeSpecificInputs =
+        typeSpecificFields.querySelectorAll('input, select');
       const formData = {};
 
       // Collect from both containers
       [...basicInputs, ...typeSpecificInputs].forEach(input => {
         if (input.value && input.value.trim() !== '') {
-          formData[input.name] = input.type === 'number' ? Number(input.value) : input.value.trim();
+          formData[input.name] =
+            input.type === 'number' ? Number(input.value) : input.value.trim();
         }
       });
 
@@ -1339,9 +1306,11 @@ export const FinancialPlanningView = () => {
         titleText.textContent = `${inv.symbol} · ${inv.name}`;
         titleText.style.fontWeight = '600';
 
-        const investmentType = inv.assetClass || inv.metadata?.investmentType || 'stocks';
+        const investmentType =
+          inv.assetClass || inv.metadata?.investmentType || 'stocks';
         const typeBadge = document.createElement('span');
-        typeBadge.textContent = investmentType.charAt(0).toUpperCase() + investmentType.slice(1);
+        typeBadge.textContent =
+          investmentType.charAt(0).toUpperCase() + investmentType.slice(1);
         typeBadge.style.backgroundColor = COLORS.PRIMARY;
         typeBadge.style.color = '#ffffff';
         typeBadge.style.padding = '2px 8px';
@@ -1357,8 +1326,10 @@ export const FinancialPlanningView = () => {
         meta.style.fontSize = '0.9rem';
         meta.style.color = COLORS.TEXT_MUTED;
 
-        const assetClass = inv.assetClass || inv.metadata?.investmentType || 'stocks';
-        const assetClassLabel = assetClass.charAt(0).toUpperCase() + assetClass.slice(1);
+        const assetClass =
+          inv.assetClass || inv.metadata?.investmentType || 'stocks';
+        const assetClassLabel =
+          assetClass.charAt(0).toUpperCase() + assetClass.slice(1);
         const currentPrice = inv.currentPrice || inv.purchasePrice;
         const priceText = assetClass === 'crypto' ? 'units' : 'shares';
 
