@@ -10,7 +10,6 @@
 import {
   COLORS,
   SPACING,
-  BREAKPOINTS,
   FONT_SIZES,
 } from '../utils/constants.js';
 import { DateInput } from './DateInput.js';
@@ -37,13 +36,26 @@ export const TimePeriodSelector = (options = {}) => {
   let customStartDate = null;
   let customEndDate = null;
 
-  // Create main selector buttons container
-  const buttonsContainer = document.createElement('div');
-  buttonsContainer.className = 'time-period-buttons';
+  // Create main selector buttons container - exact match to FinancialPlanningView
+  const buttonsContainer = document.createElement('nav');
+  buttonsContainer.className = 'financial-planning-nav'; // Use same class name
+  buttonsContainer.setAttribute('role', 'tablist');
   buttonsContainer.style.display = 'grid';
   buttonsContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
-  buttonsContainer.style.gap = SPACING.XS;
-  buttonsContainer.style.width = '100%';
+
+  buttonsContainer.style.gap = SPACING.SM;
+  buttonsContainer.style.marginBottom = SPACING.LG;
+  buttonsContainer.style.flexWrap = 'wrap'; // Allow wrapping
+  buttonsContainer.style.maxWidth = '100%';
+
+  // Hide scrollbar for webkit browsers - exact match to FinancialPlanningView
+  const style = document.createElement('style');
+  style.textContent = `
+    .financial-planning-nav::-webkit-scrollbar {
+      display: none;
+    }
+  `;
+  document.head.appendChild(style);
 
   // Define available time periods
   const periods = [
@@ -98,34 +110,41 @@ export const TimePeriodSelector = (options = {}) => {
     const initialKey = typeToKeyMap[initialPeriod.type] || 'month';
 
     const button = document.createElement('button');
-    button.textContent = period.label;
-    button.className = 'btn time-period-btn';
+    button.className = 'financial-planning-tab'; // Use same class name as FinancialPlanningView
     button.dataset.period = period.key;
-    button.style.display = 'flex';
-    button.style.alignItems = 'center';
-    button.style.justifyContent = 'center';
-    button.style.gap = SPACING.XS;
-    const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
-    button.style.padding = isMobile
-      ? `${SPACING.XS} ${SPACING.SM}`
-      : `${SPACING.MD} ${SPACING.MD}`;
-    button.style.minHeight = isMobile ? '40px' : '44px';
-    button.style.minWidth = '0'; // Allow shrinking in grid
-    button.style.border = 'none';
-    button.style.borderRadius = 'var(--radius-md)';
-    button.style.background =
-      period.key === initialKey ? COLORS.PRIMARY : COLORS.SURFACE;
-    button.style.color = period.key === initialKey ? 'white' : COLORS.TEXT_MAIN;
-    button.style.cursor = 'pointer';
-    button.style.fontSize = isMobile
-      ? 'var(--font-size-sm)'
-      : 'var(--font-size-md)';
-    button.style.fontWeight = '500';
-    button.style.whiteSpace = isMobile ? 'normal' : 'nowrap';
-    button.style.wordBreak = isMobile ? 'break-word' : 'normal';
-    button.style.lineHeight = isMobile ? '1.1' : 'normal';
-    button.style.transition = 'all 0.2s ease';
-    button.style.flex = '1 0 auto';
+    button.setAttribute('role', 'tab');
+    button.setAttribute(
+      'aria-selected',
+      period.key === initialKey ? 'true' : 'false'
+    );
+    button.setAttribute('aria-controls', `${period.key}-panel`);
+    button.id = `${period.key}-tab`;
+
+    button.innerHTML = `
+      <span class="tab-label">${period.label}</span>
+    `;
+
+    // Exact same styling as FinancialPlanningView tabs
+    Object.assign(button.style, {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: SPACING.XS,
+      padding: `${SPACING.MD} ${SPACING.XL}`,
+      minHeight: 'var(--touch-target-min)',
+      minWidth: 'var(--touch-target-min)',
+      border: 'none',
+      borderRadius: 'var(--radius-md)',
+      background:
+        period.key === initialKey ? COLORS.PRIMARY : COLORS.SURFACE,
+      color: period.key === initialKey ? 'white' : COLORS.TEXT_MAIN,
+      cursor: 'pointer',
+      fontSize: 'var(--font-size-md)',
+      fontWeight: '500',
+      whiteSpace: 'nowrap',
+      transition: 'all 0.2s ease',
+      flex: '1 0 auto', // Grow to fill space, but respect content size
+    });
     button.addEventListener('click', () => {
       if (period.key === 'custom') {
         handleCustomPeriodSelection();
@@ -134,15 +153,15 @@ export const TimePeriodSelector = (options = {}) => {
       }
     });
 
-    // Add hover effects
+    // Add hover effects matching FinancialPlanningView
     button.addEventListener('mouseenter', () => {
-      if (!button.classList.contains('active')) {
+      if (period.key !== initialKey) {
         button.style.background = COLORS.SURFACE_HOVER;
       }
     });
 
     button.addEventListener('mouseleave', () => {
-      if (!button.classList.contains('active')) {
+      if (period.key !== initialKey) {
         button.style.background = COLORS.SURFACE;
       }
     });
@@ -544,19 +563,21 @@ export const TimePeriodSelector = (options = {}) => {
   }
 
   /**
-   * Set active button state
+   * Set active button state - match FinancialPlanningView styling
    */
   function setActiveButton(activeButton) {
     // Reset all buttons
     periodButtons.forEach(button => {
       button.style.background = COLORS.SURFACE;
       button.style.color = COLORS.TEXT_MAIN;
+      button.setAttribute('aria-selected', 'false');
       button.classList.remove('active');
     });
 
     // Set active button
     activeButton.style.background = COLORS.PRIMARY;
     activeButton.style.color = 'white';
+    activeButton.setAttribute('aria-selected', 'true');
     activeButton.classList.add('active');
   }
 
@@ -603,25 +624,12 @@ export const TimePeriodSelector = (options = {}) => {
   }
 
   /**
-   * Handle responsive layout updates
+   * Handle responsive layout updates - match FinancialPlanningView exactly
    */
   function updateResponsiveLayout() {
-    const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
-
-    // Update button container layout
-    buttonsContainer.style.gridTemplateColumns = isMobile
-      ? 'repeat(2, 1fr)'
-      : 'repeat(3, 1fr)';
-
-    // Update button font sizes and text wrapping for mobile
-    periodButtons.forEach(button => {
-      button.style.fontSize = isMobile
-        ? 'var(--font-size-sm)'
-        : 'var(--font-size-md)';
-      button.style.whiteSpace = isMobile ? 'normal' : 'nowrap';
-      button.style.textAlign = 'center';
-      button.style.lineHeight = isMobile ? '1.2' : 'normal';
-    });
+    // FinancialPlanningView doesn't change tab styling based on screen size
+    // The tabs maintain consistent styling across all devices
+    // No need to update button styles - they're already responsive by design
   }
 
   // Add responsive listener

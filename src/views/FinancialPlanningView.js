@@ -187,7 +187,8 @@ export const FinancialPlanningView = () => {
     const nav = document.createElement('nav');
     nav.className = 'financial-planning-nav';
     nav.setAttribute('role', 'tablist');
-    nav.style.display = 'flex';
+    nav.style.display = 'grid';
+    nav.style.gridTemplateColumns = 'repeat(3, 1fr)';
     nav.style.gap = SPACING.SM;
     nav.style.marginBottom = SPACING.LG;
     nav.style.flexWrap = 'wrap'; // Allow wrapping
