@@ -34,9 +34,10 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
 
   const addGoalBtn = document.createElement('button');
   addGoalBtn.textContent = 'Add Goal';
-  addGoalBtn.className = 'btn btn-primary';
+  addGoalBtn.className = 'btn btn-primary add-goal-btn';
 
   const goalForm = document.createElement('div');
+  goalForm.className = 'goal-form';
   goalForm.style.display = 'none';
   goalForm.style.gap = SPACING.SM;
   goalForm.style.marginTop = SPACING.SM;
@@ -69,11 +70,35 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
 
   const saveGoalBtn = document.createElement('button');
   saveGoalBtn.textContent = 'Save Goal';
-  saveGoalBtn.className = 'btn btn-primary';
+  saveGoalBtn.className = 'btn btn-primary btn-save';
+
+  const nameError = document.createElement('div');
+  nameError.className = 'error';
+  nameError.setAttribute('name', 'name');
+  nameError.style.color = COLORS.ERROR;
+  nameError.style.fontSize = '0.8rem';
+  nameError.style.display = 'none';
+
+  const targetError = document.createElement('div');
+  targetError.className = 'error';
+  targetError.setAttribute('name', 'target');
+  targetError.style.color = COLORS.ERROR;
+  targetError.style.fontSize = '0.8rem';
+  targetError.style.display = 'none';
+
+  const dateError = document.createElement('div');
+  dateError.className = 'error';
+  dateError.setAttribute('name', 'deadline');
+  dateError.style.color = COLORS.ERROR;
+  dateError.style.fontSize = '0.8rem';
+  dateError.style.display = 'none';
 
   goalForm.appendChild(goalName);
+  goalForm.appendChild(nameError);
   goalForm.appendChild(goalTarget);
+  goalForm.appendChild(targetError);
   goalForm.appendChild(goalDate);
+  goalForm.appendChild(dateError);
   goalForm.appendChild(goalCurrent);
   goalForm.appendChild(saveGoalBtn);
 
@@ -91,16 +116,27 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
 
     // Basic validation
     let valid = true;
+    nameError.style.display = 'none';
+    targetError.style.display = 'none';
+    dateError.style.display = 'none';
+
     if (!name) {
-      console.error('Goal name is required.');
+      nameError.textContent = 'Goal name is required.';
+      nameError.style.display = 'block';
       valid = false;
     }
     if (!(target > 0)) {
-      console.error('Target amount must be greater than 0.');
+      targetError.textContent = 'Target amount must be greater than 0.';
+      targetError.style.display = 'block';
       valid = false;
     }
     if (!tdate || isNaN(tdate.getTime())) {
-      console.error('Please choose a valid target date.');
+      dateError.textContent = 'Please choose a valid target date.';
+      dateError.style.display = 'block';
+      valid = false;
+    } else if (tdate < new Date(new Date().setHours(0, 0, 0, 0))) {
+      dateError.textContent = 'Deadline must be in the future.';
+      dateError.style.display = 'block';
       valid = false;
     }
     if (!valid) return;
@@ -142,7 +178,7 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
  */
 function createGoalsList(chartRenderer, activeCharts, section) {
   const goalsList = document.createElement('div');
-  goalsList.className = 'goals-list';
+  goalsList.className = 'goal-list';
   goalsList.style.marginTop = SPACING.MD;
 
   async function refreshGoalsList() {
@@ -169,26 +205,93 @@ function createGoalsList(chartRenderer, activeCharts, section) {
       ul.style.gap = SPACING.SM;
 
       items.forEach(goal => {
+        const progress =
+          goal.targetAmount > 0
+            ? (goal.currentSavings / goal.targetAmount) * 100
+            : 0;
+        const isCompleted = progress >= 100;
+        const targetDate = new Date(goal.targetDate);
+        const isOverdue = !isCompleted && targetDate < new Date();
+
         const li = document.createElement('li');
+        li.className = `goal-item ${isCompleted ? 'completed' : 'in-progress'} ${isOverdue ? 'overdue' : ''}`;
         li.style.display = 'flex';
-        li.style.justifyContent = 'space-between';
-        li.style.alignItems = 'center';
+        li.style.flexDirection = 'column';
+        li.style.gap = SPACING.SM;
+        li.style.padding = SPACING.MD;
+        li.style.background = COLORS.SURFACE;
+        li.style.borderRadius = 'var(--radius-md)';
+        li.style.border = `1px solid ${COLORS.BORDER}`;
+
+        const topRow = document.createElement('div');
+        topRow.style.display = 'flex';
+        topRow.style.justifyContent = 'space-between';
+        topRow.style.alignItems = 'center';
 
         const left = document.createElement('div');
         left.style.display = 'flex';
         left.style.flexDirection = 'column';
 
+        const titleContainer = document.createElement('div');
+        titleContainer.style.display = 'flex';
+        titleContainer.style.alignItems = 'center';
+        titleContainer.style.gap = SPACING.SM;
+
         const title = document.createElement('div');
-        title.textContent = `${goal.name}`;
+        title.className = 'goal-name';
+        title.textContent = goal.name;
         title.style.fontWeight = '600';
+        titleContainer.appendChild(title);
+
+        if (isOverdue) {
+          const warningBadge = document.createElement('span');
+          warningBadge.className = 'warning-badge';
+          warningBadge.textContent = 'Overdue';
+          warningBadge.style.background = COLORS.ERROR;
+          warningBadge.style.color = '#fff';
+          warningBadge.style.fontSize = '0.7rem';
+          warningBadge.style.padding = '2px 6px';
+          warningBadge.style.borderRadius = '4px';
+          titleContainer.appendChild(warningBadge);
+        }
 
         const meta = document.createElement('div');
         meta.style.fontSize = '0.9rem';
         meta.style.color = COLORS.TEXT_MUTED;
-        meta.textContent = `${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(goal.currentSavings)} of ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(goal.targetAmount)} by ${new Date(goal.targetDate).toLocaleDateString()}`;
 
-        left.appendChild(title);
+        const currentFormatted = new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'EUR',
+        }).format(goal.currentSavings);
+        const targetFormatted = new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'EUR',
+        }).format(goal.targetAmount);
+
+        meta.innerHTML = `<span class="currency-value">${currentFormatted}</span> of <span class="currency-value">${targetFormatted}</span> by ${targetDate.toLocaleDateString()}`;
+
+        left.appendChild(titleContainer);
         left.appendChild(meta);
+
+        // Calculate time remaining
+        const diffTime = targetDate - new Date();
+        const diffMonths = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 30));
+        if (!isCompleted && diffMonths > 0) {
+          const timeRem = document.createElement('div');
+          timeRem.className = 'time-remaining';
+          timeRem.style.fontSize = '0.8rem';
+          timeRem.style.color = COLORS.PRIMARY;
+          timeRem.textContent = `${diffMonths} months remaining`;
+          left.appendChild(timeRem);
+
+          const needed = (goal.targetAmount - goal.currentSavings) / diffMonths;
+          const monthlyNeeded = document.createElement('div');
+          monthlyNeeded.className = 'monthly-savings-needed';
+          monthlyNeeded.style.fontSize = '0.8rem';
+          monthlyNeeded.style.fontWeight = '500';
+          monthlyNeeded.innerHTML = `Need <span class="currency-value">${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(needed)}</span> / month`;
+          left.appendChild(monthlyNeeded);
+        }
 
         const actions = document.createElement('div');
         actions.style.display = 'flex';
@@ -196,17 +299,61 @@ function createGoalsList(chartRenderer, activeCharts, section) {
 
         const editBtn = document.createElement('button');
         editBtn.textContent = 'Edit';
-        editBtn.className = 'btn btn-ghost';
+        editBtn.className = 'btn btn-ghost edit-goal';
 
         const delBtn = document.createElement('button');
         delBtn.textContent = 'Delete';
-        delBtn.className = 'btn btn-ghost';
+        delBtn.className = 'btn btn-ghost delete-goal';
 
         actions.appendChild(editBtn);
         actions.appendChild(delBtn);
 
-        li.appendChild(left);
-        li.appendChild(actions);
+        topRow.appendChild(left);
+        topRow.appendChild(actions);
+
+        li.appendChild(topRow);
+
+        // Progress bar and percentage
+        const progressContainer = document.createElement('div');
+        progressContainer.style.width = '100%';
+        progressContainer.style.marginTop = SPACING.XS;
+
+        const progHeader = document.createElement('div');
+        progHeader.style.display = 'flex';
+        progHeader.style.justifyContent = 'space-between';
+        progHeader.style.fontSize = '0.8rem';
+        progHeader.style.marginBottom = '4px';
+
+        const progLabel = document.createElement('span');
+        progLabel.textContent = 'Progress';
+        const progPct = document.createElement('span');
+        progPct.className = 'progress-percentage';
+        progPct.textContent = `${Math.min(100, progress).toFixed(1)}%`;
+
+        progHeader.appendChild(progLabel);
+        progHeader.appendChild(progPct);
+        progressContainer.appendChild(progHeader);
+
+        const progBg = document.createElement('div');
+        progBg.className = 'progress-bar-bg';
+        progBg.style.height = '8px';
+        progBg.style.background = '#eee';
+        progBg.style.borderRadius = '4px';
+        progBg.style.overflow = 'hidden';
+
+        const progFill = document.createElement('div');
+        progFill.className = 'progress-bar';
+        progFill.style.height = '100%';
+        progFill.style.width = `${Math.min(100, progress)}%`;
+        progFill.style.background = isCompleted
+          ? COLORS.SUCCESS
+          : isOverdue
+            ? COLORS.ERROR
+            : COLORS.PRIMARY;
+
+        progBg.appendChild(progFill);
+        progressContainer.appendChild(progBg);
+        li.appendChild(progressContainer);
 
         ul.appendChild(li);
 
@@ -320,10 +467,8 @@ function createGoalsList(chartRenderer, activeCharts, section) {
     }
   }
 
-  // Initial population
-  refreshGoalsList();
-
-  return goalsList;
+  // Return both the element and a way to populate it
+  return { goalsList, refreshGoalsList };
 }
 
 /**
@@ -382,14 +527,17 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
   const goalsToRender = hasRealGoals ? goalsFromStorage : sampleGoals;
 
   // Create goal progress chart
-  createGoalProgressChart(chartRenderer, goalsToRender)
-    .then(({ section: chartSection, chart }) => {
-      section.appendChild(chartSection);
-      activeCharts.set('goal-progress', chart);
-    })
-    .catch(error => {
-      console.error('Error creating goal progress chart:', error);
-    });
+  try {
+    const { section: chartSection, chart } = await createGoalProgressChart(
+      chartRenderer,
+      goalsToRender
+    );
+    chartSection.classList.add('goals-progress-chart'); // Add class for tests
+    section.appendChild(chartSection);
+    activeCharts.set('goal-progress', chart);
+  } catch (error) {
+    console.error('Error creating goal progress chart:', error);
+  }
 
   // Add goal form controls
   const goalControls = createGoalFormControls(
@@ -400,15 +548,54 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
   section.appendChild(goalControls);
 
   // Add goals list
-  const goalsList = createGoalsList(chartRenderer, activeCharts, section);
+  const { goalsList, refreshGoalsList } = createGoalsList(
+    chartRenderer,
+    activeCharts,
+    section
+  );
   section.appendChild(goalsList);
+
+  // Add insights
+  const insights = document.createElement('div');
+  insights.className = 'goal-insights';
+  insights.style.marginTop = SPACING.MD;
+  insights.style.padding = SPACING.MD;
+  insights.style.background = COLORS.SURFACE;
+  insights.style.borderRadius = 'var(--radius-md)';
+  insights.style.border = `1px solid ${COLORS.BORDER}`;
+
+  const behindSchedule = goalsToRender.filter(g => {
+    const progress =
+      g.targetAmount > 0 ? (g.currentSavings / g.targetAmount) * 100 : 0;
+    const targetDate = new Date(g.targetDate);
+    return (
+      progress < 20 &&
+      targetDate < new Date(Date.now() + 180 * 24 * 60 * 60 * 1000)
+    );
+  });
+
+  if (behindSchedule.length > 0) {
+    insights.innerHTML = `
+      <h4 style="margin-top:0">Goal Insights</h4>
+      <p style="font-size:0.9rem; color: ${COLORS.ERROR}"><strong>Recommendation:</strong> You have ${behindSchedule.length} goals that may need more aggressive savings to stay on track.</p>
+    `;
+  } else {
+    insights.innerHTML = `
+      <h4 style="margin-top:0">Goal Insights</h4>
+      <p style="font-size:0.9rem; color: ${COLORS.SUCCESS}"><strong>Recommendation:</strong> Your goals look well-paced. Keep up the consistent saving!</p>
+    `;
+  }
+  section.appendChild(insights);
+
+  // Initial population of the list
+  await refreshGoalsList();
 
   // Add placeholder only when goals are not managed yet
   if (!hasRealGoals) {
     const placeholder = createPlaceholder(
-      'Goal Planner Coming Soon',
-      'Full goal planning with custom targets, automatic progress tracking, and wealth projections is coming soon.',
-      '\ud83c\udfaf'
+      'No Goals Yet',
+      'Start planning your financial future by creating your first goal.',
+      '🎯'
     );
     section.appendChild(placeholder);
   }

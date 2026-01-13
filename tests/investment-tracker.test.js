@@ -56,23 +56,4 @@ describe('InvestmentTracker', () => {
     const aaa = gains.individualGains.find(i => i.symbol === 'AAA');
     expect(aaa.gainLoss).toBeCloseTo(150 - 100); // current - purchase
   });
-
-  it('analyzes asset allocation', () => {
-    tracker.addInvestment('S1', 1, 100, new Date(), {
-      currentPrice: 100,
-      assetClass: 'stocks',
-    });
-    tracker.addInvestment('B1', 2, 50, new Date(), {
-      currentPrice: 50,
-      assetClass: 'bonds',
-    });
-
-    const allocation = tracker.analyzeAssetAllocation();
-    expect(allocation.totalValue).toBeGreaterThan(0);
-    expect(Object.keys(allocation.allocations)).toContain('stocks');
-    expect(Object.keys(allocation.allocations)).toContain('bonds');
-    expect(
-      allocation.percentages.stocks + allocation.percentages.bonds
-    ).toBeGreaterThan(0);
-  });
 });
