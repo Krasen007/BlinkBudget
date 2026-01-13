@@ -13,7 +13,12 @@
 
 import { COLORS, SPACING } from '../../utils/constants.js';
 import { createGoalProgressChart } from '../../utils/financial-planning-charts.js';
-import { createSectionContainer, createPlaceholder, createUsageNote, safeParseDate } from '../../utils/financial-planning-helpers.js';
+import {
+    createSectionContainer,
+    createPlaceholder,
+    createUsageNote,
+    safeParseDate,
+} from '../../utils/financial-planning-helpers.js';
 import { refreshChart } from '../../utils/chart-refresh-helper.js';
 import { StorageService } from '../../core/storage.js';
 
@@ -380,7 +385,11 @@ export const GoalsSection = (chartRenderer, activeCharts) => {
         });
 
     // Add goal form controls
-    const goalControls = createGoalFormControls(chartRenderer, activeCharts, section);
+    const goalControls = createGoalFormControls(
+        chartRenderer,
+        activeCharts,
+        section
+    );
     section.appendChild(goalControls);
 
     // Add goals list
