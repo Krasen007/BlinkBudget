@@ -248,7 +248,6 @@ export const ReportsView = () => {
     headerContainer.style.flexDirection = 'column';
     headerContainer.style.gap = SPACING.SM;
     headerContainer.style.flexShrink = '0';
-    headerContainer.style.padding = '0 var(--spacing-sm)'; // Match body padding
 
     headerContainer.appendChild(header);
     headerContainer.appendChild(timePeriodSelectorComponent);
