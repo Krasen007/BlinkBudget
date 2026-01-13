@@ -75,13 +75,28 @@ export const FinancialPlanningView = () => {
 
   // Create header
   const header = createHeader();
-  container.appendChild(header);
-
-  // Create navigation tabs
   const navigation = createNavigation();
-  container.appendChild(navigation);
 
-  // Helper functions now imported from financial-planning-helpers.js
+  // Create header container that includes both header and navigation
+  const headerContainer = document.createElement('div');
+  headerContainer.className = 'financial-planning-header-container';
+  headerContainer.style.background = COLORS.BACKGROUND;
+  headerContainer.style.zIndex = '10';
+  headerContainer.style.position = 'fixed'; // Fixed to viewport
+  headerContainer.style.top = '0'; // Stick to top
+  headerContainer.style.left = '50%'; // Center horizontally
+  headerContainer.style.transform = 'translateX(-50%)'; // Center adjustment
+  headerContainer.style.width = '100%'; // Full width for centering
+  headerContainer.style.maxWidth = 'var(--container-max-width)'; // Match app width
+  headerContainer.style.display = 'flex';
+  headerContainer.style.flexDirection = 'column';
+  headerContainer.style.gap = SPACING.SM;
+  headerContainer.style.flexShrink = '0';
+  headerContainer.style.padding = '0 var(--spacing-sm)'; // Match body padding
+
+  headerContainer.appendChild(header);
+  headerContainer.appendChild(navigation);
+  container.appendChild(headerContainer);
 
   // Main content area
   const content = document.createElement('main');
@@ -95,6 +110,8 @@ export const FinancialPlanningView = () => {
   content.style.minHeight = '0';
   content.style.overflow = 'auto';
   content.style.gap = SPACING.LG;
+  content.style.paddingTop = '120px'; // Account for fixed header and navigation height
+
   container.appendChild(content);
 
   /**
@@ -106,7 +123,6 @@ export const FinancialPlanningView = () => {
     header.style.display = 'flex';
     header.style.justifyContent = 'space-between';
     header.style.alignItems = 'center';
-    header.style.marginBottom = SPACING.LG;
     header.style.flexShrink = '0';
 
     // Left side with back button and title

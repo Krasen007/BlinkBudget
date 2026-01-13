@@ -21,6 +21,15 @@ export const SettingsView = () => {
   const header = document.createElement('div');
   header.style.marginBottom = SPACING.SM;
   header.style.flexShrink = '0';
+  header.style.position = 'fixed'; // Fixed to viewport
+  header.style.top = '0'; // Stick to top
+  header.style.left = '50%'; // Center horizontally
+  header.style.transform = 'translateX(-50%)'; // Center adjustment
+  header.style.width = '100%'; // Full width for centering
+  header.style.maxWidth = 'var(--container-max-width)'; // Match app width
+  header.style.background = COLORS.BACKGROUND; // Ensure background covers content
+  header.style.zIndex = '10'; // Above content
+  header.style.padding = '0 var(--spacing-sm)'; // Match body padding
 
   const topRow = document.createElement('div');
   topRow.style.display = 'flex';
@@ -99,9 +108,15 @@ export const SettingsView = () => {
   header.appendChild(topRow);
   container.appendChild(header);
 
+  // Main content wrapper with padding for fixed header
+  const contentWrapper = document.createElement('div');
+  contentWrapper.style.paddingTop = '80px'; // Account for fixed header height
+
+  container.appendChild(contentWrapper);
+
   // Account Section
   const accountSection = AccountSection();
-  container.appendChild(accountSection);
+  contentWrapper.appendChild(accountSection);
 
   // Date Format Section
   const dateFormatSection = DateFormatSection({
@@ -114,21 +129,23 @@ export const SettingsView = () => {
       }
     },
   });
-  container.appendChild(dateFormatSection);
+  contentWrapper.appendChild(dateFormatSection);
 
   // Data Management Section
   const dataSection = DataManagementSection();
-  container.appendChild(dataSection);
+  contentWrapper.appendChild(dataSection);
 
   // General Section
   const generalSection = GeneralSection();
-  container.appendChild(generalSection);
+  contentWrapper.appendChild(generalSection);
 
   // OK Button
   const doneBtn = Button({
-    text: 'OK',
+    text: 'Done',
     variant: 'primary',
     onClick: () => Router.navigate('dashboard'),
+    fontSize: FONT_SIZES.MD,
+    fontWeight: '600',
   });
   doneBtn.className += ' touch-target';
   Object.assign(doneBtn.style, {
@@ -137,10 +154,9 @@ export const SettingsView = () => {
     marginBottom: 0,
     padding: SPACING.SM,
     minHeight: TOUCH_TARGETS.MIN_HEIGHT,
-    fontSize: FONT_SIZES.MD,
     fontWeight: '600',
   });
-  container.appendChild(doneBtn);
+  contentWrapper.appendChild(doneBtn);
 
   const handleStorageUpdate = e => {
     console.log(

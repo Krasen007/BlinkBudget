@@ -59,9 +59,9 @@ export const TimePeriodSelector = (options = {}) => {
 
   // Define available time periods
   const periods = [
-    { key: 'today', label: 'Today', getValue: getTodayPeriod },
-    { key: 'week', label: 'This Week', getValue: getCurrentWeekPeriod },
     { key: 'month', label: 'This Month', getValue: getCurrentMonthPeriod },
+    { key: 'week', label: 'This Week', getValue: getCurrentWeekPeriod },
+    { key: 'today', label: 'Today', getValue: getTodayPeriod },
     {
       key: 'quarter',
       label: 'This Quarter',

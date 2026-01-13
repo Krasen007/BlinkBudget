@@ -149,6 +149,8 @@ export const ReportsView = () => {
   //content.style.minHeight = '0';
   content.style.overflowY = 'auto'; // Vertical scroll for content only
   //content.style.gap = SPACING.LG;
+  content.style.paddingTop = '200px'; // Account for fixed header height
+
 
   // State components
   const loadingState = createLoadingState();
@@ -252,10 +254,17 @@ export const ReportsView = () => {
     headerContainer.className = 'reports-header-container';
     headerContainer.style.background = COLORS.BACKGROUND;
     headerContainer.style.zIndex = '10';
+    headerContainer.style.position = 'fixed'; // Fixed to viewport
+    headerContainer.style.top = '0'; // Stick to top
+    headerContainer.style.left = '50%'; // Center horizontally
+    headerContainer.style.transform = 'translateX(-50%)'; // Center adjustment
+    headerContainer.style.width = '100%'; // Full width for centering
+    headerContainer.style.maxWidth = 'var(--container-max-width)'; // Match app width
     headerContainer.style.display = 'flex';
     headerContainer.style.flexDirection = 'column';
     headerContainer.style.gap = SPACING.SM;
     headerContainer.style.flexShrink = '0';
+    headerContainer.style.padding = '0 var(--spacing-sm)'; // Match body padding
 
     headerContainer.appendChild(header);
     headerContainer.appendChild(timePeriodSelectorComponent);
