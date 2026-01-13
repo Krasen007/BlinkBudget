@@ -103,7 +103,7 @@ describe('Date Input Integration', () => {
     container.appendChild(editView);
 
     // Check that the view has the proper class for CSS targeting
-    expect(editView.className).toBe('view-edit');
+    expect(editView.className).toBe('view-edit view-container');
 
     // Check that date input has the expected styling class
     const displayInput = editView.querySelector(

@@ -152,7 +152,6 @@ export const ReportsView = () => {
   //content.style.gap = SPACING.LG;
   content.style.paddingTop = '200px'; // Account for fixed header height
 
-
   // State components
   const loadingState = createLoadingState();
   const emptyState = createEmptyState();

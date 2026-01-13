@@ -83,8 +83,6 @@ export const SettingsView = () => {
   leftSide.appendChild(backButton);
   leftSide.appendChild(title);
 
-
-
   // Right side: navigation buttons
   const rightControls = createNavigationButtons('settings');
 

@@ -7,11 +7,7 @@
  * Requirements: 1.2, 2.5
  */
 
-import {
-  COLORS,
-  SPACING,
-  FONT_SIZES,
-} from '../utils/constants.js';
+import { COLORS, SPACING, FONT_SIZES } from '../utils/constants.js';
 import { DateInput } from './DateInput.js';
 import { formatDate, dateToISO } from '../utils/date-utils.js';
 
@@ -135,8 +131,7 @@ export const TimePeriodSelector = (options = {}) => {
       minWidth: 'var(--touch-target-min)',
       border: 'none',
       borderRadius: 'var(--radius-md)',
-      background:
-        period.key === initialKey ? COLORS.PRIMARY : COLORS.SURFACE,
+      background: period.key === initialKey ? COLORS.PRIMARY : COLORS.SURFACE,
       color: period.key === initialKey ? 'white' : COLORS.TEXT_MAIN,
       cursor: 'pointer',
       fontSize: 'var(--font-size-md)',
