@@ -1,9 +1,7 @@
 import { TransactionForm } from '../components/TransactionForm.js';
-
 import { DateInput } from '../components/DateInput.js';
 import { TransactionService } from '../core/transaction-service.js';
 import { Router } from '../core/router.js';
-import { createButton } from '../utils/dom-factory.js';
 import {
   SPACING,
   TOUCH_TARGETS,
@@ -11,11 +9,12 @@ import {
   TIMING,
   STORAGE_KEYS,
 } from '../utils/constants.js';
+import { createButton } from '../utils/dom-factory.js';
 import { markTransactionForHighlight } from '../utils/success-feedback.js';
 
 export const EditView = ({ id }) => {
   const container = document.createElement('div');
-  container.className = 'view-edit';
+  container.className = 'view-edit view-container';
 
   const transaction = TransactionService.get(id);
 
@@ -34,7 +33,7 @@ export const EditView = ({ id }) => {
   const topRow = document.createElement('div');
   topRow.style.display = 'flex';
   topRow.style.justifyContent = 'space-between';
-  topRow.style.alignItems = 'flex-end';
+  topRow.style.alignItems = 'center';
 
   const title = document.createElement('h2');
   title.textContent = 'Edit Transaction';
@@ -50,7 +49,7 @@ export const EditView = ({ id }) => {
   // Back button
   const rightControls = document.createElement('div');
   rightControls.style.display = 'flex';
-  rightControls.style.alignItems = 'flex-end';
+  rightControls.style.alignItems = 'center';
   rightControls.style.gap = SPACING.SM;
 
   const smallBackBtn = createButton({
@@ -92,6 +91,7 @@ export const EditView = ({ id }) => {
       // Navigate to dashboard immediately
       Router.navigate('dashboard');
     },
+    onCancel: () => Router.navigate('dashboard'),
     onDelete: () => {
       import('../components/ConfirmDialog.js').then(({ ConfirmDialog }) => {
         ConfirmDialog({

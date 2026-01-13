@@ -24,7 +24,7 @@ export const AddView = ({ accountId } = {}) => {
   const topRow = document.createElement('div');
   topRow.style.display = 'flex';
   topRow.style.justifyContent = 'space-between';
-  topRow.style.alignItems = 'flex-end';
+  topRow.style.alignItems = 'center';
 
   const title = document.createElement('h2');
   title.textContent = 'Add Transaction';
@@ -37,7 +37,7 @@ export const AddView = ({ accountId } = {}) => {
   // Back button
   const rightControls = document.createElement('div');
   rightControls.style.display = 'flex';
-  rightControls.style.alignItems = 'flex-end';
+  rightControls.style.alignItems = 'center';
   rightControls.style.gap = SPACING.SM;
 
   const smallBackBtn = createButton({
