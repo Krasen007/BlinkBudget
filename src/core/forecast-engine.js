@@ -67,7 +67,7 @@ export class ForecastEngine {
         // Continue exponential smoothing for future values
         // Use the trend from the last few values to project forward
         const trend = this._calculateTrend(baseForecasts.slice(-3));
-        const projectedBase = lastSmoothedValue + (trend * (i + 1) * 0.5); // Dampen trend over time
+        const projectedBase = lastSmoothedValue + trend * (i + 1) * 0.5; // Dampen trend over time
 
         const baseAmount = projectedBase * seasonalMultiplier;
         const predictedAmount = Math.max(0, baseAmount + recurringAmount);
@@ -150,7 +150,7 @@ export class ForecastEngine {
         // Continue exponential smoothing for future values
         // Use trend from last few values to project forward
         const trend = this._calculateTrend(baseForecasts.slice(-3));
-        const projectedBase = lastSmoothedValue + (trend * (i + 1) * 0.5); // Dampen trend over time
+        const projectedBase = lastSmoothedValue + trend * (i + 1) * 0.5; // Dampen trend over time
 
         const baseAmount = projectedBase * seasonalMultiplier;
         const predictedAmount = Math.max(0, baseAmount + recurringAmount);
@@ -492,7 +492,10 @@ export class ForecastEngine {
 
     // Simple linear trend calculation
     const n = values.length;
-    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+    let sumX = 0,
+      sumY = 0,
+      sumXY = 0,
+      sumX2 = 0;
 
     for (let i = 0; i < n; i++) {
       sumX += i;

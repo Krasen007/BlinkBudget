@@ -19,7 +19,6 @@ import { ForecastEngine } from '../core/forecast-engine.js';
 import { AccountBalancePredictor } from '../core/account-balance-predictor.js';
 import { RiskAssessor } from '../core/risk-assessor.js';
 import { GoalPlanner } from '../core/goal-planner.js';
-import { StorageService } from '../core/storage.js';
 import { ChartRenderer } from '../components/ChartRenderer.js';
 
 import {
@@ -277,7 +276,7 @@ export const FinancialPlanningView = () => {
   /**
    * Switch between different planning sections
    */
-  function switchSection(sectionId) {
+  async function switchSection(sectionId) {
     if (sectionId === currentSection) return;
 
     // Clean up charts from previous section
@@ -295,13 +294,13 @@ export const FinancialPlanningView = () => {
     });
 
     // Render the selected section
-    renderSection(sectionId);
+    await renderSection(sectionId);
   }
 
   /**
    * Render the content for the selected section
    */
-  function renderSection(sectionId) {
+  async function renderSection(sectionId) {
     content.innerHTML = '';
 
     // Add section panel attributes
@@ -317,10 +316,10 @@ export const FinancialPlanningView = () => {
         renderForecastsSection();
         break;
       case 'investments':
-        renderInvestmentsSection();
+        await renderInvestmentsSection();
         break;
       case 'goals':
-        renderGoalsSection();
+        await renderGoalsSection();
         break;
       case 'insights':
         renderInsightsSection();
@@ -358,16 +357,19 @@ export const FinancialPlanningView = () => {
   /**
    * Render Investments section - Portfolio tracking
    */
-  function renderInvestmentsSection() {
-    const investmentsElement = InvestmentsSection(chartRenderer, activeCharts);
+  async function renderInvestmentsSection() {
+    const investmentsElement = await InvestmentsSection(
+      chartRenderer,
+      activeCharts
+    );
     content.appendChild(investmentsElement);
   }
 
   /**
    * Render Goals section - Long-term planning
    */
-  function renderGoalsSection() {
-    const goalsElement = GoalsSection(chartRenderer, activeCharts);
+  async function renderGoalsSection() {
+    const goalsElement = await GoalsSection(chartRenderer, activeCharts);
     content.appendChild(goalsElement);
   }
 
@@ -375,7 +377,11 @@ export const FinancialPlanningView = () => {
    * Render Insights section - Advanced analytics
    */
   function renderInsightsSection() {
-    const insightsElement = InsightsSection(planningData, chartRenderer, activeCharts);
+    const insightsElement = InsightsSection(
+      planningData,
+      chartRenderer,
+      activeCharts
+    );
     content.appendChild(insightsElement);
   }
 
@@ -383,7 +389,11 @@ export const FinancialPlanningView = () => {
    * Render Scenarios section - What-if modeling
    */
   function renderScenariosSection() {
-    const scenariosElement = ScenariosSection(goalPlanner, chartRenderer, activeCharts);
+    const scenariosElement = ScenariosSection(
+      goalPlanner,
+      chartRenderer,
+      activeCharts
+    );
     content.appendChild(scenariosElement);
   }
 
@@ -414,6 +424,8 @@ export const FinancialPlanningView = () => {
       const goalsCacheRaw = localStorage.getItem(goalsKey);
       if (goalsCacheRaw) console.log(`[Sync] ${goalsKey} loaded from cache`);
 
+      // Import StorageService dynamically
+      const { StorageService } = await import('../core/storage.js');
       const investments = StorageService.getInvestments
         ? StorageService.getInvestments()
         : [];
@@ -557,7 +569,9 @@ export const FinancialPlanningView = () => {
   // Initialize
   updateResponsiveLayout();
   loadPlanningData();
-  renderSection(currentSection);
+  (async () => {
+    await renderSection(currentSection);
+  })();
 
   return container;
 };
