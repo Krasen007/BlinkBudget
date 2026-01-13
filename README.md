@@ -14,6 +14,10 @@
 
 <img src="public/screenshot-mobile.png" alt="Mobile Screenshot"/>
 
+### Financial Planning View
+
+<img src="docs/financialplanning.png" alt="Financial Planning Screenshot" width="512"/>
+
 ## Key Features
 
 ### Lightning Fast Entry
@@ -44,14 +48,15 @@
 
 ### Financial Planning & Insights
 
-- **Advanced Financial Planning** with forecasting and predictions
-- **Investment portfolio tracking** with manual entry support
-- **Long-term goal planning** with progress tracking
-- **Comprehensive insights and analytics**
-- **Risk assessment and warnings**
-- **Scenario planning and modeling** for what-if analysis
-- **Daily/monthly expense toggles** in Financial Insights
-- **Projected Account Balance chart**
+BlinkBudget includes a sophisticated financial planning engine that helps you look beyond today's expenses:
+
+- **Interactive Scenario Modeling** - Forecast your net worth based on adjustable variables (investment returns, monthly savings, inflation).
+- **Investment Portfolio Tracking** - Monitor your total net worth with manual entry support for various investment types.
+- **Long-term Goal Planning** - Define specific financial objectives and track your progress over years or decades.
+- **Projected Account Balances** - Visualize how your current spending habits will impact your future bank balances.
+- **Risk Assessment & Warnings** - Automatically identifies potential financial risks and provides actionable alerts based on your patterns.
+- **Comprehensive Analytics** - Deep dive into your finances with "Top Movers" analysis and historical timeline comparisons.
+- **Dynamic Charting** - Toggle between daily and monthly views for precise trend analysis.
 
 ### User Experience & UI
 
@@ -213,4 +218,4 @@ GPLv3 License
 
 **BlinkBudget** - Making expense tracking effortless, all in 3 moves.
 
-Reminder: This application leverages AI-assisted development. Most logic and UI components were generated through collaborative AI engineering.
+**Reminder:** This application leverages AI-assisted development. Most logic and UI components were generated through collaborative AI engineering.

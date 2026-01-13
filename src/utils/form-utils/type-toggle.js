@@ -131,6 +131,7 @@ export const createTypeToggleGroup = (options = {}) => {
   let currentType = initialType;
 
   const typeGroup = document.createElement('div');
+  typeGroup.className = 'type-toggle-group';
   typeGroup.style.display = 'grid';
   typeGroup.style.gap = 'var(--spacing-sm)';
   typeGroup.style.marginBottom = 'var(--spacing-xs)';

@@ -275,15 +275,21 @@
 /* Responsive adjustments for cards */
 @media (width <= calc(var(--breakpoint-md) - 1px)) {
   .mobile-account-actions {
-    flex-direction: column;
+    display: grid !important;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm) !important;
+    width: 100%;
   }
 }
 
 @media (min-width: var(--breakpoint-md)) {
   .mobile-account-actions {
+    display: flex;
     flex-direction: row;
     justify-content: flex-end;
-    max-width: 300px;
+    gap: var(--spacing-md);
+    max-width: 400px;
+    margin-left: auto;
   }
 }
 

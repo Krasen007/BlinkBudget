@@ -450,8 +450,7 @@ export const FinancialPlanningView = () => {
   const updateResponsiveLayout = debounce(() => {
     const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
 
-    // Update container padding
-    container.style.padding = isMobile ? `0 ${SPACING.SM}` : `0 ${SPACING.MD}`;
+    // Layout updates for mobile
 
     // Update header layout for mobile
     const header = container.querySelector('.financial-planning-header');

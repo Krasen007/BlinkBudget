@@ -372,3 +372,17 @@ body.keyboard-visible select:focus {
     filter: invert(1);
   }
 }
+/* Type Toggle Group Styling */
+.type-toggle-group {
+  display: grid;
+  gap: var(--spacing-sm);
+  grid-template-columns: repeat(4, 1fr);
+  width: 100%;
+  margin-bottom: var(--spacing-xs);
+}
+
+@media (width <= 480px) {
+  .type-toggle-group {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

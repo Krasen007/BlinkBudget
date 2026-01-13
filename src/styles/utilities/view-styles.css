@@ -4,9 +4,9 @@
 .view-container {
   width: 100%;
   max-width: var(--container-max-width);
-  padding: 0 var(--spacing-md);
+  padding: 0 var(--spacing-sm); /* Mobile-first: 8px */
   height: 100%;
-  overflow: auto;
+  overflow: hidden auto;
   display: flex;
   flex-direction: column;
   -webkit-overflow-scrolling: touch;
@@ -96,14 +96,14 @@
   position: relative;
 }
 
-/* Mobile-specific padding adjustments (<=768px) */
+/* Mobile padding adjustment for small tablets (>=480px) */
 @media (--sm) {
   .view-container {
-    padding: 0 var(--spacing-sm);
+    padding: 0 var(--spacing-md); /* Standard: 12px */
   }
 
   .view-header {
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
   }
 }
 

@@ -95,28 +95,14 @@ export const AccountSection = () => {
       info.appendChild(name);
       info.appendChild(type);
 
-      const actions = createFlexContainer({
-        className: 'mobile-account-actions',
-        direction: 'row',
-        gap: SPACING.MD,
-        style: {
-          flexWrap: 'wrap',
-          marginTop: SPACING.SM,
-        },
-      });
+      const actions = document.createElement('div');
+      actions.className = 'mobile-account-actions';
+      actions.style.marginTop = SPACING.SM;
 
       // Rename button
       const renameBtn = document.createElement('button');
       renameBtn.textContent = 'Rename';
       renameBtn.className = 'btn btn-ghost touch-target mobile-action-btn';
-      Object.assign(renameBtn.style, {
-        fontSize: FONT_SIZES.SM,
-        padding: `${SPACING.MD} ${SPACING.LG}`,
-        minHeight: TOUCH_TARGETS.MIN_HEIGHT,
-        minWidth: TOUCH_TARGETS.MIN_HEIGHT,
-        flex: '1',
-      });
-      renameBtn.style.flex = '1';
       renameBtn.onclick = () => {
         PromptDialog({
           title: 'Rename Account',
@@ -148,14 +134,6 @@ export const AccountSection = () => {
         makeDefaultBtn.textContent = 'Set Default';
         makeDefaultBtn.className =
           'btn btn-ghost touch-target mobile-action-btn';
-        Object.assign(makeDefaultBtn.style, {
-          fontSize: FONT_SIZES.SM,
-          padding: `${SPACING.MD} ${SPACING.LG}`,
-          minHeight: TOUCH_TARGETS.MIN_HEIGHT,
-          minWidth: TOUCH_TARGETS.MIN_HEIGHT,
-          flex: '1',
-        });
-        makeDefaultBtn.style.flex = '1';
         makeDefaultBtn.onclick = () => {
           acc.isDefault = true;
           AccountService.saveAccount(acc);
@@ -171,15 +149,6 @@ export const AccountSection = () => {
         deleteBtn.textContent = 'Delete';
         deleteBtn.className =
           'btn btn-ghost touch-target mobile-action-btn mobile-delete-btn';
-        Object.assign(deleteBtn.style, {
-          color: COLORS.ERROR,
-          fontSize: FONT_SIZES.SM,
-          padding: `${SPACING.MD} ${SPACING.LG}`,
-          minHeight: TOUCH_TARGETS.MIN_HEIGHT,
-          minWidth: TOUCH_TARGETS.MIN_HEIGHT,
-          flex: '1',
-        });
-        deleteBtn.style.flex = '1';
         deleteBtn.onclick = () => {
           ConfirmDialog({
             title: `Delete account "${acc.name}"?`,

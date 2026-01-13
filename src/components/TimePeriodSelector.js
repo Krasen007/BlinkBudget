@@ -105,8 +105,11 @@ export const TimePeriodSelector = (options = {}) => {
     button.style.alignItems = 'center';
     button.style.justifyContent = 'center';
     button.style.gap = SPACING.XS;
-    button.style.padding = `${SPACING.MD} ${SPACING.MD}`;
-    button.style.minHeight = '44px'; // More balanced for 2-row grid
+    const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
+    button.style.padding = isMobile
+      ? `${SPACING.XS} ${SPACING.SM}`
+      : `${SPACING.MD} ${SPACING.MD}`;
+    button.style.minHeight = isMobile ? '40px' : '44px';
     button.style.minWidth = '0'; // Allow shrinking in grid
     button.style.border = 'none';
     button.style.borderRadius = 'var(--radius-md)';
@@ -114,9 +117,13 @@ export const TimePeriodSelector = (options = {}) => {
       period.key === initialKey ? COLORS.PRIMARY : COLORS.SURFACE;
     button.style.color = period.key === initialKey ? 'white' : COLORS.TEXT_MAIN;
     button.style.cursor = 'pointer';
-    button.style.fontSize = 'var(--font-size-md)';
+    button.style.fontSize = isMobile
+      ? 'var(--font-size-sm)'
+      : 'var(--font-size-md)';
     button.style.fontWeight = '500';
-    button.style.whiteSpace = 'normal';
+    button.style.whiteSpace = isMobile ? 'normal' : 'nowrap';
+    button.style.wordBreak = isMobile ? 'break-word' : 'normal';
+    button.style.lineHeight = isMobile ? '1.1' : 'normal';
     button.style.transition = 'all 0.2s ease';
     button.style.flex = '1 0 auto';
     button.addEventListener('click', () => {

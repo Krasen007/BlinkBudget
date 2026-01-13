@@ -864,13 +864,7 @@ export const ReportsView = () => {
       }
     }
 
-    if (isMobile) {
-      container.style.padding = '0'; // Header and content handle their own padding
-    } else if (isTablet) {
-      container.style.padding = '0';
-    } else {
-      container.style.padding = '0';
-    }
+    // Layout updates for mobile
 
     const headerContainer = container.querySelector(
       '.reports-header-container'
@@ -879,36 +873,23 @@ export const ReportsView = () => {
       // Padding removed - header container has no padding
     }
 
-    if (content) {
-      content.style.maxWidth = '100%';
-      content.style.boxSizing = 'border-box';
-      if (isMobile) {
-        content.style.padding = isShortLandscape
-          ? `${SPACING.XS} 0`
-          : `${SPACING.SM} 0`;
-        content.style.gap = SPACING.MD;
-      } else if (isTablet) {
-        content.style.padding = `${SPACING.MD} 0`;
-        content.style.gap = SPACING.LG;
-      } else {
-        content.style.padding = `${SPACING.LG} 0`;
-        content.style.gap = SPACING.LG;
-      }
+    content.style.maxWidth = '100%';
+    content.style.boxSizing = 'border-box';
+    content.style.gap = isMobile ? SPACING.MD : SPACING.LG;
 
-      // Sync charts-section horizontal padding with header
-      const chartsSections = content.querySelectorAll('.charts-section');
-      chartsSections.forEach(cs => {
-        if (isMobile) {
-          cs.style.padding = isShortLandscape
-            ? `${SPACING.XS} ${SPACING.SM}`
-            : `${SPACING.SM} ${SPACING.SM}`;
-        } else if (isTablet) {
-          cs.style.padding = `${SPACING.MD} ${SPACING.LG}`;
-        } else {
-          cs.style.padding = `${SPACING.MD} ${SPACING.XL}`;
-        }
-      });
-    }
+    // Sync charts-section horizontal padding with header
+    const chartsSections = content.querySelectorAll('.charts-section');
+    chartsSections.forEach(cs => {
+      if (isMobile) {
+        cs.style.padding = isShortLandscape
+          ? `${SPACING.XS} ${SPACING.SM}`
+          : `${SPACING.SM} ${SPACING.SM}`;
+      } else if (isTablet) {
+        cs.style.padding = `${SPACING.MD} ${SPACING.LG}`;
+      } else {
+        cs.style.padding = `${SPACING.MD} ${SPACING.XL}`;
+      }
+    });
 
     activeCharts.forEach(chart => {
       if (chart && typeof chart.resize === 'function') {
