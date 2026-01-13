@@ -18,6 +18,29 @@ import { refreshChart } from '../../utils/chart-refresh-helper.js';
 import { StorageService } from '../../core/storage.js';
 
 /**
+ * Transform portfolio data from StorageService to the format expected by the chart
+ * @param {Object} portfolioData - Raw portfolio data from StorageService
+ * @returns {Object} Transformed portfolio data for chart rendering
+ */
+function transformPortfolioData(portfolioData) {
+    const useMockPortfolio = !portfolioData || !portfolioData.totalValue || !portfolioData.assetAllocation;
+    return useMockPortfolio
+        ? {
+            totalValue: 25000,
+            assetAllocation: {
+                stocks: 15000,
+                bonds: 5000,
+                etfs: 3000,
+                cash: 2000,
+            },
+        }
+        : {
+            totalValue: portfolioData.totalValue,
+            assetAllocation: portfolioData.assetAllocation.assetAllocation || portfolioData.assetAllocation
+        };
+}
+
+/**
  * Helper function to create form fields
  */
 function createFormField(label, name, type, placeholder = '', step = '') {
@@ -666,10 +689,11 @@ function createInvestmentFormControls(chartRenderer, activeCharts) {
 
             // Refresh portfolio chart using helper
             const updated = StorageService.calculatePortfolioSummary();
+            const portfolioToRender = transformPortfolioData(updated);
             await refreshChart({
                 createChartFn: createPortfolioCompositionChart,
                 chartRenderer,
-                data: updated,
+                data: portfolioToRender,
                 section: document.querySelector('.investments-section'),
                 chartType: 'portfolio-composition',
                 activeCharts,
@@ -875,10 +899,11 @@ function createInvestmentsList(chartRenderer, activeCharts) {
 
                                 // Refresh chart and list using helper
                                 const updated = StorageService.calculatePortfolioSummary();
+                                const portfolioToRender = transformPortfolioData(updated);
                                 await refreshChart({
                                     createChartFn: createPortfolioCompositionChart,
                                     chartRenderer,
-                                    data: updated,
+                                    data: portfolioToRender,
                                     section: document.querySelector('.investments-section'),
                                     chartType: 'portfolio-composition',
                                     activeCharts,
@@ -900,10 +925,11 @@ function createInvestmentsList(chartRenderer, activeCharts) {
 
                             // Refresh chart using helper
                             const updated = StorageService.calculatePortfolioSummary();
+                            const portfolioToRender = transformPortfolioData(updated);
                             await refreshChart({
                                 createChartFn: createPortfolioCompositionChart,
                                 chartRenderer,
-                                data: updated,
+                                data: portfolioToRender,
                                 section: document.querySelector('.investments-section'),
                                 chartType: 'portfolio-composition',
                                 activeCharts,
@@ -953,17 +979,6 @@ export const InvestmentsSection = (chartRenderer, activeCharts) => {
         )
     );
 
-    // For now, create sample portfolio data since investment tracking isn't fully implemented
-    const samplePortfolioData = {
-        totalValue: 25000,
-        assetAllocation: {
-            stocks: 15000,
-            bonds: 5000,
-            etfs: 3000,
-            cash: 2000,
-        },
-    };
-
     // Try to load real portfolio summary from StorageService
     let portfolioData;
     try {
@@ -977,13 +992,7 @@ export const InvestmentsSection = (chartRenderer, activeCharts) => {
         portfolioData = null;
     }
 
-    const useMockPortfolio = !portfolioData || !portfolioData.totalValue || !portfolioData.assetAllocation;
-    const portfolioToRender = useMockPortfolio
-        ? samplePortfolioData
-        : {
-            totalValue: portfolioData.totalValue,
-            assetAllocation: portfolioData.assetAllocation.assetAllocation || portfolioData.assetAllocation
-        };
+    const portfolioToRender = transformPortfolioData(portfolioData);
 
     // Create portfolio composition chart
     createPortfolioCompositionChart(chartRenderer, portfolioToRender)
@@ -1004,7 +1013,8 @@ export const InvestmentsSection = (chartRenderer, activeCharts) => {
     section.appendChild(investmentsList);
 
     // Add placeholder only when portfolio is not managed yet
-    if (useMockPortfolio) {
+    const isUsingMockData = !portfolioData || !portfolioData.totalValue || !portfolioData.assetAllocation;
+    if (isUsingMockData) {
         const placeholder = createPlaceholder(
             'Investment Tracker Coming Soon',
             'Full investment tracking with real-time data integration and performance monitoring is coming soon.',

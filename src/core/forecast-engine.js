@@ -49,7 +49,9 @@ export class ForecastEngine {
         monthlyData.values,
         this.defaultAlpha
       );
-      const lastValue = baseForecasts[baseForecasts.length - 1] || 0;
+
+      // Continue exponential smoothing trend into the future
+      const lastSmoothedValue = baseForecasts[baseForecasts.length - 1] || 0;
 
       for (let i = 0; i < months; i++) {
         const futureDate = new Date();
@@ -62,7 +64,12 @@ export class ForecastEngine {
           futureDate
         );
 
-        const baseAmount = lastValue * seasonalMultiplier;
+        // Continue exponential smoothing for future values
+        // Use the trend from the last few values to project forward
+        const trend = this._calculateTrend(baseForecasts.slice(-3));
+        const projectedBase = lastSmoothedValue + (trend * (i + 1) * 0.5); // Dampen trend over time
+
+        const baseAmount = projectedBase * seasonalMultiplier;
         const predictedAmount = Math.max(0, baseAmount + recurringAmount);
 
         const confidence = this._calculateConfidence(monthlyData.values, i);
@@ -79,6 +86,7 @@ export class ForecastEngine {
           confidence,
           method: recurringAmount > 0 ? 'recurring' : 'exponential_smoothing',
           seasonalFactor: seasonalMultiplier,
+          trend: trend,
         });
       }
 
@@ -124,7 +132,9 @@ export class ForecastEngine {
         monthlyData.values,
         this.defaultAlpha
       );
-      const lastValue = baseForecasts[baseForecasts.length - 1] || 0;
+
+      // Continue exponential smoothing trend into the future
+      const lastSmoothedValue = baseForecasts[baseForecasts.length - 1] || 0;
 
       for (let i = 0; i < months; i++) {
         const futureDate = new Date();
@@ -137,7 +147,12 @@ export class ForecastEngine {
           futureDate
         );
 
-        const baseAmount = lastValue * seasonalMultiplier;
+        // Continue exponential smoothing for future values
+        // Use trend from last few values to project forward
+        const trend = this._calculateTrend(baseForecasts.slice(-3));
+        const projectedBase = lastSmoothedValue + (trend * (i + 1) * 0.5); // Dampen trend over time
+
+        const baseAmount = projectedBase * seasonalMultiplier;
         const predictedAmount = Math.max(0, baseAmount + recurringAmount);
 
         const confidence = this._calculateConfidence(monthlyData.values, i);
@@ -154,6 +169,7 @@ export class ForecastEngine {
           confidence,
           method: recurringAmount > 0 ? 'recurring' : 'exponential_smoothing',
           seasonalFactor: seasonalMultiplier,
+          trend: trend,
         });
       }
 
@@ -464,6 +480,29 @@ export class ForecastEngine {
     }
 
     return forecasts;
+  }
+
+  /**
+   * Calculate linear trend from recent values
+   * @param {Array} values - Recent values to analyze
+   * @returns {number} Trend value (positive = increasing, negative = decreasing)
+   */
+  _calculateTrend(values) {
+    if (!values || values.length < 2) return 0;
+
+    // Simple linear trend calculation
+    const n = values.length;
+    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+
+    for (let i = 0; i < n; i++) {
+      sumX += i;
+      sumY += values[i];
+      sumXY += i * values[i];
+      sumX2 += i * i;
+    }
+
+    const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+    return slope || 0;
   }
 
   /**
