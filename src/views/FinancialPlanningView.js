@@ -29,6 +29,7 @@ import {
   STORAGE_KEYS,
 } from '../utils/constants.js';
 import { debounce } from '../utils/touch-utils.js';
+import { createNavigationButtons } from '../utils/navigation-helper.js';
 
 import { OverviewSection } from './financial-planning/OverviewSection.js';
 import { ForecastsSection } from './financial-planning/ForecastsSection.js';
@@ -172,23 +173,8 @@ export const FinancialPlanningView = () => {
     leftSide.appendChild(backButton);
     leftSide.appendChild(title);
 
-    // Right side: add sync status indicator
-    const rightSide = document.createElement('div');
-    rightSide.style.display = 'flex';
-    rightSide.style.alignItems = 'center';
-    rightSide.style.gap = SPACING.SM;
-
-    const syncStatus = document.createElement('div');
-    syncStatus.className = 'sync-status';
-    syncStatus.style.padding = `${SPACING.XS} ${SPACING.SM}`;
-    syncStatus.style.borderRadius = 'var(--radius-sm)';
-    syncStatus.style.background = COLORS.SURFACE;
-    syncStatus.style.color = COLORS.TEXT_MUTED;
-    syncStatus.style.fontSize = '0.875rem';
-    syncStatus.textContent = navigator.onLine
-      ? 'Sync: online'
-      : 'Sync: offline';
-    rightSide.appendChild(syncStatus);
+    // Right side: navigation buttons
+    const rightSide = createNavigationButtons('financial-planning');
 
     header.appendChild(leftSide);
     header.appendChild(rightSide);

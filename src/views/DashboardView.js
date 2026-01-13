@@ -15,6 +15,7 @@ import {
 
 import { debounce } from '../utils/touch-utils.js';
 import { getTransactionToHighlight } from '../utils/success-feedback.js';
+import { createNavigationButtons } from '../utils/navigation-helper.js';
 
 export const DashboardView = () => {
   const container = document.createElement('div');
@@ -61,49 +62,8 @@ export const DashboardView = () => {
 
   leftSide.appendChild(title);
 
-  // Right side controls
-  const rightControls = document.createElement('div');
-  rightControls.style.display = 'flex';
-  rightControls.style.alignItems = 'center';
-  rightControls.style.gap = SPACING.SM;
-
-  // Charts Button (Desktop only)
-  const chartsBtn = document.createElement('button');
-  chartsBtn.innerHTML = '🎯';
-  chartsBtn.className = 'btn btn-ghost';
-  chartsBtn.style.fontSize = '1.5rem';
-  chartsBtn.style.padding = SPACING.XS;
-  chartsBtn.style.border = 'none';
-  chartsBtn.style.marginRight = SPACING.SM;
-  chartsBtn.title = 'Charts and Reports';
-  chartsBtn.addEventListener('click', () => Router.navigate('reports'));
-
-  // Financial Planning Button (Desktop only)
-  const planningBtn = document.createElement('button');
-  planningBtn.innerHTML = '📊';
-  planningBtn.className = 'btn btn-ghost';
-  planningBtn.style.fontSize = '1.5rem';
-  planningBtn.style.padding = SPACING.XS;
-  planningBtn.style.border = 'none';
-  planningBtn.style.marginRight = SPACING.SM;
-  planningBtn.title = 'Financial Planning';
-  planningBtn.addEventListener('click', () =>
-    Router.navigate('financial-planning')
-  );
-
-  // Settings Button
-  const settingsBtn = document.createElement('button');
-  settingsBtn.innerHTML = '⚙️';
-  settingsBtn.className = 'btn btn-ghost';
-  settingsBtn.style.fontSize = '1.5rem';
-  settingsBtn.style.padding = SPACING.XS;
-  settingsBtn.style.border = 'none';
-  settingsBtn.title = 'Settings';
-  settingsBtn.addEventListener('click', () => Router.navigate('settings'));
-
-  rightControls.appendChild(chartsBtn);
-  rightControls.appendChild(planningBtn);
-  rightControls.appendChild(settingsBtn);
+  // Right side controls - use navigation helper
+  const rightControls = createNavigationButtons('dashboard');
 
   topRow.appendChild(leftSide);
   topRow.appendChild(rightControls);

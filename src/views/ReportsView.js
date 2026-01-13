@@ -24,6 +24,7 @@ import {
   STORAGE_KEYS,
 } from '../utils/constants.js';
 import { debounce } from '../utils/touch-utils.js';
+import { createNavigationButtons } from '../utils/navigation-helper.js';
 
 // Import utility modules
 import {
@@ -218,25 +219,8 @@ export const ReportsView = () => {
     leftSide.appendChild(backButton);
     leftSide.appendChild(title);
 
-    // Right side: keyboard shortcuts info
-    const rightSide = document.createElement('div');
-    rightSide.style.display = 'flex';
-    rightSide.style.alignItems = 'center';
-    rightSide.style.gap = SPACING.SM;
-
-    if (window.innerWidth >= BREAKPOINTS.MOBILE) {
-      const shortcutsInfo = document.createElement('div');
-      shortcutsInfo.className = 'keyboard-shortcuts-info';
-      shortcutsInfo.style.fontSize = '0.75rem';
-      shortcutsInfo.style.color = COLORS.TEXT_MUTED;
-      shortcutsInfo.style.textAlign = 'right';
-      shortcutsInfo.style.lineHeight = '1.2';
-      shortcutsInfo.innerHTML = `
-        <div>Press <kbd style="background: ${COLORS.SURFACE}; padding: 2px 4px; border-radius: 3px; font-size: 0.7rem;">Esc</kbd> to go back</div>
-        <div>Press <kbd style="background: ${COLORS.SURFACE}; padding: 2px 4px; border-radius: 3px; font-size: 0.7rem;">Ctrl+R</kbd> to refresh</div>
-      `;
-      rightSide.appendChild(shortcutsInfo);
-    }
+    // Right side: navigation buttons
+    const rightSide = createNavigationButtons('reports');
 
     header.appendChild(leftSide);
     header.appendChild(rightSide);

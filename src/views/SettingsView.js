@@ -12,6 +12,7 @@ import {
 } from '../utils/constants.js';
 import { COLORS } from '../utils/constants.js';
 import { createButton } from '../utils/dom-factory.js';
+import { createNavigationButtons } from '../utils/navigation-helper.js';
 
 export const SettingsView = () => {
   const container = document.createElement('div');
@@ -82,17 +83,16 @@ export const SettingsView = () => {
   leftSide.appendChild(backButton);
   leftSide.appendChild(title);
 
-  // Save button in top right (same format as back button in AddView)
-  const rightControls = document.createElement('div');
-  rightControls.style.display = 'flex';
-  rightControls.style.alignItems = 'center';
 
+
+  // Right side: navigation buttons
+  const rightControls = createNavigationButtons('settings');
+
+  // Add Save button to the left of navigation buttons
   const saveBtn = createButton({
     text: 'Save',
     className: 'btn btn-ghost',
     style: {
-      height: TOUCH_TARGETS.MIN_HEIGHT,
-      minHeight: TOUCH_TARGETS.MIN_HEIGHT,
       padding: `${SPACING.SM} ${SPACING.SM}`,
       fontSize: FONT_SIZES.MD,
       width: 'auto',
@@ -101,7 +101,8 @@ export const SettingsView = () => {
     onClick: () => Router.navigate('dashboard'),
   });
 
-  rightControls.appendChild(saveBtn);
+  // Insert Save button at the beginning of rightControls
+  rightControls.insertBefore(saveBtn, rightControls.firstChild);
 
   topRow.appendChild(leftSide);
   topRow.appendChild(rightControls);
@@ -110,7 +111,7 @@ export const SettingsView = () => {
 
   // Main content wrapper with padding for fixed header
   const contentWrapper = document.createElement('div');
-  contentWrapper.style.paddingTop = '80px'; // Account for fixed header height
+  contentWrapper.style.paddingTop = '60px'; // Account for fixed header height
 
   container.appendChild(contentWrapper);
 
