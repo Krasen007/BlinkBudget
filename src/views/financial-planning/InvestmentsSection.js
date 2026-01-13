@@ -15,6 +15,7 @@ import { COLORS, SPACING } from '../../utils/constants.js';
 import { createPortfolioCompositionChart } from '../../utils/financial-planning-charts.js';
 import { createSectionContainer, createPlaceholder, createUsageNote } from '../../utils/financial-planning-helpers.js';
 import { refreshChart } from '../../utils/chart-refresh-helper.js';
+import { StorageService } from '../../core/storage.js';
 
 /**
  * Helper function to create form fields
@@ -966,9 +967,8 @@ export const InvestmentsSection = (chartRenderer, activeCharts) => {
     // Try to load real portfolio summary from StorageService
     let portfolioData;
     try {
-        import('../../core/storage.js').then(({ StorageService }) => {
-            portfolioData = StorageService.calculatePortfolioSummary();
-        });
+        portfolioData = StorageService.calculatePortfolioSummary();
+        console.log('Loaded portfolio data:', portfolioData);
     } catch (err) {
         console.warn(
             'Error fetching portfolio summary from StorageService:',
@@ -977,10 +977,13 @@ export const InvestmentsSection = (chartRenderer, activeCharts) => {
         portfolioData = null;
     }
 
-    const useMockPortfolio = !portfolioData || !portfolioData.totalValue;
+    const useMockPortfolio = !portfolioData || !portfolioData.totalValue || !portfolioData.assetAllocation;
     const portfolioToRender = useMockPortfolio
         ? samplePortfolioData
-        : portfolioData;
+        : {
+            totalValue: portfolioData.totalValue,
+            assetAllocation: portfolioData.assetAllocation.assetAllocation || portfolioData.assetAllocation
+        };
 
     // Create portfolio composition chart
     createPortfolioCompositionChart(chartRenderer, portfolioToRender)
