@@ -4,6 +4,7 @@
  */
 
 import { FONT_SIZES, TIMING } from '../constants.js';
+import { ClickTracker } from '../../core/click-tracking-service.js';
 
 /**
  * Create an amount input element with mobile optimizations
@@ -33,6 +34,11 @@ export const createAmountInput = (options = {}) => {
   input.inputMode = 'decimal'; // Show numeric keypad on mobile
   input.pattern = '[0-9]*'; // Fallback for older devices to trigger numpad
   input.setAttribute('autofocus', 'true'); // Hint to browser related to focus
+
+  // Track clicks on amount input
+  input.addEventListener('click', () => {
+    ClickTracker.recordClick();
+  });
 
   // Keyboard-aware viewport adjustments
   input.addEventListener('focus', () => {

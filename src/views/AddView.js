@@ -2,6 +2,7 @@ import { TransactionForm } from '../components/TransactionForm.js';
 import { DateInput } from '../components/DateInput.js';
 import { TransactionService } from '../core/transaction-service.js';
 import { Router } from '../core/router.js';
+import { ClickTracker } from '../core/click-tracking-service.js';
 import {
   SPACING,
   TOUCH_TARGETS,
@@ -12,6 +13,9 @@ import { createButton } from '../utils/dom-factory.js';
 import { markTransactionForHighlight } from '../utils/success-feedback.js';
 
 export const AddView = ({ accountId } = {}) => {
+  // Start tracking the transaction flow
+  ClickTracker.startTransactionFlow();
+
   const container = document.createElement('div');
   container.className = 'view-add view-container';
 
@@ -67,6 +71,19 @@ export const AddView = ({ accountId } = {}) => {
     externalDateInput: dateInput,
     showCancelButton: true, // Add cancel button to the form
     onSubmit: data => {
+      // Record the final click (submit action)
+      ClickTracker.recordClick();
+
+      // Complete tracking and get metrics
+      const metrics = ClickTracker.completeTransactionFlow();
+
+      // Log metrics for debugging (can be removed in production)
+      if (metrics) {
+        console.log(
+          `Transaction completed: ${metrics.clicks} clicks, ${metrics.duration.toFixed(1)}s`
+        );
+      }
+
       // Update dashboard filter to show the account used for this transaction
       if (data.accountId) {
         sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, data.accountId);
@@ -81,7 +98,11 @@ export const AddView = ({ accountId } = {}) => {
       // Navigate to dashboard immediately
       Router.navigate('dashboard');
     },
-    onCancel: () => Router.navigate('dashboard'),
+    onCancel: () => {
+      // Cancel tracking if user backs out
+      ClickTracker.cancelTransactionFlow();
+      Router.navigate('dashboard');
+    },
   });
   container.appendChild(form);
 

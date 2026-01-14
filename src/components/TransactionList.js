@@ -10,8 +10,10 @@ import {
   BREAKPOINTS,
   TIMING,
   FONT_SIZES,
+  COLORS,
 } from '../utils/constants.js';
 import { debounce } from '../utils/touch-utils.js';
+import { ClickTracker } from '../core/click-tracking-service.js';
 
 export const TransactionList = ({
   transactions,
@@ -31,20 +33,73 @@ export const TransactionList = ({
   listContainer.style.minHeight = '0'; // Allow flex child to shrink
   listContainer.style.overflow = 'hidden'; // Prevent container from scrolling
 
+  // Title container with metrics
+  const titleContainer = document.createElement('div');
+  titleContainer.style.display = 'flex';
+  titleContainer.style.justifyContent = 'space-between';
+  titleContainer.style.alignItems = 'center';
+  titleContainer.style.marginBottom = SPACING.SM;
+  titleContainer.style.flexShrink = '0';
+
   const listTitle = document.createElement('h3');
   listTitle.textContent = 'Recent Transactions';
   listTitle.className = 'dashboard-transactions-title';
-  listTitle.style.flexShrink = '0'; // Prevent title from shrinking
   const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
   Object.assign(listTitle.style, {
-    marginBottom: SPACING.MD,
     textAlign: 'left',
     fontSize: isMobile ? FONT_SIZES.TITLE_MOBILE : FONT_SIZES.TITLE_DESKTOP,
     lineHeight: 'var(--line-height-tight)',
     fontWeight: '600',
+    margin: '0',
   });
 
-  listContainer.appendChild(listTitle);
+  // Click metrics display
+  const metrics = ClickTracker.getAverageMetrics();
+  const metricsDisplay = document.createElement('div');
+  metricsDisplay.className = 'click-metrics';
+  metricsDisplay.style.display = 'flex';
+  metricsDisplay.style.flexDirection = 'column';
+  metricsDisplay.style.alignItems = 'flex-end';
+  metricsDisplay.style.fontSize = isMobile ? FONT_SIZES.SM : FONT_SIZES.BASE;
+  metricsDisplay.style.color = COLORS.TEXT_MUTED || '#6b7280';
+  metricsDisplay.style.textAlign = 'right';
+  metricsDisplay.style.cursor = 'pointer';
+  metricsDisplay.title = 'Click to clear tracking history';
+
+  const clicksText = document.createElement('span');
+  clicksText.textContent = `${metrics.averageClicks} clicks avg`;
+  clicksText.style.fontWeight = '500';
+
+  const timeText = document.createElement('span');
+  timeText.textContent = `${metrics.averageDuration}s avg`;
+  timeText.style.fontSize = isMobile ? FONT_SIZES.XS : FONT_SIZES.SM;
+  timeText.style.marginTop = '2px';
+
+  metricsDisplay.appendChild(clicksText);
+  metricsDisplay.appendChild(timeText);
+
+  // Add click handler to clear tracking history
+  metricsDisplay.addEventListener('click', async e => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    ClickTracker.clearHistory();
+
+    // Update display immediately
+    const newMetrics = ClickTracker.getAverageMetrics();
+    clicksText.textContent = `${newMetrics.averageClicks} clicks avg`;
+    timeText.textContent = `${newMetrics.averageDuration}s avg`;
+
+    // Visual feedback
+    metricsDisplay.style.color = COLORS.SUCCESS || '#10b981';
+    setTimeout(() => {
+      metricsDisplay.style.color = COLORS.TEXT_MUTED || '#6b7280';
+    }, 1000);
+  });
+
+  titleContainer.appendChild(listTitle);
+  titleContainer.appendChild(metricsDisplay);
+  listContainer.appendChild(titleContainer);
 
   if (transactions.length === 0) {
     const emptyState = document.createElement('p');

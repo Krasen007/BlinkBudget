@@ -15,6 +15,7 @@ import {
   TOUCH_TARGETS,
 } from '../constants.js';
 import { validateAmount, showFieldError } from './validation.js';
+import { ClickTracker } from '../../core/click-tracking-service.js';
 
 /**
  * Create a single category/account chip
@@ -133,7 +134,10 @@ const createCategoryChip = options => {
 
   // Click handler
   if (onClick) {
-    chip.addEventListener('click', onClick);
+    chip.addEventListener('click', () => {
+      ClickTracker.recordClick();
+      onClick();
+    });
   }
 
   // Initial state

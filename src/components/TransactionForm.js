@@ -4,6 +4,7 @@
  */
 
 import { AccountService } from '../core/account-service.js';
+import { ClickTracker } from '../core/click-tracking-service.js';
 import { FONT_SIZES, COLORS, HAPTIC_PATTERNS } from '../utils/constants.js';
 import { createSelect } from '../utils/dom-factory.js';
 import { createTypeToggleGroup } from '../utils/form-utils/type-toggle.js';
@@ -72,6 +73,21 @@ export const TransactionForm = ({
     }
   });
 
+  // Track clicks on account selector
+  accSelect.addEventListener('click', () => {
+    ClickTracker.recordClick();
+  });
+
+  accSelect.addEventListener('change', e => {
+    ClickTracker.recordClick();
+    currentAccountId = e.target.value;
+    if (window.mobileUtils) {
+      window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.LIGHT);
+    }
+    // Always update category selector's source account for all transaction types
+    categorySelector.setSourceAccount(currentAccountId);
+  });
+
   accountGroup.appendChild(accSelect);
 
   // 3. Type Toggle
@@ -127,8 +143,9 @@ export const TransactionForm = ({
     btn.parentNode.replaceChild(newBtn, btn);
     typeToggle.buttons[type] = newBtn;
 
-    // Add new click handler that uses wrapped setType
+    // Add new click handler that uses wrapped setType and tracks clicks
     newBtn.addEventListener('click', () => {
+      ClickTracker.recordClick();
       typeToggle.setType(type);
       if (window.mobileUtils) {
         window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.LIGHT);

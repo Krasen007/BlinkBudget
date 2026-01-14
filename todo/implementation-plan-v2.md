@@ -19,34 +19,14 @@ Transform BlinkBudget from a functional PoC to a market-leading expense tracker 
 **Estimate**: 3 days  
 **Acceptance Criteria**:
 
-- [ ] Measure actual click count from app launch to saved transaction
+- [ ] Measure actual click count from app launch to saved transaction, show average clicks and seconds in the dashboard next to the Recent Transactions title
 - [ ] Identify and remove any unnecessary steps
-- [ ] Implement haptic feedback for each interaction
-- [ ] Add visual confirmation animations
-- [ ] Test on mobile devices with real users
 
 **Files to modify**:
 
 - `src/views/AddView.js`
 - `src/components/TransactionForm.js`
 - `src/utils/form-utils/`
-
-### 🔥 Task 1.2: Smart Category Prediction
-
-**Owner**: Frontend Dev  
-**Estimate**: 4 days  
-**Acceptance Criteria**:
-
-- [ ] Analyze transaction history for pattern recognition
-- [ ] Implement time-based suggestions (coffee mornings, lunch noon)
-- [ ] Add amount-based category hints (under $10 = coffee, over $50 = shopping)
-- [ ] Create confidence scoring for suggestions
-- [ ] A/B test prediction accuracy
-
-**Files to create**:
-
-- `src/core/category-predictor.js`
-- `src/utils/pattern-analysis.js`
 
 ### 🔥 Task 1.3: Voice Input Support
 

@@ -8,9 +8,26 @@ DO NOT IMPLEMENT: Mask technical error messages from Firestore operations
 DO NOT IMPLEMENT: Implement an audit logging mechanism for sensitive user actions (account changes, data export)
 DO NOT IMPLEMENT: make security.md following all the security best practices
 DO NOT IMPLEMENT: add possibility to import transactions from a csv file
-DO NOT IMPLEMENT: Add pre-selected categories when amount matches some amount, example: if user writes 25 assume it is Гориво, between 15 and 35 assume Храна, 13,28 is Телефон, 204,52 - Кредит, 255,64 - Други, highlight the category so that is to be more visible for the user to click
-DO NOT IMPLEMENT: release as windows store app https://learn.microsoft.com/en-us/microsoft-edge/progressive-web-apps/how-to/microsoft-store
-DO NOT IMPLEMENT: use Ionic's Capacitor or Cordova to make android app
+DO NOT IMPLEMENT: Add pre-selected categories when amount matches some amount, example: if user writes 25 assume it is Гориво, between 15 and 35 assume Храна, 13,28 is Телефон, 204,52 - Кредит, 255,64 - Други, highlight the category so that is to be more visible for the user to click (
+
+### 🔥 Task 1.2: Smart Category Prediction
+
+**Owner**: Frontend Dev  
+**Estimate**: 4 days  
+**Acceptance Criteria**:
+
+- [ ] Analyze transaction history for pattern recognition
+- [ ] Implement time-based suggestions (coffee mornings, lunch noon)
+- [ ] Add amount-based category hints (under $10 = coffee, over $50 = shopping)
+- [ ] Create confidence scoring for suggestions
+- [ ] A/B test prediction accuracy
+
+**Files to create**:
+
+- `src/core/category-predictor.js`
+- `src/utils/pattern-analysis.js`)
+  DO NOT IMPLEMENT: release as windows store app https://learn.microsoft.com/en-us/microsoft-edge/progressive-web-apps/how-to/microsoft-store
+  DO NOT IMPLEMENT: use Ionic's Capacitor or Cordova to make android app
 
 ---
 
