@@ -636,12 +636,19 @@ export const ReportsView = () => {
 
       // Category Selector
       try {
+        // Generate frequency analysis data
+        const frequencyData = analyticsEngine.analyzeFrequencyPatterns(
+          currentData.transactions,
+          currentTimePeriod
+        );
+
         const categorySelectorSection = CategorySelector(
           currentData,
           categoryColorMap,
           categories => getCategoryColors(categories, categoryColorMap),
           (name, amount, percentage) =>
-            showCategoryDetails(name, amount, percentage, currentData)
+            showCategoryDetails(name, amount, percentage, currentData),
+          frequencyData.categories
         );
         categorySelectorSection.style.marginTop = `calc(${SPACING.XL} * 2)`;
         categorySelectorSection.style.clear = 'both';

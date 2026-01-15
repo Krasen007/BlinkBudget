@@ -16,150 +16,143 @@ import { formatDateForDisplay } from '../utils/date-utils.js';
 import { formatCurrency } from '../utils/financial-planning-helpers.js';
 
 export function PatternInsights(
-  transactions,
-  timePeriod,
-  previousPeriod = null
-) {
-  // Analyze patterns
-  const weekdayWeekendAnalysis = PatternAnalyzer.analyzeWeekdayVsWeekend(
-    transactions,
-    timePeriod
-  );
-  const timeOfDayAnalysis = PatternAnalyzer.analyzeTimeOfDayPatterns(
-    transactions,
-    timePeriod
-  );
-  const frequencyAnalysis = PatternAnalyzer.analyzeFrequencyPatterns(
-    transactions,
-    timePeriod
-  );
-  const trendAlerts = PatternAnalyzer.generateTrendAlerts(
     transactions,
     timePeriod,
-    previousPeriod
-  );
+    previousPeriod = null
+) {
+    // Analyze patterns
+    const weekdayWeekendAnalysis = PatternAnalyzer.analyzeWeekdayVsWeekend(
+        transactions,
+        timePeriod
+    );
+    const timeOfDayAnalysis = PatternAnalyzer.analyzeTimeOfDayPatterns(
+        transactions,
+        timePeriod
+    );
+    const trendAlerts = PatternAnalyzer.generateTrendAlerts(
+        transactions,
+        timePeriod,
+        previousPeriod
+    );
 
-  // Create main container
-  const container = document.createElement('div');
-  container.className = 'pattern-insights';
-  container.style.cssText = `
+    // Create main container
+    const container = document.createElement('div');
+    container.className = 'pattern-insights';
+    container.style.cssText = `
     display: flex;
     flex-direction: column;
     gap: ${SPACING.LG};
     padding: ${SPACING.MD};
   `;
 
-  // Header
-  const header = document.createElement('div');
-  header.style.cssText = `
+    // Header
+    const header = document.createElement('div');
+    header.style.cssText = `
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: ${SPACING.MD};
   `;
 
-  const title = document.createElement('h2');
-  title.textContent = 'Spending Patterns';
-  title.style.cssText = `
+    const title = document.createElement('h2');
+    title.textContent = 'Spending Patterns';
+    title.style.cssText = `
     margin: 0;
     color: ${COLORS.TEXT_MAIN};
     font-size: ${FONT_SIZES.XL};
     font-weight: bold;
   `;
 
-  const timeRange = document.createElement('span');
-  timeRange.textContent = `${formatDateForDisplay(timePeriod.startDate)} - ${formatDateForDisplay(timePeriod.endDate)}`;
-  timeRange.style.cssText = `
+    const timeRange = document.createElement('span');
+    timeRange.textContent = `${formatDateForDisplay(timePeriod.startDate)} - ${formatDateForDisplay(timePeriod.endDate)}`;
+    timeRange.style.cssText = `
     color: ${COLORS.TEXT_MUTED};
     font-size: ${FONT_SIZES.SM};
   `;
 
-  header.appendChild(title);
-  header.appendChild(timeRange);
-  container.appendChild(header);
+    header.appendChild(title);
+    header.appendChild(timeRange);
+    container.appendChild(header);
 
-  // Trend Alerts Section
-  if (trendAlerts.warnings.length > 0 || trendAlerts.insights.length > 0) {
-    container.appendChild(createAlertsSection(trendAlerts));
-  }
+    // Trend Alerts Section
+    if (trendAlerts.warnings.length > 0 || trendAlerts.insights.length > 0) {
+        container.appendChild(createAlertsSection(trendAlerts));
+    }
 
-  // Weekday vs Weekend Section
-  container.appendChild(createWeekdayWeekendSection(weekdayWeekendAnalysis));
+    // Weekday vs Weekend Section
+    container.appendChild(createWeekdayWeekendSection(weekdayWeekendAnalysis));
 
-  // Time of Day Section
-  container.appendChild(createTimeOfDaySection(timeOfDayAnalysis));
+    // Time of Day Section
+    container.appendChild(createTimeOfDaySection(timeOfDayAnalysis));
 
-  // Frequency Analysis Section
-  container.appendChild(createFrequencySection(frequencyAnalysis));
-
-  return container;
+    return container;
 }
 
 /**
  * Create alerts and warnings section
  */
 function createAlertsSection(alerts) {
-  const section = document.createElement('div');
-  section.style.cssText = `
+    const section = document.createElement('div');
+    section.style.cssText = `
     display: flex;
     flex-direction: column;
     gap: ${SPACING.SM};
   `;
 
-  const title = document.createElement('h3');
-  title.textContent = 'Alerts & Insights';
-  title.style.cssText = `
+    const title = document.createElement('h3');
+    title.textContent = 'Alerts & Insights';
+    title.style.cssText = `
     margin: 0;
     color: ${COLORS.TEXT_MAIN};
     font-size: ${FONT_SIZES.LG};
     font-weight: 600;
   `;
-  section.appendChild(title);
+    section.appendChild(title);
 
-  // Warnings
-  alerts.warnings.forEach(alert => {
-    const alertEl = createAlertElement(alert, 'warning');
-    section.appendChild(alertEl);
-  });
+    // Warnings
+    alerts.warnings.forEach(alert => {
+        const alertEl = createAlertElement(alert, 'warning');
+        section.appendChild(alertEl);
+    });
 
-  // Insights
-  alerts.insights.forEach(insight => {
-    const alertEl = createAlertElement(insight, 'insight');
-    section.appendChild(alertEl);
-  });
+    // Insights
+    alerts.insights.forEach(insight => {
+        const alertEl = createAlertElement(insight, 'insight');
+        section.appendChild(alertEl);
+    });
 
-  // Trends
-  alerts.trends.forEach(trend => {
-    const alertEl = createAlertElement(trend, 'trend');
-    section.appendChild(alertEl);
-  });
+    // Trends
+    alerts.trends.forEach(trend => {
+        const alertEl = createAlertElement(trend, 'trend');
+        section.appendChild(alertEl);
+    });
 
-  return section;
+    return section;
 }
 
 /**
  * Create individual alert element
  */
 function createAlertElement(alert, type) {
-  const alertEl = document.createElement('div');
+    const alertEl = document.createElement('div');
 
-  const colors = {
-    warning: {
-      bg: COLORS.WARNING_BG,
-      border: COLORS.WARNING,
-      text: COLORS.WARNING_TEXT,
-    },
-    insight: {
-      bg: COLORS.SUCCESS_BG,
-      border: COLORS.SUCCESS,
-      text: COLORS.SUCCESS_TEXT,
-    },
-    trend: { bg: COLORS.INFO_BG, border: COLORS.INFO, text: COLORS.INFO_TEXT },
-  };
+    const colors = {
+        warning: {
+            bg: COLORS.WARNING_BG,
+            border: COLORS.WARNING,
+            text: COLORS.WARNING_TEXT,
+        },
+        insight: {
+            bg: COLORS.SUCCESS_BG,
+            border: COLORS.SUCCESS,
+            text: COLORS.SUCCESS_TEXT,
+        },
+        trend: { bg: COLORS.INFO_BG, border: COLORS.INFO, text: COLORS.INFO_TEXT },
+    };
 
-  const color = colors[type] || colors.insight;
+    const color = colors[type] || colors.insight;
 
-  alertEl.style.cssText = `
+    alertEl.style.cssText = `
     display: flex;
     align-items: flex-start;
     gap: ${SPACING.SM};
@@ -170,139 +163,139 @@ function createAlertElement(alert, type) {
     margin-bottom: ${SPACING.XS};
   `;
 
-  // Icon
-  const icon = document.createElement('div');
-  icon.textContent =
-    type === 'warning' ? '⚠️' : type === 'insight' ? '✅' : '📊';
-  icon.style.cssText = `
+    // Icon
+    const icon = document.createElement('div');
+    icon.textContent =
+        type === 'warning' ? '⚠️' : type === 'insight' ? '✅' : '📊';
+    icon.style.cssText = `
     font-size: ${FONT_SIZES.LG};
     flex-shrink: 0;
   `;
 
-  // Content
-  const content = document.createElement('div');
-  content.style.cssText = `
+    // Content
+    const content = document.createElement('div');
+    content.style.cssText = `
     flex: 1;
   `;
 
-  const alertTitle = document.createElement('div');
-  alertTitle.textContent = alert.title;
-  alertTitle.style.cssText = `
+    const alertTitle = document.createElement('div');
+    alertTitle.textContent = alert.title;
+    alertTitle.style.cssText = `
     font-weight: 600;
     color: ${color.text};
     margin-bottom: ${SPACING.XS};
   `;
 
-  const message = document.createElement('div');
-  message.textContent = alert.message;
-  message.style.cssText = `
+    const message = document.createElement('div');
+    message.textContent = alert.message;
+    message.style.cssText = `
     font-size: ${FONT_SIZES.SM};
     color: ${COLORS.TEXT_MAIN};
     margin-bottom: ${SPACING.XS};
   `;
 
-  if (alert.recommendation) {
-    const recommendation = document.createElement('div');
-    recommendation.textContent = `💡 ${alert.recommendation}`;
-    recommendation.style.cssText = `
+    if (alert.recommendation) {
+        const recommendation = document.createElement('div');
+        recommendation.textContent = `💡 ${alert.recommendation}`;
+        recommendation.style.cssText = `
       font-size: ${FONT_SIZES.SM};
       color: ${COLORS.TEXT_MUTED};
       font-style: italic;
     `;
-    content.appendChild(alertTitle);
-    content.appendChild(message);
-    content.appendChild(recommendation);
-  } else {
-    content.appendChild(alertTitle);
-    content.appendChild(message);
-  }
+        content.appendChild(alertTitle);
+        content.appendChild(message);
+        content.appendChild(recommendation);
+    } else {
+        content.appendChild(alertTitle);
+        content.appendChild(message);
+    }
 
-  alertEl.appendChild(icon);
-  alertEl.appendChild(content);
+    alertEl.appendChild(icon);
+    alertEl.appendChild(content);
 
-  return alertEl;
+    return alertEl;
 }
 
 /**
  * Create weekday vs weekend section
  */
 function createWeekdayWeekendSection(analysis) {
-  const section = document.createElement('div');
-  section.style.cssText = `
+    const section = document.createElement('div');
+    section.style.cssText = `
     background: ${COLORS.SURFACE};
     border-radius: ${SPACING.MD};
     padding: ${SPACING.MD};
   `;
 
-  const title = document.createElement('h3');
-  title.textContent = 'Weekday vs Weekend Spending';
-  title.style.cssText = `
+    const title = document.createElement('h3');
+    title.textContent = 'Weekday vs Weekend Spending';
+    title.style.cssText = `
     margin: 0 0 ${SPACING.MD} 0;
     color: ${COLORS.TEXT_MAIN};
     font-size: ${FONT_SIZES.LG};
     font-weight: 600;
   `;
-  section.appendChild(title);
+    section.appendChild(title);
 
-  // Comparison chart
-  const chartContainer = document.createElement('div');
-  chartContainer.style.cssText = `
+    // Comparison chart
+    const chartContainer = document.createElement('div');
+    chartContainer.style.cssText = `
     display: flex;
     gap: ${SPACING.LG};
     margin-bottom: ${SPACING.MD};
   `;
 
-  // Weekday column
-  const weekdayColumn = createSpendingColumn(
-    'Weekday',
-    analysis.weekday.total,
-    analysis.weekend.total,
-    COLORS.PRIMARY,
-    analysis.weekend.uniqueDays
-  );
-  chartContainer.appendChild(weekdayColumn);
+    // Weekday column
+    const weekdayColumn = createSpendingColumn(
+        'Weekday',
+        analysis.weekday.total,
+        analysis.weekend.total,
+        COLORS.PRIMARY,
+        analysis.weekend.uniqueDays
+    );
+    chartContainer.appendChild(weekdayColumn);
 
-  // Weekend column
-  const weekendColumn = createSpendingColumn(
-    'Weekend',
-    analysis.weekend.total,
-    analysis.weekend.total,
-    COLORS.ACCENT,
-    analysis.weekend.uniqueDays
-  );
-  chartContainer.appendChild(weekendColumn);
+    // Weekend column
+    const weekendColumn = createSpendingColumn(
+        'Weekend',
+        analysis.weekend.total,
+        analysis.weekend.total,
+        COLORS.ACCENT,
+        analysis.weekend.uniqueDays
+    );
+    chartContainer.appendChild(weekendColumn);
 
-  section.appendChild(chartContainer);
+    section.appendChild(chartContainer);
 
-  // Insights
-  const insightsEl = document.createElement('div');
-  insightsEl.style.cssText = `
+    // Insights
+    const insightsEl = document.createElement('div');
+    insightsEl.style.cssText = `
     display: flex;
     flex-direction: column;
     gap: ${SPACING.XS};
   `;
 
-  analysis.comparison.insights.forEach(insight => {
-    const insightEl = document.createElement('div');
-    insightEl.textContent = `• ${insight}`;
-    insightEl.style.cssText = `
+    analysis.comparison.insights.forEach(insight => {
+        const insightEl = document.createElement('div');
+        insightEl.textContent = `• ${insight}`;
+        insightEl.style.cssText = `
       font-size: ${FONT_SIZES.SM};
       color: ${COLORS.TEXT_MUTED};
     `;
-    insightsEl.appendChild(insightEl);
-  });
+        insightsEl.appendChild(insightEl);
+    });
 
-  section.appendChild(insightsEl);
+    section.appendChild(insightsEl);
 
-  return section;
+    return section;
 }
 
 /**
  * Create spending column for weekday/weekend comparison
  */
 function createSpendingColumn(label, amount, maxAmount, color, uniqueDays) {
-  const column = document.createElement('div');
-  column.style.cssText = `
+    const column = document.createElement('div');
+    column.style.cssText = `
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -310,16 +303,16 @@ function createSpendingColumn(label, amount, maxAmount, color, uniqueDays) {
     gap: ${SPACING.SM};
   `;
 
-  const labelEl = document.createElement('div');
-  labelEl.textContent = label;
-  labelEl.style.cssText = `
+    const labelEl = document.createElement('div');
+    labelEl.textContent = label;
+    labelEl.style.cssText = `
     font-weight: 600;
     color: ${COLORS.TEXT_MAIN};
   `;
 
-  // Visual bar
-  const barContainer = document.createElement('div');
-  barContainer.style.cssText = `
+    // Visual bar
+    const barContainer = document.createElement('div');
+    barContainer.style.cssText = `
     width: 100%;
     height: 100px;
     background: ${COLORS.BACKGROUND};
@@ -328,9 +321,9 @@ function createSpendingColumn(label, amount, maxAmount, color, uniqueDays) {
     overflow: hidden;
   `;
 
-  const bar = document.createElement('div');
-  const heightPercent = maxAmount > 0 ? (amount / maxAmount) * 100 : 0;
-  bar.style.cssText = `
+    const bar = document.createElement('div');
+    const heightPercent = maxAmount > 0 ? (amount / maxAmount) * 100 : 0;
+    bar.style.cssText = `
     position: absolute;
     bottom: 0;
     left: 0;
@@ -340,133 +333,133 @@ function createSpendingColumn(label, amount, maxAmount, color, uniqueDays) {
     transition: height 0.3s ease;
   `;
 
-  barContainer.appendChild(bar);
+    barContainer.appendChild(bar);
 
-  const amountEl = document.createElement('div');
-  amountEl.textContent = formatCurrency(amount);
-  amountEl.style.cssText = `
+    const amountEl = document.createElement('div');
+    amountEl.textContent = formatCurrency(amount);
+    amountEl.style.cssText = `
     font-size: ${FONT_SIZES.LG};
     font-weight: bold;
     color: ${COLORS.TEXT_MAIN};
   `;
 
-  const daysEl = document.createElement('div');
-  daysEl.textContent = `${uniqueDays} days`;
-  daysEl.style.cssText = `
+    const daysEl = document.createElement('div');
+    daysEl.textContent = `${uniqueDays} days`;
+    daysEl.style.cssText = `
     font-size: ${FONT_SIZES.SM};
     color: ${COLORS.TEXT_MUTED};
   `;
 
-  column.appendChild(labelEl);
-  column.appendChild(barContainer);
-  column.appendChild(amountEl);
-  column.appendChild(daysEl);
+    column.appendChild(labelEl);
+    column.appendChild(barContainer);
+    column.appendChild(amountEl);
+    column.appendChild(daysEl);
 
-  return column;
+    return column;
 }
 
 /**
  * Create time of day section
  */
 function createTimeOfDaySection(analysis) {
-  const section = document.createElement('div');
-  section.style.cssText = `
+    const section = document.createElement('div');
+    section.style.cssText = `
     background: ${COLORS.SURFACE};
     border-radius: ${SPACING.MD};
     padding: ${SPACING.MD};
   `;
 
-  const title = document.createElement('h3');
-  title.textContent = 'Time of Day Patterns';
-  title.style.cssText = `
+    const title = document.createElement('h3');
+    title.textContent = 'Time of Day Patterns';
+    title.style.cssText = `
     margin: 0 0 ${SPACING.MD} 0;
     color: ${COLORS.TEXT_MAIN};
     font-size: ${FONT_SIZES.LG};
     font-weight: 600;
   `;
-  section.appendChild(title);
+    section.appendChild(title);
 
-  // Time period bars
-  const periodsContainer = document.createElement('div');
-  periodsContainer.style.cssText = `
+    // Time period bars
+    const periodsContainer = document.createElement('div');
+    periodsContainer.style.cssText = `
     display: flex;
     flex-direction: column;
     gap: ${SPACING.SM};
   `;
 
-  const periodColors = {
-    earlyMorning: COLORS.SECONDARY,
-    morning: COLORS.PRIMARY,
-    afternoon: COLORS.ACCENT,
-    evening: COLORS.WARNING,
-    night: COLORS.MUTED,
-  };
+    const periodColors = {
+        earlyMorning: COLORS.SECONDARY,
+        morning: COLORS.PRIMARY,
+        afternoon: COLORS.ACCENT,
+        evening: COLORS.WARNING,
+        night: COLORS.MUTED,
+    };
 
-  Object.entries(analysis.periods).forEach(([period, data]) => {
-    if (data.total > 0) {
-      const periodBar = createTimePeriodBar(period, data, periodColors[period]);
-      periodsContainer.appendChild(periodBar);
-    }
-  });
+    Object.entries(analysis.periods).forEach(([period, data]) => {
+        if (data.total > 0) {
+            const periodBar = createTimePeriodBar(period, data, periodColors[period]);
+            periodsContainer.appendChild(periodBar);
+        }
+    });
 
-  section.appendChild(periodsContainer);
+    section.appendChild(periodsContainer);
 
-  // Insights
-  if (analysis.insights.length > 0) {
-    const insightsEl = document.createElement('div');
-    insightsEl.style.cssText = `
+    // Insights
+    if (analysis.insights.length > 0) {
+        const insightsEl = document.createElement('div');
+        insightsEl.style.cssText = `
       margin-top: ${SPACING.MD};
       padding-top: ${SPACING.MD};
       border-top: 1px solid ${COLORS.BORDER};
     `;
 
-    const insightsTitle = document.createElement('div');
-    insightsTitle.textContent = 'Key Insights:';
-    insightsTitle.style.cssText = `
+        const insightsTitle = document.createElement('div');
+        insightsTitle.textContent = 'Key Insights:';
+        insightsTitle.style.cssText = `
       font-weight: 600;
       color: ${COLORS.TEXT_MAIN};
       margin-bottom: ${SPACING.XS};
     `;
-    insightsEl.appendChild(insightsTitle);
+        insightsEl.appendChild(insightsTitle);
 
-    analysis.insights.forEach(insight => {
-      const insightEl = document.createElement('div');
-      insightEl.textContent = `• ${insight}`;
-      insightEl.style.cssText = `
+        analysis.insights.forEach(insight => {
+            const insightEl = document.createElement('div');
+            insightEl.textContent = `• ${insight}`;
+            insightEl.style.cssText = `
         font-size: ${FONT_SIZES.SM};
         color: ${COLORS.TEXT_MUTED};
       `;
-      insightsEl.appendChild(insightEl);
-    });
+            insightsEl.appendChild(insightEl);
+        });
 
-    section.appendChild(insightsEl);
-  }
+        section.appendChild(insightsEl);
+    }
 
-  return section;
+    return section;
 }
 
 /**
  * Create time period bar
  */
 function createTimePeriodBar(period, data, color) {
-  const barContainer = document.createElement('div');
-  barContainer.style.cssText = `
+    const barContainer = document.createElement('div');
+    barContainer.style.cssText = `
     display: flex;
     align-items: center;
     gap: ${SPACING.SM};
   `;
 
-  const label = document.createElement('div');
-  label.textContent = data.label || period;
-  label.style.cssText = `
+    const label = document.createElement('div');
+    label.textContent = data.label || period;
+    label.style.cssText = `
     width: 120px;
     font-size: ${FONT_SIZES.SM};
     color: ${COLORS.TEXT_MAIN};
     flex-shrink: 0;
   `;
 
-  const barWrapper = document.createElement('div');
-  barWrapper.style.cssText = `
+    const barWrapper = document.createElement('div');
+    barWrapper.style.cssText = `
     flex: 1;
     height: 24px;
     background: ${COLORS.BACKGROUND};
@@ -475,13 +468,13 @@ function createTimePeriodBar(period, data, color) {
     overflow: hidden;
   `;
 
-  const maxAmount = Math.max(
-    ...Object.values(data.hourlyBreakdown).map(h => h.amount)
-  );
-  const barWidth = maxAmount > 0 ? (data.total / maxAmount) * 100 : 0;
+    const maxAmount = Math.max(
+        ...Object.values(data.hourlyBreakdown).map(h => h.amount)
+    );
+    const barWidth = maxAmount > 0 ? (data.total / maxAmount) * 100 : 0;
 
-  const bar = document.createElement('div');
-  bar.style.cssText = `
+    const bar = document.createElement('div');
+    bar.style.cssText = `
     position: absolute;
     left: 0;
     top: 0;
@@ -491,11 +484,11 @@ function createTimePeriodBar(period, data, color) {
     transition: width 0.3s ease;
   `;
 
-  barWrapper.appendChild(bar);
+    barWrapper.appendChild(bar);
 
-  const amount = document.createElement('div');
-  amount.textContent = formatCurrency(data.total);
-  amount.style.cssText = `
+    const amount = document.createElement('div');
+    amount.textContent = formatCurrency(data.total);
+    amount.style.cssText = `
     width: 80px;
     text-align: right;
     font-size: ${FONT_SIZES.SM};
@@ -504,176 +497,10 @@ function createTimePeriodBar(period, data, color) {
     flex-shrink: 0;
   `;
 
-  barContainer.appendChild(label);
-  barContainer.appendChild(barWrapper);
-  barContainer.appendChild(amount);
+    barContainer.appendChild(label);
+    barContainer.appendChild(barWrapper);
+    barContainer.appendChild(amount);
 
-  return barContainer;
+    return barContainer;
 }
 
-/**
- * Create frequency analysis section
- */
-function createFrequencySection(analysis) {
-  const section = document.createElement('div');
-  section.style.cssText = `
-    background: ${COLORS.SURFACE};
-    border-radius: ${SPACING.MD};
-    padding: ${SPACING.MD};
-  `;
-
-  const title = document.createElement('h3');
-  title.textContent = 'Visit Frequency Analysis';
-  title.style.cssText = `
-    margin: 0 0 ${SPACING.MD} 0;
-    color: ${COLORS.TEXT_MAIN};
-    font-size: ${FONT_SIZES.LG};
-    font-weight: 600;
-  `;
-  section.appendChild(title);
-
-  // Category cards
-  const categoriesContainer = document.createElement('div');
-  categoriesContainer.style.cssText = `
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: ${SPACING.MD};
-  `;
-
-  Object.entries(analysis.categories).forEach(([category, data]) => {
-    const card = createFrequencyCard(category, data);
-    categoriesContainer.appendChild(card);
-  });
-
-  section.appendChild(categoriesContainer);
-
-  // Overall insights
-  if (analysis.overall) {
-    const overallSection = document.createElement('div');
-    overallSection.style.cssText = `
-      margin-top: ${SPACING.MD};
-      padding-top: ${SPACING.MD};
-      border-top: 1px solid ${COLORS.BORDER};
-    `;
-
-    const overallTitle = document.createElement('div');
-    overallTitle.textContent = 'Overall Patterns';
-    overallTitle.style.cssText = `
-      font-weight: 600;
-      color: ${COLORS.TEXT_MAIN};
-      margin-bottom: ${SPACING.SM};
-    `;
-    overallSection.appendChild(overallTitle);
-
-    const stats = document.createElement('div');
-    stats.style.cssText = `
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: ${SPACING.SM};
-    `;
-
-    const statItems = [
-      `Total weekly visits: ${analysis.overall.totalWeeklyVisits.toFixed(1)}`,
-      `Most frequent: ${analysis.overall.mostFrequentCategory}`,
-      `Highest spending: ${analysis.overall.highestSpendingCategory}`,
-    ];
-
-    statItems.forEach(stat => {
-      const statEl = document.createElement('div');
-      statEl.textContent = stat;
-      statEl.style.cssText = `
-        font-size: ${FONT_SIZES.SM};
-        color: ${COLORS.TEXT_MUTED};
-      `;
-      stats.appendChild(statEl);
-    });
-
-    overallSection.appendChild(stats);
-    section.appendChild(overallSection);
-  }
-
-  return section;
-}
-
-/**
- * Create frequency card for a category
- */
-function createFrequencyCard(category, data) {
-  const card = document.createElement('div');
-  card.style.cssText = `
-    background: ${COLORS.BACKGROUND};
-    border-radius: ${SPACING.SM};
-    padding: ${SPACING.SM};
-    border: 1px solid ${COLORS.BORDER};
-  `;
-
-  const categoryTitle = document.createElement('h4');
-  categoryTitle.textContent = category;
-  categoryTitle.style.cssText = `
-    margin: 0 0 ${SPACING.SM} 0;
-    color: ${COLORS.TEXT_MAIN};
-    font-size: ${FONT_SIZES.MD};
-    font-weight: 600;
-  `;
-  card.appendChild(categoryTitle);
-
-  const metrics = document.createElement('div');
-  metrics.style.cssText = `
-    display: flex;
-    flex-direction: column;
-    gap: ${SPACING.XS};
-  `;
-
-  const metricItems = [
-    { label: 'Visits/week', value: data.averageVisitsPerWeek.toFixed(1) },
-    { label: 'Avg spent', value: formatCurrency(data.averageSpentPerVisit) },
-    { label: 'Total spent', value: formatCurrency(data.totalSpent) },
-  ];
-
-  metricItems.forEach(item => {
-    const metricEl = document.createElement('div');
-    metricEl.style.cssText = `
-      display: flex;
-      justify-content: space-between;
-      font-size: ${FONT_SIZES.SM};
-    `;
-
-    const label = document.createElement('span');
-    label.textContent = item.label;
-    label.style.cssText = `color: ${COLORS.TEXT_MUTED};`;
-
-    const value = document.createElement('span');
-    value.textContent = item.value;
-    value.style.cssText = `color: ${COLORS.TEXT_MAIN}; font-weight: 600;`;
-
-    metricEl.appendChild(label);
-    metricEl.appendChild(value);
-    metrics.appendChild(metricEl);
-  });
-
-  card.appendChild(metrics);
-
-  // Insights
-  if (data.insights && data.insights.length > 0) {
-    const insightsEl = document.createElement('div');
-    insightsEl.style.cssText = `
-      margin-top: ${SPACING.SM};
-      padding-top: ${SPACING.SM};
-      border-top: 1px solid ${COLORS.BORDER};
-    `;
-
-    data.insights.forEach(insight => {
-      const insightEl = document.createElement('div');
-      insightEl.textContent = `• ${insight}`;
-      insightEl.style.cssText = `
-        font-size: ${FONT_SIZES.BASE};
-        color: ${COLORS.TEXT_MUTED};
-      `;
-      insightsEl.appendChild(insightEl);
-    });
-
-    card.appendChild(insightsEl);
-  }
-
-  return card;
-}

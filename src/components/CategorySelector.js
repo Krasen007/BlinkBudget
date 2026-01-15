@@ -1,6 +1,6 @@
 /**
  * CategorySelector Component
- * Provides a grid of category cards for selection.
+ * Provides a grid of category cards for selection with frequency analysis.
  */
 
 import { COLORS, SPACING } from '../utils/constants.js';
@@ -12,13 +12,15 @@ import { CategoryCard } from './CategoryCard.js';
  * @param {Map} categoryColorMap - Category colors
  * @param {Function} getCategoryColors - Logic for consistent colors
  * @param {Function} onCategoryClick - Selection callback
+ * @param {Object} frequencyData - Optional frequency analysis data
  * @returns {HTMLElement}
  */
 export const CategorySelector = (
   currentData,
   categoryColorMap,
   getCategoryColors,
-  onCategoryClick
+  onCategoryClick,
+  frequencyData = null
 ) => {
   const section = document.createElement('div');
   section.className = 'category-selector-section';
@@ -37,7 +39,7 @@ export const CategorySelector = (
 
   const description = document.createElement('p');
   description.textContent =
-    'Click on any category below to see detailed spending patterns and trends.';
+    'Click on any category below to see detailed spending patterns and visit frequency.';
   description.style.margin = `0 0 ${SPACING.LG} 0`;
   description.style.color = COLORS.TEXT_MUTED;
   section.appendChild(description);
@@ -47,7 +49,7 @@ export const CategorySelector = (
   categoryGrid.className = 'category-grid';
   categoryGrid.style.display = 'grid';
   categoryGrid.style.gridTemplateColumns =
-    'repeat(auto-fill, minmax(200px, 1fr))';
+    'repeat(auto-fill, minmax(250px, 1fr))';
   categoryGrid.style.gap = SPACING.MD;
   categoryGrid.style.marginTop = SPACING.MD;
 
@@ -57,7 +59,8 @@ export const CategorySelector = (
       index,
       categoryColorMap,
       getCategoryColors,
-      onCategoryClick
+      onCategoryClick,
+      frequencyData
     );
     categoryGrid.appendChild(card);
   });
