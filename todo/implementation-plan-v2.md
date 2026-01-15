@@ -36,162 +36,16 @@ Transform BlinkBudget from a functional PoC to a market-leading expense tracker 
 **Estimate**: 4 days  
 **Acceptance Criteria**:
 
-- [ ] Implement weekday vs weekend spending analysis
-- [ ] Create time-of-day spending patterns
-- [ ] Add frequency analysis (how often user visits coffee shops)
-- [ ] Generate trend alerts and warnings
-- [ ] Create pattern visualization components
+- [x] Implement weekday vs weekend spending analysis
+- [x] Create time-of-day spending patterns
+- [x] Add frequency analysis (how often user visits coffee shops)
+- [x] Generate trend alerts and warnings
+- [x] Create pattern visualization components
 
 **Files to create**:
 
 - `src/analytics/pattern-analyzer.js`
 - `src/components/PatternInsights.js`
-
-### 🔥 Task 2.3: Comparative Analytics Engine
-
-**Owner**: Backend Dev  
-**Estimate**: 4 days  
-**Acceptance Criteria**:
-
-- [ ] Month-over-month category comparison
-- [ ] Year-over-year spending trends
-- [ ] Budget vs actual tracking (optional budgets)
-- [ ] Spending velocity calculations
-- [ ] Create comparative chart components
-
-**Files to create**:
-
-- `src/analytics/comparative-engine.js`
-- `src/components/ComparativeCharts.js`
-
-### 🔥 Task 2.4: Smart Insights Generator
-
-**Owner**: Backend/Frontend Dev  
-**Estimate**: 3 days  
-**Acceptance Criteria**:
-
-- [ ] Generate actionable insights from spending patterns
-- [ ] Create insight templates (coffee savings, dining optimization)
-- [ ] Implement insight scoring and prioritization
-- [ ] Add insight sharing capabilities
-- [ ] Create insight history and tracking
-
-**Files to create**:
-
-- `src/analytics/insights-generator.js`
-- `src/components/SmartInsights.js`
-
----
-
-## 🌍 Phase 3: Multi-Currency Support (Weeks 6-7)
-
-### 🔥 Task 3.1: Currency Infrastructure
-
-**Owner**: Backend Dev  
-**Estimate**: 3 days  
-**Acceptance Criteria**:
-
-- [ ] Integrate free exchange rate API (exchangerate-api.com)
-- [ ] Create currency conversion service
-- [ ] Implement rate caching (24-hour updates)
-- [ ] Add fallback for API failures
-- [ ] Create currency preference management
-
-**Files to create**:
-
-- `src/core/currency-service.js`
-- `src/utils/exchange-rates.js`
-
-### 🔥 Task 3.2: Multi-Currency Transaction Form
-
-**Owner**: Frontend Dev  
-**Estimate**: 4 days  
-**Acceptance Criteria**:
-
-- [ ] Add currency selector to transaction form
-- [ ] Show converted amounts in user's preferred currency
-- [ ] Implement automatic currency detection (optional)
-- [ ] Create currency-specific formatting
-- [ ] Add travel mode for temporary currency changes
-
-**Files to modify**:
-
-- `src/components/TransactionForm.js`
-- `src/utils/form-utils/currency-selector.js`
-
-### 🔥 Task 3.3: Multi-Currency Reporting
-
-**Owner**: Frontend Dev  
-**Estimate**: 3 days  
-**Acceptance Criteria**:
-
-- [ ] Convert all reports to user's preferred currency
-- [ ] Show original currency in transaction details
-- [ ] Create currency breakdown reports
-- [ ] Add exchange rate history tracking
-- [ ] Implement currency gain/loss calculations
-
-**Files to modify**:
-
-- `src/views/ReportsView.js`
-- `src/analytics/analytics-engine.js`
-
----
-
-## 🔒 Phase 4: Privacy & Data Ownership (Week 8)
-
-### 🔥 Task 4.1: Enhanced Export Options
-
-**Owner**: Frontend Dev  
-**Estimate**: 2 days  
-**Acceptance Criteria**:
-
-- [ ] CSV export with all transaction data
-- [ ] JSON export for data portability
-- [ ] PDF report generation with insights
-- [ ] Excel export with charts
-- [ ] Add scheduled export options
-
-**Files to create**:
-
-- `src/utils/export-service.js`
-- `src/components/ExportOptions.js`
-
-### 🔥 Task 4.2: Privacy Dashboard
-
-**Owner**: Frontend Dev  
-**Estimate**: 3 days  
-**Acceptance Criteria**:
-
-- [ ] Show data storage location (local vs cloud)
-- [ ] Display data size and usage statistics
-- [ ] Add data deletion options
-- [ ] Create privacy settings management
-- [ ] Show data ownership certificates
-
-**Files to create**:
-
-- `src/views/PrivacyView.js`
-- `src/components/PrivacyDashboard.js`
-
-### 🔥 Task 4.3: Marketing Messaging Integration
-
-**Owner**: Marketing/Content  
-**Estimate**: 2 days  
-**Acceptance Criteria**:
-
-- [ ] Update landing page with privacy-first messaging
-- [ ] Create "Your data stays yours" campaign
-- [ ] Add comparison to competitors' data practices
-- [ ] Create privacy FAQ and documentation
-- [ ] Implement trust badges and certifications
-
-**Files to modify**:
-
-- `src/views/LandingView.js`
-- `public/privacy-policy.html`
-
----
 
 ## 📱 Phase 5: Mobile Experience Enhancement (Weeks 9-10)
 
@@ -202,10 +56,7 @@ Transform BlinkBudget from a functional PoC to a market-leading expense tracker 
 **Acceptance Criteria**:
 
 - [ ] Optimize service worker for offline usage
-- [ ] Add home screen install prompts
-- [ ] Implement background sync for transactions
 - [ ] Create offline transaction queue
-- [ ] Test PWA installation on iOS/Android
 
 **Files to modify**:
 
