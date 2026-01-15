@@ -418,130 +418,6 @@ export class ChartRenderer {
   }
 
   /**
-   * Apply mobile-specific optimizations to a chart
-   * @param {Chart} chartInstance - Chart.js instance to optimize
-   */
-  applyMobileOptimizations(chartInstance) {
-    if (!chartInstance) return;
-
-    const isMobile = window.innerWidth < 768;
-    const isSmallMobile = window.innerWidth < 480;
-    const isLandscape = window.innerHeight < window.innerWidth;
-    const isShortLandscape = isLandscape && window.innerHeight < 500;
-
-    if (isMobile) {
-      // Mobile-specific chart options
-      const mobileOptions = {
-        // Reduce legend padding on mobile
-        plugins: {
-          legend: {
-            position: isShortLandscape ? 'right' : 'bottom',
-            labels: {
-              padding: isSmallMobile ? 8 : 12,
-              font: {
-                size: isSmallMobile ? 10 : 11,
-              },
-              boxWidth: isSmallMobile ? 12 : 15,
-              boxHeight: isSmallMobile ? 12 : 15,
-              usePointStyle: true,
-            },
-          },
-          tooltip: {
-            // Larger tooltips for touch interaction
-            padding: 16,
-            titleFont: {
-              size: 14,
-            },
-            bodyFont: {
-              size: 13,
-            },
-            cornerRadius: 8,
-            caretSize: 8,
-            // Position tooltips to avoid screen edges
-            position: 'nearest',
-            xAlign: 'center',
-            yAlign: 'top',
-          },
-        },
-
-        // Optimize animations for mobile performance
-        animation: {
-          duration: isSmallMobile ? 300 : 400, // Faster animations on slower devices
-        },
-
-        // Enhanced interaction for touch
-        interaction: {
-          intersect: false,
-          mode: 'index',
-        },
-
-        // Mobile-specific scales
-        scales:
-          chartInstance.config.type !== 'pie'
-            ? {
-                x: {
-                  ticks: {
-                    font: {
-                      size: isSmallMobile ? 10 : 11,
-                    },
-                    maxRotation: isSmallMobile ? 45 : 30,
-                    minRotation: 0,
-                    // Reduce number of ticks on small screens
-                    maxTicksLimit: isSmallMobile ? 5 : 8,
-                  },
-                },
-                y: {
-                  ticks: {
-                    font: {
-                      size: isSmallMobile ? 10 : 11,
-                    },
-                    // Shorter number formatting on mobile
-                    callback: function (value) {
-                      if (value >= 1000000) {
-                        return `$${(value / 1000000).toFixed(1)}M`;
-                      } else if (value >= 1000) {
-                        return `$${(value / 1000).toFixed(1)}K`;
-                      } else {
-                        return `$${value.toFixed(0)}`;
-                      }
-                    },
-                  },
-                },
-              }
-            : undefined,
-      };
-
-      // Apply mobile optimizations
-      if (chartInstance.options.plugins?.legend) {
-        Object.assign(
-          chartInstance.options.plugins.legend,
-          mobileOptions.plugins.legend
-        );
-      }
-      if (chartInstance.options.plugins?.tooltip) {
-        Object.assign(
-          chartInstance.options.plugins.tooltip,
-          mobileOptions.plugins.tooltip
-        );
-      }
-      if (chartInstance.options.animation) {
-        chartInstance.options.animation.duration =
-          mobileOptions.animation.duration;
-      }
-      chartInstance.options.interaction = mobileOptions.interaction;
-
-      if (mobileOptions.scales) {
-        Object.assign(chartInstance.options.scales, mobileOptions.scales);
-      }
-      // Update the chart with mobile optimizations
-      chartInstance.update('none'); // No animation for performance
-
-      // Add touch-specific event handlers
-      this.addTouchOptimizations(chartInstance);
-    }
-  }
-
-  /**
    * Add touch-specific optimizations for mobile devices
    * @param {Chart} chartInstance - Chart.js instance
    */
@@ -590,8 +466,8 @@ export class ChartRenderer {
           clientX: touch.clientX,
           clientY: touch.clientY,
           target: canvas,
-          preventDefault: () => {},
-          stopPropagation: () => {},
+          preventDefault: () => { },
+          stopPropagation: () => { },
         };
 
         // Get elements at touch position
@@ -830,8 +706,8 @@ export class ChartRenderer {
       originalBorderWidth
     )
       ? originalBorderWidth.map((width, i) =>
-          i === activeElement.index ? width + 2 : width
-        )
+        i === activeElement.index ? width + 2 : width
+      )
       : originalBorderWidth + 2;
 
     chart.update('none');

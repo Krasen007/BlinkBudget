@@ -774,6 +774,19 @@
   opacity: 1;
 }
 
+/* Mobile responsive styles for category cards */
+@media (width <= calc(var(--breakpoint-md) - 1px)) {
+  .category-selector-section .category-grid {
+    grid-template-columns: 1fr !important;
+    gap: var(--spacing-sm) !important;
+  }
+  
+  .category-card {
+    min-width: 0 !important;
+    overflow-wrap: break-word;
+  }
+}
+
 /* Consolidate all .income-expense-section definitions */
 .reports-view-container .income-expense-section {
   /* Layout and positioning */
