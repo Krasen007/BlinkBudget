@@ -14,6 +14,7 @@ import { AnomalyService } from './analytics/AnomalyService.js';
 import { AnalyticsCache } from './analytics/AnalyticsCache.js';
 import { PredictionService } from './analytics/PredictionService.js';
 import { ComparisonService } from './analytics/ComparisonService.js';
+import { PatternAnalyzer } from '../analytics/pattern-analyzer.js';
 
 export class AnalyticsEngine {
   constructor() {
@@ -161,6 +162,72 @@ export class AnalyticsEngine {
     const result = ComparisonService.getHistoricalInsights(
       transactions,
       historicalPeriods
+    );
+    this.cache.set(cacheKey, result);
+    return result;
+  }
+
+  /**
+   * Analyze weekday vs weekend spending patterns
+   */
+  analyzeWeekdayVsWeekend(transactions, timePeriod) {
+    const cacheKey = `weekdayWeekend_${JSON.stringify(timePeriod)}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
+
+    const result = PatternAnalyzer.analyzeWeekdayVsWeekend(
+      transactions,
+      timePeriod
+    );
+    this.cache.set(cacheKey, result);
+    return result;
+  }
+
+  /**
+   * Analyze time-of-day spending patterns
+   */
+  analyzeTimeOfDayPatterns(transactions, timePeriod) {
+    const cacheKey = `timeOfDay_${JSON.stringify(timePeriod)}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
+
+    const result = PatternAnalyzer.analyzeTimeOfDayPatterns(
+      transactions,
+      timePeriod
+    );
+    this.cache.set(cacheKey, result);
+    return result;
+  }
+
+  /**
+   * Analyze frequency patterns for categories
+   */
+  analyzeFrequencyPatterns(transactions, timePeriod, targetCategories = null) {
+    const cacheKey = `frequency_${JSON.stringify(timePeriod)}_${JSON.stringify(targetCategories || [])}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
+
+    const result = PatternAnalyzer.analyzeFrequencyPatterns(
+      transactions,
+      timePeriod,
+      targetCategories
+    );
+    this.cache.set(cacheKey, result);
+    return result;
+  }
+
+  /**
+   * Generate trend alerts and warnings
+   */
+  generateTrendAlerts(transactions, timePeriod, previousPeriod = null) {
+    const cacheKey = `trends_${JSON.stringify(timePeriod)}_${JSON.stringify(previousPeriod || {})}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
+
+    const result = PatternAnalyzer.generateTrendAlerts(
+      transactions,
+      timePeriod,
+      previousPeriod
     );
     this.cache.set(cacheKey, result);
     return result;

@@ -58,6 +58,7 @@ import {
 import { CategorySelector } from '../components/CategorySelector.js';
 import { showCategoryDetails } from '../components/CategoryDetails.js';
 import { InsightsSection } from '../components/InsightsSection.js';
+import { PatternInsights } from '../components/PatternInsights.js';
 
 export const ReportsView = () => {
   const container = document.createElement('div');
@@ -715,6 +716,33 @@ export const ReportsView = () => {
           name: 'Category Trends',
           success: false,
           error: trendsError,
+        });
+      }
+
+      // Spending Pattern Analysis Section
+      try {
+        const patternInsightsSection = PatternInsights(
+          currentData.transactions,
+          currentTimePeriod,
+          null // previousPeriod - could be implemented later
+        );
+        patternInsightsSection.style.marginTop = `${SPACING.XL} !important`;
+        patternInsightsSection.style.borderBottom = `2px solid ${COLORS.BORDER}`;
+        patternInsightsSection.style.paddingBottom = `${SPACING.LG}`;
+        chartsSection.appendChild(patternInsightsSection);
+        chartRenderResults.push({
+          name: 'Spending Pattern Analysis',
+          success: true,
+        });
+      } catch (patternError) {
+        console.error(
+          'Failed to render pattern insights section:',
+          patternError
+        );
+        chartRenderResults.push({
+          name: 'Spending Pattern Analysis',
+          success: false,
+          error: patternError,
         });
       }
 

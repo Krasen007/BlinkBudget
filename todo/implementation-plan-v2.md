@@ -19,8 +19,8 @@ Transform BlinkBudget from a functional PoC to a market-leading expense tracker 
 **Estimate**: 3 days  
 **Acceptance Criteria**:
 
-- [ ] Measure actual click count from app launch to saved transaction, show average clicks and seconds in the dashboard next to the Recent Transactions title
-- [ ] Identify and remove any unnecessary steps
+- [x] Measure actual click count from app launch to saved transaction, show average clicks and seconds in the dashboard next to the Recent Transactions title
+- [x] Identify and remove any unnecessary steps
 
 **Files to modify**:
 
@@ -28,44 +28,7 @@ Transform BlinkBudget from a functional PoC to a market-leading expense tracker 
 - `src/components/TransactionForm.js`
 - `src/utils/form-utils/`
 
-### 🔥 Task 1.3: Voice Input Support
-
-**Owner**: Frontend Dev  
-**Estimate**: 3 days  
-**Acceptance Criteria**:
-
-- [ ] Implement Web Speech API for amount entry
-- [ ] Add voice commands for categories ("add coffee", "lunch expense")
-- [ ] Create fallback for unsupported browsers
-- [ ] Add visual feedback for voice input
-- [ ] Test accuracy in noisy environments
-
-**Files to create**:
-
-- `src/components/VoiceInput.js`
-- `src/utils/speech-recognition.js`
-
----
-
 ## 📊 Phase 2: Enhanced Insights Engine (Weeks 3-5)
-
-### 🔥 Task 2.1: Sub-Category Intelligence
-
-**Owner**: Backend/Frontend Dev  
-**Estimate**: 5 days  
-**Acceptance Criteria**:
-
-- [ ] Create sub-category taxonomy (Coffee Shop, Fast Food, Restaurant)
-- [ ] Implement ML-based classification using amount + time + location
-- [ ] Add user feedback loop for misclassifications
-- [ ] Create sub-category management interface
-- [ ] Generate insights at sub-category level
-
-**Files to create**:
-
-- `src/core/subcategory-service.js`
-- `src/components/SubCategorySelector.js`
-- `src/utils/classification-engine.js`
 
 ### 🔥 Task 2.2: Spending Pattern Analytics
 
