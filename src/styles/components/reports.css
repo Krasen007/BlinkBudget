@@ -785,6 +785,14 @@
     min-width: 0 !important;
     overflow-wrap: break-word;
   }
+  
+  /* Apply text overflow only on mobile */
+  .category-card > div {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    min-width: 0 !important;
+  }
 }
 
 /* Consolidate all .income-expense-section definitions */

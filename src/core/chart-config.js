@@ -390,9 +390,9 @@ export function getChartColors(count, highContrast = false, style = 'solid') {
           borderColor: darkenColor(baseColor, 20),
           pattern:
             accessibleColors.patterns[
-            Object.keys(accessibleColors.patterns)[
-            i % Object.keys(accessibleColors.patterns).length
-            ]
+              Object.keys(accessibleColors.patterns)[
+                i % Object.keys(accessibleColors.patterns).length
+              ]
             ],
         });
         break;

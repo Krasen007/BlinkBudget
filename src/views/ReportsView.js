@@ -917,7 +917,6 @@ export const ReportsView = () => {
     activeCharts.forEach(chart => {
       if (chart && typeof chart.resize === 'function') {
         chart.resize();
-        chartRenderer.applyMobileOptimizations(chart);
       }
     });
 

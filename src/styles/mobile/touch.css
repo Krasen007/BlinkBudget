@@ -31,8 +31,8 @@
   /* Ensure all buttons meet 44px minimum */
   .btn,
   button,
-  input[type="button"],
-  input[type="submit"],
+  input[type='button'],
+  input[type='submit'],
   .category-chip,
   .type-toggle-btn,
   .transaction-item {

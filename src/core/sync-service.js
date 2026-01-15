@@ -151,15 +151,17 @@ export const SyncService = {
       console.error(`[Sync] Failed to push ${dataType} to cloud:`, error);
 
       // Check if it's a network error
-      const isNetworkError = error.message && (
-        error.message.includes('ERR_INTERNET_DISCONNECTED') ||
-        error.message.includes('ERR_BLOCKED_BY_CLIENT') ||
-        error.message.includes('network') ||
-        error.message.includes('connection')
-      );
+      const isNetworkError =
+        error.message &&
+        (error.message.includes('ERR_INTERNET_DISCONNECTED') ||
+          error.message.includes('ERR_BLOCKED_BY_CLIENT') ||
+          error.message.includes('network') ||
+          error.message.includes('connection'));
 
       if (isNetworkError) {
-        console.log(`[Sync] Network error detected for ${dataType}, will retry when online`);
+        console.log(
+          `[Sync] Network error detected for ${dataType}, will retry when online`
+        );
       }
 
       // Emit sync error for UI
@@ -337,7 +339,8 @@ export const SyncService = {
       const timeDiff = Math.abs(localTs - cloudTs);
       const localJson = JSON.stringify(localItem);
       const cloudJson = JSON.stringify(cloudItem);
-      if (timeDiff <= 2000 && localJson !== cloudJson) { // Increased from 100ms to 1000ms
+      if (timeDiff <= 2000 && localJson !== cloudJson) {
+        // Increased from 100ms to 1000ms
         console.log(
           `[Sync] Detected near-simultaneous edit for id=${id} on ${key}`
         );
@@ -453,7 +456,9 @@ export const SyncService = {
     });
 
     // Log initial connection status
-    console.log(`[Sync] Initial connection status: ${this.isOnline ? 'Online' : 'Offline'}`);
+    console.log(
+      `[Sync] Initial connection status: ${this.isOnline ? 'Online' : 'Offline'}`
+    );
   },
 
   resumeSync() {

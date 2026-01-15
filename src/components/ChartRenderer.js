@@ -466,8 +466,8 @@ export class ChartRenderer {
           clientX: touch.clientX,
           clientY: touch.clientY,
           target: canvas,
-          preventDefault: () => { },
-          stopPropagation: () => { },
+          preventDefault: () => {},
+          stopPropagation: () => {},
         };
 
         // Get elements at touch position
@@ -706,8 +706,8 @@ export class ChartRenderer {
       originalBorderWidth
     )
       ? originalBorderWidth.map((width, i) =>
-        i === activeElement.index ? width + 2 : width
-      )
+          i === activeElement.index ? width + 2 : width
+        )
       : originalBorderWidth + 2;
 
     chart.update('none');
