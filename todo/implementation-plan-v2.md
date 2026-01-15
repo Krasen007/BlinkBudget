@@ -69,8 +69,8 @@ Transform BlinkBudget from a functional PoC to a market-leading expense tracker 
 **Estimate**: 4 days  
 **Acceptance Criteria**:
 
-- [ ] Optimize touch targets for mobile
-- [ ] Create mobile-optimized report views
+- [x] Optimize touch targets for mobile
+- [x] Create mobile-optimized report views
 
 **Files to modify**:
 

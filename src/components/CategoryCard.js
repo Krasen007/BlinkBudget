@@ -51,13 +51,6 @@ export const CategoryCard = (
     card.style.boxShadow = 'none';
   });
 
-  const colorIndicator = document.createElement('div');
-  colorIndicator.style.width = '4px';
-  colorIndicator.style.height = '40px';
-  colorIndicator.style.background = categoryColor;
-  colorIndicator.style.borderRadius = '2px';
-  colorIndicator.style.marginBottom = SPACING.SM;
-
   const name = document.createElement('div');
   name.textContent = category.name;
   name.style.fontWeight = '600';
@@ -82,43 +75,31 @@ export const CategoryCard = (
   transactionCount.style.color = COLORS.TEXT_MUTED;
   transactionCount.style.marginTop = SPACING.XS;
 
-  card.appendChild(colorIndicator);
+  // Calculate and display average amount
+  const averageAmount = category.transactionCount > 0 ? category.amount / category.transactionCount : 0;
+  const averageElement = document.createElement('div');
+  averageElement.textContent = `Avg: ${formatCurrency(averageAmount)}`;
+  averageElement.style.fontSize = FONT_SIZES.SM;
+  averageElement.style.color = COLORS.TEXT_MUTED;
+  averageElement.style.marginTop = SPACING.XS;
+
   card.appendChild(name);
   card.appendChild(amount);
   card.appendChild(percentage);
   card.appendChild(transactionCount);
+  card.appendChild(averageElement);
 
   // Add frequency analysis if available
   if (frequencyData && frequencyData[category.name]) {
     const freqData = frequencyData[category.name];
 
-    const frequencySection = document.createElement('div');
-    frequencySection.style.marginTop = SPACING.SM;
-    frequencySection.style.paddingTop = SPACING.SM;
-    frequencySection.style.borderTop = `1px solid ${COLORS.BORDER}`;
-
-    const frequencyTitle = document.createElement('div');
-    frequencyTitle.textContent = 'Visit Frequency';
-    frequencyTitle.style.fontSize = FONT_SIZES.SM;
-    frequencyTitle.style.fontWeight = '600';
-    frequencyTitle.style.color = COLORS.TEXT_MAIN;
-    frequencyTitle.style.marginBottom = SPACING.XS;
-
     const visitsPerWeek = document.createElement('div');
-    visitsPerWeek.textContent = `${freqData.averageVisitsPerWeek.toFixed(1)} visits/week`;
+    visitsPerWeek.textContent = `${freqData.averageVisitsPerWeek.toFixed(1)} visits per week`;
     visitsPerWeek.style.fontSize = FONT_SIZES.SM;
     visitsPerWeek.style.color = COLORS.TEXT_MUTED;
     visitsPerWeek.style.marginBottom = SPACING.XS;
 
-    const avgSpent = document.createElement('div');
-    avgSpent.textContent = `Avg: ${formatCurrency(freqData.averageSpentPerVisit)}`;
-    avgSpent.style.fontSize = FONT_SIZES.SM;
-    avgSpent.style.color = COLORS.TEXT_MUTED;
-
-    frequencySection.appendChild(frequencyTitle);
-    frequencySection.appendChild(visitsPerWeek);
-    frequencySection.appendChild(avgSpent);
-    card.appendChild(frequencySection);
+    card.appendChild(visitsPerWeek);
 
     // Add insights if available
     if (freqData.insights && freqData.insights.length > 0) {
@@ -131,6 +112,7 @@ export const CategoryCard = (
         insightEl.style.fontSize = FONT_SIZES.BASE;
         insightEl.style.color = COLORS.TEXT_MUTED;
         insightEl.style.fontStyle = 'italic';
+        insightEl.style.textDecoration = 'underline';
         insightsSection.appendChild(insightEl);
       });
 

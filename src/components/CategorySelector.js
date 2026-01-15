@@ -67,14 +67,5 @@ export const CategorySelector = (
 
   section.appendChild(categoryGrid);
 
-  // Category details section
-  const categoryDetailsSection = document.createElement('div');
-  categoryDetailsSection.id = 'category-details-section';
-  categoryDetailsSection.style.display = 'none';
-  categoryDetailsSection.style.marginTop = SPACING.XL;
-  categoryDetailsSection.style.paddingTop = SPACING.XL;
-  categoryDetailsSection.style.borderTop = `2px solid ${COLORS.BORDER}`;
-  section.appendChild(categoryDetailsSection);
-
   return section;
 };

@@ -390,9 +390,9 @@ export function getChartColors(count, highContrast = false, style = 'solid') {
           borderColor: darkenColor(baseColor, 20),
           pattern:
             accessibleColors.patterns[
-              Object.keys(accessibleColors.patterns)[
-                i % Object.keys(accessibleColors.patterns).length
-              ]
+            Object.keys(accessibleColors.patterns)[
+            i % Object.keys(accessibleColors.patterns).length
+            ]
             ],
         });
         break;
@@ -452,6 +452,18 @@ export function createThemedChartOptions(chartType, customOptions = {}) {
     case 'pie':
       return {
         ...baseOptions,
+        scales: {
+          x: {
+            display: false,
+          },
+          y: {
+            display: false,
+          },
+        },
+        interaction: {
+          intersect: true,
+          mode: 'nearest',
+        },
         plugins: {
           ...baseOptions.plugins,
           legend: {

@@ -56,7 +56,6 @@ import {
   getCategoryColors,
 } from '../utils/reports-charts.js';
 import { CategorySelector } from '../components/CategorySelector.js';
-import { showCategoryDetails } from '../components/CategoryDetails.js';
 import { InsightsSection } from '../components/InsightsSection.js';
 import { PatternInsights } from '../components/PatternInsights.js';
 
@@ -612,8 +611,7 @@ export const ReportsView = () => {
           currentData,
           categoryColorMap,
           categories => getCategoryColors(categories, categoryColorMap),
-          (name, amount, percentage) =>
-            showCategoryDetails(name, amount, percentage, currentData)
+          null // Remove category details functionality
         );
         categoryResult.section.style.borderBottom = `2px solid ${COLORS.BORDER}`;
         categoryResult.section.style.paddingBottom = `calc(${SPACING.LG} * 1.5)`;
@@ -646,8 +644,7 @@ export const ReportsView = () => {
           currentData,
           categoryColorMap,
           categories => getCategoryColors(categories, categoryColorMap),
-          (name, amount, percentage) =>
-            showCategoryDetails(name, amount, percentage, currentData),
+          null, // Remove category details functionality
           frequencyData.categories
         );
         categorySelectorSection.style.marginTop = `calc(${SPACING.XL} * 2)`;
