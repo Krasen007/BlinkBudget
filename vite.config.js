@@ -14,6 +14,30 @@ export default defineConfig({
         skipWaiting: true,
         navigateFallback: 'offline.html',
         navigateFallbackAllowlist: [/^(?!\/__).*/], // Allow all except Firebase auth paths
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/.*\.firebaseio\.com\/.*/,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'firebase-api',
+              networkTimeoutSeconds: 3,
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          {
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'images',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+            },
+          },
+        ],
       },
       includeAssets: ['favicon.png', 'favicon.ico', 'offline.html'],
       manifest: {

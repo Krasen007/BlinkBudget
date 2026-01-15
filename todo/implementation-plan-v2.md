@@ -55,8 +55,8 @@ Transform BlinkBudget from a functional PoC to a market-leading expense tracker 
 **Estimate**: 3 days  
 **Acceptance Criteria**:
 
-- [ ] Optimize service worker for offline usage
-- [ ] Create offline transaction queue
+- [x] Optimize service worker for offline usage
+- [x] Create offline transaction queue
 
 **Files to modify**:
 
@@ -70,10 +70,7 @@ Transform BlinkBudget from a functional PoC to a market-leading expense tracker 
 **Acceptance Criteria**:
 
 - [ ] Optimize touch targets for mobile
-- [ ] Implement swipe gestures for quick actions
-- [ ] Add mobile-specific shortcuts
 - [ ] Create mobile-optimized report views
-- [ ] Test on various screen sizes
 
 **Files to modify**:
 

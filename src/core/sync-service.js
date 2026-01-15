@@ -34,8 +34,11 @@ export const SyncService = {
   pendingWrites: new Map(), // Track pending writes to avoid race conditions
   lastPushTimes: new Map(), // Track last push time per dataType for rate limiting
   _conflictResolutionHandler: null,
+  isOnline: navigator.onLine, // NEW: Track connection status
 
   async init() {
+    this.setupConnectionMonitoring(); // NEW: Setup connection monitoring
+
     AuthService.init(async user => {
       if (user) {
         await this.pullFromCloud(user.uid);
@@ -146,6 +149,19 @@ export const SyncService = {
       }, 1000); // 1 second should be enough for Firebase to process
     } catch (error) {
       console.error(`[Sync] Failed to push ${dataType} to cloud:`, error);
+
+      // Check if it's a network error
+      const isNetworkError = error.message && (
+        error.message.includes('ERR_INTERNET_DISCONNECTED') ||
+        error.message.includes('ERR_BLOCKED_BY_CLIENT') ||
+        error.message.includes('network') ||
+        error.message.includes('connection')
+      );
+
+      if (isNetworkError) {
+        console.log(`[Sync] Network error detected for ${dataType}, will retry when online`);
+      }
+
       // Emit sync error for UI
       window.dispatchEvent(
         new CustomEvent('sync-state', {
@@ -154,6 +170,7 @@ export const SyncService = {
             state: 'error',
             error: String(error),
             timestamp: Date.now(),
+            isNetworkError: isNetworkError || false,
           },
         })
       );
@@ -320,7 +337,7 @@ export const SyncService = {
       const timeDiff = Math.abs(localTs - cloudTs);
       const localJson = JSON.stringify(localItem);
       const cloudJson = JSON.stringify(cloudItem);
-      if (timeDiff <= 100 && localJson !== cloudJson) {
+      if (timeDiff <= 2000 && localJson !== cloudJson) { // Increased from 100ms to 1000ms
         console.log(
           `[Sync] Detected near-simultaneous edit for id=${id} on ${key}`
         );
@@ -418,6 +435,68 @@ export const SyncService = {
 
       seenId.add(item.id);
       return true;
+    });
+  },
+
+  // NEW: Connection monitoring methods
+  setupConnectionMonitoring() {
+    window.addEventListener('online', () => {
+      this.isOnline = true;
+      console.log('[Sync] Connection restored, resuming sync...');
+      this.resumeSync();
+    });
+
+    window.addEventListener('offline', () => {
+      this.isOnline = false;
+      console.log('[Sync] Connection lost, pausing sync...');
+      this.pauseSync();
+    });
+
+    // Log initial connection status
+    console.log(`[Sync] Initial connection status: ${this.isOnline ? 'Online' : 'Offline'}`);
+  },
+
+  resumeSync() {
+    // Trigger background sync when connection is restored
+    console.log('[Sync] Triggering background sync...');
+    this.triggerBackgroundSync();
+
+    // Notify UI about connection change
+    window.dispatchEvent(
+      new CustomEvent('connection-change', {
+        detail: { isOnline: true, timestamp: Date.now() },
+      })
+    );
+  },
+
+  pauseSync() {
+    // Notify UI about connection change
+    window.dispatchEvent(
+      new CustomEvent('connection-change', {
+        detail: { isOnline: false, timestamp: Date.now() },
+      })
+    );
+  },
+
+  triggerBackgroundSync() {
+    // Sync all data types that might have pending changes
+    const dataTypes = [
+      'transactions',
+      'accounts',
+      'settings',
+      'goals',
+      'investments',
+    ];
+
+    dataTypes.forEach(dataType => {
+      try {
+        const data = localStorage.getItem(dataType);
+        if (data) {
+          this.pushToCloud(dataType, JSON.parse(data));
+        }
+      } catch (error) {
+        console.error(`[Sync] Background sync failed for ${dataType}:`, error);
+      }
     });
   },
 };
