@@ -86,19 +86,6 @@ Transform BlinkBudget from a functional PoC to a market-leading expense tracker 
 **Acceptance Criteria**:
 
 - [x] Optimize bundle size and loading times
-- [ ] Implement offline first loading for charts to be available on PWA evene when there is no internet
-
-### 🔥 Task 6.2: Analytics & Tracking
-
-**Owner**: Backend Dev  
-**Estimate**: 2 days  
-**Acceptance Criteria**:
-
-- [ ] Implement user analytics (privacy-respecting)
-- [ ] Add feature usage tracking
-- [ ] Create conversion funnels
-- [ ] Set up error monitoring
-- [ ] Create performance dashboards
 
 ### 🔥 Task 6.3: Launch Campaign
 
@@ -106,11 +93,11 @@ Transform BlinkBudget from a functional PoC to a market-leading expense tracker 
 **Estimate**: 3 days  
 **Acceptance Criteria**:
 
-- [ ] Create launch announcement
-- [ ] Prepare competitor comparison materials
-- [ ] Set up user feedback collection
-- [ ] Create onboarding flow improvements
-- [ ] Prepare press kit and demo materials
+- [x] Create launch announcement
+- [x] Prepare competitor comparison materials
+- [x] Set up user feedback collection
+- [x] Create onboarding flow improvements
+- [x] Prepare press kit and demo materials
 
 ---
 

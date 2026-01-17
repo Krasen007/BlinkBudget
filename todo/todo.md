@@ -32,6 +32,7 @@ DO NOT IMPLEMENT: use Ionic's Capacitor or Cordova to make android app
 
 ---
 
+[ ] Implement offline first loading for charts to be available on PWA evene when there is no internet
 [ ] there is a white bar when using the PWA in light mode i must check how it is on the browser
 [ ] Chrome browser detects the app core and switches to dark or white mode but when I use the PWA it detects that I'm using light theme and it makes my bar white
 [ ] when splitting a transaction on long press add confirmation dialog to make sure the user did not unintentionally did it
