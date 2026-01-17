@@ -5,6 +5,7 @@
  */
 
 import { STORAGE_KEYS } from '../utils/constants.js';
+import { safeJsonParse } from '../utils/security-utils.js';
 
 class ClickTrackingService {
   constructor() {
@@ -131,7 +132,7 @@ class ClickTrackingService {
       const stored = localStorage.getItem(
         STORAGE_KEYS.CLICK_TRACKING || 'blinkbudget_click_tracking'
       );
-      return stored ? JSON.parse(stored) : [];
+      return stored ? safeJsonParse(stored) : [];
     } catch (error) {
       console.error('Failed to load click tracking history:', error);
       return [];

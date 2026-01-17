@@ -8,6 +8,7 @@
  */
 
 import { generateId } from '../utils/id-utils.js';
+import { safeJsonParse } from '../utils/security-utils.js';
 
 export class GoalPlanner {
   constructor() {
@@ -550,7 +551,7 @@ export class GoalPlanner {
       const stored = localStorage.getItem(this.storageKey);
       if (!stored) return [];
 
-      const goals = JSON.parse(stored);
+      const goals = safeJsonParse(stored);
 
       // Convert date strings back to Date objects
       return goals.map(goal => ({

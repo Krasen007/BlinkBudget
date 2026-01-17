@@ -8,6 +8,7 @@ import {
   getDocs,
 } from 'firebase/firestore';
 import { STORAGE_KEYS } from '../utils/constants.js';
+import { safeJsonParse } from '../utils/security-utils.js';
 
 // Sanitize helper: convert Dates to ISO, recursively sanitize objects/arrays,
 // and protect against circular references using a WeakSet.
@@ -260,7 +261,7 @@ export const SyncService = {
 
     const localRaw = localStorage.getItem(key);
     if (Array.isArray(cloudData)) {
-      const localData = JSON.parse(localRaw || '[]');
+      const localData = safeJsonParse(localRaw || '[]');
 
       // Deduplicate cloud data
       const cleanedCloudData = this.uniqueById(cloudData, key);
@@ -279,7 +280,7 @@ export const SyncService = {
       }
     } else if (typeof cloudData === 'object' && cloudData !== null) {
       // For settings objects, we still perform a shallow merge to preserve local settings not yet in cloud
-      const localData = JSON.parse(localRaw || '{}');
+      const localData = safeJsonParse(localRaw || '{}');
       const merged = { ...localData, ...cloudData };
 
       if (JSON.stringify(merged) !== JSON.stringify(localData)) {
@@ -385,7 +386,7 @@ export const SyncService = {
 
       // Load current local array
       const localRaw = localStorage.getItem(key) || '[]';
-      const localArray = JSON.parse(localRaw);
+      const localArray = safeJsonParse(localRaw);
 
       if (resolution === 'local') {
         // Push local state to cloud (authoritative single-doc pattern)
@@ -497,7 +498,7 @@ export const SyncService = {
       try {
         const data = localStorage.getItem(dataType);
         if (data) {
-          this.pushToCloud(dataType, JSON.parse(data));
+          this.pushToCloud(dataType, safeJsonParse(data));
         }
       } catch (error) {
         console.error(`[Sync] Background sync failed for ${dataType}:`, error);

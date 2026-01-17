@@ -69,32 +69,13 @@ Transform BlinkBudget from a functional PoC to a market-leading expense tracker 
 **Estimate**: 4 days  
 **Acceptance Criteria**:
 
-- [ ] Optimize touch targets for mobile
-- [ ] Create mobile-optimized report views
+- [x] Optimize touch targets for mobile
+- [x] Create mobile-optimized report views
 
 **Files to modify**:
 
 - `src/styles/mobile.css`
 - `src/components/mobile/`
-
-### 🔥 Task 5.3: Quick-Add Widget
-
-**Owner**: Frontend Dev  
-**Estimate**: 3 days  
-**Acceptance Criteria**:
-
-- [ ] Create home screen widget for quick expense entry
-- [ ] Implement notification-based quick add
-- [ ] Add share sheet integration for receipts
-- [ ] Create widget customization options
-- [ ] Test widget performance and battery usage
-
-**Files to create**:
-
-- `src/components/QuickAddWidget.js`
-- `src/utils/notification-service.js`
-
----
 
 ## 🚀 Phase 6: Launch Preparation (Weeks 11-12)
 

@@ -7,6 +7,7 @@
 import { STORAGE_KEYS, DEFAULTS } from '../utils/constants.js';
 import { SyncService } from './sync-service.js';
 import { AuthService } from './auth-service.js';
+import { safeJsonParse } from '../utils/security-utils.js';
 
 const ACCOUNTS_KEY = STORAGE_KEYS.ACCOUNTS;
 
@@ -32,7 +33,7 @@ export const AccountService = {
     }
 
     try {
-      const accounts = JSON.parse(data);
+      const accounts = safeJsonParse(data);
       return this._cleanAccounts(accounts);
     } catch (error) {
       console.error('[AccountService] Failed to parse accounts data:', error);

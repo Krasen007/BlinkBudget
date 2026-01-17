@@ -58,6 +58,7 @@ import {
 import { CategorySelector } from '../components/CategorySelector.js';
 import { InsightsSection } from '../components/InsightsSection.js';
 import { PatternInsights } from '../components/PatternInsights.js';
+import { escapeHtml } from '../utils/security-utils.js';
 
 export const ReportsView = () => {
   const container = document.createElement('div');
@@ -786,6 +787,12 @@ export const ReportsView = () => {
       fallback.style.borderRadius = 'var(--radius-lg)';
       fallback.style.border = `1px solid ${COLORS.BORDER}`;
 
+      // Sanitize financial data before display
+      const totalExpenses = escapeHtml(currentData.incomeVsExpenses.totalExpenses.toFixed(2));
+      const totalIncome = escapeHtml(currentData.incomeVsExpenses.totalIncome.toFixed(2));
+      const netBalance = escapeHtml(currentData.incomeVsExpenses.netBalance.toFixed(2));
+      const transactionCount = escapeHtml(currentData.transactions.length.toString());
+
       fallback.innerHTML = `
                 <div style="margin-bottom: ${SPACING.LG};">
                     <h3 style="color: ${COLORS.ERROR}; margin-bottom: ${SPACING.MD};">⚠️ Chart Rendering Failed</h3>
@@ -796,19 +803,19 @@ export const ReportsView = () => {
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: ${SPACING.MD};">
                     <div style="padding: ${SPACING.MD}; background: ${COLORS.BACKGROUND}; border-radius: var(--radius-md);">
                         <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED}; margin-bottom: ${SPACING.XS};">Total Expenses</div>
-                        <div style="font-size: 1.5rem; font-weight: bold; color: ${COLORS.ERROR};">€${currentData.incomeVsExpenses.totalExpenses.toFixed(2)}</div>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: ${COLORS.ERROR};">€${totalExpenses}</div>
                     </div>
                     <div style="padding: ${SPACING.MD}; background: ${COLORS.BACKGROUND}; border-radius: var(--radius-md);">
                         <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED}; margin-bottom: ${SPACING.XS};">Total Income</div>
-                        <div style="font-size: 1.5rem; font-weight: bold; color: ${COLORS.SUCCESS};">€${currentData.incomeVsExpenses.totalIncome.toFixed(2)}</div>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: ${COLORS.SUCCESS};">€${totalIncome}</div>
                     </div>
                     <div style="padding: ${SPACING.MD}; background: ${COLORS.BACKGROUND}; border-radius: var(--radius-md);">
                         <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED}; margin-bottom: ${SPACING.XS};">Net Balance</div>
-                        <div style="font-size: 1.5rem; font-weight: bold; color: ${currentData.incomeVsExpenses.netBalance >= 0 ? COLORS.SUCCESS : COLORS.ERROR};">€${currentData.incomeVsExpenses.netBalance.toFixed(2)}</div>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: ${currentData.incomeVsExpenses.netBalance >= 0 ? COLORS.SUCCESS : COLORS.ERROR};">€${netBalance}</div>
                     </div>
                     <div style="padding: ${SPACING.MD}; background: ${COLORS.BACKGROUND}; border-radius: var(--radius-md);">
                         <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED}; margin-bottom: ${SPACING.XS};">Transactions</div>
-                        <div style="font-size: 1.5rem; font-weight: bold; color: ${COLORS.PRIMARY};">${currentData.transactions.length}</div>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: ${COLORS.PRIMARY};">${transactionCount}</div>
                     </div>
                 </div>
                 <div style="margin-top: ${SPACING.LG};">

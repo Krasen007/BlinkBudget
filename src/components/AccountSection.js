@@ -15,13 +15,8 @@ import {
   HAPTIC_PATTERNS,
   ACCOUNT_TYPES,
 } from '../utils/constants.js';
-import {
-  createInput,
-  createSelect,
-  createFlexContainer,
-} from '../utils/dom-factory.js';
-
-import { sanitizeInput } from '../utils/security-utils.js';
+import { createInput, createSelect, createFlexContainer } from '../utils/dom-factory.js';
+import { sanitizeInput, escapeHtml } from '../utils/security-utils.js';
 
 export const AccountSection = () => {
   const section = document.createElement('div');
@@ -115,7 +110,7 @@ export const AccountSection = () => {
                 AccountService.isAccountDuplicate(trimmedName, acc.type, acc.id)
               ) {
                 AlertDialog({
-                  message: `An account named "${trimmedName}" of type "${acc.type}" already exists.`,
+                  message: `An account named "${escapeHtml(trimmedName)}" of type "${escapeHtml(acc.type)}" already exists.`,
                 });
                 return;
               }
@@ -151,7 +146,7 @@ export const AccountSection = () => {
           'btn btn-ghost touch-target mobile-action-btn mobile-delete-btn';
         deleteBtn.onclick = () => {
           ConfirmDialog({
-            title: `Delete account "${acc.name}"?`,
+            title: `Delete account "${escapeHtml(acc.name)}"?`,
             message:
               'Transactions will remain but might be orphaned if not handled.',
             onConfirm: () => {

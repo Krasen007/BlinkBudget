@@ -8,6 +8,7 @@
  */
 
 import { generateId } from '../utils/id-utils.js';
+import { safeJsonParse } from '../utils/security-utils.js';
 
 export class InvestmentTracker {
   constructor() {
@@ -510,7 +511,7 @@ export class InvestmentTracker {
       const stored = localStorage.getItem(this.storageKey);
       if (!stored) return [];
 
-      const investments = JSON.parse(stored);
+      const investments = safeJsonParse(stored);
 
       // Convert date strings back to Date objects (with validation)
       return investments

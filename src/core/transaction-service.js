@@ -9,6 +9,7 @@ import { SyncService } from './sync-service.js';
 import { AuthService } from './auth-service.js';
 import { AccountService } from './account-service.js';
 import { generateId } from '../utils/id-utils.js';
+import { safeJsonParse } from '../utils/security-utils.js';
 
 const TRANSACTIONS_KEY = STORAGE_KEYS.TRANSACTIONS;
 
@@ -19,7 +20,7 @@ export const TransactionService = {
    */
   getAll() {
     const data = localStorage.getItem(TRANSACTIONS_KEY);
-    let transactions = data ? JSON.parse(data) : [];
+    let transactions = data ? safeJsonParse(data) : [];
 
     // Migration: Ensure all transactions have an accountId
     const defaultAccount = AccountService.getDefaultAccount();

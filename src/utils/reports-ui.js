@@ -8,6 +8,7 @@
 import { COLORS, SPACING } from './constants.js';
 import { Router } from '../core/router.js';
 import { dom } from './dom-factory.js';
+import { escapeHtml } from './security-utils.js';
 
 /**
  * Create loading state component with progress indicator
@@ -204,7 +205,7 @@ export function showEmptyState(
     message.innerHTML = `
             <h3 style="margin: 0 0 ${SPACING.SM} 0; color: ${COLORS.TEXT_MAIN};">No Data for This Period</h3>
             <p style="margin: 0; max-width: 300px; line-height: 1.5;">
-                No transactions found for ${formatTimePeriod(currentTimePeriod)}. 
+                No transactions found for ${escapeHtml(formatTimePeriod(currentTimePeriod))}. 
                 Try selecting a different time period or add some transactions.
             </p>
         `;

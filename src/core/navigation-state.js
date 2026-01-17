@@ -9,6 +9,8 @@
  * Requirements: 7.4
  */
 
+import { safeJsonParse } from '../utils/security-utils.js';
+
 export const NavigationState = {
   // State storage keys
   STATE_KEYS: {
@@ -67,7 +69,7 @@ export const NavigationState = {
       );
       if (!savedData) return null;
 
-      const timePeriodData = JSON.parse(savedData);
+      const timePeriodData = safeJsonParse(savedData);
 
       // Validate the saved data
       if (!timePeriodData.startDate || !timePeriodData.endDate) {
@@ -166,7 +168,7 @@ export const NavigationState = {
       );
       if (!savedData) return null;
 
-      const preferences = JSON.parse(savedData);
+      const preferences = safeJsonParse(savedData);
       return preferences;
     } catch (error) {
       console.error(
@@ -211,7 +213,7 @@ export const NavigationState = {
       );
       if (!savedData) return null;
 
-      const viewData = JSON.parse(savedData);
+      const viewData = safeJsonParse(savedData);
       return viewData.view;
     } catch (error) {
       console.error('[NavigationState] Failed to get last active view:', error);
@@ -226,7 +228,7 @@ export const NavigationState = {
   addToViewHistory(viewName) {
     try {
       const savedHistory = sessionStorage.getItem(this.STATE_KEYS.VIEW_HISTORY);
-      let history = savedHistory ? JSON.parse(savedHistory) : [];
+      let history = savedHistory ? safeJsonParse(savedHistory) : [];
 
       // Remove existing entry for this view to avoid duplicates
       history = history.filter(entry => entry.view !== viewName);
@@ -256,7 +258,7 @@ export const NavigationState = {
   getViewHistory() {
     try {
       const savedHistory = sessionStorage.getItem(this.STATE_KEYS.VIEW_HISTORY);
-      return savedHistory ? JSON.parse(savedHistory) : [];
+      return savedHistory ? safeJsonParse(savedHistory) : [];
     } catch (error) {
       console.error('[NavigationState] Failed to get view history:', error);
       return [];
