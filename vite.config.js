@@ -93,6 +93,18 @@ export default defineConfig({
   ],
   build: {
     outDir: 'dist',
+    // Enable tree shaking and optimizations
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug'],
+      },
+      mangle: {
+        safari10: true,
+      },
+    },
     // CSS optimization settings
     cssCodeSplit: false, // Combine all CSS into single file for production
     rollupOptions: {
@@ -110,6 +122,13 @@ export default defineConfig({
           if (id.includes('node_modules/chart.js')) {
             return 'charts';
           }
+          // Lazy load heavy views
+          if (id.includes('ReportsView')) {
+            return 'reports-view';
+          }
+          if (id.includes('FinancialPlanningView')) {
+            return 'planning-view';
+          }
           // Other vendor dependencies
           if (id.includes('node_modules')) {
             return 'vendor';
@@ -117,13 +136,34 @@ export default defineConfig({
         },
         // Ensure CSS is properly chunked
         assetFileNames: assetInfo => {
-          if (assetInfo.name && assetInfo.name.endsWith('.css')) {
+          if (
+            assetInfo.names &&
+            assetInfo.names.original &&
+            assetInfo.names.original.endsWith('.css')
+          ) {
             return 'assets/style.[hash].css';
           }
           return 'assets/[name].[hash].[ext]';
         },
+        // Optimize chunk loading
+        chunkFileNames: 'assets/[name].[hash].js',
       },
+      // Improve tree shaking
+      treeshake: true,
     },
+    // Enable source maps for debugging
+    sourcemap: false, // Disable for production to reduce bundle size
+  },
+  resolve: {
+    // Optimize module resolution
+    alias: {
+      // Prevent multiple versions of the same library
+    },
+    dedupe: ['firebase', 'chart.js'],
+  },
+  optimizeDeps: {
+    // Optimize dependencies during build - disable for now to fix Firebase issue
+    include: ['firebase, chart.js'],
   },
   server: {
     port: 3000,

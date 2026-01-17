@@ -85,11 +85,8 @@ Transform BlinkBudget from a functional PoC to a market-leading expense tracker 
 **Estimate**: 3 days  
 **Acceptance Criteria**:
 
-- [ ] Optimize bundle size and loading times
-- [ ] Implement lazy loading for charts
-- [ ] Add performance monitoring
-- [ ] Create performance budgets
-- [ ] Test on low-end devices
+- [x] Optimize bundle size and loading times
+- [ ] Implement offline first loading for charts to be available on PWA evene when there is no internet
 
 ### 🔥 Task 6.2: Analytics & Tracking
 

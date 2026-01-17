@@ -780,12 +780,12 @@
     grid-template-columns: 1fr !important;
     gap: var(--spacing-sm) !important;
   }
-  
+
   .category-card {
     min-width: 0 !important;
     overflow-wrap: break-word;
   }
-  
+
   /* Apply text overflow only on mobile */
   .category-card > div {
     white-space: nowrap !important;

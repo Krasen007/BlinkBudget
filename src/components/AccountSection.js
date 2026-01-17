@@ -15,7 +15,11 @@ import {
   HAPTIC_PATTERNS,
   ACCOUNT_TYPES,
 } from '../utils/constants.js';
-import { createInput, createSelect, createFlexContainer } from '../utils/dom-factory.js';
+import {
+  createInput,
+  createSelect,
+  createFlexContainer,
+} from '../utils/dom-factory.js';
 import { sanitizeInput, escapeHtml } from '../utils/security-utils.js';
 
 export const AccountSection = () => {

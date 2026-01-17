@@ -788,10 +788,18 @@ export const ReportsView = () => {
       fallback.style.border = `1px solid ${COLORS.BORDER}`;
 
       // Sanitize financial data before display
-      const totalExpenses = escapeHtml(currentData.incomeVsExpenses.totalExpenses.toFixed(2));
-      const totalIncome = escapeHtml(currentData.incomeVsExpenses.totalIncome.toFixed(2));
-      const netBalance = escapeHtml(currentData.incomeVsExpenses.netBalance.toFixed(2));
-      const transactionCount = escapeHtml(currentData.transactions.length.toString());
+      const totalExpenses = escapeHtml(
+        currentData.incomeVsExpenses.totalExpenses.toFixed(2)
+      );
+      const totalIncome = escapeHtml(
+        currentData.incomeVsExpenses.totalIncome.toFixed(2)
+      );
+      const netBalance = escapeHtml(
+        currentData.incomeVsExpenses.netBalance.toFixed(2)
+      );
+      const transactionCount = escapeHtml(
+        currentData.transactions.length.toString()
+      );
 
       fallback.innerHTML = `
                 <div style="margin-bottom: ${SPACING.LG};">

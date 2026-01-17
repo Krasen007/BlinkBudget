@@ -55,14 +55,14 @@ export const validatePasswordStrength = password => {
  * @param {string} jsonString - The JSON string to parse.
  * @returns {any} The parsed object or null if parsing fails.
  */
-export const safeJsonParse = (jsonString) => {
+export const safeJsonParse = jsonString => {
   if (typeof jsonString !== 'string') return null;
 
   try {
     const parsed = JSON.parse(jsonString);
 
     // Recursively sanitize the parsed object to prevent prototype pollution
-    const sanitize = (obj) => {
+    const sanitize = obj => {
       if (obj === null || typeof obj !== 'object') return obj;
 
       if (Array.isArray(obj)) {
@@ -72,7 +72,11 @@ export const safeJsonParse = (jsonString) => {
       const sanitized = {};
       for (const key in obj) {
         // Skip dangerous prototype properties
-        if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+        if (
+          key === '__proto__' ||
+          key === 'constructor' ||
+          key === 'prototype'
+        ) {
           continue;
         }
         sanitized[key] = sanitize(obj[key]);
@@ -92,7 +96,7 @@ export const safeJsonParse = (jsonString) => {
  * @param {string} text - The text to escape.
  * @returns {string} The escaped HTML-safe string.
  */
-export const escapeHtml = (text) => {
+export const escapeHtml = text => {
   if (typeof text !== 'string') return text;
 
   const div = document.createElement('div');
