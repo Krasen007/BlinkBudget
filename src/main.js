@@ -61,6 +61,11 @@ const initApp = () => {
       console.log('[Main] User authenticated, starting sync...');
       localStorage.setItem('auth_hint', 'true');
       SyncService.startRealtimeSync(user.uid);
+      // Initialize backup service after sync service
+      import('./core/backup-service.js').then(({ BackupService }) => {
+        BackupService.init();
+      });
+
       if (currentRoute === 'login' || currentRoute === 'landing') {
         Router.navigate('dashboard');
       }

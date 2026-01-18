@@ -4,6 +4,7 @@ import { AccountSection } from '../components/AccountSection.js';
 import { DateFormatSection } from '../components/DateFormatSection.js';
 import { DataManagementSection } from '../components/DataManagementSection.js';
 import { GeneralSection } from '../components/GeneralSection.js';
+import { BackupRestoreSection } from '../components/BackupRestoreSection.js';
 import {
   SPACING,
   TOUCH_TARGETS,
@@ -134,6 +135,10 @@ export const SettingsView = () => {
   const dataSection = DataManagementSection();
   contentWrapper.appendChild(dataSection);
 
+  // Backup & Restore Section
+  const backupSection = BackupRestoreSection();
+  contentWrapper.appendChild(backupSection);
+
   // General Section
   const generalSection = GeneralSection();
   contentWrapper.appendChild(generalSection);
@@ -168,6 +173,20 @@ export const SettingsView = () => {
     }
   };
 
+  const handleBackupOperation = e => {
+    const { operation, status, count, error } = e.detail;
+
+    if (status === 'starting') {
+      console.log(`${operation} starting...`);
+    } else if (status === 'completed') {
+      console.log(`${operation} completed${count ? ` (${count} items)` : ''}`);
+    } else if (status === 'failed') {
+      console.error(`${operation} failed:`, error);
+    }
+  };
+
+  window.addEventListener('backup-operation', handleBackupOperation);
+
   const handleKeyDown = e => {
     if (e.key === 'Escape') {
       e.preventDefault();
@@ -180,6 +199,7 @@ export const SettingsView = () => {
 
   container.cleanup = () => {
     window.removeEventListener('storage-updated', handleStorageUpdate);
+    window.removeEventListener('backup-operation', handleBackupOperation);
     window.removeEventListener('keydown', handleKeyDown);
     if (dataSection && typeof dataSection.cleanup === 'function') {
       dataSection.cleanup();

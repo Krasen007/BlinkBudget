@@ -9,7 +9,7 @@ Implement offline-first backup/restore functionality allowing users to restore d
 - **Backup Storage**: Firebase `/users/{userId}/backups/daily_backup/data`
 - **Metadata Storage**: Settings document (`lastBackupDate`, `lastBackupDataAsOf`)
 - **Triggers**: App startup (30s delay) + visibility changes (once per day max)
-- **Operations**: Delete after date (local) + restore date range (from backup)
+- **Operations**: Delete after date (local) + restore last backup (cloud)
 
 ## Core Logic
 
@@ -119,17 +119,13 @@ export const BackupService = {
     }
   },
 
-  async createBackup() {
-    const userId = AuthService.getUserId();
-    if (!userId) return;
-
     // Create backup of CURRENT state (represents yesterday's backup)
     const backupData = {
       backupDate: this.getTodayISO(), // When backup was created
       dataAsOf: this.getYesterdayISO(), // What this backup represents
       transactions: TransactionService.getAll(),
       accounts: AccountService.getAccounts(),
-      settings: SettingsService.getAll(),
+      settings: SettingsService.getAllSettings(),
       goals: GoalPlanner.getAllGoals(),
       investments: InvestmentTracker.getAllInvestments(),
     };
@@ -169,7 +165,7 @@ export const BackupService = {
     return null;
   },
 
-  async restoreDateRange(startDate, endDate) {
+  async restoreBackup() {
     if (!navigator.onLine) {
       throw new Error('Restore requires internet connection');
     }
@@ -186,29 +182,30 @@ export const BackupService = {
         throw new Error('No backup data available');
       }
 
-      // Get transactions from backup in date range
-      const backupTransactions = backup.transactions.filter(t => {
-        const tDate = t.timestamp.split('T')[0];
-        return tDate >= startDate && tDate <= endDate;
-      });
+      // Hard Restore Strategy (Replace)
+      // User wants state to be exactly like backup.
 
-      // Delete existing transactions in date range (replace strategy)
-      this.deleteTransactionsInDateRange(startDate, endDate);
+      // 1. Clear current transactions
+      TransactionService.clear();
 
-      // Add transactions from backup
-      backupTransactions.forEach(t => TransactionService.add(t));
+      // 2. Load transactions from backup
+      backup.transactions.forEach(t => TransactionService.add(t));
+
+      // 3. Restore other entities (Accounts, Settings, Goals, Investments) if present in backup
+      // Assuming backup contains these, we should clear and set them too or selective update?
+      // For MVP, focus on transactions as the critical data.
 
       window.dispatchEvent(
         new CustomEvent('backup-operation', {
           detail: {
             operation: 'restore',
             status: 'completed',
-            count: backupTransactions.length,
+            count: backup.transactions.length,
           },
         })
       );
 
-      return backupTransactions.length;
+      return backup.transactions.length;
     } catch (error) {
       window.dispatchEvent(
         new CustomEvent('backup-operation', {
@@ -291,25 +288,7 @@ export const BackupRestoreSection = () => {
   });
   section.appendChild(title);
 
-  // Date Range Container
-  const dateRangeContainer = document.createElement('div');
-  dateRangeContainer.className = 'mobile-date-range-form';
-  Object.assign(dateRangeContainer.style, {
-    display: 'flex',
-    flexDirection: 'row',
-    gap: SPACING.SM,
-    marginBottom: SPACING.LG,
-  });
-
-  const startInput = createDateField(
-    'Start Date',
-    getFirstDayOfMonthISO(),
-    'restore-start'
-  );
-  const endInput = createDateField('End Date', getTodayISO(), 'restore-end');
-
-  dateRangeContainer.appendChild(startInput.wrapper);
-  dateRangeContainer.appendChild(endInput.wrapper);
+  // Date Range UI removed for simplicity
 
   // Buttons Container
   const buttonsContainer = document.createElement('div');
@@ -318,26 +297,19 @@ export const BackupRestoreSection = () => {
   buttonsContainer.style.gap = SPACING.SM;
 
   const restoreBtn = Button({
-    text: 'Restore Transactions from Backup',
+    text: 'Restore From Last Backup',
     variant: 'secondary',
     onClick: () => {
-      const start = startInput.input.getDate();
-      const end = endInput.input.getDate();
-
-      if (new Date(start) > new Date(end)) {
-        AlertDialog({ message: 'Start date cannot be after end date.' });
-        return;
-      }
-
       ConfirmDialog({
-        message: `This will REPLACE all transactions between ${start} and ${end} with data from your backup. Continue?`,
-        confirmText: 'Restore',
+        message:
+          'WARNING: This will replace your current data with the last backup. Any changes made since the last backup will be LOST. Continue?',
+        confirmText: 'Restore & Replace',
         title: 'Confirm Restore',
         onConfirm: async () => {
           try {
-            const count = await BackupService.restoreDateRange(start, end);
+            const count = await BackupService.restoreBackup();
             AlertDialog({
-              message: `Successfully restored ${count} transactions from backup.`,
+              message: `Successfully restored app state from backup.`,
             });
           } catch (error) {
             AlertDialog({ message: `Restore failed: ${error.message}` });
@@ -500,10 +472,10 @@ BackupService.init();
 
 ### Restore Behavior
 
-- **Date Range Selection**: User selects start and end dates
-- **Replace Strategy**: Deletes existing transactions in range, adds from backup
+- **Last Backup**: Restores from the single daily backup
+- **Replace Strategy**: Wipes local data and loads backup data (exact state match)
 - **Online Required**: Must be online to fetch backup from Firebase
-- **User Feedback**: Clear confirmations and progress indicators
+- **User Feedback**: Clear warning about data loss (changes since backup)
 
 ### Delete Behavior
 

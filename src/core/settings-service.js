@@ -38,6 +38,11 @@ export const SettingsService = {
    * @returns {Object} Settings object
    */
   getAllSettings() {
-    return safeJsonParse(localStorage.getItem(SETTINGS_KEY) || '{}');
+    const defaults = {
+      lastBackupDate: null,
+      lastBackupDataAsOf: null,
+    };
+    const stored = safeJsonParse(localStorage.getItem(SETTINGS_KEY) || '{}');
+    return { ...defaults, ...stored };
   },
 };
