@@ -245,13 +245,16 @@ function createWeekdayWeekendSection(analysis) {
     margin-bottom: ${SPACING.MD};
   `;
 
+  // Calculate max amount for scaling
+  const maxAmount = Math.max(analysis.weekday.total, analysis.weekend.total);
+
   // Weekday column
   const weekdayColumn = createSpendingColumn(
     'Weekday',
     analysis.weekday.total,
-    analysis.weekend.total,
+    maxAmount,
     COLORS.PRIMARY,
-    analysis.weekend.uniqueDays
+    analysis.weekday.uniqueDays
   );
   chartContainer.appendChild(weekdayColumn);
 
@@ -259,7 +262,7 @@ function createWeekdayWeekendSection(analysis) {
   const weekendColumn = createSpendingColumn(
     'Weekend',
     analysis.weekend.total,
-    analysis.weekend.total,
+    maxAmount,
     COLORS.ACCENT,
     analysis.weekend.uniqueDays
   );
@@ -395,9 +398,21 @@ function createTimeOfDaySection(analysis) {
     night: COLORS.MUTED,
   };
 
+  // Calculate max total across all periods for relative scaling
+  const maxPeriodTotal = Math.max(
+    ...Object.values(analysis.periods).map(p => p.total)
+  );
+
   Object.entries(analysis.periods).forEach(([period, data]) => {
+    // Show all periods with data, or at least show the structure if empty? 
+    // The original code only showed if total > 0. Keeping that for now.
     if (data.total > 0) {
-      const periodBar = createTimePeriodBar(period, data, periodColors[period]);
+      const periodBar = createTimePeriodBar(
+        period,
+        data,
+        periodColors[period],
+        maxPeriodTotal
+      );
       periodsContainer.appendChild(periodBar);
     }
   });
@@ -468,9 +483,12 @@ function createTimePeriodBar(period, data, color) {
     overflow: hidden;
   `;
 
-  const maxAmount = Math.max(
+  // Use the global maxPeriodTotal passed in, or fallback to internal calculation if missing (though it shouldn't be)
+  const maxAmount = arguments[3] || Math.max(
     ...Object.values(data.hourlyBreakdown).map(h => h.amount)
   );
+
+  // Calculate width relative to the biggest period total
   const barWidth = maxAmount > 0 ? (data.total / maxAmount) * 100 : 0;
 
   const bar = document.createElement('div');

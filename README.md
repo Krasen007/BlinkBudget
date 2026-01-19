@@ -69,6 +69,16 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 - **Keyboard shortcut (Escape key)** to exit Settings and return to dashboard
 - **Helpful tips on each section**
 
+### Backup & Restore
+
+- **Automatic daily backup** stored in Firebase, representing yesterday's state.
+- **Single backup** overwritten each day to keep storage simple.
+- **Restore from last backup** replaces current data with the backup (warning shown).
+- **Offline safe**: backup skips when offline; restore requires internet.
+- **User feedback** via custom events showing start, success, and failure.
+
+
+
 ### Settings & Customization
 
 - **General Settings section** - Unified Refresh App, Install App, and Logout actions

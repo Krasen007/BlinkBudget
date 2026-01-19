@@ -248,6 +248,7 @@ export const ReportsView = () => {
     headerContainer.style.flexDirection = 'column';
     headerContainer.style.gap = SPACING.SM;
     headerContainer.style.flexShrink = '0';
+    headerContainer.style.padding = `0 ${SPACING.MD}`; // Align with content
 
     headerContainer.appendChild(header);
     headerContainer.appendChild(timePeriodSelectorComponent);
