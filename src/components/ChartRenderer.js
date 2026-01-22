@@ -466,8 +466,8 @@ export class ChartRenderer {
           clientX: touch.clientX,
           clientY: touch.clientY,
           target: canvas,
-          preventDefault: () => {},
-          stopPropagation: () => {},
+          preventDefault: () => { },
+          stopPropagation: () => { },
         };
 
         // Get elements at touch position
@@ -526,34 +526,8 @@ export class ChartRenderer {
     if (activeElements && activeElements.length > 0) {
       // Change cursor
       canvas.style.cursor = 'pointer';
-
-      // Simple hover effect for pie charts
-      if (chart.config.type === 'pie') {
-        const activeElement = activeElements[0];
-        const dataset = chart.data.datasets[activeElement.datasetIndex];
-
-        if (!dataset._originalHoverOffset) {
-          dataset._originalHoverOffset = dataset.hoverOffset || 0;
-        }
-        dataset.hoverOffset = 8; // Subtle separation
-
-        chart.setActiveElements(activeElements);
-        chart.update('active');
-      }
     } else {
       canvas.style.cursor = 'default';
-
-      // Reset hover effects
-      if (chart.config.type === 'pie') {
-        chart.data.datasets.forEach(dataset => {
-          if (dataset._originalHoverOffset !== undefined) {
-            dataset.hoverOffset = dataset._originalHoverOffset;
-          }
-        });
-      }
-
-      chart.setActiveElements([]);
-      chart.update('active');
     }
 
     // Simplified canvas hover animation
@@ -706,8 +680,8 @@ export class ChartRenderer {
       originalBorderWidth
     )
       ? originalBorderWidth.map((width, i) =>
-          i === activeElement.index ? width + 2 : width
-        )
+        i === activeElement.index ? width + 2 : width
+      )
       : originalBorderWidth + 2;
 
     chart.update('none');

@@ -22,9 +22,9 @@ export const TransactionListItem = ({
   accounts,
   shouldHighlight = false,
   currentDateFilter = null,
-  onDateClick = () => {},
+  onDateClick = () => { },
   currentCategoryFilter = null,
-  onCategoryClick = () => {},
+  onCategoryClick = () => { },
 }) => {
   const item = document.createElement('li');
   item.className = 'transaction-item';
@@ -124,14 +124,7 @@ export const TransactionListItem = ({
   // Special Display for Transfers
   if (transaction.type === 'transfer') {
     const getAccName = id => accounts.find(a => a.id === id)?.name || 'Unknown';
-
-    if (currentFilter === 'all') {
-      cat.textContent = `Transfer: ${getAccName(transaction.accountId)} → ${getAccName(transaction.toAccountId)}`;
-    } else if (transaction.accountId === currentFilter) {
-      cat.textContent = `Transfer to ${getAccName(transaction.toAccountId)}`;
-    } else {
-      cat.textContent = `Transfer from ${getAccName(transaction.accountId)}`;
-    }
+    cat.textContent = `Transfer: ${getAccName(transaction.accountId)} → ${getAccName(transaction.toAccountId)}`;
   } else {
     cat.textContent = transaction.category;
   }
@@ -143,10 +136,16 @@ export const TransactionListItem = ({
     whiteSpace: 'nowrap',
     cursor: 'pointer',
     color:
-      currentCategoryFilter === transaction.category
-        ? COLORS.PRIMARY
-        : COLORS.TEXT_MAIN,
-    fontWeight: currentCategoryFilter === transaction.category ? '700' : '500',
+      transaction.type === 'transfer'
+        ? COLORS.TEXT_MUTED
+        : currentCategoryFilter === transaction.category
+          ? COLORS.PRIMARY
+          : COLORS.TEXT_MAIN,
+    fontWeight:
+      currentCategoryFilter === transaction.category ||
+        transaction.type === 'transfer'
+        ? '700'
+        : '500',
   });
 
   if (transaction.type !== 'transfer') {
@@ -201,17 +200,15 @@ export const TransactionListItem = ({
     isPositive = true;
     color = COLORS.SUCCESS;
   } else if (transaction.type === 'transfer') {
+    color = COLORS.TEXT_MUTED;
     if (currentFilter !== 'all') {
       if (transaction.toAccountId === currentFilter) {
         isPositive = true;
-        color = COLORS.SUCCESS;
       } else {
         isPositive = false;
-        color = 'inherit';
       }
     } else {
       isPositive = true;
-      color = COLORS.TEXT_MUTED;
     }
   }
 
