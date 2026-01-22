@@ -134,6 +134,10 @@ export const TransactionForm = ({
   typeToggle.setType = type => {
     originalSetType(type);
     categorySelector.setType(type);
+    // Maintain focus on amount field when switching types
+    if (amountInput) {
+      amountInput.focus({ preventScroll: true });
+    }
   };
 
   // Update button click handlers to use the wrapped setType

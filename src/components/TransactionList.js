@@ -21,9 +21,9 @@ export const TransactionList = ({
   accounts,
   highlightTransactionIds = null,
   currentDateFilter = null,
-  onDateClick = () => {},
+  onDateClick = () => { },
   currentCategoryFilter = null,
-  onCategoryClick = () => {},
+  onCategoryClick = () => { },
 }) => {
   const listContainer = document.createElement('div');
   listContainer.className = 'dashboard-transactions-container';
@@ -110,19 +110,11 @@ export const TransactionList = ({
     const list = document.createElement('ul');
     list.className = 'dashboard-transactions-list';
     list.style.flex = '1';
-    list.style.minHeight = '0'; // Allow flex child to shrink
     Object.assign(list.style, {
       listStyle: 'none',
       padding: 0,
       margin: 0,
-      overflowY: 'auto',
-      overflowX: 'hidden',
       borderTop: '1px solid var(--color-surface-hover)',
-      webkitOverflowScrolling: 'touch',
-      scrollBehavior: 'smooth',
-      overscrollBehavior: 'contain',
-      willChange: 'scroll-position',
-      transform: 'translateZ(0)',
     });
 
     // Dynamic height calculation - use flex instead of maxHeight
