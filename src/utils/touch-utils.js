@@ -3,7 +3,7 @@
  * Provides standardized touch event handlers to reduce duplication
  */
 
-import { HAPTIC_PATTERNS } from './constants.js';
+
 
 /**
  * Add touch feedback to an element
@@ -12,7 +12,6 @@ import { HAPTIC_PATTERNS } from './constants.js';
  */
 export const addTouchFeedback = (element, options = {}) => {
   const {
-    hapticPattern = HAPTIC_PATTERNS.LIGHT,
     scale = 0.98,
     backgroundColor = 'var(--color-surface-hover)',
     transform = `scale(${scale})`,
@@ -27,10 +26,6 @@ export const addTouchFeedback = (element, options = {}) => {
     () => {
       element.style.backgroundColor = backgroundColor;
       element.style.transform = transform;
-
-      if (window.mobileUtils?.supportsHaptic() && hapticPattern) {
-        window.mobileUtils.hapticFeedback(hapticPattern);
-      }
     },
     { passive }
   );
@@ -62,7 +57,6 @@ export const addTouchFeedback = (element, options = {}) => {
 export const addTouchFeedbackClass = (element, options = {}) => {
   const {
     className = 'touch-active',
-    hapticPattern = HAPTIC_PATTERNS.LIGHT,
     passive = true,
   } = options;
 
@@ -70,10 +64,6 @@ export const addTouchFeedbackClass = (element, options = {}) => {
     'touchstart',
     () => {
       element.classList.add(className);
-
-      if (window.mobileUtils?.supportsHaptic() && hapticPattern) {
-        window.mobileUtils.hapticFeedback(hapticPattern);
-      }
     },
     { passive }
   );

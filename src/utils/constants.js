@@ -128,15 +128,6 @@ export const TRANSACTION_TYPES = {
   REFUND: 'refund',
 };
 
-// Haptic feedback patterns
-export const HAPTIC_PATTERNS = {
-  LIGHT: [10],
-  MEDIUM: [15],
-  STRONG: [25],
-  SUCCESS: [25, 25, 50],
-  ERROR: [50, 50, 50],
-  WELCOME: [5],
-};
 
 // Storage keys
 export const STORAGE_KEYS = {

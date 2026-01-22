@@ -4,7 +4,7 @@
  */
 
 import { TYPE_COLORS } from './constants.js';
-import { HAPTIC_PATTERNS } from '../constants.js';
+
 
 /**
  * Create a type toggle button
@@ -66,9 +66,6 @@ const createTypeButton = options => {
     'touchstart',
     () => {
       btn.style.transform = 'scale(0.96)';
-      if (window.mobileUtils) {
-        window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.LIGHT);
-      }
     },
     { passive: true }
   );

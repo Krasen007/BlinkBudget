@@ -63,9 +63,6 @@ describe('Success Feedback Integration', () => {
     // Verify highlight was applied (background color should be set)
     expect(transactionItem.style.backgroundColor).toBeTruthy();
     expect(transactionItem.style.transition).toContain('background-color');
-
-    // Verify haptic feedback was triggered
-    expect(window.mobileUtils.hapticFeedback).toHaveBeenCalledWith([10]); // LIGHT pattern
   });
 
   it('should not highlight transaction when no highlight ID is set', () => {
@@ -92,7 +89,6 @@ describe('Success Feedback Integration', () => {
 
     // Verify no highlight styles are applied
     expect(transactionItem.style.backgroundColor).toBeFalsy();
-    expect(window.mobileUtils.hapticFeedback).not.toHaveBeenCalled();
   });
 
   it('should handle transfer transactions with highlighting', async () => {
@@ -136,6 +132,5 @@ describe('Success Feedback Integration', () => {
 
     // Verify highlight was applied
     expect(transactionItem.style.backgroundColor).toBeTruthy();
-    expect(window.mobileUtils.hapticFeedback).toHaveBeenCalled();
   });
 });

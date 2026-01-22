@@ -466,8 +466,8 @@ export class ChartRenderer {
           clientX: touch.clientX,
           clientY: touch.clientY,
           target: canvas,
-          preventDefault: () => { },
-          stopPropagation: () => { },
+          preventDefault: () => {},
+          stopPropagation: () => {},
         };
 
         // Get elements at touch position
@@ -660,9 +660,7 @@ export class ChartRenderer {
    * Add haptic feedback for mobile devices
    */
   addHapticFeedback() {
-    if ('vibrate' in navigator) {
-      navigator.vibrate(50); // Short vibration
-    }
+    // Haptic feedback disabled
   }
 
   /**
@@ -680,8 +678,8 @@ export class ChartRenderer {
       originalBorderWidth
     )
       ? originalBorderWidth.map((width, i) =>
-        i === activeElement.index ? width + 2 : width
-      )
+          i === activeElement.index ? width + 2 : width
+        )
       : originalBorderWidth + 2;
 
     chart.update('none');

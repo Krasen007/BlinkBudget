@@ -12,7 +12,6 @@ import {
   SPACING,
   TOUCH_TARGETS,
   FONT_SIZES,
-  HAPTIC_PATTERNS,
   ACCOUNT_TYPES,
 } from '../utils/constants.js';
 import {
@@ -137,9 +136,6 @@ export const AccountSection = () => {
           acc.isDefault = true;
           AccountService.saveAccount(acc);
           renderAccounts();
-          if (window.mobileUtils?.supportsHaptic()) {
-            window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.LIGHT);
-          }
         };
         actions.appendChild(makeDefaultBtn);
 
@@ -156,9 +152,6 @@ export const AccountSection = () => {
             onConfirm: () => {
               if (AccountService.deleteAccount(acc.id)) {
                 renderAccounts();
-                if (window.mobileUtils?.supportsHaptic()) {
-                  window.mobileUtils.hapticFeedback([20, 10, 20]);
-                }
               } else {
                 AlertDialog({ message: 'Cannot delete the last account.' });
               }
@@ -245,9 +238,6 @@ export const AccountSection = () => {
           errorMsg.textContent = `An account named "${name}" of type "${type}" already exists.`;
           errorMsg.style.display = 'block';
           nameInput.style.borderColor = COLORS.ERROR;
-          if (window.mobileUtils?.supportsHaptic()) {
-            window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.ERROR);
-          }
           return;
         }
         AccountService.saveAccount({
@@ -259,9 +249,6 @@ export const AccountSection = () => {
         nameInput.value = '';
         errorMsg.style.display = 'none';
         renderAccounts();
-        if (window.mobileUtils?.supportsHaptic()) {
-          window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.LIGHT);
-        }
       }
     },
   });

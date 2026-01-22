@@ -404,7 +404,7 @@ function createTimeOfDaySection(analysis) {
   );
 
   Object.entries(analysis.periods).forEach(([period, data]) => {
-    // Show all periods with data, or at least show the structure if empty? 
+    // Show all periods with data, or at least show the structure if empty?
     // The original code only showed if total > 0. Keeping that for now.
     if (data.total > 0) {
       const periodBar = createTimePeriodBar(
@@ -484,9 +484,9 @@ function createTimePeriodBar(period, data, color) {
   `;
 
   // Use the global maxPeriodTotal passed in, or fallback to internal calculation if missing (though it shouldn't be)
-  const maxAmount = arguments[3] || Math.max(
-    ...Object.values(data.hourlyBreakdown).map(h => h.amount)
-  );
+  const maxAmount =
+    arguments[3] ||
+    Math.max(...Object.values(data.hourlyBreakdown).map(h => h.amount));
 
   // Calculate width relative to the biggest period total
   const barWidth = maxAmount > 0 ? (data.total / maxAmount) * 100 : 0;

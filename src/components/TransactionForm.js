@@ -5,7 +5,7 @@
 
 import { AccountService } from '../core/account-service.js';
 import { ClickTracker } from '../core/click-tracking-service.js';
-import { FONT_SIZES, COLORS, HAPTIC_PATTERNS } from '../utils/constants.js';
+import { FONT_SIZES, COLORS } from '../utils/constants.js';
 import { createSelect } from '../utils/dom-factory.js';
 import { createTypeToggleGroup } from '../utils/form-utils/type-toggle.js';
 import { createCategorySelector } from '../utils/form-utils/category-chips.js';
@@ -81,9 +81,6 @@ export const TransactionForm = ({
   accSelect.addEventListener('change', e => {
     ClickTracker.recordClick();
     currentAccountId = e.target.value;
-    if (window.mobileUtils) {
-      window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.LIGHT);
-    }
     // Always update category selector's source account for all transaction types
     categorySelector.setSourceAccount(currentAccountId);
   });
@@ -151,9 +148,6 @@ export const TransactionForm = ({
     newBtn.addEventListener('click', () => {
       ClickTracker.recordClick();
       typeToggle.setType(type);
-      if (window.mobileUtils) {
-        window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.LIGHT);
-      }
     });
 
     // Re-add touch feedback
@@ -161,9 +155,6 @@ export const TransactionForm = ({
       'touchstart',
       () => {
         newBtn.style.transform = 'scale(0.96)';
-        if (window.mobileUtils) {
-          window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.LIGHT);
-        }
       },
       { passive: true }
     );
@@ -185,15 +176,6 @@ export const TransactionForm = ({
     );
   });
 
-  // Setup account select change handler (after categorySelector is created)
-  accSelect.addEventListener('change', e => {
-    currentAccountId = e.target.value;
-    if (window.mobileUtils) {
-      window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.LIGHT);
-    }
-    // Always update category selector's source account for all transaction types
-    categorySelector.setSourceAccount(currentAccountId);
-  });
 
   // 7. Layout Assembly
   form.appendChild(amountAccountRow);

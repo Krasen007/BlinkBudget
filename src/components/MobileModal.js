@@ -48,9 +48,6 @@ export const MobileModal = ({
         'touchstart',
         _e => {
           closeBtn.classList.add('touch-active');
-          if (window.mobileUtils?.supportsHaptic()) {
-            window.mobileUtils.hapticFeedback([5]);
-          }
         },
         { passive: true }
       );
@@ -350,9 +347,6 @@ export const MobileConfirmDialog = ({
     'touchstart',
     _e => {
       confirmBtn.classList.add('touch-active');
-      if (window.mobileUtils?.supportsHaptic()) {
-        window.mobileUtils.hapticFeedback([10]);
-      }
     },
     { passive: true }
   );

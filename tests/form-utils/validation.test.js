@@ -285,19 +285,6 @@ describe('Form Validation Utilities', () => {
       expect(mockElement.focus).toHaveBeenCalled();
     });
 
-    test('triggers haptic feedback when supported', () => {
-      const mockElement = {
-        style: {},
-        focus: vi.fn(),
-      };
-
-      showFieldError(mockElement);
-
-      expect(window.mobileUtils.hapticFeedback).toHaveBeenCalledWith([
-        50, 50, 50,
-      ]);
-    });
-
     test('clears error styling after timeout', async () => {
       vi.useFakeTimers();
       const mockElement = {
@@ -324,18 +311,6 @@ describe('Form Validation Utilities', () => {
       showContainerError(mockContainer);
 
       expect(mockContainer.style.border).toBe('1px solid #ef4444');
-    });
-
-    test('triggers haptic feedback for container errors', () => {
-      const mockContainer = {
-        style: {},
-      };
-
-      showContainerError(mockContainer);
-
-      expect(window.mobileUtils.hapticFeedback).toHaveBeenCalledWith([
-        50, 50, 50,
-      ]);
     });
 
     test('clears container error styling after timeout', async () => {

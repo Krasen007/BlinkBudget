@@ -3,7 +3,7 @@
  * Provides subtle visual confirmation for newly added/updated transactions
  */
 
-import { COLORS, HAPTIC_PATTERNS } from './constants.js';
+import { COLORS } from './constants.js';
 
 /**
  * Highlight a transaction item with subtle success animation
@@ -20,11 +20,6 @@ export const highlightTransactionSuccess = (element, duration = 1500) => {
   // Apply subtle success highlight - very light green
   element.style.transition = 'background-color 0.3s ease';
   element.style.backgroundColor = COLORS.SUCCESS_LIGHT;
-
-  // Subtle haptic feedback
-  if (window.mobileUtils && window.mobileUtils.supportsHaptic()) {
-    window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.LIGHT);
-  }
 
   // Fade back to original after 1 second
   setTimeout(() => {

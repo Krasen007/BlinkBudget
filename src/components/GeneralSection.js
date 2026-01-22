@@ -29,9 +29,6 @@ export const GeneralSection = () => {
     text: 'Refresh App',
     variant: 'ghost',
     onClick: () => {
-      if (window.mobileUtils?.supportsHaptic()) {
-        window.mobileUtils.hapticFeedback([10]);
-      }
       window.location.hash = '#dashboard';
       window.location.reload();
     },

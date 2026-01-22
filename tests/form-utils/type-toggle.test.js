@@ -178,19 +178,6 @@ describe('Type Toggle Group', () => {
       expect(result.currentType()).toBe('income');
     });
 
-    test('touchstart triggers haptic feedback', () => {
-      const result = createTypeToggleGroup();
-
-      const expenseButton = result.buttons.expense;
-      const touchStartHandler = expenseButton.addEventListener.mock.calls.find(
-        ([event]) => event === 'touchstart'
-      )[1];
-
-      touchStartHandler();
-
-      expect(window.mobileUtils.hapticFeedback).toHaveBeenCalledWith([10]);
-    });
-
     test('button click calls onTypeChange callback', () => {
       const onTypeChange = vi.fn();
       const result = createTypeToggleGroup({ onTypeChange });

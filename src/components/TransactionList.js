@@ -21,9 +21,9 @@ export const TransactionList = ({
   accounts,
   highlightTransactionIds = null,
   currentDateFilter = null,
-  onDateClick = () => { },
+  onDateClick = () => {},
   currentCategoryFilter = null,
-  onCategoryClick = () => { },
+  onCategoryClick = () => {},
 }) => {
   const listContainer = document.createElement('div');
   listContainer.className = 'dashboard-transactions-container';

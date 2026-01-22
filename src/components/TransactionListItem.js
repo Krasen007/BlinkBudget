@@ -68,10 +68,6 @@ export const TransactionListItem = ({
     longPressed = false;
     pressTimer = setTimeout(() => {
       longPressed = true;
-      // Provide haptic feedback for the long press
-      if (window.mobileUtils && window.mobileUtils.supportsHaptic()) {
-        window.mobileUtils.hapticFeedback([25]); // Strong vibration
-      }
       handleSplitTransaction();
     }, 500); // 500ms for long press
   };

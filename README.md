@@ -77,8 +77,6 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 - **Offline safe**: backup skips when offline; restore requires internet.
 - **User feedback** via custom events showing start, success, and failure.
 
-
-
 ### Settings & Customization
 
 - **General Settings section** - Unified Refresh App, Install App, and Logout actions

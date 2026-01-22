@@ -69,10 +69,6 @@ export const MobileNavigation = ({ currentRoute = 'dashboard' }) => {
       'touchstart',
       _e => {
         navItem.classList.add('touch-active');
-        // Haptic feedback for supported devices
-        if (window.mobileUtils?.supportsHaptic()) {
-          window.mobileUtils.hapticFeedback([5]);
-        }
       },
       { passive: true }
     );
@@ -141,9 +137,6 @@ export const MobileBackButton = ({ onBack, label = 'Back' }) => {
     'touchstart',
     _e => {
       backBtn.classList.add('touch-active');
-      if (window.mobileUtils?.supportsHaptic()) {
-        window.mobileUtils.hapticFeedback([5]);
-      }
     },
     { passive: true }
   );

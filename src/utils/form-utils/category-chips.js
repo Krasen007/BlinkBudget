@@ -10,7 +10,6 @@ import {
 } from './constants.js';
 import {
   SPACING,
-  HAPTIC_PATTERNS,
   FONT_SIZES,
   TOUCH_TARGETS,
 } from '../constants.js';
@@ -86,9 +85,6 @@ const createCategoryChip = options => {
     () => {
       chip.style.boxShadow = `0 4px 20px ${color}60`;
       chip.style.border = `1px solid ${color}`;
-      if (window.mobileUtils) {
-        window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.MEDIUM);
-      }
     },
     { passive: true }
   );
@@ -281,10 +277,6 @@ export const createCategorySelector = (options = {}) => {
 
             selectedToAccount = acc.id;
 
-            // Success haptic feedback
-            if (window.mobileUtils) {
-              window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.SUCCESS);
-            }
 
             // Auto-submit for Transfer
             if (onSubmit && amountInput) {
@@ -410,14 +402,6 @@ export const createCategorySelector = (options = {}) => {
               // Update this chip state
               chip.updateState(true);
 
-              // Success haptic feedback
-              try {
-                if (window.mobileUtils) {
-                  window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.SUCCESS);
-                }
-              } catch (e) {
-                console.error('Haptic feedback failed:', e);
-              }
 
               // Auto-submit
               if (onSubmit && amountInput) {
@@ -434,7 +418,7 @@ export const createCategorySelector = (options = {}) => {
                   const dateValue = dateSource.getDate
                     ? dateSource.getDate()
                     : dateSource.value ||
-                      new Date().toISOString().split('T')[0];
+                    new Date().toISOString().split('T')[0];
 
                   onSubmit({
                     amount: amountValidation.value,

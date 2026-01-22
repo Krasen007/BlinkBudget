@@ -53,18 +53,9 @@ describe('Success Feedback', () => {
     expect(secondRetrieval).toEqual([testId]);
   });
 
-  it('should trigger subtle haptic feedback when highlighting', () => {
-    const element = document.createElement('div');
-    document.body.appendChild(element);
-
-    highlightTransactionSuccess(element);
-
-    expect(window.mobileUtils.hapticFeedback).toHaveBeenCalledWith([10]); // LIGHT haptic pattern
-  });
-
-  it('should handle missing haptic feedback gracefully', () => {
-    // Temporarily disable haptic support
-    window.mobileUtils.supportsHaptic = () => false;
+  it('should handle missing mobileUtils gracefully', () => {
+    const originalMobileUtils = window.mobileUtils;
+    window.mobileUtils = null;
 
     const element = document.createElement('div');
     document.body.appendChild(element);
@@ -73,7 +64,6 @@ describe('Success Feedback', () => {
       highlightTransactionSuccess(element);
     }).not.toThrow();
 
-    // Restore haptic support
-    window.mobileUtils.supportsHaptic = () => true;
+    window.mobileUtils = originalMobileUtils;
   });
 });

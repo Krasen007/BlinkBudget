@@ -8,7 +8,6 @@ import {
   TOUCH_TARGETS,
   FONT_SIZES,
   DATE_FORMATS,
-  HAPTIC_PATTERNS,
 } from '../utils/constants.js';
 
 export const DateFormatSection = ({ onFormatChange }) => {
@@ -64,9 +63,6 @@ export const DateFormatSection = ({ onFormatChange }) => {
 
     row.addEventListener('click', () => {
       SettingsService.saveSetting('dateFormat', value);
-      if (window.mobileUtils?.supportsHaptic()) {
-        window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.WELCOME);
-      }
       if (onFormatChange) {
         onFormatChange();
       }

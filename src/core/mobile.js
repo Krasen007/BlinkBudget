@@ -115,7 +115,7 @@ export class MobileUtils {
   }
 
   supportsHaptic() {
-    return 'vibrate' in navigator;
+    return false;
   }
 
   supportsPWA() {
@@ -125,10 +125,9 @@ export class MobileUtils {
   /**
    * Haptic feedback utility
    */
-  hapticFeedback(pattern = [10]) {
-    if (this.supportsHaptic()) {
-      navigator.vibrate(pattern);
-    }
+  hapticFeedback(_pattern = [10]) {
+    // Haptic feedback disabled
+    return;
   }
 
   /**

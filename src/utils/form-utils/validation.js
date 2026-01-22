@@ -3,7 +3,7 @@
  * Centralized validation logic for transaction forms
  */
 
-import { COLORS, HAPTIC_PATTERNS, TIMING } from '../constants.js';
+import { COLORS, TIMING } from '../constants.js';
 
 /**
  * Validate amount value
@@ -82,10 +82,6 @@ export const showFieldError = (element, _errorMessage = null) => {
     element.style.border = '1px solid var(--color-border)';
   }, TIMING.ANIMATION_NORMAL * 10); // 2 seconds
 
-  // Haptic error feedback
-  if (window.mobileUtils?.supportsHaptic()) {
-    window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.ERROR);
-  }
 
   // Focus the element
   if (element.focus) {
@@ -103,10 +99,6 @@ export const showContainerError = container => {
   setTimeout(() => {
     container.style.border = '1px solid var(--color-border)';
   }, TIMING.ANIMATION_NORMAL * 10);
-
-  if (window.mobileUtils?.supportsHaptic()) {
-    window.mobileUtils.hapticFeedback(HAPTIC_PATTERNS.ERROR);
-  }
 };
 
 /**

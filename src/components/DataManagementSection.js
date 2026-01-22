@@ -119,10 +119,6 @@ export const DataManagementSection = () => {
       a.download = `blinkbudget_export_${startInput.input.getDate()}_to_${endInput.input.getDate()}.csv`;
       a.click();
       window.URL.revokeObjectURL(url);
-
-      if (window.mobileUtils?.supportsHaptic()) {
-        window.mobileUtils.hapticFeedback([10, 5, 10]);
-      }
     },
   });
   exportBtn.className += ' touch-target mobile-form-button';
