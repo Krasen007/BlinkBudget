@@ -1,40 +1,9 @@
-# Version 1.15.0 Release Notes
-
-## 🎯 Key Improvements
-- **Enhanced Chart Performance**: Fixed chart rendering and category display issues
-- **Spending Pattern Analytics**: Added new analytics to track and visualize spending patterns
-- **Mobile Experience**: Significant improvements to mobile navigation and UI responsiveness
-- **Financial Planning**: Complete overhaul with new sections for investments, goals, forecasts, and scenarios
-
-## 📊 Analytics & Insights
-- Added spending pattern analysis with visual charts
-- Improved calculation accuracy for financial metrics
-- Enhanced dashboard with click tracking metrics (shows average clicks and time to complete transactions)
-
-## 🎨 User Interface
-- Redesigned mobile navigation with new tab system
-- Fixed responsive design issues across devices
-- Improved category details and display
-- General UI polish and accessibility improvements
-
-## 🔧 Technical Updates
-- PWA optimizations for better offline performance
-- Network connectivity improvements
-- Enhanced sync service with better conflict resolution
-- Comprehensive test coverage updates
-- Build system fixes and optimizations
-
-## 🏦 Financial Planning Features
-- **Overview Section**: Centralized financial summary
-- **Investments Section**: Track and manage investment portfolios
-- **Goals Section**: Set and monitor financial goals
-- **Forecasts Section**: Predict future financial trends
-- **Insights Section**: AI-powered financial recommendations
-- **Scenarios Section**: Model different financial scenarios
-
-## 🐛 Bug Fixes
-- Resolved chart rendering issues
-- Fixed mobile touch interactions
-- Improved calculation accuracy for financial data
-- Enhanced network error handling
-- Fixed test suite stability
+e801a20 remove unused haptic feedback
+e7ba80d do not lose focus on type change
+701c8dc fix transfer style not being the same on all accounts
+a0d800d fix ui in the header of reports view
+4bf6f2c Backup/Restore Implementation
+35c909c BlinkBudget Backup/Restore Implementation Document
+78df150 marketing
+154999f Optimize bundle size and loading times
+973e8f9 snyk security

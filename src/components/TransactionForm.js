@@ -176,7 +176,6 @@ export const TransactionForm = ({
     );
   });
 
-
   // 7. Layout Assembly
   form.appendChild(amountAccountRow);
   form.appendChild(categorySelector.container);

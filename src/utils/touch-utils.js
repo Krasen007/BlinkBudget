@@ -3,8 +3,6 @@
  * Provides standardized touch event handlers to reduce duplication
  */
 
-
-
 /**
  * Add touch feedback to an element
  * @param {HTMLElement} element - Element to add touch feedback to
@@ -55,10 +53,7 @@ export const addTouchFeedback = (element, options = {}) => {
  * @param {Object} options - Configuration options
  */
 export const addTouchFeedbackClass = (element, options = {}) => {
-  const {
-    className = 'touch-active',
-    passive = true,
-  } = options;
+  const { className = 'touch-active', passive = true } = options;
 
   element.addEventListener(
     'touchstart',

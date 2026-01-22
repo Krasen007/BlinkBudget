@@ -5,7 +5,6 @@
 
 import { TYPE_COLORS } from './constants.js';
 
-
 /**
  * Create a type toggle button
  * @param {Object} options - Button configuration

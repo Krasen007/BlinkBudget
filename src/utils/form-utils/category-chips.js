@@ -8,11 +8,7 @@ import {
   CATEGORY_COLORS,
   CATEGORY_OPTIONS,
 } from './constants.js';
-import {
-  SPACING,
-  FONT_SIZES,
-  TOUCH_TARGETS,
-} from '../constants.js';
+import { SPACING, FONT_SIZES, TOUCH_TARGETS } from '../constants.js';
 import { validateAmount, showFieldError } from './validation.js';
 import { ClickTracker } from '../../core/click-tracking-service.js';
 
@@ -277,7 +273,6 @@ export const createCategorySelector = (options = {}) => {
 
             selectedToAccount = acc.id;
 
-
             // Auto-submit for Transfer
             if (onSubmit && amountInput) {
               const dateSource =
@@ -402,7 +397,6 @@ export const createCategorySelector = (options = {}) => {
               // Update this chip state
               chip.updateState(true);
 
-
               // Auto-submit
               if (onSubmit && amountInput) {
                 try {
@@ -418,7 +412,7 @@ export const createCategorySelector = (options = {}) => {
                   const dateValue = dateSource.getDate
                     ? dateSource.getDate()
                     : dateSource.value ||
-                    new Date().toISOString().split('T')[0];
+                      new Date().toISOString().split('T')[0];
 
                   onSubmit({
                     amount: amountValidation.value,

@@ -82,7 +82,6 @@ export const showFieldError = (element, _errorMessage = null) => {
     element.style.border = '1px solid var(--color-border)';
   }, TIMING.ANIMATION_NORMAL * 10); // 2 seconds
 
-
   // Focus the element
   if (element.focus) {
     element.focus();

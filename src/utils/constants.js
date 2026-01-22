@@ -128,7 +128,6 @@ export const TRANSACTION_TYPES = {
   REFUND: 'refund',
 };
 
-
 // Storage keys
 export const STORAGE_KEYS = {
   TRANSACTIONS: 'blinkbudget_transactions',

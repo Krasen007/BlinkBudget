@@ -22,9 +22,9 @@ export const TransactionListItem = ({
   accounts,
   shouldHighlight = false,
   currentDateFilter = null,
-  onDateClick = () => { },
+  onDateClick = () => {},
   currentCategoryFilter = null,
-  onCategoryClick = () => { },
+  onCategoryClick = () => {},
 }) => {
   const item = document.createElement('li');
   item.className = 'transaction-item';
@@ -139,7 +139,7 @@ export const TransactionListItem = ({
           : COLORS.TEXT_MAIN,
     fontWeight:
       currentCategoryFilter === transaction.category ||
-        transaction.type === 'transfer'
+      transaction.type === 'transfer'
         ? '700'
         : '500',
   });
