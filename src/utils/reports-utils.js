@@ -5,13 +5,23 @@
  * browser support checks, and data validation.
  */
 
+import { formatDateForDisplay } from './date-utils.js';
+
 /**
  * Get current week time period
  */
 export function getCurrentWeekPeriod() {
   const now = new Date();
   const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
+
+  // Adjust to Monday start (ISO style: Monday=1, ..., Sunday=0)
+  // Logic: now.getDay() returns 0 for Sunday.
+  // If today is Sunday (0), we need to go back 6 days.
+  // If today is Monday (1), we stay here (0 days).
+  // If today is Tuesday (2), we go back 1 day.
+  const day = now.getDay();
+  const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+  startOfWeek.setDate(diff);
   startOfWeek.setHours(0, 0, 0, 0);
 
   const endOfWeek = new Date(startOfWeek);
@@ -23,6 +33,25 @@ export function getCurrentWeekPeriod() {
     startDate: startOfWeek,
     endDate: endOfWeek,
     label: 'This Week',
+  };
+}
+
+/**
+ * Get today's time period
+ */
+export function getTodayPeriod() {
+  const today = new Date();
+  const startOfDay = new Date(today);
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const endOfDay = new Date(today);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  return {
+    type: 'daily',
+    startDate: startOfDay,
+    endDate: endOfDay,
+    label: 'Today',
   };
 }
 
@@ -85,8 +114,8 @@ export function formatTimePeriod(timePeriod) {
   if (!timePeriod || !timePeriod.startDate || !timePeriod.endDate) {
     throw new Error('Invalid time period object');
   }
-  const startDate = timePeriod.startDate.toLocaleDateString();
-  const endDate = timePeriod.endDate.toLocaleDateString();
+  const startDate = formatDateForDisplay(timePeriod.startDate);
+  const endDate = formatDateForDisplay(timePeriod.endDate);
   return `${startDate} - ${endDate}`;
 }
 /**
@@ -97,7 +126,7 @@ export function checkBrowserSupport() {
   const requiredFeatures = {
     'ES6 Classes': () => {
       // Test ES6 class support
-      return typeof class {} === 'function';
+      return typeof class { } === 'function';
     },
     Promises: () => typeof Promise !== 'undefined',
     'Fetch API': () => typeof fetch !== 'undefined',

@@ -251,6 +251,48 @@ export const ReportsView = () => {
   }
 
   /**
+   * Handle category chart click - scroll to category details
+   */
+  function handleCategoryChartClick(label) {
+    if (!label) return;
+
+    const categoryCard = container.querySelector(`[data-category="${label}"]`);
+    if (categoryCard) {
+      categoryCard.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+
+      // Brief highlight effect
+      const originalBorder = categoryCard.style.borderColor;
+      const originalShadow = categoryCard.style.boxShadow;
+
+      categoryCard.style.borderColor = COLORS.PRIMARY;
+      categoryCard.style.boxShadow = `0 0 15px ${COLORS.PRIMARY}44`;
+
+      setTimeout(() => {
+        categoryCard.style.borderColor = originalBorder;
+        categoryCard.style.boxShadow = originalShadow;
+      }, 1000);
+    }
+  }
+
+  /**
+   * Handle category card click - scroll back up to chart
+   */
+  function handleCategoryCardClick() {
+    const chartSection = container.querySelector(
+      '[data-chart-type="category-breakdown"]'
+    );
+    if (chartSection) {
+      chartSection.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }
+  }
+
+  /**
    * Handle time period changes
    */
   function handleTimePeriodChange(newTimePeriod) {
@@ -607,7 +649,7 @@ export const ReportsView = () => {
           currentData,
           categoryColorMap,
           categories => getCategoryColors(categories, categoryColorMap),
-          null // Remove category details functionality
+          handleCategoryChartClick
         );
         categoryResult.section.style.borderBottom = `2px solid ${COLORS.BORDER}`;
         categoryResult.section.style.paddingBottom = `calc(${SPACING.LG} * 1.5)`;
@@ -640,7 +682,7 @@ export const ReportsView = () => {
           currentData,
           categoryColorMap,
           categories => getCategoryColors(categories, categoryColorMap),
-          null, // Remove category details functionality
+          handleCategoryCardClick,
           frequencyData.categories
         );
         categorySelectorSection.style.marginTop = `calc(${SPACING.XL} * 2)`;

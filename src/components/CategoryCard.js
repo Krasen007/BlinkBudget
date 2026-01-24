@@ -26,6 +26,7 @@ export const CategoryCard = (
 ) => {
   const card = document.createElement('button');
   card.className = 'category-card';
+  card.setAttribute('data-category', category.name);
   card.style.background = COLORS.SURFACE;
   card.style.border = `2px solid ${COLORS.BORDER}`;
   card.style.borderRadius = 'var(--radius-md)';

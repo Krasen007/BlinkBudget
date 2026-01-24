@@ -75,7 +75,7 @@ export class AnomalyService {
       insights.push({
         id: 'spending_spikes',
         type: 'anomaly',
-        message: `Detected ${spikes.length} unusually large transaction${spikes.length > 1 ? 's' : ''} totaling ${totalSpikeAmount.toFixed(2)} (${spikePercentage.toFixed(1)}% of total spending).`,
+        message: `Detected ${spikes.length} unusually large transaction${spikes.length > 1 ? 's' : ''} (over ${spikeThreshold.toFixed(2)}) totaling ${totalSpikeAmount.toFixed(2)} (${spikePercentage.toFixed(1)}% of total spending).`,
         severity: spikePercentage > 30 ? 'high' : 'medium',
         actionable: true,
         recommendation:

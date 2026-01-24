@@ -80,21 +80,21 @@ export class PatternAnalyzer {
     const weekdayPercentage =
       totalDays > 0
         ? (weekdaySpending.total /
-            (weekdaySpending.total + weekendSpending.total)) *
-          100
+          (weekdaySpending.total + weekendSpending.total)) *
+        100
         : 0;
     const weekendPercentage =
       totalDays > 0
         ? (weekendSpending.total /
-            (weekdaySpending.total + weekendSpending.total)) *
-          100
+          (weekdaySpending.total + weekendSpending.total)) *
+        100
         : 0;
 
     const dailyAverageDiff =
       weekdaySpending.dailyAverage > 0
         ? ((weekendSpending.dailyAverage - weekdaySpending.dailyAverage) /
-            weekdaySpending.dailyAverage) *
-          100
+          weekdaySpending.dailyAverage) *
+        100
         : 0;
 
     return {
@@ -523,18 +523,18 @@ export class PatternAnalyzer {
   /**
    * Generate insights for frequency patterns
    */
-  static generateFrequencyInsights(category, metrics) {
+  static generateFrequencyInsights(metrics) {
     const insights = [];
 
     if (metrics.averageVisitsPerWeek > 5) {
       insights.push(
-        `High frequency for ${category} - ${metrics.averageVisitsPerWeek.toFixed(1)} visits per week`
+        `High frequency for - ${metrics.averageVisitsPerWeek.toFixed(1)} visits per week`
       );
     }
 
     if (metrics.averageSpentPerVisit > 20) {
       insights.push(
-        `High average spending per ${category} visit - $${metrics.averageSpentPerVisit.toFixed(2)}`
+        `High average spending per visit ($${metrics.averageSpentPerVisit.toFixed(2)})`
       );
     }
 
@@ -561,7 +561,7 @@ export class PatternAnalyzer {
       mostFrequentCategory: categories.reduce(
         (most, cat) =>
           frequencyAnalysis[cat].averageVisitsPerWeek >
-          (frequencyAnalysis[most]?.averageVisitsPerWeek || 0)
+            (frequencyAnalysis[most]?.averageVisitsPerWeek || 0)
             ? cat
             : most,
         categories[0]
@@ -569,7 +569,7 @@ export class PatternAnalyzer {
       highestSpendingCategory: categories.reduce(
         (highest, cat) =>
           frequencyAnalysis[cat].totalSpent >
-          (frequencyAnalysis[highest]?.totalSpent || 0)
+            (frequencyAnalysis[highest]?.totalSpent || 0)
             ? cat
             : highest,
         categories[0]

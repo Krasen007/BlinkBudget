@@ -23,13 +23,13 @@ export const createNavigationButtons = currentView => {
     {
       key: 'reports',
       icon: '🎯',
-      title: 'Charts and Reports',
+      title: 'Charts',
       route: 'reports',
     },
     {
       key: 'financial-planning',
       icon: '📊',
-      title: 'Financial Planning',
+      title: 'Planning',
       route: 'financial-planning',
     },
     {

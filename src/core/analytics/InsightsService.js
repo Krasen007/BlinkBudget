@@ -292,9 +292,6 @@ export class InsightsService {
     const smallTransactions = amounts.filter(
       amount => amount < averageAmount * 0.5
     );
-    const largeTransactions = amounts.filter(
-      amount => amount > averageAmount * 2
-    );
 
     if (smallTransactions.length > amounts.length * 0.7) {
       insights.push({
@@ -305,25 +302,6 @@ export class InsightsService {
         actionable: true,
         recommendation:
           'Small frequent purchases can add up. Consider tracking these more closely or setting daily limits.',
-      });
-    }
-
-    if (largeTransactions.length > 0) {
-      const largeTransactionTotal = largeTransactions.reduce(
-        (sum, amount) => sum + amount,
-        0
-      );
-      const largeTransactionPercentage =
-        (largeTransactionTotal / totalAmount) * 100;
-
-      insights.push({
-        id: 'large_transaction_pattern',
-        type: 'pattern',
-        message: `${largeTransactions.length} large transactions (over ${(averageAmount * 2).toFixed(2)}) account for ${largeTransactionPercentage.toFixed(1)}% of your total spending.`,
-        severity: 'medium',
-        actionable: true,
-        recommendation:
-          'Large transactions have significant impact. Consider if these align with your financial priorities.',
       });
     }
 

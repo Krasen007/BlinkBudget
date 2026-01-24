@@ -10,6 +10,13 @@
 import { COLORS, SPACING, FONT_SIZES } from '../utils/constants.js';
 import { DateInput } from './DateInput.js';
 import { formatDate, dateToISO } from '../utils/date-utils.js';
+import {
+  getCurrentWeekPeriod,
+  getCurrentMonthPeriod,
+  getCurrentQuarterPeriod,
+  getCurrentYearPeriod,
+  getTodayPeriod,
+} from '../utils/reports-utils.js';
 
 export const TimePeriodSelector = (options = {}) => {
   const {
@@ -651,84 +658,3 @@ export const TimePeriodSelector = (options = {}) => {
 
   return container;
 };
-
-/**
- * Helper functions for time period calculations
- */
-
-function getTodayPeriod() {
-  const today = new Date();
-  const startOfDay = new Date(today);
-  startOfDay.setHours(0, 0, 0, 0);
-
-  const endOfDay = new Date(today);
-  endOfDay.setHours(23, 59, 59, 999);
-
-  return {
-    type: 'daily',
-    startDate: startOfDay,
-    endDate: endOfDay,
-    label: 'Today',
-  };
-}
-
-function getCurrentWeekPeriod() {
-  const now = new Date();
-  const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
-  startOfWeek.setHours(0, 0, 0, 0);
-
-  const endOfWeek = new Date(startOfWeek);
-  endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday
-  endOfWeek.setHours(23, 59, 59, 999);
-
-  return {
-    type: 'weekly',
-    startDate: startOfWeek,
-    endDate: endOfWeek,
-    label: 'This Week',
-  };
-}
-
-function getCurrentMonthPeriod() {
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  endOfMonth.setHours(23, 59, 59, 999);
-
-  return {
-    type: 'monthly',
-    startDate: startOfMonth,
-    endDate: endOfMonth,
-    label: 'This Month',
-  };
-}
-
-function getCurrentQuarterPeriod() {
-  const now = new Date();
-  const quarter = Math.floor(now.getMonth() / 3);
-  const startOfQuarter = new Date(now.getFullYear(), quarter * 3, 1);
-  const endOfQuarter = new Date(now.getFullYear(), quarter * 3 + 3, 0);
-  endOfQuarter.setHours(23, 59, 59, 999);
-
-  return {
-    type: 'quarterly',
-    startDate: startOfQuarter,
-    endDate: endOfQuarter,
-    label: 'This Quarter',
-  };
-}
-
-function getCurrentYearPeriod() {
-  const now = new Date();
-  const startOfYear = new Date(now.getFullYear(), 0, 1);
-  const endOfYear = new Date(now.getFullYear(), 11, 31);
-  endOfYear.setHours(23, 59, 59, 999);
-
-  return {
-    type: 'yearly',
-    startDate: startOfYear,
-    endDate: endOfYear,
-    label: 'This Year',
-  };
-}

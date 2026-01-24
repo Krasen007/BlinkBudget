@@ -8,24 +8,7 @@ DO NOT IMPLEMENT: Mask technical error messages from Firestore operations
 DO NOT IMPLEMENT: Implement an audit logging mechanism for sensitive user actions (account changes, data export)
 DO NOT IMPLEMENT: make security.md following all the security best practices
 DO NOT IMPLEMENT: add possibility to import transactions from a csv file
-DO NOT IMPLEMENT: Add pre-selected categories when amount matches some amount, example: if user writes 25 assume it is Гориво, between 15 and 35 assume Храна, 13,28 is Телефон, 204,52 - Кредит, 255,64 - Други, highlight the category so that is to be more visible for the user to click (
-
-### 🔥 Task 1.2: Smart Category Prediction
-
-**Owner**: Frontend Dev  
-**Estimate**: 4 days  
-**Acceptance Criteria**:
-
-- [ ] Analyze transaction history for pattern recognition
-- [ ] Implement time-based suggestions (coffee mornings, lunch noon)
-- [ ] Add amount-based category hints (under $10 = coffee, over $50 = shopping)
-- [ ] Create confidence scoring for suggestions
-- [ ] A/B test prediction accuracy
-
-**Files to create**:
-
-- `src/core/category-predictor.js`
-- `src/utils/pattern-analysis.js`).
+DO NOT IMPLEMENT: Add pre-selected categories when amount matches some amount, example: if user writes 25 assume it is Гориво, between 15 and 35 assume Храна, 13,28 is Телефон, 204,52 - Кредит, 255,64 - Други, highlight the category so that is to be more visible for the user to click e.g. Analyze transaction history; Implement time-based suggestions; Add amount-based category hints; Create confidence scoring; A/B test prediction accuracy
 
 DO NOT IMPLEMENT: release as windows store app https://learn.microsoft.com/en-us/microsoft-edge/progressive-web-apps/how-to/microsoft-store
 DO NOT IMPLEMENT: use Ionic's Capacitor or Cordova to make android app
@@ -39,4 +22,3 @@ DO NOT IMPLEMENT: use Ionic's Capacitor or Cordova to make android app
 [x] implement backup solution on server so if needed a user can restore their data up to the previous day, this could be added in the settings. the button will delete all the transactions after the selected date. example: if i select 2025-12-15 it will delete all the transactions after 2025-12-15 and keep the transactions before 2025-12-15, better will be to select range and the backup to restore transactions in the selected period. think of how this will be implemented on the app while keeping it offline first.
 [ ] lazy load older transactions, they should be kept on server and only the transactions for the last 30 days should be cached on the device / PWA
 [ ] add option to mark a transaction as important, maybe a checkbox or a star icon and when the user marks a transaction as important it should be highlighted in the transactions list
-[ ] when on mobile and i scroll fast up and the content hits the top of the window there is a visual cue that bounces the header, i want to remove this on all the views
