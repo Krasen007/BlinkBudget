@@ -238,13 +238,6 @@
   /* Force hardware acceleration */
 }
 
-@media (width <= calc(var(--breakpoint-md) - 1px)) {
-  .dashboard-transactions-list {
-    max-height: 50vh;
-    /* Responsive height for mobile */
-  }
-}
-
 /* Mobile-friendly focus states */
 @media (width <= calc(var(--breakpoint-md) - 1px)) {
   .btn:focus,

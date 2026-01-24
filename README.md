@@ -24,7 +24,7 @@
 
 - **3-click expense logging** - Amount -> Category -> Done
 - **Auto-submit on category selection** - No save buttons needed
-- **Mobile-optimized interface** with haptic feedback
+- **Mobile-optimized interface** focused on speed and simplicity
 - **Offline-capable** with localStorage and Service Worker persistence
 
 ### Transaction Management
@@ -64,7 +64,6 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 - **Touch-friendly interface** with proper touch targets (56px minimum)
 - **Mobile navigation** with bottom tab bar
 - **Keyboard-aware UI** that adapts to virtual keyboard
-- **Haptic feedback** for enhanced user experience
 - **PWA support** - Installable as a standalone app with offline support
 - **Keyboard shortcut (Escape key)** to exit Settings and return to dashboard
 - **Helpful tips on each section**

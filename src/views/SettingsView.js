@@ -23,15 +23,12 @@ export const SettingsView = () => {
   const header = document.createElement('div');
   header.style.marginBottom = SPACING.SM;
   header.style.flexShrink = '0';
-  header.style.position = 'fixed'; // Fixed to viewport
+  header.style.position = 'sticky'; // Sticky positioning
   header.style.top = '0'; // Stick to top
-  header.style.left = '50%'; // Center horizontally
-  header.style.transform = 'translateX(-50%)'; // Center adjustment
-  header.style.width = '100%'; // Full width for centering
-  header.style.maxWidth = 'var(--container-max-width)'; // Match app width
+  header.style.width = '100%';
   header.style.background = COLORS.BACKGROUND; // Ensure background covers content
   header.style.zIndex = '10'; // Above content
-  header.style.padding = '0 var(--spacing-sm)'; // Match body padding
+  header.style.padding = `${SPACING.SM} 0`; // Vertical padding, horizontal handled by container
 
   const topRow = document.createElement('div');
   topRow.style.display = 'flex';
@@ -108,9 +105,8 @@ export const SettingsView = () => {
   header.appendChild(topRow);
   container.appendChild(header);
 
-  // Main content wrapper with padding for fixed header
+  // Main content wrapper
   const contentWrapper = document.createElement('div');
-  contentWrapper.style.paddingTop = '60px'; // Account for fixed header height
 
   container.appendChild(contentWrapper);
 

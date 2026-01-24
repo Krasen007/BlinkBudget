@@ -8,6 +8,7 @@ import {
   FONT_SIZES,
   TIMING,
   STORAGE_KEYS,
+  COLORS,
 } from '../utils/constants.js';
 import { createButton } from '../utils/dom-factory.js';
 import { markTransactionForHighlight } from '../utils/success-feedback.js';
@@ -29,6 +30,11 @@ export const EditView = ({ id }) => {
   header.style.flexDirection = 'column';
   header.style.alignItems = 'stretch';
   header.style.gap = SPACING.SM;
+  header.style.position = 'sticky';
+  header.style.top = '0';
+  header.style.zIndex = '10';
+  header.style.background = COLORS.BACKGROUND;
+  header.style.padding = `${SPACING.SM} 0`;
 
   const topRow = document.createElement('div');
   topRow.style.display = 'flex';

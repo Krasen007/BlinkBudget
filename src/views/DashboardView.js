@@ -19,21 +19,18 @@ import { createNavigationButtons } from '../utils/navigation-helper.js';
 
 export const DashboardView = () => {
   const container = document.createElement('div');
-  container.className = 'view-dashboard view-container view-fixed';
+  container.className = 'view-dashboard view-container';
 
-  // Header with unified pattern
+  // Header with sticky positioning
   const header = document.createElement('div');
   header.style.marginBottom = SPACING.MD;
   header.style.flexShrink = '0';
-  header.style.position = 'fixed'; // Fixed to viewport
+  header.style.position = 'sticky'; // Sticky positioning
   header.style.top = '0'; // Stick to top
-  header.style.left = '50%'; // Center horizontally
-  header.style.transform = 'translateX(-50%)'; // Center adjustment
-  header.style.width = '100%'; // Full width for centering
-  header.style.maxWidth = 'var(--container-max-width)'; // Match app width
+  header.style.width = '100%';
   header.style.background = COLORS.BACKGROUND; // Ensure background covers content
   header.style.zIndex = '10'; // Above content
-  header.style.padding = '0 var(--spacing-sm)'; // Match body padding
+  header.style.padding = `${SPACING.SM} 0`; // Vertical padding, horizontal handled by container
 
   const topRow = document.createElement('div');
   topRow.style.display = 'flex';
@@ -85,6 +82,7 @@ export const DashboardView = () => {
     minWidth: '150px',
     appearance: 'auto',
     width: '100%',
+    marginTop: SPACING.SM,
   });
   accountSelect.className = 'input-select';
 
@@ -136,14 +134,12 @@ export const DashboardView = () => {
     accountSelect.value = currentVal;
   };
 
-  // Main Content Wrapper to allow re-rendering
+  // Main Content Wrapper
   const content = document.createElement('div');
   content.style.flex = '1';
   content.style.display = 'flex';
   content.style.flexDirection = 'column';
   content.style.minHeight = '0'; // Allow flex child to shrink below content size
-  content.style.overflow = 'hidden'; // Prevent content from scrolling
-  content.style.paddingTop = '120px'; // Account for fixed header height
 
   container.appendChild(content);
 

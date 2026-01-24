@@ -1,9 +1,12 @@
-e801a20 remove unused haptic feedback
-e7ba80d do not lose focus on type change
-701c8dc fix transfer style not being the same on all accounts
-a0d800d fix ui in the header of reports view
-4bf6f2c Backup/Restore Implementation
-35c909c BlinkBudget Backup/Restore Implementation Document
-78df150 marketing
-154999f Optimize bundle size and loading times
-973e8f9 snyk security
+### BlinkBudget v1.16.0 Changelog
+
+* **Haptic Feedback Removal**: Completely removed haptic feedback (vibrations) across the entire application for a more consistent and power-efficient experience.
+* **Backup & Restore**: Introduced a comprehensive backup and restore system, allowing users to safely manage and sync their financial data.
+* **Enhanced Transaction Entry**: Improved the 'Add Transaction' experience by maintaining field focus when switching transaction types (Expense/Income/Transfer/Refund).
+* **UI & Style Refinements**: 
+    - Standardized transfer styling across all account types.
+    - Improved the Reports View header for better visibility and layout on mobile devices.
+* **Performance & Security**:
+    - Optimized bundle sizing and application loading times for a Snappier feel.
+    - Implemented critical security updates via Snyk.
+* **General**: Updated internal dependencies and marketing materials.

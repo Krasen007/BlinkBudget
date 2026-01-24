@@ -40,7 +40,7 @@ import { ScenariosSection } from './financial-planning/ScenariosSection.js';
 
 export const FinancialPlanningView = () => {
   const container = document.createElement('div');
-  container.className = 'view-financial-planning view-container view-fixed';
+  container.className = 'view-financial-planning view-container';
 
   // State management
   let currentSection = 'overview';
@@ -83,17 +83,14 @@ export const FinancialPlanningView = () => {
   headerContainer.className = 'financial-planning-header-container';
   headerContainer.style.background = COLORS.BACKGROUND;
   headerContainer.style.zIndex = '10';
-  headerContainer.style.position = 'fixed'; // Fixed to viewport
+  headerContainer.style.position = 'sticky'; // Sticky positioning
   headerContainer.style.top = '0'; // Stick to top
-  headerContainer.style.left = '50%'; // Center horizontally
-  headerContainer.style.transform = 'translateX(-50%)'; // Center adjustment
-  headerContainer.style.width = '100%'; // Full width for centering
-  headerContainer.style.maxWidth = 'var(--container-max-width)'; // Match app width
+  headerContainer.style.width = '100%';
   headerContainer.style.display = 'flex';
   headerContainer.style.flexDirection = 'column';
   headerContainer.style.gap = SPACING.SM;
   headerContainer.style.flexShrink = '0';
-  headerContainer.style.padding = '0 var(--spacing-sm)'; // Match body padding
+  headerContainer.style.padding = `${SPACING.SM} 0`; // Vertical padding, horizontal handled by container
 
   headerContainer.appendChild(header);
   headerContainer.appendChild(navigation);
@@ -109,9 +106,7 @@ export const FinancialPlanningView = () => {
   content.style.display = 'flex';
   content.style.flexDirection = 'column';
   content.style.minHeight = '0';
-  content.style.overflow = 'auto';
   content.style.gap = SPACING.LG;
-  content.style.paddingTop = '120px'; // Account for fixed header and navigation height
 
   container.appendChild(content);
 

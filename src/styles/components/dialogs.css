@@ -234,6 +234,7 @@
   overflow-y: auto;
   flex-grow: 1;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none;
 }
 
 /* Mobile Navigation */
