@@ -1,17 +1,24 @@
 /* Main CSS entry point importing all modules */
 
-/* Import order follows CSS architecture hierarchy */
 /* 1. Design tokens (no dependencies) */
-@import './tokens/index.css';
+@import './tokens.css';
 
 /* 2. Base styles (depends on tokens) */
-@import './base/index.css';
+@import './base.css';
 
 /* 3. Component styles (depends on tokens and base) */
-@import './components/index.css';
+@import './components/ui.css';
+@import './components/forms-dialogs.css';
+@import './components/reports-responsive.css';
+@import './components/reports-accessibility.css';
+@import './components/reports.css';
 
 /* 4. Mobile-specific styles (depends on tokens, base, components) */
-@import './mobile/index.css';
+@import './mobile.css';
 
 /* 5. Utility classes (depends on tokens) */
-@import './utilities/index.css';
+@import './utilities/layout.css';
+@import './utilities/spacing.css';
+@import './utilities/text-access.css';
+@import './utilities/responsive.css';
+@import './utilities/view-styles.css';

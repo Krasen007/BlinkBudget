@@ -1,8 +1,0 @@
-/* Imports all component files */
-@import './buttons.css';
-@import './forms.css';
-@import './cards.css';
-@import './dialogs.css';
-@import './reports-responsive.css';
-@import './reports-accessibility.css';
-@import './reports.css'; /* Main reports styles come last to override responsive styles */

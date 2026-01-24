@@ -73,7 +73,7 @@ export default {
     'at-rule-no-unknown': [
       true,
       {
-        ignoreAtRules: ['import'],
+        ignoreAtRules: ['import', 'custom-media'],
       },
     ],
 
