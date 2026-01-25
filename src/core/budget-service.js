@@ -1,6 +1,6 @@
 /**
  * BudgetService
- * 
+ *
  * Handles all budget-related operations and persistence.
  */
 
@@ -12,80 +12,82 @@ import { safeJsonParse } from '../utils/security-utils.js';
 const BUDGETS_KEY = STORAGE_KEYS.BUDGETS;
 
 export const BudgetService = {
-    /**
-     * Get all budgets
-     * @returns {Array} List of budgets
-     */
-    getAll() {
-        const data = localStorage.getItem(BUDGETS_KEY);
-        const budgets = data ? safeJsonParse(data) : [];
+  /**
+   * Get all budgets
+   * @returns {Array} List of budgets
+   */
+  getAll() {
+    const data = localStorage.getItem(BUDGETS_KEY);
+    const budgets = data ? safeJsonParse(data) : [];
 
-        // IDOR Protection: Filter by current userId
-        const currentUserId = AuthService.getUserId();
-        if (!currentUserId) return [];
+    // IDOR Protection: Filter by current userId
+    const currentUserId = AuthService.getUserId();
+    if (!currentUserId) return [];
 
-        return budgets.filter(b => !b.userId || b.userId === currentUserId);
-    },
+    return budgets.filter(b => !b.userId || b.userId === currentUserId);
+  },
 
-    /**
-     * Add or update a budget
-     * @param {Object} budgetData - Budget data
-     * @returns {Object} Added/updated budget
-     */
-    save(budgetData) {
-        const budgets = this.getAll();
-        const index = budgets.findIndex(b => b.categoryName === budgetData.categoryName);
+  /**
+   * Add or update a budget
+   * @param {Object} budgetData - Budget data
+   * @returns {Object} Added/updated budget
+   */
+  save(budgetData) {
+    const budgets = this.getAll();
+    const index = budgets.findIndex(
+      b => b.categoryName === budgetData.categoryName
+    );
 
-        let budget;
-        if (index !== -1) {
-            // Update existing
-            budget = {
-                ...budgets[index],
-                ...budgetData,
-                updatedAt: new Date().toISOString(),
-            };
-            budgets[index] = budget;
-        } else {
-            // Add new
-            budget = {
-                id: generateId(),
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                userId: AuthService.getUserId(),
-                period: 'monthly',
-                ...budgetData,
-            };
-            budgets.push(budget);
-        }
+    let budget;
+    if (index !== -1) {
+      // Update existing
+      budget = {
+        ...budgets[index],
+        ...budgetData,
+        updatedAt: new Date().toISOString(),
+      };
+      budgets[index] = budget;
+    } else {
+      // Add new
+      budget = {
+        id: generateId(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        userId: AuthService.getUserId(),
+        period: 'monthly',
+        ...budgetData,
+      };
+      budgets.push(budget);
+    }
 
-        this._persist(budgets);
-        return budget;
-    },
+    this._persist(budgets);
+    return budget;
+  },
 
-    /**
-     * Delete a budget
-     * @param {string} id - Budget ID
-     */
-    delete(id) {
-        let budgets = this.getAll();
-        budgets = budgets.filter(b => b.id !== id);
-        this._persist(budgets);
-    },
+  /**
+   * Delete a budget
+   * @param {string} id - Budget ID
+   */
+  delete(id) {
+    let budgets = this.getAll();
+    budgets = budgets.filter(b => b.id !== id);
+    this._persist(budgets);
+  },
 
-    /**
-     * Get budget for a specific category
-     * @param {string} categoryName - Category name
-     * @returns {Object|null} Budget or null
-     */
-    getByCategory(categoryName) {
-        const budgets = this.getAll();
-        return budgets.find(b => b.categoryName === categoryName) || null;
-    },
+  /**
+   * Get budget for a specific category
+   * @param {string} categoryName - Category name
+   * @returns {Object|null} Budget or null
+   */
+  getByCategory(categoryName) {
+    const budgets = this.getAll();
+    return budgets.find(b => b.categoryName === categoryName) || null;
+  },
 
-    /**
-     * Private helper to persist budgets
-     */
-    _persist(budgets) {
-        localStorage.setItem(BUDGETS_KEY, JSON.stringify(budgets));
-    },
+  /**
+   * Private helper to persist budgets
+   */
+  _persist(budgets) {
+    localStorage.setItem(BUDGETS_KEY, JSON.stringify(budgets));
+  },
 };

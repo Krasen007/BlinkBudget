@@ -59,7 +59,7 @@ export class AnomalyService {
       amounts.length;
     const standardDeviation = Math.sqrt(variance);
 
-    const spikeThreshold = mean + 2 * standardDeviation;
+    const spikeThreshold = mean + 1.5 * standardDeviation;
     const spikes = expenseTransactions.filter(
       t => Math.abs(t.amount || 0) > spikeThreshold
     );
@@ -119,7 +119,7 @@ export class AnomalyService {
     for (const [category, amount] of Object.entries(categoryTotals)) {
       const percentage = (amount / totalAmount) * 100;
 
-      if (percentage > 60) {
+      if (percentage > 40) {
         insights.push({
           id: `high_concentration_${category.toLowerCase().replace(/\s+/g, '_')}`,
           type: 'anomaly',
@@ -163,9 +163,9 @@ export class AnomalyService {
       dailyAmounts.length;
     const maxDaily = Math.max(...dailyAmounts);
 
-    if (maxDaily > meanDaily * 3 && maxDaily > 50) {
+    if (maxDaily > meanDaily * 2 && maxDaily > 30) {
       const highSpendingDays = Object.entries(dailySpending).filter(
-        ([_date, amount]) => amount > meanDaily * 3
+        ([_date, amount]) => amount > meanDaily * 2
       ).length;
 
       insights.push({

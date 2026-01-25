@@ -586,9 +586,6 @@ export class ChartRenderer {
     });
 
     chart.canvas.dispatchEvent(customEvent);
-
-    // Optional: Log click for debugging
-    console.log('Chart segment clicked:', clickData);
   }
 
   /**

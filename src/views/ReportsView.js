@@ -644,14 +644,19 @@ export const ReportsView = () => {
 
       // Budget Summary
       try {
-        const budgetsSummary = BudgetPlanner.getSummary(currentData.transactions);
+        const budgetsSummary = BudgetPlanner.getSummary(
+          currentData.transactions
+        );
         if (budgetsSummary.totalBudgets > 0) {
           const summaryCard = BudgetSummaryCard(budgetsSummary);
           summaryCard.style.marginBottom = SPACING.LG;
           chartsSection.appendChild(summaryCard);
         }
       } catch (budgetError) {
-        console.warn('[ReportsView] Failed to render budget summary:', budgetError);
+        console.warn(
+          '[ReportsView] Failed to render budget summary:',
+          budgetError
+        );
       }
 
       const chartRenderResults = [];

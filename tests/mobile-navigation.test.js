@@ -45,7 +45,7 @@ describe('MobileNavigation', () => {
     const label = reportsItem.querySelector('.mobile-nav-label');
     expect(icon).toBeTruthy();
     expect(label).toBeTruthy();
-    expect(label.textContent).toBe('Charts');
+    expect(label.textContent).toBe('Reports');
   });
 
   it('should highlight correct active route', () => {

@@ -6,10 +6,7 @@ describe('CSS Architecture Foundation', () => {
   const stylesDir = 'src/styles';
 
   it('should have all required directory structure', () => {
-    const requiredDirs = [
-      'components',
-      'utilities',
-    ];
+    const requiredDirs = ['components', 'utilities'];
 
     requiredDirs.forEach(dir => {
       expect(existsSync(join(stylesDir, dir))).toBe(true);
@@ -17,12 +14,7 @@ describe('CSS Architecture Foundation', () => {
   });
 
   it('should have core style files', () => {
-    const coreFiles = [
-      'tokens.css',
-      'base.css',
-      'mobile.css',
-      'main.css',
-    ];
+    const coreFiles = ['tokens.css', 'base.css', 'mobile.css', 'main.css'];
 
     coreFiles.forEach(file => {
       expect(existsSync(join(stylesDir, file))).toBe(true);
@@ -41,10 +33,7 @@ describe('CSS Architecture Foundation', () => {
   });
 
   it('should have CSS custom properties defined in tokens', () => {
-    const tokensCss = readFileSync(
-      join(stylesDir, 'tokens.css'),
-      'utf-8'
-    );
+    const tokensCss = readFileSync(join(stylesDir, 'tokens.css'), 'utf-8');
 
     // Check for key CSS custom properties
     expect(tokensCss).toContain('--color-primary');

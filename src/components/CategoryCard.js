@@ -24,7 +24,8 @@ export const CategoryCard = (
   categoryColorMap,
   getChartColors,
   onCategoryClick,
-  frequencyData = null
+  frequencyData = null,
+  allInsights = []
 ) => {
   const card = document.createElement('button');
   card.className = 'category-card';
@@ -96,21 +97,6 @@ export const CategoryCard = (
   card.appendChild(transactionCount);
   card.appendChild(averageElement);
 
-  // Add Budget Progress if budget exists
-  const budget = BudgetService.getByCategory(category.name);
-  if (budget) {
-    const utilization = budget.amountLimit > 0 ? (category.amount / budget.amountLimit) * 100 : 0;
-    const progress = BudgetProgress({
-      utilization,
-      isExceeded: category.amount > budget.amountLimit,
-      isWarning: utilization >= 80 && utilization <= 100,
-      label: 'Budget',
-      secondaryLabel: `${((category.amount / budget.amountLimit) * 100).toFixed(0)}%`
-    });
-    progress.style.marginTop = SPACING.SM;
-    card.appendChild(progress);
-  }
-
   // Add frequency analysis if available
   if (frequencyData && frequencyData[category.name]) {
     const freqData = frequencyData[category.name];
@@ -122,12 +108,41 @@ export const CategoryCard = (
 
     card.appendChild(visitsPerWeek);
 
-    // Add insights if available
-    if (freqData.insights && freqData.insights.length > 0) {
+    // Gather all insights for this category
+    const categoryInsights = [];
+
+    // 1. Add frequency insights
+    if (freqData.insights) {
+      categoryInsights.push(...freqData.insights);
+    }
+
+    // 2. Add matching insights from global InsightsService (Anomalies, Trends, etc.)
+    const matchingInsights = allInsights.filter(insight => {
+      // Direct category match
+      if (insight.category === category.name) return true;
+
+      // Match category in metadata (e.g. for spikes)
+      if (
+        insight.metadata?.spikeTransactions?.some(
+          t => t.category === category.name
+        )
+      ) {
+        return true;
+      }
+
+      return false;
+    });
+
+    categoryInsights.push(...matchingInsights.map(i => i.message));
+
+    // Display unique insights
+    const uniqueInsights = [...new Set(categoryInsights)];
+
+    if (uniqueInsights.length > 0) {
       const insightsSection = document.createElement('div');
       insightsSection.style.marginTop = SPACING.XS;
 
-      freqData.insights.slice(0, 1).forEach(insight => {
+      uniqueInsights.forEach(insight => {
         const insightEl = document.createElement('div');
         insightEl.textContent = `💡 ${insight}`;
         insightEl.style.fontSize = FONT_SIZES.BASE;
@@ -139,6 +154,22 @@ export const CategoryCard = (
 
       card.appendChild(insightsSection);
     }
+  }
+
+  // Add Budget Progress if budget exists
+  const budget = BudgetService.getByCategory(category.name);
+  if (budget) {
+    const utilization =
+      budget.amountLimit > 0 ? (category.amount / budget.amountLimit) * 100 : 0;
+    const progress = BudgetProgress({
+      utilization,
+      isExceeded: category.amount > budget.amountLimit,
+      isWarning: utilization >= 80 && utilization <= 100,
+      label: 'Budget',
+      secondaryLabel: `${((category.amount / budget.amountLimit) * 100).toFixed(0)}%`,
+    });
+    progress.style.marginTop = SPACING.SM;
+    card.appendChild(progress);
   }
 
   card.addEventListener('click', () => {

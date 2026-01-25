@@ -60,7 +60,8 @@ export const CategorySelector = (
       categoryColorMap,
       getCategoryColors,
       onCategoryClick,
-      frequencyData
+      frequencyData,
+      currentData.insights
     );
     categoryGrid.appendChild(card);
   });

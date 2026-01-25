@@ -156,7 +156,7 @@ export class InsightsService {
             message: `You've exceeded your budget for "${status.categoryName}" by ${Math.abs(status.amountLimit - status.actual).toFixed(2)}.`,
             severity: 'high',
             actionable: true,
-            recommendation: `Consider reviewing recent purchases in "${status.categoryName}" to find savings for the rest of the month.`
+            recommendation: `Consider reviewing recent purchases in "${status.categoryName}" to find savings for the rest of the month.`,
           });
         } else if (status.isWarning) {
           insights.push({
@@ -166,12 +166,15 @@ export class InsightsService {
             message: `You've used ${status.utilization.toFixed(0)}% of your "${status.categoryName}" budget.`,
             severity: 'medium',
             actionable: true,
-            recommendation: `You have ${status.remaining.toFixed(2)} remaining in your "${status.categoryName}" budget.`
+            recommendation: `You have ${status.remaining.toFixed(2)} remaining in your "${status.categoryName}" budget.`,
           });
         }
       });
     } catch (budgetInsightError) {
-      console.warn('[InsightsService] Failed to generate budget insights:', budgetInsightError);
+      console.warn(
+        '[InsightsService] Failed to generate budget insights:',
+        budgetInsightError
+      );
     }
 
     return insights;
