@@ -190,6 +190,7 @@ export const SyncService = {
       STORAGE_KEYS.SETTINGS,
       STORAGE_KEYS.INVESTMENTS,
       STORAGE_KEYS.GOALS,
+      STORAGE_KEYS.BUDGETS,
     ];
 
     for (const key of keys) {
@@ -221,6 +222,7 @@ export const SyncService = {
       STORAGE_KEYS.SETTINGS,
       STORAGE_KEYS.INVESTMENTS,
       STORAGE_KEYS.GOALS,
+      STORAGE_KEYS.BUDGETS,
     ];
 
     keys.forEach(key => {
@@ -492,6 +494,7 @@ export const SyncService = {
       'settings',
       'goals',
       'investments',
+      'budgets',
     ];
 
     dataTypes.forEach(dataType => {

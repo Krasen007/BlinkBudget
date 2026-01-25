@@ -5,7 +5,6 @@
  */
 
 import { STORAGE_KEYS } from '../utils/constants.js';
-import { SyncService } from './sync-service.js';
 import { AuthService } from './auth-service.js';
 import { generateId } from '../utils/id-utils.js';
 import { safeJsonParse } from '../utils/security-utils.js';
@@ -19,7 +18,13 @@ export const BudgetService = {
      */
     getAll() {
         const data = localStorage.getItem(BUDGETS_KEY);
-        return data ? safeJsonParse(data) : [];
+        const budgets = data ? safeJsonParse(data) : [];
+
+        // IDOR Protection: Filter by current userId
+        const currentUserId = AuthService.getUserId();
+        if (!currentUserId) return [];
+
+        return budgets.filter(b => !b.userId || b.userId === currentUserId);
     },
 
     /**
@@ -37,7 +42,7 @@ export const BudgetService = {
             budget = {
                 ...budgets[index],
                 ...budgetData,
-                updatedAt: new Date().toISOString()
+                updatedAt: new Date().toISOString(),
             };
             budgets[index] = budget;
         } else {
@@ -80,10 +85,7 @@ export const BudgetService = {
     /**
      * Private helper to persist budgets
      */
-    _persist(budgets, sync = true) {
+    _persist(budgets) {
         localStorage.setItem(BUDGETS_KEY, JSON.stringify(budgets));
-        if (sync) {
-            SyncService.pushToCloud(BUDGETS_KEY, budgets);
-        }
     },
 };

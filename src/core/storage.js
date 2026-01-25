@@ -203,7 +203,15 @@ export const StorageService = {
 
   // --- Budgets (delegated to BudgetService) ---
   getBudgets: () => BudgetService.getAll(),
-  saveBudget: budget => BudgetService.save(budget),
-  deleteBudget: id => BudgetService.delete(id),
+  saveBudget: function (budget) {
+    const res = BudgetService.save(budget);
+    this._pushToCloudSafe(STORAGE_KEYS.BUDGETS, BudgetService.getAll());
+    return res;
+  },
+  deleteBudget: function (id) {
+    const res = BudgetService.delete(id);
+    this._pushToCloudSafe(STORAGE_KEYS.BUDGETS, BudgetService.getAll());
+    return res;
+  },
   getBudgetByCategory: categoryName => BudgetService.getByCategory(categoryName),
 };
