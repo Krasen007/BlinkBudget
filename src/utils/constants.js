@@ -139,6 +139,7 @@ export const STORAGE_KEYS = {
   DASHBOARD_DATE_FILTER: 'dashboard_date_filter',
   DASHBOARD_CATEGORY_FILTER: 'dashboard_category_filter',
   CLICK_TRACKING: 'blinkbudget_click_tracking',
+  BUDGETS: 'blinkbudget_budgets',
 };
 
 // Default values

@@ -37,6 +37,7 @@ import { InvestmentsSection } from './financial-planning/InvestmentsSection.js';
 import { GoalsSection } from './financial-planning/GoalsSection.js';
 import { InsightsSection } from './financial-planning/InsightsSection.js';
 import { ScenariosSection } from './financial-planning/ScenariosSection.js';
+import { BudgetsSection } from './financial-planning/BudgetsSection.js';
 
 export const FinancialPlanningView = () => {
   const container = document.createElement('div');
@@ -207,6 +208,7 @@ export const FinancialPlanningView = () => {
       { id: 'goals', label: 'Goals', icon: '🎯' },
       { id: 'insights', label: 'Insights', icon: '💡' },
       { id: 'scenarios', label: 'Scenarios', icon: '🔄' },
+      { id: 'budgets', label: 'Budgets', icon: '📉' },
     ];
 
     sections.forEach(section => {
@@ -325,6 +327,9 @@ export const FinancialPlanningView = () => {
       case 'scenarios':
         renderScenariosSection();
         break;
+      case 'budgets':
+        renderBudgetsSection();
+        break;
       default:
         renderOverviewSection();
     }
@@ -393,6 +398,14 @@ export const FinancialPlanningView = () => {
       activeCharts
     );
     content.appendChild(scenariosElement);
+  }
+
+  /**
+   * Render Budgets section - Category limits and tracking
+   */
+  function renderBudgetsSection() {
+    const budgetsElement = BudgetsSection(planningData);
+    content.appendChild(budgetsElement);
   }
 
   // createStatsCard is now imported from StatsCard.js component

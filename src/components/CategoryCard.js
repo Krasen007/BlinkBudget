@@ -5,6 +5,8 @@
 
 import { COLORS, SPACING, FONT_SIZES } from '../utils/constants.js';
 import { formatCurrency } from '../utils/financial-planning-helpers.js';
+import { BudgetService } from '../core/budget-service.js';
+import { BudgetProgress } from './BudgetProgress.js';
 
 /**
  * Create individual category card
@@ -93,6 +95,21 @@ export const CategoryCard = (
   card.appendChild(percentage);
   card.appendChild(transactionCount);
   card.appendChild(averageElement);
+
+  // Add Budget Progress if budget exists
+  const budget = BudgetService.getByCategory(category.name);
+  if (budget) {
+    const utilization = budget.amountLimit > 0 ? (category.amount / budget.amountLimit) * 100 : 0;
+    const progress = BudgetProgress({
+      utilization,
+      isExceeded: category.amount > budget.amountLimit,
+      isWarning: utilization >= 80 && utilization <= 100,
+      label: 'Budget',
+      secondaryLabel: `${((category.amount / budget.amountLimit) * 100).toFixed(0)}%`
+    });
+    progress.style.marginTop = SPACING.SM;
+    card.appendChild(progress);
+  }
 
   // Add frequency analysis if available
   if (frequencyData && frequencyData[category.name]) {

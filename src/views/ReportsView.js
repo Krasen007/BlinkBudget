@@ -58,6 +58,8 @@ import {
 import { CategorySelector } from '../components/CategorySelector.js';
 import { InsightsSection } from '../components/InsightsSection.js';
 import { PatternInsights } from '../components/PatternInsights.js';
+import { BudgetSummaryCard } from '../components/BudgetSummaryCard.js';
+import { BudgetPlanner } from '../core/budget-planner.js';
 import { escapeHtml } from '../utils/security-utils.js';
 
 export const ReportsView = () => {
@@ -639,6 +641,18 @@ export const ReportsView = () => {
       chartsSection.style.flexDirection = 'column';
       chartsSection.style.gap = SPACING.XL;
       chartsSection.style.position = 'relative';
+
+      // Budget Summary
+      try {
+        const budgetsSummary = BudgetPlanner.getSummary(currentData.transactions);
+        if (budgetsSummary.totalBudgets > 0) {
+          const summaryCard = BudgetSummaryCard(budgetsSummary);
+          summaryCard.style.marginBottom = SPACING.LG;
+          chartsSection.appendChild(summaryCard);
+        }
+      } catch (budgetError) {
+        console.warn('[ReportsView] Failed to render budget summary:', budgetError);
+      }
 
       const chartRenderResults = [];
 

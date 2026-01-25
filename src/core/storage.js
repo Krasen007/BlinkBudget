@@ -4,6 +4,7 @@ import { SettingsService } from './settings-service.js';
 import { InvestmentTracker } from './investment-tracker.js';
 import { GoalPlanner } from './goal-planner.js';
 import { SyncService } from './sync-service.js';
+import { BudgetService } from './budget-service.js';
 import { STORAGE_KEYS } from '../utils/constants.js';
 import { CacheService } from './cache-service.js';
 import { generateId } from '../utils/id-utils.js';
@@ -55,7 +56,7 @@ export const StorageService = {
     // keep chain but swallow final rejection so it doesn't break subsequent chains
     this._pushChains.set(
       key,
-      newChain.catch(() => {})
+      newChain.catch(() => { })
     );
     return newChain;
   },
@@ -199,4 +200,10 @@ export const StorageService = {
     CacheService.put('goalsSummary', summary, 30000);
     return summary;
   },
+
+  // --- Budgets (delegated to BudgetService) ---
+  getBudgets: () => BudgetService.getAll(),
+  saveBudget: budget => BudgetService.save(budget),
+  deleteBudget: id => BudgetService.delete(id),
+  getBudgetByCategory: categoryName => BudgetService.getByCategory(categoryName),
 };

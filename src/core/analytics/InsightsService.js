@@ -7,6 +7,7 @@ import { TRANSACTION_TYPES } from '../../utils/constants.js';
 import { FilteringService } from './FilteringService.js';
 import { MetricsService } from './MetricsService.js';
 import { AnomalyService } from './AnomalyService.js';
+import { BudgetPlanner } from '../budget-planner.js';
 
 export class InsightsService {
   /**
@@ -142,6 +143,36 @@ export class InsightsService {
       currentPeriod
     );
     insights.push(...anomalyInsights);
+
+    // Add Budget Insights
+    try {
+      const budgetStatuses = BudgetPlanner.getBudgetsStatus(transactions);
+      budgetStatuses.forEach(status => {
+        if (status.isExceeded) {
+          insights.push({
+            id: `budget_exceeded_${status.categoryName}`,
+            type: 'warning',
+            category: status.categoryName,
+            message: `You've exceeded your budget for "${status.categoryName}" by ${Math.abs(status.amountLimit - status.actual).toFixed(2)}.`,
+            severity: 'high',
+            actionable: true,
+            recommendation: `Consider reviewing recent purchases in "${status.categoryName}" to find savings for the rest of the month.`
+          });
+        } else if (status.isWarning) {
+          insights.push({
+            id: `budget_warning_${status.categoryName}`,
+            type: 'warning',
+            category: status.categoryName,
+            message: `You've used ${status.utilization.toFixed(0)}% of your "${status.categoryName}" budget.`,
+            severity: 'medium',
+            actionable: true,
+            recommendation: `You have ${status.remaining.toFixed(2)} remaining in your "${status.categoryName}" budget.`
+          });
+        }
+      });
+    } catch (budgetInsightError) {
+      console.warn('[InsightsService] Failed to generate budget insights:', budgetInsightError);
+    }
 
     return insights;
   }
