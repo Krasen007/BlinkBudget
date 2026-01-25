@@ -23,7 +23,7 @@ export const createNavigationButtons = currentView => {
     {
       key: 'reports',
       icon: '🎯',
-      title: 'Charts',
+      title: 'Reports',
       route: 'reports',
     },
     {

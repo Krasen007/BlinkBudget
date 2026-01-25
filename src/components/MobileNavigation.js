@@ -23,10 +23,10 @@ export const MobileNavigation = ({ currentRoute = 'dashboard' }) => {
     },
     {
       id: 'reports',
-      label: 'Charts',
+      label: 'Reports',
       icon: '🎯',
       route: 'reports',
-      ariaLabel: 'Go to Charts and Reports',
+      ariaLabel: 'Go to Reports',
     },
     {
       id: 'financial-planning',

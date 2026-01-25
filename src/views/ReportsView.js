@@ -206,7 +206,7 @@ export const ReportsView = () => {
     // Title
     const title = document.createElement('h2');
     title.id = 'reports-title';
-    title.textContent = 'Charts and Reports';
+    title.textContent = 'Reports';
     title.style.margin = '0';
     title.style.fontSize =
       window.innerWidth < BREAKPOINTS.MOBILE ? '1.25rem' : 'h2';
@@ -324,7 +324,7 @@ export const ReportsView = () => {
     const sectionTitle = document.createElement('h2');
     sectionTitle.id = 'chart-section-title';
     sectionTitle.className = 'sr-only';
-    sectionTitle.textContent = 'Financial Charts and Visualizations';
+    sectionTitle.textContent = 'Financial Reports and Visualizations';
     chartContainer.appendChild(sectionTitle);
 
     return chartContainer;
