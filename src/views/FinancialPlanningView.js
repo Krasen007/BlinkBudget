@@ -328,7 +328,7 @@ export const FinancialPlanningView = () => {
         renderScenariosSection();
         break;
       case 'budgets':
-        renderBudgetsSection();
+        await renderBudgetsSection();
         break;
       default:
         renderOverviewSection();
@@ -403,8 +403,8 @@ export const FinancialPlanningView = () => {
   /**
    * Render Budgets section - Category limits and tracking
    */
-  function renderBudgetsSection() {
-    const budgetsElement = BudgetsSection(planningData);
+  async function renderBudgetsSection() {
+    const budgetsElement = await BudgetsSection(planningData);
     content.appendChild(budgetsElement);
   }
 
