@@ -82,7 +82,7 @@ Analysis reveals BlinkBudget has stronger-than-expected analytics foundation but
   - Smart category pre-selection
   - Auto-submit on category selection
   - Settings toggle for "Quick Mode"
-- **Dependencies**: Smart suggestions, account optimization
+- **Dependencies**: Smart suggestions (required), account optimization (optional enhancement)
 - **Effort**: 2-3 weeks for complete implementation
 
 #### **Contextual Intelligence** ❌ **0% Complete**
