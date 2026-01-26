@@ -1,12 +1,23 @@
-### BlinkBudget v1.16.0 Changelog
+# BlinkBudget Changelog
 
-* **Haptic Feedback Removal**: Completely removed haptic feedback (vibrations) across the entire application for a more consistent and power-efficient experience.
-* **Backup & Restore**: Introduced a comprehensive backup and restore system, allowing users to safely manage and sync their financial data.
-* **Enhanced Transaction Entry**: Improved the 'Add Transaction' experience by maintaining field focus when switching transaction types (Expense/Income/Transfer/Refund).
-* **UI & Style Refinements**: 
-    - Standardized transfer styling across all account types.
-    - Improved the Reports View header for better visibility and layout on mobile devices.
-* **Performance & Security**:
-    - Optimized bundle sizing and application loading times for a Snappier feel.
-    - Implemented critical security updates via Snyk.
-* **General**: Updated internal dependencies and marketing materials.
+## Version 1.17.6
+
+### Bug Fixes
+- Fixed build error that was preventing successful compilation
+- Resolved issues with Insights functionality to ensure proper operation
+- Fixed rubber banding effect when scrolling on mobile devices
+
+### Features & Enhancements
+- **Budgets Integration**: Added budgets to cloud sync functionality for seamless cross-device budget management
+- **Charts to Reports**: Renamed and reorganized charts section to Reports for better clarity
+- **Category Navigation**: Added scroll-to-category functionality in reports for improved user experience
+- **Data Accuracy**: Fixed incorrect week data display in reports
+- **Insights Enhancement**: Improved Insights section with better data presentation and functionality
+
+### Code Quality
+- **CSS Optimization**: Merged multiple CSS files into a more organized structure to reduce complexity and improve maintainability
+
+### Technical Improvements
+- Enhanced cloud synchronization to include budget data
+- Improved mobile responsiveness and scrolling behavior
+- Better organization of chart/report components for clearer user understanding

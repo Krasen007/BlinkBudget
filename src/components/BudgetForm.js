@@ -74,7 +74,8 @@ export const BudgetForm = ({
   const saveBtn = Button({
     text: 'Save Budget',
     onClick: () => {
-      const limit = parseFloat(input.value) || 0;
+      const raw = (input.value || '').toString().trim();
+      const limit = raw === '' ? null : parseFloat(raw);
       onSave(limit);
     },
     variant: 'primary',
