@@ -7,7 +7,6 @@
  * Requirements: 7.5, 1.6, 5.5
  */
 
-
 import { getAnalyticsEngine } from '../core/analytics/AnalyticsInstance.js';
 import { ChartRenderer } from '../components/ChartRenderer.js';
 import { ProgressiveDataLoader } from '../core/progressive-data-loader.js';
@@ -351,22 +350,33 @@ export const ReportsView = () => {
       container.appendChild(content);
 
       // Generate a stable cache key
-      const startStr = currentTimePeriod.startDate instanceof Date ? currentTimePeriod.startDate.toISOString() : currentTimePeriod.startDate;
-      const endStr = currentTimePeriod.endDate instanceof Date ? currentTimePeriod.endDate.toISOString() : currentTimePeriod.endDate;
+      const startStr =
+        currentTimePeriod.startDate instanceof Date
+          ? currentTimePeriod.startDate.toISOString()
+          : currentTimePeriod.startDate;
+      const endStr =
+        currentTimePeriod.endDate instanceof Date
+          ? currentTimePeriod.endDate.toISOString()
+          : currentTimePeriod.endDate;
       const cacheKey = `report_data_${startStr}_${endStr}`;
 
       // NEW: Check for cached data first to enable instant load
       const cachedData = analyticsEngine.cache.get(cacheKey);
 
       if (cachedData) {
-        console.log('[ReportsView] Using full cached report data', { key: cacheKey });
+        console.log('[ReportsView] Using full cached report data', {
+          key: cacheKey,
+        });
         currentData = cachedData;
         renderReports();
         isLoading = false;
         return;
       }
 
-      console.log('[ReportsView] Cache miss', { key: cacheKey, stats: analyticsEngine.getCacheStats() });
+      console.log('[ReportsView] Cache miss', {
+        key: cacheKey,
+        stats: analyticsEngine.getCacheStats(),
+      });
 
       showLoadingState();
 

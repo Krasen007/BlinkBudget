@@ -101,20 +101,20 @@ describe('AnalyticsEngine', () => {
         timePeriod
       );
 
-      expect(breakdown.totalAmount).toBe(75.0); // 50 + 25 (expenses only)
+      expect(breakdown.totalAmount).toBe(65.0); // 50 + 25 - 10 (refund included)
       expect(breakdown.categories).toHaveLength(2);
 
       const foodCategory = breakdown.categories.find(
         c => c.name === 'Food & Groceries'
       );
-      expect(foodCategory.amount).toBe(50.0);
-      expect(foodCategory.percentage).toBeCloseTo(66.67, 1);
+      expect(foodCategory.amount).toBe(40.0); // 50 - 10
+      expect(foodCategory.percentage).toBeCloseTo(61.54, 1);
 
       const diningCategory = breakdown.categories.find(
         c => c.name === 'Dining & Coffee'
       );
       expect(diningCategory.amount).toBe(25.0);
-      expect(diningCategory.percentage).toBeCloseTo(33.33, 1);
+      expect(diningCategory.percentage).toBeCloseTo(38.46, 1);
     });
 
     it('should sort categories by amount (highest first)', () => {
@@ -129,7 +129,7 @@ describe('AnalyticsEngine', () => {
       );
 
       expect(breakdown.categories[0].name).toBe('Food & Groceries');
-      expect(breakdown.categories[0].amount).toBe(50.0);
+      expect(breakdown.categories[0].amount).toBe(40.0);
       expect(breakdown.categories[1].name).toBe('Dining & Coffee');
       expect(breakdown.categories[1].amount).toBe(25.0);
     });

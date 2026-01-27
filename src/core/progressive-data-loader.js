@@ -118,12 +118,24 @@ export class ProgressiveDataLoader {
     // and filters them. To be safe and consistent with previous logic, we'll let MetricsService handle it.
 
     // Calculate metrics using the centralized service
-    const categoryBreakdown = MetricsService.calculateCategoryBreakdown(transactions, timePeriod);
-    const incomeVsExpenses = MetricsService.calculateIncomeVsExpenses(transactions, timePeriod);
-    const costOfLiving = MetricsService.calculateCostOfLiving(transactions, timePeriod);
+    const categoryBreakdown = MetricsService.calculateCategoryBreakdown(
+      transactions,
+      timePeriod
+    );
+    const incomeVsExpenses = MetricsService.calculateIncomeVsExpenses(
+      transactions,
+      timePeriod
+    );
+    const costOfLiving = MetricsService.calculateCostOfLiving(
+      transactions,
+      timePeriod
+    );
 
     // Re-filter for the list of transactions to return (excluding ghosts)
-    const filteredTransactions = this.filterByTimePeriod(transactions, timePeriod);
+    const filteredTransactions = this.filterByTimePeriod(
+      transactions,
+      timePeriod
+    );
 
     return {
       transactions: filteredTransactions,
@@ -235,7 +247,7 @@ export class ProgressiveDataLoader {
           totals.expenseCount > 0 ? totals.expenses / totals.expenseCount : 0,
         timePeriod,
       },
-      costOfLiving: this.calculateCostOfLiving(
+      costOfLiving: MetricsService.calculateCostOfLiving(
         processedTransactions,
         timePeriod
       ),
@@ -419,8 +431,6 @@ export class ProgressiveDataLoader {
       ),
     };
   }
-
-
 
   /**
    * Create empty result for no data scenarios

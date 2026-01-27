@@ -80,21 +80,21 @@ export class PatternAnalyzer {
     const weekdayPercentage =
       totalDays > 0
         ? (weekdaySpending.total /
-          (weekdaySpending.total + weekendSpending.total)) *
-        100
+            (weekdaySpending.total + weekendSpending.total)) *
+          100
         : 0;
     const weekendPercentage =
       totalDays > 0
         ? (weekendSpending.total /
-          (weekdaySpending.total + weekendSpending.total)) *
-        100
+            (weekdaySpending.total + weekendSpending.total)) *
+          100
         : 0;
 
     const dailyAverageDiff =
       weekdaySpending.dailyAverage > 0
         ? ((weekendSpending.dailyAverage - weekdaySpending.dailyAverage) /
-          weekdaySpending.dailyAverage) *
-        100
+            weekdaySpending.dailyAverage) *
+          100
         : 0;
 
     return {
@@ -561,7 +561,7 @@ export class PatternAnalyzer {
       mostFrequentCategory: categories.reduce(
         (most, cat) =>
           frequencyAnalysis[cat].averageVisitsPerWeek >
-            (frequencyAnalysis[most]?.averageVisitsPerWeek || 0)
+          (frequencyAnalysis[most]?.averageVisitsPerWeek || 0)
             ? cat
             : most,
         categories[0]
@@ -569,7 +569,7 @@ export class PatternAnalyzer {
       highestSpendingCategory: categories.reduce(
         (highest, cat) =>
           frequencyAnalysis[cat].totalSpent >
-            (frequencyAnalysis[highest]?.totalSpent || 0)
+          (frequencyAnalysis[highest]?.totalSpent || 0)
             ? cat
             : highest,
         categories[0]

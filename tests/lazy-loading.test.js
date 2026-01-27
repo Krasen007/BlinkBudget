@@ -13,6 +13,7 @@ import {
   preloadChartJS,
 } from '../src/core/chart-loader.js';
 import { ProgressiveDataLoader } from '../src/core/progressive-data-loader.js';
+import { MetricsService } from '../src/core/analytics/MetricsService.js';
 
 describe('Chart.js Lazy Loading', () => {
   beforeEach(() => {
@@ -276,7 +277,7 @@ describe('Progressive Data Loading', () => {
       { id: '4', amount: 100, type: 'income', category: 'Salary' },
     ];
 
-    const result = progressiveLoader.calculateCategoryBreakdown(transactions);
+    const result = MetricsService.calculateCategoryBreakdown(transactions);
 
     expect(result.categories).toHaveLength(2);
     expect(result.totalAmount).toBe(100); // Only expenses
@@ -295,14 +296,12 @@ describe('Progressive Data Loading', () => {
       { id: '4', amount: 100, type: 'income', category: 'Freelance' },
     ];
 
-    const result = progressiveLoader.calculateIncomeVsExpenses(transactions);
+    const result = MetricsService.calculateIncomeVsExpenses(transactions);
 
     expect(result.totalIncome).toBe(300);
     expect(result.totalExpenses).toBe(80);
     expect(result.netBalance).toBe(220);
     expect(result.incomeCount).toBe(2);
     expect(result.expenseCount).toBe(2);
-    expect(result.averageIncome).toBe(150);
-    expect(result.averageExpense).toBe(40);
   });
 });

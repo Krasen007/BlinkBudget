@@ -10,13 +10,13 @@ import { AnalyticsEngine } from '../analytics-engine.js';
 let instance = null;
 
 export const getAnalyticsEngine = () => {
-    if (!instance) {
-        instance = new AnalyticsEngine();
-    }
-    return instance;
+  if (!instance) {
+    instance = new AnalyticsEngine();
+  }
+  return instance;
 };
 
 // Allow resetting for testing or hard refresh
 export const resetAnalyticsEngine = () => {
-    instance = null;
+  instance = null;
 };

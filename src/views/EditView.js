@@ -89,21 +89,45 @@ export const EditView = ({ id }) => {
       const newDate = data.timestamp.split('T')[0];
 
       if (originalDate !== newDate) {
-        // Create ghost transaction at details existing at the original date
-        const ghostTransaction = {
-          ...transaction,
-          isGhost: true,
-          movedToDate: data.timestamp,
-        };
+        // REVERSION: If moving back to the VERY FIRST original date, just clear the metadata
+        if (
+          transaction.originalDate &&
+          newDate === transaction.originalDate.split('T')[0]
+        ) {
+          if (transaction.ghostId) {
+            TransactionService.remove(transaction.ghostId);
+          }
+          data.originalDate = null;
+          data.ghostId = null;
+        } else {
+          // If we already have a ghost (moving for the 2nd/3rd time), reuse it
+          if (transaction.ghostId) {
+            // Update the existing ghost's info to point to the new destination
+            TransactionService.update(transaction.ghostId, {
+              movedToDate: data.timestamp,
+            });
+            // Keep the original metadata
+            data.originalDate = transaction.originalDate;
+            data.ghostId = transaction.ghostId;
+          } else {
+            // FIRST MOVE: Create new ghost
+            const ghostTransaction = {
+              ...transaction,
+              isGhost: true,
+              movedToDate: data.timestamp,
+            };
 
-        // Ensure we don't accidentally update the existing ID when adding the ghost
-        // TransactionService.add will generate a new ID
-        delete ghostTransaction.id;
+            delete ghostTransaction.id;
+            delete ghostTransaction.ghostId;
+            delete ghostTransaction.originalDate;
 
-        TransactionService.add(ghostTransaction);
+            const addedGhost = TransactionService.add(ghostTransaction);
 
-        // Metadata for the moved transaction
-        data.originalDate = transaction.timestamp;
+            // Link the moved transaction to its ghost
+            data.originalDate = transaction.timestamp;
+            data.ghostId = addedGhost.id;
+          }
+        }
       }
 
       // Update dashboard filter to show the account used for this transaction
@@ -125,6 +149,10 @@ export const EditView = ({ id }) => {
         ConfirmDialog({
           message: 'Are you sure you want to delete this transaction?',
           onConfirm: () => {
+            // If it has a linked ghost, delete it too
+            if (transaction.ghostId) {
+              TransactionService.remove(transaction.ghostId);
+            }
             TransactionService.remove(id);
             Router.navigate('dashboard');
           },

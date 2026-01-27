@@ -76,7 +76,7 @@ export const BudgetForm = ({
     onClick: () => {
       const raw = (input.value || '').trim();
       const parsed = parseFloat(raw);
-      const limit = raw === '' ? null : (Number.isNaN(parsed) ? null : parsed);
+      const limit = raw === '' ? null : Number.isNaN(parsed) ? null : parsed;
       onSave(limit);
     },
     variant: 'primary',
