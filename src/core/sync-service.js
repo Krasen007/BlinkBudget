@@ -34,6 +34,7 @@ export const SyncService = {
   unsubscribes: [],
   pendingWrites: new Map(), // Track pending writes to avoid race conditions
   lastPushTimes: new Map(), // Track last push time per dataType for rate limiting
+  _debounceTimeouts: new Map(), // Track active debounces per dataType
   _conflictResolutionHandler: null,
   isOnline: navigator.onLine, // NEW: Track connection status
 
@@ -102,13 +103,33 @@ export const SyncService = {
     const userId = AuthService.getUserId();
     if (!userId) return;
 
-    // Rate limiting: Ensure at least 2 seconds between pushes for the same dataType
+    // Clear any existing debounce for this dataType
+    if (this._debounceTimeouts.has(dataType)) {
+      clearTimeout(this._debounceTimeouts.get(dataType));
+    }
+
+    // Schedule a new push (300ms debounce ensures rapid changes are batched)
+    const timeout = setTimeout(async () => {
+      this._debounceTimeouts.delete(dataType);
+      await this._executePush(dataType, data, userId);
+    }, 300);
+
+    this._debounceTimeouts.set(dataType, timeout);
+  },
+
+  /**
+   * Internal method to execute the actual push to Firestore
+   */
+  async _executePush(dataType, data, userId) {
+    // Rate limiting: Ensure at least 1 second between actual network calls
     const now = Date.now();
     const lastPush = this.lastPushTimes.get(dataType) || 0;
-    if (now - lastPush < 2000) {
-      console.log(`[Sync] Throttling push for ${dataType}...`);
-      // We could use a debounce here instead, but for now simple throttle/skip is safer for security context
-      return;
+    const isTransactions = dataType === STORAGE_KEYS.TRANSACTIONS;
+    const throttleTime = isTransactions ? 500 : 2000; // Faster for transactions, slower for static configs
+
+    if (now - lastPush < throttleTime) {
+      // Re-schedule if too frequent
+      return this.pushToCloud(dataType, data);
     }
     this.lastPushTimes.set(dataType, now);
 

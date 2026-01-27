@@ -22,9 +22,9 @@ export const TransactionListItem = ({
   accounts,
   shouldHighlight = false,
   currentDateFilter = null,
-  onDateClick = () => {},
+  onDateClick = () => { },
   currentCategoryFilter = null,
-  onCategoryClick = () => {},
+  onCategoryClick = () => { },
 }) => {
   const item = document.createElement('li');
   item.className = 'transaction-item';
@@ -140,7 +140,7 @@ export const TransactionListItem = ({
           : COLORS.TEXT_MAIN,
     fontWeight:
       currentCategoryFilter === transaction.category ||
-      transaction.type === 'transfer'
+        transaction.type === 'transfer'
         ? '700'
         : '500',
   });
@@ -189,11 +189,13 @@ export const TransactionListItem = ({
     const movedSpan = document.createElement('span');
     movedSpan.textContent = ` • Moved to ${formatDateForDisplay(transaction.movedToDate)}`;
     movedSpan.style.fontStyle = 'italic';
+    movedSpan.style.whiteSpace = 'nowrap';
     date.appendChild(movedSpan);
   } else if (!transaction.isGhost && transaction.originalDate) {
     const originalSpan = document.createElement('span');
     originalSpan.textContent = ` • Original: ${formatDateForDisplay(transaction.originalDate)}`;
     originalSpan.style.fontStyle = 'italic';
+    originalSpan.style.whiteSpace = 'nowrap';
     date.appendChild(originalSpan);
   }
 

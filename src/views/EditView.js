@@ -149,10 +149,6 @@ export const EditView = ({ id }) => {
         ConfirmDialog({
           message: 'Are you sure you want to delete this transaction?',
           onConfirm: () => {
-            // If it has a linked ghost, delete it too
-            if (transaction.ghostId) {
-              TransactionService.remove(transaction.ghostId);
-            }
             TransactionService.remove(id);
             Router.navigate('dashboard');
           },

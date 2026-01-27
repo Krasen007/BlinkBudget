@@ -55,7 +55,7 @@ export const TransactionService = {
 
     const newTransaction = {
       id: generateId(),
-      timestamp: new Date().toISOString(),
+      timestamp: transaction.timestamp || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       userId: AuthService.getUserId(),
       ...transaction,
@@ -113,6 +113,12 @@ export const TransactionService = {
    * @param {string} id - Transaction ID
    */
   remove(id) {
+    const transaction = this.get(id);
+    if (transaction && transaction.ghostId) {
+      // Cascade to ghost if this is a moved transaction being deleted
+      this.remove(transaction.ghostId);
+    }
+
     let transactions = this.getAll();
     transactions = transactions.filter(t => t.id !== id);
     this._persist(transactions);
