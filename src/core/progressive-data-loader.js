@@ -8,6 +8,8 @@
  * Requirements: 9.2 - Performance optimization for large datasets
  */
 
+import { MetricsService } from './analytics/MetricsService.js';
+
 /**
  * Configuration for progressive loading
  */
@@ -111,23 +113,23 @@ export class ProgressiveDataLoader {
    * @returns {Object} Processed data
    */
   processDataDirectly(transactions, timePeriod) {
-    const filteredTransactions = this.filterByTimePeriod(
-      transactions,
-      timePeriod
-    );
+    // MetricsService handles ghost filtering internally now, but we double-check here
+    // if we are passing raw transactions. However, MetricsService expects raw transactions
+    // and filters them. To be safe and consistent with previous logic, we'll let MetricsService handle it.
 
-    if (filteredTransactions.length === 0) {
-      return this.createEmptyResult(timePeriod);
-    }
+    // Calculate metrics using the centralized service
+    const categoryBreakdown = MetricsService.calculateCategoryBreakdown(transactions, timePeriod);
+    const incomeVsExpenses = MetricsService.calculateIncomeVsExpenses(transactions, timePeriod);
+    const costOfLiving = MetricsService.calculateCostOfLiving(transactions, timePeriod);
+
+    // Re-filter for the list of transactions to return (excluding ghosts)
+    const filteredTransactions = this.filterByTimePeriod(transactions, timePeriod);
 
     return {
       transactions: filteredTransactions,
-      categoryBreakdown: this.calculateCategoryBreakdown(filteredTransactions),
-      incomeVsExpenses: this.calculateIncomeVsExpenses(filteredTransactions),
-      costOfLiving: this.calculateCostOfLiving(
-        filteredTransactions,
-        timePeriod
-      ),
+      categoryBreakdown,
+      incomeVsExpenses,
+      costOfLiving,
       processingTime: 0,
       isProgressive: false,
     };
@@ -418,108 +420,7 @@ export class ProgressiveDataLoader {
     };
   }
 
-  /**
-   * Calculate basic category breakdown (for direct processing)
-   * @param {Array} transactions - Filtered transactions
-   * @returns {Object} Category breakdown
-   */
-  calculateCategoryBreakdown(transactions) {
-    const expenseTransactions = transactions.filter(t => t.type === 'expense');
-    const categoryTotals = {};
-    let totalExpenses = 0;
 
-    expenseTransactions.forEach(transaction => {
-      const category = transaction.category || 'Uncategorized';
-      const amount = Math.abs(transaction.amount || 0);
-
-      if (!categoryTotals[category]) {
-        categoryTotals[category] = {
-          name: category,
-          amount: 0,
-          transactionCount: 0,
-        };
-      }
-
-      categoryTotals[category].amount += amount;
-      categoryTotals[category].transactionCount += 1;
-      totalExpenses += amount;
-    });
-
-    const categories = Object.values(categoryTotals).map(category => ({
-      ...category,
-      percentage:
-        totalExpenses > 0 ? (category.amount / totalExpenses) * 100 : 0,
-    }));
-
-    categories.sort((a, b) => b.amount - a.amount);
-
-    return {
-      categories,
-      totalAmount: totalExpenses,
-      transactionCount: expenseTransactions.length,
-    };
-  }
-
-  /**
-   * Calculate income vs expenses (for direct processing)
-   * @param {Array} transactions - Filtered transactions
-   * @returns {Object} Income vs expenses data
-   */
-  calculateIncomeVsExpenses(transactions) {
-    let totalIncome = 0;
-    let totalExpenses = 0;
-    let incomeCount = 0;
-    let expenseCount = 0;
-
-    transactions.forEach(transaction => {
-      const amount = Math.abs(transaction.amount || 0);
-
-      if (transaction.type === 'income') {
-        totalIncome += amount;
-        incomeCount += 1;
-      } else if (transaction.type === 'expense') {
-        totalExpenses += amount;
-        expenseCount += 1;
-      }
-    });
-
-    return {
-      totalIncome,
-      totalExpenses,
-      netBalance: totalIncome - totalExpenses,
-      incomeCount,
-      expenseCount,
-      averageIncome: incomeCount > 0 ? totalIncome / incomeCount : 0,
-      averageExpense: expenseCount > 0 ? totalExpenses / expenseCount : 0,
-    };
-  }
-
-  /**
-   * Calculate cost of living metrics
-   * @param {Array} transactions - Filtered transactions
-   * @param {Object} timePeriod - Time period
-   * @returns {Object} Cost of living data
-   */
-  calculateCostOfLiving(transactions, timePeriod) {
-    const incomeVsExpenses = this.calculateIncomeVsExpenses(transactions);
-
-    const startDate = new Date(timePeriod.startDate);
-    const endDate = new Date(timePeriod.endDate);
-    const durationDays =
-      Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-
-    const dailySpending =
-      durationDays > 0 ? incomeVsExpenses.totalExpenses / durationDays : 0;
-    const monthlySpending = dailySpending * 30;
-
-    return {
-      totalExpenditure: incomeVsExpenses.totalExpenses,
-      dailySpending,
-      monthlySpending,
-      durationDays,
-      timePeriod,
-    };
-  }
 
   /**
    * Create empty result for no data scenarios

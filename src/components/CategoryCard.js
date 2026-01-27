@@ -118,6 +118,15 @@ export const CategoryCard = (
 
     // 2. Add matching insights from global InsightsService (Anomalies, Trends, etc.)
     const matchingInsights = allInsights.filter(insight => {
+      // Skip budget-related insights as they are redundant with the progress bar
+      if (
+        insight.id &&
+        (insight.id.startsWith('budget_exceeded_') ||
+          insight.id.startsWith('budget_warning_'))
+      ) {
+        return false;
+      }
+
       // Direct category match
       if (insight.category === category.name) return true;
 
