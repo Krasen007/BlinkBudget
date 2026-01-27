@@ -359,12 +359,12 @@ export const SyncService = {
       const localTs = ts(localItem);
       const cloudTs = ts(cloudItem);
 
-      // If timestamps are very close and payload differs, emit conflict for UI resolution
+      // If timestamps are very close (but not identical) and payload differs, emit conflict for UI resolution
       const timeDiff = Math.abs(localTs - cloudTs);
       const localJson = JSON.stringify(localItem);
       const cloudJson = JSON.stringify(cloudItem);
-      if (timeDiff <= 2000 && localJson !== cloudJson) {
-        // Increased from 100ms to 1000ms
+
+      if (timeDiff > 0 && timeDiff <= 2000 && localJson !== cloudJson) {
         console.log(
           `[Sync] Detected near-simultaneous edit for id=${id} on ${key}`
         );

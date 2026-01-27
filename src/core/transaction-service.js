@@ -35,7 +35,7 @@ export const TransactionService = {
     });
 
     if (hasChanges) {
-      this._persist(transactions, false);
+      this._persist(transactions, true); // Push migration changes to cloud
     }
 
     return transactions;
