@@ -74,7 +74,7 @@ export class PredictionService {
    */
   static analyzeHistoricalPatterns(transactions) {
     const expenseTransactions = transactions.filter(
-      t => t.type === TRANSACTION_TYPES.EXPENSE
+      t => !t.isGhost && t.type === TRANSACTION_TYPES.EXPENSE
     );
 
     if (expenseTransactions.length === 0) {

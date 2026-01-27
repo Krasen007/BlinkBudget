@@ -67,10 +67,12 @@ export const OverviewSection = (planningData, riskAssessor) => {
   const now = new Date();
   const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
   const recentTransactions = transactions.filter(
-    t => new Date(t.timestamp) >= threeMonthsAgo
+    t => !t.isGhost && new Date(t.timestamp) >= threeMonthsAgo
   );
 
   transactions.forEach(transaction => {
+    if (transaction.isGhost) return; // Skip ghost transactions
+
     if (transaction.type === 'income') {
       totalIncome += transaction.amount;
     } else if (transaction.type === 'expense') {

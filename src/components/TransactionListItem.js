@@ -22,9 +22,9 @@ export const TransactionListItem = ({
   accounts,
   shouldHighlight = false,
   currentDateFilter = null,
-  onDateClick = () => {},
+  onDateClick = () => { },
   currentCategoryFilter = null,
-  onCategoryClick = () => {},
+  onCategoryClick = () => { },
 }) => {
   const item = document.createElement('li');
   item.className = 'transaction-item';
@@ -37,6 +37,7 @@ export const TransactionListItem = ({
     cursor: 'pointer',
     minHeight: TOUCH_TARGETS.MIN_HEIGHT,
     alignItems: 'center',
+    opacity: transaction.isGhost ? '0.6' : '1',
   });
 
   // Long press to split, instant click to edit
@@ -139,7 +140,7 @@ export const TransactionListItem = ({
           : COLORS.TEXT_MAIN,
     fontWeight:
       currentCategoryFilter === transaction.category ||
-      transaction.type === 'transfer'
+        transaction.type === 'transfer'
         ? '700'
         : '500',
   });
@@ -181,6 +182,19 @@ export const TransactionListItem = ({
     const accBadge = document.createElement('span');
     accBadge.textContent = `• ${accName}`;
     date.appendChild(accBadge);
+  }
+
+  // Ghost/Moved Indicator (Inline with date)
+  if (transaction.isGhost && transaction.movedToDate) {
+    const movedSpan = document.createElement('span');
+    movedSpan.textContent = ` • Moved to ${formatDateForDisplay(transaction.movedToDate)}`;
+    movedSpan.style.fontStyle = 'italic';
+    date.appendChild(movedSpan);
+  } else if (!transaction.isGhost && transaction.originalDate) {
+    const originalSpan = document.createElement('span');
+    originalSpan.textContent = ` • Original: ${formatDateForDisplay(transaction.originalDate)}`;
+    originalSpan.style.fontStyle = 'italic';
+    date.appendChild(originalSpan);
   }
 
   info.appendChild(cat);

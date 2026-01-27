@@ -16,7 +16,7 @@ export class AnomalyService {
   static detectAnomalies(transactions, currentPeriod) {
     const insights = [];
     const filteredTransactions = FilteringService.filterByTimePeriod(
-      transactions,
+      transactions.filter(t => !t.isGhost),
       currentPeriod
     );
     const expenseTransactions = filteredTransactions.filter(

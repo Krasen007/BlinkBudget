@@ -16,7 +16,7 @@ const PROGRESSIVE_CONFIG = {
   CHUNK_DELAY: 10, // 10ms delay between chunks to prevent blocking
   LARGE_DATASET_THRESHOLD: 500, // Consider dataset large if > 500 transactions
   MAX_PROCESSING_TIME: 50, // Max time per chunk in milliseconds
-  PRIORITY_CATEGORIES: ['Food', 'Transportation', 'Shopping', 'Bills'], // Load these first
+  PRIORITY_CATEGORIES: ['Храна', 'Гориво', 'Заведения', 'Други'], // Load these first
 };
 
 /**
@@ -308,7 +308,11 @@ export class ProgressiveDataLoader {
       const transactionDate = new Date(
         transaction.date || transaction.timestamp
       );
-      return transactionDate >= startDate && transactionDate <= endDate;
+      return (
+        !transaction.isGhost &&
+        transactionDate >= startDate &&
+        transactionDate <= endDate
+      );
     });
   }
 

@@ -17,7 +17,7 @@ export class MetricsService {
     const filteredTransactions = FilteringService.filterByTimePeriod(
       transactions,
       timePeriod
-    );
+    ).filter(t => !t.isGhost);
 
     // Only process expense transactions for category breakdown
     const expenseTransactions = filteredTransactions.filter(
@@ -72,7 +72,7 @@ export class MetricsService {
     const filteredTransactions = FilteringService.filterByTimePeriod(
       transactions,
       timePeriod
-    );
+    ).filter(t => !t.isGhost);
 
     let totalIncome = 0;
     let totalExpenses = 0;
@@ -174,7 +174,7 @@ export class MetricsService {
       spendingRate:
         incomeVsExpenses.totalIncome > 0
           ? (incomeVsExpenses.totalExpenses / incomeVsExpenses.totalIncome) *
-            100
+          100
           : 0,
     };
   }
@@ -202,6 +202,7 @@ export class MetricsService {
         timePeriod
       ).filter(
         t =>
+          !t.isGhost &&
           t.type === TRANSACTION_TYPES.EXPENSE &&
           (t.category || 'Uncategorized') === category.name
       );

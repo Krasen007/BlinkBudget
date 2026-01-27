@@ -201,6 +201,33 @@ export const DashboardView = () => {
       }
     });
 
+    // Filter out ghost transactions for totals calculation
+    // We want them in the list but not affecting the balance/stats
+    const validTransactionsForStats = transactions.filter(t => !t.isGhost);
+
+    totalIncome = 0;
+    totalExpense = 0;
+
+    validTransactionsForStats.forEach(t => {
+      if (currentFilter === 'all') {
+        if (t.type === 'income') totalIncome += t.amount;
+        if (t.type === 'expense') totalExpense += t.amount;
+        if (t.type === 'refund') totalExpense -= t.amount;
+      } else {
+        const isSource = t.accountId === currentFilter;
+        const isDest = t.toAccountId === currentFilter;
+
+        if (t.type === 'income' && isSource) totalIncome += t.amount;
+        if (t.type === 'expense' && isSource) totalExpense += t.amount;
+        if (t.type === 'refund' && isSource) totalExpense -= t.amount;
+
+        if (t.type === 'transfer') {
+          if (isSource) totalExpense += t.amount;
+          if (isDest) totalIncome += t.amount;
+        }
+      }
+    });
+
     const availableBalance = totalIncome - totalExpense;
 
     // Statistics Cards Container

@@ -84,6 +84,28 @@ export const EditView = ({ id }) => {
     initialValues: transaction,
     externalDateInput: dateInput,
     onSubmit: data => {
+      // Check for date change to create a "ghost" of the original transaction
+      const originalDate = transaction.timestamp.split('T')[0];
+      const newDate = data.timestamp.split('T')[0];
+
+      if (originalDate !== newDate) {
+        // Create ghost transaction at details existing at the original date
+        const ghostTransaction = {
+          ...transaction,
+          isGhost: true,
+          movedToDate: data.timestamp,
+        };
+
+        // Ensure we don't accidentally update the existing ID when adding the ghost
+        // TransactionService.add will generate a new ID
+        delete ghostTransaction.id;
+
+        TransactionService.add(ghostTransaction);
+
+        // Metadata for the moved transaction
+        data.originalDate = transaction.timestamp;
+      }
+
       // Update dashboard filter to show the account used for this transaction
       if (data.accountId) {
         sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, data.accountId);
