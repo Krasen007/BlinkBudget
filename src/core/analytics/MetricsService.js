@@ -19,17 +19,21 @@ export class MetricsService {
       timePeriod
     ).filter(t => !t.isGhost);
 
-    // Only process expense transactions for category breakdown
-    const expenseTransactions = filteredTransactions.filter(
-      t => t.type === TRANSACTION_TYPES.EXPENSE
+    // Process expense and refund transactions for category breakdown
+    const relevantTransactions = filteredTransactions.filter(
+      t =>
+        t.type === TRANSACTION_TYPES.EXPENSE ||
+        t.type === TRANSACTION_TYPES.REFUND
     );
 
     const categoryTotals = {};
     let totalExpenses = 0;
 
-    expenseTransactions.forEach(transaction => {
+    relevantTransactions.forEach(transaction => {
       const category = transaction.category || 'Uncategorized';
-      const amount = Math.abs(transaction.amount || 0);
+      const rawAmount = Math.abs(transaction.amount || 0);
+      const isRefund = transaction.type === TRANSACTION_TYPES.REFUND;
+      const amount = isRefund ? -rawAmount : rawAmount;
 
       if (!categoryTotals[category]) {
         categoryTotals[category] = {
@@ -44,11 +48,16 @@ export class MetricsService {
       totalExpenses += amount;
     });
 
+    // Ensure total expenses don't go negative for percentages (though rare)
+    const normalizedTotal = Math.max(0, totalExpenses);
+
     // Convert to array and calculate percentages
     const categories = Object.values(categoryTotals).map(category => ({
       ...category,
       percentage:
-        totalExpenses > 0 ? (category.amount / totalExpenses) * 100 : 0,
+        normalizedTotal > 0
+          ? (Math.max(0, category.amount) / normalizedTotal) * 100
+          : 0,
     }));
 
     // Sort by amount (highest first)
@@ -58,7 +67,7 @@ export class MetricsService {
       categories,
       totalAmount: totalExpenses,
       timePeriod,
-      transactionCount: expenseTransactions.length,
+      transactionCount: relevantTransactions.length,
     };
   }
 
