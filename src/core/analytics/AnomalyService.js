@@ -5,6 +5,7 @@
 
 import { TRANSACTION_TYPES } from '../../utils/constants.js';
 import { FilteringService } from './FilteringService.js';
+import { formatCurrency } from '../../utils/financial-planning-helpers.js';
 
 export class AnomalyService {
   /**
@@ -72,24 +73,67 @@ export class AnomalyService {
       const totalAmount = amounts.reduce((sum, amount) => sum + amount, 0);
       const spikePercentage = (totalSpikeAmount / totalAmount) * 100;
 
-      insights.push({
-        id: 'spending_spikes',
-        type: 'anomaly',
-        message: `Detected ${spikes.length} unusually large transaction${spikes.length > 1 ? 's' : ''} (over ${spikeThreshold.toFixed(2)}) totaling ${totalSpikeAmount.toFixed(2)} (${spikePercentage.toFixed(1)}% of total spending).`,
-        severity: spikePercentage > 30 ? 'high' : 'medium',
-        actionable: true,
-        recommendation:
-          'Review these large transactions to ensure they align with your budget and financial goals.',
-        metadata: {
-          spikeTransactions: spikes.map(t => ({
-            amount: t.amount,
-            category: t.category,
-            description: t.description,
-            date: t.date || t.timestamp,
-          })),
-          threshold: spikeThreshold,
-        },
+      // Group spikes by category for more specific insights
+      const categorySpikes = Object.create(null);
+      spikes.forEach(t => {
+        const cat = t.category || 'Uncategorized';
+        if (!categorySpikes[cat]) categorySpikes[cat] = [];
+        categorySpikes[cat].push(t);
       });
+
+      // Add category-specific spike insights
+      for (const [category, catSpikes] of Object.entries(categorySpikes)) {
+        const catSpikeAmount = catSpikes.reduce(
+          (sum, t) => sum + Math.abs(t.amount || 0),
+          0
+        );
+        const catTotalAmount = expenseTransactions
+          .filter(t => (t.category || 'Uncategorized') === category)
+          .reduce((sum, t) => sum + Math.abs(t.amount || 0), 0);
+        const catSpikePercentage =
+          catTotalAmount > 0 ? (catSpikeAmount / catTotalAmount) * 100 : 0;
+
+        insights.push({
+          id: `spending_spike_${category.toLowerCase().replace(/\s+/g, '_')}`,
+          type: 'anomaly',
+          category: category,
+          message: `Detected ${catSpikes.length} unusually large transaction${catSpikes.length > 1 ? 's' : ''} in "${category}" totaling ${formatCurrency(catSpikeAmount)} (${catSpikePercentage.toFixed(1)}% of category spending).`,
+          severity: catSpikePercentage > 50 ? 'high' : 'medium',
+          actionable: true,
+          recommendation: `Review these large "${category}" purchases to ensure they align with your financial goals.`,
+          metadata: {
+            spikeTransactions: catSpikes.map(t => ({
+              amount: t.amount,
+              category: t.category,
+              description: t.description,
+              date: t.date || t.timestamp,
+            })),
+            threshold: spikeThreshold,
+          },
+        });
+      }
+
+      // Add a global summary insight if there are multiple categories involved
+      if (Object.keys(categorySpikes).length > 1) {
+        insights.push({
+          id: 'spending_spikes_summary',
+          type: 'anomaly',
+          message: `Detected ${spikes.length} unusually large transactions across ${Object.keys(categorySpikes).length} categories totaling ${formatCurrency(totalSpikeAmount)} (${spikePercentage.toFixed(1)}% of total spending).`,
+          severity: spikePercentage > 30 ? 'high' : 'medium',
+          actionable: true,
+          recommendation:
+            'Review these large transactions to ensure they align with your budget and financial goals.',
+          metadata: {
+            spikeTransactions: spikes.map(t => ({
+              amount: t.amount,
+              category: t.category,
+              description: t.description,
+              date: t.date || t.timestamp,
+            })),
+            threshold: spikeThreshold,
+          },
+        });
+      }
     }
 
     return insights;
@@ -163,15 +207,18 @@ export class AnomalyService {
       dailyAmounts.length;
     const maxDaily = Math.max(...dailyAmounts);
 
-    if (maxDaily > meanDaily * 2 && maxDaily > 30) {
+    // Consistency fix: Use meanDaily * 2 for both detection and message
+    const threshold = meanDaily * 2;
+
+    if (maxDaily > threshold && maxDaily > 30) {
       const highSpendingDays = Object.entries(dailySpending).filter(
-        ([_date, amount]) => amount > meanDaily * 2
+        ([_date, amount]) => amount > threshold
       ).length;
 
       insights.push({
         id: 'daily_spending_spike',
         type: 'anomaly',
-        message: `Detected ${highSpendingDays} day${highSpendingDays > 1 ? 's' : ''} with unusually high spending (over ${(meanDaily * 3).toFixed(2)}).`,
+        message: `Detected ${highSpendingDays} day${highSpendingDays > 1 ? 's' : ''} with unusually high spending (over ${formatCurrency(threshold)}).`,
         severity: 'medium',
         actionable: true,
         recommendation:

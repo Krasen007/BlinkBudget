@@ -15,7 +15,7 @@ export const sanitizeInput = (input, maxLength = 255) => {
   try {
     const parser = new window.DOMParser();
     const doc = parser.parseFromString(input, 'text/html');
-    const sanitized = doc.body.textContent || '';
+    const sanitized = doc.documentElement.textContent || '';
 
     // 2. Enforce length limit
     if (sanitized.length > maxLength) {

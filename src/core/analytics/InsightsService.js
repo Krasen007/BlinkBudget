@@ -8,6 +8,7 @@ import { FilteringService } from './FilteringService.js';
 import { MetricsService } from './MetricsService.js';
 import { AnomalyService } from './AnomalyService.js';
 import { BudgetPlanner } from '../budget-planner.js';
+import { formatCurrency } from '../../utils/financial-planning-helpers.js';
 
 export class InsightsService {
   /**
@@ -38,7 +39,7 @@ export class InsightsService {
       insights.push({
         id: 'positive_balance',
         type: 'positive',
-        message: `You saved ${Math.abs(currentData.netBalance).toFixed(2)} this period with a positive balance.`,
+        message: `You saved ${formatCurrency(Math.abs(currentData.netBalance))} this period with a positive balance.`,
         severity: 'low',
         actionable: false,
       });
@@ -46,7 +47,7 @@ export class InsightsService {
       insights.push({
         id: 'negative_balance',
         type: 'warning',
-        message: `You spent ${Math.abs(currentData.netBalance).toFixed(2)} more than you earned this period.`,
+        message: `You spent ${formatCurrency(Math.abs(currentData.netBalance))} more than you earned this period.`,
         severity: 'high',
         actionable: true,
         recommendation:
@@ -153,7 +154,7 @@ export class InsightsService {
             id: `budget_exceeded_${status.categoryName}`,
             type: 'warning',
             category: status.categoryName,
-            message: `You've exceeded your budget for "${status.categoryName}" by ${Math.abs(status.amountLimit - status.actual).toFixed(2)}.`,
+            message: `You've exceeded your budget for "${status.categoryName}" by ${formatCurrency(Math.abs(status.amountLimit - status.actual))}.`,
             severity: 'high',
             actionable: true,
             recommendation: `Consider reviewing recent purchases in "${status.categoryName}" to find savings for the rest of the month.`,
@@ -166,7 +167,7 @@ export class InsightsService {
             message: `You've used ${status.utilization.toFixed(0)}% of your "${status.categoryName}" budget.`,
             severity: 'medium',
             actionable: true,
-            recommendation: `You have ${status.remaining.toFixed(2)} remaining in your "${status.categoryName}" budget.`,
+            recommendation: `You have ${formatCurrency(status.remaining)} remaining in your "${status.categoryName}" budget.`,
           });
         }
       });
@@ -331,7 +332,7 @@ export class InsightsService {
       insights.push({
         id: 'small_transaction_pattern',
         type: 'pattern',
-        message: `${((smallTransactions.length / amounts.length) * 100).toFixed(1)}% of your transactions are small purchases under ${(averageAmount * 0.5).toFixed(2)}.`,
+        message: `${((smallTransactions.length / amounts.length) * 100).toFixed(1)}% of your transactions are small purchases under ${formatCurrency(averageAmount * 0.5)}.`,
         severity: 'low',
         actionable: true,
         recommendation:
@@ -378,7 +379,7 @@ export class InsightsService {
             id: `category_change_${categoryName.toLowerCase().replace(/\s+/g, '_')}`,
             type: amountChange > 0 ? 'increase' : 'decrease',
             category: categoryName,
-            message: `Your "${categoryName}" spending ${amountChange > 0 ? 'increased' : 'decreased'} by ${Math.abs(percentChange).toFixed(1)}% (${Math.abs(amountChange).toFixed(2)}) compared to the previous period.`,
+            message: `Your "${categoryName}" spending ${amountChange > 0 ? 'increased' : 'decreased'} by ${Math.abs(percentChange).toFixed(1)}% (${formatCurrency(Math.abs(amountChange))}) compared to the previous period.`,
             severity: Math.abs(percentChange) > 50 ? 'high' : 'medium',
             actionable: amountChange > 0,
             recommendation:
@@ -392,7 +393,7 @@ export class InsightsService {
           id: `new_category_${categoryName.toLowerCase().replace(/\s+/g, '_')}`,
           type: 'pattern',
           category: categoryName,
-          message: `You started spending in a new category "${categoryName}" with ${currentCat.amount.toFixed(2)} this period.`,
+          message: `You started spending in a new category "${categoryName}" with ${formatCurrency(currentCat.amount)} this period.`,
           severity: 'low',
           actionable: false,
         });

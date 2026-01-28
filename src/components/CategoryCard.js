@@ -130,15 +130,6 @@ export const CategoryCard = (
       // Direct category match
       if (insight.category === category.name) return true;
 
-      // Match category in metadata (e.g. for spikes)
-      if (
-        insight.metadata?.spikeTransactions?.some(
-          t => t.category === category.name
-        )
-      ) {
-        return true;
-      }
-
       return false;
     });
 
