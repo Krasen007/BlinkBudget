@@ -413,7 +413,7 @@ export class ComparisonService {
       comparisonTransactions
     );
 
-    const dayOfWeekChanges = {};
+    const dayOfWeekChanges = Object.create(null);
     for (const day of dayNames) {
       const currentPercent = currentDayPattern[day] || 0;
       const comparisonPercent = comparisonDayPattern[day] || 0;
@@ -451,7 +451,7 @@ export class ComparisonService {
       'Friday',
       'Saturday',
     ];
-    const dayCounts = {};
+    const dayCounts = Object.create(null);
     transactions.forEach(transaction => {
       const date = new Date(transaction.date || transaction.timestamp);
       const dayName = dayNames[date.getDay()];
@@ -459,7 +459,7 @@ export class ComparisonService {
     });
 
     const total = transactions.length;
-    const dayPercentages = {};
+    const dayPercentages = Object.create(null);
     for (const day of dayNames) {
       dayPercentages[day] =
         total > 0 ? ((dayCounts[day] || 0) / total) * 100 : 0;

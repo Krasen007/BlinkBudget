@@ -284,7 +284,7 @@ export const OverviewSection = ({ planningData, onSectionSwitch }) => {
   actions.forEach(action => {
     const button = document.createElement('button');
     button.className = 'action-button';
-    button.innerHTML = `${action.icon} ${action.label}`;
+    button.textContent = `${action.icon} ${action.label}`;
     button.style.padding = 'var(--spacing-md) var(--spacing-lg)';
     button.style.border = `1px solid ${COLORS.BORDER}`;
     button.style.borderRadius = 'var(--radius-md)';

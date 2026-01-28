@@ -8,6 +8,7 @@ import { COLORS, SPACING } from './constants.js';
 import { getChartColors } from '../core/chart-config.js';
 import { TransactionService } from '../core/transaction-service.js';
 import { generateMonthlyTrendData } from './reports-utils.js';
+import { escapeHtml } from './security-utils.js';
 
 /**
  * Create tooltip configuration for category charts
@@ -51,8 +52,8 @@ function createCategoryTooltipConfig(detailsContainer) {
         // Create structured HTML for the details container
         detailsContainer.innerHTML = `
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-weight: 600; color: var(--color-text-main);">${label}</span>
-                            <span style="font-weight: bold; color: var(--color-primary);">${formattedValue}</span>
+                            <span style="font-weight: 600; color: var(--color-text-main);">${escapeHtml(label)}</span>
+                            <span style="font-weight: bold; color: var(--color-primary);">${escapeHtml(formattedValue)}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; font-size: 0.85em; color: var(--color-text-muted);">
                             <span>Percentage</span>

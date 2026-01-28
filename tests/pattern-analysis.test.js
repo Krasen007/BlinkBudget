@@ -482,4 +482,78 @@ describe('Integration Tests', () => {
       }
     }
   });
+
+  describe('Security', () => {
+    it('should not allow polluting Object.prototype via analyzeWeekdayVsWeekend', () => {
+      const maliciousTransactions = [
+        {
+          id: '1',
+          timestamp: '2024-01-08T10:00:00Z',
+          amount: 10,
+          type: 'expense',
+          category: '__proto__',
+        },
+      ];
+
+      PatternAnalyzer.analyzeWeekdayVsWeekend(
+        maliciousTransactions,
+        timePeriod
+      );
+
+      expect(Object.prototype.totalVisits).toBeUndefined();
+      expect(Object.prototype.amount).toBeUndefined();
+      expect(Object.prototype.count).toBeUndefined();
+
+      // Cleanup
+      delete Object.prototype.totalVisits;
+      delete Object.prototype.amount;
+      delete Object.prototype.count;
+    });
+
+    it('should not allow polluting Object.prototype via analyzeTimeOfDayPatterns', () => {
+      const maliciousTransactions = [
+        {
+          id: '1',
+          timestamp: '2024-01-08T10:00:00Z',
+          amount: 10,
+          type: 'expense',
+          category: '__proto__',
+        },
+      ];
+
+      PatternAnalyzer.analyzeTimeOfDayPatterns(
+        maliciousTransactions,
+        timePeriod
+      );
+
+      expect(Object.prototype.amount).toBeUndefined();
+      expect(Object.prototype.count).toBeUndefined();
+
+      // Cleanup
+      delete Object.prototype.amount;
+      delete Object.prototype.count;
+    });
+
+    it('should not allow polluting Object.prototype via analyzeFrequencyPatterns', () => {
+      const maliciousTransactions = [
+        {
+          id: '1',
+          timestamp: '2024-01-08T10:00:00Z',
+          amount: 10,
+          type: 'expense',
+          category: '__proto__',
+        },
+      ];
+
+      PatternAnalyzer.analyzeFrequencyPatterns(
+        maliciousTransactions,
+        timePeriod
+      );
+
+      expect(Object.prototype.totalVisits).toBeUndefined();
+
+      // Cleanup
+      delete Object.prototype.totalVisits;
+    });
+  });
 });

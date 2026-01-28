@@ -102,7 +102,7 @@ export class AnomalyService {
    */
   static detectCategoryConcentration(expenseTransactions) {
     const insights = [];
-    const categoryTotals = {};
+    const categoryTotals = Object.create(null);
     let totalAmount = 0;
 
     expenseTransactions.forEach(transaction => {
@@ -142,7 +142,7 @@ export class AnomalyService {
    */
   static detectTimingAnomalies(expenseTransactions) {
     const insights = [];
-    const dailySpending = {};
+    const dailySpending = Object.create(null);
 
     expenseTransactions.forEach(transaction => {
       const date = new Date(transaction.date || transaction.timestamp);

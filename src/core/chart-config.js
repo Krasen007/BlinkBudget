@@ -621,6 +621,9 @@ export function createChartOptions(customOptions = {}) {
   const deepMerge = (target, source) => {
     const result = { ...target };
     for (const key of Object.keys(source)) {
+      if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+        continue;
+      }
       if (
         source[key] &&
         typeof source[key] === 'object' &&

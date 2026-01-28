@@ -138,7 +138,7 @@ export class PredictionService {
   }
 
   static groupTransactionsByMonth(transactions) {
-    const monthlyData = {};
+    const monthlyData = Object.create(null);
     transactions.forEach(transaction => {
       const date = new Date(transaction.date || transaction.timestamp);
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -152,7 +152,7 @@ export class PredictionService {
   }
 
   static calculateMonthlyCategories(transactions) {
-    const categoryTotals = {};
+    const categoryTotals = Object.create(null);
     let totalAmount = 0;
 
     transactions.forEach(transaction => {
@@ -166,7 +166,7 @@ export class PredictionService {
       totalAmount += amount;
     });
 
-    const categoryBreakdown = {};
+    const categoryBreakdown = Object.create(null);
     for (const [category, amount] of Object.entries(categoryTotals)) {
       categoryBreakdown[category] = {
         amount,
@@ -228,6 +228,7 @@ export class PredictionService {
 
   static detectSeasonalPatterns(monthlySpending) {
     const seasonalData = { spring: [], summer: [], fall: [], winter: [] };
+    // No change needed for seasonalData as keys are hardcoded: spring, summer, fall, winter
 
     monthlySpending.forEach(monthData => {
       const month = monthData.month;
@@ -239,8 +240,8 @@ export class PredictionService {
       seasonalData[season].push(monthData.totalSpending);
     });
 
-    const seasonalAverages = {};
-    const seasonalPatterns = {};
+    const seasonalAverages = Object.create(null);
+    const seasonalPatterns = Object.create(null);
 
     for (const [season, amounts] of Object.entries(seasonalData)) {
       if (amounts.length > 0) {
@@ -288,7 +289,7 @@ export class PredictionService {
   }
 
   static analyzeCategoryPatterns(monthlySpending) {
-    const categoryTrends = {};
+    const categoryTrends = Object.create(null);
     monthlySpending.forEach((monthData, monthIndex) => {
       for (const [category, data] of Object.entries(
         monthData.categoryBreakdown
@@ -302,7 +303,7 @@ export class PredictionService {
       }
     });
 
-    const categoryAnalysis = {};
+    const categoryAnalysis = Object.create(null);
     for (const [category, data] of Object.entries(categoryTrends)) {
       if (data.length >= 2) {
         const amounts = data.map(d => d.amount);

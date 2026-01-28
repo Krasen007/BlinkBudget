@@ -26,7 +26,7 @@ export class MetricsService {
         t.type === TRANSACTION_TYPES.REFUND
     );
 
-    const categoryTotals = {};
+    const categoryTotals = Object.create(null);
     let totalExpenses = 0;
 
     relevantTransactions.forEach(transaction => {

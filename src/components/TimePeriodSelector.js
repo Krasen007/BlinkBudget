@@ -123,9 +123,10 @@ export const TimePeriodSelector = (options = {}) => {
     button.setAttribute('aria-controls', `${period.key}-panel`);
     button.id = `${period.key}-tab`;
 
-    button.innerHTML = `
-      <span class="tab-label">${period.label}</span>
-    `;
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'tab-label';
+    labelSpan.textContent = period.label;
+    button.appendChild(labelSpan);
 
     // Exact same styling as FinancialPlanningView tabs
     Object.assign(button.style, {

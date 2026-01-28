@@ -30,14 +30,14 @@ export class PatternAnalyzer {
       total: 0,
       count: 0,
       dailyAverage: 0,
-      categories: {},
+      categories: Object.create(null),
     };
 
     const weekendSpending = {
       total: 0,
       count: 0,
       dailyAverage: 0,
-      categories: {},
+      categories: Object.create(null),
     };
 
     const weekdayDays = new Set();
@@ -149,8 +149,8 @@ export class PatternAnalyzer {
       periodAnalysis[period] = {
         total: 0,
         count: 0,
-        categories: {},
-        hourlyBreakdown: {},
+        categories: Object.create(null),
+        hourlyBreakdown: Object.create(null),
       };
     });
 
@@ -247,7 +247,7 @@ export class PatternAnalyzer {
     ];
     const categoriesToAnalyze = targetCategories || actualCategories;
 
-    const frequencyAnalysis = {};
+    const frequencyAnalysis = Object.create(null);
 
     categoriesToAnalyze.forEach(category => {
       const categoryTransactions = filteredTransactions.filter(
@@ -256,8 +256,8 @@ export class PatternAnalyzer {
 
       // Visit frequency analysis
       const visitDates = new Set();
-      const visitsByDayOfWeek = {};
-      const visitsByHour = {};
+      const visitsByDayOfWeek = Object.create(null);
+      const visitsByHour = Object.create(null);
 
       categoryTransactions.forEach(transaction => {
         const date = new Date(transaction.timestamp);

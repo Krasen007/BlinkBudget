@@ -202,13 +202,24 @@ export function showEmptyState(
     addButton.addEventListener('click', () => Router.navigate('add-expense'));
   } else if (scenario === 'no-data-for-period') {
     icon.innerHTML = '📅';
-    message.innerHTML = `
-            <h3 style="margin: 0 0 ${SPACING.SM} 0; color: ${COLORS.TEXT_MAIN};">No Data for This Period</h3>
-            <p style="margin: 0; max-width: 300px; line-height: 1.5;">
-                No transactions found for ${escapeHtml(formatTimePeriod(currentTimePeriod))}. 
-                Try selecting a different time period or add some transactions.
-            </p>
-        `;
+
+    const title = document.createElement('h3');
+    title.style.margin = `0 0 ${SPACING.SM} 0`;
+    title.style.color = COLORS.TEXT_MAIN;
+    title.textContent = 'No Data for This Period';
+
+    const p = document.createElement('p');
+    p.style.margin = '0';
+    p.style.maxWidth = '300px';
+    p.style.lineHeight = '1.5';
+
+    // Safely construct the message text
+    const periodText = formatTimePeriod(currentTimePeriod);
+    p.textContent = `No transactions found for ${periodText}. Try selecting a different time period or add some transactions.`;
+
+    message.appendChild(title);
+    message.appendChild(p);
+
     addButton.textContent = '+ Add Transaction';
     addButton.addEventListener('click', () => Router.navigate('add-expense'));
   } else {
@@ -272,9 +283,9 @@ export function showErrorState(errorState, customMessage, onRetry) {
     'There was an error loading your financial data. Please try again.';
 
   message.innerHTML = `
-        <h3 style="margin: 0 0 ${SPACING.SM} 0; color: ${COLORS.ERROR};">${errorTitle}</h3>
+        <h3 style="margin: 0 0 ${SPACING.SM} 0; color: ${COLORS.ERROR};">${escapeHtml(errorTitle)}</h3>
         <p style="margin: 0; max-width: 400px; line-height: 1.5; color: ${COLORS.TEXT_MUTED};">
-            ${errorDescription}
+            ${escapeHtml(errorDescription)}
         </p>
     `;
 
@@ -508,7 +519,7 @@ export function showChartRenderingWarning(container, failedCharts) {
     },
     innerHTML: `
             ⚠️ <strong>Chart Rendering Issues:</strong> 
-            Some charts couldn't be displayed (${failedChartNames}). 
+            Some charts couldn't be displayed (${escapeHtml(failedChartNames)}). 
             Fallback displays are shown instead. Try refreshing the page if the issue persists.
         `,
     children: [closeBtn],

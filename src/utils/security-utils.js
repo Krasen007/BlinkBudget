@@ -11,17 +11,26 @@
 export const sanitizeInput = (input, maxLength = 255) => {
   if (typeof input !== 'string') return input;
 
-  // 1. Strip HTML tags
-  const div = document.createElement('div');
-  div.innerHTML = input;
-  let sanitized = div.textContent || div.innerText || '';
+  // 1. Strip HTML tags using DOMParser (safer than innerHTML)
+  try {
+    const parser = new window.DOMParser();
+    const doc = parser.parseFromString(input, 'text/html');
+    const sanitized = doc.body.textContent || '';
 
-  // 2. Enforce length limit
-  if (sanitized.length > maxLength) {
-    sanitized = sanitized.substring(0, maxLength);
+    // 2. Enforce length limit
+    if (sanitized.length > maxLength) {
+      return sanitized.substring(0, maxLength);
+    }
+
+    return sanitized;
+  } catch {
+    // Fallback to simple regex if DOMParser fails
+    const sanitized = input.replace(/<[^>]*>?/gm, '');
+    if (sanitized.length > maxLength) {
+      return sanitized.substring(0, maxLength);
+    }
+    return sanitized;
   }
-
-  return sanitized;
 };
 
 /**

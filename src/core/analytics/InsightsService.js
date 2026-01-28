@@ -258,7 +258,7 @@ export class InsightsService {
    */
   static analyzeSpendingTiming(expenseTransactions) {
     const insights = [];
-    const dayOfWeekCounts = {};
+    const dayOfWeekCounts = Object.create(null);
     const dayNames = [
       'Sunday',
       'Monday',
