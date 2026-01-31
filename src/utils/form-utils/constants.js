@@ -26,19 +26,48 @@ export const CATEGORY_DEFINITIONS = {
 };
 
 // Category colors for visual feedback
+// Category colors for visual feedback
 export const CATEGORY_COLORS = {
   // Expense
-  'Food & Groceries': '#10b981', // Green
-  'Dining & Coffee': '#f97316', // Orange
-  'Housing & Bills': '#3b82f6', // Blue
-  Transportation: '#eab308', // Yellow
-  'Leisure & Shopping': '#a855f7', // Purple
-  'Personal Care': '#ffffff', // White
+  'Храна': '#10b981', // Green
+  'Заведения': '#f97316', // Orange
+  'Други': '#9ca3af', // Gray
+  'Гориво': '#eab308', // Yellow
+  'Подаръци': '#ec4899', // Pink
+  'Автомобил': '#ef4444', // Red
+  'Сметки': '#3b82f6', // Blue
+  'Дрехи': '#a855f7', // Purple
+  'Лекарства': '#14b8a6', // Teal
+  'Забавления': '#6366f1', // Indigo
+  'Кредит': '#64748b', // Slate
+  'Телефон': '#0ea5e9', // Sky
+  'Почивка': '#06b6d4', // Cyan
+  'Транспорт': '#d97706', // Amber
+  'Баланс': '#059669', // Emerald
+  'Лекар': '#dc2626', // Red
+  'Инвестиции': '#84cc16', // Lime
+  'Ремонти': '#78716c', // Stone
+  'Данъци': '#52525b', // Zinc
+  'Застраховки': '#8b5cf6', // Violet
+  'Зъболекар': '#f43f5e', // Rose
+
   // Income
-  Paycheck: '#10b981', // Green
-  'Business / Freelance': '#f97316', // Orange
-  'Investment Income': '#3b82f6', // Blue
-  'Other / Gift': '#eab308', // Yellow
+  'Заплата': '#10b981', // Green
+  // 'Инвестиции' handled above
+  // 'Други' handled above
+  // 'Подаръци' handled above
+
+  // English fallbacks (keep for compatibility if needed, or remove if strictly Bulgarian)
+  'Food & Groceries': '#10b981',
+  'Dining & Coffee': '#f97316',
+  'Housing & Bills': '#3b82f6',
+  'Transportation': '#eab308',
+  'Leisure & Shopping': '#a855f7',
+  'Personal Care': '#ffffff',
+  'Paycheck': '#10b981',
+  'Business / Freelance': '#f97316',
+  'Investment Income': '#3b82f6',
+  'Other / Gift': '#eab308',
 };
 
 // Category options by transaction type

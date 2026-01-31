@@ -422,24 +422,44 @@ export async function createCategoryTrendsChart(
 //   return button;
 // }
 
+import { CATEGORY_COLORS } from './form-utils/constants.js';
+
+/**
+ * Get a deterministic color for a category
+ * Checks predefined colors first, then falls back to a consistent hash-based color
+ */
+export function getColorForCategory(categoryName) {
+  if (!categoryName) return COLORS.TEXT_MUTED;
+
+  // 1. Check predefined colors
+  if (CATEGORY_COLORS[categoryName]) {
+    return CATEGORY_COLORS[categoryName];
+  }
+
+  // 2. Fallback: Deterministic hash to select from strict palette
+  const totalColors = 12; // Use standard size palette
+  const colors = getChartColors(totalColors);
+
+  // Simple string hash
+  let hash = 0;
+  for (let i = 0; i < categoryName.length; i++) {
+    hash = categoryName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  const index = Math.abs(hash) % colors.length;
+  return colors[index];
+}
+
 /**
  * Get consistent colors for categories across all charts and UI elements
  */
 export function getCategoryColors(categories, categoryColorMap) {
-  if (
-    categoryColorMap.size === 0 ||
-    categoryColorMap.size < categories.length
-  ) {
-    const totalColors = Math.max(categories.length, 12);
-    const colors = getChartColors(totalColors);
-
-    categories.forEach((category, index) => {
-      if (!categoryColorMap.has(category.name)) {
-        const colorIndex = index % colors.length;
-        categoryColorMap.set(category.name, colors[colorIndex]);
-      }
-    });
-  }
+  // Update map with colors for all categories
+  categories.forEach(category => {
+    if (!categoryColorMap.has(category.name)) {
+      categoryColorMap.set(category.name, getColorForCategory(category.name));
+    }
+  });
 
   return categories.map(category => categoryColorMap.get(category.name));
 }

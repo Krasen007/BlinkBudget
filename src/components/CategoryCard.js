@@ -47,6 +47,7 @@ export const CategoryCard = (
   const categoryColor =
     categoryColorMap.get(category.name) || getChartColors(1)[0];
   card.style.setProperty('--category-color', categoryColor);
+  card.style.borderLeft = `6px solid ${categoryColor}`; // Visual indicator consistent with BudgetForm
 
   card.addEventListener('mouseenter', () => {
     card.style.borderColor = COLORS.PRIMARY;

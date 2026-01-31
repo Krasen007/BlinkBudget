@@ -6,6 +6,7 @@
 
 import { COLORS, SPACING, FONT_SIZES } from '../utils/constants.js';
 import { Button } from './Button.js';
+import { getColorForCategory } from '../utils/reports-charts.js';
 
 /**
  * Create a budget form
@@ -20,6 +21,10 @@ export const BudgetForm = ({
 }) => {
   const form = document.createElement('div');
   form.className = 'budget-form';
+
+  // Get consistent category color
+  const categoryColor = getColorForCategory(categoryName);
+
   Object.assign(form.style, {
     display: 'flex',
     flexDirection: 'column',
@@ -28,12 +33,14 @@ export const BudgetForm = ({
     background: COLORS.BACKGROUND,
     borderRadius: 'var(--radius-md)',
     border: `1px solid ${COLORS.BORDER}`,
+    borderLeft: `6px solid ${categoryColor}`, // Visual indicator
   });
 
   const title = document.createElement('h4');
   title.textContent = `Set Budget for ${categoryName}`;
   title.style.margin = '0';
   title.style.fontSize = FONT_SIZES.MD;
+  title.style.color = categoryColor; // Also color the title
   form.appendChild(title);
 
   const inputGroup = document.createElement('div');
@@ -62,6 +69,15 @@ export const BudgetForm = ({
     fontSize: FONT_SIZES.MD,
     outline: 'none',
   });
+
+  // Add subtle focus color
+  input.addEventListener('focus', () => {
+    input.style.borderColor = categoryColor;
+  });
+  input.addEventListener('blur', () => {
+    input.style.borderColor = COLORS.BORDER;
+  });
+
   input.focus();
   inputGroup.appendChild(input);
   form.appendChild(inputGroup);
@@ -82,6 +98,9 @@ export const BudgetForm = ({
     variant: 'primary',
   });
   saveBtn.style.flex = '1';
+  // Override primary button color to match category
+  saveBtn.style.backgroundColor = categoryColor;
+  saveBtn.style.borderColor = categoryColor;
 
   const cancelBtn = Button({
     text: 'Cancel',
