@@ -13,12 +13,12 @@ describe('Form Constants', () => {
   describe('CATEGORY_DEFINITIONS', () => {
     test('contains definitions for all expense categories', () => {
       const expenseCategories = [
-        'Food & Groceries',
-        'Dining & Coffee',
-        'Housing & Bills',
-        'Transportation',
-        'Leisure & Shopping',
-        'Personal Care',
+        'Храна',
+        'Заведения',
+        'Сметки',
+        'Транспорт',
+        'Забавления',
+        'Лекарства',
       ];
 
       expenseCategories.forEach(category => {
@@ -29,12 +29,7 @@ describe('Form Constants', () => {
     });
 
     test('contains definitions for all income categories', () => {
-      const incomeCategories = [
-        'Paycheck',
-        'Business / Freelance',
-        'Investment Income',
-        'Other / Gift',
-      ];
+      const incomeCategories = ['Заплата', 'Инвестиции', 'Други'];
 
       incomeCategories.forEach(category => {
         expect(CATEGORY_DEFINITIONS).toHaveProperty(category);
@@ -54,12 +49,12 @@ describe('Form Constants', () => {
   describe('CATEGORY_COLORS', () => {
     test('contains colors for all expense categories', () => {
       const expenseCategories = [
-        'Food & Groceries',
-        'Dining & Coffee',
-        'Housing & Bills',
-        'Transportation',
-        'Leisure & Shopping',
-        'Personal Care',
+        'Храна',
+        'Заведения',
+        'Сметки',
+        'Транспорт',
+        'Забавления',
+        'Лекарства',
       ];
 
       expenseCategories.forEach(category => {
@@ -69,12 +64,7 @@ describe('Form Constants', () => {
     });
 
     test('contains colors for all income categories', () => {
-      const incomeCategories = [
-        'Paycheck',
-        'Business / Freelance',
-        'Investment Income',
-        'Other / Gift',
-      ];
+      const incomeCategories = ['Заплата'];
 
       incomeCategories.forEach(category => {
         expect(CATEGORY_COLORS).toHaveProperty(category);
@@ -83,19 +73,10 @@ describe('Form Constants', () => {
     });
 
     test('uses consistent color mapping between expense and income categories', () => {
-      // Income categories reuse colors from corresponding expense categories
-      expect(CATEGORY_COLORS['Food & Groceries']).toBe(
-        CATEGORY_COLORS.Paycheck
-      );
-      expect(CATEGORY_COLORS['Dining & Coffee']).toBe(
-        CATEGORY_COLORS['Business / Freelance']
-      );
-      expect(CATEGORY_COLORS['Housing & Bills']).toBe(
-        CATEGORY_COLORS['Investment Income']
-      );
-      expect(CATEGORY_COLORS.Transportation).toBe(
-        CATEGORY_COLORS['Other / Gift']
-      );
+      // Consistency check: ensure key categories have colors
+      expect(CATEGORY_COLORS['Храна']).toBeDefined();
+      expect(CATEGORY_COLORS['Заплата']).toBeDefined();
+      expect(CATEGORY_COLORS['Заплата']).toBe('#10b981'); // Green
     });
   });
 

@@ -6,68 +6,66 @@
 // Category definitions (tooltips/descriptions)
 export const CATEGORY_DEFINITIONS = {
   // Expense
-  'Food & Groceries':
-    'Supermarket runs, bakery, household supplies bought at the grocery store.',
-  'Dining & Coffee':
-    'Restaurants, fast food, coffee shops, food delivery apps.',
-  'Housing & Bills':
-    'Rent, Mortgage, Utilities (Electricity/Water/Internet), Repairs, Taxes.',
-  Transportation:
-    'Car payments, gas, maintenance, public transit tickets, Uber/Lyft.',
-  'Leisure & Shopping':
-    'Shopping (clothes/gadgets), hobbies, movies, subscriptions (Netflix/Spotify), vacations.',
-  'Personal Care':
-    'Medical bills, pharmacy, gym memberships, haircuts, tuition/school fees (Education).',
+  Храна: 'Supermarket runs, bakery, household supplies.',
+  Заведения: 'Restaurants, fast food, coffee shops, food delivery.',
+  Други: "Miscellaneous expenses that don't fit elsewhere.",
+  Гориво: 'Fuel for vehicles.',
+  Подаръци: 'Gifts for others.',
+  Автомобил: 'Car maintenance, repairs, insurance.',
+  Сметки: 'Utility bills (Electricity, Water, Internet, etc.).',
+  Дрехи: 'Clothing and apparel.',
+  Лекарства: 'Pharmacy and medicines.',
+  Забавления: 'Movies, hobbies, subscriptions, fun activities.',
+  Кредит: 'Loan payments, mortgage, credit card payoff.',
+  Телефон: 'Mobile phone bill and equipment.',
+  Почивка: 'Vacations, travel, hotels.',
+  Транспорт: 'Public transit, taxi, ride-sharing.',
+  Баланс: 'Adjustments to account balance.',
+  Лекар: 'Doctor visits and medical procedures.',
+  Инвестиции: 'Investment contributions and income.',
+  Ремонти: 'Home repairs and maintenance.',
+  Данъци: 'Taxes and government fees.',
+  Застраховки: 'Insurance policies (Life, Home, Health).',
+  Зъболекар: 'Dentist visits.',
+
   // Income
-  Paycheck: 'Most reliable source',
-  'Business / Freelance': 'Variable, side income',
-  'Investment Income': 'Dividends, interest, profits',
-  'Other / Gift': 'Everything else, like cash gifts',
+  Заплата: 'Salary and primary income.',
 };
 
 // Category colors for visual feedback
-// Category colors for visual feedback
 export const CATEGORY_COLORS = {
-  // Expense
-  'Храна': '#10b981', // Green
-  'Заведения': '#f97316', // Orange
-  'Други': '#9ca3af', // Gray
-  'Гориво': '#eab308', // Yellow
-  'Подаръци': '#ec4899', // Pink
-  'Автомобил': '#ef4444', // Red
-  'Сметки': '#3b82f6', // Blue
-  'Дрехи': '#a855f7', // Purple
-  'Лекарства': '#14b8a6', // Teal
-  'Забавления': '#6366f1', // Indigo
-  'Кредит': '#64748b', // Slate
-  'Телефон': '#0ea5e9', // Sky
-  'Почивка': '#06b6d4', // Cyan
-  'Транспорт': '#d97706', // Amber
-  'Баланс': '#059669', // Emerald
-  'Лекар': '#dc2626', // Red
-  'Инвестиции': '#84cc16', // Lime
-  'Ремонти': '#78716c', // Stone
-  'Данъци': '#52525b', // Zinc
-  'Застраховки': '#8b5cf6', // Violet
-  'Зъболекар': '#f43f5e', // Rose
+  // Bold, vibrant color scheme using red, blue, green, white, orange, purple
 
-  // Income
-  'Заплата': '#10b981', // Green
-  // 'Инвестиции' handled above
-  // 'Други' handled above
-  // 'Подаръци' handled above
+  // Major expenses - Primary bold colors
+  Други: '#f19317ff', // White/Light gray (30.2% - largest)
+  Храна: '#22C55E', // Vibrant green (25.0% - second largest)
+  Кредит: '#3B82F6', // Bold blue (21.3% - third largest)
 
-  // English fallbacks (keep for compatibility if needed, or remove if strictly Bulgarian)
-  'Food & Groceries': '#10b981',
-  'Dining & Coffee': '#f97316',
-  'Housing & Bills': '#3b82f6',
-  'Transportation': '#eab308',
-  'Leisure & Shopping': '#a855f7',
-  'Personal Care': '#ffffff',
-  'Paycheck': '#10b981',
-  'Business / Freelance': '#f97316',
-  'Investment Income': '#3b82f6',
-  'Other / Gift': '#eab308',
+  // Medium expenses - Bright accent colors
+  Подаръци: '#A855F7', // Purple (7.9%)
+  Заведения: '#F97316', // Orange (4.8%)
+  Гориво: '#EF4444', // Red (4.5%)
+
+  // Smaller expenses - Variations of primary colors
+  Дрехи: '#8B5CF6', // Deep purple (1.7%)
+  Автомобил: '#DC2626', // Dark red (1.5%)
+  Телефон: '#0EA5E9', // Bright blue (1.4%)
+  Лекарства: '#10B981', // Emerald green (1.1%)
+  Сметки: '#60A5FA', // Light blue (0.6%)
+
+  // Additional categories - Using the same color palette
+  Почивка: '#06B6D4', // Cyan blue
+  Транспорт: '#FB923C', // Light orange
+  Баланс: '#16A34A', // Dark green
+  Лекар: '#B91C1C', // Deep red
+  Инвестиции: '#84CC16', // Lime green
+  Ремонти: '#F59E0B', // Amber orange
+  Данъци: '#1D4ED8', // Dark blue
+  Застраховки: '#C084FC', // Light purple
+  Зъболекар: '#F87171', // Coral red
+  Забавления: '#7C3AED', // Violet purple
+
+  Заплата: '#10b981', // Green
 };
 
 // Category options by transaction type
