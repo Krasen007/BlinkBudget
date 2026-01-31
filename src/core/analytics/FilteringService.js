@@ -29,6 +29,9 @@ export class FilteringService {
     endDate.setHours(23, 59, 59, 999);
 
     return transactions.filter(transaction => {
+      // Exclude ghost (moved) transactions by default to prevent double counting
+      if (transaction.isGhost) return false;
+
       const transactionDate = new Date(
         transaction.date || transaction.timestamp
       );

@@ -166,7 +166,7 @@ export const CategoryCard = (
       utilization,
       isExceeded: category.amount > budget.amountLimit,
       isWarning: utilization >= 80 && utilization <= 100,
-      label: 'Budget',
+      label: `Budget (${formatCurrency(budget.amountLimit)})`,
       secondaryLabel: `${((category.amount / budget.amountLimit) * 100).toFixed(0)}%`,
     });
     progress.style.marginTop = SPACING.SM;
