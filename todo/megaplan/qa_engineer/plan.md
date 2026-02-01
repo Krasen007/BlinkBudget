@@ -1,0 +1,83 @@
+# QA Engineer Plan
+
+**Role:** QA Engineer
+**Focus:** Testing Strategy, Automation, Manual Verification, Bug Tracking, Release Quality.
+
+## Collaboration Rules
+
+- **With Full Stack Developer:**
+  - _Bug Reports:_ Provide clear reproduction steps, screenshots/videos, and environment details in every bug report.
+  - _Automation:_ Coordinate on test IDs (data-testid) for E2E tests to ensure selectors are stable.
+- **With UX/UI Designer:**
+  - _Visual QA:_ Consult Designer on "judgment calls" (e.g., "Is this padding correct?").
+- **With DevOps:**
+  - _CI/CD:_ Verify that automated tests are running correctly in the pipeline.
+
+## Schedule & Tasks
+
+### Phase 1: Security Testing & Validation (Weeks 1-3)
+
+**Week 1: Security Audit Prep**
+
+- [ ] **Task:** Define security testing checklist (OWASP Top 10 focus).
+- [ ] **Task:** Prepare test data (mock PII, mock financial data).
+
+**Week 2: Security Execution**
+
+- [ ] **Task:** Perform standard penetration testing on Auth endpoints.
+- [ ] **Task:** Validate Rate Limiting by simulating high traffic.
+- [ ] **Task:** Verify "Emergency Data Export" integrity (compare source DB to export JSON).
+
+**Week 3: Privacy Validation**
+
+- [ ] **Task:** Verify "Delete Account" actually sanitizes/deletes data from all collections.
+
+### Phase 2: UX Optimization & 3-Click Promise (Weeks 4-6)
+
+**Week 4: Smart Suggestions**
+
+- [ ] **Task:** Create test cases for "Smart Suggestions" logic (edge cases, empty history).
+
+**Week 6: Mobile Verification**
+
+- [ ] **Task:** Test on real devices (iOS/Android/Tablets).
+- [ ] **Task:** Verify touch target sizes using browser dev tools overlays.
+- [ ] **Task:** Verify virtual keyboard behavior (does it hide inputs?).
+
+### Phase 3: Feature Polish & User Experience (Weeks 7-8)
+
+**Week 7: Onboarding**
+
+- [ ] **Task:** Test "Interactive Tutorial" flow for breakage/skipping logic.
+- [ ] **Task:** Verify "First Run" experience on fresh accounts.
+
+**Week 8: Accessibility & Advanced Features**
+
+- [ ] **Task:** Run automated Accessibility audits (Axe/Lighthouse).
+- [ ] **Task:** Manual keyboard navigation testing (Tab order, Focus traps).
+- [ ] **Task:** Test advanced filtering/search combinations.
+
+### Phase 4: Testing Suite Expansion (Weeks 9-10)
+
+**Week 9: Comprehensive Automation**
+
+- [ ] **Task:** Implement E2E tests for critical flows (Signup -> Add Transaction -> View Report).
+- [ ] **Task:** Expand test coverage report to identify gaps.
+- [ ] **Task:** Set up Performance Regression tests (Lighthouse CI).
+
+**Week 10: Pre-Launch Validation**
+
+- [ ] **Task:** Execute full Regression Test Suite.
+- [ ] **Task:** Validate "Report a Bug" feature.
+
+### Phase 5: Launch (Weeks 11-12)
+
+**Week 11: Beta Management**
+
+- [ ] **Task:** Triage Beta user reports.
+- [ ] **Task:** verify fixes for critical bugs.
+
+**Week 12: Public Launch**
+
+- [ ] **Task:** Smoke test production environment immediately after deployment.
+- [ ] **Task:** Monitor error reporting tools.

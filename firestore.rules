@@ -1,0 +1,93 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isValidTransactionData(data) {
+      return data.keys().hasAll(['amount', 'category', 'description', 'date', 'type']) &&
+             data.amount is number && 
+             data.amount > 0 &&
+             data.category is string &&
+             data.category.size() > 0 &&
+             data.description is string &&
+             data.description.size() > 0 &&
+             data.date is timestamp &&
+             data.type in ['income', 'expense'];
+    }
+    
+    function isValidBudgetData(data) {
+      return data.keys().hasAll(['name', 'amount', 'category', 'period']) &&
+             data.name is string &&
+             data.name.size() > 0 &&
+             data.amount is number && 
+             data.amount > 0 &&
+             data.category is string &&
+             data.category.size() > 0 &&
+             data.period in ['monthly', 'weekly', 'yearly'];
+    }
+    
+    // Users can only read/write their own data
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+      
+      // User profile subcollection
+      match /profile/{profileId} {
+        allow read, write: if isOwner(userId) && profileId == userId;
+      }
+      
+      // Transactions subcollection
+      match /transactions/{transactionId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidTransactionData(resource.data);
+        allow update: if isOwner(userId) && isValidTransactionData(resource.data);
+        allow delete: if isOwner(userId);
+      }
+      
+      // Budgets subcollection
+      match /budgets/{budgetId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidBudgetData(resource.data);
+        allow update: if isOwner(userId) && isValidBudgetData(resource.data);
+        allow delete: if isOwner(userId);
+      }
+      
+      // Categories subcollection (custom categories)
+      match /categories/{categoryId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && 
+                     resource.data.keys().hasAll(['name', 'color', 'icon']) &&
+                     resource.data.name is string &&
+                     resource.data.name.size() > 0 &&
+                     resource.data.color is string &&
+                     resource.data.color.size() > 0 &&
+                     resource.data.icon is string;
+        allow update: if isOwner(userId);
+        allow delete: if isOwner(userId);
+      }
+      
+      // Settings subcollection
+      match /settings/{settingId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      // Backup data subcollection
+      match /backups/{backupId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId);
+        allow delete: if isOwner(userId);
+      }
+    }
+    
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
