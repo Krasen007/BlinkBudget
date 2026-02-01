@@ -269,5 +269,5 @@ export const auditEvents = {
   RATE_LIMIT_EXCEEDED: 'rate_limit_exceeded',
   CONFIGURATION_CHANGE: 'configuration_change',
   DATA_RECOVERY: 'data_recovery',
-  DATA_INTEGRITY_CHECK: 'data_integrity_check'
+  DATA_INTEGRITY_CHECK: 'data_integrity_check',
 };

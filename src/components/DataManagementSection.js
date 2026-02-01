@@ -7,7 +7,12 @@ import { Button } from './Button.js';
 import { DateInput } from './DateInput.js';
 import { TransactionService } from '../core/transaction-service.js';
 import { AlertDialog } from './ConfirmDialog.js';
-import { SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
+import {
+  COLORS,
+  SPACING,
+  TOUCH_TARGETS,
+  FONT_SIZES,
+} from '../utils/constants.js';
 import { getFirstDayOfMonthISO, getTodayISO } from '../utils/date-utils.js';
 
 export const DataManagementSection = () => {
@@ -131,6 +136,52 @@ export const DataManagementSection = () => {
 
   section.appendChild(dateRangeContainer);
   section.appendChild(exportBtn);
+
+  // Emergency Recovery Section
+  const emergencyDivider = document.createElement('div');
+  emergencyDivider.style.margin = `${SPACING.LG} 0`;
+  emergencyDivider.style.borderTop = `1px solid ${COLORS.BORDER}`;
+  section.appendChild(emergencyDivider);
+
+  const emergencyTitle = document.createElement('h4');
+  emergencyTitle.textContent = 'Recovery & Fail-safe';
+  emergencyTitle.style.marginBottom = SPACING.SM;
+  emergencyTitle.style.fontSize = FONT_SIZES.MD;
+  emergencyTitle.style.color = 'var(--color-primary-light)';
+  section.appendChild(emergencyTitle);
+
+  const emergencyBtn = Button({
+    text: '⚠️ Emergency JSON Export',
+    variant: 'secondary',
+    onClick: async () => {
+      const { EmergencyService } = await import('../core/emergency-service.js');
+      const result = EmergencyService.triggerEmergencyDownload();
+
+      if (result.success) {
+        // Dynamic import to avoid circular dependencies
+        const { MobileAlert } = await import('./MobileModal.js');
+        MobileAlert({
+          title: 'Export Successful',
+          message:
+            'Your emergency data file has been downloaded. Keep this file safe!',
+          buttonText: 'Got it',
+        });
+      }
+    },
+  });
+
+  emergencyBtn.className += ' touch-target mobile-form-button';
+  Object.assign(emergencyBtn.style, {
+    width: '100%',
+    minHeight: TOUCH_TARGETS.MIN_HEIGHT,
+    padding: SPACING.MD,
+    fontSize: FONT_SIZES.BASE,
+    borderColor: 'var(--color-primary)',
+    color: 'var(--color-primary-light)',
+    background: 'rgba(255, 255, 255, 0.05)',
+  });
+
+  section.appendChild(emergencyBtn);
 
   return section;
 };

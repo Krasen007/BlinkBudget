@@ -25,10 +25,15 @@ export class DataIntegrityService {
     const startTime = Date.now();
 
     try {
-      auditService.log(auditEvents.DATA_INTEGRITY_CHECK, {
-        checkId,
-        options
-      }, AuthService.getUserId(), 'medium');
+      auditService.log(
+        auditEvents.DATA_INTEGRITY_CHECK,
+        {
+          checkId,
+          options,
+        },
+        AuthService.getUserId(),
+        'medium'
+      );
 
       const results = {
         checkId,
@@ -39,7 +44,7 @@ export class DataIntegrityService {
           passedChecks: 0,
           failedChecks: 0,
           warnings: 0,
-          corruptionDetected: false
+          corruptionDetected: false,
         },
         dataMetrics: {
           totalTransactions: 0,
@@ -47,10 +52,10 @@ export class DataIntegrityService {
           totalSettings: 0,
           totalGoals: 0,
           totalInvestments: 0,
-          totalBudgets: 0
+          totalBudgets: 0,
         },
         issues: [],
-        recommendations: []
+        recommendations: [],
       };
 
       // Perform all integrity checks
@@ -65,10 +70,18 @@ export class DataIntegrityService {
 
       // Calculate summary
       results.summary.totalChecks = results.checks.length;
-      results.summary.passedChecks = results.checks.filter(c => c.status === 'passed').length;
-      results.summary.failedChecks = results.checks.filter(c => c.status === 'failed').length;
-      results.summary.warnings = results.checks.filter(c => c.status === 'warning').length;
-      results.summary.corruptionDetected = results.issues.some(i => i.severity === 'critical');
+      results.summary.passedChecks = results.checks.filter(
+        c => c.status === 'passed'
+      ).length;
+      results.summary.failedChecks = results.checks.filter(
+        c => c.status === 'failed'
+      ).length;
+      results.summary.warnings = results.checks.filter(
+        c => c.status === 'warning'
+      ).length;
+      results.summary.corruptionDetected = results.issues.some(
+        i => i.severity === 'critical'
+      );
 
       // Generate recommendations
       this.generateRecommendations(results);
@@ -79,23 +92,32 @@ export class DataIntegrityService {
       this.corruptionDetected = results.summary.corruptionDetected;
 
       // Log completion
-      auditService.log(auditEvents.DATA_INTEGRITY_CHECK, {
-        checkId,
-        success: !results.summary.corruptionDetected,
-        duration: results.duration,
-        issuesFound: results.issues.length,
-        corruptionDetected: results.summary.corruptionDetected
-      }, AuthService.getUserId(), results.summary.corruptionDetected ? 'high' : 'low');
+      auditService.log(
+        auditEvents.DATA_INTEGRITY_CHECK,
+        {
+          checkId,
+          success: !results.summary.corruptionDetected,
+          duration: results.duration,
+          issuesFound: results.issues.length,
+          corruptionDetected: results.summary.corruptionDetected,
+        },
+        AuthService.getUserId(),
+        results.summary.corruptionDetected ? 'high' : 'low'
+      );
 
       return results;
-
     } catch (error) {
-      auditService.log(auditEvents.DATA_INTEGRITY_CHECK, {
-        checkId,
-        success: false,
-        error: error.message,
-        duration: Date.now() - startTime
-      }, AuthService.getUserId(), 'critical');
+      auditService.log(
+        auditEvents.DATA_INTEGRITY_CHECK,
+        {
+          checkId,
+          success: false,
+          error: error.message,
+          duration: Date.now() - startTime,
+        },
+        AuthService.getUserId(),
+        'critical'
+      );
 
       throw error;
     }
@@ -105,7 +127,11 @@ export class DataIntegrityService {
    * Check transaction data integrity
    */
   async checkTransactionIntegrity(results) {
-    const check = { name: 'Transaction Integrity', status: 'running', startTime: Date.now() };
+    const check = {
+      name: 'Transaction Integrity',
+      status: 'running',
+      startTime: Date.now(),
+    };
 
     try {
       const transactions = StorageService.getAll();
@@ -120,7 +146,7 @@ export class DataIntegrityService {
           issues.push({
             id: transaction.id,
             issues: transactionIssues,
-            severity: this.determineSeverity(transactionIssues)
+            severity: this.determineSeverity(transactionIssues),
           });
         } else {
           validCount++;
@@ -130,29 +156,32 @@ export class DataIntegrityService {
       if (issues.length === 0) {
         check.status = 'passed';
       } else {
-        check.status = issues.some(i => i.severity === 'critical') ? 'failed' : 'warning';
-        results.issues.push(...issues.map(i => ({
-          type: 'transaction',
-          id: i.id,
-          description: i.issues.join(', '),
-          severity: i.severity
-        })));
+        check.status = issues.some(i => i.severity === 'critical')
+          ? 'failed'
+          : 'warning';
+        results.issues.push(
+          ...issues.map(i => ({
+            type: 'transaction',
+            id: i.id,
+            description: i.issues.join(', '),
+            severity: i.severity,
+          }))
+        );
       }
 
       check.endTime = Date.now();
       check.details = {
         total: transactions.length,
         valid: validCount,
-        invalid: issues.length
+        invalid: issues.length,
       };
-
     } catch (error) {
       check.status = 'failed';
       check.error = error.message;
       results.issues.push({
         type: 'transaction',
         description: `Transaction integrity check failed: ${error.message}`,
-        severity: 'critical'
+        severity: 'critical',
       });
     }
 
@@ -163,7 +192,11 @@ export class DataIntegrityService {
    * Check account data integrity
    */
   async checkAccountIntegrity(results) {
-    const check = { name: 'Account Integrity', status: 'running', startTime: Date.now() };
+    const check = {
+      name: 'Account Integrity',
+      status: 'running',
+      startTime: Date.now(),
+    };
 
     try {
       const accounts = StorageService.getAccounts();
@@ -178,7 +211,7 @@ export class DataIntegrityService {
           issues.push({
             id: account.id,
             issues: accountIssues,
-            severity: this.determineSeverity(accountIssues)
+            severity: this.determineSeverity(accountIssues),
           });
         } else {
           validCount++;
@@ -188,29 +221,32 @@ export class DataIntegrityService {
       if (issues.length === 0) {
         check.status = 'passed';
       } else {
-        check.status = issues.some(i => i.severity === 'critical') ? 'failed' : 'warning';
-        results.issues.push(...issues.map(i => ({
-          type: 'account',
-          id: i.id,
-          description: i.issues.join(', '),
-          severity: i.severity
-        })));
+        check.status = issues.some(i => i.severity === 'critical')
+          ? 'failed'
+          : 'warning';
+        results.issues.push(
+          ...issues.map(i => ({
+            type: 'account',
+            id: i.id,
+            description: i.issues.join(', '),
+            severity: i.severity,
+          }))
+        );
       }
 
       check.endTime = Date.now();
       check.details = {
         total: accounts.length,
         valid: validCount,
-        invalid: issues.length
+        invalid: issues.length,
       };
-
     } catch (error) {
       check.status = 'failed';
       check.error = error.message;
       results.issues.push({
         type: 'account',
         description: `Account integrity check failed: ${error.message}`,
-        severity: 'critical'
+        severity: 'critical',
       });
     }
 
@@ -221,7 +257,11 @@ export class DataIntegrityService {
    * Check settings integrity
    */
   async checkSettingsIntegrity(results) {
-    const check = { name: 'Settings Integrity', status: 'running', startTime: Date.now() };
+    const check = {
+      name: 'Settings Integrity',
+      status: 'running',
+      startTime: Date.now(),
+    };
 
     try {
       const settings = this.getAllSettings();
@@ -236,7 +276,7 @@ export class DataIntegrityService {
           issues.push({
             key,
             issues: settingIssues,
-            severity: this.determineSeverity(settingIssues)
+            severity: this.determineSeverity(settingIssues),
           });
         } else {
           validSettings.push(key);
@@ -246,29 +286,32 @@ export class DataIntegrityService {
       if (issues.length === 0) {
         check.status = 'passed';
       } else {
-        check.status = issues.some(i => i.severity === 'critical') ? 'failed' : 'warning';
-        results.issues.push(...issues.map(i => ({
-          type: 'setting',
-          id: i.key,
-          description: i.issues.join(', '),
-          severity: i.severity
-        })));
+        check.status = issues.some(i => i.severity === 'critical')
+          ? 'failed'
+          : 'warning';
+        results.issues.push(
+          ...issues.map(i => ({
+            type: 'setting',
+            id: i.key,
+            description: i.issues.join(', '),
+            severity: i.severity,
+          }))
+        );
       }
 
       check.endTime = Date.now();
       check.details = {
         total: Object.keys(settings).length,
         valid: validSettings.length,
-        invalid: issues.length
+        invalid: issues.length,
       };
-
     } catch (error) {
       check.status = 'failed';
       check.error = error.message;
       results.issues.push({
         type: 'setting',
         description: `Settings integrity check failed: ${error.message}`,
-        severity: 'critical'
+        severity: 'critical',
       });
     }
 
@@ -279,7 +322,11 @@ export class DataIntegrityService {
    * Check data consistency across different data types
    */
   async checkDataConsistency(results) {
-    const check = { name: 'Data Consistency', status: 'running', startTime: Date.now() };
+    const check = {
+      name: 'Data Consistency',
+      status: 'running',
+      startTime: Date.now(),
+    };
 
     try {
       const transactions = StorageService.getAll();
@@ -288,12 +335,14 @@ export class DataIntegrityService {
       // Check if transaction account references are valid
       for (const transaction of transactions) {
         if (transaction.accountId) {
-          const accountExists = StorageService.getAccounts().some(acc => acc.id === transaction.accountId);
+          const accountExists = StorageService.getAccounts().some(
+            acc => acc.id === transaction.accountId
+          );
           if (!accountExists) {
             issues.push({
               type: 'consistency',
               description: `Transaction ${transaction.id} references non-existent account ${transaction.accountId}`,
-              severity: 'high'
+              severity: 'high',
             });
           }
         }
@@ -305,7 +354,7 @@ export class DataIntegrityService {
           issues.push({
             type: 'consistency',
             description: `Account ${account.id} has negative balance but is not a credit account`,
-            severity: 'medium'
+            severity: 'medium',
           });
         }
       }
@@ -313,22 +362,23 @@ export class DataIntegrityService {
       if (issues.length === 0) {
         check.status = 'passed';
       } else {
-        check.status = issues.some(i => i.severity === 'high') ? 'failed' : 'warning';
+        check.status = issues.some(i => i.severity === 'high')
+          ? 'failed'
+          : 'warning';
         results.issues.push(...issues);
       }
 
       check.endTime = Date.now();
       check.details = {
-        consistencyIssues: issues.length
+        consistencyIssues: issues.length,
       };
-
     } catch (error) {
       check.status = 'failed';
       check.error = error.message;
       results.issues.push({
         type: 'consistency',
         description: `Data consistency check failed: ${error.message}`,
-        severity: 'critical'
+        severity: 'critical',
       });
     }
 
@@ -339,7 +389,11 @@ export class DataIntegrityService {
    * Check data structure validity
    */
   async checkDataStructure(results) {
-    const check = { name: 'Data Structure', status: 'running', startTime: Date.now() };
+    const check = {
+      name: 'Data Structure',
+      status: 'running',
+      startTime: Date.now(),
+    };
 
     try {
       const transactions = StorageService.getAll();
@@ -351,7 +405,7 @@ export class DataIntegrityService {
         issues.push({
           type: 'structure',
           description: `Circular references detected: ${circularRefs.join(', ')}`,
-          severity: 'critical'
+          severity: 'critical',
         });
       }
 
@@ -361,30 +415,31 @@ export class DataIntegrityService {
         issues.push({
           type: 'structure',
           description: `Malformed data in localStorage keys: ${malformedKeys.join(', ')}`,
-          severity: 'high'
+          severity: 'high',
         });
       }
 
       if (issues.length === 0) {
         check.status = 'passed';
       } else {
-        check.status = issues.some(i => i.severity === 'critical') ? 'failed' : 'warning';
+        check.status = issues.some(i => i.severity === 'critical')
+          ? 'failed'
+          : 'warning';
         results.issues.push(...issues);
       }
 
       check.endTime = Date.now();
       check.details = {
         circularReferences: circularRefs.length,
-        malformedKeys: malformedKeys.length
+        malformedKeys: malformedKeys.length,
       };
-
     } catch (error) {
       check.status = 'failed';
       check.error = error.message;
       results.issues.push({
         type: 'structure',
         description: `Data structure check failed: ${error.message}`,
-        severity: 'critical'
+        severity: 'critical',
       });
     }
 
@@ -395,7 +450,11 @@ export class DataIntegrityService {
    * Check for duplicate data
    */
   async checkDuplicates(results) {
-    const check = { name: 'Duplicate Detection', status: 'running', startTime: Date.now() };
+    const check = {
+      name: 'Duplicate Detection',
+      status: 'running',
+      startTime: Date.now(),
+    };
 
     try {
       const transactions = StorageService.getAll();
@@ -417,7 +476,7 @@ export class DataIntegrityService {
           issues.push({
             type: 'duplicate',
             description: `Duplicate transactions detected: ${ids.join(', ')}`,
-            severity: 'medium'
+            severity: 'medium',
           });
         }
       }
@@ -438,7 +497,7 @@ export class DataIntegrityService {
           issues.push({
             type: 'duplicate',
             description: `Duplicate accounts detected: ${ids.join(', ')}`,
-            severity: 'medium'
+            severity: 'medium',
           });
         }
       }
@@ -452,17 +511,20 @@ export class DataIntegrityService {
 
       check.endTime = Date.now();
       check.details = {
-        duplicateTransactions: issues.filter(i => i.description.includes('transactions')).length,
-        duplicateAccounts: issues.filter(i => i.description.includes('accounts')).length
+        duplicateTransactions: issues.filter(i =>
+          i.description.includes('transactions')
+        ).length,
+        duplicateAccounts: issues.filter(i =>
+          i.description.includes('accounts')
+        ).length,
       };
-
     } catch (error) {
       check.status = 'failed';
       check.error = error.message;
       results.issues.push({
         type: 'duplicate',
         description: `Duplicate detection failed: ${error.message}`,
-        severity: 'critical'
+        severity: 'critical',
       });
     }
 
@@ -473,7 +535,11 @@ export class DataIntegrityService {
    * Check for orphaned data
    */
   async checkDataOrphans(results) {
-    const check = { name: 'Orphaned Data', status: 'running', startTime: Date.now() };
+    const check = {
+      name: 'Orphaned Data',
+      status: 'running',
+      startTime: Date.now(),
+    };
 
     try {
       const issues = [];
@@ -484,7 +550,7 @@ export class DataIntegrityService {
         issues.push({
           type: 'orphaned',
           description: `Orphaned localStorage entries: ${orphanedKeys.join(', ')}`,
-          severity: 'low'
+          severity: 'low',
         });
       }
 
@@ -497,16 +563,15 @@ export class DataIntegrityService {
 
       check.endTime = Date.now();
       check.details = {
-        orphanedEntries: orphanedKeys.length
+        orphanedEntries: orphanedKeys.length,
       };
-
     } catch (error) {
       check.status = 'failed';
       check.error = error.message;
       results.issues.push({
         type: 'orphaned',
         description: `Orphaned data check failed: ${error.message}`,
-        severity: 'critical'
+        severity: 'critical',
       });
     }
 
@@ -517,7 +582,11 @@ export class DataIntegrityService {
    * Check for data corruption
    */
   async checkDataCorruption(results) {
-    const check = { name: 'Data Corruption', status: 'running', startTime: Date.now() };
+    const check = {
+      name: 'Data Corruption',
+      status: 'running',
+      startTime: Date.now(),
+    };
 
     try {
       const issues = [];
@@ -525,11 +594,14 @@ export class DataIntegrityService {
       // Check for NaN values in numeric fields
       const transactions = StorageService.getAll();
       for (const transaction of transactions) {
-        if (typeof transaction.amount === 'number' && isNaN(transaction.amount)) {
+        if (
+          typeof transaction.amount === 'number' &&
+          isNaN(transaction.amount)
+        ) {
           issues.push({
             type: 'corruption',
             description: `Transaction ${transaction.id} has NaN amount`,
-            severity: 'critical'
+            severity: 'critical',
           });
         }
 
@@ -537,7 +609,7 @@ export class DataIntegrityService {
           issues.push({
             type: 'corruption',
             description: `Transaction ${transaction.id} has invalid date`,
-            severity: 'critical'
+            severity: 'critical',
           });
         }
       }
@@ -549,7 +621,7 @@ export class DataIntegrityService {
           issues.push({
             type: 'corruption',
             description: `Account ${account.id} has infinite balance`,
-            severity: 'critical'
+            severity: 'critical',
           });
         }
       }
@@ -563,16 +635,15 @@ export class DataIntegrityService {
 
       check.endTime = Date.now();
       check.details = {
-        corruptionIssues: issues.length
+        corruptionIssues: issues.length,
       };
-
     } catch (error) {
       check.status = 'failed';
       check.error = error.message;
       results.issues.push({
         type: 'corruption',
         description: `Data corruption check failed: ${error.message}`,
-        severity: 'critical'
+        severity: 'critical',
       });
     }
 
@@ -601,11 +672,17 @@ export class DataIntegrityService {
       issues.push('Invalid or missing category');
     }
 
-    if (!transaction.description || typeof transaction.description !== 'string') {
+    if (
+      !transaction.description ||
+      typeof transaction.description !== 'string'
+    ) {
       issues.push('Invalid or missing description');
     }
 
-    if (!transaction.type || !['income', 'expense'].includes(transaction.type)) {
+    if (
+      !transaction.type ||
+      !['income', 'expense'].includes(transaction.type)
+    ) {
       issues.push('Invalid or missing transaction type');
     }
 
@@ -626,7 +703,10 @@ export class DataIntegrityService {
       issues.push('Invalid or missing account name');
     }
 
-    if (!account.type || !['checking', 'savings', 'credit', 'investment'].includes(account.type)) {
+    if (
+      !account.type ||
+      !['checking', 'savings', 'credit', 'investment'].includes(account.type)
+    ) {
       issues.push('Invalid or missing account type');
     }
 
@@ -658,10 +738,16 @@ export class DataIntegrityService {
    * Determine severity based on issues
    */
   determineSeverity(issues) {
-    if (issues.some(issue => issue.includes('Missing') || issue.includes('Invalid'))) {
+    if (
+      issues.some(
+        issue => issue.includes('Missing') || issue.includes('Invalid')
+      )
+    ) {
       return 'critical';
     }
-    if (issues.some(issue => issue.includes('NaN') || issue.includes('infinite'))) {
+    if (
+      issues.some(issue => issue.includes('NaN') || issue.includes('infinite'))
+    ) {
       return 'critical';
     }
     return 'medium';
@@ -722,13 +808,15 @@ export class DataIntegrityService {
       'blinkbudget_setting_',
       'blinkbudget_cache_',
       'blinkbudget_backup_',
-      'blinkbudget_sync_'
+      'blinkbudget_sync_',
     ];
 
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && key.startsWith('blinkbudget_')) {
-        const isValidPrefix = validPrefixes.some(prefix => key.startsWith(prefix));
+        const isValidPrefix = validPrefixes.some(prefix =>
+          key.startsWith(prefix)
+        );
         if (!isValidPrefix) {
           orphanedKeys.push(key);
         }
@@ -750,7 +838,8 @@ export class DataIntegrityService {
           const value = localStorage.getItem(key);
           settings[key.replace('blinkbudget_setting_', '')] = JSON.parse(value);
         } catch {
-          settings[key.replace('blinkbudget_setting_', '')] = localStorage.getItem(key);
+          settings[key.replace('blinkbudget_setting_', '')] =
+            localStorage.getItem(key);
         }
       }
     }
@@ -767,7 +856,8 @@ export class DataIntegrityService {
       recommendations.push({
         priority: 'high',
         action: 'Run emergency data recovery',
-        description: 'Critical data corruption detected. Immediate recovery recommended.'
+        description:
+          'Critical data corruption detected. Immediate recovery recommended.',
       });
     }
 
@@ -775,7 +865,8 @@ export class DataIntegrityService {
       recommendations.push({
         priority: 'medium',
         action: 'Remove duplicate entries',
-        description: 'Duplicate data found. Review and remove duplicates to maintain data integrity.'
+        description:
+          'Duplicate data found. Review and remove duplicates to maintain data integrity.',
       });
     }
 
@@ -783,7 +874,8 @@ export class DataIntegrityService {
       recommendations.push({
         priority: 'low',
         action: 'Clean up orphaned data',
-        description: 'Orphaned data entries found. Consider cleaning up to optimize storage.'
+        description:
+          'Orphaned data entries found. Consider cleaning up to optimize storage.',
       });
     }
 
@@ -791,7 +883,8 @@ export class DataIntegrityService {
       recommendations.push({
         priority: 'medium',
         action: 'Fix data consistency issues',
-        description: 'Data consistency issues found. Review and fix to ensure data reliability.'
+        description:
+          'Data consistency issues found. Review and fix to ensure data reliability.',
       });
     }
 

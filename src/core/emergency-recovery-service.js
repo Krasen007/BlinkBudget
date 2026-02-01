@@ -38,11 +38,16 @@ export class EmergencyRecoveryService {
     const startTime = Date.now();
 
     try {
-      auditService.log(auditEvents.DATA_RECOVERY, {
-        recoveryId,
-        attempt: this.recoveryAttempts,
-        options: _options
-      }, AuthService.getUserId(), 'high');
+      auditService.log(
+        auditEvents.DATA_RECOVERY,
+        {
+          recoveryId,
+          attempt: this.recoveryAttempts,
+          options: _options,
+        },
+        AuthService.getUserId(),
+        'high'
+      );
 
       const results = {
         recoveryId,
@@ -54,11 +59,11 @@ export class EmergencyRecoveryService {
           settings: 0,
           goals: 0,
           investments: 0,
-          budgets: 0
+          budgets: 0,
         },
         errors: [],
         warnings: [],
-        success: false
+        success: false,
       };
 
       // Step 1: Validate current environment
@@ -80,36 +85,44 @@ export class EmergencyRecoveryService {
       results.success = results.errors.length === 0;
 
       // Log recovery completion
-      auditService.log(auditEvents.DATA_RECOVERY, {
-        recoveryId,
-        success: results.success,
-        duration: results.duration,
-        dataRestored: results.dataRestored,
-        errors: results.errors.length
-      }, AuthService.getUserId(), results.success ? 'medium' : 'high');
+      auditService.log(
+        auditEvents.DATA_RECOVERY,
+        {
+          recoveryId,
+          success: results.success,
+          duration: results.duration,
+          dataRestored: results.dataRestored,
+          errors: results.errors.length,
+        },
+        AuthService.getUserId(),
+        results.success ? 'medium' : 'high'
+      );
 
       this.recoveryLog.push(results);
       return results;
-
     } catch (error) {
       const errorResult = {
         recoveryId,
         success: false,
         error: error.message,
         timestamp: new Date().toISOString(),
-        duration: Date.now() - startTime
+        duration: Date.now() - startTime,
       };
 
-      auditService.log(auditEvents.DATA_RECOVERY, {
-        recoveryId,
-        success: false,
-        error: error.message,
-        duration: errorResult.duration
-      }, AuthService.getUserId(), 'critical');
+      auditService.log(
+        auditEvents.DATA_RECOVERY,
+        {
+          recoveryId,
+          success: false,
+          error: error.message,
+          duration: errorResult.duration,
+        },
+        AuthService.getUserId(),
+        'critical'
+      );
 
       this.recoveryLog.push(errorResult);
       throw error;
-
     } finally {
       this.isRecovering = false;
     }
@@ -119,7 +132,11 @@ export class EmergencyRecoveryService {
    * Step 1: Validate recovery environment
    */
   async stepValidateEnvironment(results) {
-    const step = { name: 'Environment Validation', status: 'running', startTime: Date.now() };
+    const step = {
+      name: 'Environment Validation',
+      status: 'running',
+      startTime: Date.now(),
+    };
 
     try {
       // Check authentication
@@ -129,7 +146,9 @@ export class EmergencyRecoveryService {
 
       // Check online status
       if (!navigator.onLine) {
-        results.warnings.push('Offline mode - limited recovery options available');
+        results.warnings.push(
+          'Offline mode - limited recovery options available'
+        );
       }
 
       // Check localStorage availability
@@ -142,7 +161,6 @@ export class EmergencyRecoveryService {
 
       step.status = 'completed';
       step.endTime = Date.now();
-
     } catch (error) {
       step.status = 'failed';
       step.error = error.message;
@@ -156,7 +174,11 @@ export class EmergencyRecoveryService {
    * Step 2: Create emergency backup of current state
    */
   async stepCreateEmergencyBackup(results) {
-    const step = { name: 'Emergency Backup Creation', status: 'running', startTime: Date.now() };
+    const step = {
+      name: 'Emergency Backup Creation',
+      status: 'running',
+      startTime: Date.now(),
+    };
 
     try {
       const backupData = {
@@ -167,16 +189,18 @@ export class EmergencyRecoveryService {
         settings: this.getAllSettings(),
         goals: StorageService.getGoals(),
         investments: StorageService.getInvestments(),
-        budgets: StorageService.getBudgets()
+        budgets: StorageService.getBudgets(),
       };
 
       // Store emergency backup in localStorage
-      localStorage.setItem(`emergency_backup_${results.recoveryId}`, JSON.stringify(backupData));
+      localStorage.setItem(
+        `emergency_backup_${results.recoveryId}`,
+        JSON.stringify(backupData)
+      );
 
       step.status = 'completed';
       step.endTime = Date.now();
       step.backupSize = JSON.stringify(backupData).length;
-
     } catch (error) {
       step.status = 'failed';
       step.error = error.message;
@@ -194,15 +218,17 @@ export class EmergencyRecoveryService {
       () => this.attemptCloudBackupRecovery(results),
       () => this.attemptLocalStorageRecovery(results),
       () => this.attemptSyncServiceRecovery(results),
-      () => this.attemptCacheRecovery(results)
+      () => this.attemptCacheRecovery(results),
     ];
 
     // Try each strategy until one succeeds
     for (const strategy of strategies) {
       try {
         await strategy();
-        if (results.dataRestored.transactions > 0 ||
-          results.dataRestored.accounts > 0) {
+        if (
+          results.dataRestored.transactions > 0 ||
+          results.dataRestored.accounts > 0
+        ) {
           break; // Stop if we've recovered some data
         }
       } catch {
@@ -215,7 +241,11 @@ export class EmergencyRecoveryService {
    * Attempt recovery from cloud backup
    */
   async attemptCloudBackupRecovery(results) {
-    const step = { name: 'Cloud Backup Recovery', status: 'running', startTime: Date.now() };
+    const step = {
+      name: 'Cloud Backup Recovery',
+      status: 'running',
+      startTime: Date.now(),
+    };
 
     try {
       if (!navigator.onLine) {
@@ -246,9 +276,8 @@ export class EmergencyRecoveryService {
       step.endTime = Date.now();
       step.dataRecovered = {
         transactions: results.dataRestored.transactions,
-        accounts: results.dataRestored.accounts
+        accounts: results.dataRestored.accounts,
       };
-
     } catch (error) {
       step.status = 'failed';
       step.error = error.message;
@@ -262,12 +291,17 @@ export class EmergencyRecoveryService {
    * Attempt recovery from localStorage
    */
   async attemptLocalStorageRecovery(results) {
-    const step = { name: 'LocalStorage Recovery', status: 'running', startTime: Date.now() };
+    const step = {
+      name: 'LocalStorage Recovery',
+      status: 'running',
+      startTime: Date.now(),
+    };
 
     try {
       // Look for previous emergency backups
-      const backupKeys = Object.keys(localStorage).filter(key =>
-        key.startsWith('emergency_backup_') || key.startsWith('blinkbudget_')
+      const backupKeys = Object.keys(localStorage).filter(
+        key =>
+          key.startsWith('emergency_backup_') || key.startsWith('blinkbudget_')
       );
 
       let dataFound = false;
@@ -293,9 +327,10 @@ export class EmergencyRecoveryService {
               results.dataRestored.accounts = data.accounts.length;
             }
           }
-
         } catch (parseError) {
-          results.warnings.push(`Failed to parse backup ${key}: ${parseError.message}`);
+          results.warnings.push(
+            `Failed to parse backup ${key}: ${parseError.message}`
+          );
         }
       }
 
@@ -303,7 +338,7 @@ export class EmergencyRecoveryService {
         step.status = 'completed';
         step.dataRecovered = {
           transactions: results.dataRestored.transactions,
-          accounts: results.dataRestored.accounts
+          accounts: results.dataRestored.accounts,
         };
       } else {
         step.status = 'failed';
@@ -311,7 +346,6 @@ export class EmergencyRecoveryService {
       }
 
       step.endTime = Date.now();
-
     } catch (error) {
       step.status = 'failed';
       step.error = error.message;
@@ -325,7 +359,11 @@ export class EmergencyRecoveryService {
    * Attempt recovery from sync service
    */
   async attemptSyncServiceRecovery(results) {
-    const step = { name: 'Sync Service Recovery', status: 'running', startTime: Date.now() };
+    const step = {
+      name: 'Sync Service Recovery',
+      status: 'running',
+      startTime: Date.now(),
+    };
 
     try {
       if (!navigator.onLine) {
@@ -347,7 +385,6 @@ export class EmergencyRecoveryService {
 
       step.status = 'completed';
       step.endTime = Date.now();
-
     } catch (error) {
       step.status = 'failed';
       step.error = error.message;
@@ -361,7 +398,11 @@ export class EmergencyRecoveryService {
    * Attempt recovery from cache
    */
   async attemptCacheRecovery(results) {
-    const step = { name: 'Cache Recovery', status: 'running', startTime: Date.now() };
+    const step = {
+      name: 'Cache Recovery',
+      status: 'running',
+      startTime: Date.now(),
+    };
 
     try {
       // Look for cached data that might be recoverable
@@ -385,7 +426,9 @@ export class EmergencyRecoveryService {
             }
           }
         } catch (parseError) {
-          results.warnings.push(`Failed to parse cache ${key}: ${parseError.message}`);
+          results.warnings.push(
+            `Failed to parse cache ${key}: ${parseError.message}`
+          );
         }
       }
 
@@ -397,7 +440,6 @@ export class EmergencyRecoveryService {
       }
 
       step.endTime = Date.now();
-
     } catch (error) {
       step.status = 'failed';
       step.error = error.message;
@@ -411,7 +453,11 @@ export class EmergencyRecoveryService {
    * Step 4: Validate recovered data
    */
   async validateRecoveredData(results) {
-    const step = { name: 'Data Validation', status: 'running', startTime: Date.now() };
+    const step = {
+      name: 'Data Validation',
+      status: 'running',
+      startTime: Date.now(),
+    };
 
     try {
       const transactions = StorageService.getAll();
@@ -427,12 +473,14 @@ export class EmergencyRecoveryService {
       }
 
       // Validate transaction structure
-      const invalidTransactions = transactions.filter(t =>
-        !t.id || !t.amount || !t.date || !t.category
+      const invalidTransactions = transactions.filter(
+        t => !t.id || !t.amount || !t.date || !t.category
       );
 
       if (invalidTransactions.length > 0) {
-        results.warnings.push(`Found ${invalidTransactions.length} invalid transactions`);
+        results.warnings.push(
+          `Found ${invalidTransactions.length} invalid transactions`
+        );
       }
 
       // Check for duplicates
@@ -448,9 +496,8 @@ export class EmergencyRecoveryService {
         totalTransactions: transactions.length,
         totalAccounts: accounts.length,
         invalidTransactions: invalidTransactions.length,
-        duplicatesFound: transactionIds.length !== uniqueIds.size
+        duplicatesFound: transactionIds.length !== uniqueIds.size,
       };
-
     } catch (error) {
       step.status = 'failed';
       step.error = error.message;
@@ -464,7 +511,11 @@ export class EmergencyRecoveryService {
    * Step 5: Finalize recovery
    */
   async finalizeRecovery(results, _options) {
-    const step = { name: 'Recovery Finalization', status: 'running', startTime: Date.now() };
+    const step = {
+      name: 'Recovery Finalization',
+      status: 'running',
+      startTime: Date.now(),
+    };
 
     try {
       // Clear recovery attempts counter on success
@@ -477,7 +528,9 @@ export class EmergencyRecoveryService {
         try {
           await this.triggerDataSync();
         } catch (syncError) {
-          results.warnings.push(`Post-recovery sync failed: ${syncError.message}`);
+          results.warnings.push(
+            `Post-recovery sync failed: ${syncError.message}`
+          );
         }
       }
 
@@ -486,7 +539,6 @@ export class EmergencyRecoveryService {
 
       step.status = 'completed';
       step.endTime = Date.now();
-
     } catch (error) {
       step.status = 'failed';
       step.error = error.message;
@@ -513,7 +565,8 @@ export class EmergencyRecoveryService {
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && key.startsWith('blinkbudget_setting_')) {
-          settings[key.replace('blinkbudget_setting_', '')] = localStorage.getItem(key);
+          settings[key.replace('blinkbudget_setting_', '')] =
+            localStorage.getItem(key);
         }
       }
       return settings;
@@ -562,7 +615,6 @@ export class EmergencyRecoveryService {
       // Keep only the 5 most recent backups
       const keysToRemove = backupKeys.slice(5);
       keysToRemove.forEach(key => localStorage.removeItem(key));
-
     } catch (error) {
       console.warn('Backup cleanup failed:', error);
     }
