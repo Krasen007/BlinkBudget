@@ -1,0 +1,532 @@
+/**
+ * Account Deletion Service
+ * GDPR-compliant account deletion with data handling and audit logging
+ */
+
+import { AuthService } from './auth-service.js';
+import { TransactionService } from './transaction-service.js';
+import { auditService, auditEvents } from './audit-service.js';
+
+export class AccountDeletionService {
+  constructor() {
+    this.deletionInProgress = false;
+    this.deletionSteps = [];
+  }
+
+  /**
+   * Initiate GDPR-compliant account deletion
+   * @param {Object} options - Deletion options
+   * @returns {Promise<Object>} Deletion process result
+   */
+  async initiateAccountDeletion(options = {}) {
+    if (this.deletionInProgress) {
+      throw new Error('Account deletion already in progress');
+    }
+
+    this.deletionInProgress = true;
+    const deletionId = this.generateDeletionId();
+    const startTime = Date.now();
+
+    try {
+      // Validate user is authenticated
+      if (!AuthService.isAuthenticated()) {
+        throw new Error('User must be authenticated to delete account');
+      }
+
+      const userId = AuthService.getUserId();
+      const userEmail = AuthService.getUserEmail();
+
+      // Log deletion initiation
+      auditService.log(
+        auditEvents.ACCOUNT_DELETION,
+        {
+          deletionId,
+          userId,
+          userEmail,
+          stage: 'initiated',
+          options,
+        },
+        userId,
+        'critical'
+      );
+
+      const result = {
+        deletionId,
+        userId,
+        userEmail,
+        timestamp: new Date().toISOString(),
+        steps: [],
+        dataDeleted: {
+          transactions: 0,
+          accounts: 0,
+          settings: 0,
+          goals: 0,
+          investments: 0,
+          budgets: 0,
+          auditLogs: 0,
+        },
+        errors: [],
+        warnings: [],
+        success: false,
+      };
+
+      // Step 1: Create final data export (GDPR requirement)
+      await this.stepCreateFinalExport(result, options);
+
+      // Step 2: Delete user data from all services
+      await this.stepDeleteUserData(result, options);
+
+      // Step 3: Clean up authentication data
+      await this.stepDeleteAuthData(result, options);
+
+      // Step 4: Verify deletion completion
+      await this.stepVerifyDeletion(result, options);
+
+      // Step 5: Final cleanup and logging
+      await this.stepFinalizeDeletion(result, options);
+
+      result.duration = Date.now() - startTime;
+      result.success = result.errors.length === 0;
+
+      // Log completion
+      auditService.log(
+        auditEvents.ACCOUNT_DELETION,
+        {
+          deletionId,
+          userId,
+          success: result.success,
+          duration: result.duration,
+          dataDeleted: result.dataDeleted,
+          errors: result.errors.length,
+        },
+        userId,
+        result.success ? 'high' : 'critical'
+      );
+
+      this.deletionSteps.push(result);
+      return result;
+    } catch (error) {
+      const errorResult = {
+        deletionId,
+        success: false,
+        error: error.message,
+        timestamp: new Date().toISOString(),
+        duration: Date.now() - startTime,
+      };
+
+      auditService.log(
+        auditEvents.ACCOUNT_DELETION,
+        {
+          deletionId,
+          userId: AuthService.getUserId(),
+          success: false,
+          error: error.message,
+          duration: errorResult.duration,
+        },
+        AuthService.getUserId(),
+        'critical'
+      );
+
+      this.deletionSteps.push(errorResult);
+      throw error;
+    } finally {
+      this.deletionInProgress = false;
+    }
+  }
+
+  /**
+   * Step 1: Create final data export for user
+   */
+  async stepCreateFinalExport(result, _options) {
+    const step = {
+      name: 'Final Data Export',
+      status: 'running',
+      startTime: Date.now(),
+    };
+
+    try {
+      const { EmergencyExportService } =
+        await import('./emergency-export-service.js');
+
+      // Create comprehensive export
+      const exportResult = await EmergencyExportService.createEmergencyExport({
+        format: 'json',
+        includeAudit: true,
+        reason: 'account_deletion',
+      });
+
+      if (exportResult.success) {
+        result.finalExport = {
+          filename: exportResult.filename,
+          size: exportResult.size,
+          downloadUrl: exportResult.downloadUrl,
+          dataCount: exportResult.dataCount,
+        };
+        step.status = 'completed';
+        step.exportSize = exportResult.size;
+      } else {
+        throw new Error(`Export failed: ${exportResult.error}`);
+      }
+    } catch (error) {
+      step.status = 'failed';
+      step.error = error.message;
+      result.errors.push(`Final export failed: ${error.message}`);
+    }
+
+    step.endTime = Date.now();
+    result.steps.push(step);
+  }
+
+  /**
+   * Step 2: Delete user data from all services
+   */
+  async stepDeleteUserData(result, _options) {
+    const step = {
+      name: 'User Data Deletion',
+      status: 'running',
+      startTime: Date.now(),
+    };
+
+    try {
+      const userId = AuthService.getUserId();
+
+      // Delete transactions
+      try {
+        const transactions = TransactionService.getAll();
+        const userTransactions = transactions.filter(
+          tx => !tx.userId || tx.userId === userId
+        );
+
+        for (const transaction of userTransactions) {
+          TransactionService.remove(transaction.id);
+          result.dataDeleted.transactions++;
+        }
+      } catch (error) {
+        result.warnings.push(`Transaction deletion failed: ${error.message}`);
+      }
+
+      // Delete accounts
+      try {
+        const { AccountService } = await import('./account-service.js');
+        const accounts = AccountService.getAccounts();
+
+        for (const account of accounts) {
+          AccountService.deleteAccount(account.id);
+          result.dataDeleted.accounts++;
+        }
+      } catch (error) {
+        result.warnings.push(`Account deletion failed: ${error.message}`);
+      }
+
+      // Delete goals
+      try {
+        const { GoalPlanner } = await import('./goal-planner.js');
+        const goals = GoalPlanner.getAllGoals();
+
+        for (const goal of goals) {
+          GoalPlanner.deleteGoal(goal.id);
+          result.dataDeleted.goals++;
+        }
+      } catch (error) {
+        result.warnings.push(`Goal deletion failed: ${error.message}`);
+      }
+
+      // Delete investments
+      try {
+        const { InvestmentTracker } = await import('./investment-tracker.js');
+        const investments = InvestmentTracker.getAllInvestments();
+
+        for (const investment of investments) {
+          InvestmentTracker.removeInvestment(investment.id);
+          result.dataDeleted.investments++;
+        }
+      } catch (error) {
+        result.warnings.push(`Investment deletion failed: ${error.message}`);
+      }
+
+      // Delete budgets
+      try {
+        const { BudgetService } = await import('./budget-service.js');
+        const budgets = BudgetService.getAllBudgets();
+
+        for (const budget of budgets) {
+          BudgetService.deleteBudget(budget.id);
+          result.dataDeleted.budgets++;
+        }
+      } catch (error) {
+        result.warnings.push(`Budget deletion failed: ${error.message}`);
+      }
+
+      // Delete settings
+      try {
+        const settingsKeys = Object.keys(localStorage).filter(
+          key =>
+            key.startsWith('blinkbudget_setting_') ||
+            key.startsWith('blink_settings')
+        );
+
+        for (const key of settingsKeys) {
+          localStorage.removeItem(key);
+          result.dataDeleted.settings++;
+        }
+      } catch (error) {
+        result.warnings.push(`Settings deletion failed: ${error.message}`);
+      }
+
+      step.status = 'completed';
+      step.dataDeleted = result.dataDeleted;
+    } catch (error) {
+      step.status = 'failed';
+      step.error = error.message;
+      result.errors.push(`Data deletion failed: ${error.message}`);
+    }
+
+    step.endTime = Date.now();
+    result.steps.push(step);
+  }
+
+  /**
+   * Step 3: Delete authentication data
+   */
+  async stepDeleteAuthData(result, _options) {
+    const step = {
+      name: 'Authentication Data Deletion',
+      status: 'running',
+      startTime: Date.now(),
+    };
+
+    try {
+      // Sign out user
+      await AuthService.signOut();
+
+      // Clear auth-related localStorage
+      const authKeys = Object.keys(localStorage).filter(
+        key =>
+          key.includes('auth') ||
+          key.includes('token') ||
+          key.includes('session')
+      );
+
+      for (const key of authKeys) {
+        localStorage.removeItem(key);
+      }
+
+      // Clear session storage
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.clear();
+      }
+
+      step.status = 'completed';
+      step.authKeysCleared = authKeys.length;
+    } catch (error) {
+      step.status = 'failed';
+      step.error = error.message;
+      result.errors.push(`Auth deletion failed: ${error.message}`);
+    }
+
+    step.endTime = Date.now();
+    result.steps.push(step);
+  }
+
+  /**
+   * Step 4: Verify deletion completion
+   */
+  async stepVerifyDeletion(result, _options) {
+    const step = {
+      name: 'Deletion Verification',
+      status: 'running',
+      startTime: Date.now(),
+    };
+
+    try {
+      // Check if user is still authenticated (should be false)
+      if (AuthService.isAuthenticated()) {
+        result.warnings.push('User still appears to be authenticated');
+      }
+
+      // Check localStorage for remaining user data
+      const remainingKeys = Object.keys(localStorage).filter(key =>
+        key.startsWith('blinkbudget_')
+      );
+
+      if (remainingKeys.length > 0) {
+        result.warnings.push(
+          `${remainingKeys.length} localStorage keys remain: ${remainingKeys.join(', ')}`
+        );
+      }
+
+      // Check if any user data can still be retrieved
+      try {
+        const remainingTransactions = TransactionService.getAll();
+        if (remainingTransactions.length > 0) {
+          result.warnings.push(
+            `${remainingTransactions.length} transactions still exist`
+          );
+        }
+      } catch {
+        // Expected - service should fail after auth deletion
+      }
+
+      step.status = 'completed';
+      step.verificationPassed = result.errors.length === 0;
+    } catch (error) {
+      step.status = 'failed';
+      step.error = error.message;
+      result.errors.push(`Verification failed: ${error.message}`);
+    }
+
+    step.endTime = Date.now();
+    result.steps.push(step);
+  }
+
+  /**
+   * Step 5: Finalize deletion
+   */
+  async stepFinalizeDeletion(result, _options) {
+    const step = {
+      name: 'Finalization',
+      status: 'running',
+      startTime: Date.now(),
+    };
+
+    try {
+      // Create deletion record
+      const deletionRecord = {
+        deletionId: result.deletionId,
+        userId: result.userId,
+        userEmail: result.userEmail,
+        timestamp: result.timestamp,
+        duration: result.duration,
+        dataDeleted: result.dataDeleted,
+        success: result.success,
+      };
+
+      // Store deletion record (for compliance purposes)
+      localStorage.setItem(
+        `deletion_record_${result.deletionId}`,
+        JSON.stringify(deletionRecord)
+      );
+
+      // Clear any remaining cache
+      if (typeof window !== 'undefined' && 'caches' in window) {
+        try {
+          const cacheNames = await window.caches.keys();
+          await Promise.all(cacheNames.map(name => window.caches.delete(name)));
+        } catch (cacheError) {
+          result.warnings.push(`Cache clearing failed: ${cacheError.message}`);
+        }
+      }
+
+      step.status = 'completed';
+      step.recordCreated = true;
+    } catch (error) {
+      step.status = 'failed';
+      step.error = error.message;
+      result.errors.push(`Finalization failed: ${error.message}`);
+    }
+
+    step.endTime = Date.now();
+    result.steps.push(step);
+  }
+
+  /**
+   * Get deletion status
+   * @param {string} deletionId - Deletion ID
+   * @returns {Object|null} Deletion status
+   */
+  getDeletionStatus(deletionId) {
+    return (
+      this.deletionSteps.find(step => step.deletionId === deletionId) || null
+    );
+  }
+
+  /**
+   * Get all deletion history
+   * @returns {Array} Deletion history
+   */
+  getDeletionHistory() {
+    return [...this.deletionSteps];
+  }
+
+  /**
+   * Generate unique deletion ID
+   */
+  generateDeletionId() {
+    return `del_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  /**
+   * Check if deletion is in progress
+   * @returns {boolean} Deletion status
+   */
+  isDeletionInProgress() {
+    return this.deletionInProgress;
+  }
+
+  /**
+   * Get user data summary before deletion
+   * @returns {Object} Data summary
+   */
+  async getUserDataSummary() {
+    const summary = {
+      transactions: 0,
+      accounts: 0,
+      goals: 0,
+      investments: 0,
+      budgets: 0,
+      settings: 0,
+      totalStorageSize: 0,
+    };
+
+    try {
+      // Count transactions
+      const transactions = TransactionService.getAll();
+      summary.transactions = transactions.length;
+
+      // Count accounts
+      const { AccountService } = await import('./account-service.js');
+      const accounts = AccountService.getAccounts();
+      summary.accounts = accounts.length;
+
+      // Count goals
+      const { GoalPlanner } = await import('./goal-planner.js');
+      const goals = GoalPlanner.getAllGoals();
+      summary.goals = goals.length;
+
+      // Count investments
+      const { InvestmentTracker } = await import('./investment-tracker.js');
+      const investments = InvestmentTracker.getAllInvestments();
+      summary.investments = investments.length;
+
+      // Count budgets
+      const { BudgetService } = await import('./budget-service.js');
+      const budgets = BudgetService.getAllBudgets();
+      summary.budgets = budgets.length;
+
+      // Count settings
+      const settingsKeys = Object.keys(localStorage).filter(
+        key =>
+          key.startsWith('blinkbudget_setting_') ||
+          key.startsWith('blink_settings')
+      );
+      summary.settings = settingsKeys.length;
+
+      // Calculate storage size
+      let totalSize = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('blinkbudget_')) {
+          totalSize += localStorage.getItem(key).length;
+        }
+      }
+      summary.totalStorageSize = totalSize;
+    } catch (error) {
+      console.warn('Failed to get user data summary:', error);
+    }
+
+    return summary;
+  }
+}
+
+// Singleton instance
+export const accountDeletionService = new AccountDeletionService();

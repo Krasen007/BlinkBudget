@@ -270,4 +270,5 @@ export const auditEvents = {
   CONFIGURATION_CHANGE: 'configuration_change',
   DATA_RECOVERY: 'data_recovery',
   DATA_INTEGRITY_CHECK: 'data_integrity_check',
+  ACCOUNT_DELETION: 'account_deletion',
 };

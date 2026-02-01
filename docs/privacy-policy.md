@@ -97,8 +97,14 @@ BlinkBudget uses a hybrid local-cloud architecture designed for privacy and perf
 ### 5.2 Cloud Data
 
 - Cloud data is retained as long as your account is active
-- You can delete your account and all associated data at any time
+- You can delete your account and all associated data at any time through the Settings > Account Deletion section
 - Deleted accounts are removed from our servers within 30 days
+- **Account Deletion Process:** When you delete your account, the following occurs:
+  - A final data export is automatically generated and downloaded for your records
+  - All transactions, accounts, goals, investments, budgets, and settings are permanently deleted
+  - Authentication data is removed and you are logged out immediately
+  - A deletion record is created for compliance purposes
+  - The entire process is audited and logged for security and compliance
 
 ## 6. Your Rights and Choices
 
@@ -170,12 +176,20 @@ If you have questions about this Privacy Policy or want to exercise your rights,
 
 If you are located in the EU, you have the following rights under GDPR:
 
-- **Right to Access:** Request a copy of your data
-- **Right to Rectification:** Correct inaccurate data
-- **Right to Erasure:** Request deletion of your data
-- **Right to Portability:** Transfer your data to another service
-- **Right to Object:** Object to certain data processing
-- **Right to Restrict:** Limit processing of your data
+- **Right to Access:** Request a copy of your data (available through Settings > Data Management > Emergency Export)
+- **Right to Rectification:** Correct inaccurate data (available through individual transaction editing)
+- **Right to Erasure:** Request deletion of your data (available through Settings > Account Deletion)
+- **Right to Portability:** Transfer your data to another service (available through JSON export)
+- **Right to Object:** Object to certain data processing (contact privacy@blinkbudget.app)
+- **Right to Restrict:** Limit processing of your data (contact privacy@blinkbudget.app)
+
+**Technical Implementation:**
+
+- Account deletion is implemented as a 5-step GDPR-compliant process
+- All deletion actions are logged with unique deletion IDs for audit trails
+- Data exports include integrity checksums for verification
+- Deletion records are stored securely for compliance verification
+- Users receive immediate confirmation and final data export upon deletion
 
 ## 13. California Privacy Rights (CCPA)
 

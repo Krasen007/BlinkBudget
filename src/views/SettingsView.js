@@ -5,6 +5,7 @@ import { DateFormatSection } from '../components/DateFormatSection.js';
 import { DataManagementSection } from '../components/DataManagementSection.js';
 import { GeneralSection } from '../components/GeneralSection.js';
 import { BackupRestoreSection } from '../components/BackupRestoreSection.js';
+import { AccountDeletionSection } from '../components/AccountDeletionSection.js';
 import {
   SPACING,
   TOUCH_TARGETS,
@@ -139,7 +140,7 @@ export const SettingsView = () => {
   const generalSection = GeneralSection();
   contentWrapper.appendChild(generalSection);
 
-  // OK Button
+  // Done Button
   const doneBtn = Button({
     text: 'Done',
     variant: 'primary',
@@ -157,6 +158,10 @@ export const SettingsView = () => {
     fontWeight: '600',
   });
   contentWrapper.appendChild(doneBtn);
+
+  // Account Deletion Section
+  const deletionSection = AccountDeletionSection();
+  contentWrapper.appendChild(deletionSection);
 
   const handleStorageUpdate = e => {
     console.log(
