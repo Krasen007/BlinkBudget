@@ -42,6 +42,14 @@ export const TransactionService = {
   },
 
   /**
+   * Get all transactions (alias for getAll for API consistency)
+   * @returns {Array} List of transactions
+   */
+  getAllTransactions() {
+    return this.getAll();
+  },
+
+  /**
    * Add a new transaction
    * @param {Object} transaction - Transaction data
    * @returns {Object} Added transaction

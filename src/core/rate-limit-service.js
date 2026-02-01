@@ -16,7 +16,22 @@ export class RateLimitService {
    * @returns {string} Rate limit key
    */
   generateKey(identifier) {
-    return `auth_${identifier}`;
+    // Input validation to prevent crashes with Symbol/object inputs
+    if (identifier === null || identifier === undefined) {
+      return 'auth_null';
+    }
+
+    // Convert to string safely, handling Symbol and other non-string types
+    let stringIdentifier;
+    try {
+      stringIdentifier = String(identifier);
+    } catch {
+      // Fallback for values that can't be converted to string
+      stringIdentifier = 'auth_invalid';
+    }
+
+    // Additional sanitization to prevent key collisions
+    return `auth_${stringIdentifier.replace(/[^a-zA-Z0-9_@.-]/g, '_')}`;
   }
 
   /**
@@ -31,7 +46,12 @@ export class RateLimitService {
 
     // If no record exists, allow
     if (!record) {
-      return { allowed: true, remainingAttempts: this.maxAttempts };
+      return {
+        allowed: true,
+        remainingAttempts: this.maxAttempts,
+        locked: false,
+        lockedUntil: null,
+      };
     }
 
     // Check if currently locked out
@@ -40,6 +60,7 @@ export class RateLimitService {
       return {
         allowed: false,
         locked: true,
+        lockedUntil: record.lockedUntil,
         remainingTime,
         error: `Too many failed attempts. Try again in ${remainingTime} seconds.`,
       };
@@ -48,7 +69,12 @@ export class RateLimitService {
     // Check if window has expired, reset if so
     if (now - record.lastAttempt > this.windowDuration) {
       this.attempts.delete(key);
-      return { allowed: true, remainingAttempts: this.maxAttempts };
+      return {
+        allowed: true,
+        remainingAttempts: this.maxAttempts,
+        locked: false,
+        lockedUntil: null,
+      };
     }
 
     // Check if max attempts reached
@@ -61,13 +87,19 @@ export class RateLimitService {
       return {
         allowed: false,
         locked: true,
+        lockedUntil: lockedUntil,
         remainingTime,
         error: `Too many failed attempts. Try again in ${remainingTime} seconds.`,
       };
     }
 
     const remainingAttempts = this.maxAttempts - record.count;
-    return { allowed: true, remainingAttempts };
+    return {
+      allowed: true,
+      remainingAttempts,
+      locked: false,
+      lockedUntil: null,
+    };
   }
 
   /**
@@ -111,18 +143,18 @@ export class RateLimitService {
         attempts: 0,
         remainingAttempts: this.maxAttempts,
         lockedUntil: null,
-        isLocked: false,
+        locked: false,
       };
     }
 
-    const isLocked = record.lockedUntil && now < record.lockedUntil;
-    const remainingAttempts = isLocked ? 0 : this.maxAttempts - record.count;
+    const locked = Boolean(record.lockedUntil && now < record.lockedUntil);
+    const remainingAttempts = locked ? 0 : this.maxAttempts - record.count;
 
     return {
       attempts: record.count,
       remainingAttempts,
-      lockedUntil: record.lockedUntil,
-      isLocked,
+      lockedUntil: record.lockedUntil || null,
+      locked,
     };
   }
 

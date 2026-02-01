@@ -18,10 +18,11 @@ export const AuthService = {
   async init(onAuthStateChange) {
     return new Promise(resolve => {
       onAuthStateChanged(auth, async user => {
-        this.user = user;
+        // Make user object read-only to prevent manipulation
+        this.user = user ? Object.freeze({ ...user }) : null;
         this.initialized = true;
-        if (onAuthStateChange) await onAuthStateChange(user);
-        resolve(user);
+        if (onAuthStateChange) await onAuthStateChange(this.user);
+        resolve(this.user);
       });
     });
   },
@@ -53,7 +54,8 @@ export const AuthService = {
         email,
         password
       );
-      this.user = userCredential.user;
+      // Make user object read-only to prevent manipulation
+      this.user = Object.freeze({ ...userCredential.user });
       localStorage.setItem('auth_hint', 'true');
 
       // Clear rate limit on successful login
@@ -75,7 +77,7 @@ export const AuthService = {
       // Record failed attempt for rate limiting
       rateLimitService.recordFailedAttempt(email);
 
-      // Log failed login
+      // Log failed login with full error details for debugging
       auditService.log(
         auditEvents.LOGIN_FAILURE,
         {
@@ -88,7 +90,9 @@ export const AuthService = {
         'medium'
       );
 
-      let message = 'An unexpected error occurred. Please try again.';
+      // Return sanitized error message to user
+      let message =
+        'Authentication failed. Please check your credentials and try again.';
       if (
         error.code === 'auth/wrong-password' ||
         error.code === 'auth/user-not-found'
@@ -96,6 +100,13 @@ export const AuthService = {
         message = 'Invalid email or password.';
       } else if (error.code === 'auth/too-many-requests') {
         message = 'Too many failed attempts. Please try again later.';
+      } else if (error.code === 'auth/invalid-email') {
+        message = 'Please enter a valid email address.';
+      } else if (error.code === 'auth/user-disabled') {
+        message = 'Account has been disabled. Please contact support.';
+      } else {
+        // Log unexpected errors for security monitoring
+        console.warn('[AuthService] Unexpected login error:', error.code);
       }
 
       return {
@@ -133,7 +144,8 @@ export const AuthService = {
         email,
         password
       );
-      this.user = userCredential.user;
+      // Make user object read-only to prevent manipulation
+      this.user = Object.freeze({ ...userCredential.user });
       localStorage.setItem('auth_hint', 'true');
 
       // Clear rate limit on successful signup
@@ -155,7 +167,7 @@ export const AuthService = {
       // Record failed attempt for rate limiting
       rateLimitService.recordFailedAttempt(email);
 
-      // Log failed signup
+      // Log failed signup with full error details for debugging
       auditService.log(
         auditEvents.SIGNUP_FAILURE,
         {
@@ -168,13 +180,23 @@ export const AuthService = {
         'medium'
       );
 
-      let message = 'An unexpected error occurred. Please try again.';
+      // Return sanitized error message to user
+      let message = 'Account creation failed. Please try again.';
       if (error.code === 'auth/email-already-in-use') {
         message = 'This email address is already in use.';
       } else if (error.code === 'auth/invalid-email') {
         message = 'Please enter a valid email address.';
       } else if (error.code === 'auth/weak-password') {
-        message = 'The password is too weak.';
+        message =
+          'The password is too weak. Please choose a stronger password.';
+      } else if (error.code === 'auth/too-many-requests') {
+        message = 'Too many requests. Please try again later.';
+      } else if (error.code === 'auth/operation-not-allowed') {
+        message =
+          'Email/password accounts are not enabled. Please contact support.';
+      } else {
+        // Log unexpected errors for security monitoring
+        console.warn('[AuthService] Unexpected signup error:', error.code);
       }
 
       return {
@@ -189,11 +211,29 @@ export const AuthService = {
     try {
       const provider = new GoogleAuthProvider();
       const userCredential = await signInWithPopup(auth, provider);
-      this.user = userCredential.user;
+      // Make user object read-only to prevent manipulation
+      this.user = Object.freeze({ ...userCredential.user });
       localStorage.setItem('auth_hint', 'true');
       return { user: this.user, error: null };
     } catch (error) {
-      return { user: null, error: error.message };
+      // Log full error for debugging but return sanitized message
+      console.warn(
+        '[AuthService] Google login error:',
+        error.code,
+        error.message
+      );
+
+      let message = 'Google authentication failed. Please try again.';
+      if (error.code === 'auth/popup-closed-by-user') {
+        message = 'Sign-in popup was closed before completion.';
+      } else if (error.code === 'auth/popup-blocked') {
+        message =
+          'Sign-in popup was blocked by the browser. Please allow popups.';
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        message = 'Sign-in was cancelled.';
+      }
+
+      return { user: null, error: message };
     }
   },
 
@@ -284,7 +324,7 @@ export const AuthService = {
       // Record failed attempt for rate limiting
       rateLimitService.recordFailedAttempt(email);
 
-      // Log password reset failure
+      // Log password reset failure with full details for debugging
       auditService.log(
         auditEvents.PASSWORD_RESET_REQUEST,
         {
@@ -297,13 +337,21 @@ export const AuthService = {
         'medium'
       );
 
-      let message = 'An unexpected error occurred. Please try again.';
+      // Return sanitized error message to user
+      let message = 'Password reset failed. Please try again.';
       if (error.code === 'auth/invalid-email') {
         message = 'Please enter a valid email address.';
       } else if (error.code === 'auth/user-not-found') {
-        message = 'No account found with this email address.';
+        message =
+          'If an account exists with this email, a password reset link has been sent.';
       } else if (error.code === 'auth/too-many-requests') {
         message = 'Too many requests. Please try again later.';
+      } else {
+        // Log unexpected errors for security monitoring
+        console.warn(
+          '[AuthService] Unexpected password reset error:',
+          error.code
+        );
       }
 
       return {

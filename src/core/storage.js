@@ -208,6 +208,9 @@ export const StorageService = {
     this._pushToCloudSafe(STORAGE_KEYS.BUDGETS, BudgetService.getAll());
     return res;
   },
+  addBudget: function (budget) {
+    return this.saveBudget(budget);
+  },
   deleteBudget: function (id) {
     const res = BudgetService.delete(id);
     this._pushToCloudSafe(STORAGE_KEYS.BUDGETS, BudgetService.getAll());
