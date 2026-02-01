@@ -299,7 +299,7 @@ export const ReportsView = () => {
   /**
    * Handle time period changes
    */
-  function handleTimePeriodChange(newTimePeriod) {
+  function handleTimePeriodChange(newTimePeriod, options = {}) {
     if (!newTimePeriod || !newTimePeriod.startDate || !newTimePeriod.endDate) {
       console.error('Invalid time period provided:', newTimePeriod);
       return;
@@ -313,7 +313,13 @@ export const ReportsView = () => {
     analyticsEngine.invalidateCache('incomeVsExpenses');
     analyticsEngine.invalidateCache('costOfLiving');
 
-    loadReportData();
+    // If this is a navigation action, only reload data without recreating the header
+    if (options.isNavigation) {
+      loadReportData(true); // Skip header recreation
+    } else {
+      // Full recreation for other time period changes
+      loadReportData(false);
+    }
   }
 
   /**
@@ -337,17 +343,19 @@ export const ReportsView = () => {
   /**
    * Load and display report data
    */
-  async function loadReportData() {
+  async function loadReportData(skipHeaderRecreation = false) {
     if (isLoading) return;
 
     try {
       isLoading = true;
 
       // Add header (which now includes time period selector) to container (outside scrollable content)
-      container.innerHTML = '';
-      const header = createHeader();
-      container.appendChild(header);
-      container.appendChild(content);
+      if (!skipHeaderRecreation) {
+        container.innerHTML = '';
+        const header = createHeader();
+        container.appendChild(header);
+        container.appendChild(content);
+      }
 
       // Generate a stable cache key
       const startStr =
@@ -680,10 +688,11 @@ export const ReportsView = () => {
       // Budget Summary
       try {
         const budgetsSummary = BudgetPlanner.getSummary(
-          currentData.transactions
+          currentData.transactions,
+          currentTimePeriod
         );
         if (budgetsSummary.totalBudgets > 0) {
-          const summaryCard = BudgetSummaryCard(budgetsSummary);
+          const summaryCard = BudgetSummaryCard(budgetsSummary, currentTimePeriod);
           summaryCard.style.marginBottom = SPACING.LG;
           chartsSection.appendChild(summaryCard);
         }

@@ -56,6 +56,23 @@ export function getTodayPeriod() {
 }
 
 /**
+ * Get last month time period
+ */
+export function getLastMonthPeriod() {
+  const now = new Date();
+  const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+  endOfLastMonth.setHours(23, 59, 59, 999);
+
+  return {
+    type: 'monthly',
+    startDate: lastMonth,
+    endDate: endOfLastMonth,
+    label: 'Last Month',
+  };
+}
+
+/**
  * Get current month time period
  */
 export function getCurrentMonthPeriod() {
@@ -126,7 +143,7 @@ export function checkBrowserSupport() {
   const requiredFeatures = {
     'ES6 Classes': () => {
       // Test ES6 class support
-      return typeof class {} === 'function';
+      return typeof class { } === 'function';
     },
     Promises: () => typeof Promise !== 'undefined',
     'Fetch API': () => typeof fetch !== 'undefined',

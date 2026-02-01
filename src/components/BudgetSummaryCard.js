@@ -11,9 +11,10 @@ import { BudgetProgress } from './BudgetProgress.js';
 /**
  * Create a budget summary card
  * @param {Object} summary - Budget summary data from BudgetPlanner
+ * @param {Object} timePeriod - Time period object for context
  * @returns {HTMLElement}
  */
-export const BudgetSummaryCard = summary => {
+export const BudgetSummaryCard = (summary, timePeriod = null) => {
   const card = document.createElement('div');
   card.className = 'budget-summary-card';
   Object.assign(card.style, {
@@ -33,7 +34,7 @@ export const BudgetSummaryCard = summary => {
   header.style.alignItems = 'center';
 
   const title = document.createElement('h3');
-  title.textContent = 'Monthly Budget';
+  title.textContent = timePeriod?.label || 'Monthly Budget';
   title.style.margin = '0';
   title.style.fontSize = FONT_SIZES.LG;
   header.appendChild(title);

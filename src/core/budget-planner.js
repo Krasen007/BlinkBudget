@@ -12,11 +12,12 @@ export class BudgetPlanner {
   /**
    * Get utilization for all budgets
    * @param {Array} transactions - List of transactions
+   * @param {Object} timePeriod - Time period object (optional, defaults to current month)
    * @returns {Array} List of budget status objects
    */
-  static getBudgetsStatus(transactions) {
+  static getBudgetsStatus(transactions, timePeriod = null) {
     const budgets = BudgetService.getAll();
-    const currentPeriod = getCurrentMonthPeriod();
+    const currentPeriod = timePeriod || getCurrentMonthPeriod();
     const categoryBreakdown = MetricsService.calculateCategoryBreakdown(
       transactions,
       currentPeriod
@@ -44,10 +45,11 @@ export class BudgetPlanner {
   /**
    * Get overall budget health summary
    * @param {Array} transactions - List of transactions
+   * @param {Object} timePeriod - Time period object (optional, defaults to current month)
    * @returns {Object} Summary object
    */
-  static getSummary(transactions) {
-    const status = this.getBudgetsStatus(transactions);
+  static getSummary(transactions, timePeriod = null) {
+    const status = this.getBudgetsStatus(transactions, timePeriod);
     const totalLimit = status.reduce((sum, b) => sum + b.amountLimit, 0);
     const totalActual = status.reduce((sum, b) => sum + b.actual, 0);
     const exceededCount = status.filter(b => b.isExceeded).length;

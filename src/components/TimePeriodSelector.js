@@ -11,12 +11,49 @@ import { COLORS, SPACING, FONT_SIZES } from '../utils/constants.js';
 import { DateInput } from './DateInput.js';
 import { formatDate, dateToISO } from '../utils/date-utils.js';
 import {
-  getCurrentWeekPeriod,
   getCurrentMonthPeriod,
   getCurrentQuarterPeriod,
-  getCurrentYearPeriod,
   getTodayPeriod,
 } from '../utils/reports-utils.js';
+
+/**
+ * Get a specific month period (for navigation)
+ */
+function getSpecificMonthPeriod(monthsOffset = 0) {
+  const now = new Date();
+  const targetDate = new Date(now.getFullYear(), now.getMonth() + monthsOffset, 1);
+  const startOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
+  const endOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0);
+  endOfMonth.setHours(23, 59, 59, 999);
+
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'];
+
+  return {
+    type: 'monthly',
+    startDate: startOfMonth,
+    endDate: endOfMonth,
+    label: `${monthNames[targetDate.getMonth()]} ${targetDate.getFullYear()}`,
+  };
+}
+
+/**
+ * Get a specific year period (for navigation)
+ */
+function getSpecificYearPeriod(yearsOffset = 0) {
+  const now = new Date();
+  const targetYear = now.getFullYear() + yearsOffset;
+  const startOfYear = new Date(targetYear, 0, 1);
+  const endOfYear = new Date(targetYear, 11, 31);
+  endOfYear.setHours(23, 59, 59, 999);
+
+  return {
+    type: 'yearly',
+    startDate: startOfYear,
+    endDate: endOfYear,
+    label: targetYear.toString(),
+  };
+}
 
 export const TimePeriodSelector = (options = {}) => {
   const {
@@ -63,14 +100,14 @@ export const TimePeriodSelector = (options = {}) => {
   // Define available time periods
   const periods = [
     { key: 'month', label: 'This Month', getValue: getCurrentMonthPeriod },
-    { key: 'week', label: 'This Week', getValue: getCurrentWeekPeriod },
+    { key: 'lastMonth', label: 'Last Month', getValue: () => getSpecificMonthPeriod(-1) },
     { key: 'today', label: 'Today', getValue: getTodayPeriod },
     {
       key: 'quarter',
       label: 'This Quarter',
       getValue: getCurrentQuarterPeriod,
     },
-    { key: 'year', label: 'This Year', getValue: getCurrentYearPeriod },
+    { key: 'year', label: 'This Year', getValue: () => getSpecificYearPeriod(0) },
   ];
 
   // Add custom period option if enabled
@@ -102,19 +139,44 @@ export const TimePeriodSelector = (options = {}) => {
     // Map period types to button keys
     const typeToKeyMap = {
       daily: 'today',
-      weekly: 'week',
       monthly: 'month',
+      lastMonth: 'lastMonth',
       quarterly: 'quarter',
       yearly: 'year',
       custom: 'custom',
     };
 
     // Set active state for initial period
-    const initialKey = typeToKeyMap[initialPeriod.type] || 'month';
+    // For monthly periods, we need to check if it's last month vs current month
+    let initialKey = 'month'; // default
+    if (initialPeriod.type === 'monthly') {
+      // Check if this is last month by comparing dates
+      const now = new Date();
+      const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+      const periodStart = new Date(initialPeriod.startDate);
+
+      if (periodStart.getFullYear() === lastMonthStart.getFullYear() &&
+        periodStart.getMonth() === lastMonthStart.getMonth()) {
+        initialKey = 'lastMonth';
+      } else {
+        initialKey = 'month';
+      }
+    } else {
+      initialKey = typeToKeyMap[initialPeriod.type] || 'month';
+    }
 
     const button = document.createElement('button');
     button.className = 'financial-planning-tab'; // Use same class name as FinancialPlanningView
     button.dataset.period = period.key;
+
+    // Initialize month offset for last month button and year offset for year button
+    if (period.key === 'lastMonth') {
+      button.dataset.monthOffset = '-1';
+    } else if (period.key === 'year') {
+      button.dataset.yearOffset = '0';
+    }
+
     button.setAttribute('role', 'tab');
     button.setAttribute(
       'aria-selected',
@@ -125,8 +187,80 @@ export const TimePeriodSelector = (options = {}) => {
 
     const labelSpan = document.createElement('span');
     labelSpan.className = 'tab-label';
-    labelSpan.textContent = period.label;
-    button.appendChild(labelSpan);
+
+    // Set initial label for Last Month and Year buttons
+    if (period.key === 'lastMonth') {
+      labelSpan.textContent = 'Last Month';
+    } else if (period.key === 'year') {
+      labelSpan.textContent = 'This Year';
+    } else {
+      labelSpan.textContent = period.label;
+    }
+
+    // Add arrow for Last Month and Year buttons
+    if (period.key === 'lastMonth' || period.key === 'year') {
+      const arrowContainer = document.createElement('div');
+      arrowContainer.style.display = 'flex';
+      arrowContainer.style.alignItems = 'center';
+      arrowContainer.style.justifyContent = 'flex-start'; // Anchor to left
+      arrowContainer.style.width = '100%';
+      arrowContainer.style.position = 'relative';
+
+      // Left arrow for navigation - fixed position
+      const leftArrow = document.createElement('span');
+      leftArrow.innerHTML = '←';
+      leftArrow.style.fontSize = '1.2em';
+      leftArrow.style.position = 'absolute';
+      leftArrow.style.left = '-5px'; // Why is -5px? it is not fixed exactly on the left side
+      leftArrow.style.top = '50%';
+      leftArrow.style.transform = 'translateY(-50%)';
+      leftArrow.style.cursor = 'pointer';
+      leftArrow.style.padding = `${SPACING.XS}`;
+      leftArrow.style.borderRadius = 'var(--radius-sm)';
+      leftArrow.style.transition = 'background 0.2s ease';
+      leftArrow.style.zIndex = '1';
+
+      // Add hover effect for arrow
+      leftArrow.addEventListener('mouseenter', () => {
+        leftArrow.style.background = 'rgba(255, 255, 255, 0.1)';
+      });
+      leftArrow.addEventListener('mouseleave', () => {
+        leftArrow.style.background = 'transparent';
+      });
+
+      // Arrow click handler for navigation
+      leftArrow.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent button click
+
+        if (period.key === 'lastMonth') {
+          // Handle month navigation
+          const currentOffset = parseInt(button.dataset.monthOffset || '-1');
+          const newOffset = currentOffset - 1;
+          button.dataset.monthOffset = newOffset.toString();
+          const newPeriod = getSpecificMonthPeriod(newOffset);
+          handleMonthNavigation(newPeriod);
+        } else if (period.key === 'year') {
+          // Handle year navigation
+          const currentOffset = parseInt(button.dataset.yearOffset || '0');
+          const newOffset = currentOffset - 1;
+          button.dataset.yearOffset = newOffset.toString();
+          const newPeriod = getSpecificYearPeriod(newOffset);
+          handleYearNavigation(newPeriod);
+        }
+      });
+
+      // Text container with left padding for arrow
+      const textContainer = document.createElement('span');
+      textContainer.style.paddingLeft = '28px'; // Space for arrow
+      textContainer.style.display = 'block';
+      textContainer.appendChild(labelSpan);
+
+      arrowContainer.appendChild(leftArrow);
+      arrowContainer.appendChild(textContainer);
+      button.appendChild(arrowContainer);
+    } else {
+      button.appendChild(labelSpan);
+    }
 
     // Exact same styling as FinancialPlanningView tabs
     Object.assign(button.style, {
@@ -343,6 +477,76 @@ export const TimePeriodSelector = (options = {}) => {
     const end2 = new Date(period2.endDate).getTime();
 
     return start1 === start2 && end1 === end2;
+  }
+
+  /**
+   * Handle month navigation
+   */
+  function handleMonthNavigation(newPeriod) {
+    try {
+      // Validate the period
+      if (!validateTimePeriod(newPeriod)) {
+        showValidationError('Invalid time period selected');
+        return;
+      }
+
+      // Update state
+      currentPeriod = newPeriod;
+
+      // Update UI - set Last Month button as active
+      setActiveButton(periodButtons.get('lastMonth'));
+      hideCustomRangeSelector();
+
+      // Update the Last Month button label to show the actual month
+      const lastMonthButton = periodButtons.get('lastMonth');
+      const labelSpan = lastMonthButton.querySelector('.tab-label');
+      if (labelSpan) {
+        labelSpan.textContent = newPeriod.label;
+      }
+
+      // Notify parent component but with a flag to prevent full recreation
+      if (onChange) {
+        onChange(currentPeriod, { isNavigation: true });
+      }
+    } catch (error) {
+      console.error('Error navigating to month:', error);
+      showValidationError('Error navigating to month');
+    }
+  }
+
+  /**
+   * Handle year navigation
+   */
+  function handleYearNavigation(newPeriod) {
+    try {
+      // Validate the period
+      if (!validateTimePeriod(newPeriod)) {
+        showValidationError('Invalid time period selected');
+        return;
+      }
+
+      // Update state
+      currentPeriod = newPeriod;
+
+      // Update UI - set Year button as active
+      setActiveButton(periodButtons.get('year'));
+      hideCustomRangeSelector();
+
+      // Update the Year button label to show the actual year
+      const yearButton = periodButtons.get('year');
+      const labelSpan = yearButton.querySelector('.tab-label');
+      if (labelSpan) {
+        labelSpan.textContent = newPeriod.label;
+      }
+
+      // Notify parent component but with a flag to prevent full recreation
+      if (onChange) {
+        onChange(currentPeriod, { isNavigation: true });
+      }
+    } catch (error) {
+      console.error('Error navigating to year:', error);
+      showValidationError('Error navigating to year');
+    }
   }
 
   /**
