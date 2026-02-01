@@ -24,6 +24,13 @@ vi.mock('../../src/core/firebase-config.js', () => ({
     sendPasswordResetEmail: mockResetPassword,
     signOut: mockSignOut,
   },
+  firebaseStatus: {
+    isInitialized: true,
+    hasError: false,
+    error: null,
+    canUseAuth: true,
+    canUseFirestore: () => true,
+  },
   // Export the mocks so we can access them in tests
   mockSignIn,
   mockCreateUser,

@@ -1,4 +1,4 @@
-import { auth } from './firebase-config.js';
+import { auth, firebaseStatus } from './firebase-config.js';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -11,11 +11,30 @@ import {
 import { rateLimitService } from './rate-limit-service.js';
 import { auditService, auditEvents } from './audit-service.js';
 
+// Helper function to check if Firebase is available
+const checkFirebaseAvailability = () => {
+  if (!firebaseStatus.isInitialized || !firebaseStatus.canUseAuth) {
+    const error = 'Firebase is not available. Running in local-only mode.';
+    console.warn(error);
+    return { available: false, error };
+  }
+  return { available: true };
+};
+
 export const AuthService = {
   user: null,
   initialized: false,
 
   async init(onAuthStateChange) {
+    // Check Firebase availability first
+    const firebaseCheck = checkFirebaseAvailability();
+    if (!firebaseCheck.available) {
+      console.warn('AuthService initialized in local-only mode');
+      this.initialized = true;
+      if (onAuthStateChange) await onAuthStateChange(null);
+      return null;
+    }
+
     return new Promise(resolve => {
       onAuthStateChanged(auth, async user => {
         // Make user object read-only to prevent manipulation
@@ -28,6 +47,16 @@ export const AuthService = {
   },
 
   async login(email, password) {
+    // Check Firebase availability first
+    const firebaseCheck = checkFirebaseAvailability();
+    if (!firebaseCheck.available) {
+      return {
+        user: null,
+        error: firebaseCheck.error,
+        localMode: true,
+      };
+    }
+
     try {
       // Check rate limit before attempting login
       const rateLimitStatus = rateLimitService.checkRateLimit(email);
@@ -118,6 +147,16 @@ export const AuthService = {
   },
 
   async signup(email, password) {
+    // Check Firebase availability first
+    const firebaseCheck = checkFirebaseAvailability();
+    if (!firebaseCheck.available) {
+      return {
+        user: null,
+        error: firebaseCheck.error,
+        localMode: true,
+      };
+    }
+
     try {
       // Check rate limit before attempting signup
       const rateLimitStatus = rateLimitService.checkRateLimit(email);
@@ -208,6 +247,16 @@ export const AuthService = {
   },
 
   async loginWithGoogle() {
+    // Check Firebase availability first
+    const firebaseCheck = checkFirebaseAvailability();
+    if (!firebaseCheck.available) {
+      return {
+        user: null,
+        error: firebaseCheck.error,
+        localMode: true,
+      };
+    }
+
     try {
       const provider = new GoogleAuthProvider();
       const userCredential = await signInWithPopup(auth, provider);
@@ -238,6 +287,15 @@ export const AuthService = {
   },
 
   async logout() {
+    // Check Firebase availability first
+    const firebaseCheck = checkFirebaseAvailability();
+    if (!firebaseCheck.available) {
+      console.warn('Logout called in local-only mode');
+      this.user = null;
+      localStorage.removeItem('auth_hint');
+      return;
+    }
+
     try {
       const userId = this.getUserId();
       await signOut(auth);
@@ -283,6 +341,15 @@ export const AuthService = {
   },
 
   async resetPassword(email) {
+    // Check Firebase availability first
+    const firebaseCheck = checkFirebaseAvailability();
+    if (!firebaseCheck.available) {
+      return {
+        error: firebaseCheck.error,
+        localMode: true,
+      };
+    }
+
     try {
       // Check rate limit before attempting password reset
       const rateLimitStatus = rateLimitService.checkRateLimit(email);

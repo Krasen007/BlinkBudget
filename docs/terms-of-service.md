@@ -22,12 +22,15 @@ BlinkBudget is a free, open-source expense tracking application that provides:
 ## 3. License and Usage Rights
 
 ### 3.1 Open Source License
+
 BlinkBudget is licensed under the GNU General Public License v3.0 (GPL-3.0). This means:
+
 - You are free to use, modify, and distribute the software
 - Any modifications must also be licensed under GPL-3.0
 - Source code is available for inspection and contribution
 
 ### 3.2 Service Usage
+
 - **Personal Use:** BlinkBudget is intended for personal financial management
 - **Commercial Use:** Businesses may use the software for internal expense tracking
 - **Redistribution:** You may redistribute the original or modified software under GPL-3.0 terms
@@ -35,17 +38,21 @@ BlinkBudget is licensed under the GNU General Public License v3.0 (GPL-3.0). Thi
 ## 4. User Responsibilities
 
 ### 4.1 Account Security
+
 - You are responsible for maintaining the security of your account credentials
 - You must notify us immediately of any unauthorized account access
 - You are responsible for all activities that occur under your account
 
 ### 4.2 Data Accuracy
+
 - You are responsible for the accuracy of financial data you enter
 - BlinkBudget is not responsible for errors in your financial records
 - You should verify important financial calculations independently
 
 ### 4.3 Prohibited Uses
+
 You may not use BlinkBudget to:
+
 - Engage in illegal activities or money laundering
 - Store false or fraudulent financial information
 - Attempt to compromise the security or integrity of the service
@@ -55,16 +62,19 @@ You may not use BlinkBudget to:
 ## 5. Data and Privacy
 
 ### 5.1 Data Ownership
+
 - **You Own Your Data:** All financial data you enter remains your property
 - **Right to Export:** You can export your data at any time
 - **Right to Delete:** You can delete your data and account at any time
 
 ### 5.2 Data Storage
+
 - **Local Storage:** Primary storage is in your browser's localStorage
 - **Cloud Storage:** Optional cloud sync via Firebase when logged in
 - **Data Portability:** You can export and import your data freely
 
 ### 5.3 Privacy Protection
+
 - We do not sell, rent, or share your personal financial data
 - Your data is used only to provide the service
 - See our Privacy Policy for detailed information about data handling
@@ -72,11 +82,13 @@ You may not use BlinkBudget to:
 ## 6. Service Availability and Support
 
 ### 6.1 Service Availability
+
 - **Best Effort Basis:** The service is provided on a "best effort" basis
 - **No Guaranteed Uptime:** We do not guarantee 100% service availability
 - **Maintenance:** The service may be unavailable for maintenance or updates
 
 ### 6.2 Support
+
 - **Community Support:** Support is provided through community forums and GitHub issues
 - **Documentation:** Comprehensive documentation is available
 - **No Guaranteed Support:** We do not provide guaranteed individual support
@@ -84,18 +96,23 @@ You may not use BlinkBudget to:
 ## 7. Limitations and Disclaimers
 
 ### 7.1 Financial Advice Disclaimer
+
 BlinkBudget is not a financial advisor. The application:
+
 - Does not provide financial advice or recommendations
 - Should not be used as the sole basis for financial decisions
 - Is not a substitute for professional financial advice
 
 ### 7.2 Accuracy Disclaimer
+
 - We do not guarantee the accuracy of calculations or reports
 - Financial calculations should be verified independently
 - We are not responsible for decisions made based on app data
 
 ### 7.3 Security Disclaimer
+
 While we implement reasonable security measures:
+
 - We cannot guarantee absolute security of your data
 - You are responsible for backing up important financial data
 - We are not liable for unauthorized access to your account
@@ -103,11 +120,13 @@ While we implement reasonable security measures:
 ## 8. Intellectual Property
 
 ### 8.1 BlinkBudget Property
+
 - The BlinkBudget name, logo, and branding are our property
 - Original code and documentation are protected by intellectual property laws
 - Third-party components are used under their respective licenses
 
 ### 8.2 User Contributions
+
 - You retain rights to any code or documentation you contribute
 - Contributions must be compatible with the GPL-3.0 license
 - We may incorporate contributions into the main project
@@ -115,11 +134,13 @@ While we implement reasonable security measures:
 ## 9. Termination
 
 ### 9.1 User Termination
+
 - You may stop using the service at any time
 - You may delete your account and data at any time
 - No notice is required to terminate your use
 
 ### 9.2 Service Termination
+
 - We may suspend or terminate accounts for violations of these terms
 - We may discontinue the service with reasonable notice
 - We will provide data export options before service termination
@@ -127,12 +148,15 @@ While we implement reasonable security measures:
 ## 10. Limitation of Liability
 
 ### 10.1 Service Liability
+
 To the maximum extent permitted by law:
+
 - We are not liable for any indirect, incidental, or consequential damages
 - Our total liability is limited to the amount you paid for the service (which is $0)
 - We are not liable for lost profits, data, or business opportunities
 
 ### 10.2 Financial Losses
+
 - We are not responsible for financial losses resulting from app usage
 - We are not liable for errors in financial calculations or reports
 - You assume all risk for financial decisions based on app data
@@ -140,6 +164,7 @@ To the maximum extent permitted by law:
 ## 11. Indemnification
 
 You agree to indemnify and hold harmless BlinkBudget and its contributors from:
+
 - Claims arising from your use of the service
 - Violations of these terms by you
 - Any illegal activities conducted using the service
@@ -147,9 +172,11 @@ You agree to indemnify and hold harmless BlinkBudget and its contributors from:
 ## 12. Governing Law and Dispute Resolution
 
 ### 12.1 Governing Law
+
 These terms are governed by the laws of the jurisdiction where the service is operated, without regard to conflict of law principles.
 
 ### 12.2 Dispute Resolution
+
 - **Informal Resolution:** We encourage informal resolution of disputes
 - **Mediation:** Disputes may be resolved through mediation before legal action
 - **Jurisdiction:** Legal actions must be filed in the appropriate jurisdiction
@@ -157,6 +184,7 @@ These terms are governed by the laws of the jurisdiction where the service is op
 ## 13. Changes to Terms
 
 We may update these Terms of Service from time to time. Changes will be effective when posted. We will notify users of significant changes through:
+
 - Posting in the application
 - Updates to our website
 - Community announcements

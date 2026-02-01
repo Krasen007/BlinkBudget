@@ -21,6 +21,13 @@ vi.mock('../../src/core/firebase-config.js', () => ({
     createUserWithEmailAndPassword: vi.fn(),
     sendPasswordResetEmail: vi.fn(),
   },
+  firebaseStatus: {
+    isInitialized: true,
+    hasError: false,
+    error: null,
+    canUseAuth: true,
+    canUseFirestore: () => true,
+  },
 }));
 
 describe('Comprehensive Security Tests - OWASP Top 10', () => {
