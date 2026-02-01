@@ -11,6 +11,7 @@ export default [
       'vite.config.js',
       'postcss.config.js',
       'vite.config.lightning.js',
+      'functions/**',
     ],
   },
   js.configs.recommended,

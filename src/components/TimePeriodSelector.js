@@ -21,13 +21,37 @@ import {
  */
 function getSpecificMonthPeriod(monthsOffset = 0) {
   const now = new Date();
-  const targetDate = new Date(now.getFullYear(), now.getMonth() + monthsOffset, 1);
-  const startOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
-  const endOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0);
+  const targetDate = new Date(
+    now.getFullYear(),
+    now.getMonth() + monthsOffset,
+    1
+  );
+  const startOfMonth = new Date(
+    targetDate.getFullYear(),
+    targetDate.getMonth(),
+    1
+  );
+  const endOfMonth = new Date(
+    targetDate.getFullYear(),
+    targetDate.getMonth() + 1,
+    0
+  );
   endOfMonth.setHours(23, 59, 59, 999);
 
-  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'];
+  const monthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
 
   return {
     type: 'monthly',
@@ -100,14 +124,22 @@ export const TimePeriodSelector = (options = {}) => {
   // Define available time periods
   const periods = [
     { key: 'month', label: 'This Month', getValue: getCurrentMonthPeriod },
-    { key: 'lastMonth', label: 'Last Month', getValue: () => getSpecificMonthPeriod(-1) },
+    {
+      key: 'lastMonth',
+      label: 'Last Month',
+      getValue: () => getSpecificMonthPeriod(-1),
+    },
     { key: 'today', label: 'Today', getValue: getTodayPeriod },
     {
       key: 'quarter',
       label: 'This Quarter',
       getValue: getCurrentQuarterPeriod,
     },
-    { key: 'year', label: 'This Year', getValue: () => getSpecificYearPeriod(0) },
+    {
+      key: 'year',
+      label: 'This Year',
+      getValue: () => getSpecificYearPeriod(0),
+    },
   ];
 
   // Add custom period option if enabled
@@ -156,8 +188,10 @@ export const TimePeriodSelector = (options = {}) => {
 
       const periodStart = new Date(initialPeriod.startDate);
 
-      if (periodStart.getFullYear() === lastMonthStart.getFullYear() &&
-        periodStart.getMonth() === lastMonthStart.getMonth()) {
+      if (
+        periodStart.getFullYear() === lastMonthStart.getFullYear() &&
+        periodStart.getMonth() === lastMonthStart.getMonth()
+      ) {
         initialKey = 'lastMonth';
       } else {
         initialKey = 'month';
@@ -229,7 +263,7 @@ export const TimePeriodSelector = (options = {}) => {
       });
 
       // Arrow click handler for navigation
-      leftArrow.addEventListener('click', (e) => {
+      leftArrow.addEventListener('click', e => {
         e.stopPropagation(); // Prevent button click
 
         if (period.key === 'lastMonth') {

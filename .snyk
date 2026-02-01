@@ -1,0 +1,37 @@
+# See https://snyk.co/docs/configuration for more information
+
+# Exclude certain files from scanning
+                # Snyk configuration file
+exclude:
+  - node_modules/**
+  - dist/**
+  - .git/**
+  - *.log
+
+# Security severity thresholds
+severity-threshold:
+  # Fail for high and critical vulnerabilities
+  high: true
+  # Warn for medium vulnerabilities
+  medium: false
+  # Ignore low vulnerabilities
+  low: false
+
+# Organization settings
+org: blinkbudget
+
+# Project settings
+project-name: blinkbudget-web-app
+
+# Additional Snyk options
+# --strict: Enforce strict mode for more accurate results
+# --all-projects: Scan all sub-projects
+# --detection-depth: Set depth for dependency detection
+args: --strict
+
+# Ignore specific vulnerabilities (add as needed)
+# ignore:
+#   SNYK-JS-LODASH-567790:
+#     - '*':
+#         reason: 'Development dependency only'
+#         expires: '2024-12-31T23:59:59.999Z'

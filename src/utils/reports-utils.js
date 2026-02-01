@@ -143,7 +143,7 @@ export function checkBrowserSupport() {
   const requiredFeatures = {
     'ES6 Classes': () => {
       // Test ES6 class support
-      return typeof class { } === 'function';
+      return typeof class {} === 'function';
     },
     Promises: () => typeof Promise !== 'undefined',
     'Fetch API': () => typeof fetch !== 'undefined',

@@ -692,7 +692,10 @@ export const ReportsView = () => {
           currentTimePeriod
         );
         if (budgetsSummary.totalBudgets > 0) {
-          const summaryCard = BudgetSummaryCard(budgetsSummary, currentTimePeriod);
+          const summaryCard = BudgetSummaryCard(
+            budgetsSummary,
+            currentTimePeriod
+          );
           summaryCard.style.marginBottom = SPACING.LG;
           chartsSection.appendChild(summaryCard);
         }
