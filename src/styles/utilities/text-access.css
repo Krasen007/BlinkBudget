@@ -187,9 +187,8 @@
   }
 
   .mobile-touch-feedback:active {
-    transform: scale(0.98);
-    transition: transform 0.1s ease;
-  }
+  /* Remove transform animation and transition */
+}
 
   .mobile-touch-target {
     min-height: var(--touch-target-min);

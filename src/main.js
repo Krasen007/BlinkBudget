@@ -13,6 +13,9 @@ import './pwa.js'; // Register PWA service worker
 import { InstallService } from './core/install.js';
 import { CacheInvalidator } from './core/cache-invalidator.js';
 import { PrivacyService } from './core/privacy-service.js';
+import './core/mobile-viewport-manager.js';
+import './core/touch-feedback-manager.js';
+import './core/mobile-form-optimizer.js';
 
 InstallService.init();
 

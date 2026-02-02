@@ -37,7 +37,8 @@ export const TransactionForm = ({
   onDelete = null,
 }) => {
   // Check if smart suggestions are enabled
-  const smartSuggestionsEnabled = SettingsService.getSetting('smartSuggestionsEnabled') !== false; // Default to true
+  const smartSuggestionsEnabled =
+    SettingsService.getSetting('smartSuggestionsEnabled') !== false; // Default to true
 
   // Initialize category icons CSS only if smart suggestions are enabled
   if (smartSuggestionsEnabled) {
@@ -50,7 +51,7 @@ export const TransactionForm = ({
   form.style.display = 'flex';
   form.style.flexDirection = 'column';
   form.style.gap = window.mobileUtils?.isMobile()
-    ? 'var(--spacing-xs)'
+    ? 'var(--mobile-spacing-md)'
     : 'var(--spacing-sm)';
   form.style.width = '100%';
   form.style.position = 'relative';
@@ -113,17 +114,20 @@ export const TransactionForm = ({
   if (smartSuggestionsEnabled) {
     // Smart Amount Input
     smartAmountInput = SmartAmountInput.create({
-      onAmountChange: (amount) => {
+      onAmountChange: amount => {
         // Update category suggestions when amount changes
         if (smartCategorySelector) {
           smartCategorySelector.updateSmartMatch(amount);
         }
         // Update note suggestions when amount changes
         if (smartNoteField) {
-          smartNoteField.updateContext(smartCategorySelector?.getSelectedCategory(), amount);
+          smartNoteField.updateContext(
+            smartCategorySelector?.getSelectedCategory(),
+            amount
+          );
         }
       },
-      onSuggestionSelect: (suggestion) => {
+      onSuggestionSelect: suggestion => {
         // Apply suggestion and update other fields
         smartAmountInput.setAmount(suggestion.amount);
         if (suggestion.category && smartCategorySelector) {
@@ -136,6 +140,8 @@ export const TransactionForm = ({
       initialValue: initialValues.amount?.toString() || '',
     });
     amountInput = smartAmountInput;
+    // Add touch target classes
+    smartAmountInput.classList.add('touch-target-primary');
   } else {
     // Classic Amount Input
     const amountState = createAmountInput({
@@ -165,7 +171,7 @@ export const TransactionForm = ({
   if (smartSuggestionsEnabled) {
     // Smart Category Selector
     smartCategorySelector = SmartCategorySelector.create({
-      onCategorySelect: (category) => {
+      onCategorySelect: category => {
         // Update note suggestions when category changes
         if (smartNoteField) {
           const currentAmount = smartAmountInput.getAmount();
@@ -173,7 +179,7 @@ export const TransactionForm = ({
         }
         ClickTracker.recordClick();
       },
-      onSmartMatchAccept: (_smartMatch) => {
+      onSmartMatchAccept: _smartMatch => {
         // Handle smart match acceptance
         ClickTracker.recordClick();
       },
@@ -184,7 +190,7 @@ export const TransactionForm = ({
     // Keep backward compatibility with existing category selector interface
     categorySelector = {
       container: smartCategorySelector,
-      setType: (_type) => {
+      setType: _type => {
         // Type changes don't affect smart suggestions for now
       },
       selectedCategory: () => smartCategorySelector.getSelectedCategory(),
@@ -194,6 +200,8 @@ export const TransactionForm = ({
         // Account changes don't affect smart suggestions for now
       },
     };
+    // Add touch target classes to category cards
+    smartCategorySelector.classList.add('touch-target-secondary');
   } else {
     // Classic Category Selector
     categorySelector = createCategorySelector({
@@ -266,10 +274,10 @@ export const TransactionForm = ({
   if (smartSuggestionsEnabled) {
     // Smart Note Field
     smartNoteField = SmartNoteField.create({
-      onNoteChange: (_note) => {
+      onNoteChange: _note => {
         // Note changes don't affect other fields for now
       },
-      onSuggestionSelect: (suggestion) => {
+      onSuggestionSelect: suggestion => {
         smartNoteField.setNote(suggestion.note);
         ClickTracker.recordClick();
       },
@@ -278,6 +286,8 @@ export const TransactionForm = ({
       initialValue: initialValues.description || '',
     });
     noteField = smartNoteField;
+    // Add touch target classes
+    smartNoteField.classList.add('touch-target-secondary');
   }
 
   // 7. Layout Assembly
@@ -329,7 +339,7 @@ export const TransactionForm = ({
       okBtn.style.padding = 'var(--spacing-sm)';
       okBtn.style.fontSize = FONT_SIZES.BASE;
       okBtn.style.height = 'auto';
-      okBtn.style.minHeight = '30px'; // Compact but clickable
+      okBtn.style.minHeight = '30px'; // Match delete button height
     }
 
     okBtn.addEventListener('click', () => {
@@ -369,11 +379,16 @@ export const TransactionForm = ({
         accountId: currentAccountId,
         toAccountId: categorySelector.selectedToAccount(),
         externalDateInput,
-        description: noteField ? noteField.getNote() : (initialValues.description || ''), // Add note field if available
+        description: noteField
+          ? noteField.getNote()
+          : initialValues.description || '',
       });
 
       handleFormSubmit(transactionData, onSubmit);
     });
+
+    // Remove mobile-specific classes to match other buttons
+    okBtn.classList.remove('mobile-btn-primary', 'touch-target-primary');
 
     form.appendChild(okBtn);
 
@@ -392,7 +407,7 @@ export const TransactionForm = ({
       deleteBtn.style.backgroundColor = 'transparent';
       deleteBtn.style.color = COLORS.ERROR;
       deleteBtn.style.border = `1px solid ${COLORS.ERROR}`;
-      deleteBtn.style.transition = 'all 0.2s ease';
+      // Remove transition animation
 
       if (isMobile) {
         deleteBtn.style.marginTop = '0';
@@ -402,16 +417,7 @@ export const TransactionForm = ({
         deleteBtn.style.minHeight = '30px'; // Compact but clickable
       }
 
-      // Add hover effects
-      deleteBtn.addEventListener('mouseenter', () => {
-        deleteBtn.style.backgroundColor = COLORS.ERROR;
-        deleteBtn.style.color = 'white';
-      });
-
-      deleteBtn.addEventListener('mouseleave', () => {
-        deleteBtn.style.backgroundColor = 'transparent';
-        deleteBtn.style.color = COLORS.ERROR;
-      });
+      // Remove hover effects (animations)
 
       deleteBtn.addEventListener('click', onDelete);
 

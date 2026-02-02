@@ -140,6 +140,8 @@ export const DashboardView = () => {
   content.style.display = 'flex';
   content.style.flexDirection = 'column';
   content.style.minHeight = '0'; // Allow flex child to shrink below content size
+  content.style.overflow = 'hidden'; // Prevent container from scrolling
+  content.style.position = 'relative'; // For proper overflow handling
 
   container.appendChild(content);
 
@@ -321,10 +323,15 @@ export const DashboardView = () => {
     content.appendChild(transactionList);
   };
 
+  // Cache DOM element references to prevent excessive queries
+  let statsContainer = null;
+
   // Responsive layout updates
   const updateResponsiveLayout = debounce(() => {
     const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
-    const statsContainer = document.querySelector('.dashboard-stats-container');
+    if (!statsContainer) {
+      statsContainer = document.querySelector('.dashboard-stats-container');
+    }
     if (!statsContainer) return;
     statsContainer.style.gridTemplateColumns = isMobile
       ? '1fr 1fr'

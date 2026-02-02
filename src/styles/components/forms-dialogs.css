@@ -186,7 +186,7 @@ select.input-select:focus {
   text-align: center;
   margin-bottom: var(--spacing-xs);
   opacity: 0.8;
-  transition: opacity var(--transition-fast);
+  /* Remove transition animation */
 }
 
 .view-add .mobile-form-input[aria-label*='Transaction date']::after,
@@ -199,7 +199,7 @@ select.input-select:focus {
   width: 0;
   height: 2px;
   background: var(--color-primary);
-  transition: width var(--transition-fast);
+  /* Remove transition animation */
 }
 
 .view-add .mobile-form-input[aria-label*='Transaction date']:hover::after,
@@ -215,7 +215,7 @@ select.input-select:focus {
 
 @media (width <=767px) {
   .transaction-form.mobile-optimized {
-    min-height: calc(var(--visual-viewport-height) - 120px);
+    min-height: calc(100vh - 120px); /* Use fixed height instead of viewport variable */
     justify-content: flex-end;
   }
 }

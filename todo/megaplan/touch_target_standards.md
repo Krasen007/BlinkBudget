@@ -12,14 +12,16 @@
 ### Human Factors Considerations
 
 #### Average Finger Dimensions
+
 - **Adult fingertip:** 10-14mm diameter
 - **Average touch accuracy:** 7-10mm
 - **Recommended minimum:** 44px (≈ 11mm) for reliable targeting
 - **Optimal size:** 56px (≈ 14mm) for primary actions
 
 #### Touch Accuracy Statistics
+
 - **Success rate at 44px:** 95%+ accuracy
-- **Success rate at 34px:** 85% accuracy  
+- **Success rate at 34px:** 85% accuracy
 - **Success rate at 24px:** 65% accuracy
 - **Error reduction:** 40% fewer errors when increasing from 34px to 44px
 
@@ -30,20 +32,21 @@
 ### Primary Touch Targets (56px Standard)
 
 #### Critical Actions & Primary Buttons
+
 ```css
 .touch-target-primary {
   /* Core dimensions */
   min-width: 56px;
   min-height: 56px;
-  
+
   /* Spacing and padding */
   padding: 16px 24px;
   margin: 8px;
-  
+
   /* Visual feedback */
   border-radius: var(--radius-lg);
   transition: all var(--transition-fast);
-  
+
   /* Touch optimization */
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -53,7 +56,7 @@
 /* Primary action buttons */
 .mobile-btn-primary {
   @extend .touch-target-primary;
-  
+
   /* Specific styling */
   background: var(--color-primary);
   color: white;
@@ -61,7 +64,7 @@
   font-size: 16px;
   border: none;
   cursor: pointer;
-  
+
   /* Touch feedback */
   transform: scale(1);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -79,10 +82,11 @@
 ```
 
 #### Form Input Fields
+
 ```css
 .mobile-form-input-primary {
   @extend .touch-target-primary;
-  
+
   /* Input-specific styling */
   height: 56px;
   font-size: 16px; /* Prevent iOS zoom */
@@ -91,27 +95,28 @@
   border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-text-main);
-  
+
   /* Focus states */
   transition: all var(--transition-fast);
 }
 
 .mobile-form-input-primary:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
+  box-shadow: 0 0 0 3px
+    hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
   outline: none;
 }
 
 /* Amount input specific */
 .mobile-amount-input {
   @extend .mobile-form-input-primary;
-  
+
   /* Larger for importance */
   height: 64px;
   font-size: 20px;
   font-weight: 600;
   text-align: center;
-  
+
   /* Currency formatting */
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
 }
@@ -120,20 +125,21 @@
 ### Secondary Touch Targets (44px Minimum)
 
 #### Secondary Actions & Navigation
+
 ```css
 .touch-target-secondary {
   /* Core dimensions */
   min-width: 44px;
   min-height: 44px;
-  
+
   /* Spacing and padding */
   padding: 8px 16px;
   margin: 4px;
-  
+
   /* Visual feedback */
   border-radius: var(--radius-md);
   transition: all var(--transition-fast);
-  
+
   /* Touch optimization */
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -143,7 +149,7 @@
 /* Secondary buttons */
 .mobile-btn-secondary {
   @extend .touch-target-secondary;
-  
+
   /* Specific styling */
   background: var(--color-surface);
   color: var(--color-text-main);
@@ -161,7 +167,7 @@
 /* Icon buttons */
 .mobile-icon-btn {
   @extend .touch-target-secondary;
-  
+
   /* Icon-specific styling */
   width: 44px;
   height: 44px;
@@ -169,17 +175,18 @@
   align-items: center;
   justify-content: center;
   font-size: 20px;
-  
+
   /* No text padding for pure icons */
   padding: 0;
 }
 ```
 
 #### Category Chips & Tags
+
 ```css
 .mobile-category-chip {
   @extend .touch-target-secondary;
-  
+
   /* Category-specific styling */
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -187,12 +194,12 @@
   font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
-  
+
   /* Icon + text layout */
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  
+
   /* Selection states */
   transition: all var(--transition-fast);
 }
@@ -211,20 +218,21 @@
 ### Tertiary Touch Targets (40px Minimum)
 
 #### Small Interactive Elements
+
 ```css
 .touch-target-tertiary {
   /* Core dimensions - use sparingly */
   min-width: 40px;
   min-height: 40px;
-  
+
   /* Only for non-critical actions */
   padding: 6px 12px;
   margin: 2px;
-  
+
   /* Enhanced visual feedback */
   border-radius: var(--radius-sm);
   transition: all var(--transition-fast);
-  
+
   /* Touch optimization */
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -233,13 +241,13 @@
 /* Close buttons, expand/collapse, etc. */
 .micro-btn {
   @extend .touch-target-tertiary;
-  
+
   /* Micro-interaction styling */
   background: transparent;
   border: none;
   color: var(--color-text-muted);
   font-size: 16px;
-  
+
   /* Larger touch area than visual */
   position: relative;
 }
@@ -262,6 +270,7 @@
 ### Smart Suggestions Touch Targets
 
 #### Amount Suggestion Chips
+
 ```css
 .suggestion-chip {
   /* Optimized for quick selection */
@@ -269,19 +278,19 @@
   min-height: 48px;
   padding: 8px 12px;
   margin: 0 4px 8px 0;
-  
+
   /* Visual hierarchy */
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  
+
   /* Content layout */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  
+
   /* Touch feedback */
   transition: all var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
@@ -317,6 +326,7 @@
 ```
 
 #### Category Selection Grid
+
 ```css
 .category-card-mobile {
   /* Optimized for thumb reach */
@@ -324,12 +334,12 @@
   min-height: 80px;
   padding: 12px;
   margin: 4px;
-  
+
   /* Visual design */
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  
+
   /* Content layout */
   display: flex;
   flex-direction: column;
@@ -337,7 +347,7 @@
   justify-content: center;
   text-align: center;
   gap: 6px;
-  
+
   /* Touch feedback */
   transition: all var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
@@ -382,6 +392,7 @@
 ### Navigation Touch Targets
 
 #### Bottom Navigation
+
 ```css
 .mobile-nav-item {
   /* Large, easy-to-hit navigation */
@@ -389,20 +400,20 @@
   min-height: 60px;
   padding: 8px;
   margin: 4px;
-  
+
   /* Layout */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  
+
   /* Visual design */
   background: none;
   border: none;
   border-radius: var(--radius-md);
   color: var(--color-text-muted);
-  
+
   /* Touch feedback */
   transition: all var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
@@ -417,7 +428,12 @@
 
 .mobile-nav-item.active {
   color: var(--color-primary);
-  background: hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  background: hsla(
+    var(--primary-hue),
+    var(--primary-sat),
+    var(--primary-light),
+    0.1
+  );
 }
 
 /* Navigation icon */
@@ -440,6 +456,7 @@
 ```
 
 #### Back Button
+
 ```css
 .mobile-back-btn {
   /* Easy-to-hit back navigation */
@@ -447,18 +464,18 @@
   min-width: 80px;
   padding: 12px 16px;
   margin: 8px 0;
-  
+
   /* Layout */
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  
+
   /* Visual design */
   background: none;
   border: none;
   color: var(--color-primary);
   border-radius: var(--radius-md);
-  
+
   /* Touch feedback */
   transition: all var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
@@ -467,7 +484,12 @@
 }
 
 .mobile-back-btn:active {
-  background: hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  background: hsla(
+    var(--primary-hue),
+    var(--primary-sat),
+    var(--primary-light),
+    0.1
+  );
   transform: scale(0.98);
 }
 
@@ -491,6 +513,7 @@
 ### Minimum Spacing Requirements
 
 #### Between Touch Targets
+
 ```css
 .touch-spacing {
   /* Minimum spacing between adjacent touch targets */
@@ -512,6 +535,7 @@
 ```
 
 #### From Screen Edges
+
 ```css
 .touch-edge-spacing {
   /* Minimum spacing from screen edges */
@@ -531,6 +555,7 @@
 ```
 
 #### Safe Area Integration
+
 ```css
 .safe-area-touch-targets {
   /* Respect device safe areas */
@@ -553,6 +578,7 @@
 ### Breakpoint-Specific Adjustments
 
 #### Small Mobile (≤ 380px)
+
 ```css
 @media (width <= 380px) {
   /* Reduce non-essential spacing */
@@ -562,19 +588,19 @@
     padding: 6px 12px;
     margin: 2px;
   }
-  
+
   .category-card-mobile {
     min-width: 70px;
     min-height: 70px;
     padding: 8px;
   }
-  
+
   .suggestion-chip {
     min-width: 70px;
     min-height: 44px;
     padding: 6px 10px;
   }
-  
+
   /* Reduce spacing */
   .touch-spacing {
     gap: 4px;
@@ -584,6 +610,7 @@
 ```
 
 #### Standard Mobile (381px - 480px)
+
 ```css
 @media (width >= 381px) and (width <= 480px) {
   /* Standard touch targets */
@@ -591,12 +618,12 @@
     min-width: 56px;
     min-height: 56px;
   }
-  
+
   .touch-target-secondary {
     min-width: 44px;
     min-height: 44px;
   }
-  
+
   /* Standard spacing */
   .touch-spacing {
     gap: 8px;
@@ -606,6 +633,7 @@
 ```
 
 #### Large Mobile (481px - 767px)
+
 ```css
 @media (width >= 481px) and (width <= 767px) {
   /* Enhanced touch targets for larger screens */
@@ -614,19 +642,19 @@
     min-height: 64px;
     padding: 20px 28px;
   }
-  
+
   .touch-target-secondary {
     min-width: 48px;
     min-height: 48px;
     padding: 10px 18px;
   }
-  
+
   /* Enhanced spacing */
   .touch-spacing {
     gap: 12px;
     margin: 6px;
   }
-  
+
   /* Larger category cards */
   .category-card-mobile {
     min-width: 90px;
@@ -643,14 +671,16 @@
 ### Visual Feedback Systems
 
 #### Immediate Touch Response
+
 ```css
 .touch-target-primary,
 .touch-target-secondary,
 .touch-target-tertiary {
   /* Immediate visual feedback */
-  transition: transform 0.1s ease-out, 
-              background-color 0.1s ease-out,
-              box-shadow 0.1s ease-out;
+  transition:
+    transform 0.1s ease-out,
+    background-color 0.1s ease-out,
+    box-shadow 0.1s ease-out;
 }
 
 .touch-target-primary:active,
@@ -658,7 +688,7 @@
 .touch-target-tertiary:active {
   /* Subtle scale reduction */
   transform: scale(0.95);
-  
+
   /* Immediate background change */
   background-color: var(--color-surface-hover);
 }
@@ -672,41 +702,46 @@
 ```
 
 #### Haptic Feedback Integration
+
 ```javascript
 class TouchFeedbackManager {
   constructor() {
     this.setupTouchListeners();
   }
-  
+
   setupTouchListeners() {
-    document.addEventListener('touchstart', this.handleTouchStart, { passive: true });
-    document.addEventListener('touchend', this.handleTouchEnd, { passive: true });
+    document.addEventListener('touchstart', this.handleTouchStart, {
+      passive: true,
+    });
+    document.addEventListener('touchend', this.handleTouchEnd, {
+      passive: true,
+    });
   }
-  
-  handleTouchStart = (e) => {
+
+  handleTouchStart = e => {
     const target = e.target.closest('.touch-target');
     if (target) {
       // Add visual feedback
       target.classList.add('touch-active');
-      
+
       // Trigger haptic feedback if available
       this.triggerHaptic('light');
     }
   };
-  
-  handleTouchEnd = (e) => {
+
+  handleTouchEnd = e => {
     const target = e.target.closest('.touch-target');
     if (target) {
       // Remove visual feedback with delay
       setTimeout(() => {
         target.classList.remove('touch-active');
       }, 150);
-      
+
       // Trigger haptic feedback for successful interaction
       this.triggerHaptic('medium');
     }
   };
-  
+
   triggerHaptic(type) {
     // Check for haptic feedback support
     if ('vibrate' in navigator) {
@@ -729,12 +764,13 @@ class TouchFeedbackManager {
 ### State-Based Feedback
 
 #### Loading States
+
 ```css
 .touch-target-loading {
   /* Disable interaction during loading */
   pointer-events: none;
   opacity: 0.7;
-  
+
   /* Show loading indicator */
   position: relative;
   color: transparent !important;
@@ -756,11 +792,14 @@ class TouchFeedbackManager {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 ```
 
 #### Success/Error States
+
 ```css
 .touch-target-success {
   background: var(--color-success, #22c55e);
@@ -777,15 +816,28 @@ class TouchFeedbackManager {
 }
 
 @keyframes success-pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 @keyframes error-shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
 }
 ```
 
@@ -794,6 +846,7 @@ class TouchFeedbackManager {
 ## Accessibility Considerations
 
 ### Screen Reader Support
+
 ```css
 .touch-target {
   /* Ensure touch targets are accessible */
@@ -822,7 +875,7 @@ class TouchFeedbackManager {
   .touch-target {
     border: 2px solid var(--color-text-main);
   }
-  
+
   .touch-target:focus {
     border-width: 3px;
   }
@@ -830,6 +883,7 @@ class TouchFeedbackManager {
 ```
 
 ### Motor Accessibility
+
 ```css
 /* Enhanced touch targets for motor accessibility */
 @media (prefers-reduced-motion: no-preference) {
@@ -845,7 +899,7 @@ class TouchFeedbackManager {
   .touch-target {
     transition: none;
   }
-  
+
   .touch-target:active {
     transform: none;
   }
@@ -859,6 +913,7 @@ class TouchFeedbackManager {
 ### Touch Target Testing Checklist
 
 #### Size Requirements
+
 - [ ] All primary actions ≥ 56px
 - [ ] All secondary actions ≥ 44px
 - [ ] All tertiary actions ≥ 40px (use sparingly)
@@ -866,6 +921,7 @@ class TouchFeedbackManager {
 - [ ] Touch targets don't overlap or interfere
 
 #### Spacing Requirements
+
 - [ ] Minimum 8px spacing between adjacent targets
 - [ ] Minimum 4px spacing from screen edges
 - [ ] Safe area insets respected on notched devices
@@ -873,6 +929,7 @@ class TouchFeedbackManager {
 - [ ] Proper spacing in grid layouts
 
 #### Interaction Testing
+
 - [ ] Touch feedback is immediate (< 50ms)
 - [ ] Visual feedback is clear and unambiguous
 - [ ] Touch targets work with various finger sizes
@@ -880,6 +937,7 @@ class TouchFeedbackManager {
 - [ ] Touch targets work in different orientations
 
 #### Accessibility Testing
+
 - [ ] Focus indicators are visible
 - [ ] Screen reader announcements work
 - [ ] High contrast mode support

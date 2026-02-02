@@ -21,9 +21,9 @@ export const TransactionList = ({
   accounts,
   highlightTransactionIds = null,
   currentDateFilter = null,
-  onDateClick = () => {},
+  onDateClick = () => { },
   currentCategoryFilter = null,
-  onCategoryClick = () => {},
+  onCategoryClick = () => { },
 }) => {
   const listContainer = document.createElement('div');
   listContainer.className = 'dashboard-transactions-container';
@@ -32,6 +32,7 @@ export const TransactionList = ({
   listContainer.style.flexDirection = 'column';
   listContainer.style.minHeight = '0'; // Allow flex child to shrink
   listContainer.style.overflow = 'hidden'; // Prevent container from scrolling
+  listContainer.style.position = 'relative'; // For proper overflow handling
 
   // Title container with metrics
   const titleContainer = document.createElement('div');
@@ -110,6 +111,9 @@ export const TransactionList = ({
     const list = document.createElement('ul');
     list.className = 'dashboard-transactions-list';
     list.style.flex = '1';
+    list.style.overflowY = 'auto'; // Enable vertical scrolling
+    list.style.overflowX = 'hidden'; // Prevent horizontal scrolling
+    list.style.webkitOverflowScrolling = 'touch'; // Smooth scrolling on iOS
     Object.assign(list.style, {
       listStyle: 'none',
       padding: 0,

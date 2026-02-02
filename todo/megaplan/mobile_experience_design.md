@@ -24,6 +24,7 @@
 Based on existing mobile.css and tokens.css analysis:
 
 **Strengths:**
+
 - ✅ Touch target minimum (44px) already defined in tokens
 - ✅ Safe area insets for notch devices implemented
 - ✅ Mobile navigation with proper touch targets
@@ -31,6 +32,7 @@ Based on existing mobile.css and tokens.css analysis:
 - ✅ Responsive breakpoints established
 
 **Areas for Enhancement:**
+
 - 🔄 Transaction form stacking needs optimization
 - 🔄 Smart suggestions mobile layout refinement
 - 🔄 Keyboard avoidance behaviors need enhancement
@@ -44,6 +46,7 @@ Based on existing mobile.css and tokens.css analysis:
 ### 1. Transaction Form Mobile Layout
 
 #### Current Layout Issues
+
 ```
 ┌─────────────────────────────────┐
 │ Add Transaction    [Date] [Back] │ ← Header too crowded
@@ -58,6 +61,7 @@ Based on existing mobile.css and tokens.css analysis:
 ```
 
 #### Optimized Mobile Layout
+
 ```
 ┌─────────────────────────────────┐
 │ ← Add Transaction        [Date] │ ← Simplified header
@@ -97,6 +101,7 @@ Based on existing mobile.css and tokens.css analysis:
 ### 2. Smart Suggestions Mobile Layout
 
 #### Amount Suggestions Mobile
+
 ```
 ┌─────────────────────────────────┐
 │ 💰 Smart Amount                 │
@@ -115,6 +120,7 @@ Based on existing mobile.css and tokens.css analysis:
 ```
 
 #### Category Selection Mobile
+
 ```
 ┌─────────────────────────────────┐
 │ 🏷️ Smart Category              │
@@ -147,11 +153,13 @@ Based on existing mobile.css and tokens.css analysis:
 ### 3. Dashboard Mobile Layout
 
 #### Current Issues
+
 - Stats cards too small for touch
 - Transaction list needs better spacing
 - Navigation optimization needed
 
 #### Optimized Dashboard
+
 ```
 ┌─────────────────────────────────┐
 │ 👋 Hello, User                 │ ← Personalized greeting
@@ -184,6 +192,7 @@ Based on existing mobile.css and tokens.css analysis:
 ### Minimum Requirements
 
 #### Primary Touch Targets (56px Standard)
+
 ```css
 .touch-target-primary {
   min-width: 56px;
@@ -208,6 +217,7 @@ Based on existing mobile.css and tokens.css analysis:
 ```
 
 #### Secondary Touch Targets (44px Minimum)
+
 ```css
 .touch-target-secondary {
   min-width: 44px;
@@ -233,6 +243,7 @@ Based on existing mobile.css and tokens.css analysis:
 ```
 
 #### Touch Spacing Standards
+
 ```css
 /* Minimum spacing between touch targets */
 .touch-spacing {
@@ -250,6 +261,7 @@ Based on existing mobile.css and tokens.css analysis:
 ### Component-Specific Touch Targets
 
 #### Smart Suggestions
+
 ```css
 /* Amount suggestion chips */
 .suggestion-chip {
@@ -269,6 +281,7 @@ Based on existing mobile.css and tokens.css analysis:
 ```
 
 #### Navigation Elements
+
 ```css
 /* Bottom navigation */
 .mobile-nav-item {
@@ -291,6 +304,7 @@ Based on existing mobile.css and tokens.css analysis:
 ### Virtual Keyboard Handling Strategy
 
 #### 1. Viewport Management
+
 ```javascript
 // Keyboard viewport management
 class MobileKeyboardManager {
@@ -298,53 +312,53 @@ class MobileKeyboardManager {
     this.visualViewport = window.visualViewport;
     this.originalHeight = window.innerHeight;
     this.isKeyboardVisible = false;
-    
+
     this.setupViewportListeners();
   }
-  
+
   setupViewportListeners() {
     // Listen for viewport changes (keyboard show/hide)
     this.visualViewport.addEventListener('resize', this.handleViewportChange);
-    
+
     // Listen for focus/blur on inputs
     document.addEventListener('focusin', this.handleInputFocus);
     document.addEventListener('focusout', this.handleInputBlur);
   }
-  
+
   handleViewportChange = () => {
     const currentHeight = this.visualViewport.height;
     const heightDiff = this.originalHeight - currentHeight;
-    
+
     this.isKeyboardVisible = heightDiff > 150; // Keyboard threshold
-    
+
     if (this.isKeyboardVisible) {
       this.adjustLayoutForKeyboard();
     } else {
       this.restoreOriginalLayout();
     }
   };
-  
+
   adjustLayoutForKeyboard() {
     // Add keyboard-visible class to body
     document.body.classList.add('keyboard-visible');
-    
+
     // Update CSS custom property for visual viewport height
     document.documentElement.style.setProperty(
-      '--visual-viewport-height', 
+      '--visual-viewport-height',
       `${this.visualViewport.height}px`
     );
-    
+
     // Scroll focused element into view
     this.scrollFocusedElementIntoView();
   }
-  
+
   scrollFocusedElementIntoView() {
     const activeElement = document.activeElement;
     if (activeElement && activeElement.tagName === 'INPUT') {
       setTimeout(() => {
         activeElement.scrollIntoView({
           behavior: 'smooth',
-          block: 'center'
+          block: 'center',
         });
       }, 300); // Allow keyboard animation to complete
     }
@@ -353,6 +367,7 @@ class MobileKeyboardManager {
 ```
 
 #### 2. Form Layout Adjustments
+
 ```css
 /* Keyboard-aware form adjustments */
 body.keyboard-visible {
@@ -394,6 +409,7 @@ body.keyboard-visible .smart-note-input {
 ```
 
 #### 3. Input-Specific Behaviors
+
 ```css
 /* Amount input keyboard handling */
 .smart-amount-input:focus {
@@ -425,6 +441,7 @@ body.keyboard-visible .smart-match-container {
 ```
 
 #### 4. Smart Suggestions Keyboard Integration
+
 ```javascript
 // Smart suggestions keyboard management
 class SmartSuggestionsKeyboardHandler {
@@ -433,10 +450,10 @@ class SmartSuggestionsKeyboardHandler {
     this.activeInput = null;
     this.suggestionsVisible = false;
   }
-  
+
   handleInputFocus(inputElement, inputType) {
     this.activeInput = inputElement;
-    
+
     // Adjust suggestions based on keyboard state
     if (document.body.classList.contains('keyboard-visible')) {
       this.showCompactSuggestions(inputType);
@@ -444,21 +461,23 @@ class SmartSuggestionsKeyboardHandler {
       this.showFullSuggestions(inputType);
     }
   }
-  
+
   showCompactSuggestions(inputType) {
     // Show fewer, more relevant suggestions when keyboard is visible
     const maxSuggestions = inputType === 'amount' ? 3 : 2;
-    
+
     // Position suggestions above keyboard if possible
     this.positionSuggestionsAboveKeyboard();
   }
-  
+
   positionSuggestionsAboveKeyboard() {
     const viewportHeight = window.visualViewport.height;
     const keyboardHeight = window.innerHeight - viewportHeight;
-    
+
     // Position suggestions in available space
-    const suggestionsContainer = document.querySelector('.smart-suggestions-container');
+    const suggestionsContainer = document.querySelector(
+      '.smart-suggestions-container'
+    );
     if (suggestionsContainer) {
       suggestionsContainer.style.maxHeight = `${viewportHeight - 200}px`;
       suggestionsContainer.style.overflowY = 'auto';
@@ -474,6 +493,7 @@ class SmartSuggestionsKeyboardHandler {
 ### Breakpoint-Specific Layouts
 
 #### Mobile Portrait (≤ 480px)
+
 ```css
 @media (width <= 480px) {
   /* Single column layout */
@@ -483,7 +503,7 @@ class SmartSuggestionsKeyboardHandler {
     gap: 12px;
     padding: 16px;
   }
-  
+
   /* Type toggle - horizontal scroll */
   .type-toggle-group {
     display: flex;
@@ -493,14 +513,14 @@ class SmartSuggestionsKeyboardHandler {
     -webkit-overflow-scrolling: touch;
     scroll-snap-type: x mandatory;
   }
-  
+
   .type-toggle-btn {
     flex-shrink: 0;
     scroll-snap-align: start;
     min-width: 80px;
     min-height: 48px;
   }
-  
+
   /* Category grid - 2x2 for thumb reach */
   .category-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -508,7 +528,7 @@ class SmartSuggestionsKeyboardHandler {
     max-height: 300px;
     overflow-y: auto;
   }
-  
+
   /* Amount suggestions - horizontal scroll */
   .smart-suggestions-container {
     overflow-x: auto;
@@ -517,7 +537,7 @@ class SmartSuggestionsKeyboardHandler {
     scroll-snap-type: x mandatory;
     padding: 8px 0;
   }
-  
+
   .suggestion-chip {
     flex-shrink: 0;
     scroll-snap-align: start;
@@ -527,6 +547,7 @@ class SmartSuggestionsKeyboardHandler {
 ```
 
 #### Mobile Landscape (481px - 767px)
+
 ```css
 @media (width >= 481px) and (width <= 767px) {
   /* Optimized for landscape */
@@ -536,35 +557,35 @@ class SmartSuggestionsKeyboardHandler {
     gap: 16px;
     padding: 20px;
   }
-  
+
   .form-header {
     grid-column: 1 / -1;
   }
-  
+
   .amount-section {
     grid-column: 1 / -1;
   }
-  
+
   .category-section {
     grid-column: 1 / -1;
   }
-  
+
   .note-section {
     grid-column: 1 / -1;
   }
-  
+
   .form-actions {
     grid-column: 1 / -1;
     display: flex;
     gap: 12px;
   }
-  
+
   /* Category grid - 3x2 in landscape */
   .category-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
   }
-  
+
   /* Reduce keyboard impact in landscape */
   body.keyboard-visible .transaction-form {
     grid-template-columns: 1fr;
@@ -573,6 +594,7 @@ class SmartSuggestionsKeyboardHandler {
 ```
 
 #### Small Tablets (768px - 1023px)
+
 ```css
 @media (width >= 768px) and (width <= 1023px) {
   /* Tablet optimization */
@@ -581,13 +603,13 @@ class SmartSuggestionsKeyboardHandler {
     margin: 0 auto;
     padding: 24px;
   }
-  
+
   /* Category grid - 4x2 */
   .category-grid {
     grid-template-columns: repeat(4, 1fr);
     gap: 16px;
   }
-  
+
   /* Side-by-side layout for some elements */
   .amount-category-row {
     display: grid;
@@ -604,6 +626,7 @@ class SmartSuggestionsKeyboardHandler {
 ### Natural Thumb Reach Analysis
 
 #### Right-Handed Users (85% of users)
+
 ```
 ┌─────────────────────────────────┐
 │ ⚡ Easy Reach                   │ ← Top 60% of screen
@@ -621,6 +644,7 @@ class SmartSuggestionsKeyboardHandler {
 ```
 
 #### Layout Optimization Strategy
+
 ```css
 /* Primary actions in easy reach zone */
 .mobile-primary-actions {
@@ -647,6 +671,7 @@ class SmartSuggestionsKeyboardHandler {
 ### Component Placement Strategy
 
 #### Transaction Form Thumb Optimization
+
 ```css
 .transaction-form {
   /* Critical inputs at top of thumb zone */
@@ -689,6 +714,7 @@ class SmartSuggestionsKeyboardHandler {
 ### CSS Architecture for Mobile
 
 #### Mobile-First Approach
+
 ```css
 /* Base mobile styles (default) */
 .smart-suggestions-container {
@@ -710,6 +736,7 @@ class SmartSuggestionsKeyboardHandler {
 ```
 
 #### Component Mobile Classes
+
 ```css
 /* Mobile-specific component modifiers */
 .mobile-optimized {
@@ -746,6 +773,7 @@ class SmartSuggestionsKeyboardHandler {
 ### JavaScript Mobile Utilities
 
 #### Touch Detection
+
 ```javascript
 class MobileUtils {
   constructor() {
@@ -753,29 +781,35 @@ class MobileUtils {
     this.isTouch = 'ontouchstart' in window;
     this.setupTouchListeners();
   }
-  
+
   detectMobile() {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    ) || window.innerWidth <= 767;
+    return (
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      ) || window.innerWidth <= 767
+    );
   }
-  
+
   setupTouchListeners() {
     if (this.isTouch) {
-      document.addEventListener('touchstart', this.handleTouchStart, { passive: true });
-      document.addEventListener('touchend', this.handleTouchEnd, { passive: true });
+      document.addEventListener('touchstart', this.handleTouchStart, {
+        passive: true,
+      });
+      document.addEventListener('touchend', this.handleTouchEnd, {
+        passive: true,
+      });
     }
   }
-  
-  handleTouchStart = (e) => {
+
+  handleTouchStart = e => {
     // Add touch-active class for immediate feedback
     const target = e.target.closest('.touch-target');
     if (target) {
       target.classList.add('touch-active');
     }
   };
-  
-  handleTouchEnd = (e) => {
+
+  handleTouchEnd = e => {
     // Remove touch-active class
     const target = e.target.closest('.touch-target');
     if (target) {
@@ -788,33 +822,45 @@ class MobileUtils {
 ```
 
 #### Viewport Management
+
 ```javascript
 class ViewportManager {
   constructor() {
     this.visualViewport = window.visualViewport;
     this.setupViewportListeners();
   }
-  
+
   setupViewportListeners() {
     if (this.visualViewport) {
       this.visualViewport.addEventListener('resize', this.handleViewportResize);
     }
   }
-  
+
   handleViewportResize = () => {
     const height = this.visualViewport.height;
     const width = this.visualViewport.width;
     const offsetTop = this.visualViewport.offsetTop;
-    
+
     // Update CSS custom properties
-    document.documentElement.style.setProperty('--visual-viewport-height', `${height}px`);
-    document.documentElement.style.setProperty('--visual-viewport-width', `${width}px`);
-    document.documentElement.style.setProperty('--visual-viewport-offset-top', `${offsetTop}px`);
-    
+    document.documentElement.style.setProperty(
+      '--visual-viewport-height',
+      `${height}px`
+    );
+    document.documentElement.style.setProperty(
+      '--visual-viewport-width',
+      `${width}px`
+    );
+    document.documentElement.style.setProperty(
+      '--visual-viewport-offset-top',
+      `${offsetTop}px`
+    );
+
     // Trigger custom event for components to listen to
-    window.dispatchEvent(new CustomEvent('viewportchange', {
-      detail: { height, width, offsetTop }
-    }));
+    window.dispatchEvent(
+      new CustomEvent('viewportchange', {
+        detail: { height, width, offsetTop },
+      })
+    );
   };
 }
 ```
@@ -824,6 +870,7 @@ class ViewportManager {
 ## Testing Requirements
 
 ### Touch Target Testing
+
 - [ ] All interactive elements meet 44px minimum
 - [ ] Primary actions meet 56px standard
 - [ ] Touch targets have proper spacing (8px minimum)
@@ -831,6 +878,7 @@ class ViewportManager {
 - [ ] Touch targets work with various finger sizes
 
 ### Keyboard Behavior Testing
+
 - [ ] Virtual keyboard doesn't hide focused inputs
 - [ ] Layout adjusts smoothly when keyboard appears
 - [ ] Form remains usable with keyboard visible
@@ -838,6 +886,7 @@ class ViewportManager {
 - [ ] Scroll behavior works correctly with keyboard
 
 ### Responsive Layout Testing
+
 - [ ] Layout works correctly at 320px width
 - [ ] Horizontal scrolling works smoothly
 - [ ] Vertical scrolling has momentum
@@ -845,6 +894,7 @@ class ViewportManager {
 - [ ] Content remains accessible in all orientations
 
 ### Thumb Reach Testing
+
 - [ ] Primary actions in easy reach zone
 - [ ] Critical inputs don't require hand repositioning
 - [ ] Navigation is easily accessible
@@ -856,12 +906,14 @@ class ViewportManager {
 ## Performance Considerations
 
 ### Touch Performance
+
 - **Touch Response Time:** < 50ms for touch feedback
 - **Scroll Performance:** 60fps smooth scrolling
 - **Animation Performance:** Hardware-accelerated transitions
 - **Memory Usage:** Efficient touch event handling
 
 ### Layout Performance
+
 - **Reflow Minimization:** Use transform for animations
 - **Paint Optimization:** Avoid layout thrashing
 - **Scroll Performance:** Use CSS scroll-snap for smooth scrolling

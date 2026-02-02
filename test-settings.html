@@ -1,47 +1,48 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Settings Service Test</title>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Settings Service Test</h1>
     <div id="test-results"></div>
-    
+
     <script type="module">
-        // Test the SettingsService directly
-        import { SettingsService } from './src/core/settings-service.js';
-        
-        const results = document.getElementById('test-results');
-        
-        try {
-            // Test getting a setting that doesn't exist (should return undefined)
-            const test1 = SettingsService.getSetting('smartSuggestionsEnabled');
-            results.innerHTML += `<p>Test 1 - Get non-existent setting: ${test1}</p>`;
-            
-            // Test saving a setting
-            SettingsService.saveSetting('smartSuggestionsEnabled', true);
-            results.innerHTML += `<p>Test 2 - Saved setting to true</p>`;
-            
-            // Test getting the saved setting
-            const test3 = SettingsService.getSetting('smartSuggestionsEnabled');
-            results.innerHTML += `<p>Test 3 - Get saved setting: ${test3}</p>`;
-            
-            // Test the default logic
-            const test4 = SettingsService.getSetting('smartSuggestionsEnabled') !== false;
-            results.innerHTML += `<p>Test 4 - Default logic: ${test4}</p>`;
-            
-            // Test saving to false
-            SettingsService.saveSetting('smartSuggestionsEnabled', false);
-            const test5 = SettingsService.getSetting('smartSuggestionsEnabled') !== false;
-            results.innerHTML += `<p>Test 5 - After setting to false: ${test5}</p>`;
-            
-            results.innerHTML += `<p><strong>All tests completed successfully!</strong></p>`;
-            
-        } catch (error) {
-            results.innerHTML += `<p style="color: red;">Error: ${error.message}</p>`;
-        }
+      // Test the SettingsService directly
+      import { SettingsService } from './src/core/settings-service.js';
+
+      const results = document.getElementById('test-results');
+
+      try {
+        // Test getting a setting that doesn't exist (should return undefined)
+        const test1 = SettingsService.getSetting('smartSuggestionsEnabled');
+        results.innerHTML += `<p>Test 1 - Get non-existent setting: ${test1}</p>`;
+
+        // Test saving a setting
+        SettingsService.saveSetting('smartSuggestionsEnabled', true);
+        results.innerHTML += `<p>Test 2 - Saved setting to true</p>`;
+
+        // Test getting the saved setting
+        const test3 = SettingsService.getSetting('smartSuggestionsEnabled');
+        results.innerHTML += `<p>Test 3 - Get saved setting: ${test3}</p>`;
+
+        // Test the default logic
+        const test4 =
+          SettingsService.getSetting('smartSuggestionsEnabled') !== false;
+        results.innerHTML += `<p>Test 4 - Default logic: ${test4}</p>`;
+
+        // Test saving to false
+        SettingsService.saveSetting('smartSuggestionsEnabled', false);
+        const test5 =
+          SettingsService.getSetting('smartSuggestionsEnabled') !== false;
+        results.innerHTML += `<p>Test 5 - After setting to false: ${test5}</p>`;
+
+        results.innerHTML += `<p><strong>All tests completed successfully!</strong></p>`;
+      } catch (error) {
+        results.innerHTML += `<p style="color: red;">Error: ${error.message}</p>`;
+      }
     </script>
-</body>
+  </body>
 </html>

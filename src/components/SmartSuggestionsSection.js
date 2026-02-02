@@ -19,7 +19,8 @@ export const SmartSuggestionsSection = () => {
   container.appendChild(header);
 
   // Get current setting
-  const currentSetting = SettingsService.getSetting('smartSuggestionsEnabled') !== false; // Default to true
+  const currentSetting =
+    SettingsService.getSetting('smartSuggestionsEnabled') !== false; // Default to true
 
   // Create toggle container
   const toggleContainer = document.createElement('div');
@@ -40,7 +41,8 @@ export const SmartSuggestionsSection = () => {
 
   // Toggle functionality
   const toggleSuggestions = () => {
-    const isEnabled = SettingsService.getSetting('smartSuggestionsEnabled') !== false;
+    const isEnabled =
+      SettingsService.getSetting('smartSuggestionsEnabled') !== false;
     const newSetting = !isEnabled;
     SettingsService.saveSetting('smartSuggestionsEnabled', newSetting);
 
@@ -55,7 +57,7 @@ export const SmartSuggestionsSection = () => {
   };
 
   // Update description based on setting
-  const updateDescription = (isEnabled) => {
+  const updateDescription = isEnabled => {
     description.innerHTML = isEnabled
       ? `🚀 <strong>Smart Suggestions Active</strong><br>
          Get intelligent amount, category, and note suggestions based on your spending patterns.<br>
@@ -66,7 +68,7 @@ export const SmartSuggestionsSection = () => {
   };
 
   // Show feedback toast
-  const showFeedback = (isEnabled) => {
+  const showFeedback = isEnabled => {
     const toast = document.createElement('div');
     toast.className = 'settings-toast';
     toast.textContent = isEnabled

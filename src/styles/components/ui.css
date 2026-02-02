@@ -11,7 +11,7 @@
   border-radius: var(--radius-md);
   border: 1px solid transparent;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  /* Remove transition animation */
   text-decoration: none;
   font-size: var(--font-size-base);
   position: relative;
@@ -24,7 +24,7 @@
 }
 
 .btn-touch-active {
-  transition: all var(--transition-fast);
+  /* Remove transition animation */
 }
 
 .btn::before {
@@ -34,7 +34,7 @@
   border-radius: inherit;
   background: rgb(255, 255, 255, 0.1);
   opacity: 0;
-  transition: opacity var(--transition-fast);
+  /* Remove transition animation */
   pointer-events: none;
 }
 

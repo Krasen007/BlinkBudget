@@ -10,6 +10,7 @@
 @import './components/ui.css';
 @import './components/forms-dialogs.css';
 @import './components/smart-suggestions.css';
+@import './mobile-enhanced.css';
 @import './components/reports-responsive.css';
 @import './components/reports-accessibility.css';
 @import './components/reports.css';
