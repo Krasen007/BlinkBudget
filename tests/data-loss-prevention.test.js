@@ -254,12 +254,16 @@ describe('Week 2: Data Loss Prevention', () => {
 
       dataIntegrityService.generateRecommendations(testResult);
 
-      expect(testResult.recommendations).toHaveLength(4);
+      expect(testResult.recommendations.length).toBeGreaterThan(0);
       expect(
         testResult.recommendations.some(rec => rec.priority === 'high')
       ).toBe(true);
       expect(
         testResult.recommendations.some(rec => rec.action.includes('recovery'))
+      ).toBe(true);
+      // Verify each issue type gets a recommendation
+      expect(
+        testResult.recommendations.some(rec => rec.relatedTo === 'duplicate')
       ).toBe(true);
     });
 

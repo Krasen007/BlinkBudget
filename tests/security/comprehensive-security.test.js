@@ -199,7 +199,9 @@ describe('Comprehensive Security Tests - OWASP Top 10', () => {
           const escaped = escapeHtml(input);
           expect(escaped).not.toContain('<');
           expect(escaped).not.toContain('>');
-          expect(escaped).toContain('&lt;') || escaped.contains('&gt;');
+          expect(escaped.includes('&lt;') || escaped.includes('&gt;')).toBe(
+            true
+          );
         });
       });
 

@@ -124,7 +124,7 @@ export const mockFinancialData = {
     0.01, // Minimum positive
     999999999.99, // Very large amount
     -100, // Negative amount (should be rejected)
-    100.0, // Extra decimal places
+    100.001, // Extra decimal places
     '100', // String number
     'invalid', // Invalid amount
     null, // Null amount

@@ -177,6 +177,9 @@ export const SmartCategorySelector = {
         if (onSelect) {
           onSelect(category);
         }
+
+        // Record selection for learning
+        suggestionService.recordUserSelection('category', category);
       });
 
       grid.appendChild(card);

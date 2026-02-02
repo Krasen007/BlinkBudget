@@ -23,7 +23,9 @@ export class MobileViewportManager {
   initialize() {
     // Temporarily disable viewport management to prevent layout jumps
     // TODO: Re-enable after fixing layout issues
-    console.warn('Mobile viewport manager temporarily disabled to prevent layout jumps');
+    console.warn(
+      'Mobile viewport manager temporarily disabled to prevent layout jumps'
+    );
     return;
   }
 
@@ -89,11 +91,12 @@ export class MobileViewportManager {
     const newOffsetTop = this.visualViewport.offsetTop;
 
     const keyboardHeight = this.originalHeight - newHeight;
-    const isKeyboardVisible = keyboardHeight > 150;
+    const clampedKeyboardHeight = Math.max(0, keyboardHeight);
+    const isKeyboardVisible = clampedKeyboardHeight > 150;
 
     this.keyboardState = {
       visible: isKeyboardVisible,
-      height: keyboardHeight,
+      height: clampedKeyboardHeight,
       offsetTop: newOffsetTop,
     };
 

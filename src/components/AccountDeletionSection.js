@@ -100,17 +100,42 @@ export const AccountDeletionSection = () => {
         const dataSummary = await accountDeletionService.getUserDataSummary();
 
         // Show data summary
-        summaryContent.innerHTML = `
-          <div style="display: grid; grid-template-columns: auto 1fr; gap: ${SPACING.XS}; font-size: ${FONT_SIZES.SM};">
-            <span>• Transactions:</span><span><strong>${dataSummary.transactions}</strong></span>
-            <span>• Accounts:</span><span><strong>${dataSummary.accounts}</strong></span>
-            <span>• Goals:</span><span><strong>${dataSummary.goals}</strong></span>
-            <span>• Investments:</span><span><strong>${dataSummary.investments}</strong></span>
-            <span>• Budgets:</span><span><strong>${dataSummary.budgets}</strong></span>
-            <span>• Settings:</span><span><strong>${dataSummary.settings}</strong></span>
-            <span>• Storage Size:</span><span><strong>${(dataSummary.totalStorageSize / 1024).toFixed(1)} KB</strong></span>
-          </div>
-        `;
+        // Clear previous content
+        summaryContent.innerHTML = '';
+
+        const grid = document.createElement('div');
+        Object.assign(grid.style, {
+          display: 'grid',
+          gridTemplateColumns: 'auto 1fr',
+          gap: SPACING.XS,
+          fontSize: FONT_SIZES.SM,
+        });
+
+        const items = [
+          ['Transactions', dataSummary.transactions],
+          ['Accounts', dataSummary.accounts],
+          ['Goals', dataSummary.goals],
+          ['Investments', dataSummary.investments],
+          ['Budgets', dataSummary.budgets],
+          ['Settings', dataSummary.settings],
+          [
+            'Storage Size',
+            `${(Number(dataSummary.totalStorageSize) / 1024).toFixed(1)} KB`,
+          ],
+        ];
+
+        items.forEach(([label, value]) => {
+          const labelSpan = document.createElement('span');
+          labelSpan.textContent = `• ${label}:`;
+          const valueSpan = document.createElement('span');
+          const strong = document.createElement('strong');
+          strong.textContent = String(value);
+          valueSpan.appendChild(strong);
+          grid.appendChild(labelSpan);
+          grid.appendChild(valueSpan);
+        });
+
+        summaryContent.appendChild(grid);
         dataSummaryBox.style.display = 'block';
 
         deleteBtn.textContent = '⚠️ Confirm Deletion';
@@ -144,16 +169,14 @@ export const AccountDeletionSection = () => {
 
             if (result.success) {
               const { MobileAlert } = await import('./MobileModal.js');
-              MobileAlert({
+              await MobileAlert({
                 title: '✅ Account Deleted',
                 message: `Your account has been successfully deleted. ${result.dataDeleted.transactions} transactions and all associated data have been removed.`,
                 buttonText: 'OK',
               });
 
-              // Redirect to landing page after a short delay
-              setTimeout(() => {
-                window.location.href = '/';
-              }, 2000);
+              // Redirect to landing page
+              window.location.href = '/';
             } else {
               throw new Error(`Deletion failed: ${result.errors.join(', ')}`);
             }

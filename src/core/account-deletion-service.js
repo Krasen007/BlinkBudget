@@ -510,8 +510,7 @@ export class AccountDeletionService {
       // Create deletion record
       const deletionRecord = {
         deletionId: result.deletionId,
-        userId: result.userId,
-        userEmail: result.userEmail,
+        // Omit PII for compliance - store only operational metadata
         timestamp: result.timestamp,
         duration: result.duration,
         dataDeleted: result.dataDeleted,
@@ -633,7 +632,10 @@ export class AccountDeletionService {
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && key.startsWith('blinkbudget_')) {
-          totalSize += localStorage.getItem(key).length;
+          const value = localStorage.getItem(key);
+          if (value) {
+            totalSize += value.length;
+          }
         }
       }
       summary.totalStorageSize = totalSize;

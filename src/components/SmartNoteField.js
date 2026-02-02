@@ -189,7 +189,7 @@ export const SmartNoteField = {
     // Suggestions label
     const label = document.createElement('div');
     label.className = 'suggestions-label';
-    label.textContent = `💡 Suggestions${suggestions[0].source === 'category' ? ` for ${suggestions[0].source}` : ''}:`;
+    label.textContent = `💡 Suggestions:`;
     container.appendChild(label);
 
     // Suggestions list

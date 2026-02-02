@@ -65,16 +65,22 @@ export class SecurityMonitor {
   trackFailedLogin(userId, ip) {
     const key = `${userId}:${ip}`;
     const attempts = this.monitoring.failedLogins.get(key) || [];
+    const now = Date.now();
+    const window = this.threatThresholds.suspiciousActivityWindow;
 
-    attempts.push(Date.now());
-    this.monitoring.failedLogins.set(key, attempts);
+    // Filter to recent attempts and add new one
+    const recentAttempts = attempts.filter(
+      timestamp => now - timestamp < window
+    );
+    recentAttempts.push(now);
+    this.monitoring.failedLogins.set(key, recentAttempts);
 
     // Check if threshold exceeded
-    if (attempts.length >= this.threatThresholds.failedLoginAttempts) {
+    if (recentAttempts.length >= this.threatThresholds.failedLoginAttempts) {
       this.handleSuspiciousActivity('brute_force', {
         userId,
         ip,
-        attempts: attempts.length,
+        attempts: recentAttempts.length,
         timeWindow: this.threatThresholds.suspiciousActivityWindow,
       });
     }

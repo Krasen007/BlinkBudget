@@ -161,11 +161,10 @@ export const EmergencyExportService = {
         })),
         lastUpdated:
           transactions.length > 0
-            ? Math.max(
-                ...transactions.map(tx =>
-                  new Date(tx.updatedAt || tx.createdAt).getTime()
-                )
-              )
+            ? transactions.reduce((max, tx) => {
+                const time = new Date(tx.updatedAt || tx.createdAt).getTime();
+                return time > max ? time : max;
+              }, 0)
             : null,
       };
     } catch (error) {

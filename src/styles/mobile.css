@@ -502,7 +502,10 @@
 
 .transaction-form.mobile-optimized {
   @media (width <= calc(var(--breakpoint-md) - 1px)) {
-    min-height: calc(100vh - 120px); /* Use fixed height instead of viewport variable */
+    min-height: calc(
+      100vh - 120px
+    ); /* Use fixed height instead of viewport variable */
+
     justify-content: flex-end;
   }
 }
@@ -536,7 +539,9 @@
   }
 
   .transaction-form.mobile-optimized {
-    min-height: calc(100vh - 80px); /* Use fixed height instead of viewport variable */
+    min-height: calc(
+      100vh - 80px
+    ); /* Use fixed height instead of viewport variable */
   }
 }
 

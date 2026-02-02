@@ -49,8 +49,10 @@ export const SmartAmountInput = {
       const formattedValue = this.formatAmount(value);
       if (formattedValue !== value) {
         const cursorPos = e.target.selectionStart;
+        const lengthDiff = value.length - formattedValue.length;
+        const adjustedPos = Math.max(0, cursorPos - lengthDiff);
         e.target.value = formattedValue;
-        e.target.setSelectionRange(cursorPos, cursorPos);
+        e.target.setSelectionRange(adjustedPos, adjustedPos);
       }
 
       const amount = this.parseAmount(formattedValue);
@@ -115,9 +117,10 @@ export const SmartAmountInput = {
     let clean = value.replace(/[^0-9.]/g, '');
 
     // Ensure only one decimal point
-    const parts = clean.split('.');
+    let parts = clean.split('.');
     if (parts.length > 2) {
       clean = `${parts[0]}.${parts.slice(1).join('')}`;
+      parts = clean.split('.');
     }
 
     // Limit to 2 decimal places
@@ -191,12 +194,14 @@ export const SmartAmountInput = {
 
       chip.addEventListener('click', () => {
         // Remove selected class from all chips
-        chipsContainer
-          .querySelectorAll('.suggestion-chip')
-          .forEach(c => c.classList.remove('selected'));
+        chipsContainer.querySelectorAll('.suggestion-chip').forEach(c => {
+          c.classList.remove('selected');
+          c.setAttribute('aria-selected', 'false');
+        });
 
         // Add selected class to clicked chip
         chip.classList.add('selected');
+        chip.setAttribute('aria-selected', 'true');
 
         if (onSelect) {
           onSelect(suggestion);
@@ -251,7 +256,13 @@ export const SmartAmountInput = {
       const iconHTML = getCategoryIconHTML(suggestion.category, {
         size: 'small',
       });
-      categoryDiv.innerHTML = `${iconHTML} ${suggestion.category}`;
+      // Create icon container separately to avoid XSS
+      const iconSpan = document.createElement('span');
+      iconSpan.innerHTML = iconHTML;
+      const textSpan = document.createElement('span');
+      textSpan.textContent = ` ${suggestion.category}`;
+      categoryDiv.appendChild(iconSpan);
+      categoryDiv.appendChild(textSpan);
 
       chip.appendChild(categoryDiv);
     }
@@ -262,15 +273,15 @@ export const SmartAmountInput = {
   /**
    * Create confidence indicator
    * @param {Object} suggestion - Top suggestion
-   * @returns {HTMLElement} Confidence indicator element
-   */
   createConfidenceIndicator(suggestion) {
     const indicator = document.createElement('div');
     indicator.className = `confidence-indicator confidence-${suggestionService.getConfidenceLevel(suggestion.confidence)}`;
 
     const confidencePercent = Math.round(suggestion.confidence * 100);
-    indicator.innerHTML = `⭐ Most Likely: ${suggestion.category || 'Unknown'} (${confidencePercent}% confidence)`;
+    indicator.textContent = `⭐ Most Likely: ${suggestion.category || 'Unknown'} (${confidencePercent}% confidence)`;
 
+    return indicator;
+  },
     return indicator;
   },
 

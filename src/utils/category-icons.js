@@ -33,7 +33,7 @@ export const categoryIcons = {
   Сметки: {
     name: 'utilities',
     svg: '<path d="M15 3v4a3 3 0 0 0 3 3v9a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V10a3 3 0 0 0 3-3V3"/><path d="M9 3v4a3 3 0 0 0 3 3"/><path d="M9 12v6"/><path d="M12 12v6"/><path d="M15 12v6"/>',
-    color: '#F59E0B',
+    color: '#8B5CF6',
     category: 'home',
   },
   Забавления: {
@@ -171,11 +171,12 @@ export function getCategoriesByFrequency(transactions = []) {
   return Object.entries(categoryCount)
     .map(([category, count]) => {
       const iconData = getCategoryIcon(category);
+      const pct = totalTransactions > 0 ? count / totalTransactions : 0;
       return {
         category,
         count,
-        percentage: totalTransactions > 0 ? count / totalTransactions : 0,
-        frequency: getFrequencyLevel(count / totalTransactions),
+        percentage: pct,
+        frequency: getFrequencyLevel(pct),
         ...iconData,
       };
     })

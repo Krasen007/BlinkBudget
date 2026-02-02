@@ -90,12 +90,16 @@ export const PrivacyService = {
    * Ensure privacy settings exist
    */
   ensurePrivacySettings() {
-    const existing = localStorage.getItem(this.PRIVACY_SETTINGS_KEY);
-    if (!existing) {
-      localStorage.setItem(
-        this.PRIVACY_SETTINGS_KEY,
-        JSON.stringify(this.defaultSettings)
-      );
+    try {
+      const existing = localStorage.getItem(this.PRIVACY_SETTINGS_KEY);
+      if (!existing) {
+        localStorage.setItem(
+          this.PRIVACY_SETTINGS_KEY,
+          JSON.stringify(this.defaultSettings)
+        );
+      }
+    } catch (error) {
+      console.warn('Failed to ensure privacy settings:', error);
     }
   },
 
@@ -139,15 +143,15 @@ export const PrivacyService = {
       case 'transaction':
         // Remove optional metadata if enabled
         if (settings.dataMinimization.excludeOptionalMetadata) {
-          delete sanitized.userAgent;
-          delete sanitized.sessionId;
-          delete sanitized.clientIP;
-          // Keep only essential timestamps
           if (sanitized.timestamp) {
-            sanitized.timestamp = new Date(sanitized.timestamp)
-              .toISOString()
-              .split('T')[0];
+            // Keep hour precision for ordering, remove minutes/seconds
+            const d = new Date(sanitized.timestamp);
+            d.setMinutes(0, 0, 0);
+            sanitized.timestamp = d.toISOString();
           }
+          sanitized.timestamp = new Date(sanitized.timestamp)
+            .toISOString()
+            .split('T')[0];
         }
         break;
 
