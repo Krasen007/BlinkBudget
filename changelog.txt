@@ -1,23 +1,45 @@
-# BlinkBudget Changelog
+# BlinkBudget v1.18.0 Changelog
 
-## Version 1.17.6
+## 🚀 Key Improvements
 
-### Bug Fixes
-- Fixed build error that was preventing successful compilation
-- Resolved issues with Insights functionality to ensure proper operation
-- Fixed rubber banding effect when scrolling on mobile devices
+### Mobile Experience & UI/UX
+- **Mobile Optimization**: Complete mobile experience redesign for better touch interactions
+- **UI Bug Fixes**: Resolved various interface issues and improved visual consistency
+- **Enhanced Navigation**: Improved button layouts and interactions across all views
 
-### Features & Enhancements
-- **Budgets Integration**: Added budgets to cloud sync functionality for seamless cross-device budget management
-- **Charts to Reports**: Renamed and reorganized charts section to Reports for better clarity
-- **Category Navigation**: Added scroll-to-category functionality in reports for improved user experience
-- **Data Accuracy**: Fixed incorrect week data display in reports
-- **Insights Enhancement**: Improved Insights section with better data presentation and functionality
+### 📊 Smart Features
+- **Smart Suggestions Engine**: New intelligent transaction categorization and insights
+- **Ghost Transactions**: Added ability to see historical transaction data when dates are modified
+- **Performance Boost**: Fixed slow chart loading with intelligent caching system
 
-### Code Quality
-- **CSS Optimization**: Merged multiple CSS files into a more organized structure to reduce complexity and improve maintainability
+### 🔒 Security & Privacy
+- **Enhanced Security**: Comprehensive security audit and hardening measures
+- **Privacy Compliance**: Full privacy validation and data protection compliance
+- **Data Protection**: Added robust backup and recovery solutions
 
-### Technical Improvements
-- Enhanced cloud synchronization to include budget data
-- Improved mobile responsiveness and scrolling behavior
-- Better organization of chart/report components for clearer user understanding
+### 🛠️ Technical Improvements
+- **Budget Calculations**: Fixed budget and category calculation logic for accurate financial tracking
+- **Transaction Management**: Improved transaction handling with anchor persistence and deletion sync
+- **Multi-Agent Development**: Enhanced development workflow and code quality
+
+### 🎨 Visual Enhancements
+- **Color System**: Updated color schemes for better readability and accessibility
+- **Chart Improvements**: Enhanced data visualization with fixed colors for transactions
+- **Text Wrapping**: Improved text handling for better mobile display
+
+---
+
+## 📝 Recent Commits (v1.17..v1.18.0)
+- cleanup and UI bug fixes
+- Mobile experience optimization complete
+- Smart suggestions engine implementation
+- Privacy and security compliance
+- Enhanced data backup solutions
+- Budget calculation fixes
+- Performance improvements and caching
+- Ghost transactions feature
+- Visual and accessibility improvements
+
+---
+
+*Last updated: February 2026*

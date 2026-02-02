@@ -26,6 +26,8 @@
 - **Auto-submit on category selection** - No save buttons needed
 - **Mobile-optimized interface** focused on speed and simplicity
 - **Offline-capable** with localStorage and Service Worker persistence
+- **Smart Suggestions Engine** - Intelligent transaction categorization and insights
+- **Ghost Transactions** - See historical transaction data when dates are modified
 
 ### Transaction Management
 
@@ -44,7 +46,9 @@
 - **Account filtering** - View transactions by specific account or all accounts
 - **Transaction history** with edit/delete capabilities
 - **Visual feedback** for recently added transactions
-- **Fixed Dashboard layout** with improved spacing and non-clipping action buttons
+- **Dashboard layout** with improved spacing and optimized action buttons
+- **Fast chart loading** with intelligent caching system
+- **Enhanced data visualization** with consistent colors for transactions
 
 ### Financial Planning & Insights
 
@@ -61,12 +65,15 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 ### User Experience & UI
 
 - **Responsive layout** optimized for mobile devices
+- **Mobile experience** optimized for better touch interactions
 - **Touch-friendly interface** with proper touch targets (56px minimum)
 - **Mobile navigation** with bottom tab bar
 - **Keyboard-aware UI** that adapts to virtual keyboard
 - **PWA support** - Installable as a standalone app with offline support
 - **Keyboard shortcut (Escape key)** to exit Settings and return to dashboard
 - **Helpful tips on each section**
+- **Enhanced security** with comprehensive privacy compliance
+- **Improved accessibility** with updated color schemes and better text handling
 
 ### Backup & Restore
 
