@@ -339,8 +339,21 @@ export class AccountDeletionService {
     };
 
     try {
+      const userId = result.userId;
+      const verificationResults = {
+        authCheck: false,
+        localStorageCheck: false,
+        transactionCheck: false,
+        accountCheck: false,
+        goalCheck: false,
+        investmentCheck: false,
+        budgetCheck: false,
+        settingsCheck: false,
+      };
+
       // Check if user is still authenticated (should be false)
-      if (AuthService.isAuthenticated()) {
+      verificationResults.authCheck = !AuthService.isAuthenticated();
+      if (!verificationResults.authCheck) {
         result.warnings.push('User still appears to be authenticated');
       }
 
@@ -349,26 +362,130 @@ export class AccountDeletionService {
         key.startsWith('blinkbudget_')
       );
 
+      verificationResults.localStorageCheck = remainingKeys.length === 0;
       if (remainingKeys.length > 0) {
         result.warnings.push(
           `${remainingKeys.length} localStorage keys remain: ${remainingKeys.join(', ')}`
         );
       }
 
-      // Check if any user data can still be retrieved
+      // Verify transactions are deleted
       try {
         const remainingTransactions = TransactionService.getAll();
-        if (remainingTransactions.length > 0) {
+        const userTransactions = remainingTransactions.filter(
+          tx => !tx.userId || tx.userId === userId
+        );
+        verificationResults.transactionCheck = userTransactions.length === 0;
+        if (userTransactions.length > 0) {
           result.warnings.push(
-            `${remainingTransactions.length} transactions still exist`
+            `${userTransactions.length} user transactions still exist`
           );
         }
       } catch {
         // Expected - service should fail after auth deletion
+        verificationResults.transactionCheck = true;
       }
 
+      // Verify accounts are deleted
+      try {
+        const { AccountService } = await import('./account-service.js');
+        const remainingAccounts = AccountService.getAccounts();
+        const userAccounts = remainingAccounts.filter(
+          acc => !acc.userId || acc.userId === userId
+        );
+        verificationResults.accountCheck = userAccounts.length === 0;
+        if (userAccounts.length > 0) {
+          result.warnings.push(
+            `${userAccounts.length} user accounts still exist`
+          );
+        }
+      } catch {
+        verificationResults.accountCheck = true;
+      }
+
+      // Verify goals are deleted
+      try {
+        const { GoalPlanner } = await import('./goal-planner.js');
+        const remainingGoals = GoalPlanner.getAllGoals();
+        const userGoals = remainingGoals.filter(
+          goal => !goal.userId || goal.userId === userId
+        );
+        verificationResults.goalCheck = userGoals.length === 0;
+        if (userGoals.length > 0) {
+          result.warnings.push(`${userGoals.length} user goals still exist`);
+        }
+      } catch {
+        verificationResults.goalCheck = true;
+      }
+
+      // Verify investments are deleted
+      try {
+        const { InvestmentTracker } = await import('./investment-tracker.js');
+        const remainingInvestments = InvestmentTracker.getAllInvestments();
+        const userInvestments = remainingInvestments.filter(
+          inv => !inv.userId || inv.userId === userId
+        );
+        verificationResults.investmentCheck = userInvestments.length === 0;
+        if (userInvestments.length > 0) {
+          result.warnings.push(
+            `${userInvestments.length} user investments still exist`
+          );
+        }
+      } catch {
+        verificationResults.investmentCheck = true;
+      }
+
+      // Verify budgets are deleted
+      try {
+        const { BudgetService } = await import('./budget-service.js');
+        const remainingBudgets = BudgetService.getAllBudgets();
+        const userBudgets = remainingBudgets.filter(
+          budget => !budget.userId || budget.userId === userId
+        );
+        verificationResults.budgetCheck = userBudgets.length === 0;
+        if (userBudgets.length > 0) {
+          result.warnings.push(
+            `${userBudgets.length} user budgets still exist`
+          );
+        }
+      } catch {
+        verificationResults.budgetCheck = true;
+      }
+
+      // Verify settings are deleted
+      const settingsKeys = Object.keys(localStorage).filter(
+        key =>
+          key.startsWith('blinkbudget_setting_') ||
+          key.startsWith('blink_settings')
+      );
+      verificationResults.settingsCheck = settingsKeys.length === 0;
+      if (settingsKeys.length > 0) {
+        result.warnings.push(
+          `${settingsKeys.length} settings keys still exist`
+        );
+      }
+
+      // Overall verification result
+      const allChecksPass = Object.values(verificationResults).every(
+        check => check === true
+      );
+
       step.status = 'completed';
-      step.verificationPassed = result.errors.length === 0;
+      step.verificationPassed = allChecksPass;
+      step.verificationResults = verificationResults;
+      step.verificationSummary = {
+        totalChecks: Object.keys(verificationResults).length,
+        passedChecks: Object.values(verificationResults).filter(check => check)
+          .length,
+        failedChecks: Object.values(verificationResults).filter(check => !check)
+          .length,
+      };
+
+      if (!allChecksPass) {
+        result.warnings.push(
+          'Some verification checks failed - data may not be completely deleted'
+        );
+      }
     } catch (error) {
       step.status = 'failed';
       step.error = error.message;

@@ -10,6 +10,8 @@ import { AuthService } from './auth-service.js';
 import { AccountService } from './account-service.js';
 import { generateId } from '../utils/id-utils.js';
 import { safeJsonParse } from '../utils/security-utils.js';
+import { auditService, auditEvents } from './audit-service.js';
+import { PrivacyService } from './privacy-service.js';
 
 const TRANSACTIONS_KEY = STORAGE_KEYS.TRANSACTIONS;
 
@@ -69,9 +71,30 @@ export const TransactionService = {
       ...transaction,
     };
 
-    transactions.unshift(newTransaction);
+    // Apply data minimization
+    const sanitizedTransaction = PrivacyService.sanitizeDataForStorage(
+      newTransaction,
+      'transaction'
+    );
+
+    transactions.unshift(sanitizedTransaction);
     this._persist(transactions);
-    return newTransaction;
+
+    // Audit log transaction creation
+    auditService.log(
+      auditEvents.DATA_CREATE,
+      {
+        entityType: 'transaction',
+        entityId: sanitizedTransaction.id,
+        amount: sanitizedTransaction.amount,
+        category: sanitizedTransaction.category,
+        accountId: sanitizedTransaction.accountId,
+      },
+      AuthService.getUserId(),
+      'low'
+    );
+
+    return sanitizedTransaction;
   },
 
   /**
@@ -107,12 +130,28 @@ export const TransactionService = {
     const index = transactions.findIndex(t => t.id === id);
     if (index === -1) return null;
 
+    const originalTransaction = transactions[index];
     transactions[index] = {
       ...transactions[index],
       ...updates,
       updatedAt: new Date().toISOString(),
     };
     this._persist(transactions);
+
+    // Audit log transaction update
+    auditService.log(
+      auditEvents.DATA_UPDATE,
+      {
+        entityType: 'transaction',
+        entityId: id,
+        changes: Object.keys(updates),
+        originalAmount: originalTransaction.amount,
+        newAmount: updates.amount || originalTransaction.amount,
+      },
+      AuthService.getUserId(),
+      'low'
+    );
+
     return transactions[index];
   },
 
@@ -122,6 +161,8 @@ export const TransactionService = {
    */
   remove(id) {
     const transaction = this.get(id);
+    if (!transaction) return;
+
     if (transaction && transaction.ghostId) {
       // Cascade to ghost if this is a moved transaction being deleted
       this.remove(transaction.ghostId);
@@ -130,6 +171,19 @@ export const TransactionService = {
     let transactions = this.getAll();
     transactions = transactions.filter(t => t.id !== id);
     this._persist(transactions);
+
+    // Audit log transaction deletion
+    auditService.log(
+      auditEvents.DATA_DELETE,
+      {
+        entityType: 'transaction',
+        entityId: id,
+        amount: transaction.amount,
+        category: transaction.category,
+      },
+      AuthService.getUserId(),
+      'medium'
+    );
   },
 
   /**
@@ -176,7 +230,20 @@ export const TransactionService = {
    * Clear all transactions
    */
   clear() {
+    const transactionCount = this.getAll().length;
     localStorage.removeItem(TRANSACTIONS_KEY);
+
+    // Audit log bulk transaction deletion
+    auditService.log(
+      auditEvents.DATA_DELETE,
+      {
+        entityType: 'transaction',
+        operation: 'bulk_clear',
+        count: transactionCount,
+      },
+      AuthService.getUserId(),
+      'high'
+    );
   },
 
   /**

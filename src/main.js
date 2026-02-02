@@ -12,8 +12,12 @@ import './core/mobile.js'; // Initialize mobile utilities
 import './pwa.js'; // Register PWA service worker
 import { InstallService } from './core/install.js';
 import { CacheInvalidator } from './core/cache-invalidator.js';
+import { PrivacyService } from './core/privacy-service.js';
 
 InstallService.init();
+
+// Initialize privacy service
+PrivacyService.init();
 
 const initApp = () => {
   const app = document.querySelector('#app');

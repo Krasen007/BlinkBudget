@@ -8,6 +8,7 @@ import { STORAGE_KEYS, DEFAULTS } from '../utils/constants.js';
 import { SyncService } from './sync-service.js';
 import { AuthService } from './auth-service.js';
 import { safeJsonParse } from '../utils/security-utils.js';
+import { auditService, auditEvents } from './audit-service.js';
 
 const ACCOUNTS_KEY = STORAGE_KEYS.ACCOUNTS;
 
@@ -63,8 +64,9 @@ export const AccountService = {
     console.log('[AccountService] Saving account:', account.name, account.id);
     const accounts = this.getAccounts();
     const index = accounts.findIndex(a => a.id === account.id);
+    const isUpdate = index !== -1;
 
-    if (index !== -1) {
+    if (isUpdate) {
       accounts[index] = {
         ...accounts[index],
         ...account,
@@ -83,6 +85,21 @@ export const AccountService = {
     }
 
     this._persist(accounts);
+
+    // Audit log account operation
+    auditService.log(
+      isUpdate ? auditEvents.DATA_UPDATE : auditEvents.DATA_CREATE,
+      {
+        entityType: 'account',
+        entityId: account.id,
+        accountName: account.name,
+        accountType: account.type,
+        operation: isUpdate ? 'update' : 'create',
+      },
+      userId,
+      'low'
+    );
+
     return account;
   },
 
@@ -94,6 +111,7 @@ export const AccountService = {
   deleteAccount(id) {
     console.log('[AccountService] Deleting account:', id);
     let accounts = this.getAccounts();
+    const accountToDelete = accounts.find(a => a.id === id);
 
     // Prevent deleting the last account
     if (accounts.length <= 1) return false;
@@ -106,6 +124,20 @@ export const AccountService = {
     }
 
     this._persist(accounts);
+
+    // Audit log account deletion
+    auditService.log(
+      auditEvents.DATA_DELETE,
+      {
+        entityType: 'account',
+        entityId: id,
+        accountName: accountToDelete?.name || 'unknown',
+        accountType: accountToDelete?.type || 'unknown',
+      },
+      AuthService.getUserId(),
+      'medium'
+    );
+
     return true;
   },
 

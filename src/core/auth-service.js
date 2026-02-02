@@ -340,6 +340,10 @@ export const AuthService = {
     return this.user ? this.user.uid : null;
   },
 
+  getUserEmail() {
+    return this.user ? this.user.email : null;
+  },
+
   async resetPassword(email) {
     // Check Firebase availability first
     const firebaseCheck = checkFirebaseAvailability();

@@ -64,6 +64,7 @@ export const StorageService = {
   // --- Accounts (delegated to AccountService) ---
   getAccounts: () => AccountService.getAccounts(),
   saveAccount: account => AccountService.saveAccount(account),
+  addAccount: account => AccountService.saveAccount(account),
   deleteAccount: id => AccountService.deleteAccount(id),
   getDefaultAccount: () => AccountService.getDefaultAccount(),
   isAccountDuplicate: (name, type, excludeId) =>
@@ -71,6 +72,7 @@ export const StorageService = {
 
   // --- Transactions (delegated to TransactionService) ---
   getAll: () => TransactionService.getAll(),
+  getAllTransactions: () => TransactionService.getAll(),
   add: transaction => TransactionService.add(transaction),
   get: id => TransactionService.get(id),
   update: (id, updates) => TransactionService.update(id, updates),
@@ -156,6 +158,18 @@ export const StorageService = {
   _goalPlanner: new GoalPlanner(),
   getGoals: function () {
     return this._goalPlanner.getAllGoals();
+  },
+  addGoal: function (goal) {
+    const res = this._goalPlanner.createGoal(
+      goal.name,
+      goal.targetAmount,
+      goal.targetDate,
+      goal.currentSavings || 0,
+      goal.options || {}
+    );
+    CacheService.del('goalsSummary');
+    this._pushToCloudSafe(STORAGE_KEYS.GOALS, this._goalPlanner.getAllGoals());
+    return res;
   },
   createGoal: function (
     name,
