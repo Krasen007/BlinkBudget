@@ -6,6 +6,7 @@ import { DataManagementSection } from '../components/DataManagementSection.js';
 import { GeneralSection } from '../components/GeneralSection.js';
 import { BackupRestoreSection } from '../components/BackupRestoreSection.js';
 import { AccountDeletionSection } from '../components/AccountDeletionSection.js';
+import { SmartSuggestionsSection } from '../components/SmartSuggestionsSection.js';
 import {
   SPACING,
   TOUCH_TARGETS,
@@ -139,6 +140,10 @@ export const SettingsView = () => {
   // General Section
   const generalSection = GeneralSection();
   contentWrapper.appendChild(generalSection);
+
+  // Smart Suggestions Section
+  const smartSuggestionsSection = SmartSuggestionsSection();
+  contentWrapper.appendChild(smartSuggestionsSection);
 
   /// Privacy system disabled for now, to be implemented backend later
   // import { createPrivacyControls, initializePrivacyControls } from '../components/PrivacyControls.js';

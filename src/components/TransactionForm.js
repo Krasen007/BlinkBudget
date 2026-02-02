@@ -5,12 +5,17 @@
 
 import { AccountService } from '../core/account-service.js';
 import { ClickTracker } from '../core/click-tracking-service.js';
+import { SettingsService } from '../core/settings-service.js';
 import { FONT_SIZES, COLORS } from '../utils/constants.js';
 import { createSelect } from '../utils/dom-factory.js';
 import { createTypeToggleGroup } from '../utils/form-utils/type-toggle.js';
 import { createCategorySelector } from '../utils/form-utils/category-chips.js';
 import { createAmountInput } from '../utils/form-utils/amount-input.js';
 import { setupFormKeyboardHandling } from '../utils/form-utils/keyboard.js';
+import { SmartAmountInput } from './SmartAmountInput.js';
+import { SmartCategorySelector } from './SmartCategorySelector.js';
+import { SmartNoteField } from './SmartNoteField.js';
+import { initializeCategoryIconsCSS } from '../utils/category-icons.js';
 import {
   validateAmount,
   validateCategory,
@@ -31,6 +36,14 @@ export const TransactionForm = ({
   onCancel = null,
   onDelete = null,
 }) => {
+  // Check if smart suggestions are enabled
+  const smartSuggestionsEnabled = SettingsService.getSetting('smartSuggestionsEnabled') !== false; // Default to true
+
+  // Initialize category icons CSS only if smart suggestions are enabled
+  if (smartSuggestionsEnabled) {
+    initializeCategoryIconsCSS();
+  }
+
   // 1. Form setup
   const form = document.createElement('form');
   form.className = 'transaction-form mobile-optimized';
@@ -92,12 +105,45 @@ export const TransactionForm = ({
     initialType: initialValues.type || 'expense',
   });
 
-  // 4. Amount Input
-  const amountState = createAmountInput({
-    initialValue: initialValues.amount || '',
-    externalDateInput,
-  });
-  const amountInput = amountState.input;
+  // 4. Amount Input (Smart or Classic based on setting)
+  let amountInput;
+  let smartAmountInput = null;
+  let smartNoteField = null;
+
+  if (smartSuggestionsEnabled) {
+    // Smart Amount Input
+    smartAmountInput = SmartAmountInput.create({
+      onAmountChange: (amount) => {
+        // Update category suggestions when amount changes
+        if (smartCategorySelector) {
+          smartCategorySelector.updateSmartMatch(amount);
+        }
+        // Update note suggestions when amount changes
+        if (smartNoteField) {
+          smartNoteField.updateContext(smartCategorySelector?.getSelectedCategory(), amount);
+        }
+      },
+      onSuggestionSelect: (suggestion) => {
+        // Apply suggestion and update other fields
+        smartAmountInput.setAmount(suggestion.amount);
+        if (suggestion.category && smartCategorySelector) {
+          smartCategorySelector.setSelectedCategory(suggestion.category);
+          smartNoteField?.updateContext(suggestion.category, suggestion.amount);
+        }
+        // Record selection for learning
+        ClickTracker.recordClick();
+      },
+      initialValue: initialValues.amount?.toString() || '',
+    });
+    amountInput = smartAmountInput;
+  } else {
+    // Classic Amount Input
+    const amountState = createAmountInput({
+      initialValue: initialValues.amount || '',
+      externalDateInput,
+    });
+    amountInput = amountState.input;
+  }
 
   const amountGroup = document.createElement('div');
   amountGroup.style.flex = '1.5';
@@ -112,19 +158,57 @@ export const TransactionForm = ({
   amountAccountRow.appendChild(amountGroup);
   amountAccountRow.appendChild(accountGroup);
 
-  // 6. Category Selector
-  const categorySelector = createCategorySelector({
-    type: typeToggle.currentType(),
-    accounts,
-    currentAccountId,
-    initialCategory: initialValues.category || null,
-    initialToAccount: initialValues.toAccountId || null,
-    amountInput,
-    externalDateInput,
-    onSubmit: data => {
-      handleFormSubmit(data, onSubmit);
-    },
-  });
+  // 6. Category Selector (Smart or Classic based on setting)
+  let categorySelector;
+  let smartCategorySelector = null;
+
+  if (smartSuggestionsEnabled) {
+    // Smart Category Selector
+    smartCategorySelector = SmartCategorySelector.create({
+      onCategorySelect: (category) => {
+        // Update note suggestions when category changes
+        if (smartNoteField) {
+          const currentAmount = smartAmountInput.getAmount();
+          smartNoteField.updateContext(category, currentAmount);
+        }
+        ClickTracker.recordClick();
+      },
+      onSmartMatchAccept: (_smartMatch) => {
+        // Handle smart match acceptance
+        ClickTracker.recordClick();
+      },
+      amount: smartAmountInput.getAmount(),
+      initialCategory: initialValues.category || '',
+    });
+
+    // Keep backward compatibility with existing category selector interface
+    categorySelector = {
+      container: smartCategorySelector,
+      setType: (_type) => {
+        // Type changes don't affect smart suggestions for now
+      },
+      selectedCategory: () => smartCategorySelector.getSelectedCategory(),
+      selectedToAccount: () => null, // Smart selector doesn't handle transfers
+      chipContainer: smartCategorySelector,
+      setSourceAccount: () => {
+        // Account changes don't affect smart suggestions for now
+      },
+    };
+  } else {
+    // Classic Category Selector
+    categorySelector = createCategorySelector({
+      type: typeToggle.currentType(),
+      accounts,
+      currentAccountId,
+      initialCategory: initialValues.category || null,
+      initialToAccount: initialValues.toAccountId || null,
+      amountInput,
+      externalDateInput,
+      onSubmit: data => {
+        handleFormSubmit(data, onSubmit);
+      },
+    });
+  }
 
   // Setup type toggle change handler (after categorySelector is created)
   const originalSetType = typeToggle.setType;
@@ -176,10 +260,33 @@ export const TransactionForm = ({
     );
   });
 
+  // 7. Note Field (Smart or Classic based on setting)
+  let noteField = null;
+
+  if (smartSuggestionsEnabled) {
+    // Smart Note Field
+    smartNoteField = SmartNoteField.create({
+      onNoteChange: (_note) => {
+        // Note changes don't affect other fields for now
+      },
+      onSuggestionSelect: (suggestion) => {
+        smartNoteField.setNote(suggestion.note);
+        ClickTracker.recordClick();
+      },
+      category: smartCategorySelector.getSelectedCategory(),
+      amount: smartAmountInput.getAmount(),
+      initialValue: initialValues.description || '',
+    });
+    noteField = smartNoteField;
+  }
+
   // 7. Layout Assembly
   form.appendChild(amountAccountRow);
   form.appendChild(categorySelector.container);
   form.appendChild(typeToggle.container);
+  if (noteField) {
+    form.appendChild(noteField);
+  }
 
   // 7.5. Cancel Button (for Add mode)
   if (showCancelButton && onCancel) {
@@ -262,6 +369,7 @@ export const TransactionForm = ({
         accountId: currentAccountId,
         toAccountId: categorySelector.selectedToAccount(),
         externalDateInput,
+        description: noteField ? noteField.getNote() : (initialValues.description || ''), // Add note field if available
       });
 
       handleFormSubmit(transactionData, onSubmit);
