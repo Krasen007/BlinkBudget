@@ -19,7 +19,7 @@ export const SmartAmountInput = {
       onSuggestionSelect,
       placeholder = '0.00',
       initialValue = '',
-      className = ''
+      className = '',
     } = options;
 
     const container = document.createElement('div');
@@ -44,7 +44,7 @@ export const SmartAmountInput = {
     input.autocomplete = 'off';
 
     // Format amount as user types
-    input.addEventListener('input', (e) => {
+    input.addEventListener('input', e => {
       const value = e.target.value;
       const formattedValue = this.formatAmount(value);
       if (formattedValue !== value) {
@@ -86,7 +86,7 @@ export const SmartAmountInput = {
 
     // Store reference for external access
     container.getAmount = () => this.parseAmount(input.value);
-    container.setAmount = (amount) => {
+    container.setAmount = amount => {
       input.value = this.formatAmount(amount.toString());
       const parsedAmount = this.parseAmount(input.value);
       if (onAmountChange) {
@@ -152,7 +152,9 @@ export const SmartAmountInput = {
     }
 
     try {
-      const suggestions = await suggestionService.getAmountSuggestions({ amount });
+      const suggestions = await suggestionService.getAmountSuggestions({
+        amount,
+      });
       this.renderSuggestions(suggestions, container, onSelect);
     } catch (error) {
       console.warn('Failed to load amount suggestions:', error);
@@ -189,9 +191,9 @@ export const SmartAmountInput = {
 
       chip.addEventListener('click', () => {
         // Remove selected class from all chips
-        chipsContainer.querySelectorAll('.suggestion-chip').forEach(c =>
-          c.classList.remove('selected')
-        );
+        chipsContainer
+          .querySelectorAll('.suggestion-chip')
+          .forEach(c => c.classList.remove('selected'));
 
         // Add selected class to clicked chip
         chip.classList.add('selected');
@@ -226,7 +228,10 @@ export const SmartAmountInput = {
     chip.className = 'suggestion-chip';
     chip.setAttribute('role', 'option');
     chip.setAttribute('aria-selected', 'false');
-    chip.setAttribute('aria-label', `${suggestion.amount} dollars, ${suggestion.category || 'no category'}`);
+    chip.setAttribute(
+      'aria-label',
+      `${suggestion.amount} dollars, ${suggestion.category || 'no category'}`
+    );
 
     if (isTopSuggestion) {
       chip.classList.add('top-suggestion');
@@ -243,7 +248,9 @@ export const SmartAmountInput = {
       const categoryDiv = document.createElement('div');
       categoryDiv.className = 'suggestion-category';
 
-      const iconHTML = getCategoryIconHTML(suggestion.category, { size: 'small' });
+      const iconHTML = getCategoryIconHTML(suggestion.category, {
+        size: 'small',
+      });
       categoryDiv.innerHTML = `${iconHTML} ${suggestion.category}`;
 
       chip.appendChild(categoryDiv);
@@ -278,5 +285,5 @@ export const SmartAmountInput = {
         this.updateSuggestions(amount, container, null);
       }, 300);
     };
-  })()
+  })(),
 };

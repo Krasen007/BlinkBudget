@@ -7,6 +7,7 @@ The privacy controls provide users with comprehensive management over their data
 ## 📍 Where Privacy Controls Are Located
 
 ### 1. **Settings Integration**
+
 The privacy controls are designed to be integrated into the main settings view:
 
 ```javascript
@@ -17,10 +18,14 @@ initializePrivacyControls(privacySection);
 ```
 
 ### 2. **Standalone Access**
+
 Privacy controls can also be accessed as a standalone component:
 
 ```javascript
-import { createPrivacyControls, initializePrivacyControls } from './components/PrivacyControls.js';
+import {
+  createPrivacyControls,
+  initializePrivacyControls,
+} from './components/PrivacyControls.js';
 
 // Create and initialize privacy controls
 const privacyControls = createPrivacyControls();
@@ -33,44 +38,53 @@ initializePrivacyControls(privacyControls);
 ### **For Users**
 
 #### **1. Accessing Privacy Settings**
+
 - Navigate to **Settings** → **Privacy & Data Controls**
 - Or access via direct URL: `/settings#privacy`
 
 #### **2. Managing Data Collection Consent**
 
 **Analytics Data**
+
 - ✅ Enable: Help improve the app by sharing anonymous usage statistics
 - ❌ Disable: No analytics data will be collected
 
 **Crash Reporting**
+
 - ✅ Enable: Automatically report errors to help fix bugs
 - ❌ Disable: Error reporting disabled (not recommended)
 
 **Feature Usage**
+
 - ✅ Enable: Share which features you use most to guide development
 - ❌ Disable: No feature usage tracking
 
 **Marketing Communications**
+
 - ✅ Enable: Receive updates about new features and offers
 - ❌ Disable: No marketing emails or notifications
 
 #### **3. Configuring Data Minimization**
 
 **Exclude Optional Metadata**
+
 - ✅ Enable: Remove unnecessary metadata from stored data
 - ❌ Disable: Keep all metadata for debugging purposes
 
 **Anonymize Analytics**
+
 - ✅ Enable: Remove personally identifiable information from analytics
 - ❌ Disable: Include user identifiers in analytics (if analytics enabled)
 
 **Limit Data Collection**
+
 - ✅ Enable: Collect only essential data required for functionality
 - ❌ Disable: Collect additional data for enhanced features
 
 #### **4. Setting Data Retention Periods**
 
 **Transaction History**
+
 - **30 days**: Minimal storage, quick cleanup
 - **90 days**: Balanced approach
 - **6 months**: Medium-term storage
@@ -79,6 +93,7 @@ initializePrivacyControls(privacyControls);
 - **Forever**: No automatic deletion
 
 **Audit Logs**
+
 - **30 days**: Minimal logging
 - **90 days**: Standard retention (default)
 - **6 months**: Extended logging
@@ -86,6 +101,7 @@ initializePrivacyControls(privacyControls);
 - **Forever**: Keep all logs
 
 **Analytics Data**
+
 - **30 days**: Standard retention (default)
 - **90 days**: Extended analytics
 - **6 months**: Medium-term analytics
@@ -95,16 +111,19 @@ initializePrivacyControls(privacyControls);
 #### **5. Choosing Privacy Mode**
 
 **Standard Mode** (Default)
+
 - Balanced between functionality and privacy
 - Recommended for most users
 - Enables essential features while protecting privacy
 
 **Enhanced Mode**
+
 - Increased privacy with some feature limitations
 - Disables optional data collection
 - May limit some advanced features
 
 **Minimal Mode**
+
 - Maximum privacy, limited analytics and features
 - Only essential functionality
 - Best for privacy-conscious users
@@ -112,16 +131,19 @@ initializePrivacyControls(privacyControls);
 #### **6. Data Management Actions**
 
 **Export My Data**
+
 - Downloads all user data in JSON format
 - Includes transactions, accounts, goals, settings
 - GDPR right to data portability
 
 **View Data Summary**
+
 - Shows current data storage statistics
 - Displays transaction counts, audit logs, settings
 - Shows total storage size in KB
 
 **Cleanup Old Data**
+
 - Immediately deletes data older than retention periods
 - Permanent deletion - cannot be undone
 - Frees up storage space
@@ -132,7 +154,10 @@ initializePrivacyControls(privacyControls);
 
 ```javascript
 // Import the privacy controls
-import { createPrivacyControls, initializePrivacyControls } from './components/PrivacyControls.js';
+import {
+  createPrivacyControls,
+  initializePrivacyControls,
+} from './components/PrivacyControls.js';
 
 // Create privacy controls container
 const privacyContainer = createPrivacyControls();
@@ -190,13 +215,13 @@ const dashboard = PrivacyService.getPrivacyDashboard();
 
 ```javascript
 // Listen for privacy setting changes
-window.addEventListener('privacy-settings-changed', (event) => {
+window.addEventListener('privacy-settings-changed', event => {
   const { newSettings, changedKeys } = event.detail;
   console.log('Privacy settings updated:', changedKeys);
 });
 
 // Listen for data cleanup events
-window.addEventListener('data-cleanup-completed', (event) => {
+window.addEventListener('data-cleanup-completed', event => {
   const { deletedCount, types } = event.detail;
   console.log(`Cleaned up ${deletedCount} items of types: ${types.join(', ')}`);
 });
@@ -258,7 +283,7 @@ auditService.log(
   {
     settingType: 'privacy',
     changes: ['analytics', 'dataRetention'],
-    newSettings: updatedSettings
+    newSettings: updatedSettings,
   },
   userId,
   'medium'
@@ -285,16 +310,16 @@ auditService.log(
 
 ## 🔍 Privacy Features Summary
 
-| Feature | Status | Description |
-|---------|--------|-------------|
+| Feature                | Status      | Description                         |
+| ---------------------- | ----------- | ----------------------------------- |
 | **Consent Management** | ✅ Complete | Granular consent for all data types |
-| **Data Minimization** | ✅ Complete | Automatic data sanitization |
-| **Data Retention** | ✅ Complete | Configurable retention periods |
-| **Data Export** | ✅ Complete | GDPR-compliant data portability |
-| **Audit Logging** | ✅ Complete | Comprehensive activity tracking |
-| **Account Deletion** | ✅ Complete | Verified data deletion |
-| **Privacy Modes** | ✅ Complete | Standard/Enhanced/Minimal modes |
-| **User Controls** | ✅ Complete | Full user control interface |
+| **Data Minimization**  | ✅ Complete | Automatic data sanitization         |
+| **Data Retention**     | ✅ Complete | Configurable retention periods      |
+| **Data Export**        | ✅ Complete | GDPR-compliant data portability     |
+| **Audit Logging**      | ✅ Complete | Comprehensive activity tracking     |
+| **Account Deletion**   | ✅ Complete | Verified data deletion              |
+| **Privacy Modes**      | ✅ Complete | Standard/Enhanced/Minimal modes     |
+| **User Controls**      | ✅ Complete | Full user control interface         |
 
 ## 📱 Mobile Support
 

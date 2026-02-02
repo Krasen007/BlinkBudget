@@ -32,6 +32,7 @@
 ### Detailed Redlines
 
 #### Container & Layout
+
 ```css
 .smart-amount-container {
   width: 100%;
@@ -53,6 +54,7 @@
 ```
 
 #### Amount Input Field
+
 ```css
 .smart-amount-input {
   width: 100%;
@@ -72,7 +74,8 @@
 
 .smart-amount-input:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
+  box-shadow: 0 0 0 3px
+    hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
   outline: none;
 }
 
@@ -83,13 +86,20 @@
 ```
 
 #### Suggestion Chips Container
+
 ```css
 .smart-suggestions-container {
   margin-top: var(--spacing-md);
   padding: var(--spacing-md);
-  background: hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.05);
+  background: hsla(
+    var(--primary-hue),
+    var(--primary-sat),
+    var(--primary-light),
+    0.05
+  );
   border-radius: var(--radius-md);
-  border: 1px solid hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2);
+  border: 1px solid
+    hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2);
 }
 
 .suggestions-label {
@@ -104,6 +114,7 @@
 ```
 
 #### Individual Suggestion Chip
+
 ```css
 .suggestion-chip {
   display: inline-flex;
@@ -151,6 +162,7 @@
 ```
 
 #### Confidence Indicator
+
 ```css
 .confidence-indicator {
   margin-top: var(--spacing-md);
@@ -182,6 +194,7 @@
 ```
 
 ### Responsive Behavior
+
 ```css
 @media (width <= 480px) {
   .suggestion-chip {
@@ -189,11 +202,11 @@
     min-height: 56px;
     padding: var(--spacing-xs);
   }
-  
+
   .suggestion-amount {
     font-size: var(--font-size-sm);
   }
-  
+
   .suggestion-category {
     font-size: 10px;
   }
@@ -207,7 +220,7 @@
     padding: var(--spacing-sm);
     scroll-snap-type: x mandatory;
   }
-  
+
   .suggestion-chip {
     flex-shrink: 0;
     scroll-snap-align: start;
@@ -251,13 +264,16 @@
 ### Detailed Redlines
 
 #### Smart Match Section
+
 ```css
 .smart-match-container {
   margin-bottom: var(--spacing-lg);
   padding: var(--spacing-lg);
-  background: linear-gradient(135deg, 
+  background: linear-gradient(
+    135deg,
     hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1) 0%,
-    hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.05) 100%
+    hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.05)
+      100%
   );
   border: 2px solid var(--color-primary);
   border-radius: var(--radius-lg);
@@ -302,6 +318,7 @@
 ```
 
 #### Category Grid
+
 ```css
 .category-grid-container {
   margin-bottom: var(--spacing-md);
@@ -377,11 +394,21 @@
 
 .category-card.high-frequency {
   border-width: 2px;
-  border-color: hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.3);
+  border-color: hsla(
+    var(--primary-hue),
+    var(--primary-sat),
+    var(--primary-light),
+    0.3
+  );
 }
 
 .category-card.medium-frequency {
-  border-color: hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2);
+  border-color: hsla(
+    var(--primary-hue),
+    var(--primary-sat),
+    var(--primary-light),
+    0.2
+  );
 }
 
 .category-card.low-frequency {
@@ -390,22 +417,23 @@
 ```
 
 ### Responsive Grid Behavior
+
 ```css
 @media (width <= 480px) {
   .category-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: var(--spacing-xs);
   }
-  
+
   .category-card {
     min-height: 70px;
     padding: var(--spacing-sm);
   }
-  
+
   .category-icon {
     font-size: var(--font-size-xl);
   }
-  
+
   .category-name {
     font-size: 10px;
   }
@@ -415,7 +443,7 @@
   .category-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .category-card {
     min-height: 60px;
   }
@@ -451,6 +479,7 @@
 ### Detailed Redlines
 
 #### Note Input Field
+
 ```css
 .smart-note-container {
   margin-top: var(--spacing-lg);
@@ -484,7 +513,8 @@
 
 .smart-note-input:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
+  box-shadow: 0 0 0 3px
+    hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
   outline: none;
 }
 
@@ -495,13 +525,20 @@
 ```
 
 #### Suggestion List
+
 ```css
 .note-suggestions-container {
   margin-top: var(--spacing-md);
   padding: var(--spacing-md);
-  background: hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.05);
+  background: hsla(
+    var(--primary-hue),
+    var(--primary-sat),
+    var(--primary-light),
+    0.05
+  );
   border-radius: var(--radius-md);
-  border: 1px solid hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2);
+  border: 1px solid
+    hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2);
 }
 
 .suggestion-list {
@@ -527,7 +564,12 @@
 
 .suggestion-item:hover {
   border-color: var(--color-primary);
-  background: hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+  background: hsla(
+    var(--primary-hue),
+    var(--primary-sat),
+    var(--primary-light),
+    0.1
+  );
 }
 
 .suggestion-item:last-child {
@@ -542,11 +584,13 @@
 ```
 
 #### Merchant Recognition
+
 ```css
 .merchant-recognition-container {
   margin-top: var(--spacing-md);
   padding: var(--spacing-md);
-  background: linear-gradient(135deg, 
+  background: linear-gradient(
+    135deg,
     hsla(45, 90%, 50%, 0.1) 0%,
     hsla(45, 90%, 50%, 0.05) 100%
   );
@@ -580,62 +624,66 @@
 ### JavaScript Integration Points
 
 #### Smart Amount Input
+
 ```javascript
 // Integration with existing TransactionForm
 const smartAmountInput = SmartAmountInput({
-  onAmountChange: (amount) => {
+  onAmountChange: amount => {
     // Trigger category suggestions
     updateCategorySuggestions(amount);
     // Update note suggestions
     updateNoteSuggestions(getSelectedCategory(), amount);
   },
-  onSuggestionSelect: (suggestion) => {
+  onSuggestionSelect: suggestion => {
     // Auto-fill amount and category
     setAmount(suggestion.amount);
     setCategory(suggestion.category);
     // Focus next field
     categorySelector.focus();
-  }
+  },
 });
 ```
 
 #### Smart Category Selector
+
 ```javascript
 const smartCategorySelector = SmartCategorySelector({
-  onCategorySelect: (category) => {
+  onCategorySelect: category => {
     // Update note suggestions based on category
     updateNoteSuggestions(category, getAmount());
     // Record selection for learning
     recordUserSelection('category', category);
   },
-  onSmartMatchAccept: (category) => {
+  onSmartMatchAccept: category => {
     // Track smart match acceptance
     recordSmartMatchAcceptance(category, confidence);
-  }
+  },
 });
 ```
 
 #### Smart Note Field
+
 ```javascript
 const smartNoteField = SmartNoteField({
-  onNoteChange: (note) => {
+  onNoteChange: note => {
     // Auto-complete suggestions
     showNoteSuggestions(note);
   },
-  onSuggestionSelect: (suggestion) => {
+  onSuggestionSelect: suggestion => {
     setNote(suggestion);
     hideSuggestions();
   },
-  onMerchantRecognized: (merchant) => {
+  onMerchantRecognized: merchant => {
     // Highlight recognized merchant
     showMerchantInfo(merchant);
-  }
+  },
 });
 ```
 
 ### CSS Integration Requirements
 
 #### Import Order
+
 ```css
 /* 1. Existing tokens */
 @import './tokens.css';
@@ -649,13 +697,34 @@ const smartNoteField = SmartNoteField({
 ```
 
 #### Custom Properties for Smart Suggestions
+
 ```css
 :root {
   /* Smart suggestions specific tokens */
-  --smart-suggestion-bg: hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.05);
-  --smart-suggestion-border: hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2);
-  --smart-match-gradient-start: hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
-  --smart-match-gradient-end: hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.05);
+  --smart-suggestion-bg: hsla(
+    var(--primary-hue),
+    var(--primary-sat),
+    var(--primary-light),
+    0.05
+  );
+  --smart-suggestion-border: hsla(
+    var(--primary-hue),
+    var(--primary-sat),
+    var(--primary-light),
+    0.2
+  );
+  --smart-match-gradient-start: hsla(
+    var(--primary-hue),
+    var(--primary-sat),
+    var(--primary-light),
+    0.1
+  );
+  --smart-match-gradient-end: hsla(
+    var(--primary-hue),
+    var(--primary-sat),
+    var(--primary-light),
+    0.05
+  );
   --confidence-high: hsl(120, 70%, 50%);
   --confidence-medium: hsl(45, 90%, 50%);
   --confidence-low: hsl(0, 70%, 50%);
@@ -666,13 +735,14 @@ const smartNoteField = SmartNoteField({
 ### Performance Considerations
 
 #### Lazy Loading Implementation
+
 ```javascript
 class SmartSuggestionsLoader {
   constructor() {
     this.loaded = false;
     this.suggestionData = null;
   }
-  
+
   async loadSuggestions() {
     if (!this.loaded) {
       this.suggestionData = await import('./analytics/suggestion-data.js');
@@ -680,7 +750,7 @@ class SmartSuggestionsLoader {
     }
     return this.suggestionData;
   }
-  
+
   async getSuggestions(type, context) {
     await this.loadSuggestions();
     return this.suggestionData.getSuggestions(type, context);
@@ -689,6 +759,7 @@ class SmartSuggestionsLoader {
 ```
 
 #### Debounced Input Handling
+
 ```javascript
 const debounceInput = (callback, delay = 300) => {
   let timeoutId;
@@ -699,39 +770,47 @@ const debounceInput = (callback, delay = 300) => {
 };
 
 // Usage in amount input
-amountInput.addEventListener('input', debounceInput((e) => {
-  updateSuggestions(e.target.value);
-}));
+amountInput.addEventListener(
+  'input',
+  debounceInput(e => {
+    updateSuggestions(e.target.value);
+  })
+);
 ```
 
 ### Accessibility Implementation
 
 #### ARIA Labels Structure
+
 ```javascript
-const createAccessibleSuggestionChip = (suggestion) => {
+const createAccessibleSuggestionChip = suggestion => {
   const chip = document.createElement('button');
   chip.setAttribute('role', 'option');
   chip.setAttribute('aria-selected', 'false');
-  chip.setAttribute('aria-label', `${suggestion.amount} dollars, ${suggestion.category}`);
+  chip.setAttribute(
+    'aria-label',
+    `${suggestion.amount} dollars, ${suggestion.category}`
+  );
   chip.setAttribute('aria-describedby', `suggestion-${suggestion.id}-desc`);
-  
+
   const desc = document.createElement('div');
   desc.id = `suggestion-${suggestion.id}-desc`;
   desc.textContent = `Confidence: ${suggestion.confidence}%, based on ${suggestion.reason}`;
   desc.className = 'sr-only'; // Screen reader only
-  
+
   return { chip, desc };
 };
 ```
 
 #### Keyboard Navigation
+
 ```javascript
-const setupKeyboardNavigation = (container) => {
+const setupKeyboardNavigation = container => {
   const focusableElements = container.querySelectorAll(
     'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
   );
-  
-  container.addEventListener('keydown', (e) => {
+
+  container.addEventListener('keydown', e => {
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
       e.preventDefault();
       focusNext(focusableElements);
@@ -748,6 +827,7 @@ const setupKeyboardNavigation = (container) => {
 ## Testing Checklist for Developers
 
 ### Visual Testing
+
 - [ ] All suggestion chips render correctly on mobile (320px+)
 - [ ] Smart match highlighting is prominent but not distracting
 - [ ] Confidence indicators use appropriate colors
@@ -755,6 +835,7 @@ const setupKeyboardNavigation = (container) => {
 - [ ] Focus states are visible and accessible
 
 ### Functional Testing
+
 - [ ] Suggestions appear within 100ms of field focus
 - [ ] Selecting suggestion auto-fills related fields
 - [ ] User can easily override all suggestions
@@ -762,6 +843,7 @@ const setupKeyboardNavigation = (container) => {
 - [ ] Touch interactions work on mobile devices
 
 ### Performance Testing
+
 - [ ] Memory usage remains < 10MB additional
 - [ ] Suggestions don't block UI thread
 - [ ] Lazy loading works for suggestion data
@@ -769,6 +851,7 @@ const setupKeyboardNavigation = (container) => {
 - [ ] Cache invalidation works properly
 
 ### Accessibility Testing
+
 - [ ] Screen reader announces all suggestions
 - [ ] All interactive elements have proper ARIA labels
 - [ ] Keyboard navigation covers all suggestions

@@ -32,11 +32,11 @@ You can access privacy controls programmatically:
 import('./src/core/privacy-service.js').then(({ PrivacyService }) => {
   // View current settings
   console.log('Current privacy settings:', PrivacyService.getPrivacySettings());
-  
+
   // Export your data
   const exportData = PrivacyService.exportUserData();
   console.log('Your data export:', exportData);
-  
+
   // Get data summary
   const dashboard = PrivacyService.getPrivacyDashboard();
   console.log('Data summary:', dashboard);
@@ -49,42 +49,49 @@ Create a standalone privacy controls page:
 
 ```javascript
 // In browser console:
-import('./src/components/PrivacyControls.js').then(({ createPrivacyControls, initializePrivacyControls }) => {
-  // Create privacy controls
-  const privacyControls = createPrivacyControls();
-  
-  // Add to page
-  document.body.appendChild(privacyControls);
-  
-  // Initialize functionality
-  initializePrivacyControls(privacyControls);
-});
+import('./src/components/PrivacyControls.js').then(
+  ({ createPrivacyControls, initializePrivacyControls }) => {
+    // Create privacy controls
+    const privacyControls = createPrivacyControls();
+
+    // Add to page
+    document.body.appendChild(privacyControls);
+
+    // Initialize functionality
+    initializePrivacyControls(privacyControls);
+  }
+);
 ```
 
 ## 🎯 What You Can Do
 
 ### **1. Control Data Collection**
+
 - ✅ **Analytics**: Help improve the app anonymously
 - ✅ **Crash Reporting**: Automatic error reporting
 - ✅ **Feature Usage**: Share which features you use
 - ✅ **Marketing**: Receive updates and offers
 
 ### **2. Minimize Data Storage**
+
 - ✅ **Exclude Metadata**: Remove unnecessary data
 - ✅ **Anonymize Analytics**: Strip personal info from analytics
 - ✅ **Limit Collection**: Only collect essential data
 
 ### **3. Set Data Retention**
+
 - **Transactions**: 30 days to Forever
-- **Audit Logs**: 30 days to Forever  
+- **Audit Logs**: 30 days to Forever
 - **Analytics**: 30 days to Forever
 
 ### **4. Choose Privacy Mode**
+
 - **Standard**: Balanced privacy and functionality
 - **Enhanced**: Increased privacy, some limitations
 - **Minimal**: Maximum privacy, limited features
 
 ### **5. Manage Your Data**
+
 - **Export Data**: Download all your data (GDPR right)
 - **View Summary**: See storage statistics
 - **Cleanup**: Delete old data immediately
@@ -95,7 +102,10 @@ The privacy controls are now integrated into the main settings view:
 
 ```javascript
 // File: src/views/SettingsView.js
-import { createPrivacyControls, initializePrivacyControls } from '../components/PrivacyControls.js';
+import {
+  createPrivacyControls,
+  initializePrivacyControls,
+} from '../components/PrivacyControls.js';
 
 // Privacy controls are automatically added to settings
 const privacySection = createPrivacyControls();
@@ -106,21 +116,22 @@ initializePrivacyControls(privacySection);
 ## 📱 Mobile Support
 
 The privacy controls work perfectly on mobile devices:
+
 - Touch-friendly interface
 - Responsive design
 - Mobile-optimized notifications
 
 ## 🔒 Privacy Features Status
 
-| Feature | Status | Location |
-|---------|--------|----------|
+| Feature               | Status   | Location           |
+| --------------------- | -------- | ------------------ |
 | ✅ Consent Management | Complete | Settings → Privacy |
-| ✅ Data Minimization | Complete | Settings → Privacy |
-| ✅ Data Retention | Complete | Settings → Privacy |
-| ✅ Data Export | Complete | Settings → Privacy |
-| ✅ Audit Logging | Complete | Background |
-| ✅ Account Deletion | Complete | Settings → Account |
-| ✅ Privacy Modes | Complete | Settings → Privacy |
+| ✅ Data Minimization  | Complete | Settings → Privacy |
+| ✅ Data Retention     | Complete | Settings → Privacy |
+| ✅ Data Export        | Complete | Settings → Privacy |
+| ✅ Audit Logging      | Complete | Background         |
+| ✅ Account Deletion   | Complete | Settings → Account |
+| ✅ Privacy Modes      | Complete | Settings → Privacy |
 
 ## 🚀 Try It Now!
 

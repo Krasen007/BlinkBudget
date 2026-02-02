@@ -16,12 +16,16 @@ export const SmartNoteField = {
     const {
       onNoteChange,
       onSuggestionSelect,
-      category = '',
-      amount = 0,
+      category: initialCategory = '',
+      amount: initialAmount = 0,
       initialValue = '',
       placeholder = 'Add a note (optional)',
-      className = ''
+      className = '',
     } = options;
+
+    // Use mutable variables for context that can be updated
+    let category = initialCategory;
+    let amount = initialAmount;
 
     const container = document.createElement('div');
     container.className = `smart-note-container ${className}`;
@@ -49,12 +53,24 @@ export const SmartNoteField = {
       }
 
       // Update suggestions with debouncing
-      this.debounceUpdateSuggestions(input.value, category, amount, suggestionsContainer, onSuggestionSelect);
+      this.debounceUpdateSuggestions(
+        input.value,
+        category,
+        amount,
+        suggestionsContainer,
+        onSuggestionSelect
+      );
     });
 
     // Focus event to show suggestions
     input.addEventListener('focus', () => {
-      this.updateSuggestions(input.value, category, amount, suggestionsContainer, onSuggestionSelect);
+      this.updateSuggestions(
+        input.value,
+        category,
+        amount,
+        suggestionsContainer,
+        onSuggestionSelect
+      );
     });
 
     // Blur event with delay
@@ -80,7 +96,7 @@ export const SmartNoteField = {
 
     // Store references for external access
     container.getNote = () => input.value;
-    container.setNote = (note) => {
+    container.setNote = note => {
       input.value = note;
       this.autoResizeTextarea(input);
       if (onNoteChange) {
@@ -101,7 +117,13 @@ export const SmartNoteField = {
       category = newCategory;
       amount = newAmount;
       if (input.value) {
-        this.updateSuggestions(input.value, category, amount, suggestionsContainer, onSuggestionSelect);
+        this.updateSuggestions(
+          input.value,
+          category,
+          amount,
+          suggestionsContainer,
+          onSuggestionSelect
+        );
       }
     };
 
@@ -125,14 +147,24 @@ export const SmartNoteField = {
    * @param {HTMLElement} container - Suggestions container
    * @param {Function} onSelect - Selection callback
    */
-  async updateSuggestions(note, currentCategory, currentAmount, container, onSelect) {
+  async updateSuggestions(
+    note,
+    currentCategory,
+    currentAmount,
+    container,
+    onSelect
+  ) {
     if (!currentCategory && currentAmount <= 0) {
       container.style.display = 'none';
       return;
     }
 
     try {
-      const suggestions = await suggestionService.getNoteSuggestions(currentCategory, currentAmount, note);
+      const suggestions = await suggestionService.getNoteSuggestions(
+        currentCategory,
+        currentAmount,
+        note
+      );
       this.renderSuggestions(suggestions, container, onSelect);
     } catch (error) {
       console.warn('Failed to load note suggestions:', error);
@@ -164,7 +196,7 @@ export const SmartNoteField = {
     const list = document.createElement('ul');
     list.className = 'suggestion-list';
 
-    suggestions.forEach((suggestion) => {
+    suggestions.forEach(suggestion => {
       const item = document.createElement('li');
       item.className = 'suggestion-item';
       item.textContent = suggestion.note;
@@ -232,13 +264,13 @@ export const SmartNoteField = {
     }
 
     const merchantPatterns = {
-      'starbucks': { name: 'Starbucks', confidence: 0.9 },
-      'shell': { name: 'Shell Gas Station', confidence: 0.8 },
-      'walmart': { name: 'Walmart', confidence: 0.8 },
-      'mcdonald': { name: 'McDonald\'s', confidence: 0.8 },
-      'target': { name: 'Target', confidence: 0.7 },
-      'costco': { name: 'Costco', confidence: 0.7 },
-      'amazon': { name: 'Amazon', confidence: 0.6 }
+      starbucks: { name: 'Starbucks', confidence: 0.9 },
+      shell: { name: 'Shell Gas Station', confidence: 0.8 },
+      walmart: { name: 'Walmart', confidence: 0.8 },
+      mcdonald: { name: "McDonald's", confidence: 0.8 },
+      target: { name: 'Target', confidence: 0.7 },
+      costco: { name: 'Costco', confidence: 0.7 },
+      amazon: { name: 'Amazon', confidence: 0.6 },
     };
 
     const noteLower = note.toLowerCase();
@@ -264,7 +296,7 @@ export const SmartNoteField = {
 
     let currentIndex = -1;
 
-    const selectItem = (index) => {
+    const selectItem = index => {
       items.forEach((item, i) => {
         item.classList.toggle('hovered', i === index);
       });
@@ -272,13 +304,13 @@ export const SmartNoteField = {
       if (index >= 0 && index < items.length && onSelect) {
         const suggestion = {
           note: items[index].textContent,
-          source: 'keyboard'
+          source: 'keyboard',
         };
         onSelect(suggestion);
       }
     };
 
-    container.addEventListener('keydown', (e) => {
+    container.addEventListener('keydown', e => {
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
@@ -316,5 +348,5 @@ export const SmartNoteField = {
         this.updateSuggestions(note, category, amount, container, onSelect);
       }, 300);
     };
-  })()
+  })(),
 };

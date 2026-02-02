@@ -15,7 +15,7 @@ export class SuggestionService {
     this.confidenceThresholds = {
       high: 0.8,
       medium: 0.6,
-      low: 0.4
+      low: 0.4,
     };
 
     // Initialize with common patterns
@@ -30,76 +30,76 @@ export class SuggestionService {
     this.patterns.set('timePatterns', {
       '06:00-10:00': {
         categories: ['Coffee', 'Breakfast', 'Food & Drink'],
-        amounts: [4.50, 5.00, 8.00, 12.00],
-        confidence: 0.7
+        amounts: [4.5, 5.0, 8.0, 12.0],
+        confidence: 0.7,
       },
       '11:00-14:00': {
         categories: ['Lunch', 'Food & Drink', 'Restaurant'],
-        amounts: [12.00, 15.00, 18.00, 25.00],
-        confidence: 0.8
+        amounts: [12.0, 15.0, 18.0, 25.0],
+        confidence: 0.8,
       },
       '17:00-21:00': {
         categories: ['Dinner', 'Entertainment', 'Restaurant'],
-        amounts: [25.00, 35.00, 50.00, 75.00],
-        confidence: 0.6
+        amounts: [25.0, 35.0, 50.0, 75.0],
+        confidence: 0.6,
       },
       '21:00-23:59': {
         categories: ['Entertainment', 'Gaming', 'Other'],
-        amounts: [15.00, 20.00, 30.00],
-        confidence: 0.5
-      }
+        amounts: [15.0, 20.0, 30.0],
+        confidence: 0.5,
+      },
     });
 
     // Amount range patterns
     this.patterns.set('amountRanges', {
       '0-5': {
         categories: ['Coffee', 'Snacks', 'Other'],
-        confidence: 0.8
+        confidence: 0.8,
       },
       '5-15': {
         categories: ['Lunch', 'Coffee', 'Transport', 'Food & Drink'],
-        confidence: 0.7
+        confidence: 0.7,
       },
       '15-30': {
         categories: ['Groceries', 'Transport', 'Entertainment'],
-        confidence: 0.6
+        confidence: 0.6,
       },
       '30-100': {
         categories: ['Groceries', 'Shopping', 'Bills', 'Home'],
-        confidence: 0.7
+        confidence: 0.7,
       },
       '100+': {
         categories: ['Bills', 'Home', 'Shopping', 'Other'],
-        confidence: 0.5
-      }
+        confidence: 0.5,
+      },
     });
 
     // Common merchant patterns
     this.patterns.set('merchantPatterns', {
-      'starbucks': {
+      starbucks: {
         category: 'Coffee',
-        amounts: [4.50, 5.00, 6.00],
+        amounts: [4.5, 5.0, 6.0],
         notes: ['Starbucks coffee', 'Morning latte', 'Coffee break'],
-        confidence: 0.9
+        confidence: 0.9,
       },
-      'shell': {
+      shell: {
         category: 'Gas',
-        amounts: [25.00, 35.00, 50.00, 65.00],
+        amounts: [25.0, 35.0, 50.0, 65.0],
         notes: ['Gas', 'Fuel up', 'Weekly gas'],
-        confidence: 0.8
+        confidence: 0.8,
       },
-      'walmart': {
+      walmart: {
         category: 'Groceries',
-        amounts: [50.00, 100.00, 150.00, 200.00],
+        amounts: [50.0, 100.0, 150.0, 200.0],
         notes: ['Groceries', 'Weekly shopping', 'Household items'],
-        confidence: 0.8
+        confidence: 0.8,
       },
-      'mcdonald': {
+      mcdonald: {
         category: 'Food & Drink',
-        amounts: [8.00, 12.00, 15.00],
+        amounts: [8.0, 12.0, 15.0],
         notes: ['Lunch', 'Fast food', 'Quick meal'],
-        confidence: 0.8
-      }
+        confidence: 0.8,
+      },
     });
   }
 
@@ -109,87 +109,122 @@ export class SuggestionService {
    * @returns {Array} Array of amount suggestions with confidence
    */
   async getAmountSuggestions(context = {}) {
-    const cacheKey = `amount_${JSON.stringify(context)}`;
-    if (this.cache.has(cacheKey)) {
-      return this.cache.get(cacheKey);
-    }
+    try {
+      const cacheKey = `amount_${JSON.stringify(context)}`;
+      if (this.cache.has(cacheKey)) {
+        return this.cache.get(cacheKey);
+      }
 
+      const suggestions = [];
+      const now = new Date();
+      const timeOfDay = this.getTimeOfDay(now);
+      const dayOfWeek = now.getDay();
+
+      // Get user's transaction history
+      const transactions = await this.getUserTransactionHistory();
+
+      // 1. Time-based suggestions
+      const timePatterns = this.patterns.get('timePatterns');
+      if (timePatterns[timeOfDay]) {
+        const pattern = timePatterns[timeOfDay];
+        pattern.amounts.forEach(amount => {
+          suggestions.push({
+            amount,
+            category: pattern.categories[0],
+            confidence: pattern.confidence,
+            reason: `Time-based: ${timeOfDay}`,
+            source: 'timePattern',
+          });
+        });
+      }
+
+      // 2. Recent amounts (last 10 transactions)
+      const recentAmounts = transactions
+        .slice(-10)
+        .map(tx => tx.amount)
+        .filter((amount, index, arr) => arr.indexOf(amount) === index) // unique
+        .slice(0, 5);
+
+      recentAmounts.forEach(amount => {
+        const matchingTx = transactions.find(tx => tx.amount === amount);
+        suggestions.push({
+          amount,
+          category: matchingTx?.category,
+          confidence: 0.6,
+          reason: 'Recent transaction',
+          source: 'recent',
+        });
+      });
+
+      // 3. Common amounts for this day of week
+      const dayOfWeekAmounts = this.getCommonAmountsForDayOfWeek(
+        transactions,
+        dayOfWeek
+      );
+      dayOfWeekAmounts.forEach(({ amount, frequency }) => {
+        suggestions.push({
+          amount,
+          confidence: Math.min(0.7, frequency * 0.1),
+          reason: `Common on this day`,
+          source: 'dayPattern',
+        });
+      });
+
+      // 4. Most frequent amounts overall
+      const frequentAmounts = this.getMostFrequentAmounts(transactions, 5);
+      frequentAmounts.forEach(({ amount, frequency }) => {
+        suggestions.push({
+          amount,
+          confidence: Math.min(0.5, frequency * 0.05),
+          reason: 'Frequent overall',
+          source: 'frequency',
+        });
+      });
+
+      // Sort by confidence and amount, remove duplicates
+      const uniqueSuggestions = this.deduplicateSuggestions(suggestions);
+      const sortedSuggestions = uniqueSuggestions
+        .sort((a, b) => {
+          if (b.confidence !== a.confidence) {
+            return b.confidence - a.confidence;
+          }
+          return a.amount - b.amount;
+        })
+        .slice(0, 8); // Top 8 suggestions
+
+      this.cache.set(cacheKey, sortedSuggestions);
+      return sortedSuggestions;
+    } catch (error) {
+      console.warn('Error in getAmountSuggestions:', error);
+      // Return basic time-based suggestions as fallback
+      return this.getBasicTimeBasedSuggestions();
+    }
+  }
+
+  /**
+   * Get basic time-based suggestions as fallback
+   * @returns {Array} Basic suggestions
+   */
+  getBasicTimeBasedSuggestions() {
     const suggestions = [];
     const now = new Date();
     const timeOfDay = this.getTimeOfDay(now);
-    const dayOfWeek = now.getDay();
-
-    // Get user's transaction history
-    const transactions = await this.getUserTransactionHistory();
-
-    // 1. Time-based suggestions
     const timePatterns = this.patterns.get('timePatterns');
+
     if (timePatterns[timeOfDay]) {
       const pattern = timePatterns[timeOfDay];
       pattern.amounts.forEach(amount => {
         suggestions.push({
           amount,
           category: pattern.categories[0],
-          confidence: pattern.confidence,
-          reason: `Time-based: ${timeOfDay}`,
-          source: 'timePattern'
+          confidence: pattern.confidence * 0.5, // Lower confidence for fallback
+          reason: `Time-based fallback: ${timeOfDay}`,
+          source: 'timePattern',
         });
       });
     }
 
-    // 2. Recent amounts (last 10 transactions)
-    const recentAmounts = transactions
-      .slice(-10)
-      .map(tx => tx.amount)
-      .filter((amount, index, arr) => arr.indexOf(amount) === index) // unique
-      .slice(0, 5);
-
-    recentAmounts.forEach(amount => {
-      const matchingTx = transactions.find(tx => tx.amount === amount);
-      suggestions.push({
-        amount,
-        category: matchingTx?.category,
-        confidence: 0.6,
-        reason: 'Recent transaction',
-        source: 'recent'
-      });
-    });
-
-    // 3. Common amounts for this day of week
-    const dayOfWeekAmounts = this.getCommonAmountsForDayOfWeek(transactions, dayOfWeek);
-    dayOfWeekAmounts.forEach(({ amount, frequency }) => {
-      suggestions.push({
-        amount,
-        confidence: Math.min(0.7, frequency * 0.1),
-        reason: `Common on this day`,
-        source: 'dayPattern'
-      });
-    });
-
-    // 4. Most frequent amounts overall
-    const frequentAmounts = this.getMostFrequentAmounts(transactions, 5);
-    frequentAmounts.forEach(({ amount, frequency }) => {
-      suggestions.push({
-        amount,
-        confidence: Math.min(0.5, frequency * 0.05),
-        reason: 'Frequent overall',
-        source: 'frequency'
-      });
-    });
-
-    // Sort by confidence and amount, remove duplicates
-    const uniqueSuggestions = this.deduplicateSuggestions(suggestions);
-    const sortedSuggestions = uniqueSuggestions
-      .sort((a, b) => {
-        if (b.confidence !== a.confidence) {
-          return b.confidence - a.confidence;
-        }
-        return a.amount - b.amount;
-      })
-      .slice(0, 8); // Top 8 suggestions
-
-    this.cache.set(cacheKey, sortedSuggestions);
-    return sortedSuggestions;
+    return suggestions.slice(0, 3); // Limit fallback suggestions
   }
 
   /**
@@ -219,7 +254,7 @@ export class SuggestionService {
           category,
           confidence: pattern.confidence,
           reason: `Amount range: ${range}`,
-          source: 'amountRange'
+          source: 'amountRange',
         });
       });
     }
@@ -233,20 +268,21 @@ export class SuggestionService {
           category,
           confidence: pattern.confidence * 0.8, // Slightly lower for time-only
           reason: `Time-based: ${timeOfDay}`,
-          source: 'timePattern'
+          source: 'timePattern',
         });
       });
     }
 
     // 3. Historical patterns for this amount
-    const similarAmounts = transactions.filter(tx =>
-      Math.abs(tx.amount - amount) < (amount * 0.2) // Within 20%
+    const similarAmounts = transactions.filter(
+      tx => Math.abs(tx.amount - amount) < amount * 0.2 // Within 20%
     );
 
     const categoryFrequency = {};
     similarAmounts.forEach(tx => {
       if (tx.category) {
-        categoryFrequency[tx.category] = (categoryFrequency[tx.category] || 0) + 1;
+        categoryFrequency[tx.category] =
+          (categoryFrequency[tx.category] || 0) + 1;
       }
     });
 
@@ -256,7 +292,7 @@ export class SuggestionService {
         category,
         confidence,
         reason: `Historical pattern for $${amount}`,
-        source: 'historical'
+        source: 'historical',
       });
     });
 
@@ -267,7 +303,7 @@ export class SuggestionService {
         category,
         confidence: percentage * 0.3, // Lower confidence for general usage
         reason: 'Frequently used',
-        source: 'frequency'
+        source: 'frequency',
       });
     });
 
@@ -298,7 +334,9 @@ export class SuggestionService {
     const transactions = await this.getUserTransactionHistory();
 
     // 1. Category-specific common notes
-    const categoryTransactions = transactions.filter(tx => tx.category === category);
+    const categoryTransactions = transactions.filter(
+      tx => tx.category === category
+    );
     const noteFrequency = {};
 
     categoryTransactions.forEach(tx => {
@@ -317,7 +355,7 @@ export class SuggestionService {
           note: this.capitalizeFirst(note),
           confidence: Math.min(0.8, frequency / categoryTransactions.length),
           reason: `Common for ${category}`,
-          source: 'category'
+          source: 'category',
         });
       });
 
@@ -331,7 +369,7 @@ export class SuggestionService {
               note,
               confidence: pattern.confidence,
               reason: `Recognized merchant: ${merchant}`,
-              source: 'merchant'
+              source: 'merchant',
             });
           });
         }
@@ -340,7 +378,7 @@ export class SuggestionService {
 
     // 3. Amount-based patterns
     const similarAmountNotes = transactions
-      .filter(tx => Math.abs(tx.amount - amount) < (amount * 0.1))
+      .filter(tx => Math.abs(tx.amount - amount) < amount * 0.1)
       .map(tx => tx.description)
       .filter(desc => desc && desc.trim())
       .slice(0, 3);
@@ -350,7 +388,7 @@ export class SuggestionService {
         note,
         confidence: 0.5,
         reason: 'Similar amount pattern',
-        source: 'amount'
+        source: 'amount',
       });
     });
 
@@ -358,7 +396,10 @@ export class SuggestionService {
     if (description.length > 2) {
       const matchingNotes = categoryTransactions
         .map(tx => tx.description)
-        .filter(desc => desc && desc.toLowerCase().startsWith(description.toLowerCase()))
+        .filter(
+          desc =>
+            desc && desc.toLowerCase().startsWith(description.toLowerCase())
+        )
         .slice(0, 3);
 
       matchingNotes.forEach(note => {
@@ -366,7 +407,7 @@ export class SuggestionService {
           note,
           confidence: 0.7,
           reason: 'Auto-complete',
-          source: 'autocomplete'
+          source: 'autocomplete',
         });
       });
     }
@@ -388,7 +429,10 @@ export class SuggestionService {
    * @returns {Object|null} Best category match with confidence
    */
   async getSmartCategoryMatch(amount, context = {}) {
-    const categorySuggestions = await this.getCategorySuggestions(amount, context);
+    const categorySuggestions = await this.getCategorySuggestions(
+      amount,
+      context
+    );
 
     if (categorySuggestions.length === 0) {
       return null;
@@ -403,7 +447,7 @@ export class SuggestionService {
         category: bestMatch.category,
         confidence: bestMatch.confidence,
         reasoning: bestMatch.reason,
-        alternatives: categorySuggestions.slice(1, 3) // Top 2 alternatives
+        alternatives: categorySuggestions.slice(1, 3), // Top 2 alternatives
       };
     }
 
@@ -491,7 +535,7 @@ export class SuggestionService {
     return Object.entries(amountFrequency)
       .map(([amount, frequency]) => ({
         amount: parseFloat(amount),
-        frequency
+        frequency,
       }))
       .sort((a, b) => b.frequency - a.frequency)
       .slice(0, 3);
@@ -512,7 +556,7 @@ export class SuggestionService {
     return Object.entries(amountFrequency)
       .map(([amount, frequency]) => ({
         amount: parseFloat(amount),
-        frequency
+        frequency,
       }))
       .sort((a, b) => b.frequency - a.frequency)
       .slice(0, limit);
@@ -537,7 +581,7 @@ export class SuggestionService {
       .map(([category, count]) => ({
         category,
         count,
-        percentage: count / totalTransactions
+        percentage: count / totalTransactions,
       }))
       .sort((a, b) => b.percentage - a.percentage);
   }
@@ -567,10 +611,14 @@ export class SuggestionService {
   deduplicateCategorySuggestions(suggestions) {
     const seen = new Set();
     return suggestions.filter(suggestion => {
-      if (seen.has(suggestion.category)) {
+      if (!suggestion || !suggestion.category) {
+        return false; // Filter out invalid suggestions
+      }
+      const key = suggestion.category.toLowerCase();
+      if (seen.has(key)) {
         return false;
       }
-      seen.add(suggestion.category);
+      seen.add(key);
       return true;
     });
   }
@@ -583,6 +631,13 @@ export class SuggestionService {
   deduplicateNoteSuggestions(suggestions) {
     const seen = new Set();
     return suggestions.filter(suggestion => {
+      if (
+        !suggestion ||
+        suggestion.note === null ||
+        suggestion.note === undefined
+      ) {
+        return false; // Filter out null/undefined notes
+      }
       const key = suggestion.note.toLowerCase();
       if (seen.has(key)) {
         return false;

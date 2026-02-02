@@ -140,7 +140,7 @@ export const SettingsView = () => {
   const generalSection = GeneralSection();
   contentWrapper.appendChild(generalSection);
 
-  /// Privacy system disabled for now, to be implemented backend later 
+  /// Privacy system disabled for now, to be implemented backend later
   // import { createPrivacyControls, initializePrivacyControls } from '../components/PrivacyControls.js';
   // // Privacy Controls Section
   // const privacySection = createPrivacyControls();

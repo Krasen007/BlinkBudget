@@ -6,66 +6,66 @@
 
 export const categoryIcons = {
   // Food & Drink
-  'Храна': {
+  Храна: {
     name: 'coffee-shop',
     svg: '<path d="M18 6h-1a4 4 0 0 0-4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V10a4 4 0 0 0-4-4H2"/><path d="M6 6h12"/><path d="M18 10h2a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2h-2"/><path d="M8 14h.01"/><path d="M8 18h.01"/>',
     color: '#F97316',
-    category: 'food-drink'
+    category: 'food-drink',
   },
-  'Заведения': {
+  Заведения: {
     name: 'restaurant',
     svg: '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>',
     color: '#F97316',
-    category: 'food-drink'
+    category: 'food-drink',
   },
-  'Гориво': {
+  Гориво: {
     name: 'gas-station',
     svg: '<path d="M5 12V4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v4"/><path d="M5 12v8a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-8"/><path d="M9 8v2"/><path d="M19 2v10l-2 2v6a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2v-8"/><path d="M19 8h3"/>',
     color: '#EF4444',
-    category: 'transport'
+    category: 'transport',
   },
-  'Автомобил': {
+  Автомобил: {
     name: 'car',
     svg: '<path d="M19 9h-4.79a1 1 0 0 0-.72.31l-3.1 3.1a1 1 0 0 1-.72.31H5a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2Z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/><path d="M5 11V9a2 2 0 0 1 2-2h1"/>',
     color: '#EF4444',
-    category: 'transport'
+    category: 'transport',
   },
-  'Сметки': {
+  Сметки: {
     name: 'utilities',
     svg: '<path d="M15 3v4a3 3 0 0 0 3 3v9a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V10a3 3 0 0 0 3-3V3"/><path d="M9 3v4a3 3 0 0 0 3 3"/><path d="M9 12v6"/><path d="M12 12v6"/><path d="M15 12v6"/>',
     color: '#F59E0B',
-    category: 'home'
+    category: 'home',
   },
-  'Забавления': {
+  Забавления: {
     name: 'entertainment',
     svg: '<rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/>',
     color: '#A855F7',
-    category: 'entertainment'
+    category: 'entertainment',
   },
-  'Лекар': {
+  Лекар: {
     name: 'medical',
     svg: '<path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/><path d="M12 8v8"/><path d="M8 12h8"/>',
     color: '#EF4444',
-    category: 'medical'
+    category: 'medical',
   },
-  'Заплата': {
+  Заплата: {
     name: 'salary',
     svg: '<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
     color: '#22C55E',
-    category: 'income'
+    category: 'income',
   },
-  'Подаръци': {
+  Подаръци: {
     name: 'gifts',
     svg: '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M8 21h8"/><path d="M12 8V2h0a2 2 0 0 1 2 2v4"/>',
     color: '#A855F7',
-    category: 'personal'
+    category: 'personal',
   },
-  'Други': {
+  Други: {
     name: 'miscellaneous',
     svg: '<circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/>',
     color: '#6B7280',
-    category: 'miscellaneous'
-  }
+    category: 'miscellaneous',
+  },
 };
 
 /**
@@ -87,11 +87,7 @@ export function createCategoryIcon(category, options = {}) {
   const iconData = getCategoryIcon(category);
   if (!iconData) return null;
 
-  const {
-    size = 'medium',
-    className = '',
-    color = null
-  } = options;
+  const { size = 'medium', className = '', color = null } = options;
 
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('viewBox', '0 0 24 24');
@@ -100,20 +96,20 @@ export function createCategoryIcon(category, options = {}) {
   svg.setAttribute('stroke-width', '2');
   svg.setAttribute('stroke-linecap', 'round');
   svg.setAttribute('stroke-linejoin', 'round');
-  
+
   // Set size classes
   const sizeClasses = {
     small: 'category-icon-small',
     medium: '',
     large: 'category-icon-large',
-    xl: 'category-icon-xl'
+    xl: 'category-icon-xl',
   };
-  
+
   svg.className.baseVal = `category-icon ${sizeClasses[size]} category-icon-${iconData.category} ${className}`;
-  
+
   // Add SVG paths
   svg.innerHTML = iconData.svg;
-  
+
   return svg;
 }
 
@@ -127,17 +123,13 @@ export function getCategoryIconHTML(category, options = {}) {
   const iconData = getCategoryIcon(category);
   if (!iconData) return '';
 
-  const {
-    size = 'medium',
-    className = '',
-    color = null
-  } = options;
+  const { size = 'medium', className = '', color = null } = options;
 
   const sizeClasses = {
     small: 'category-icon-small',
     medium: '',
     large: 'category-icon-large',
-    xl: 'category-icon-xl'
+    xl: 'category-icon-xl',
   };
 
   return `
@@ -156,7 +148,7 @@ export function getCategoryIconHTML(category, options = {}) {
 export function getAllCategoriesWithIcons() {
   return Object.entries(categoryIcons).map(([name, iconData]) => ({
     name,
-    ...iconData
+    ...iconData,
   }));
 }
 
@@ -167,7 +159,7 @@ export function getAllCategoriesWithIcons() {
  */
 export function getCategoriesByFrequency(transactions = []) {
   const categoryCount = {};
-  
+
   transactions.forEach(tx => {
     if (tx.category) {
       categoryCount[tx.category] = (categoryCount[tx.category] || 0) + 1;
@@ -175,16 +167,16 @@ export function getCategoriesByFrequency(transactions = []) {
   });
 
   const totalTransactions = transactions.length;
-  
+
   return Object.entries(categoryCount)
     .map(([category, count]) => {
       const iconData = getCategoryIcon(category);
       return {
         category,
         count,
-        percentage: totalTransactions > 0 ? (count / totalTransactions) : 0,
+        percentage: totalTransactions > 0 ? count / totalTransactions : 0,
         frequency: getFrequencyLevel(count / totalTransactions),
-        ...iconData
+        ...iconData,
       };
     })
     .sort((a, b) => b.count - a.count);

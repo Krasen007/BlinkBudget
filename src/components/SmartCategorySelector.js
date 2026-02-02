@@ -5,7 +5,10 @@
  */
 
 import { suggestionService } from '../core/suggestion-service.js';
-import { getCategoryIconHTML, getCategoriesByFrequency } from '../utils/category-icons.js';
+import {
+  getCategoryIconHTML,
+  getCategoriesByFrequency,
+} from '../utils/category-icons.js';
 
 export const SmartCategorySelector = {
   /**
@@ -19,7 +22,7 @@ export const SmartCategorySelector = {
       onSmartMatchAccept,
       amount = 0,
       initialCategory = '',
-      className = ''
+      className = '',
     } = options;
 
     const container = document.createElement('div');
@@ -52,8 +55,13 @@ export const SmartCategorySelector = {
     this.initializeCategories(categoryGrid, onCategorySelect, initialCategory);
 
     // Store references
-    container.updateSmartMatch = (newAmount) => {
-      this.updateSmartMatch(newAmount, smartMatchContainer, onSmartMatchAccept, onCategorySelect);
+    container.updateSmartMatch = newAmount => {
+      this.updateSmartMatch(
+        newAmount,
+        smartMatchContainer,
+        onSmartMatchAccept,
+        onCategorySelect
+      );
     };
 
     container.getSelectedCategory = () => {
@@ -61,7 +69,7 @@ export const SmartCategorySelector = {
       return selected ? selected.dataset.category : null;
     };
 
-    container.setSelectedCategory = (category) => {
+    container.setSelectedCategory = category => {
       categoryGrid.querySelectorAll('.category-card').forEach(card => {
         card.classList.remove('selected');
         if (card.dataset.category === category) {
@@ -100,9 +108,9 @@ export const SmartCategorySelector = {
 
         card.addEventListener('click', () => {
           // Remove selected class from all cards
-          grid.querySelectorAll('.category-card').forEach(c =>
-            c.classList.remove('selected')
-          );
+          grid
+            .querySelectorAll('.category-card')
+            .forEach(c => c.classList.remove('selected'));
 
           // Add selected class to clicked card
           card.classList.add('selected');
@@ -112,12 +120,14 @@ export const SmartCategorySelector = {
           }
 
           // Record selection for learning
-          suggestionService.recordUserSelection('category', categoryData.category);
+          suggestionService.recordUserSelection(
+            'category',
+            categoryData.category
+          );
         });
 
         grid.appendChild(card);
       });
-
     } catch (error) {
       console.warn('Failed to initialize categories:', error);
       // Fallback to basic categories
@@ -133,16 +143,23 @@ export const SmartCategorySelector = {
    */
   initializeFallbackCategories(grid, onSelect, initialCategory) {
     const fallbackCategories = [
-      'Храна', 'Заведения', 'Гориво', 'Автомобил',
-      'Сметки', 'Забавления', 'Лекар', 'Заплата',
-      'Подаръци', 'Други'
+      'Храна',
+      'Заведения',
+      'Гориво',
+      'Автомобил',
+      'Сметки',
+      'Забавления',
+      'Лекар',
+      'Заплата',
+      'Подаръци',
+      'Други',
     ];
 
     fallbackCategories.forEach((category, index) => {
       const categoryData = {
         category,
         frequency: 'medium',
-        percentage: 0.1
+        percentage: 0.1,
       };
 
       const card = this.createCategoryCard(categoryData, index === 0);
@@ -152,9 +169,9 @@ export const SmartCategorySelector = {
       }
 
       card.addEventListener('click', () => {
-        grid.querySelectorAll('.category-card').forEach(c =>
-          c.classList.remove('selected')
-        );
+        grid
+          .querySelectorAll('.category-card')
+          .forEach(c => c.classList.remove('selected'));
         card.classList.add('selected');
 
         if (onSelect) {
@@ -183,7 +200,9 @@ export const SmartCategorySelector = {
     // Category icon
     const icon = document.createElement('div');
     icon.className = 'category-icon';
-    icon.innerHTML = getCategoryIconHTML(categoryData.category, { size: 'medium' });
+    icon.innerHTML = getCategoryIconHTML(categoryData.category, {
+      size: 'medium',
+    });
     card.appendChild(icon);
 
     // Category name
@@ -255,7 +274,9 @@ export const SmartCategorySelector = {
     const categoryDiv = document.createElement('div');
     categoryDiv.className = 'smart-match-category';
 
-    const iconHTML = getCategoryIconHTML(smartMatch.category, { size: 'medium' });
+    const iconHTML = getCategoryIconHTML(smartMatch.category, {
+      size: 'medium',
+    });
     categoryDiv.innerHTML = `${iconHTML} ${smartMatch.category}`;
     matchContent.appendChild(categoryDiv);
 
@@ -299,11 +320,12 @@ export const SmartCategorySelector = {
    */
   async getTransactionHistory() {
     try {
-      const { TransactionService } = await import('../core/transaction-service.js');
+      const { TransactionService } =
+        await import('../core/transaction-service.js');
       return TransactionService.getAll();
     } catch (error) {
       console.warn('Failed to load transaction history:', error);
       return [];
     }
-  }
+  },
 };
