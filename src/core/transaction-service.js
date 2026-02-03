@@ -44,6 +44,22 @@ export const TransactionService = {
   },
 
   /**
+   * Get all transactions for export (sanitized)
+   * @returns {Array} List of transactions with internal fields removed
+   */
+  getAllForExport() {
+    const transactions = this.getAll();
+
+    return transactions.map(transaction => {
+      // Create a copy and remove internal fields
+      const exportTx = { ...transaction };
+      delete exportTx.internalId;
+      delete exportTx.metadata;
+      return exportTx;
+    });
+  },
+
+  /**
    * Get all transactions (alias for getAll for API consistency)
    * @returns {Array} List of transactions
    */

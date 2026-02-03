@@ -593,3 +593,6 @@ export class GoalPlanner {
     this._saveGoals();
   }
 }
+
+// Singleton instance
+export const goalPlanner = new GoalPlanner();

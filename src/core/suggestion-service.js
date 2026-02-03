@@ -5,6 +5,7 @@
  */
 
 import { TransactionService } from './transaction-service.js';
+import { categoryIcons } from '../utils/category-icons.js';
 
 export class SuggestionService {
   constructor() {
@@ -29,22 +30,22 @@ export class SuggestionService {
     // Time-based patterns
     this.patterns.set('timePatterns', {
       '06:00-10:00': {
-        categories: ['Coffee', 'Breakfast', 'Food & Drink'],
+        categories: ['Храна', 'Заведения'],
         amounts: [4.5, 5.0, 8.0, 12.0],
         confidence: 0.7,
       },
       '11:00-14:00': {
-        categories: ['Lunch', 'Food & Drink', 'Restaurant'],
+        categories: ['Заведения', 'Храна'],
         amounts: [12.0, 15.0, 18.0, 25.0],
         confidence: 0.8,
       },
       '17:00-21:00': {
-        categories: ['Dinner', 'Entertainment', 'Restaurant'],
+        categories: ['Заведения', 'Забавления'],
         amounts: [25.0, 35.0, 50.0, 75.0],
         confidence: 0.6,
       },
       '21:00-23:59': {
-        categories: ['Entertainment', 'Gaming', 'Other'],
+        categories: ['Забавления', 'Други'],
         amounts: [15.0, 20.0, 30.0],
         confidence: 0.5,
       },
@@ -53,23 +54,23 @@ export class SuggestionService {
     // Amount range patterns
     this.patterns.set('amountRanges', {
       '0-5': {
-        categories: ['Coffee', 'Snacks', 'Other'],
+        categories: ['Храна', 'Други'],
         confidence: 0.8,
       },
       '5-15': {
-        categories: ['Lunch', 'Coffee', 'Transport', 'Food & Drink'],
+        categories: ['Заведения', 'Храна', 'Гориво'],
         confidence: 0.7,
       },
       '15-30': {
-        categories: ['Groceries', 'Transport', 'Entertainment'],
+        categories: ['Гориво', 'Забавления'],
         confidence: 0.6,
       },
       '30-100': {
-        categories: ['Groceries', 'Shopping', 'Bills', 'Home'],
+        categories: ['Сметки', 'Забавления', 'Други'],
         confidence: 0.7,
       },
       '100+': {
-        categories: ['Bills', 'Home', 'Shopping', 'Other'],
+        categories: ['Сметки', 'Други'],
         confidence: 0.5,
       },
     });
@@ -77,27 +78,27 @@ export class SuggestionService {
     // Common merchant patterns
     this.patterns.set('merchantPatterns', {
       starbucks: {
-        category: 'Coffee',
+        category: 'Храна',
         amounts: [4.5, 5.0, 6.0],
-        notes: ['Starbucks coffee', 'Morning latte', 'Coffee break'],
+        notes: ['Starbucks кафе', 'Кафе сутрин', 'Кафе пауза'],
         confidence: 0.9,
       },
       shell: {
-        category: 'Gas',
+        category: 'Гориво',
         amounts: [25.0, 35.0, 50.0, 65.0],
-        notes: ['Gas', 'Fuel up', 'Weekly gas'],
+        notes: ['Гориво', 'Танкване', 'Седмично гориво'],
         confidence: 0.8,
       },
       walmart: {
-        category: 'Groceries',
+        category: 'Храна',
         amounts: [50.0, 100.0, 150.0, 200.0],
-        notes: ['Groceries', 'Weekly shopping', 'Household items'],
+        notes: ['Хранителни стоки', 'Седмично пазаруване', 'Домашни потреби'],
         confidence: 0.8,
       },
       mcdonald: {
-        category: 'Food & Drink',
+        category: 'Заведения',
         amounts: [8.0, 12.0, 15.0],
-        notes: ['Lunch', 'Fast food', 'Quick meal'],
+        notes: ['Обяд', 'Бързо хранене', 'Бързо ядене'],
         confidence: 0.8,
       },
     });

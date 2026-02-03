@@ -6,6 +6,8 @@
 import { AuthService } from './auth-service.js';
 import { TransactionService } from './transaction-service.js';
 import { auditService, auditEvents } from './audit-service.js';
+import { auth } from './firebase-config.js';
+import { deleteUser } from 'firebase/auth';
 
 export class AccountDeletionService {
   constructor() {
@@ -296,8 +298,18 @@ export class AccountDeletionService {
     };
 
     try {
-      // Sign out user
-      await AuthService.signOut();
+      const user = AuthService.user;
+
+      if (user && auth) {
+        // Delete the Firebase user account
+        await deleteUser(user);
+        result.authDeleted = true;
+      } else {
+        // Fallback: just sign out if no authenticated user
+        await AuthService.logout();
+        result.authDeleted = false;
+        result.warnings.push('No authenticated user found for deletion');
+      }
 
       // Clear auth-related localStorage
       const authKeys = Object.keys(localStorage).filter(
@@ -318,10 +330,19 @@ export class AccountDeletionService {
 
       step.status = 'completed';
       step.authKeysCleared = authKeys.length;
+      step.firebaseAccountDeleted = result.authDeleted;
     } catch (error) {
       step.status = 'failed';
       step.error = error.message;
       result.errors.push(`Auth deletion failed: ${error.message}`);
+
+      // Fallback: try to at least sign out
+      try {
+        await AuthService.logout();
+        result.warnings.push('Firebase account deletion failed, but user was signed out');
+      } catch (logoutError) {
+        result.warnings.push(`Sign out also failed: ${logoutError.message}`);
+      }
     }
 
     step.endTime = Date.now();

@@ -156,6 +156,13 @@ export const TransactionForm = ({
   amountGroup.style.marginBottom = '0';
   amountGroup.appendChild(amountInput);
 
+  // Add tutorial data attribute to amount input
+  if (smartAmountInput) {
+    smartAmountInput.setAttribute('data-tutorial-target', 'amount-input');
+  } else {
+    amountInput.setAttribute('data-tutorial-target', 'amount-input');
+  }
+
   // 5. Amount and Account Row
   const amountAccountRow = document.createElement('div');
   amountAccountRow.style.display = 'flex';
@@ -202,6 +209,11 @@ export const TransactionForm = ({
     };
     // Add touch target classes to category cards
     smartCategorySelector.classList.add('touch-target-secondary');
+    // Add tutorial data attribute to category selector
+    smartCategorySelector.setAttribute(
+      'data-tutorial-target',
+      'category-selector'
+    );
   } else {
     // Classic Category Selector
     categorySelector = createCategorySelector({
@@ -216,6 +228,11 @@ export const TransactionForm = ({
         handleFormSubmit(data, onSubmit);
       },
     });
+    // Add tutorial data attribute to classic category selector
+    categorySelector.container.setAttribute(
+      'data-tutorial-target',
+      'category-selector'
+    );
   }
 
   // Setup type toggle change handler (after categorySelector is created)

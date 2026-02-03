@@ -273,6 +273,7 @@ export const SmartAmountInput = {
   /**
    * Create confidence indicator
    * @param {Object} suggestion - Top suggestion
+   */
   createConfidenceIndicator(suggestion) {
     const indicator = document.createElement('div');
     indicator.className = `confidence-indicator confidence-${suggestionService.getConfidenceLevel(suggestion.confidence)}`;
@@ -280,8 +281,6 @@ export const SmartAmountInput = {
     const confidencePercent = Math.round(suggestion.confidence * 100);
     indicator.textContent = `⭐ Most Likely: ${suggestion.category || 'Unknown'} (${confidencePercent}% confidence)`;
 
-    return indicator;
-  },
     return indicator;
   },
 

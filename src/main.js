@@ -73,6 +73,30 @@ const initApp = () => {
         BackupService.init();
       });
 
+      // Initialize tutorial system after user is authenticated
+      import('./components/tutorial/TutorialManager.js').then(
+        ({ TutorialManager }) => {
+          const initTutorial = async () => {
+            const tutorialManager = new TutorialManager();
+            const shouldShowTutorial = await tutorialManager.initialize();
+
+            if (shouldShowTutorial) {
+              // Show tutorial after a short delay to let app settle
+              setTimeout(() => {
+                tutorialManager.start();
+              }, 1500);
+            }
+
+            // Store reference globally for potential future use
+            window.tutorialManager = tutorialManager;
+          };
+
+          initTutorial().catch(error => {
+            console.warn('[Main] Failed to initialize tutorial:', error);
+          });
+        }
+      );
+
       if (currentRoute === 'login' || currentRoute === 'landing') {
         Router.navigate('dashboard');
       }
