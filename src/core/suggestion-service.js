@@ -5,7 +5,6 @@
  */
 
 import { TransactionService } from './transaction-service.js';
-import { categoryIcons } from '../utils/category-icons.js';
 
 export class SuggestionService {
   constructor() {
@@ -75,33 +74,7 @@ export class SuggestionService {
       },
     });
 
-    // Common merchant patterns
-    this.patterns.set('merchantPatterns', {
-      starbucks: {
-        category: 'Храна',
-        amounts: [4.5, 5.0, 6.0],
-        notes: ['Starbucks кафе', 'Кафе сутрин', 'Кафе пауза'],
-        confidence: 0.9,
-      },
-      shell: {
-        category: 'Гориво',
-        amounts: [25.0, 35.0, 50.0, 65.0],
-        notes: ['Гориво', 'Танкване', 'Седмично гориво'],
-        confidence: 0.8,
-      },
-      walmart: {
-        category: 'Храна',
-        amounts: [50.0, 100.0, 150.0, 200.0],
-        notes: ['Хранителни стоки', 'Седмично пазаруване', 'Домашни потреби'],
-        confidence: 0.8,
-      },
-      mcdonald: {
-        category: 'Заведения',
-        amounts: [8.0, 12.0, 15.0],
-        notes: ['Обяд', 'Бързо хранене', 'Бързо ядене'],
-        confidence: 0.8,
-      },
-    });
+    // No merchant patterns - removed all merchants
   }
 
   /**
@@ -360,22 +333,7 @@ export class SuggestionService {
         });
       });
 
-    // 2. Merchant pattern matching
-    if (description) {
-      const merchantPatterns = this.patterns.get('merchantPatterns');
-      Object.entries(merchantPatterns).forEach(([merchant, pattern]) => {
-        if (description.toLowerCase().includes(merchant)) {
-          pattern.notes.forEach(note => {
-            suggestions.push({
-              note,
-              confidence: pattern.confidence,
-              reason: `Recognized merchant: ${merchant}`,
-              source: 'merchant',
-            });
-          });
-        }
-      });
-    }
+    // No merchant pattern matching - removed all merchants
 
     // 3. Amount-based patterns
     const similarAmountNotes = transactions

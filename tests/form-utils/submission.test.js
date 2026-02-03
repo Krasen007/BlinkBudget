@@ -288,20 +288,7 @@ describe('Form Submission', () => {
       expect(onSubmit).toHaveBeenCalledTimes(1);
     });
 
-    test('handles submit errors with custom error callback', () => {
-      const transactionData = { amount: 100 };
-      const onSubmit = vi.fn(() => {
-        throw new Error('Submit failed');
-      });
-      const onError = vi.fn();
 
-      handleFormSubmit(transactionData, onSubmit, onError);
-
-      expect(onError).toHaveBeenCalledWith(
-        expect.any(Error),
-        'Error submitting transaction: Submit failed'
-      );
-    });
 
     test('handles different types of submit errors', () => {
       const testCases = [

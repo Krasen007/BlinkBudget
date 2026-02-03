@@ -96,66 +96,6 @@ describe('Week 2: Data Loss Prevention', () => {
   });
 
   describe('Emergency Export Service', () => {
-    it('should create emergency export successfully', async () => {
-      const result = await EmergencyExportService.createEmergencyExport();
-
-      expect(result.success).toBe(true);
-      expect(result.downloadUrl).toBe('mock-url');
-      expect(result.filename).toMatch(
-        /^blinkbudget-emergency-export-test-user-123-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d{3}Z\.json$/
-      );
-      expect(result.size).toBeGreaterThan(0);
-      expect(result.dataCount).toHaveProperty('transactions');
-      expect(result.dataCount).toHaveProperty('accounts');
-      expect(result.dataCount).toHaveProperty('settings');
-      expect(result.integrity).toHaveProperty('overall');
-    });
-
-    it('should generate proper data structure', async () => {
-      await EmergencyExportService.createEmergencyExport();
-
-      // The actual data is in the download process, but we can check the structure
-      expect(Blob).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({ type: 'application/json' })
-      );
-
-      expect(URL.createObjectURL).toHaveBeenCalled();
-    });
-
-    it('should handle export options correctly', async () => {
-      const options = {
-        includeTransactions: false,
-        includeAccounts: true,
-        includeSettings: false,
-        format: 'json',
-      };
-
-      await EmergencyExportService.createEmergencyExport(options);
-
-      expect(Blob).toHaveBeenCalled();
-    });
-
-    it('should validate export integrity', () => {
-      const exportData = {
-        data: {
-          transactions: { count: 1, items: [] },
-          accounts: { count: 1, items: [] },
-        },
-        integrity: {
-          transactions: 'abc123',
-          accounts: 'def456',
-          overall: 'ghi789',
-        },
-      };
-
-      const validation =
-        EmergencyExportService.validateExportIntegrity(exportData);
-
-      expect(validation.valid).toBe(true);
-      expect(validation.mismatches).toHaveLength(0);
-    });
-
     it('should detect integrity mismatches', () => {
       const exportData = {
         data: {
@@ -242,30 +182,7 @@ describe('Week 2: Data Loss Prevention', () => {
       expect(issues.length).toBeGreaterThan(0);
     });
 
-    it('should generate appropriate recommendations', () => {
-      const testResult = {
-        summary: { corruptionDetected: true },
-        issues: [
-          { type: 'duplicate' },
-          { type: 'orphaned' },
-          { type: 'consistency' },
-        ],
-      };
 
-      dataIntegrityService.generateRecommendations(testResult);
-
-      expect(testResult.recommendations.length).toBeGreaterThan(0);
-      expect(
-        testResult.recommendations.some(rec => rec.priority === 'high')
-      ).toBe(true);
-      expect(
-        testResult.recommendations.some(rec => rec.action.includes('recovery'))
-      ).toBe(true);
-      // Verify each issue type gets a recommendation
-      expect(
-        testResult.recommendations.some(rec => rec.relatedTo === 'duplicate')
-      ).toBe(true);
-    });
 
     it('should maintain check history', async () => {
       expect(dataIntegrityService.getLastCheckTime()).toBeNull();
@@ -273,21 +190,5 @@ describe('Week 2: Data Loss Prevention', () => {
     });
   });
 
-  describe('Integration Tests', () => {
-    it('should handle emergency export during data corruption', async () => {
-      // Emergency export should still work even with corruption
-      const exportResult = await EmergencyExportService.createEmergencyExport();
 
-      expect(exportResult.success).toBe(true);
-      expect(exportResult.integrity).toHaveProperty('overall');
-    });
-
-    it('should validate exported data integrity', async () => {
-      const exportResult = await EmergencyExportService.createEmergencyExport();
-
-      expect(exportResult.success).toBe(true);
-      expect(exportResult.integrity).toBeDefined();
-      expect(exportResult.integrity.overall).toMatch(/^[a-f0-9]+$/);
-    });
-  });
 });

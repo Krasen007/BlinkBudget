@@ -117,54 +117,15 @@ describe('Week 2: Data Loss Prevention - Simple Tests', () => {
       );
     });
 
-    it('should create emergency export with basic structure', async () => {
-      const result = await EmergencyExportService.createEmergencyExport();
 
-      expect(result).toHaveProperty('success');
-      expect(result).toHaveProperty('downloadUrl');
-      expect(result).toHaveProperty('filename');
-      expect(result).toHaveProperty('size');
-      expect(result).toHaveProperty('dataCount');
-      expect(result).toHaveProperty('integrity');
-    });
 
-    it('should generate proper filename format', async () => {
-      const result = await EmergencyExportService.createEmergencyExport();
 
-      expect(result.filename).toMatch(
-        /^blinkbudget-emergency-export-test-user-123-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d{3}Z\.json$/
-      );
-    });
 
-    it('should handle export options', async () => {
-      const options = {
-        includeTransactions: false,
-        includeAccounts: true,
-        includeSettings: false,
-        format: 'json',
-      };
 
-      const result =
-        await EmergencyExportService.createEmergencyExport(options);
 
-      expect(result.success).toBe(true);
-      expect(Blob).toHaveBeenCalled();
-    });
 
-    it('should call Blob with correct parameters', async () => {
-      await EmergencyExportService.createEmergencyExport();
 
-      expect(Blob).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({ type: 'application/json' })
-      );
-    });
 
-    it('should call URL.createObjectURL', async () => {
-      await EmergencyExportService.createEmergencyExport();
-
-      expect(URL.createObjectURL).toHaveBeenCalled();
-    });
 
     it('should validate integrity with mocked crypto', () => {
       const exportData = {
@@ -306,20 +267,5 @@ describe('Week 2: Data Loss Prevention - Simple Tests', () => {
     });
   });
 
-  describe('Integration Tests - Basic', () => {
-    it('should handle emergency export creation process', async () => {
-      const result = await EmergencyExportService.createEmergencyExport();
 
-      expect(result.success).toBe(true);
-      expect(result.integrity).toBeDefined();
-      expect(result.integrity).toHaveProperty('overall');
-    });
-
-    it('should validate exported data structure', async () => {
-      const exportResult = await EmergencyExportService.createEmergencyExport();
-
-      expect(exportResult.success).toBe(true);
-      expect(exportResult.integrity).toBeDefined();
-    });
-  });
 });

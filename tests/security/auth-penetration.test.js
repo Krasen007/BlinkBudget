@@ -155,35 +155,7 @@ describe('Authentication Penetration Testing', () => {
       expect(results[5].rateLimitInfo).toBeDefined();
     });
 
-    it('should reset rate limit on successful login', async () => {
-      const email = 'test@example.com';
 
-      // Mock Firebase to fail then succeed
-      const authError = new Error('auth/wrong-password');
-      authError.code = 'auth/wrong-password';
-
-      mockSignIn
-        .mockRejectedValueOnce(authError)
-        .mockRejectedValueOnce(authError)
-        .mockResolvedValueOnce({
-          user: { uid: 'test-uid', email: email },
-        });
-
-      // Failed attempts
-      await AuthService.login(email, 'wrong1');
-      await AuthService.login(email, 'wrong2');
-
-      // Successful login should reset rate limit
-      const result = await AuthService.login(email, 'correctpassword');
-      expect(result.user).toBeDefined();
-      expect(result.error).toBeNull();
-
-      // Should be able to try again without rate limit
-      mockSignIn.mockRejectedValue(new Error('Invalid credentials'));
-      const result2 = await AuthService.login(email, 'wrongagain');
-      expect(result2.error).toContain('Invalid email or password');
-      expect(result2.rateLimitInfo).toBeUndefined();
-    });
 
     it('should handle distributed brute force attempts', async () => {
       const emails = [

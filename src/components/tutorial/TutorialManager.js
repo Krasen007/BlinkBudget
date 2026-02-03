@@ -225,20 +225,38 @@ export class TutorialManager {
    * Show spotlight step (highlight specific element)
    */
   showSpotlightStep(step) {
-    const targetElement = document.querySelector(step.target);
+    // Try to find the target element with retries
+    this.findTargetWithRetry(step.target, (targetElement) => {
+      if (!targetElement) {
+        console.warn(`Tutorial target not found after retries: ${step.target}`);
+        this.emitEvent(TUTORIAL_EVENTS.TARGET_NOT_FOUND, { target: step.target });
+        this.next();
+        return;
+      }
 
-    if (!targetElement) {
-      console.warn(`Tutorial target not found: ${step.target}`);
-      this.emitEvent(TUTORIAL_EVENTS.TARGET_NOT_FOUND, { target: step.target });
-      this.next();
-      return;
+      // Create spotlight
+      this.createSpotlight(targetElement);
+
+      // Show tooltip
+      this.showTooltipStep(step);
+    });
+  }
+
+  /**
+   * Find target element with retries for dynamic content
+   */
+  findTargetWithRetry(target, callback, retries = 3, delay = 500) {
+    const targetElement = document.querySelector(target);
+
+    if (targetElement) {
+      callback(targetElement);
+    } else if (retries > 0) {
+      setTimeout(() => {
+        this.findTargetWithRetry(target, callback, retries - 1, delay);
+      }, delay);
+    } else {
+      callback(null);
     }
-
-    // Create spotlight
-    this.createSpotlight(targetElement);
-
-    // Show tooltip
-    this.showTooltipStep(step);
   }
 
   /**

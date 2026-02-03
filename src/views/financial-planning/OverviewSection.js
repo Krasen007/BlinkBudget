@@ -57,30 +57,40 @@ export const OverviewSection = (planningData, riskAssessor) => {
   statsGrid.style.gap = SPACING.MD;
   statsGrid.style.marginBottom = SPACING.XL;
 
-  // Calculate real stats from transaction data
+  // Calculate real stats from transaction data - SAME LOGIC AS DASHBOARD
   const { transactions } = planningData;
-  let totalIncome = 0;
-  let totalExpenses = 0;
+  let allTimeIncome = 0;
+  let allTimeExpense = 0;
   let monthlyExpenses = 0;
 
-  // Calculate totals and monthly averages
+  // Filter out ghost transactions for totals calculation (same as dashboard)
+  const validTransactionsForStats = transactions.filter(t => !t.isGhost);
+
+  // Calculate ALL TIME totals (same as dashboard)
+  validTransactionsForStats.forEach(t => {
+    if (t.type === 'income') {
+      allTimeIncome += t.amount;
+    } else if (t.type === 'expense') {
+      allTimeExpense += t.amount;
+    } else if (t.type === 'refund') {
+      allTimeExpense -= t.amount; // Refunds reduce expenses
+    } else if (t.type === 'transfer') {
+      // For transfers, money moves between accounts, so net effect is 0 for overall balance
+      // But we track the movement for individual account calculations
+      allTimeExpense += t.amount; // Money out of source
+      allTimeIncome += t.amount;  // Money into destination
+    }
+  });
+
+  const currentBalance = allTimeIncome - allTimeExpense;
+
+  // Calculate monthly expenses from recent data
   const now = new Date();
   const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
   const recentTransactions = transactions.filter(
     t => !t.isGhost && new Date(t.timestamp) >= threeMonthsAgo
   );
 
-  transactions.forEach(transaction => {
-    if (transaction.isGhost) return; // Skip ghost transactions
-
-    if (transaction.type === 'income') {
-      totalIncome += transaction.amount;
-    } else if (transaction.type === 'expense') {
-      totalExpenses += transaction.amount;
-    }
-  });
-
-  // Calculate monthly expenses from recent data
   if (recentTransactions.length > 0) {
     const recentExpenses = recentTransactions
       .filter(t => t.type === 'expense')
@@ -92,9 +102,8 @@ export const OverviewSection = (planningData, riskAssessor) => {
     monthlyExpenses = recentExpenses / monthsOfData;
   }
 
-  const currentBalance = totalIncome - totalExpenses;
   const savingsRate =
-    totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0;
+    allTimeIncome > 0 ? ((allTimeIncome - allTimeExpense) / allTimeIncome) * 100 : 0;
 
   // Generate risk assessments
   let emergencyFundAssessment = null;
@@ -129,8 +138,8 @@ export const OverviewSection = (planningData, riskAssessor) => {
       icon: '💰',
       subtitle: currentBalance >= 0 ? 'Positive balance' : 'Negative balance',
       calculationHelp: `
-        <p><strong>Formula:</strong> Total Income - Total Expenses</p>
-        <p>This shows your net financial position by subtracting all expenses from all income transactions in your account.</p>
+        <p><strong>Formula:</strong> Total Income - Total Expenses (including refunds and transfers)</p>
+        <p>This shows your net financial position by calculating all income minus all expenses, refunds, and transfer movements across all your accounts. Matches the dashboard calculation.</p>
       `,
     },
     {

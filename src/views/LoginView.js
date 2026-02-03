@@ -385,6 +385,15 @@ export const LoginView = () => {
   form.appendChild(errorMsg);
   form.appendChild(submitBtn);
 
+  // Ensure the submit button has type="submit" for proper Enter key behavior
+  submitBtn.type = 'submit';
+
+  // Add form submit event listener to handle Enter key
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    submitBtn.click();
+  });
+
   container.appendChild(title);
   container.appendChild(form);
   container.appendChild(separator);

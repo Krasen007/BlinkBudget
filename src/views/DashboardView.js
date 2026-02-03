@@ -140,7 +140,7 @@ export const DashboardView = () => {
   content.style.display = 'flex';
   content.style.flexDirection = 'column';
   content.style.minHeight = '0'; // Allow flex child to shrink below content size
-  content.style.overflow = 'hidden'; // Prevent container from scrolling
+  content.style.overflow = 'visible'; // Allow child to scroll
   content.style.position = 'relative'; // For proper overflow handling
 
   container.appendChild(content);
@@ -179,58 +179,65 @@ export const DashboardView = () => {
       })
       .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-    // Calculate Totals (Respecting Filter)
-    let totalIncome = 0;
-    let totalExpense = 0;
-
-    transactions.forEach(t => {
-      if (currentFilter === 'all') {
-        if (t.type === 'income') totalIncome += t.amount;
-        if (t.type === 'expense') totalExpense += t.amount;
-        if (t.type === 'refund') totalExpense -= t.amount;
-      } else {
-        const isSource = t.accountId === currentFilter;
-        const isDest = t.toAccountId === currentFilter;
-
-        if (t.type === 'income' && isSource) totalIncome += t.amount;
-        if (t.type === 'expense' && isSource) totalExpense += t.amount;
-        if (t.type === 'refund' && isSource) totalExpense -= t.amount;
-
-        if (t.type === 'transfer') {
-          if (isSource) totalExpense += t.amount;
-          if (isDest) totalIncome += t.amount;
-        }
-      }
-    });
-
     // Filter out ghost transactions for totals calculation
     // We want them in the list but not affecting the balance/stats
     const validTransactionsForStats = transactions.filter(t => !t.isGhost);
 
-    totalIncome = 0;
-    totalExpense = 0;
+    // Calculate ALL TIME net worth for Total Available
+    let allTimeIncome = 0;
+    let allTimeExpense = 0;
 
     validTransactionsForStats.forEach(t => {
       if (currentFilter === 'all') {
-        if (t.type === 'income') totalIncome += t.amount;
-        if (t.type === 'expense') totalExpense += t.amount;
-        if (t.type === 'refund') totalExpense -= t.amount;
+        if (t.type === 'income') allTimeIncome += t.amount;
+        if (t.type === 'expense') allTimeExpense += t.amount;
+        if (t.type === 'refund') allTimeExpense -= t.amount;
       } else {
         const isSource = t.accountId === currentFilter;
         const isDest = t.toAccountId === currentFilter;
 
-        if (t.type === 'income' && isSource) totalIncome += t.amount;
+        if (t.type === 'income' && isSource) allTimeIncome += t.amount;
+        if (t.type === 'expense' && isSource) allTimeExpense += t.amount;
+        if (t.type === 'refund' && isSource) allTimeExpense -= t.amount;
+
+        if (t.type === 'transfer') {
+          if (isSource) allTimeExpense += t.amount;
+          if (isDest) allTimeIncome += t.amount;
+        }
+      }
+    });
+
+    const availableBalance = allTimeIncome - allTimeExpense;
+
+    // Filter for current month only for Monthly Spent calculation
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const currentMonthTransactions = validTransactionsForStats.filter(t => {
+      const transactionDate = new Date(t.timestamp);
+      return transactionDate.getMonth() === currentMonth &&
+        transactionDate.getFullYear() === currentYear;
+    });
+
+    // Calculate monthly expense for the monthly spent card
+    let totalExpense = 0;
+
+    currentMonthTransactions.forEach(t => {
+      if (currentFilter === 'all') {
+        if (t.type === 'expense') totalExpense += t.amount;
+        if (t.type === 'refund') totalExpense -= t.amount;
+      } else {
+        const isSource = t.accountId === currentFilter;
+
         if (t.type === 'expense' && isSource) totalExpense += t.amount;
         if (t.type === 'refund' && isSource) totalExpense -= t.amount;
 
         if (t.type === 'transfer') {
           if (isSource) totalExpense += t.amount;
-          if (isDest) totalIncome += t.amount;
         }
       }
     });
-
-    const availableBalance = totalIncome - totalExpense;
 
     // Statistics Cards Container
     const statsContainer = document.createElement('div');
@@ -246,6 +253,11 @@ export const DashboardView = () => {
         : 'repeat(auto-fit, minmax(250px, 1fr))',
     });
 
+    // Get current month name for the label
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'];
+    const currentMonthName = monthNames[currentMonth];
+
     statsContainer.appendChild(
       DashboardStatsCard({
         label: 'Total Available',
@@ -255,7 +267,7 @@ export const DashboardView = () => {
     );
     statsContainer.appendChild(
       DashboardStatsCard({
-        label: 'Total Spent',
+        label: `${currentMonthName} Spent`,
         value: totalExpense,
         color: COLORS.ERROR,
       })

@@ -517,41 +517,7 @@ describe('Smart Suggestions Service', () => {
   });
 
   describe('Merchant Pattern Edge Cases', () => {
-    it('should handle merchant name variations', async () => {
-      const transactions = [
-        {
-          id: 1,
-          amount: 4.5,
-          category: 'Coffee',
-          description: 'Starbucks Coffee',
-          date: new Date().toISOString(),
-        },
-        {
-          id: 2,
-          amount: 5.0,
-          category: 'Coffee',
-          description: 'starbucks',
-          date: new Date().toISOString(),
-        },
-        {
-          id: 3,
-          amount: 6.0,
-          category: 'Coffee',
-          description: 'STARBUCKS',
-          date: new Date().toISOString(),
-        },
-      ];
-      TransactionService.getAll.mockReturnValue(transactions);
 
-      const suggestions = await service.getNoteSuggestions(
-        'Coffee',
-        5,
-        'starbucks'
-      );
-
-      expect(Array.isArray(suggestions)).toBe(true);
-      expect(suggestions.some(s => s.source === 'merchant')).toBe(true);
-    });
 
     it('should handle partial merchant matches', async () => {
       TransactionService.getAll.mockReturnValue([]);

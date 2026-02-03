@@ -222,11 +222,11 @@ export class AccountDeletionService {
 
       // Delete goals
       try {
-        const { GoalPlanner } = await import('./goal-planner.js');
-        const goals = GoalPlanner.getAllGoals();
+        const { goalPlanner } = await import('./goal-planner.js');
+        const goals = goalPlanner.getAllGoals();
 
         for (const goal of goals) {
-          GoalPlanner.deleteGoal(goal.id);
+          goalPlanner.deleteGoal(goal.id);
           result.dataDeleted.goals++;
         }
       } catch (error) {
@@ -301,10 +301,13 @@ export class AccountDeletionService {
       const user = AuthService.user;
 
       if (user && auth) {
+        console.log('[AccountDeletion] Attempting to delete Firebase user:', user.uid);
         // Delete the Firebase user account
         await deleteUser(user);
         result.authDeleted = true;
+        console.log('[AccountDeletion] Firebase user deleted successfully');
       } else {
+        console.warn('[AccountDeletion] No authenticated user found for deletion');
         // Fallback: just sign out if no authenticated user
         await AuthService.logout();
         result.authDeleted = false;
@@ -332,14 +335,28 @@ export class AccountDeletionService {
       step.authKeysCleared = authKeys.length;
       step.firebaseAccountDeleted = result.authDeleted;
     } catch (error) {
+      console.error('[AccountDeletion] Auth deletion failed:', error);
       step.status = 'failed';
       step.error = error.message;
       result.errors.push(`Auth deletion failed: ${error.message}`);
 
+      // Check if it's a Firebase auth error
+      if (error.code === 'auth/user-not-found') {
+        result.warnings.push('User was already deleted from Firebase');
+        result.authDeleted = true; // Consider this successful
+      } else if (error.code === 'auth/requires-recent-login') {
+        result.warnings.push('Recent login required for account deletion. Please log in again and try.');
+        result.authDeleted = false;
+      } else {
+        result.authDeleted = false;
+      }
+
       // Fallback: try to at least sign out
       try {
         await AuthService.logout();
-        result.warnings.push('Firebase account deletion failed, but user was signed out');
+        if (!result.authDeleted) {
+          result.warnings.push('Firebase account deletion failed, but user was signed out');
+        }
       } catch (logoutError) {
         result.warnings.push(`Sign out also failed: ${logoutError.message}`);
       }
@@ -426,8 +443,8 @@ export class AccountDeletionService {
 
       // Verify goals are deleted
       try {
-        const { GoalPlanner } = await import('./goal-planner.js');
-        const remainingGoals = GoalPlanner.getAllGoals();
+        const { goalPlanner } = await import('./goal-planner.js');
+        const remainingGoals = goalPlanner.getAllGoals();
         const userGoals = remainingGoals.filter(
           goal => !goal.userId || goal.userId === userId
         );
@@ -626,8 +643,8 @@ export class AccountDeletionService {
       summary.accounts = accounts.length;
 
       // Count goals
-      const { GoalPlanner } = await import('./goal-planner.js');
-      const goals = GoalPlanner.getAllGoals();
+      const { goalPlanner } = await import('./goal-planner.js');
+      const goals = goalPlanner.getAllGoals();
       summary.goals = goals.length;
 
       // Count investments

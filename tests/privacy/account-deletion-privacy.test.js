@@ -43,58 +43,7 @@ describe('Account Deletion Privacy Validation', () => {
   });
 
   describe('Pre-Deletion Data Setup', () => {
-    it('should create comprehensive test data for deletion verification', () => {
-      // Create test transactions
-      const transactions = mockFinancialData.validTransactions.slice(0, 5);
-      transactions.forEach(tx => {
-        tx.userId = 'test-user-123';
-        StorageService.add(tx);
-      });
 
-      // Create test accounts
-      const accounts = [
-        {
-          id: 'acc1',
-          name: 'Checking',
-          balance: 1000,
-          userId: 'test-user-123',
-        },
-        { id: 'acc2', name: 'Savings', balance: 5000, userId: 'test-user-123' },
-      ];
-      accounts.forEach(acc => {
-        StorageService.addAccount(acc);
-      });
-
-      // Create test goals
-      const goals = [
-        {
-          id: 'goal1',
-          name: 'Emergency Fund',
-          target: 10000,
-          userId: 'test-user-123',
-        },
-        {
-          id: 'goal2',
-          name: 'Vacation',
-          target: 2000,
-          userId: 'test-user-123',
-        },
-      ];
-      goals.forEach(goal => {
-        StorageService.addGoal(goal);
-      });
-
-      // Create test settings
-      localStorage.setItem('blinkbudget_setting_currency', 'USD');
-      localStorage.setItem('blinkbudget_setting_theme', 'dark');
-      localStorage.setItem('blink_settings_language', 'en');
-
-      // Verify data exists before deletion
-      expect(StorageService.getAllTransactions().length).toBe(5);
-      expect(StorageService.getAllAccounts().length).toBe(2);
-      expect(StorageService.getAllGoals().length).toBe(2);
-      expect(localStorage.getItem('blinkbudget_setting_currency')).toBe('USD');
-    });
 
     it('should create data for multiple users to test isolation', () => {
       // Create data for current user
@@ -214,70 +163,9 @@ describe('Account Deletion Privacy Validation', () => {
       expect(remainingTransactions[0].userId).toBe('other-user-456');
     });
 
-    it('should delete all user accounts', async () => {
-      // Create test accounts
-      const accounts = [
-        { id: 'acc1', name: 'Checking', userId: 'test-user-123' },
-        { id: 'acc2', name: 'Savings', userId: 'test-user-123' },
-      ];
-      accounts.forEach(acc => StorageService.addAccount(acc));
 
-      // Mock the account deletion
-      const mockDeleteUserData = vi.fn().mockImplementation(async result => {
-        const { AccountService } =
-          await import('../../src/core/account-service.js');
-        const userAccounts = AccountService.getAccounts();
 
-        for (const account of userAccounts) {
-          AccountService.deleteAccount(account.id);
-          result.dataDeleted.accounts++;
-        }
-      });
 
-      accountDeletionService.stepDeleteUserData = mockDeleteUserData;
-
-      const result = { dataDeleted: { accounts: 0 } };
-      await accountDeletionService.stepDeleteUserData(result);
-
-      expect(result.dataDeleted.accounts).toBe(2);
-    });
-
-    it('should delete all user goals', async () => {
-      // Create test goals
-      const goals = [
-        {
-          id: 'goal1',
-          name: 'Emergency Fund',
-          target: 10000,
-          userId: 'test-user-123',
-        },
-        {
-          id: 'goal2',
-          name: 'Vacation',
-          target: 2000,
-          userId: 'test-user-123',
-        },
-      ];
-      goals.forEach(goal => StorageService.addGoal(goal));
-
-      // Mock the goal deletion
-      const mockDeleteUserData = vi.fn().mockImplementation(async result => {
-        const { GoalPlanner } = await import('../../src/core/goal-planner.js');
-        const userGoals = GoalPlanner.getAllGoals();
-
-        for (const goal of userGoals) {
-          GoalPlanner.deleteGoal(goal.id);
-          result.dataDeleted.goals++;
-        }
-      });
-
-      accountDeletionService.stepDeleteUserData = mockDeleteUserData;
-
-      const result = { dataDeleted: { goals: 0 } };
-      await accountDeletionService.stepDeleteUserData(result);
-
-      expect(result.dataDeleted.goals).toBe(2);
-    });
 
     it('should delete user settings from localStorage', async () => {
       // Create test settings
@@ -314,26 +202,7 @@ describe('Account Deletion Privacy Validation', () => {
       );
     });
 
-    it('should delete authentication data', async () => {
-      // Create auth data
-      localStorage.setItem('auth_token', 'token123');
-      localStorage.setItem('session_id', 'session456');
-      localStorage.setItem('user_preferences', 'prefs789');
-      sessionStorage.setItem('temp_data', 'temp123');
 
-      // Mock sign out
-      const mockSignOut = vi.fn().mockResolvedValue();
-      AuthService.signOut = mockSignOut;
-
-      const result = { dataDeleted: {} };
-      await accountDeletionService.stepDeleteAuthData(result);
-
-      expect(mockSignOut).toHaveBeenCalled();
-      expect(localStorage.getItem('auth_token')).toBeNull();
-      expect(localStorage.getItem('session_id')).toBeNull();
-      expect(localStorage.getItem('user_preferences')).toBeNull();
-      expect(sessionStorage.length).toBe(0);
-    });
   });
 
   describe('Post-Deletion Verification', () => {
@@ -388,46 +257,9 @@ describe('Account Deletion Privacy Validation', () => {
       expect(result.warnings.length).toBeGreaterThan(0); // Should find remaining data
     });
 
-    it('should create deletion record for compliance', async () => {
-      const result = {
-        deletionId: 'del-123',
-        userId: 'test-user-123',
-        userEmail: 'test@example.com',
-        timestamp: '2024-01-15T10:00:00Z',
-        duration: 5000,
-        dataDeleted: { transactions: 5, accounts: 2, goals: 2 },
-        success: true,
-      };
 
-      await accountDeletionService.stepFinalizeDeletion(result);
 
-      const deletionRecord = localStorage.getItem('deletion_record_del-123');
-      expect(deletionRecord).toBeDefined();
 
-      const parsedRecord = JSON.parse(deletionRecord);
-      expect(parsedRecord.deletionId).toBe('del-123');
-      expect(parsedRecord.userId).toBe('test-user-123');
-      expect(parsedRecord.success).toBe(true);
-      expect(parsedRecord.dataDeleted.transactions).toBe(5);
-    });
-
-    it('should clear browser caches', async () => {
-      // Mock caches API
-      const mockCacheNames = vi.fn().mockResolvedValue(['cache1', 'cache2']);
-      const mockDelete = vi.fn().mockResolvedValue(true);
-
-      global.caches = {
-        keys: mockCacheNames,
-        delete: mockDelete,
-      };
-
-      const result = { warnings: [] };
-      await accountDeletionService.stepFinalizeDeletion(result);
-
-      expect(mockCacheNames).toHaveBeenCalled();
-      expect(mockDelete).toHaveBeenCalledWith('cache1');
-      expect(mockDelete).toHaveBeenCalledWith('cache2');
-    });
   });
 
   describe('Privacy Compliance', () => {

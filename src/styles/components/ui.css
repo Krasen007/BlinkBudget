@@ -377,7 +377,11 @@
 
 @media (width <= calc(var(--breakpoint-md) - 1px)) {
   .dashboard-transactions-list {
-    max-height: 50vh;
+    /* Remove max-height restriction to allow full scrolling */
+    max-height: none;
+    /* Ensure proper flex behavior for mobile */
+    flex: 1;
+    min-height: 200px; /* Minimum height for usability */
   }
 }
 

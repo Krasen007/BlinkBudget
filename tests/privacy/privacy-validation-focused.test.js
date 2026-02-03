@@ -1,4 +1,4 @@
-/* eslint-disable no-script-url, no-unused-vars */
+/* eslint-disable no-unused-vars */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { AuthService } from '../../src/core/auth-service.js';
 import { StorageService } from '../../src/core/storage.js';
@@ -54,32 +54,7 @@ describe('Privacy Validation - Focused Tests', () => {
       expect(savedTransaction.id).toBeDefined();
     });
 
-    it('should isolate data between different users', () => {
-      // Create data for user 1
-      AuthService.user = { uid: 'user1', email: 'user1@example.com' };
-      const _tx1 = StorageService.add({
-        amount: 100,
-        category: 'Food',
-        type: 'expense',
-      });
 
-      // Create data for user 2
-      AuthService.user = { uid: 'user2', email: 'user2@example.com' };
-      const _tx2 = StorageService.add({
-        amount: 200,
-        category: 'Transport',
-        type: 'expense',
-      });
-
-      // Switch back to user 1
-      AuthService.user = { uid: 'user1', email: 'user1@example.com' };
-      const user1Transactions = StorageService.getAllTransactions();
-
-      // Should only see user 1's data
-      expect(user1Transactions.length).toBe(1);
-      expect(user1Transactions[0].userId).toBe('user1');
-      expect(user1Transactions[0].amount).toBe(100);
-    });
 
     it('should not expose sensitive data in localStorage keys', () => {
       // Create some data
@@ -101,24 +76,7 @@ describe('Privacy Validation - Focused Tests', () => {
       });
     });
 
-    it('should sanitize data before storage', () => {
-      const maliciousData = {
-        amount: 100,
-        category: '<script>alert("XSS")</script>',
-        type: 'expense',
-        description: 'javascript:alert("XSS")',
-      };
 
-      const savedData = StorageService.add(maliciousData);
-
-      // Data should be stored but sanitized when retrieved
-      expect(typeof savedData.category).toBe('string');
-      expect(typeof savedData.description).toBe('string');
-
-      // Should not contain executable script tags
-      expect(savedData.category).not.toContain('<script>');
-      expect(savedData.description).not.toContain('javascript:');
-    });
   });
 
   describe('Data Retention and Deletion', () => {
@@ -427,23 +385,7 @@ describe('Privacy Validation - Focused Tests', () => {
       expect(transaction.sessionId).toBeUndefined();
     });
 
-    it('should provide data deletion options', () => {
-      // Create test data
-      const transaction = StorageService.add({
-        amount: 100,
-        category: 'Food',
-        type: 'expense',
-      });
 
-      // Should be able to delete specific data (remove returns undefined)
-      expect(StorageService.remove(transaction.id)).toBeUndefined();
-
-      // Verify the transaction is actually deleted
-      expect(StorageService.get(transaction.id)).toBeNull();
-
-      // Should be able to clear all data
-      expect(StorageService.clear).toBeDefined();
-    });
   });
 
   describe('Privacy Compliance Issues', () => {

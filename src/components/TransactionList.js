@@ -21,9 +21,9 @@ export const TransactionList = ({
   accounts,
   highlightTransactionIds = null,
   currentDateFilter = null,
-  onDateClick = () => {},
+  onDateClick = () => { },
   currentCategoryFilter = null,
-  onCategoryClick = () => {},
+  onCategoryClick = () => { },
 }) => {
   const listContainer = document.createElement('div');
   listContainer.className = 'dashboard-transactions-container';
@@ -31,7 +31,7 @@ export const TransactionList = ({
   listContainer.style.display = 'flex';
   listContainer.style.flexDirection = 'column';
   listContainer.style.minHeight = '0'; // Allow flex child to shrink
-  listContainer.style.overflow = 'hidden'; // Prevent container from scrolling
+  listContainer.style.overflow = 'visible'; // Allow child to scroll
   listContainer.style.position = 'relative'; // For proper overflow handling
 
   // Title container with metrics
@@ -114,18 +114,28 @@ export const TransactionList = ({
     list.style.overflowY = 'auto'; // Enable vertical scrolling
     list.style.overflowX = 'hidden'; // Prevent horizontal scrolling
     list.style.webkitOverflowScrolling = 'touch'; // Smooth scrolling on iOS
+    list.style.overscrollBehavior = 'contain'; // Prevent bounce scrolling on mobile
+    list.style.touchAction = 'pan-y'; // Allow only vertical panning on touch
     Object.assign(list.style, {
       listStyle: 'none',
       padding: 0,
       margin: 0,
       borderTop: '1px solid var(--color-surface-hover)',
+      // Ensure proper height on mobile
+      height: 'auto',
+      maxHeight: 'none',
     });
 
-    // Dynamic height calculation - use flex instead of maxHeight
+    // Dynamic height calculation - ensure proper scrolling
     const calculateListHeight = () => {
-      // List will use flex: 1, but we can still set a min-height for small screens
+      // Set a reasonable minimum height for scrolling
       const minHeight = DIMENSIONS.MIN_LIST_HEIGHT;
       list.style.minHeight = `${minHeight}px`;
+      // Ensure the list can grow to fill available space
+      list.style.flex = '1';
+      list.style.height = 'auto';
+      // Remove any max-height restrictions
+      list.style.maxHeight = 'none';
     };
 
     calculateListHeight();

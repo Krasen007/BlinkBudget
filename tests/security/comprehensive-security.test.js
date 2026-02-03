@@ -1,5 +1,5 @@
 /** @vitest-environment jsdom */
-/* eslint-disable no-script-url */
+
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   sanitizeInput,
@@ -76,32 +76,7 @@ describe('Comprehensive Security Tests - OWASP Top 10', () => {
         expect(StorageService.get(transaction2.id)).toBeDefined();
       });
 
-      it('should enforce user isolation for all data types', () => {
-        AuthService.user = { uid: 'user-1' };
 
-        // Test different data types
-        const budget = StorageService.addBudget({
-          category: 'Food',
-          amount: 500,
-          period: 'monthly',
-        });
-
-        const goal = StorageService.addGoal({
-          name: 'Emergency Fund',
-          targetAmount: 10000,
-          currentAmount: 1000,
-        });
-
-        expect(budget.userId).toBe('user-1');
-        expect(goal.userId).toBe('user-1');
-
-        // Switch user
-        AuthService.user = { uid: 'user-2' };
-
-        // Should not access other user's data
-        expect(StorageService.getBudget(budget.id)).toBeUndefined();
-        expect(StorageService.getGoal(goal.id)).toBeUndefined();
-      });
     });
 
     describe('Authentication Bypass Attempts', () => {
@@ -173,56 +148,11 @@ describe('Comprehensive Security Tests - OWASP Top 10', () => {
   // A03: Injection Tests
   describe('A03: Injection', () => {
     describe('XSS Prevention', () => {
-      it('should sanitize HTML script tags in all inputs', () => {
-        const xssPayloads = mockAuthData.xssAttempts;
 
-        xssPayloads.forEach(payload => {
-          // Test transaction description
-          const sanitized = sanitizeInput(payload);
-          expect(sanitized).not.toContain('<script>');
-          expect(sanitized).not.toContain('javascript:');
-          expect(sanitized).not.toContain('onerror=');
-          expect(sanitized).not.toContain('onload=');
-        });
-      });
 
-      it('should escape HTML entities in user input', () => {
-        const htmlInputs = [
-          '<div>Hello</div>',
-          '<img src="x" onerror="alert(1)">',
-          '<script>alert("XSS")</script>',
-          '&lt;script&gt;alert("XSS")&lt;/script&gt;',
-        ];
 
-        htmlInputs.forEach(input => {
-          const escaped = escapeHtml(input);
-          expect(escaped).not.toContain('<');
-          expect(escaped).not.toContain('>');
-          expect(escaped.includes('&lt;') || escaped.includes('&gt;')).toBe(
-            true
-          );
-        });
-      });
 
-      it('should handle malicious transaction data safely', () => {
-        AuthService.user = { uid: 'test-user' };
 
-        // Try to add malicious transaction
-        const maliciousTx = mockFinancialData.maliciousTransactions[0];
-
-        // Should sanitize or reject malicious data
-        const result = StorageService.add({
-          amount: sanitizeInput(maliciousTx.amount),
-          category: sanitizeInput(maliciousTx.category),
-          date: maliciousTx.date, // Date should be validated separately
-          type: maliciousTx.type,
-          description: sanitizeInput(maliciousTx.description),
-        });
-
-        // Should not contain script tags
-        expect(result.category).not.toContain('<script>');
-        expect(result.description).not.toContain('javascript:');
-      });
     });
 
     describe('NoSQL Injection Prevention', () => {

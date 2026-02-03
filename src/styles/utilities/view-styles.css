@@ -6,7 +6,7 @@
   max-width: var(--container-max-width);
   padding: 0 var(--spacing-sm); /* Mobile-first: 8px */
   height: 100%;
-  overflow: hidden auto;
+  overflow: hidden; /* Remove auto to prevent conflicts with child scrolling */
   display: flex;
   flex-direction: column;
   -webkit-overflow-scrolling: touch;
@@ -374,7 +374,52 @@
   background: var(--color-surface-hover);
 }
 
-/* Mobile-specific utility classes */
+/* Dashboard-specific scrolling fix - Allow both header and transactions to scroll */
+.view-dashboard {
+  overflow: hidden auto; /* Allow main dashboard to scroll */
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.view-dashboard > div:first-child {
+  flex-shrink: 0; /* Header can scroll with page */
+}
+
+.view-dashboard .dashboard-transactions-container {
+  flex: 1;
+  overflow: visible; /* Allow container to participate in page scroll */
+  min-height: 0; /* Allow flex child to shrink */
+  display: flex;
+  flex-direction: column;
+}
+
+.view-dashboard .dashboard-transactions-list {
+  flex: 1;
+  overflow: hidden auto; /* Transaction list also scrolls independently */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  min-height: 200px; /* Minimum scrollable area */
+  max-height: 60vh; /* Reasonable max height */
+}
+
+/* Desktop-specific dashboard scrolling */
+@media (width >= calc(var(--breakpoint-md))) {
+  .view-dashboard .dashboard-transactions-list {
+    min-height: 300px; /* Larger minimum on desktop */
+    max-height: 50vh; /* Reasonable max height on desktop */
+  }
+}
+
+/* Mobile-specific dashboard scrolling */
+@media (width <= calc(var(--breakpoint-md) - 1px)) {
+  .view-dashboard .dashboard-transactions-list {
+    min-height: 250px; /* Ensure minimum touchable area */
+    max-height: 70vh; /* Larger max on mobile for better touch experience */
+  }
+}
+
 .view-mobile-full-width {
   width: 100%;
   max-width: 100%;
