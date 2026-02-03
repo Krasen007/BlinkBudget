@@ -517,8 +517,6 @@ describe('Smart Suggestions Service', () => {
   });
 
   describe('Merchant Pattern Edge Cases', () => {
-
-
     it('should handle partial merchant matches', async () => {
       TransactionService.getAll.mockReturnValue([]);
 

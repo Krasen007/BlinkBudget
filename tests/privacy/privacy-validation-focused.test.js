@@ -54,8 +54,6 @@ describe('Privacy Validation - Focused Tests', () => {
       expect(savedTransaction.id).toBeDefined();
     });
 
-
-
     it('should not expose sensitive data in localStorage keys', () => {
       // Create some data
       StorageService.add({
@@ -75,8 +73,6 @@ describe('Privacy Validation - Focused Tests', () => {
         expect(key).not.toContain('ssn');
       });
     });
-
-
   });
 
   describe('Data Retention and Deletion', () => {
@@ -384,8 +380,6 @@ describe('Privacy Validation - Focused Tests', () => {
       expect(transaction.userAgent).toBeUndefined();
       expect(transaction.sessionId).toBeUndefined();
     });
-
-
   });
 
   describe('Privacy Compliance Issues', () => {

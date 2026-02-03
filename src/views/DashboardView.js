@@ -216,8 +216,10 @@ export const DashboardView = () => {
 
     const currentMonthTransactions = validTransactionsForStats.filter(t => {
       const transactionDate = new Date(t.timestamp);
-      return transactionDate.getMonth() === currentMonth &&
-        transactionDate.getFullYear() === currentYear;
+      return (
+        transactionDate.getMonth() === currentMonth &&
+        transactionDate.getFullYear() === currentYear
+      );
     });
 
     // Calculate monthly expense for the monthly spent card
@@ -254,8 +256,20 @@ export const DashboardView = () => {
     });
 
     // Get current month name for the label
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'];
+    const monthNames = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
     const currentMonthName = monthNames[currentMonth];
 
     statsContainer.appendChild(

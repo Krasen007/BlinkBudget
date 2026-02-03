@@ -46,8 +46,6 @@ describe('TransactionForm', () => {
     expect(buttonLabels).toContain('Refund');
   });
 
-
-
   it('should apply refund-specific styling to refund button when active', () => {
     const mockSubmit = vi.fn();
     const form = TransactionForm({ onSubmit: mockSubmit });
@@ -66,10 +64,6 @@ describe('TransactionForm', () => {
     expect(refundButton.style.background).toBe('rgb(6, 182, 212)');
     expect(refundButton.style.color).toBe('white');
   });
-
-
-
-
 
   it('should show OK button on mobile when editing an existing transaction', () => {
     const mockSubmit = vi.fn();

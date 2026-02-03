@@ -226,10 +226,12 @@ export class TutorialManager {
    */
   showSpotlightStep(step) {
     // Try to find the target element with retries
-    this.findTargetWithRetry(step.target, (targetElement) => {
+    this.findTargetWithRetry(step.target, targetElement => {
       if (!targetElement) {
         console.warn(`Tutorial target not found after retries: ${step.target}`);
-        this.emitEvent(TUTORIAL_EVENTS.TARGET_NOT_FOUND, { target: step.target });
+        this.emitEvent(TUTORIAL_EVENTS.TARGET_NOT_FOUND, {
+          target: step.target,
+        });
         this.next();
         return;
       }

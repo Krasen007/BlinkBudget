@@ -288,8 +288,6 @@ describe('Form Submission', () => {
       expect(onSubmit).toHaveBeenCalledTimes(1);
     });
 
-
-
     test('handles different types of submit errors', () => {
       const testCases = [
         new Error('Network timeout'),

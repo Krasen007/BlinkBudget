@@ -301,13 +301,18 @@ export class AccountDeletionService {
       const user = AuthService.user;
 
       if (user && auth) {
-        console.log('[AccountDeletion] Attempting to delete Firebase user:', user.uid);
+        console.log(
+          '[AccountDeletion] Attempting to delete Firebase user:',
+          user.uid
+        );
         // Delete the Firebase user account
         await deleteUser(user);
         result.authDeleted = true;
         console.log('[AccountDeletion] Firebase user deleted successfully');
       } else {
-        console.warn('[AccountDeletion] No authenticated user found for deletion');
+        console.warn(
+          '[AccountDeletion] No authenticated user found for deletion'
+        );
         // Fallback: just sign out if no authenticated user
         await AuthService.logout();
         result.authDeleted = false;
@@ -345,7 +350,9 @@ export class AccountDeletionService {
         result.warnings.push('User was already deleted from Firebase');
         result.authDeleted = true; // Consider this successful
       } else if (error.code === 'auth/requires-recent-login') {
-        result.warnings.push('Recent login required for account deletion. Please log in again and try.');
+        result.warnings.push(
+          'Recent login required for account deletion. Please log in again and try.'
+        );
         result.authDeleted = false;
       } else {
         result.authDeleted = false;
@@ -355,7 +362,9 @@ export class AccountDeletionService {
       try {
         await AuthService.logout();
         if (!result.authDeleted) {
-          result.warnings.push('Firebase account deletion failed, but user was signed out');
+          result.warnings.push(
+            'Firebase account deletion failed, but user was signed out'
+          );
         }
       } catch (logoutError) {
         result.warnings.push(`Sign out also failed: ${logoutError.message}`);

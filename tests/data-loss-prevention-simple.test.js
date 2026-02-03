@@ -117,16 +117,6 @@ describe('Week 2: Data Loss Prevention - Simple Tests', () => {
       );
     });
 
-
-
-
-
-
-
-
-
-
-
     it('should validate integrity with mocked crypto', () => {
       const exportData = {
         data: {
@@ -266,6 +256,4 @@ describe('Week 2: Data Loss Prevention - Simple Tests', () => {
       expect(checkId).toMatch(/^integrity_\d+_[a-z0-9]+$/);
     });
   });
-
-
 });

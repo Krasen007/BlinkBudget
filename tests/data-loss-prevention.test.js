@@ -182,13 +182,9 @@ describe('Week 2: Data Loss Prevention', () => {
       expect(issues.length).toBeGreaterThan(0);
     });
 
-
-
     it('should maintain check history', async () => {
       expect(dataIntegrityService.getLastCheckTime()).toBeNull();
       expect(dataIntegrityService.getLastReport()).toBeNull();
     });
   });
-
-
 });

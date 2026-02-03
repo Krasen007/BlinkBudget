@@ -78,7 +78,7 @@ export const OverviewSection = (planningData, riskAssessor) => {
       // For transfers, money moves between accounts, so net effect is 0 for overall balance
       // But we track the movement for individual account calculations
       allTimeExpense += t.amount; // Money out of source
-      allTimeIncome += t.amount;  // Money into destination
+      allTimeIncome += t.amount; // Money into destination
     }
   });
 
@@ -103,7 +103,9 @@ export const OverviewSection = (planningData, riskAssessor) => {
   }
 
   const savingsRate =
-    allTimeIncome > 0 ? ((allTimeIncome - allTimeExpense) / allTimeIncome) * 100 : 0;
+    allTimeIncome > 0
+      ? ((allTimeIncome - allTimeExpense) / allTimeIncome) * 100
+      : 0;
 
   // Generate risk assessments
   let emergencyFundAssessment = null;

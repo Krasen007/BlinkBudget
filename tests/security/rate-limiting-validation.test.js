@@ -70,7 +70,10 @@ describe('Rate Limiting Validation - High Traffic Simulation', () => {
   describe('High Traffic Simulation', () => {
     it('should handle concurrent requests efficiently', async () => {
       const promises = [];
-      const emails = Array.from({ length: 10 }, (_, i) => `user${i}@example.com`);
+      const emails = Array.from(
+        { length: 10 },
+        (_, i) => `user${i}@example.com`
+      );
 
       // Create concurrent requests for different users
       emails.forEach(email => {
@@ -122,7 +125,10 @@ describe('Rate Limiting Validation - High Traffic Simulation', () => {
       results.forEach(result => {
         if (result.status === 'fulfilled') {
           const loginResult = result.value;
-          if (loginResult.error && loginResult.error.includes('Too many attempts')) {
+          if (
+            loginResult.error &&
+            loginResult.error.includes('Too many attempts')
+          ) {
             rateLimitedCount++;
           } else if (loginResult.error) {
             normalFailureCount++;
@@ -291,7 +297,7 @@ describe('Rate Limiting Validation - High Traffic Simulation', () => {
         false,
         {},
         [],
-        () => { },
+        () => {},
         Symbol('test'),
       ];
 

@@ -155,8 +155,6 @@ describe('Authentication Penetration Testing', () => {
       expect(results[5].rateLimitInfo).toBeDefined();
     });
 
-
-
     it('should handle distributed brute force attempts', async () => {
       const emails = [
         'user1@example.com',
