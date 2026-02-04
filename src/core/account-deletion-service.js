@@ -305,10 +305,19 @@ export class AccountDeletionService {
           '[AccountDeletion] Attempting to delete Firebase user:',
           user.uid
         );
-        // Delete the Firebase user account
-        await deleteUser(user);
-        result.authDeleted = true;
-        console.log('[AccountDeletion] Firebase user deleted successfully');
+
+        // Check if Firebase is available before attempting deletion
+        const { firebaseStatus } = await import('./firebase-config.js');
+        if (!firebaseStatus.isInitialized || !firebaseStatus.canUseAuth) {
+          console.warn('[AccountDeletion] Firebase not available, skipping auth deletion');
+          result.authDeleted = false;
+          result.warnings.push('Firebase not available, skipping authentication deletion');
+        } else {
+          // Delete the Firebase user account
+          await deleteUser(user);
+          result.authDeleted = true;
+          console.log('[AccountDeletion] Firebase user deleted successfully');
+        }
       } else {
         console.warn(
           '[AccountDeletion] No authenticated user found for deletion'

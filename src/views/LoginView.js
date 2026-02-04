@@ -394,6 +394,14 @@ export const LoginView = () => {
     submitBtn.click();
   });
 
+  // Add Enter key listener to the form for better accessibility
+  form.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      submitBtn.click();
+    }
+  });
+
   container.appendChild(title);
   container.appendChild(form);
   container.appendChild(separator);
