@@ -37,6 +37,7 @@ export const TutorialOverlay = {
     // Add methods
     overlay.showWelcome = options => this.showWelcome(overlay, options);
     overlay.showCelebration = options => this.showCelebration(overlay, options);
+    overlay.showInfo = options => this.showInfo(overlay, options);
     overlay.remove = () => this.remove(overlay);
 
     // Handle escape key
@@ -135,6 +136,46 @@ export const TutorialOverlay = {
     this.attachActionListeners(content, overlay);
   },
 
+  showInfo(overlay, options) {
+    const content = document.createElement('div');
+    content.className = 'tutorial-info';
+    content.style.cssText = `
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-2xl);
+      max-width: 500px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      opacity: 0;
+      transform: scale(0.9);
+      transition: all var(--transition-normal);
+    `;
+
+    // Create illustration if provided
+    const illustration = options.illustration ?
+      this.createInfoIllustration(options.illustration) : '';
+
+    content.innerHTML = `
+      ${illustration ? `<div class="tutorial-info__illustration">${illustration}</div>` : ''}
+      <h2 class="tutorial-info__title">${options.title}</h2>
+      <div class="tutorial-info__content">${options.content}</div>
+      <div class="tutorial-info__actions">
+        ${this.createActions(...options.actions)}
+      </div>
+    `;
+
+    overlay.innerHTML = '';
+    overlay.appendChild(content);
+
+    // Animate in
+    requestAnimationFrame(() => {
+      content.style.opacity = '1';
+      content.style.transform = 'scale(1)';
+    });
+
+    this.attachActionListeners(content, overlay);
+  },
+
   createWelcomeIllustration() {
     return `
       <svg width="120" height="120" viewBox="0 0 120 120" style="margin-bottom: var(--spacing-lg);">
@@ -180,6 +221,109 @@ export const TutorialOverlay = {
             </g>
           </svg>
         `;
+      default:
+        return this.createWelcomeIllustration();
+    }
+  },
+
+  createInfoIllustration(type) {
+    switch (type) {
+      case 'three-clicks':
+        return `
+          <svg width="120" height="120" viewBox="0 0 120 120" style="margin-bottom: var(--spacing-lg);">
+            <g class="three-clicks-animation">
+              <!-- Click circles -->
+              <circle cx="30" cy="60" r="8" fill="var(--color-primary)" opacity="0.8"/>
+              <circle cx="60" cy="60" r="8" fill="var(--color-primary)" opacity="0.8"/>
+              <circle cx="90" cy="60" r="8" fill="var(--color-primary)" opacity="0.8"/>
+              
+              <!-- Connecting lines -->
+              <path d="M38 60 L52 60 M68 60 L82 60" 
+                    stroke="var(--color-primary)" stroke-width="2" opacity="0.5"/>
+              
+              <!-- Numbers -->
+              <text x="30" y="45" text-anchor="middle" fill="var(--color-primary)" font-size="12" font-weight="bold">1</text>
+              <text x="60" y="45" text-anchor="middle" fill="var(--color-primary)" font-size="12" font-weight="bold">2</text>
+              <text x="90" y="45" text-anchor="middle" fill="var(--color-primary)" font-size="12" font-weight="bold">3</text>
+            </g>
+          </svg>
+        `;
+      case 'smart-features':
+        return `
+          <svg width="120" height="120" viewBox="0 0 120 120" style="margin-bottom: var(--spacing-lg);">
+            <g class="smart-features-animation">
+              <!-- Brain outline -->
+              <path d="M60 30 C40 30, 25 45, 25 60 C25 75, 40 90, 60 90 C80 90, 95 75, 95 60 C95 45, 80 30, 60 30 Z" 
+                    fill="var(--color-primary)" opacity="0.1"/>
+              
+              <!-- Lightbulb -->
+              <circle cx="60" cy="55" r="15" fill="var(--color-primary)" opacity="0.8"/>
+              <rect x="50" y="70" width="20" height="8" fill="var(--color-primary)" opacity="0.6"/>
+              
+              <!-- Light rays -->
+              <path d="M60 25 L60 15 M45 35 L35 25 M75 35 L85 25" 
+                    stroke="var(--color-primary)" stroke-width="2" opacity="0.6"/>
+            </g>
+          </svg>
+        `;
+      case 'accounts':
+        return `
+          <svg width="120" height="120" viewBox="0 0 120 120" style="margin-bottom: var(--spacing-lg);">
+            <g class="accounts-animation">
+              <!-- Cards -->
+              <rect x="25" y="40" width="35" height="25" rx="4" fill="var(--color-primary)" opacity="0.8"/>
+              <rect x="35" y="50" width="35" height="25" rx="4" fill="var(--color-primary)" opacity="0.6"/>
+              <rect x="45" y="60" width="35" height="25" rx="4" fill="var(--color-primary)" opacity="0.4"/>
+              
+              <!-- Card chips -->
+              <rect x="30" y="47" width="8" height="6" fill="white" opacity="0.8"/>
+              <rect x="40" y="57" width="8" height="6" fill="white" opacity="0.8"/>
+              <rect x="50" y="67" width="8" height="6" fill="white" opacity="0.8"/>
+            </g>
+          </svg>
+        `;
+      case 'planning':
+        return `
+          <svg width="120" height="120" viewBox="0 0 120 120" style="margin-bottom: var(--spacing-lg);">
+            <g class="planning-animation">
+              <!-- Chart bars -->
+              <rect x="20" y="70" width="15" height="20" fill="var(--color-primary)" opacity="0.6"/>
+              <rect x="40" y="60" width="15" height="30" fill="var(--color-primary)" opacity="0.7"/>
+              <rect x="60" y="50" width="15" height="40" fill="var(--color-primary)" opacity="0.8"/>
+              <rect x="80" y="40" width="15" height="50" fill="var(--color-primary)" opacity="0.9"/>
+              
+              <!-- Trend line -->
+              <path d="M27 70 L47 60 L67 50 L87 40" 
+                    stroke="var(--color-primary)" stroke-width="2" fill="none"/>
+              
+              <!-- Target -->
+              <circle cx="87" cy="40" r="4" fill="var(--color-primary)"/>
+            </g>
+          </svg>
+        `;
+      case 'mobile':
+        return `
+          <svg width="120" height="120" viewBox="0 0 120 120" style="margin-bottom: var(--spacing-lg);">
+            <g class="mobile-animation">
+              <!-- Phone outline -->
+              <rect x="40" y="25" width="40" height="70" rx="8" 
+                    fill="var(--color-primary)" opacity="0.1" stroke="var(--color-primary)" stroke-width="2"/>
+              
+              <!-- Screen -->
+              <rect x="45" y="35" width="30" height="45" fill="var(--color-primary)" opacity="0.2"/>
+              
+              <!-- Touch indicator -->
+              <circle cx="60" cy="57" r="8" fill="var(--color-primary)" opacity="0.8"/>
+              <circle cx="60" cy="57" r="12" fill="none" stroke="var(--color-primary)" 
+                      stroke-width="2" opacity="0.4" class="touch-ripple"/>
+              
+              <!-- Home button -->
+              <rect x="55" y="85" width="10" height="2" rx="1" fill="var(--color-primary)" opacity="0.6"/>
+            </g>
+          </svg>
+        `;
+      case 'success-celebration':
+        return this.createCelebrationIllustration('success-check');
       default:
         return this.createWelcomeIllustration();
     }

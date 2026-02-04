@@ -27,6 +27,7 @@ export const SmartCategorySelector = {
 
     const container = document.createElement('div');
     container.className = `smart-category-container ${className}`;
+    container.setAttribute('data-tutorial-target', 'category-selector');
 
     // Label
     const label = document.createElement('div');

@@ -20,6 +20,7 @@ import { createNavigationButtons } from '../utils/navigation-helper.js';
 export const DashboardView = () => {
   const container = document.createElement('div');
   container.className = 'view-dashboard view-container';
+  container.setAttribute('data-tutorial-target', 'dashboard');
 
   // Header with sticky positioning
   const header = document.createElement('div');

@@ -42,6 +42,7 @@ export const SmartAmountInput = {
     input.value = initialValue;
     input.inputMode = 'decimal';
     input.autocomplete = 'off';
+    input.setAttribute('data-tutorial-target', 'amount-input');
 
     // Format amount as user types
     input.addEventListener('input', e => {

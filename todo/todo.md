@@ -23,3 +23,4 @@ DO NOT IMPLEMENT: use Ionic's Capacitor or Cordova to make android app
 [ ] lazy load older transactions, they should be kept on server and only the transactions for the last 30 days should be cached on the device / PWA
 [ ] add option to mark a transaction as important, maybe a checkbox or a star icon and when the user marks a transaction as important it should be highlighted in the transactions list
 [ ] when visualizing the chart in reports view, make sure to always use the same colors for the same categories
+[ ] fix tutorial, fix delete account properly

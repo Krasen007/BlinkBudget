@@ -195,8 +195,14 @@ export class TutorialManager {
       case 'welcome':
         this.showWelcomeStep(step);
         break;
+      case 'navigation':
+        this.showNavigationStep(step);
+        break;
       case 'spotlight':
         this.showSpotlightStep(step);
+        break;
+      case 'info':
+        this.showInfoStep(step);
         break;
       case 'tooltip':
         this.showTooltipStep(step);
@@ -225,6 +231,21 @@ export class TutorialManager {
    * Show spotlight step (highlight specific element)
    */
   showSpotlightStep(step) {
+    const delay = step.delay || 0;
+
+    if (delay > 0) {
+      setTimeout(() => {
+        this.executeSpotlightStep(step);
+      }, delay);
+    } else {
+      this.executeSpotlightStep(step);
+    }
+  }
+
+  /**
+   * Execute the actual spotlight step after delay
+   */
+  executeSpotlightStep(step) {
     // Try to find the target element with retries
     this.findTargetWithRetry(step.target, targetElement => {
       if (!targetElement) {
@@ -247,7 +268,7 @@ export class TutorialManager {
   /**
    * Find target element with retries for dynamic content
    */
-  findTargetWithRetry(target, callback, retries = 3, delay = 500) {
+  findTargetWithRetry(target, callback, retries = 5, delay = 800) {
     const targetElement = document.querySelector(target);
 
     if (targetElement) {
@@ -327,6 +348,37 @@ export class TutorialManager {
     this.overlay.showCelebration({
       title: step.title,
       description: step.description,
+      illustration: step.illustration,
+      actions: step.actions || [],
+    });
+  }
+
+  /**
+   * Show navigation step
+   */
+  showNavigationStep(step) {
+    this.overlay.showInfo({
+      title: step.title,
+      content: step.content,
+      illustration: step.illustration,
+      actions: step.actions || [],
+    });
+
+    // Navigate to the target route after a short delay
+    setTimeout(() => {
+      import('../../core/router.js').then(({ Router }) => {
+        Router.navigate(step.target);
+      });
+    }, 1000);
+  }
+
+  /**
+   * Show info step
+   */
+  showInfoStep(step) {
+    this.overlay.showInfo({
+      title: step.title,
+      content: step.content,
       illustration: step.illustration,
       actions: step.actions || [],
     });
