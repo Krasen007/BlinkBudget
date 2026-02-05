@@ -12,7 +12,7 @@ export class FilteringService {
    * @param {Date|string} timePeriod.endDate - End date
    * @returns {Array} Filtered transactions
    */
-  static filterByTimePeriod(transactions, timePeriod) {
+  static filterByTimePeriod(transactions, timePeriod, includeGhosts = false) {
     if (!transactions || !Array.isArray(transactions)) {
       return [];
     }
@@ -30,7 +30,7 @@ export class FilteringService {
 
     return transactions.filter(transaction => {
       // Exclude ghost (moved) transactions by default to prevent double counting
-      if (transaction.isGhost) return false;
+      if (transaction.isGhost && !includeGhosts) return false;
 
       const transactionDate = new Date(
         transaction.date || transaction.timestamp
@@ -49,7 +49,8 @@ export class FilteringService {
   static filterByCategories(
     transactions,
     categories = [],
-    filterType = 'include'
+    filterType = 'include',
+    includeGhosts = false
   ) {
     if (!transactions || !Array.isArray(transactions)) {
       return [];
@@ -61,7 +62,7 @@ export class FilteringService {
 
     return transactions.filter(transaction => {
       // Exclude ghost transactions
-      if (transaction.isGhost) return false;
+      if (transaction.isGhost && !includeGhosts) return false;
 
       const hasCategory = categories.includes(transaction.category);
       return filterType === 'include' ? hasCategory : !hasCategory;
@@ -76,7 +77,7 @@ export class FilteringService {
    * @param {number} amountRange.max - Maximum amount (optional)
    * @returns {Array} Filtered transactions
    */
-  static filterByAmountRange(transactions, amountRange) {
+  static filterByAmountRange(transactions, amountRange, includeGhosts = false) {
     if (!transactions || !Array.isArray(transactions)) {
       return [];
     }
@@ -92,7 +93,7 @@ export class FilteringService {
 
     return transactions.filter(transaction => {
       // Exclude ghost transactions
-      if (transaction.isGhost) return false;
+      if (transaction.isGhost && !includeGhosts) return false;
 
       const amount = Math.abs(transaction.amount || 0);
 
@@ -109,7 +110,7 @@ export class FilteringService {
    * @param {Array} types - Array of types to include ('expense', 'income', 'transfer')
    * @returns {Array} Filtered transactions
    */
-  static filterByTypes(transactions, types = []) {
+  static filterByTypes(transactions, types = [], includeGhosts = false) {
     if (!transactions || !Array.isArray(transactions)) {
       return [];
     }
@@ -120,7 +121,7 @@ export class FilteringService {
 
     return transactions.filter(transaction => {
       // Exclude ghost transactions
-      if (transaction.isGhost) return false;
+      if (transaction.isGhost && !includeGhosts) return false;
 
       return types.includes(transaction.type);
     });
@@ -132,7 +133,11 @@ export class FilteringService {
    * @param {Array} accountIds - Array of account IDs to include
    * @returns {Array} Filtered transactions
    */
-  static filterByAccounts(transactions, accountIds = []) {
+  static filterByAccounts(
+    transactions,
+    accountIds = [],
+    includeGhosts = false
+  ) {
     if (!transactions || !Array.isArray(transactions)) {
       return [];
     }
@@ -143,7 +148,7 @@ export class FilteringService {
 
     return transactions.filter(transaction => {
       // Exclude ghost transactions
-      if (transaction.isGhost) return false;
+      if (transaction.isGhost && !includeGhosts) return false;
 
       return accountIds.includes(transaction.accountId);
     });
@@ -156,7 +161,12 @@ export class FilteringService {
    * @param {boolean} caseSensitive - Whether search should be case sensitive
    * @returns {Array} Filtered transactions
    */
-  static filterByText(transactions, searchText = '', caseSensitive = false) {
+  static filterByText(
+    transactions,
+    searchText = '',
+    caseSensitive = false,
+    includeGhosts = false
+  ) {
     if (!transactions || !Array.isArray(transactions)) {
       return [];
     }
@@ -169,15 +179,14 @@ export class FilteringService {
 
     return transactions.filter(transaction => {
       // Exclude ghost transactions
-      if (transaction.isGhost) return false;
+      if (transaction.isGhost && !includeGhosts) return false;
 
       const description = transaction.description || '';
-      const notes = transaction.notes || '';
       const category = transaction.category || '';
 
       const searchableText = caseSensitive
-        ? `${description} ${notes} ${category}`
-        : `${description} ${notes} ${category}`.toLowerCase();
+        ? `${description} ${category}`
+        : `${description} ${category}`.toLowerCase();
 
       return searchableText.includes(search);
     });
@@ -203,12 +212,14 @@ export class FilteringService {
     }
 
     let filteredTransactions = [...transactions];
+    const includeGhosts = filters.includeGhosts || false;
 
     // Apply each filter if present
     if (filters.dateRange) {
       filteredTransactions = this.filterByTimePeriod(
         filteredTransactions,
-        filters.dateRange
+        filters.dateRange,
+        includeGhosts
       );
     }
 
@@ -216,28 +227,32 @@ export class FilteringService {
       filteredTransactions = this.filterByCategories(
         filteredTransactions,
         filters.categories,
-        filters.categoryFilterType || 'include'
+        filters.categoryFilterType || 'include',
+        includeGhosts
       );
     }
 
     if (filters.amountRange) {
       filteredTransactions = this.filterByAmountRange(
         filteredTransactions,
-        filters.amountRange
+        filters.amountRange,
+        includeGhosts
       );
     }
 
     if (filters.types && filters.types.length > 0) {
       filteredTransactions = this.filterByTypes(
         filteredTransactions,
-        filters.types
+        filters.types,
+        includeGhosts
       );
     }
 
     if (filters.accounts && filters.accounts.length > 0) {
       filteredTransactions = this.filterByAccounts(
         filteredTransactions,
-        filters.accounts
+        filters.accounts,
+        includeGhosts
       );
     }
 
@@ -245,7 +260,8 @@ export class FilteringService {
       filteredTransactions = this.filterByText(
         filteredTransactions,
         filters.searchText,
-        filters.caseSensitive || false
+        filters.caseSensitive || false,
+        includeGhosts
       );
     }
 

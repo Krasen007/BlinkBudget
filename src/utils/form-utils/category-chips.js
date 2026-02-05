@@ -3,14 +3,11 @@
  * Creates category selection chips and transfer account chips
  */
 
-import {
-  CATEGORY_DEFINITIONS,
-  CATEGORY_COLORS,
-  CATEGORY_OPTIONS,
-} from './constants.js';
+import { CATEGORY_DEFINITIONS, CATEGORY_COLORS } from './constants.js';
 import { SPACING, FONT_SIZES, TOUCH_TARGETS } from '../constants.js';
 import { validateAmount, showFieldError } from './validation.js';
 import { ClickTracker } from '../../core/click-tracking-service.js';
+import { CustomCategoryService } from '../../core/custom-category-service.js';
 
 /**
  * Create a single category/account chip
@@ -311,7 +308,7 @@ export const createCategorySelector = (options = {}) => {
       });
     } else {
       // Standard Categories
-      let rawCats = CATEGORY_OPTIONS[currentType] || CATEGORY_OPTIONS.expense;
+      let rawCats = CustomCategoryService.getAllCategoryNames(currentType);
 
       // REFINEMENT: If we have a prioritized category, move it to the front
       if (prioritizedCategory && rawCats.includes(prioritizedCategory)) {

@@ -32,7 +32,7 @@ describe('MobileNavigation', () => {
     expect(nav.getAttribute('role')).toBe('navigation');
     expect(nav.getAttribute('aria-label')).toBe('Main navigation');
 
-    // Should have 4 navigation items
+    // Should have 4 navigation itemsq
     const _navItems = nav.querySelectorAll('.mobile-nav-item');
     expect(_navItems.length).toBe(4);
 

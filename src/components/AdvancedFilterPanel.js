@@ -5,8 +5,8 @@
  */
 
 import { FilteringService } from '../core/analytics/FilteringService.js';
-import { TransactionService } from '../core/transaction-service.js';
-import { createButton } from './Button.js';
+import { Button } from './Button.js';
+import { CustomCategoryService } from '../core/custom-category-service.js';
 
 export const AdvancedFilterPanel = ({
   onFiltersChange,
@@ -24,7 +24,18 @@ export const AdvancedFilterPanel = ({
   `;
 
   // Current filters state
-  let currentFilters = { ...initialFilters };
+  let currentFilters = {
+    categories: [],
+    types: [],
+    categoryFilterType: 'include',
+    searchText: '',
+    caseSensitive: false,
+    ...initialFilters,
+  };
+
+  // Ensure arrays exist for includes() calls
+  if (!Array.isArray(currentFilters.categories)) currentFilters.categories = [];
+  if (!Array.isArray(currentFilters.types)) currentFilters.types = [];
 
   // Header
   const header = document.createElement('div');
@@ -44,7 +55,7 @@ export const AdvancedFilterPanel = ({
     font-weight: 600;
   `;
 
-  const clearButton = createButton({
+  const clearButton = Button({
     text: 'Clear All',
     variant: 'ghost',
     onClick: () => {
@@ -123,11 +134,8 @@ export const AdvancedFilterPanel = ({
     background: var(--color-background);
   `;
 
-  // Get unique categories from transactions
-  const transactions = TransactionService.getAll();
-  const uniqueCategories = [
-    ...new Set(transactions.map(t => t.category).filter(Boolean)),
-  ];
+  // Get all available category names
+  const uniqueCategories = CustomCategoryService.getAllCategoryNames('all');
 
   uniqueCategories.forEach(category => {
     const checkboxWrapper = document.createElement('label');
@@ -327,7 +335,7 @@ export const AdvancedFilterPanel = ({
   searchSection.appendChild(searchOptions);
 
   // Apply Filters Button
-  const applyButton = createButton({
+  const applyButton = Button({
     text: 'Apply Filters',
     variant: 'primary',
     onClick: () => {

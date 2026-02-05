@@ -5,8 +5,9 @@
  */
 
 import { CustomCategoryService } from '../core/custom-category-service.js';
-import { createButton } from './Button.js';
+import { Button } from './Button.js';
 import { ConfirmDialog } from './ConfirmDialog.js';
+import { Router } from '../core/router.js';
 
 export const CustomCategoryManager = ({
   onCategoryChange,
@@ -35,23 +36,39 @@ export const CustomCategoryManager = ({
     margin-bottom: var(--spacing-lg);
   `;
 
+  // Left side: Back + Title
+  const leftSide = document.createElement('div');
+  leftSide.style.display = 'flex';
+  leftSide.style.alignItems = 'center';
+  leftSide.style.gap = 'var(--spacing-md)';
+
+  const backButton = Button({
+    text: '←',
+    variant: 'ghost',
+    onClick: () => Router.navigate('settings'),
+  });
+  backButton.style.padding = 'var(--spacing-xs) var(--spacing-sm)';
+  leftSide.appendChild(backButton);
+
   const title = document.createElement('h2');
-  title.textContent = 'Category Manager';
+  title.textContent = 'Categories';
   title.style.cssText = `
     margin: 0;
     color: var(--color-text-main);
     font-size: var(--font-size-xl);
     font-weight: 600;
   `;
+  leftSide.appendChild(title);
 
-  const addButton = createButton({
-    text: 'Add Category',
+  const addButton = Button({
+    text: 'Add',
     variant: 'primary',
     onClick: () => showCategoryForm(),
   });
   addButton.setAttribute('aria-label', 'Add new category');
+  addButton.style.padding = 'var(--spacing-xs) var(--spacing-md)';
 
-  header.appendChild(title);
+  header.appendChild(leftSide);
   header.appendChild(addButton);
   container.appendChild(header);
 
@@ -78,6 +95,7 @@ export const CustomCategoryManager = ({
   categoriesList.className = 'categories-list';
   categoriesList.style.cssText = `
     display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: var(--spacing-md);
   `;
 
@@ -165,7 +183,7 @@ export const CustomCategoryManager = ({
     card.setAttribute('role', 'article');
     card.setAttribute(
       'aria-label',
-      `${category.name} category, ${category.type}, used ${category.usageCount || 0} times`
+      `${category.name} category, ${category.type}`
     );
     card.style.cssText = `
       display: flex;
@@ -216,11 +234,7 @@ export const CustomCategoryManager = ({
       margin-right: var(--spacing-sm);
     `;
 
-    const usage = document.createElement('span');
-    usage.textContent = `${category.usageCount || 0} uses`;
-
     meta.appendChild(type);
-    meta.appendChild(usage);
 
     if (category.description) {
       const description = document.createElement('div');
@@ -442,13 +456,13 @@ export const CustomCategoryManager = ({
       margin-top: var(--spacing-md);
     `;
 
-    const cancelButton = createButton({
+    const cancelButton = Button({
       text: 'Cancel',
       variant: 'ghost',
       onClick: () => overlay.remove(),
     });
 
-    const saveButton = createButton({
+    const saveButton = Button({
       text: isEdit ? 'Update' : 'Create',
       variant: 'primary',
       onClick: e => {
@@ -571,7 +585,9 @@ export const CustomCategoryManager = ({
       color: var(--color-text-main);
     `;
 
-    const input = document.createElement(type === 'textarea' ? 'textarea' : 'input');
+    const input = document.createElement(
+      type === 'textarea' ? 'textarea' : 'input'
+    );
     input.id = id;
     input.className = `input-${type}`;
     input.required = required;
@@ -598,7 +614,7 @@ export const CustomCategoryManager = ({
   }
 
   function confirmDeleteCategory(category) {
-    const confirmDialog = ConfirmDialog({
+    ConfirmDialog({
       title: 'Delete Category',
       message: `Are you sure you want to delete "${category.name}"? This action cannot be undone.`,
       confirmText: 'Delete',
@@ -630,8 +646,6 @@ export const CustomCategoryManager = ({
         }
       },
     });
-
-    document.body.appendChild(confirmDialog);
   }
 
   function renderCategories(searchQuery = '') {

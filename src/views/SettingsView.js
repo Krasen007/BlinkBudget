@@ -7,6 +7,7 @@ import { GeneralSection } from '../components/GeneralSection.js';
 import { BackupRestoreSection } from '../components/BackupRestoreSection.js';
 import { AccountDeletionSection } from '../components/AccountDeletionSection.js';
 import { SmartSuggestionsSection } from '../components/SmartSuggestionsSection.js';
+import { AdvancedFilteringSection } from '../components/AdvancedFilteringSection.js';
 import {
   SPACING,
   TOUCH_TARGETS,
@@ -141,9 +142,31 @@ export const SettingsView = () => {
   const generalSection = GeneralSection();
   contentWrapper.appendChild(generalSection);
 
+  // Category Management Section
+  const categoryManagementSection = document.createElement('div');
+  categoryManagementSection.className = 'settings-section';
+  categoryManagementSection.innerHTML = `
+    <div class="settings-section-header">
+      <h3>🏷️ Category Management</h3>
+      <p>Organize and customize your transaction categories</p>
+    </div>
+  `;
+  const manageCategoriesBtn = Button({
+    text: 'Manage Categories',
+    variant: 'primary',
+    onClick: () => Router.navigate('category-manager'),
+  });
+  manageCategoriesBtn.style.width = '100%';
+  categoryManagementSection.appendChild(manageCategoriesBtn);
+  contentWrapper.appendChild(categoryManagementSection);
+
   // Smart Suggestions Section
   const smartSuggestionsSection = SmartSuggestionsSection();
   contentWrapper.appendChild(smartSuggestionsSection);
+
+  // Advanced Filtering Section
+  const advancedFilteringSection = AdvancedFilteringSection();
+  contentWrapper.appendChild(advancedFilteringSection);
 
   /// Privacy system disabled for now, to be implemented backend later
   // import { createPrivacyControls, initializePrivacyControls } from '../components/PrivacyControls.js';

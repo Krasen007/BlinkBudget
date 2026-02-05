@@ -31,6 +31,11 @@ export const SettingsService = {
     settings[key] = value;
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
     SyncService.pushToCloud(SETTINGS_KEY, settings);
+
+    // Dispatch event for UI re-renders
+    window.dispatchEvent(
+      new CustomEvent('storage-updated', { detail: { key: SETTINGS_KEY } })
+    );
   },
 
   /**

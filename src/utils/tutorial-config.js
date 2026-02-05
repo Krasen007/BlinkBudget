@@ -47,8 +47,9 @@ export const TUTORIAL_STEPS = [
     id: 'navigate-to-add',
     type: 'navigation',
     target: 'add-expense',
-    title: 'Let\'s Add Your First Transaction',
-    content: 'We\'ll navigate to add transaction page where you can log expenses in just 3 clicks.',
+    title: "Let's Add Your First Transaction",
+    content:
+      "We'll navigate to add transaction page where you can log expenses in just 3 clicks.",
     actions: [
       {
         id: 'next',
@@ -89,7 +90,8 @@ export const TUTORIAL_STEPS = [
     type: 'spotlight',
     target: '[data-tutorial-target="category-selector"]',
     title: 'Smart Categories',
-    content: 'Just tap one to save! We learn your favorite categories and remember typical amounts. No need to click a separate save button.\n\n🍔 Food & Groceries • ☕ Dining & Coffee • 🏠 Housing & Bills • 🚗 Transportation • 🛍️ Leisure & Shopping • 💇 Personal Care',
+    content:
+      'Just tap one to save! We learn your favorite categories and remember typical amounts. No need to click a separate save button.\n\n🍔 Food & Groceries • ☕ Dining & Coffee • 🏠 Housing & Bills • 🚗 Transportation • 🛍️ Leisure & Shopping • 💇 Personal Care',
     position: 'auto',
     delay: 1500, // Wait longer for animations
     actions: [
@@ -110,7 +112,8 @@ export const TUTORIAL_STEPS = [
     type: 'navigation',
     target: 'dashboard',
     title: 'Back to Your Dashboard',
-    content: 'Let\'s go back to your dashboard to see your complete financial picture.',
+    content:
+      "Let's go back to your dashboard to see your complete financial picture.",
     actions: [
       {
         id: 'next',
@@ -129,7 +132,8 @@ export const TUTORIAL_STEPS = [
     type: 'spotlight',
     target: '[data-tutorial-target="dashboard"]',
     title: 'Your Financial Dashboard',
-    content: 'This is your command center. Everything you need at a glance:\n\n**Balance Cards** - See your total across all accounts\n**Recent Transactions** - Your latest expenses, color-coded by category\n**Quick Stats** - Today\'s spending, monthly trends\n\n**Pro Tip:** Tap any category name to filter transactions by that category!',
+    content:
+      "This is your command center. Everything you need at a glance:\n\n**Balance Cards** - See your total across all accounts\n**Recent Transactions** - Your latest expenses, color-coded by category\n**Quick Stats** - Today's spending, monthly trends\n\n**Pro Tip:** Tap any category name to filter transactions by that category!",
     position: 'bottom',
     delay: 2000, // Wait longer for page to load
     actions: [

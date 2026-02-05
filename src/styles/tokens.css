@@ -44,12 +44,8 @@
   --color-text-muted: hsl(240, 5%, 65%);
 
   /* Border colors */
-  --color-border: hsl(
-    240,
-    5%,
-    30%
-  );
-   /* Enhanced from 20% for WCAG AA compliance */
+  --color-border: hsl(240, 5%, 30%);
+  /* Enhanced from 20% for WCAG AA compliance */
   --color-border-strong: hsl(240, 5%, 40%); /* New token for stronger borders */
 
   /* Enhanced accessibility tokens */

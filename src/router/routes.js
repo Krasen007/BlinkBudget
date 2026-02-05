@@ -32,6 +32,20 @@ export const routes = {
     ViewManager.setView(EditView(params));
     updateMobileNavigation('dashboard');
   },
+  'category-manager': async () => {
+    const { CustomCategoryManager } =
+      await import('../components/CustomCategoryManager.js');
+    NavigationState.setLastActiveView('category-manager');
+    ViewManager.setView(
+      CustomCategoryManager({
+        onCategoryChange: () => {
+          // Refresh category selectors throughout app
+          window.dispatchEvent(new CustomEvent('categories-updated'));
+        },
+      })
+    );
+    updateMobileNavigation('category-manager');
+  },
   settings: async () => {
     const { SettingsView } = await import('../views/SettingsView.js');
     NavigationState.setLastActiveView('settings');

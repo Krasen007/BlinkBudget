@@ -3,7 +3,9 @@ import { DashboardStatsCard } from '../components/DashboardStatsCard.js';
 import { TransactionList } from '../components/TransactionList.js';
 import { AccountService } from '../core/account-service.js';
 import { TransactionService } from '../core/transaction-service.js';
+import { FilteringService } from '../core/analytics/FilteringService.js';
 import { AuthService } from '../core/auth-service.js';
+import { SettingsService } from '../core/settings-service.js';
 import { Router } from '../core/router.js';
 import {
   COLORS,
@@ -16,6 +18,7 @@ import {
 import { debounce } from '../utils/touch-utils.js';
 import { getTransactionToHighlight } from '../utils/success-feedback.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
+import { AdvancedFilterPanel } from '../components/AdvancedFilterPanel.js';
 
 export const DashboardView = () => {
   const container = document.createElement('div');
@@ -38,7 +41,7 @@ export const DashboardView = () => {
   topRow.style.justifyContent = 'space-between';
   topRow.style.alignItems = 'center';
 
-  // Left side with title only
+  // Left side with title and category manager button
   const leftSide = document.createElement('div');
   leftSide.style.display = 'flex';
   leftSide.style.alignItems = 'center';
@@ -48,16 +51,14 @@ export const DashboardView = () => {
   const title = document.createElement('h2');
   const updateTitle = userObj => {
     const u = userObj || AuthService.user;
-    const uName = u ? u.displayName || u.email : '';
-    title.textContent = `Dashboard 1.18 ${uName}`;
+    title.textContent = `Welcome back${u ? `, ${u.displayName}` : ''}!`;
+    title.style.margin = '0';
+    title.style.fontSize =
+      window.innerWidth < BREAKPOINTS.MOBILE ? '1.25rem' : 'h2';
+    title.style.fontWeight = 'bold';
+    title.style.color = COLORS.TEXT_MAIN;
   };
   updateTitle();
-  title.style.margin = '0';
-  title.style.fontSize =
-    window.innerWidth < BREAKPOINTS.MOBILE ? '1.25rem' : 'h2';
-  title.style.fontWeight = 'bold';
-  title.style.color = COLORS.TEXT_MAIN;
-
   leftSide.appendChild(title);
 
   // Right side controls - use navigation helper
@@ -88,26 +89,27 @@ export const DashboardView = () => {
   accountSelect.className = 'input-select';
 
   // Account Options Logic
-  let currentFilter =
+  let currentAccountFilter =
     sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_FILTER) || 'all';
   let currentDateFilter =
     sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_DATE_FILTER) || null;
   let currentCategoryFilter =
     sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER) || null;
+  let advancedFilters = null;
 
   const accounts = AccountService.getAccounts();
 
   const allOption = document.createElement('option');
   allOption.value = 'all';
   allOption.textContent = 'All Accounts';
-  allOption.selected = currentFilter === 'all';
+  allOption.selected = currentAccountFilter === 'all';
   accountSelect.appendChild(allOption);
 
   accounts.forEach(acc => {
     const opt = document.createElement('option');
     opt.value = acc.id;
     opt.textContent = acc.name;
-    if (acc.id === currentFilter) opt.selected = true;
+    if (acc.id === currentAccountFilter) opt.selected = true;
     accountSelect.appendChild(opt);
   });
 
@@ -146,6 +148,22 @@ export const DashboardView = () => {
 
   container.appendChild(content);
 
+  // Advanced Filter Panel (Conditional)
+  const advancedFilteringEnabled =
+    SettingsService.getSetting('advancedFilteringEnabled') !== false;
+  let filterPanel = null;
+
+  if (advancedFilteringEnabled) {
+    filterPanel = AdvancedFilterPanel({
+      onFiltersChange: filters => {
+        console.log('Dashboard filters applied:', filters);
+        advancedFilters = filters;
+        renderDashboard();
+      },
+    });
+    container.appendChild(filterPanel);
+  }
+
   const renderDashboard = () => {
     content.innerHTML = '';
 
@@ -153,25 +171,35 @@ export const DashboardView = () => {
     const allTransactions = TransactionService.getAll();
     const currentAccounts = AccountService.getAccounts();
 
-    // Filter Transactions
-    const transactions = allTransactions
+    // 1. First apply advanced filters if they exist
+    let transactions = allTransactions;
+    if (advancedFilters) {
+      // Include ghosts in filtering because list wants them
+      transactions = FilteringService.applyFilters(transactions, {
+        ...advancedFilters,
+        includeGhosts: true,
+      });
+    }
+
+    // 2. Then apply legacy filters (Account, Quick Date, Quick Category)
+    transactions = transactions
       .filter(t => {
         // Account Filter
         if (
-          currentFilter !== 'all' &&
-          t.accountId !== currentFilter &&
-          t.toAccountId !== currentFilter
+          currentAccountFilter !== 'all' &&
+          t.accountId !== currentAccountFilter &&
+          t.toAccountId !== currentAccountFilter
         ) {
           return false;
         }
 
-        // Date Filter
+        // Quick Date Filter (from clicking date in list)
         if (currentDateFilter) {
           const tDate = t.timestamp.split('T')[0];
           if (tDate !== currentDateFilter) return false;
         }
 
-        // Category Filter
+        // Quick Category Filter (from clicking category in list)
         if (currentCategoryFilter) {
           if (t.category !== currentCategoryFilter) return false;
         }
@@ -189,13 +217,13 @@ export const DashboardView = () => {
     let allTimeExpense = 0;
 
     validTransactionsForStats.forEach(t => {
-      if (currentFilter === 'all') {
+      if (currentAccountFilter === 'all') {
         if (t.type === 'income') allTimeIncome += t.amount;
         if (t.type === 'expense') allTimeExpense += t.amount;
         if (t.type === 'refund') allTimeExpense -= t.amount;
       } else {
-        const isSource = t.accountId === currentFilter;
-        const isDest = t.toAccountId === currentFilter;
+        const isSource = t.accountId === currentAccountFilter;
+        const isDest = t.toAccountId === currentAccountFilter;
 
         if (t.type === 'income' && isSource) allTimeIncome += t.amount;
         if (t.type === 'expense' && isSource) allTimeExpense += t.amount;
@@ -227,11 +255,11 @@ export const DashboardView = () => {
     let totalExpense = 0;
 
     currentMonthTransactions.forEach(t => {
-      if (currentFilter === 'all') {
+      if (currentAccountFilter === 'all') {
         if (t.type === 'expense') totalExpense += t.amount;
         if (t.type === 'refund') totalExpense -= t.amount;
       } else {
-        const isSource = t.accountId === currentFilter;
+        const isSource = t.accountId === currentAccountFilter;
 
         if (t.type === 'expense' && isSource) totalExpense += t.amount;
         if (t.type === 'refund' && isSource) totalExpense -= t.amount;
@@ -295,7 +323,9 @@ export const DashboardView = () => {
       text: '+ Add Transaction',
       onClick: () => {
         const params =
-          currentFilter !== 'all' ? { accountId: currentFilter } : {};
+          currentAccountFilter !== 'all'
+            ? { accountId: currentAccountFilter }
+            : {};
         Router.navigate('add-expense', params);
       },
       variant: 'primary',
@@ -310,7 +340,7 @@ export const DashboardView = () => {
     const highlightTransactionIds = getTransactionToHighlight();
     const transactionList = TransactionList({
       transactions,
-      currentFilter,
+      currentAccountFilter,
       accounts: currentAccounts,
       highlightTransactionIds,
       // Pass date filter props
@@ -387,9 +417,9 @@ export const DashboardView = () => {
   window.addEventListener('auth-state-changed', handleAuthChange);
 
   accountSelect.addEventListener('change', e => {
-    currentFilter = e.target.value;
+    currentAccountFilter = e.target.value;
     // Use localStorage directly to avoid syncing this preference
-    sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, currentFilter);
+    sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, currentAccountFilter);
     renderDashboard();
   });
 

@@ -5,10 +5,7 @@
  */
 
 import { suggestionService } from '../core/suggestion-service.js';
-import {
-  getCategoryIconHTML,
-  getCategoriesByFrequency,
-} from '../utils/category-icons.js';
+import { getCategoryIconHTML } from '../utils/category-icons.js';
 
 export const SmartCategorySelector = {
   /**
@@ -95,13 +92,48 @@ export const SmartCategorySelector = {
    */
   async initializeCategories(grid, onSelect, initialCategory = '') {
     try {
-      // Get categories with frequency data
-      const transactions = await this.getTransactionHistory();
-      const categories = getCategoriesByFrequency(transactions);
+      // 1. Get all available categories (system + custom)
+      const { CustomCategoryService } =
+        await import('../core/custom-category-service.js');
+      const allCategoryData =
+        CustomCategoryService.getSystemCategories('expense');
+      const customCategories = CustomCategoryService.getByType('expense');
 
-      // Create category cards
-      categories.forEach((categoryData, index) => {
-        const card = this.createCategoryCard(categoryData, index === 0);
+      // Combine them
+      const availableCategories = [...allCategoryData, ...customCategories];
+
+      // 2. Get transaction history for frequency data
+      const transactions = await this.getTransactionHistory();
+
+      // Calculate frequencies for ALL available categories
+      const categoryCount = {};
+      transactions.forEach(tx => {
+        if (tx.category) {
+          categoryCount[tx.category] = (categoryCount[tx.category] || 0) + 1;
+        }
+      });
+
+      const totalTransactions = transactions.length;
+
+      // Map frequencies to our combined list
+      const categoriesWithFrequency = availableCategories.map(cat => {
+        const count = categoryCount[cat.name] || 0;
+        const pct = totalTransactions > 0 ? count / totalTransactions : 0;
+        return {
+          category: cat.name,
+          count,
+          percentage: pct,
+          frequency: this.getFrequencyLevel(pct),
+          ...cat,
+        };
+      });
+
+      // Sort by frequency
+      categoriesWithFrequency.sort((a, b) => b.count - a.count);
+
+      // 3. Create category cards
+      categoriesWithFrequency.forEach(categoryData => {
+        const card = this.createCategoryCard(categoryData);
 
         if (categoryData.category === initialCategory) {
           card.classList.add('selected');
@@ -134,6 +166,17 @@ export const SmartCategorySelector = {
       // Fallback to basic categories
       this.initializeFallbackCategories(grid, onSelect, initialCategory);
     }
+  },
+
+  /**
+   * Get frequency level for UI styling
+   * @param {number} percentage - Usage percentage (0-1)
+   * @returns {string} Frequency level (high, medium, low)
+   */
+  getFrequencyLevel(percentage) {
+    if (percentage >= 0.2) return 'high';
+    if (percentage >= 0.1) return 'medium';
+    return 'low';
   },
 
   /**

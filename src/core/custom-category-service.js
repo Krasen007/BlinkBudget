@@ -50,7 +50,8 @@ export const CustomCategoryService = {
     if (type === 'all') {
       return categories;
     }
-    return categories.filter(cat => cat.type === type);
+    const filterType = type === 'refund' ? 'expense' : type;
+    return categories.filter(cat => cat.type === filterType);
   },
 
   /**
@@ -88,7 +89,6 @@ export const CustomCategoryService = {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       userId: AuthService.getUserId(),
-      usageCount: 0,
     };
 
     categories.push(newCategory);
@@ -174,7 +174,7 @@ export const CustomCategoryService = {
    * @param {boolean} force - Force delete even if category is in use
    * @returns {boolean} True if deleted successfully
    */
-  remove(id, force = false) {
+  remove(id, _force = false) {
     const categories = this.getAll();
     const category = categories.find(cat => cat.id === id);
 
@@ -187,13 +187,6 @@ export const CustomCategoryService = {
       throw new Error('Cannot delete system categories');
     }
 
-    // Check if category is in use (unless force delete)
-    if (!force && category.usageCount > 0) {
-      throw new Error(
-        `Cannot delete category "${category.name}" as it is used in ${category.usageCount} transactions`
-      );
-    }
-
     const filteredCategories = categories.filter(cat => cat.id !== id);
     this._persist(filteredCategories);
 
@@ -204,43 +197,12 @@ export const CustomCategoryService = {
         entityType: 'category',
         entityId: id,
         name: category.name,
-        usageCount: category.usageCount,
       },
       AuthService.getUserId(),
       'medium'
     );
 
     return true;
-  },
-
-  /**
-   * Increment usage count for a category
-   * @param {string} categoryName - Category name
-   */
-  incrementUsage(categoryName) {
-    const categories = this.getAll();
-    const category = categories.find(cat => cat.name === categoryName);
-
-    if (category) {
-      category.usageCount = (category.usageCount || 0) + 1;
-      category.updatedAt = new Date().toISOString();
-      this._persist(categories);
-    }
-  },
-
-  /**
-   * Decrement usage count for a category
-   * @param {string} categoryName - Category name
-   */
-  decrementUsage(categoryName) {
-    const categories = this.getAll();
-    const category = categories.find(cat => cat.name === categoryName);
-
-    if (category && category.usageCount > 0) {
-      category.usageCount = Math.max(0, category.usageCount - 1);
-      category.updatedAt = new Date().toISOString();
-      this._persist(categories);
-    }
   },
 
   /**
@@ -266,81 +228,187 @@ export const CustomCategoryService = {
   getSystemCategories(type = 'all') {
     const systemExpenseCategories = [
       {
-        name: 'Food & Dining',
+        name: 'Храна',
         type: 'expense',
         icon: 'restaurant',
-        color: '#ef4444',
+        color: '#22C55E',
+        description: 'Supermarket runs, bakery, household supplies.',
       },
       {
-        name: 'Transportation',
+        name: 'Заведения',
         type: 'expense',
-        icon: 'car',
-        color: '#f59e0b',
+        icon: 'restaurant',
+        color: '#F97316',
+        description: 'Restaurants, fast food, coffee shops, food delivery.',
       },
       {
-        name: 'Shopping',
-        type: 'expense',
-        icon: 'shopping-bag',
-        color: '#8b5cf6',
-      },
-      {
-        name: 'Entertainment',
-        type: 'expense',
-        icon: 'film',
-        color: '#ec4899',
-      },
-      {
-        name: 'Bills & Utilities',
-        type: 'expense',
-        icon: 'file-text',
-        color: '#3b82f6',
-      },
-      { name: 'Healthcare', type: 'expense', icon: 'heart', color: '#10b981' },
-      { name: 'Education', type: 'expense', icon: 'book', color: '#6366f1' },
-      { name: 'Travel', type: 'expense', icon: 'plane', color: '#14b8a6' },
-      { name: 'Personal', type: 'expense', icon: 'user', color: '#f97316' },
-      {
-        name: 'Gifts & Donations',
-        type: 'expense',
-        icon: 'gift',
-        color: '#a855f7',
-      },
-      {
-        name: 'Investments',
-        type: 'expense',
-        icon: 'trending-up',
-        color: '#059669',
-      },
-      {
-        name: 'Other Expenses',
+        name: 'Други',
         type: 'expense',
         icon: 'more-horizontal',
-        color: '#6b7280',
+        color: '#f19317ff',
+        description: "Miscellaneous expenses that don't fit elsewhere.",
+      },
+      {
+        name: 'Гориво',
+        type: 'expense',
+        icon: 'car',
+        color: '#EF4444',
+        description: 'Fuel for vehicles.',
+      },
+      {
+        name: 'Подаръци',
+        type: 'expense',
+        icon: 'gift',
+        color: '#A855F7',
+        description: 'Gifts for others.',
+      },
+      {
+        name: 'Автомобил',
+        type: 'expense',
+        icon: 'car',
+        color: '#DC2626',
+        description: 'Car maintenance, repairs, insurance.',
+      },
+      {
+        name: 'Сметки',
+        type: 'expense',
+        icon: 'file-text',
+        color: '#60A5FA',
+        description: 'Utility bills (Electricity, Water, Internet, etc.).',
+      },
+      {
+        name: 'Дрехи',
+        type: 'expense',
+        icon: 'shopping-bag',
+        color: '#8B5CF6',
+        description: 'Clothing and apparel.',
+      },
+      {
+        name: 'Лекарства',
+        type: 'expense',
+        icon: 'heart',
+        color: '#10B981',
+        description: 'Pharmacy and medicines.',
+      },
+      {
+        name: 'Забавления',
+        type: 'expense',
+        icon: 'film',
+        color: '#7C3AED',
+        description: 'Movies, hobbies, subscriptions, fun activities.',
+      },
+      {
+        name: 'Кредит',
+        type: 'expense',
+        icon: 'credit-card',
+        color: '#3B82F6',
+        description: 'Loan payments, mortgage, credit card payoff.',
+      },
+      {
+        name: 'Телефон',
+        type: 'expense',
+        icon: 'phone',
+        color: '#0EA5E9',
+        description: 'Mobile phone bill and equipment.',
+      },
+      {
+        name: 'Почивка',
+        type: 'expense',
+        icon: 'plane',
+        color: '#06B6D4',
+        description: 'Vacations, travel, hotels.',
+      },
+      {
+        name: 'Транспорт',
+        type: 'expense',
+        icon: 'truck',
+        color: '#FB923C',
+        description: 'Public transit, taxi, ride-sharing.',
+      },
+      {
+        name: 'Баланс',
+        type: 'expense',
+        icon: 'refresh-cw',
+        color: '#16A34A',
+        description: 'Adjustments to account balance.',
+      },
+      {
+        name: 'Лекар',
+        type: 'expense',
+        icon: 'heart',
+        color: '#B91C1C',
+        description: 'Doctor visits and medical procedures.',
+      },
+      {
+        name: 'Инвестиции',
+        type: 'expense',
+        icon: 'trending-up',
+        color: '#84CC16',
+        description: 'Investment contributions and income.',
+      },
+      {
+        name: 'Ремонти',
+        type: 'expense',
+        icon: 'tool',
+        color: '#F59E0B',
+        description: 'Home repairs and maintenance.',
+      },
+      {
+        name: 'Данъци',
+        type: 'expense',
+        icon: 'file-text',
+        color: '#1D4ED8',
+        description: 'Taxes and government fees.',
+      },
+      {
+        name: 'Застраховки',
+        type: 'expense',
+        icon: 'shield',
+        color: '#C084FC',
+        description: 'Insurance policies (Life, Home, Health).',
+      },
+      {
+        name: 'Зъболекар',
+        type: 'expense',
+        icon: 'heart',
+        color: '#F87171',
+        description: 'Dentist visits.',
       },
     ];
 
     const systemIncomeCategories = [
-      { name: 'Salary', type: 'income', icon: 'briefcase', color: '#10b981' },
-      { name: 'Freelance', type: 'income', icon: 'laptop', color: '#3b82f6' },
       {
-        name: 'Investments',
+        name: 'Заплата',
+        type: 'income',
+        icon: 'briefcase',
+        color: '#10b981',
+        description: 'Salary and primary income.',
+      },
+      {
+        name: 'Инвестиции',
         type: 'income',
         icon: 'trending-up',
-        color: '#059669',
+        color: '#84CC16',
+        description: 'Investment contributions and income.',
       },
-      { name: 'Business', type: 'income', icon: 'briefcase', color: '#8b5cf6' },
-      { name: 'Rental Income', type: 'income', icon: 'home', color: '#f59e0b' },
-      { name: 'Gifts', type: 'income', icon: 'gift', color: '#ec4899' },
       {
-        name: 'Other Income',
+        name: 'Други',
         type: 'income',
-        icon: 'plus-circle',
-        color: '#6b7280',
+        icon: 'more-horizontal',
+        color: '#f19317ff',
+        description: "Miscellaneous income that don't fit elsewhere.",
+      },
+      {
+        name: 'Подаръци',
+        type: 'income',
+        icon: 'gift',
+        color: '#A855F7',
+        description: 'Gifts received.',
       },
     ];
 
     let systemCategories = [];
-    if (type === 'all' || type === 'expense') {
+    if (type === 'all' || type === 'expense' || type === 'refund') {
       systemCategories = [...systemCategories, ...systemExpenseCategories];
     }
     if (type === 'all' || type === 'income') {
@@ -353,7 +421,6 @@ export const CustomCategoryService = {
       isSystem: true,
       isCustom: false,
       isActive: true,
-      usageCount: 0,
     }));
   },
 
@@ -404,9 +471,12 @@ export const CustomCategoryService = {
       errors.push('Category name must be 50 characters or less');
     }
 
-    if (categoryData.name && !/^[a-zA-Z0-9\s\-_&]+$/.test(categoryData.name)) {
+    if (
+      categoryData.name &&
+      !/^[a-zA-Z0-9\u0400-\u04FF\s\-_&]+$/.test(categoryData.name)
+    ) {
       errors.push(
-        'Category name can only contain letters, numbers, spaces, hyphens, underscores, and ampersands'
+        'Category name can only contain letters (Latin or Cyrillic), numbers, spaces, hyphens, underscores, and ampersands'
       );
     }
 

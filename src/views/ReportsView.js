@@ -16,6 +16,7 @@ import { TransactionService } from '../core/transaction-service.js';
 import { AccountService } from '../core/account-service.js';
 import { Router } from '../core/router.js';
 import { NavigationState } from '../core/navigation-state.js';
+import { SettingsService } from '../core/settings-service.js';
 import {
   COLORS,
   SPACING,
@@ -25,6 +26,8 @@ import {
 } from '../utils/constants.js';
 import { debounce } from '../utils/touch-utils.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
+import { AdvancedFilterPanel } from '../components/AdvancedFilterPanel.js';
+import { FilteringService } from '../core/analytics/FilteringService.js';
 
 // Import utility modules
 import {
@@ -137,10 +140,12 @@ export const ReportsView = () => {
   // State management
   let currentTimePeriod =
     NavigationState.restoreTimePeriod() || getCurrentMonthPeriod();
+  let currentAdvancedFilters = null;
   let isLoading = false;
   let currentData = null;
   const activeCharts = new Map();
   let timePeriodSelectorComponent = null;
+  let advancedFilterPanelComponent = null;
   const categoryColorMap = new Map();
 
   // Main content area - match FinancialPlanningView structure
@@ -234,6 +239,18 @@ export const ReportsView = () => {
       className: 'reports-time-selector',
     });
 
+    // Advanced Filter Panel (Conditional)
+    const advancedFilteringEnabled =
+      SettingsService.getSetting('advancedFilteringEnabled') !== false;
+    if (advancedFilteringEnabled) {
+      advancedFilterPanelComponent = AdvancedFilterPanel({
+        onFiltersChange: filters => {
+          currentAdvancedFilters = filters;
+          loadReportData(true); // Fast reload
+        },
+      });
+    }
+
     // Create header container that includes both header and time period selector
     const headerContainer = document.createElement('div');
     headerContainer.className = 'reports-header-container';
@@ -250,6 +267,10 @@ export const ReportsView = () => {
 
     headerContainer.appendChild(header);
     headerContainer.appendChild(timePeriodSelectorComponent);
+
+    if (advancedFilterPanelComponent) {
+      headerContainer.appendChild(advancedFilterPanelComponent);
+    }
 
     return headerContainer;
   }
@@ -392,10 +413,19 @@ export const ReportsView = () => {
 
       let transactions;
       try {
-        transactions = TransactionService.getAll();
+        const allTransactions = TransactionService.getAll();
 
-        if (!Array.isArray(transactions)) {
+        if (!Array.isArray(allTransactions)) {
           throw new Error('Invalid transaction data format - expected array');
+        }
+
+        // Apply advanced filters if they exist
+        transactions = allTransactions;
+        if (currentAdvancedFilters) {
+          transactions = FilteringService.applyFilters(
+            transactions,
+            currentAdvancedFilters
+          );
         }
       } catch (storageError) {
         console.error('Storage access error:', storageError);
@@ -425,7 +455,7 @@ export const ReportsView = () => {
               // Chunk processed callback - currently unused
             },
             prioritizeCategories: true,
-            enableCaching: true,
+            enableCaching: !currentAdvancedFilters, // Disable caching if advanced filters are active
           }
         );
       } catch (analyticsError) {
