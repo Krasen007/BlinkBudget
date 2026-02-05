@@ -7,7 +7,7 @@ import {
   CATEGORY_COLORS,
   CATEGORY_OPTIONS,
   TYPE_COLORS,
-} from '../../src/utils/form-utils/constants.js';
+} from '../../src/utils/constants.js';
 
 describe('Form Constants', () => {
   describe('CATEGORY_DEFINITIONS', () => {

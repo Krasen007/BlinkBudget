@@ -3,8 +3,13 @@
  * Creates category selection chips and transfer account chips
  */
 
-import { CATEGORY_DEFINITIONS, CATEGORY_COLORS } from './constants.js';
-import { SPACING, FONT_SIZES, TOUCH_TARGETS } from '../constants.js';
+import {
+  CATEGORY_DEFINITIONS,
+  CATEGORY_COLORS,
+  SPACING,
+  FONT_SIZES,
+  TOUCH_TARGETS,
+} from '../constants.js';
 import { validateAmount, showFieldError } from './validation.js';
 import { ClickTracker } from '../../core/click-tracking-service.js';
 import { CustomCategoryService } from '../../core/custom-category-service.js';

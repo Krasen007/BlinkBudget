@@ -20,7 +20,7 @@ export const AdvancedFilteringSection = () => {
 
   // Get current setting
   const currentSetting =
-    SettingsService.getSetting('advancedFilteringEnabled') !== false; // Default to true
+    SettingsService.getSetting('advancedFilteringEnabled') === true; // Default to false
 
   // Create toggle container
   const toggleContainer = document.createElement('div');
@@ -42,7 +42,7 @@ export const AdvancedFilteringSection = () => {
   // Toggle functionality
   const toggleFiltering = () => {
     const isEnabled =
-      SettingsService.getSetting('advancedFilteringEnabled') !== false;
+      SettingsService.getSetting('advancedFilteringEnabled') === true;
     const newSetting = !isEnabled;
     SettingsService.saveSetting('advancedFilteringEnabled', newSetting);
 

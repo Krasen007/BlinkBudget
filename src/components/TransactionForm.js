@@ -38,7 +38,7 @@ export const TransactionForm = ({
 }) => {
   // Check if smart suggestions are enabled
   const smartSuggestionsEnabled =
-    SettingsService.getSetting('smartSuggestionsEnabled') !== false; // Default to true
+    SettingsService.getSetting('smartSuggestionsEnabled') === true; // Default to false
 
   // Initialize category icons CSS only if smart suggestions are enabled
   if (smartSuggestionsEnabled) {

@@ -99,29 +99,6 @@ export const CustomCategoryManager = ({
     gap: var(--spacing-md);
   `;
 
-  // Search box
-  const searchContainer = document.createElement('div');
-  searchContainer.style.cssText = `
-    margin-bottom: var(--spacing-md);
-  `;
-
-  const searchInput = document.createElement('input');
-  searchInput.type = 'text';
-  searchInput.placeholder = 'Search categories...';
-  searchInput.className = 'input-text';
-  searchInput.setAttribute('aria-label', 'Search categories');
-  searchInput.style.cssText = `
-    width: 100%;
-    padding: var(--spacing-sm);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-background);
-    color: var(--color-text-main);
-    font-size: var(--font-size-base);
-  `;
-
-  searchContainer.appendChild(searchInput);
-  container.appendChild(searchContainer);
   container.appendChild(categoriesList);
 
   // Helper functions
@@ -144,6 +121,7 @@ export const CustomCategoryManager = ({
       font-weight: 500;
       cursor: pointer;
       transition: all var(--transition-fast);
+      flex: 1;
     `;
 
     button.addEventListener('click', () => {
@@ -187,53 +165,75 @@ export const CustomCategoryManager = ({
     );
     card.style.cssText = `
       display: flex;
-      align-items: center;
-      gap: var(--spacing-md);
+      flex-direction: column;
+      gap: var(--spacing-sm);
       padding: var(--spacing-md);
       border: 1px solid var(--color-border);
       border-radius: var(--radius-md);
       background: var(--color-background);
       transition: all var(--transition-fast);
+      position: relative;
+      height: 100%;
+      justify-content: space-between;
+      align-items: flex-start; /* Override center alignment from CSS */
+      text-align: left; /* Override center text alignment from CSS */
+    `;
+
+    // Info section (top)
+    const infoArea = document.createElement('div');
+    infoArea.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+      width: 100%;
+    `;
+
+    // Header within card (color + name)
+    const cardHeader = document.createElement('div');
+    cardHeader.style.cssText = `
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-xs);
     `;
 
     // Category color indicator
     const colorIndicator = document.createElement('div');
     colorIndicator.style.cssText = `
-      width: 16px;
-      height: 16px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
       background: ${category.color || '#6b7280'};
       flex-shrink: 0;
     `;
 
-    // Category info
-    const info = document.createElement('div');
-    info.style.cssText = `
-      flex: 1;
-      min-width: 0;
-    `;
-
     const name = document.createElement('div');
     name.textContent = category.name;
     name.style.cssText = `
-      font-weight: 500;
+      font-weight: 600;
       color: var(--color-text-main);
-      margin-bottom: var(--spacing-xs);
+      font-size: var(--font-size-base);
     `;
+
+    cardHeader.appendChild(colorIndicator);
+    cardHeader.appendChild(name);
+    infoArea.appendChild(cardHeader);
 
     const meta = document.createElement('div');
     meta.style.cssText = `
       font-size: var(--font-size-xs);
       color: var(--color-text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
     `;
 
     const type = document.createElement('span');
     type.textContent = category.type;
     type.style.cssText = `
       text-transform: capitalize;
-      margin-right: var(--spacing-sm);
+      opacity: 0.8;
     `;
-
     meta.appendChild(type);
 
     if (category.description) {
@@ -242,22 +242,24 @@ export const CustomCategoryManager = ({
       description.style.cssText = `
         font-size: var(--font-size-xs);
         color: var(--color-text-muted);
-        margin-top: var(--spacing-xs);
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
         overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
       `;
       meta.appendChild(description);
     }
+    infoArea.appendChild(meta);
+    card.appendChild(infoArea);
 
-    info.appendChild(name);
-    info.appendChild(meta);
-
-    // Actions
+    // Actions (bottom)
     const actions = document.createElement('div');
     actions.style.cssText = `
       display: flex;
       gap: var(--spacing-xs);
+      margin-top: var(--spacing-sm);
+      width: 100%;
     `;
 
     if (!category.isSystem) {
@@ -270,11 +272,14 @@ export const CustomCategoryManager = ({
 
       actions.appendChild(editButton);
       actions.appendChild(deleteButton);
+      card.appendChild(actions);
+    } else {
+      // Add a placeholder or just space
+      const placeholder = document.createElement('div');
+      placeholder.style.height = '30px'; // Same height as buttons
+      actions.appendChild(placeholder);
+      card.appendChild(actions);
     }
-
-    card.appendChild(colorIndicator);
-    card.appendChild(info);
-    card.appendChild(actions);
 
     // Keyboard navigation
     card.addEventListener('keydown', e => {
@@ -314,6 +319,8 @@ export const CustomCategoryManager = ({
       font-size: var(--font-size-xs);
       cursor: pointer;
       transition: all var(--transition-fast);
+      flex: 1;
+      height: 30px;
     `;
 
     button.addEventListener('click', onClick);
@@ -648,10 +655,8 @@ export const CustomCategoryManager = ({
     });
   }
 
-  function renderCategories(searchQuery = '') {
-    categories = searchQuery
-      ? CustomCategoryService.search(searchQuery, currentType)
-      : CustomCategoryService.getByType(currentType);
+  function renderCategories() {
+    categories = CustomCategoryService.getByType(currentType);
 
     // Add system categories
     const systemCategories =
@@ -680,15 +685,6 @@ export const CustomCategoryManager = ({
       categoriesList.appendChild(card);
     });
   }
-
-  // Search functionality
-  let searchTimeout;
-  searchInput.addEventListener('input', e => {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-      renderCategories(e.target.value);
-    }, 300);
-  });
 
   // Initial render
   renderCategories();

@@ -241,7 +241,7 @@ export const ReportsView = () => {
 
     // Advanced Filter Panel (Conditional)
     const advancedFilteringEnabled =
-      SettingsService.getSetting('advancedFilteringEnabled') !== false;
+      SettingsService.getSetting('advancedFilteringEnabled') === true;
     if (advancedFilteringEnabled) {
       advancedFilterPanelComponent = AdvancedFilterPanel({
         onFiltersChange: filters => {

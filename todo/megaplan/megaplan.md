@@ -199,11 +199,11 @@ BlinkBudget has a surprisingly mature foundation with enterprise-level analytics
 
 ### Development Team
 
-- 1 Full-stack developer (lead) - [View Plan](full_stack_developer/plan.md)
-- 1 UX/UI designer - [View Plan](ui_ux_designer/plan.md)
-- 1 QA engineer - [View Plan](qa_engineer/plan.md)
-- 1 DevOps engineer (part-time) - [View Plan](devops_engineer/plan.md)
-- 1 Technical writer (part-time) - [View Plan](technical_writer/plan.md)
+- 1 Full-stack developer (lead)
+- 1 UX/UI designer
+- 1 QA engineer
+- 1 DevOps engineer (part-time)
+- 1 Technical writer (part-time)
 
 ### Tools & Services
 

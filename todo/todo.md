@@ -24,3 +24,12 @@ DO NOT IMPLEMENT: use Ionic's Capacitor or Cordova to make android app
 [ ] add option to mark a transaction as important, maybe a checkbox or a star icon and when the user marks a transaction as important it should be highlighted in the transactions list
 [ ] when visualizing the chart in reports view, make sure to always use the same colors for the same categories
 [ ] fix tutorial, fix delete account properly
+
+- [x] **Task:** Implement advanced filtering logic (date ranges, multi-category).
+- [x] **Task:** Create `CustomCategoryManager` service and UI.
+- [x] **Task:** Add 'Notes' field to Transaction schema and UI forms.
+- [ ] **Task:** Run automated Accessibility audits (Axe/Lighthouse).
+- [ ] **Task:** Manual keyboard navigation testing (Tab order, Focus traps).
+- [ ] **Task:** Test advanced filtering/search combinations.
+- [ ] **Task:** Test "Interactive Tutorial" flow for breakage/skipping logic.
+- [ ] **Task:** Verify "First Run" experience on fresh accounts.

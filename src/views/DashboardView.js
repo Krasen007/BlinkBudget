@@ -150,7 +150,7 @@ export const DashboardView = () => {
 
   // Advanced Filter Panel (Conditional)
   const advancedFilteringEnabled =
-    SettingsService.getSetting('advancedFilteringEnabled') !== false;
+    SettingsService.getSetting('advancedFilteringEnabled') === true;
   let filterPanel = null;
 
   if (advancedFilteringEnabled) {

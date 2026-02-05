@@ -3,7 +3,7 @@
  * Creates transaction type toggle buttons (expense, income, transfer, refund)
  */
 
-import { TYPE_COLORS } from './constants.js';
+import { TYPE_COLORS } from '../constants.js';
 
 /**
  * Create a type toggle button

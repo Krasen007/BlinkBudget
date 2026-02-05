@@ -422,7 +422,7 @@ export async function createCategoryTrendsChart(
 //   return button;
 // }
 
-import { CATEGORY_COLORS } from './form-utils/constants.js';
+import { CATEGORY_COLORS } from './constants.js';
 
 /**
  * Get a deterministic color for a category

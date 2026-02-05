@@ -20,7 +20,7 @@ export const SmartSuggestionsSection = () => {
 
   // Get current setting
   const currentSetting =
-    SettingsService.getSetting('smartSuggestionsEnabled') !== false; // Default to true
+    SettingsService.getSetting('smartSuggestionsEnabled') === true; // Default to false
 
   // Create toggle container
   const toggleContainer = document.createElement('div');
@@ -42,7 +42,7 @@ export const SmartSuggestionsSection = () => {
   // Toggle functionality
   const toggleSuggestions = () => {
     const isEnabled =
-      SettingsService.getSetting('smartSuggestionsEnabled') !== false;
+      SettingsService.getSetting('smartSuggestionsEnabled') === true;
     const newSetting = !isEnabled;
     SettingsService.saveSetting('smartSuggestionsEnabled', newSetting);
 
