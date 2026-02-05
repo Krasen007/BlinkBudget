@@ -8,11 +8,13 @@ export const TUTORIAL_STEPS = [
     id: 'welcome',
     type: 'welcome',
     title: 'Welcome to BlinkBudget! 🚀',
-    description: 'Track your expenses in just 3 clicks. Let\'s get you started with the fastest expense tracking experience!',
-    content: 'No complicated forms or endless fields. Smart categorization that learns from your habits. Beautiful insights to help you make smarter financial decisions.',
+    description:
+      "Track your expenses in just 3 clicks. Let's get you started with the fastest expense tracking experience!",
+    content:
+      'No complicated forms or endless fields. Smart categorization that learns from your habits. Beautiful insights to help you make smarter financial decisions.',
     primaryAction: {
       id: 'start',
-      text: 'Let\'s start your first transaction →',
+      text: "Let's start your first transaction →",
       variant: 'primary',
     },
     secondaryAction: {
@@ -25,7 +27,8 @@ export const TUTORIAL_STEPS = [
     id: 'three-click-promise',
     type: 'info',
     title: 'The Magic of 3 Clicks',
-    content: 'Here\'s how BlinkBudget transforms expense tracking from a chore into a habit:\n\n**Step 1:** Click "Add Transaction"\n**Step 2:** Enter the amount\n**Step 3:** Choose a category - and you\'re done!\n\n**Pro Tip:** The transaction saves automatically when you pick a category. No save button needed!',
+    content:
+      'Here\'s how BlinkBudget transforms expense tracking from a chore into a habit:\n\n**Step 1:** Click "Add Transaction"\n**Step 2:** Enter the amount\n**Step 3:** Choose a category - and you\'re done!\n\n**Pro Tip:** The transaction saves automatically when you pick a category. No save button needed!',
     illustration: 'three-clicks',
     actions: [
       {
@@ -43,9 +46,9 @@ export const TUTORIAL_STEPS = [
   {
     id: 'navigate-to-add',
     type: 'navigation',
-    target: '/add',
+    target: 'add-expense',
     title: 'Let\'s Add Your First Transaction',
-    content: 'We\'ll navigate to the add transaction page where you can log expenses in just 3 clicks.',
+    content: 'We\'ll navigate to add transaction page where you can log expenses in just 3 clicks.',
     actions: [
       {
         id: 'next',
@@ -64,9 +67,10 @@ export const TUTORIAL_STEPS = [
     type: 'spotlight',
     target: '[data-tutorial-target="amount-input"]',
     title: 'Your First Transaction',
-    content: 'Let\'s log a sample expense together. Notice how simple this is. Enter any amount (try $5.50) and choose where this expense came from.',
+    content:
+      "Let's log a sample expense together. Notice how simple this is. Enter any amount (try $5.50) and choose where this expense came from.",
     position: 'top',
-    delay: 1000, // Wait for page to load
+    delay: 2000, // Wait longer for page to load
     actions: [
       {
         id: 'next',
@@ -87,7 +91,7 @@ export const TUTORIAL_STEPS = [
     title: 'Smart Categories',
     content: 'Just tap one to save! We learn your favorite categories and remember typical amounts. No need to click a separate save button.\n\n🍔 Food & Groceries • ☕ Dining & Coffee • 🏠 Housing & Bills • 🚗 Transportation • 🛍️ Leisure & Shopping • 💇 Personal Care',
     position: 'auto',
-    delay: 500, // Wait for any animations
+    delay: 1500, // Wait longer for animations
     actions: [
       {
         id: 'next',
@@ -104,7 +108,7 @@ export const TUTORIAL_STEPS = [
   {
     id: 'navigate-to-dashboard',
     type: 'navigation',
-    target: '/',
+    target: 'dashboard',
     title: 'Back to Your Dashboard',
     content: 'Let\'s go back to your dashboard to see your complete financial picture.',
     actions: [
@@ -127,7 +131,7 @@ export const TUTORIAL_STEPS = [
     title: 'Your Financial Dashboard',
     content: 'This is your command center. Everything you need at a glance:\n\n**Balance Cards** - See your total across all accounts\n**Recent Transactions** - Your latest expenses, color-coded by category\n**Quick Stats** - Today\'s spending, monthly trends\n\n**Pro Tip:** Tap any category name to filter transactions by that category!',
     position: 'bottom',
-    delay: 1000, // Wait for page to load
+    delay: 2000, // Wait longer for page to load
     actions: [
       {
         id: 'next',
@@ -145,7 +149,8 @@ export const TUTORIAL_STEPS = [
     id: 'smart-features',
     type: 'info',
     title: 'BlinkBudget Gets Smarter',
-    content: 'The more you use BlinkBudget, the better it gets:\n\n**Smart Suggestions:**\n• Learns your favorite categories\n• Remembers typical amounts\n• Suggests accounts based on time and location\n\n**Ghost Transactions:**\n• See past spending patterns when you change dates\n• Make informed decisions with historical context',
+    content:
+      'The more you use BlinkBudget, the better it gets:\n\n**Smart Suggestions:**\n• Learns your favorite categories\n• Remembers typical amounts\n• Suggests accounts based on time and location\n\n**Ghost Transactions:**\n• See past spending patterns when you change dates\n• Make informed decisions with historical context',
     illustration: 'smart-features',
     actions: [
       {
@@ -164,7 +169,8 @@ export const TUTORIAL_STEPS = [
     id: 'accounts',
     type: 'info',
     title: 'Manage All Your Money',
-    content: 'Track expenses across different accounts seamlessly:\n\n**Supported Accounts:**\n💳 Credit Cards • 🏦 Checking Accounts • 💰 Savings Accounts • 💵 Cash\n\n**Easy Transfers:**\n• Move money between accounts\n• Automatic balance updates\n• No manual math required',
+    content:
+      'Track expenses across different accounts seamlessly:\n\n**Supported Accounts:**\n💳 Credit Cards • 🏦 Checking Accounts • 💰 Savings Accounts • 💵 Cash\n\n**Easy Transfers:**\n• Move money between accounts\n• Automatic balance updates\n• No manual math required',
     illustration: 'accounts',
     actions: [
       {
@@ -182,8 +188,9 @@ export const TUTORIAL_STEPS = [
   {
     id: 'financial-planning',
     type: 'info',
-    title: 'Beyond Today\'s Expenses',
-    content: 'BlinkBudget helps you plan for the future:\n\n**Planning Features:**\n• **Scenario Modeling** - "What if I save $200 more monthly?"\n• **Investment Tracking** - Monitor your net worth growth\n• **Goal Planning** - Track progress toward financial targets\n• **Risk Warnings** - Get alerts about potential issues',
+    title: "Beyond Today's Expenses",
+    content:
+      'BlinkBudget helps you plan for the future:\n\n**Planning Features:**\n• **Scenario Modeling** - "What if I save $200 more monthly?"\n• **Investment Tracking** - Monitor your net worth growth\n• **Goal Planning** - Track progress toward financial targets\n• **Risk Warnings** - Get alerts about potential issues',
     illustration: 'planning',
     actions: [
       {
@@ -202,7 +209,8 @@ export const TUTORIAL_STEPS = [
     id: 'mobile-experience',
     type: 'info',
     title: 'Perfect On Mobile',
-    content: 'BlinkBudget is designed for your phone:\n\n**Mobile Optimizations:**\n• One-handed transaction entry\n• Thumb-friendly buttons (56px minimum)\n• Smart keyboard that gets out of your way\n• Install as a standalone app\n\n**Pro Tip:** Add BlinkBudget to your home screen for instant access!',
+    content:
+      'BlinkBudget is designed for your phone:\n\n**Mobile Optimizations:**\n• One-handed transaction entry\n• Thumb-friendly buttons (56px minimum)\n• Smart keyboard that gets out of your way\n• Install as a standalone app\n\n**Pro Tip:** Add BlinkBudget to your home screen for instant access!',
     illustration: 'mobile',
     actions: [
       {
@@ -221,8 +229,10 @@ export const TUTORIAL_STEPS = [
     id: 'congratulations',
     type: 'celebration',
     title: 'Congratulations! 🎉',
-    description: 'You\'ve mastered the basics of BlinkBudget. Here\'s what to remember:',
-    content: '**Key Takeaways:**\n• 3 clicks = expense logged\n• Categories auto-save your transactions\n• Dashboard shows your complete financial picture\n• Mobile app for tracking on the go\n\n**Next Steps:**\n• Try adding a few more transactions\n• Explore the Financial Planning section\n• Set up all your accounts\n\n**Welcome to effortless expense tracking!**',
+    description:
+      "You've mastered the basics of BlinkBudget. Here's what to remember:",
+    content:
+      '**Key Takeaways:**\n• 3 clicks = expense logged\n• Categories auto-save your transactions\n• Dashboard shows your complete financial picture\n• Mobile app for tracking on the go\n\n**Next Steps:**\n• Try adding a few more transactions\n• Explore the Financial Planning section\n• Set up all your accounts\n\n**Welcome to effortless expense tracking!**',
     illustration: 'success-celebration',
     actions: [
       {

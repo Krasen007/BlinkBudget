@@ -309,9 +309,13 @@ export class AccountDeletionService {
         // Check if Firebase is available before attempting deletion
         const { firebaseStatus } = await import('./firebase-config.js');
         if (!firebaseStatus.isInitialized || !firebaseStatus.canUseAuth) {
-          console.warn('[AccountDeletion] Firebase not available, skipping auth deletion');
+          console.warn(
+            '[AccountDeletion] Firebase not available, skipping auth deletion'
+          );
           result.authDeleted = false;
-          result.warnings.push('Firebase not available, skipping authentication deletion');
+          result.warnings.push(
+            'Firebase not available, skipping authentication deletion'
+          );
         } else {
           // Delete the Firebase user account
           await deleteUser(user);
@@ -667,7 +671,9 @@ export class AccountDeletionService {
 
       // Count investments
       const { InvestmentTracker } = await import('./investment-tracker.js');
-      const investments = InvestmentTracker.getAllInvestments();
+      const investments = InvestmentTracker.getAllInvestments
+        ? InvestmentTracker.getAllInvestments()
+        : [];
       summary.investments = investments.length;
 
       // Count budgets

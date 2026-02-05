@@ -44,7 +44,33 @@
   --color-text-muted: hsl(240, 5%, 65%);
 
   /* Border colors */
-  --color-border: hsl(240, 5%, 20%);
+  --color-border: hsl(
+    240,
+    5%,
+    30%
+  );
+   /* Enhanced from 20% for WCAG AA compliance */
+  --color-border-strong: hsl(240, 5%, 40%); /* New token for stronger borders */
+
+  /* Enhanced accessibility tokens */
+  --focus-color: hsl(250, 84%, 60%); /* Same as primary for consistency */
+  --focus-color-light: hsl(250, 84%, 75%); /* Lighter variant */
+  --focus-color-dark: hsl(250, 84%, 50%); /* Darker variant */
+
+  /* Focus dimensions */
+  --focus-width: 2px;
+  --focus-width-thick: 3px;
+  --focus-offset: 2px;
+  --focus-offset-large: 4px;
+
+  /* Focus effects */
+  --focus-shadow: 0 0 0 3px hsl(250, 84%, 60%, 0.2);
+  --focus-shadow-strong: 0 0 0 4px hsl(250, 84%, 60%, 0.3);
+  --focus-shadow-subtle: 0 0 0 2px hsl(250, 84%, 60%, 0.15);
+
+  /* Focus transitions */
+  --focus-transition: all 150ms ease;
+  --focus-transition-fast: all 100ms ease;
 }
 
 /* spacing.css */

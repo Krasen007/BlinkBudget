@@ -22,9 +22,9 @@ export const TransactionListItem = ({
   accounts,
   shouldHighlight = false,
   currentDateFilter = null,
-  onDateClick = () => {},
+  onDateClick = () => { },
   currentCategoryFilter = null,
-  onCategoryClick = () => {},
+  onCategoryClick = () => { },
 }) => {
   const item = document.createElement('li');
   item.className = 'transaction-item';
@@ -140,7 +140,7 @@ export const TransactionListItem = ({
           : COLORS.TEXT_MAIN,
     fontWeight:
       currentCategoryFilter === transaction.category ||
-      transaction.type === 'transfer'
+        transaction.type === 'transfer'
         ? '700'
         : '500',
   });
@@ -202,6 +202,24 @@ export const TransactionListItem = ({
 
   info.appendChild(cat);
   info.appendChild(date);
+
+  // Add description/notes if available
+  if (transaction.description && transaction.description.trim()) {
+    const description = document.createElement('div');
+    description.textContent = transaction.description;
+    description.className = 'transaction-item-description';
+    Object.assign(description.style, {
+      fontSize: isMobile ? FONT_SIZES.XS : '0.7rem',
+      color: COLORS.TEXT_MUTED,
+      fontStyle: 'italic',
+      marginTop: '2px',
+      maxWidth: '200px',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    });
+    info.appendChild(description);
+  }
 
   const val = document.createElement('div');
 

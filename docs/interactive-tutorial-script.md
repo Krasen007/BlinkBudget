@@ -1,19 +1,22 @@
 # BlinkBudget Interactive Tutorial Script
 
 ## Overview
+
 This tutorial guides new users through BlinkBudget's core functionality with a friendly, concise tone. The tutorial focuses on the 3-click promise and key features that make expense tracking effortless.
 
 ## Tutorial Structure
 
 ### Welcome Screen (Slide 1)
+
 **Title:** Welcome to BlinkBudget! 🚀
 
 **Content:**
 Track your expenses in just 3 clicks. Let's get you started with the fastest expense tracking experience!
 
 **Key Points:**
+
 - No complicated forms or endless fields
-- Smart categorization that learns from your habits  
+- Smart categorization that learns from your habits
 - Beautiful insights to help you make smarter financial decisions
 
 **Call to Action:** Let's start your first transaction →
@@ -21,12 +24,13 @@ Track your expenses in just 3 clicks. Let's get you started with the fastest exp
 ---
 
 ### The 3-Click Promise (Slide 2)
+
 **Title:** The Magic of 3 Clicks
 
 **Content:**
 Here's how BlinkBudget transforms expense tracking from a chore into a habit:
 
-**Step 1:** Click "Add Transaction" 
+**Step 1:** Click "Add Transaction"
 **Step 2:** Enter the amount
 **Step 3:** Choose a category - and you're done!
 
@@ -37,19 +41,22 @@ Here's how BlinkBudget transforms expense tracking from a chore into a habit:
 ---
 
 ### Adding Your First Transaction (Slide 3)
+
 **Title:** Your First Transaction
 
 **Content:**
 Let's log a sample expense together. Notice how simple this is:
 
 **Interactive Elements:**
+
 - [Amount field] - Enter any amount (try $5.50)
 - [Account selector] - Choose where this expense came from
 - [Category chips] - Just tap one to save!
 
 **Smart Categories:**
+
 - 🍔 Food & Groceries
-- ☕ Dining & Coffee  
+- ☕ Dining & Coffee
 - 🏠 Housing & Bills
 - 🚗 Transportation
 - 🛍️ Leisure & Shopping
@@ -60,12 +67,14 @@ Let's log a sample expense together. Notice how simple this is:
 ---
 
 ### Understanding Your Dashboard (Slide 4)
+
 **Title:** Your Financial Dashboard
 
 **Content:**
 This is your command center. Everything you need at a glance:
 
 **Key Areas:**
+
 - **Balance Cards** - See your total across all accounts
 - **Recent Transactions** - Your latest expenses, color-coded by category
 - **Quick Stats** - Today's spending, monthly trends
@@ -77,17 +86,20 @@ This is your command center. Everything you need at a glance:
 ---
 
 ### Smart Features (Slide 5)
+
 **Title:** BlinkBudget Gets Smarter
 
 **Content:**
 The more you use BlinkBudget, the better it gets:
 
 **Smart Suggestions:**
+
 - Learns your favorite categories
 - Remembers typical amounts
 - Suggests accounts based on time and location
 
 **Ghost Transactions:**
+
 - See past spending patterns when you change dates
 - Make informed decisions with historical context
 
@@ -96,18 +108,21 @@ The more you use BlinkBudget, the better it gets:
 ---
 
 ### Multiple Accounts (Slide 6)
+
 **Title:** Manage All Your Money
 
 **Content:**
 Track expenses across different accounts seamlessly:
 
 **Supported Accounts:**
+
 - 💳 Credit Cards
-- 🏦 Checking Accounts  
+- 🏦 Checking Accounts
 - 💰 Savings Accounts
 - 💵 Cash
 
 **Easy Transfers:**
+
 - Move money between accounts
 - Automatic balance updates
 - No manual math required
@@ -117,12 +132,14 @@ Track expenses across different accounts seamlessly:
 ---
 
 ### Financial Insights (Slide 7)
+
 **Title:** Beyond Today's Expenses
 
 **Content:**
 BlinkBudget helps you plan for the future:
 
 **Planning Features:**
+
 - **Scenario Modeling** - "What if I save $200 more monthly?"
 - **Investment Tracking** - Monitor your net worth growth
 - **Goal Planning** - Track progress toward financial targets
@@ -133,12 +150,14 @@ BlinkBudget helps you plan for the future:
 ---
 
 ### Mobile Experience (Slide 8)
+
 **Title:** Perfect On Mobile
 
 **Content:**
 BlinkBudget is designed for your phone:
 
 **Mobile Optimizations:**
+
 - One-handed transaction entry
 - Thumb-friendly buttons (56px minimum)
 - Smart keyboard that gets out of your way
@@ -151,18 +170,21 @@ BlinkBudget is designed for your phone:
 ---
 
 ### You're All Set! (Slide 9)
+
 **Title:** Congratulations! 🎉
 
 **Content:**
 You've mastered the basics of BlinkBudget. Here's what to remember:
 
 **Key Takeaways:**
+
 - 3 clicks = expense logged
 - Categories auto-save your transactions
 - Dashboard shows your complete financial picture
 - Mobile app for tracking on the go
 
 **Next Steps:**
+
 - Try adding a few more transactions
 - Explore the Financial Planning section
 - Set up all your accounts
@@ -257,6 +279,7 @@ You've mastered the basics of BlinkBudget. Here's what to remember:
 ## Implementation Notes
 
 ### Tone Guidelines
+
 - **Friendly and encouraging:** Use "you" and "your" frequently
 - **Action-oriented:** Start sentences with verbs
 - **Benefit-focused:** Explain why each feature matters
@@ -264,18 +287,21 @@ You've mastered the basics of BlinkBudget. Here's what to remember:
 - **Emoji usage:** Minimal and purposeful (1-2 per slide max)
 
 ### Interactive Elements
+
 - **Progress indicators:** Show users where they are in the tutorial
 - **Skip option:** Allow experienced users to bypass the tutorial
 - **Practice mode:** Let users try features with sample data
 - **Highlight effects:** Use visual cues to draw attention to UI elements
 
 ### Mobile Considerations
+
 - **Vertical layout:** Optimize for phone screens
 - **Large touch targets:** Ensure all interactive elements are 56px minimum
 - **Thumb-friendly design:** Place navigation within easy reach
 - **Readable text:** Use larger fonts and high contrast
 
 ### Accessibility
+
 - **Screen reader support:** Provide alt text for all visual elements
 - **Keyboard navigation:** Ensure all tutorial steps are keyboard accessible
 - **High contrast:** Maintain WCAG AA compliance for text readability
@@ -284,25 +310,30 @@ You've mastered the basics of BlinkBudget. Here's what to remember:
 ## Success Metrics
 
 ### Tutorial Completion
+
 - Target: 85% of new users complete the full tutorial
 - Measure drop-off points and optimize content
 
 ### Feature Adoption
+
 - Track usage of features highlighted in tutorial
 - Goal: 60% adoption rate for core features within 7 days
 
 ### User Feedback
+
 - Collect feedback on tutorial helpfulness
 - Iterate based on user suggestions and confusion points
 
 ## Content Updates
 
 ### Regular Review
+
 - Quarterly review of tutorial content for accuracy
 - Update screenshots when UI changes
 - Refresh examples with current features
 
 ### A/B Testing
+
 - Test different welcome messages and calls-to-action
 - Optimize slide order based on user behavior
 - Experiment with tooltip timing and placement

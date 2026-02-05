@@ -41,6 +41,7 @@ export const getDateSource = (externalDateInput = null) => {
  * @param {string} accountId - Source account ID
  * @param {string|null} toAccountId - Destination account ID (for transfers)
  * @param {HTMLInputElement|null} externalDateInput - External date input
+ * @param {string} description - Transaction description/notes (optional)
  * @returns {Object} Prepared transaction data
  */
 export const prepareTransactionData = formState => {
@@ -51,6 +52,7 @@ export const prepareTransactionData = formState => {
     accountId,
     toAccountId = null,
     externalDateInput = null,
+    description = '',
   } = formState;
 
   const dateSource = getDateSource(externalDateInput);
@@ -68,6 +70,11 @@ export const prepareTransactionData = formState => {
     transactionData.toAccountId = toAccountId;
   } else {
     transactionData.category = sanitizeInput(category || '');
+  }
+
+  // Add description/notes field if provided
+  if (description && description.trim()) {
+    transactionData.description = sanitizeInput(description.trim());
   }
 
   return transactionData;

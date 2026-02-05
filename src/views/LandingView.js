@@ -76,7 +76,8 @@ export const LandingView = () => {
   `;
 
   const tutorialDescription = document.createElement('p');
-  tutorialDescription.textContent = 'Start with our interactive tutorial that guides you through everything you need to know in just a few minutes. Learn the 3-click promise, smart categorization, and powerful insights.';
+  tutorialDescription.textContent =
+    'Start with our interactive tutorial that guides you through everything you need to know in just a few minutes. Learn the 3-click promise, smart categorization, and powerful insights.';
   tutorialDescription.style.cssText = `
     margin: 0 0 1rem 0;
     line-height: 1.5;

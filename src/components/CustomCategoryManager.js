@@ -1,0 +1,683 @@
+/**
+ * CustomCategoryManager Component
+ * Provides UI for managing custom categories including create, edit, delete,
+ * and organize functionality with accessibility features.
+ */
+
+import { CustomCategoryService } from '../core/custom-category-service.js';
+import { createButton } from './Button.js';
+import { ConfirmDialog } from './ConfirmDialog.js';
+
+export const CustomCategoryManager = ({
+  onCategoryChange,
+  initialType = 'expense',
+}) => {
+  // Main container
+  const container = document.createElement('div');
+  container.className = 'custom-category-manager';
+  container.style.cssText = `
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+  `;
+
+  // Current state
+  let currentType = initialType;
+  let categories = [];
+
+  // Header
+  const header = document.createElement('div');
+  header.style.cssText = `
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+  `;
+
+  const title = document.createElement('h2');
+  title.textContent = 'Category Manager';
+  title.style.cssText = `
+    margin: 0;
+    color: var(--color-text-main);
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+  `;
+
+  const addButton = createButton({
+    text: 'Add Category',
+    variant: 'primary',
+    onClick: () => showCategoryForm(),
+  });
+  addButton.setAttribute('aria-label', 'Add new category');
+
+  header.appendChild(title);
+  header.appendChild(addButton);
+  container.appendChild(header);
+
+  // Type selector
+  const typeSelector = document.createElement('div');
+  typeSelector.style.cssText = `
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-xs);
+    background: var(--color-background);
+    border-radius: var(--radius-md);
+  `;
+
+  const expenseButton = createTypeButton('Expense', 'expense');
+  const incomeButton = createTypeButton('Income', 'income');
+
+  typeSelector.appendChild(expenseButton);
+  typeSelector.appendChild(incomeButton);
+  container.appendChild(typeSelector);
+
+  // Categories list
+  const categoriesList = document.createElement('div');
+  categoriesList.className = 'categories-list';
+  categoriesList.style.cssText = `
+    display: grid;
+    gap: var(--spacing-md);
+  `;
+
+  // Search box
+  const searchContainer = document.createElement('div');
+  searchContainer.style.cssText = `
+    margin-bottom: var(--spacing-md);
+  `;
+
+  const searchInput = document.createElement('input');
+  searchInput.type = 'text';
+  searchInput.placeholder = 'Search categories...';
+  searchInput.className = 'input-text';
+  searchInput.setAttribute('aria-label', 'Search categories');
+  searchInput.style.cssText = `
+    width: 100%;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-background);
+    color: var(--color-text-main);
+    font-size: var(--font-size-base);
+  `;
+
+  searchContainer.appendChild(searchInput);
+  container.appendChild(searchContainer);
+  container.appendChild(categoriesList);
+
+  // Helper functions
+  function createTypeButton(text, type) {
+    const button = document.createElement('button');
+    button.textContent = text;
+    button.className = 'type-button';
+    button.setAttribute('role', 'tab');
+    button.setAttribute(
+      'aria-selected',
+      type === currentType ? 'true' : 'false'
+    );
+    button.setAttribute('aria-controls', 'categories-panel');
+    button.style.cssText = `
+      padding: var(--spacing-sm) var(--spacing-md);
+      border: none;
+      border-radius: var(--radius-sm);
+      background: ${type === currentType ? 'var(--color-primary)' : 'transparent'};
+      color: ${type === currentType ? 'white' : 'var(--color-text-muted)'};
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    `;
+
+    button.addEventListener('click', () => {
+      currentType = type;
+      updateTypeButtons();
+      renderCategories();
+    });
+
+    button.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        button.click();
+      }
+    });
+
+    return button;
+  }
+
+  function updateTypeButtons() {
+    const buttons = typeSelector.querySelectorAll('.type-button');
+    buttons.forEach((button, index) => {
+      const type = index === 0 ? 'expense' : 'income';
+      const isSelected = type === currentType;
+
+      button.style.background = isSelected
+        ? 'var(--color-primary)'
+        : 'transparent';
+      button.style.color = isSelected ? 'white' : 'var(--color-text-muted)';
+      button.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+    });
+  }
+
+  function createCategoryCard(category) {
+    const card = document.createElement('div');
+    card.className = 'category-card';
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'article');
+    card.setAttribute(
+      'aria-label',
+      `${category.name} category, ${category.type}, used ${category.usageCount || 0} times`
+    );
+    card.style.cssText = `
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: var(--spacing-md);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-background);
+      transition: all var(--transition-fast);
+    `;
+
+    // Category color indicator
+    const colorIndicator = document.createElement('div');
+    colorIndicator.style.cssText = `
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: ${category.color || '#6b7280'};
+      flex-shrink: 0;
+    `;
+
+    // Category info
+    const info = document.createElement('div');
+    info.style.cssText = `
+      flex: 1;
+      min-width: 0;
+    `;
+
+    const name = document.createElement('div');
+    name.textContent = category.name;
+    name.style.cssText = `
+      font-weight: 500;
+      color: var(--color-text-main);
+      margin-bottom: var(--spacing-xs);
+    `;
+
+    const meta = document.createElement('div');
+    meta.style.cssText = `
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    `;
+
+    const type = document.createElement('span');
+    type.textContent = category.type;
+    type.style.cssText = `
+      text-transform: capitalize;
+      margin-right: var(--spacing-sm);
+    `;
+
+    const usage = document.createElement('span');
+    usage.textContent = `${category.usageCount || 0} uses`;
+
+    meta.appendChild(type);
+    meta.appendChild(usage);
+
+    if (category.description) {
+      const description = document.createElement('div');
+      description.textContent = category.description;
+      description.style.cssText = `
+        font-size: var(--font-size-xs);
+        color: var(--color-text-muted);
+        margin-top: var(--spacing-xs);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      `;
+      meta.appendChild(description);
+    }
+
+    info.appendChild(name);
+    info.appendChild(meta);
+
+    // Actions
+    const actions = document.createElement('div');
+    actions.style.cssText = `
+      display: flex;
+      gap: var(--spacing-xs);
+    `;
+
+    if (!category.isSystem) {
+      const editButton = createActionButton('Edit', () =>
+        showCategoryForm(category)
+      );
+      const deleteButton = createActionButton('Delete', () =>
+        confirmDeleteCategory(category)
+      );
+
+      actions.appendChild(editButton);
+      actions.appendChild(deleteButton);
+    }
+
+    card.appendChild(colorIndicator);
+    card.appendChild(info);
+    card.appendChild(actions);
+
+    // Keyboard navigation
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (!category.isSystem) {
+          showCategoryForm(category);
+        }
+      }
+    });
+
+    // Hover effects
+    card.addEventListener('mouseenter', () => {
+      card.style.backgroundColor = 'var(--color-surface-hover)';
+      card.style.transform = 'translateY(-1px)';
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.backgroundColor = 'var(--color-background)';
+      card.style.transform = 'translateY(0)';
+    });
+
+    return card;
+  }
+
+  function createActionButton(text, onClick) {
+    const button = document.createElement('button');
+    button.textContent = text;
+    button.className = 'action-button';
+    button.setAttribute('aria-label', `${text} category`);
+    button.style.cssText = `
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background: var(--color-surface);
+      color: var(--color-text-main);
+      font-size: var(--font-size-xs);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    `;
+
+    button.addEventListener('click', onClick);
+
+    button.addEventListener('mouseenter', () => {
+      button.style.backgroundColor = 'var(--color-surface-hover)';
+    });
+
+    button.addEventListener('mouseleave', () => {
+      button.style.backgroundColor = 'var(--color-surface)';
+    });
+
+    return button;
+  }
+
+  function showCategoryForm(category = null) {
+    const isEdit = !!category;
+
+    // Create modal overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    `;
+
+    // Create form modal
+    const modal = document.createElement('div');
+    modal.className = 'category-form-modal';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-labelledby', 'category-form-title');
+    modal.style.cssText = `
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg);
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+    `;
+
+    // Form title
+    const title = document.createElement('h3');
+    title.id = 'category-form-title';
+    title.textContent = isEdit ? 'Edit Category' : 'Add New Category';
+    title.style.cssText = `
+      margin: 0 0 var(--spacing-lg) 0;
+      color: var(--color-text-main);
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+    `;
+
+    // Form fields
+    const form = document.createElement('form');
+    form.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+    `;
+
+    // Name field
+    const nameGroup = createFormField(
+      'Name',
+      'text',
+      category?.name || '',
+      'category-name',
+      true
+    );
+
+    // Type field
+    const typeGroup = document.createElement('div');
+    typeGroup.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+    `;
+
+    const typeLabel = document.createElement('label');
+    typeLabel.textContent = 'Type';
+    typeLabel.setAttribute('for', 'category-type');
+    typeLabel.style.cssText = `
+      font-weight: 500;
+      color: var(--color-text-main);
+    `;
+
+    const typeSelect = document.createElement('select');
+    typeSelect.id = 'category-type';
+    typeSelect.className = 'input-select';
+    typeSelect.style.cssText = `
+      padding: var(--spacing-sm);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-background);
+      color: var(--color-text-main);
+      font-size: var(--font-size-base);
+    `;
+
+    typeSelect.innerHTML = `
+      <option value="expense" ${category?.type === 'expense' ? 'selected' : ''}>Expense</option>
+      <option value="income" ${category?.type === 'income' ? 'selected' : ''}>Income</option>
+    `;
+
+    typeGroup.appendChild(typeLabel);
+    typeGroup.appendChild(typeSelect);
+
+    // Color field
+    const colorGroup = createFormField(
+      'Color',
+      'color',
+      category?.color || CustomCategoryService.generateDefaultColor(),
+      'category-color'
+    );
+
+    // Description field
+    const descriptionGroup = createFormField(
+      'Description',
+      'textarea',
+      category?.description || '',
+      'category-description',
+      false,
+      3
+    );
+
+    // Form buttons
+    const buttonGroup = document.createElement('div');
+    buttonGroup.style.cssText = `
+      display: flex;
+      gap: var(--spacing-sm);
+      justify-content: flex-end;
+      margin-top: var(--spacing-md);
+    `;
+
+    const cancelButton = createButton({
+      text: 'Cancel',
+      variant: 'ghost',
+      onClick: () => overlay.remove(),
+    });
+
+    const saveButton = createButton({
+      text: isEdit ? 'Update' : 'Create',
+      variant: 'primary',
+      onClick: e => {
+        e.preventDefault();
+        saveCategory();
+      },
+    });
+
+    buttonGroup.appendChild(cancelButton);
+    buttonGroup.appendChild(saveButton);
+
+    // Assemble form
+    form.appendChild(nameGroup.field);
+    form.appendChild(typeGroup);
+    form.appendChild(colorGroup.field);
+    form.appendChild(descriptionGroup.field);
+    form.appendChild(buttonGroup);
+
+    // Assemble modal
+    modal.appendChild(title);
+    modal.appendChild(form);
+
+    // Add to overlay
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // Focus management
+    const nameInput = nameGroup.field.querySelector('input');
+    nameInput.focus();
+
+    // Close on overlay click
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) {
+        overlay.remove();
+      }
+    });
+
+    // Close on Escape
+    const handleEscape = e => {
+      if (e.key === 'Escape') {
+        overlay.remove();
+        document.removeEventListener('keydown', handleEscape);
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+
+    // Save function
+    function saveCategory() {
+      const formData = {
+        name: nameInput.value.trim(),
+        type: typeSelect.value,
+        color: colorGroup.field.querySelector('input').value,
+        description: descriptionGroup.field
+          .querySelector('textarea')
+          .value.trim(),
+      };
+
+      const validation = CustomCategoryService.validate(formData);
+      if (!validation.valid) {
+        console.error('Validation errors:', validation.errors);
+        // Show validation error in a user-friendly way
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = `
+          background: #ef4444;
+          color: white;
+          padding: var(--spacing-sm);
+          border-radius: var(--radius-sm);
+          margin-bottom: var(--spacing-sm);
+          font-size: var(--font-size-sm);
+        `;
+        errorDiv.textContent = validation.errors.join(', ');
+        form.insertBefore(errorDiv, form.firstChild);
+        setTimeout(() => errorDiv.remove(), 5000);
+        return;
+      }
+
+      try {
+        if (isEdit) {
+          CustomCategoryService.update(category.id, formData);
+        } else {
+          CustomCategoryService.add(formData);
+        }
+
+        overlay.remove();
+        document.removeEventListener('keydown', handleEscape);
+        renderCategories();
+        onCategoryChange && onCategoryChange();
+      } catch (error) {
+        console.error('Error saving category:', error);
+        // Show error in a user-friendly way
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = `
+          background: #ef4444;
+          color: white;
+          padding: var(--spacing-sm);
+          border-radius: var(--radius-sm);
+          margin-bottom: var(--spacing-sm);
+          font-size: var(--font-size-sm);
+        `;
+        errorDiv.textContent = error.message || 'Failed to save category';
+        form.insertBefore(errorDiv, form.firstChild);
+        setTimeout(() => errorDiv.remove(), 5000);
+      }
+    }
+  }
+
+  function createFormField(label, type, value, id, required = false, rows = 1) {
+    const group = document.createElement('div');
+    group.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+    `;
+
+    const labelElement = document.createElement('label');
+    labelElement.textContent = label;
+    labelElement.setAttribute('for', id);
+    labelElement.style.cssText = `
+      font-weight: 500;
+      color: var(--color-text-main);
+    `;
+
+    const input = document.createElement(type === 'textarea' ? 'textarea' : 'input');
+    input.id = id;
+    input.className = `input-${type}`;
+    input.required = required;
+    input.setAttribute('aria-label', label);
+    input.style.cssText = `
+      padding: var(--spacing-sm);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-background);
+      color: var(--color-text-main);
+      font-size: var(--font-size-base);
+    `;
+
+    if (type === 'textarea') {
+      input.rows = rows;
+    }
+
+    input.value = value;
+
+    group.appendChild(labelElement);
+    group.appendChild(input);
+
+    return { field: group, input };
+  }
+
+  function confirmDeleteCategory(category) {
+    const confirmDialog = ConfirmDialog({
+      title: 'Delete Category',
+      message: `Are you sure you want to delete "${category.name}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      onConfirm: () => {
+        try {
+          CustomCategoryService.remove(category.id, true);
+          renderCategories();
+          onCategoryChange && onCategoryChange();
+        } catch (error) {
+          console.error('Error deleting category:', error);
+          // Show error in a user-friendly way
+          const errorDiv = document.createElement('div');
+          errorDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ef4444;
+            color: white;
+            padding: var(--spacing-sm);
+            border-radius: var(--radius-sm);
+            z-index: 10000;
+            font-size: var(--font-size-sm);
+            max-width: 300px;
+          `;
+          errorDiv.textContent = error.message || 'Failed to delete category';
+          document.body.appendChild(errorDiv);
+          setTimeout(() => errorDiv.remove(), 5000);
+        }
+      },
+    });
+
+    document.body.appendChild(confirmDialog);
+  }
+
+  function renderCategories(searchQuery = '') {
+    categories = searchQuery
+      ? CustomCategoryService.search(searchQuery, currentType)
+      : CustomCategoryService.getByType(currentType);
+
+    // Add system categories
+    const systemCategories =
+      CustomCategoryService.getSystemCategories(currentType);
+    categories = [...systemCategories, ...categories];
+
+    categoriesList.innerHTML = '';
+
+    if (categories.length === 0) {
+      const emptyState = document.createElement('div');
+      emptyState.style.cssText = `
+        text-align: center;
+        padding: var(--spacing-2xl);
+        color: var(--color-text-muted);
+      `;
+      emptyState.innerHTML = `
+        <div style="font-size: var(--font-size-lg); margin-bottom: var(--spacing-sm);">No categories found</div>
+        <div>Create your first custom category to get started</div>
+      `;
+      categoriesList.appendChild(emptyState);
+      return;
+    }
+
+    categories.forEach(category => {
+      const card = createCategoryCard(category);
+      categoriesList.appendChild(card);
+    });
+  }
+
+  // Search functionality
+  let searchTimeout;
+  searchInput.addEventListener('input', e => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      renderCategories(e.target.value);
+    }, 300);
+  });
+
+  // Initial render
+  renderCategories();
+
+  return container;
+};

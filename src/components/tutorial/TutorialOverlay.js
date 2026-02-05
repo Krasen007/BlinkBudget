@@ -152,8 +152,9 @@ export const TutorialOverlay = {
     `;
 
     // Create illustration if provided
-    const illustration = options.illustration ?
-      this.createInfoIllustration(options.illustration) : '';
+    const illustration = options.illustration
+      ? this.createInfoIllustration(options.illustration)
+      : '';
 
     content.innerHTML = `
       ${illustration ? `<div class="tutorial-info__illustration">${illustration}</div>` : ''}

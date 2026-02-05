@@ -268,7 +268,7 @@ export class TutorialManager {
   /**
    * Find target element with retries for dynamic content
    */
-  findTargetWithRetry(target, callback, retries = 5, delay = 800) {
+  findTargetWithRetry(target, callback, retries = 8, delay = 1000) {
     const targetElement = document.querySelector(target);
 
     if (targetElement) {

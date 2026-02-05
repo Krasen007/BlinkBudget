@@ -12,7 +12,8 @@ export const TOOLTIP_CONFIG = {
       delay: 500,
     },
     'balance-card': {
-      content: 'Your total balance across all accounts. Tap an account name to filter.',
+      content:
+        'Your total balance across all accounts. Tap an account name to filter.',
       position: 'top',
       delay: 300,
     },
@@ -32,7 +33,7 @@ export const TOOLTIP_CONFIG = {
       delay: 300,
     },
     'quick-stats': {
-      content: 'Today\'s spending and monthly trends at a glance.',
+      content: "Today's spending and monthly trends at a glance.",
       position: 'top',
       delay: 300,
     },
@@ -56,12 +57,14 @@ export const TOOLTIP_CONFIG = {
       delay: 200,
     },
     'date-field': {
-      content: 'Change the date for past expenses. See ghost transactions for context.',
+      content:
+        'Change the date for past expenses. See ghost transactions for context.',
       position: 'top',
       delay: 300,
     },
     'transaction-type': {
-      content: 'Expense, Income, Transfer, or Refund. Each type handles balances differently.',
+      content:
+        'Expense, Income, Transfer, or Refund. Each type handles balances differently.',
       position: 'top',
       delay: 300,
     },
@@ -90,7 +93,8 @@ export const TOOLTIP_CONFIG = {
       delay: 300,
     },
     'backup-restore': {
-      content: 'Automatic daily backups. Restore if needed (replaces current data).',
+      content:
+        'Automatic daily backups. Restore if needed (replaces current data).',
       position: 'top',
       delay: 300,
     },
@@ -104,7 +108,7 @@ export const TOOLTIP_CONFIG = {
       position: 'top',
       delay: 300,
     },
-    'logout': {
+    logout: {
       content: 'Sign out of your account. Your data stays safe in the cloud.',
       position: 'top',
       delay: 300,
@@ -114,7 +118,8 @@ export const TOOLTIP_CONFIG = {
   // Financial Planning Tooltips
   financialPlanning: {
     'scenario-modeling': {
-      content: 'Forecast your future based on different savings and investment scenarios.',
+      content:
+        'Forecast your future based on different savings and investment scenarios.',
       position: 'top',
       delay: 300,
     },
@@ -129,7 +134,8 @@ export const TOOLTIP_CONFIG = {
       delay: 300,
     },
     'risk-assessment': {
-      content: 'Automatic alerts for potential financial issues based on your patterns.',
+      content:
+        'Automatic alerts for potential financial issues based on your patterns.',
       position: 'top',
       delay: 300,
     },
@@ -239,7 +245,7 @@ export const TOOLTIP_CONFIG = {
       position: 'top',
       delay: 300,
     },
-    'predictions': {
+    predictions: {
       content: 'Forecast future spending based on your historical patterns.',
       position: 'top',
       delay: 300,
@@ -253,30 +259,30 @@ export const TOOLTIP_BEHAVIOR = {
   showDelay: 300, // Default delay before showing tooltip
   hideDelay: 200, // Delay before hiding tooltip
   maxDisplayTime: 5000, // Maximum time to show tooltip
-  
+
   // Positioning
   offset: 8, // Distance from target element
   maxWidth: 280, // Maximum tooltip width
   mobileMaxWidth: 'calc(100vw - 32px)', // Mobile maximum width
-  
+
   // Animation
   animationDuration: 200, // Fade in/out duration
   easing: 'ease-in-out',
-  
+
   // Mobile settings
   mobileBreakpoint: 768,
   touchDelay: 500, // Longer delay for touch devices
-  
+
   // Accessibility
   enableKeyboardNavigation: true,
   enableScreenReaderSupport: true,
   announceTooltips: true,
-  
+
   // User preferences
   respectReducedMotion: true,
   respectDarkMode: true,
   allowDismissal: true,
-  
+
   // Storage
   seenTooltipsKey: 'blinkbudget_seen_tooltips',
   tooltipsDisabledKey: 'blinkbudget_tooltips_disabled',
@@ -290,14 +296,14 @@ export const TOOLTIP_PRIORITY = {
     'addTransaction.amount-input',
     'addTransaction.category-chips',
   ],
-  
+
   // Medium priority - show after initial interaction
   medium: [
     'dashboard.balance-card',
     'dashboard.category-filter',
     'mobileNavigation.dashboard-tab',
   ],
-  
+
   // Low priority - show as users explore
   low: [
     'settings.account-management',
@@ -309,62 +315,50 @@ export const TOOLTIP_PRIORITY = {
 // Tooltip triggers - when to show specific tooltips
 export const TOOLTIP_TRIGGERS = {
   // First visit triggers
-  firstVisit: [
-    'dashboard.add-transaction',
-    'dashboard.balance-card',
-  ],
-  
+  firstVisit: ['dashboard.add-transaction', 'dashboard.balance-card'],
+
   // Contextual triggers
-  afterFirstTransaction: [
-    'dashboard.category-filter',
-    'dashboard.date-filter',
-  ],
-  
+  afterFirstTransaction: ['dashboard.category-filter', 'dashboard.date-filter'],
+
   afterThreeTransactions: [
     'reports.top-movers',
     'smartFeatures.smart-suggestions',
   ],
-  
-  afterOneWeek: [
-    'financialPlanning.scenario-modeling',
-    'settings.export-data',
-  ],
-  
+
+  afterOneWeek: ['financialPlanning.scenario-modeling', 'settings.export-data'],
+
   // Feature discovery triggers
   onAccountPage: [
     'settings.account-management',
     'addTransaction.account-selector',
   ],
-  
+
   onPlanningPage: [
     'financialPlanning.scenario-modeling',
     'financialPlanning.goal-planning',
   ],
-  
-  onReportsPage: [
-    'reports.top-movers',
-    'reports.category-breakdown',
-  ],
+
+  onReportsPage: ['reports.top-movers', 'reports.category-breakdown'],
 };
 
 // Tooltip content templates for dynamic content
 export const TOOLTIP_TEMPLATES = {
   // Account-specific tooltip
-  accountBalance: (accountName, balance) => 
+  accountBalance: (accountName, balance) =>
     `${accountName}: ${balance}. Tap to see transactions for this account only.`,
-  
+
   // Category-specific tooltip
   categorySpending: (categoryName, amount, percentage) =>
     `${categoryName}: ${amount} (${percentage}% of total spending). Click to filter.`,
-  
+
   // Time-specific tooltip
   timePeriod: (period, total) =>
     `Viewing ${period}. Total spending: ${total}. Click to change time period.`,
-  
+
   // Smart suggestion tooltip
   smartSuggestion: (suggestion, confidence) =>
     `Suggested: ${suggestion} (${confidence}% confidence). Based on your habits.`,
-  
+
   // Goal progress tooltip
   goalProgress: (goalName, progress, remaining) =>
     `${goalName}: ${progress}% complete. ${remaining} to go!`,
