@@ -3,13 +3,7 @@
  * Creates category selection chips and transfer account chips
  */
 
-import {
-  CATEGORY_DEFINITIONS,
-  CATEGORY_COLORS,
-  SPACING,
-  FONT_SIZES,
-  TOUCH_TARGETS,
-} from '../constants.js';
+import { SPACING, FONT_SIZES, TOUCH_TARGETS } from '../constants.js';
 import { validateAmount, showFieldError } from './validation.js';
 import { ClickTracker } from '../../core/click-tracking-service.js';
 import { CustomCategoryService } from '../../core/custom-category-service.js';
@@ -369,12 +363,18 @@ export const createCategorySelector = (options = {}) => {
           chip.style.margin = '0';
           chip.style.visibility = 'hidden';
         } else {
-          const catColor = CATEGORY_COLORS[cat] || 'var(--color-primary)';
+          // Fetch category metadata from service
+          const categoryObj = CustomCategoryService.getByType(currentType).find(
+            c => c.name === cat
+          );
+          const catColor = categoryObj?.color || 'var(--color-primary)';
+          const catDesc = categoryObj?.description || null;
+
           chip = createCategoryChip({
             label: cat,
             color: catColor,
             isSelected: selectedCategory === cat,
-            title: CATEGORY_DEFINITIONS[cat] || null,
+            title: catDesc,
             onClick: () => {
               // Validate amount
               // Validate amount
@@ -414,7 +414,7 @@ export const createCategorySelector = (options = {}) => {
                   const dateValue = dateSource.getDate
                     ? dateSource.getDate()
                     : dateSource.value ||
-                      new Date().toISOString().split('T')[0];
+                    new Date().toISOString().split('T')[0];
 
                   onSubmit({
                     amount: amountValidation.value,

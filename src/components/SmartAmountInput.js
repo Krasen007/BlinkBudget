@@ -44,6 +44,25 @@ export const SmartAmountInput = {
     input.autocomplete = 'off';
     input.setAttribute('data-tutorial-target', 'amount-input');
 
+    // Prevent non-numeric input
+    input.addEventListener('keydown', e => {
+      // Allow: backspace, delete, tab, escape, enter, decimal point, numbers
+      const allowedKeys = [
+        'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
+        'Decimal', '.', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+        'ArrowLeft', 'ArrowRight', 'Home', 'End'
+      ];
+
+      // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+      if (e.ctrlKey && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase())) {
+        return;
+      }
+
+      if (!allowedKeys.includes(e.key) && !/^[0-9.]$/.test(e.key)) {
+        e.preventDefault();
+      }
+    });
+
     // Format amount as user types
     input.addEventListener('input', e => {
       const value = e.target.value;

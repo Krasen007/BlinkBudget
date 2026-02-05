@@ -262,24 +262,16 @@ export const CustomCategoryManager = ({
       width: 100%;
     `;
 
-    if (!category.isSystem) {
-      const editButton = createActionButton('Edit', () =>
-        showCategoryForm(category)
-      );
-      const deleteButton = createActionButton('Delete', () =>
-        confirmDeleteCategory(category)
-      );
+    const editButton = createActionButton('Edit', () =>
+      showCategoryForm(category)
+    );
+    const deleteButton = createActionButton('Delete', () =>
+      confirmDeleteCategory(category)
+    );
 
-      actions.appendChild(editButton);
-      actions.appendChild(deleteButton);
-      card.appendChild(actions);
-    } else {
-      // Add a placeholder or just space
-      const placeholder = document.createElement('div');
-      placeholder.style.height = '30px'; // Same height as buttons
-      actions.appendChild(placeholder);
-      card.appendChild(actions);
-    }
+    actions.appendChild(editButton);
+    actions.appendChild(deleteButton);
+    card.appendChild(actions);
 
     // Keyboard navigation
     card.addEventListener('keydown', e => {
@@ -657,11 +649,6 @@ export const CustomCategoryManager = ({
 
   function renderCategories() {
     categories = CustomCategoryService.getByType(currentType);
-
-    // Add system categories
-    const systemCategories =
-      CustomCategoryService.getSystemCategories(currentType);
-    categories = [...systemCategories, ...categories];
 
     categoriesList.innerHTML = '';
 

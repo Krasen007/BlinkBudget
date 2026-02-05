@@ -33,8 +33,11 @@ export const createElement = (tag, options = {}) => {
         element.selected = true;
       } else if (key === 'value') {
         element.value = value;
-      } else if (key === 'readOnly' && value) {
-        element.readOnly = true;
+      } else if (key === 'readOnly') {
+        // Only set readOnly if true, don't set if false
+        if (value) {
+          element.readOnly = true;
+        }
       } else {
         element.setAttribute(key, value);
       }
@@ -67,6 +70,7 @@ export const createInput = (options = {}) => {
     style = {},
     attributes = {},
     readOnly = false,
+    autocomplete = null,
   } = options;
 
   return createElement('input', {
@@ -79,6 +83,7 @@ export const createInput = (options = {}) => {
       placeholder,
       value: value || '',
       readOnly,
+      ...(autocomplete !== null && { autocomplete }),
       ...attributes,
     },
   });

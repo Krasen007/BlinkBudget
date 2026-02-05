@@ -20,6 +20,11 @@ export const CustomCategoryService = {
    * @returns {Array} List of custom categories
    */
   getAll() {
+    // Check if migration is needed
+    if (!localStorage.getItem('categories_initialized')) {
+      this._migrateSystemToCustom();
+    }
+
     const data = localStorage.getItem(CUSTOM_CATEGORIES_KEY);
     const categories = data ? safeJsonParse(data) : [];
 
@@ -28,6 +33,39 @@ export const CustomCategoryService = {
     return categories.filter(
       cat => !cat.userId || cat.userId === currentUserId
     );
+  },
+
+  /**
+   * Migrate system categories to custom categories
+   * @private
+   */
+  _migrateSystemToCustom() {
+    console.log('[CategoryService] Initializing default categories...');
+    const data = localStorage.getItem(CUSTOM_CATEGORIES_KEY);
+    const existingCategories = data ? safeJsonParse(data) : [];
+    const systemCategories = this.getSystemCategories('all');
+
+    const merged = [...existingCategories];
+    systemCategories.forEach(systemCat => {
+      // Avoid duplication by name
+      const exists = merged.find(
+        c => c.name.toLowerCase() === systemCat.name.toLowerCase()
+      );
+      if (!exists) {
+        merged.push({
+          ...systemCat,
+          id: generateId(), // New real ID
+          isSystem: false, // Now editable
+          isCustom: true,
+          userId: AuthService.getUserId(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+      }
+    });
+
+    this._persist(merged, false); // Don't sync yet to avoid flood, main sync will pick it up
+    localStorage.setItem('categories_initialized', 'true');
   },
 
   /**
@@ -126,11 +164,6 @@ export const CustomCategoryService = {
 
     const originalCategory = categories[index];
 
-    // Don't allow updating system categories
-    if (originalCategory.isSystem) {
-      throw new Error('Cannot update system categories');
-    }
-
     // Check for duplicate names (excluding current category)
     if (updates.name) {
       const duplicateCategory = categories.find(
@@ -182,11 +215,6 @@ export const CustomCategoryService = {
       return false;
     }
 
-    // Don't allow deleting system categories
-    if (category.isSystem) {
-      throw new Error('Cannot delete system categories');
-    }
-
     const filteredCategories = categories.filter(cat => cat.id !== id);
     this._persist(filteredCategories);
 
@@ -211,13 +239,9 @@ export const CustomCategoryService = {
    * @returns {Array} List of category names
    */
   getAllCategoryNames(type = 'all') {
-    const customCategories = this.getByType(type);
-    const systemCategories = this.getSystemCategories(type);
+    const categories = this.getByType(type);
 
-    return [
-      ...systemCategories.map(cat => cat.name),
-      ...customCategories.map(cat => cat.name),
-    ];
+    return categories.map(cat => cat.name);
   },
 
   /**

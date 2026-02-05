@@ -106,5 +106,21 @@ export const AddView = ({ accountId } = {}) => {
   });
   container.appendChild(form);
 
+  // Handle Escape key to navigate back to dashboard
+  const handleKeyDown = e => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      // Cancel tracking if user backs out
+      ClickTracker.cancelTransactionFlow();
+      Router.navigate('dashboard');
+    }
+  };
+
+  window.addEventListener('keydown', handleKeyDown);
+
+  container.cleanup = () => {
+    window.removeEventListener('keydown', handleKeyDown);
+  };
+
   return container;
 };

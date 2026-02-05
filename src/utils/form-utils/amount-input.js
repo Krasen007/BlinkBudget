@@ -35,6 +35,25 @@ export const createAmountInput = (options = {}) => {
   input.pattern = '[0-9]*'; // Fallback for older devices to trigger numpad
   input.setAttribute('autofocus', 'true'); // Hint to browser related to focus
 
+  // Prevent non-numeric input
+  input.addEventListener('keydown', e => {
+    // Allow: backspace, delete, tab, escape, enter, decimal point, numbers, comma
+    const allowedKeys = [
+      'Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'Esc',
+      'Decimal', '.', ',', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+      'ArrowLeft', 'ArrowRight', 'Home', 'End'
+    ];
+
+    // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+    if (e.ctrlKey && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase())) {
+      return;
+    }
+
+    if (!allowedKeys.includes(e.key) && !/^[0-9.,]$/.test(e.key)) {
+      e.preventDefault();
+    }
+  });
+
   // Track clicks on amount input
   input.addEventListener('click', () => {
     ClickTracker.recordClick();

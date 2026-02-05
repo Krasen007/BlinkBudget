@@ -186,20 +186,26 @@ export const AccountSection = () => {
     autocomplete: 'off',
     placeholder: 'Account Name',
     className: 'touch-target mobile-form-input',
-    fontSize: FONT_SIZES.PREVENT_ZOOM,
+    style: {
+      fontSize: FONT_SIZES.PREVENT_ZOOM,
+      caretColor: COLORS.TEXT_MAIN, // Ensure cursor is visible
+      cursor: 'text', // Ensure text cursor on hover
+    },
   });
 
   const typeSelect = createSelect({
     id: 'new-account-type',
     name: 'new-account-type',
     className: 'touch-target mobile-form-select input-select',
+    style: {
+      fontSize: FONT_SIZES.PREVENT_ZOOM,
+    },
     options: [
       { value: ACCOUNT_TYPES.CHECKING, text: 'Checking' },
       { value: ACCOUNT_TYPES.SAVINGS, text: 'Savings' },
       { value: ACCOUNT_TYPES.CREDIT_CARD, text: 'Credit Card' },
       { value: ACCOUNT_TYPES.CASH, text: 'Cash' },
     ],
-    fontSize: FONT_SIZES.PREVENT_ZOOM,
   });
 
   // Add mobile focus handling

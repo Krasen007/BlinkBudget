@@ -678,7 +678,7 @@ export class AccountDeletionService {
 
       // Count budgets
       const { BudgetService } = await import('./budget-service.js');
-      const budgets = BudgetService.getAllBudgets();
+      const budgets = BudgetService.getAll();
       summary.budgets = budgets.length;
 
       // Count settings
