@@ -48,9 +48,27 @@ export const SmartAmountInput = {
     input.addEventListener('keydown', e => {
       // Allow: backspace, delete, tab, escape, enter, decimal point, numbers
       const allowedKeys = [
-        'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
-        'Decimal', '.', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-        'ArrowLeft', 'ArrowRight', 'Home', 'End'
+        'Backspace',
+        'Delete',
+        'Tab',
+        'Escape',
+        'Enter',
+        'Decimal',
+        '.',
+        '0',
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+        'ArrowLeft',
+        'ArrowRight',
+        'Home',
+        'End',
       ];
 
       // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X

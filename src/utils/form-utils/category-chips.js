@@ -414,7 +414,7 @@ export const createCategorySelector = (options = {}) => {
                   const dateValue = dateSource.getDate
                     ? dateSource.getDate()
                     : dateSource.value ||
-                    new Date().toISOString().split('T')[0];
+                      new Date().toISOString().split('T')[0];
 
                   onSubmit({
                     amount: amountValidation.value,

@@ -318,9 +318,16 @@ export class AccountDeletionService {
           );
         } else {
           // Delete the Firebase user account
-          await deleteUser(user);
-          result.authDeleted = true;
-          console.log('[AccountDeletion] Firebase user deleted successfully');
+          const currentUser = auth.currentUser;
+          if (currentUser) {
+            await deleteUser(currentUser);
+            result.authDeleted = true;
+            console.log('[AccountDeletion] Firebase user deleted successfully');
+          } else {
+            console.warn('[AccountDeletion] No current Firebase user found');
+            result.authDeleted = false;
+            result.warnings.push('No current Firebase user found for deletion');
+          }
         }
       } else {
         console.warn(
