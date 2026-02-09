@@ -56,7 +56,8 @@ export const DashboardView = () => {
   const title = document.createElement('h2');
   const updateTitle = userObj => {
     const u = userObj || AuthService.user;
-    title.textContent = `Welcome back${u ? `, ${u.displayName}` : ''}!`;
+    const name = u?.displayName || u?.email?.split('@')[0];
+    title.textContent = name ? `Welcome back, ${name}!` : 'Welcome back!';
     title.style.margin = '0';
     title.style.fontSize =
       window.innerWidth < BREAKPOINTS.MOBILE ? '1.25rem' : '1.5rem';

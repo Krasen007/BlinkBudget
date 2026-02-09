@@ -190,6 +190,23 @@ export class TutorialManager {
       stepIndex: this.currentStep,
     });
 
+    // Handle overlay visibility based on step type
+    const usesOverlay = ['welcome', 'info', 'celebration', 'navigation'].includes(
+      step.type
+    );
+
+    if (this.overlay) {
+      if (usesOverlay) {
+        this.overlay.style.display = 'flex';
+        // Ensure opacity is reset if it was hidden
+        requestAnimationFrame(() => {
+          this.overlay.style.opacity = '1';
+        });
+      } else {
+        this.overlay.style.display = 'none';
+      }
+    }
+
     // Handle different step types
     switch (step.type) {
       case 'welcome':

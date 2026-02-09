@@ -149,86 +149,7 @@ export const TUTORIAL_STEPS = [
       },
     ],
   },
-  {
-    id: 'smart-features',
-    type: 'info',
-    title: 'BlinkBudget Gets Smarter',
-    content:
-      'The more you use BlinkBudget, the better it gets:\n\n**Smart Suggestions:**\n• Learns your favorite categories\n• Remembers typical amounts\n• Suggests accounts based on time and location\n\n**Ghost Transactions:**\n• See past spending patterns when you change dates\n• Make informed decisions with historical context',
-    illustration: 'smart-features',
-    actions: [
-      {
-        id: 'next',
-        text: 'Discover more features →',
-        variant: 'primary',
-      },
-      {
-        id: 'previous',
-        text: 'Previous',
-        variant: 'secondary',
-      },
-    ],
-  },
-  {
-    id: 'accounts',
-    type: 'info',
-    title: 'Manage All Your Money',
-    content:
-      'Track expenses across different accounts seamlessly:\n\n**Supported Accounts:**\n💳 Credit Cards • 🏦 Checking Accounts • 💰 Savings Accounts • 💵 Cash\n\n**Easy Transfers:**\n• Move money between accounts\n• Automatic balance updates\n• No manual math required',
-    illustration: 'accounts',
-    actions: [
-      {
-        id: 'next',
-        text: 'Set up your accounts →',
-        variant: 'primary',
-      },
-      {
-        id: 'previous',
-        text: 'Previous',
-        variant: 'secondary',
-      },
-    ],
-  },
-  {
-    id: 'financial-planning',
-    type: 'info',
-    title: "Beyond Today's Expenses",
-    content:
-      'BlinkBudget helps you plan for the future:\n\n**Planning Features:**\n• **Scenario Modeling** - "What if I save $200 more monthly?"\n• **Investment Tracking** - Monitor your net worth growth\n• **Goal Planning** - Track progress toward financial targets\n• **Risk Warnings** - Get alerts about potential issues',
-    illustration: 'planning',
-    actions: [
-      {
-        id: 'next',
-        text: 'Start planning →',
-        variant: 'primary',
-      },
-      {
-        id: 'previous',
-        text: 'Previous',
-        variant: 'secondary',
-      },
-    ],
-  },
-  {
-    id: 'mobile-experience',
-    type: 'info',
-    title: 'Perfect On Mobile',
-    content:
-      'BlinkBudget is designed for your phone:\n\n**Mobile Optimizations:**\n• One-handed transaction entry\n• Thumb-friendly buttons (56px minimum)\n• Smart keyboard that gets out of your way\n• Install as a standalone app\n\n**Pro Tip:** Add BlinkBudget to your home screen for instant access!',
-    illustration: 'mobile',
-    actions: [
-      {
-        id: 'next',
-        text: 'Make it yours →',
-        variant: 'primary',
-      },
-      {
-        id: 'previous',
-        text: 'Previous',
-        variant: 'secondary',
-      },
-    ],
-  },
+
   {
     id: 'congratulations',
     type: 'celebration',
@@ -236,7 +157,7 @@ export const TUTORIAL_STEPS = [
     description:
       "You've mastered the basics of BlinkBudget. Here's what to remember:",
     content:
-      '**Key Takeaways:**\n• 3 clicks = expense logged\n• Categories auto-save your transactions\n• Dashboard shows your complete financial picture\n• Mobile app for tracking on the go\n\n**Next Steps:**\n• Try adding a few more transactions\n• Explore the Financial Planning section\n• Set up all your accounts\n\n**Welcome to effortless expense tracking!**',
+      '**Key Takeaways:**\n• 3 clicks = expense logged\n• Categories auto-save your transactions\n• Dashboard shows your complete financial picture\n\n**Next Steps:**\n• Try adding a few more transactions\n\n**Welcome to effortless expense tracking!**',
     illustration: 'success-celebration',
     actions: [
       {
