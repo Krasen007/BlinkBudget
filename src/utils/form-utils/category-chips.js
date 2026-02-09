@@ -307,7 +307,8 @@ export const createCategorySelector = (options = {}) => {
       });
     } else {
       // Standard Categories
-      let rawCats = CustomCategoryService.getAllCategoryNames(currentType);
+      let rawCats =
+        CustomCategoryService.getAllCategoryNames(currentType) || [];
 
       // REFINEMENT: If we have a prioritized category, move it to the front
       if (prioritizedCategory && rawCats.includes(prioritizedCategory)) {

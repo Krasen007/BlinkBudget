@@ -249,7 +249,7 @@ export class AccountDeletionService {
       // Delete budgets
       try {
         const { BudgetService } = await import('./budget-service.js');
-        const budgets = BudgetService.getAllBudgets();
+        const budgets = BudgetService.getAll();
 
         for (const budget of budgets) {
           BudgetService.deleteBudget(budget.id);
@@ -505,7 +505,7 @@ export class AccountDeletionService {
       // Verify budgets are deleted
       try {
         const { BudgetService } = await import('./budget-service.js');
-        const remainingBudgets = BudgetService.getAllBudgets();
+        const remainingBudgets = BudgetService.getAll();
         const userBudgets = remainingBudgets.filter(
           budget => !budget.userId || budget.userId === userId
         );

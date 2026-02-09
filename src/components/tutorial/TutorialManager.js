@@ -404,8 +404,7 @@ export class TutorialManager {
         this.skip();
         break;
       case 'complete':
-        // For "Add Another" - restart tutorial for another transaction
-        this.restart();
+        this.complete();
         break;
       case 'dismiss':
         this.dismiss();

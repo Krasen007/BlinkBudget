@@ -97,7 +97,6 @@ export const LandingView = () => {
     '🎯 Interactive walkthrough',
     '📱 Mobile-first experience',
     '🧠 Smart categorization',
-    '📊 Beautiful insights',
     '🎓 Learn at your own pace',
   ];
 

@@ -80,6 +80,9 @@ export const TutorialTooltip = {
   },
 
   calculatePosition(target, preferredPosition) {
+    if (!target) {
+      return { top: 0, left: 0, arrowPosition: 'top' };
+    }
     const targetRect = target.getBoundingClientRect();
     const viewport = {
       width: window.innerWidth,
@@ -208,7 +211,7 @@ export const TutorialTooltip = {
       return {
         top: adjustedTop,
         left,
-        arrowPosition: 'top',
+        arrowPosition: 'bottom',
       };
     }
 

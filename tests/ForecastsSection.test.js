@@ -62,6 +62,7 @@ vi.mock('../src/utils/financial-planning-helpers.js', () => ({
   }),
 }));
 
+//TODO: implement tests
 describe('ForecastsSection', () => {
   it('placeholder test', () => {
     expect(true).toBe(true);

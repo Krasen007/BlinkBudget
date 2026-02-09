@@ -120,11 +120,11 @@ export const SmartCategorySelector = {
         const count = categoryCount[cat.name] || 0;
         const pct = totalTransactions > 0 ? count / totalTransactions : 0;
         return {
+          ...cat,
           category: cat.name,
           count,
           percentage: pct,
           frequency: this.getFrequencyLevel(pct),
-          ...cat,
         };
       });
 

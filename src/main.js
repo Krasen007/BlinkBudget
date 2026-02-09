@@ -74,8 +74,8 @@ const initApp = () => {
       });
 
       // Initialize tutorial system after user is authenticated
-      import('./components/tutorial/TutorialManager.js').then(
-        ({ TutorialManager }) => {
+      import('./components/tutorial/TutorialManager.js')
+        .then(({ TutorialManager }) => {
           const initTutorial = async () => {
             const tutorialManager = new TutorialManager();
             const shouldShowTutorial = await tutorialManager.initialize();
@@ -94,8 +94,10 @@ const initApp = () => {
           initTutorial().catch(error => {
             console.warn('[Main] Failed to initialize tutorial:', error);
           });
-        }
-      );
+        })
+        .catch(error => {
+          console.warn('[Main] Failed to load tutorial module:', error);
+        });
 
       if (currentRoute === 'login' || currentRoute === 'landing') {
         Router.navigate('dashboard');

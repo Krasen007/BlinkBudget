@@ -176,9 +176,21 @@ export const CustomCategoryService = {
       }
     }
 
+    const allowedFields = [
+      'name',
+      'type',
+      'color',
+      'icon',
+      'description',
+      'isActive',
+    ];
+    const sanitizedUpdates = Object.fromEntries(
+      Object.entries(updates).filter(([key]) => allowedFields.includes(key))
+    );
+
     categories[index] = {
       ...categories[index],
-      ...updates,
+      ...sanitizedUpdates,
       updatedAt: new Date().toISOString(),
     };
 
@@ -202,13 +214,13 @@ export const CustomCategoryService = {
   },
 
   /**
-   * Delete a category
-   * @param {string} id - Category ID
-   * @param {boolean} force - Force delete even if category is in use
-   * @returns {boolean} True if deleted successfully
-   */
-  remove(id, _force = false) {
+  remove(id) {
     const categories = this.getAll();
+    const category = categories.find(cat => cat.id === id);
+
+    if (!category) {
+      return false;
+    }
     const category = categories.find(cat => cat.id === id);
 
     if (!category) {
@@ -467,7 +479,7 @@ export const CustomCategoryService = {
       '#059669',
       '#dc2626',
       '#d97706',
-      '#059669',
+      '#0891b2', // or another distinct color
       '#2563eb',
     ];
 
@@ -563,10 +575,7 @@ export const CustomCategoryService = {
       incomeCategories:
         customCategories.filter(cat => cat.type === 'income').length +
         systemCategories.filter(cat => cat.type === 'income').length,
-      mostUsedCategories: customCategories
-        .filter(cat => cat.usageCount > 0)
-        .sort((a, b) => b.usageCount - a.usageCount)
-        .slice(0, 5),
+      mostUsedCategories: [],
     };
   },
 

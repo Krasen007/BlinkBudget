@@ -25,6 +25,11 @@ export const DashboardView = () => {
   container.className = 'view-dashboard view-container';
   container.setAttribute('data-tutorial-target', 'dashboard');
 
+  // Make container fill the viewport height
+  container.style.minHeight = '100vh';
+  container.style.display = 'flex';
+  container.style.flexDirection = 'column';
+
   // Header with sticky positioning
   const header = document.createElement('div');
   header.style.marginBottom = SPACING.MD;
@@ -54,7 +59,7 @@ export const DashboardView = () => {
     title.textContent = `Welcome back${u ? `, ${u.displayName}` : ''}!`;
     title.style.margin = '0';
     title.style.fontSize =
-      window.innerWidth < BREAKPOINTS.MOBILE ? '1.25rem' : 'h2';
+      window.innerWidth < BREAKPOINTS.MOBILE ? '1.25rem' : '1.5rem';
     title.style.fontWeight = 'bold';
     title.style.color = COLORS.TEXT_MAIN;
   };

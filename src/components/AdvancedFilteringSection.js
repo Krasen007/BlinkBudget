@@ -83,7 +83,11 @@ export const AdvancedFilteringSection = () => {
     // Remove after 2 seconds
     setTimeout(() => {
       toast.classList.remove('show');
-      setTimeout(() => document.body.removeChild(toast), 300);
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      }, 300);
     }, 2000);
   };
 

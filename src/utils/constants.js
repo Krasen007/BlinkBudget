@@ -65,7 +65,7 @@ export const CATEGORY_COLORS = {
   // Bold, vibrant color scheme using red, blue, green, white, orange, purple
 
   // Major expenses - Primary bold colors
-  Други: '#f19317ff', // White/Light gray (30.2% - largest)
+  Други: '#f19317', // Orange (30.2% - largest)
   Храна: '#22C55E', // Vibrant green (25.0% - second largest)
   Кредит: '#3B82F6', // Bold blue (21.3% - third largest)
 

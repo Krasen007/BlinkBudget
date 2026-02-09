@@ -495,6 +495,7 @@ export const CustomCategoryManager = ({
     // Close on overlay click
     overlay.addEventListener('click', e => {
       if (e.target === overlay) {
+        document.removeEventListener('keydown', handleEscape);
         overlay.remove();
       }
     });

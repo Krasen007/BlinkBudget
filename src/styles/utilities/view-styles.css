@@ -388,7 +388,7 @@
 
 .view-dashboard .dashboard-transactions-container {
   flex: 1;
-  overflow: visible; /* Allow container to participate in page scroll */
+  overflow: hidden; /* Container should not scroll, child should */
   min-height: 0; /* Allow flex child to shrink */
   display: flex;
   flex-direction: column;
