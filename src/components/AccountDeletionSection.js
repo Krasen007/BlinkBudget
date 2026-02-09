@@ -177,6 +177,19 @@ export const AccountDeletionSection = () => {
 
               // Redirect to landing page
               window.location.href = '/';
+            } else if (result.requiresReauth) {
+              const { MobileAlert } = await import('./MobileModal.js');
+              await MobileAlert({
+                title: '🔒 Security Check',
+                message:
+                  'For your security, account deletion requires a recent login. Please log out and log back in, then try again.',
+                buttonText: 'Log Out Now',
+              });
+
+              // Logout and redirect
+              const { AuthService } = await import('../core/auth-service.js');
+              await AuthService.logout();
+              window.location.hash = '#login';
             } else {
               throw new Error(`Deletion failed: ${result.errors.join(', ')}`);
             }

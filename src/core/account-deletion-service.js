@@ -374,6 +374,7 @@ export class AccountDeletionService {
           'Recent login required for account deletion. Please log in again and try.'
         );
         result.authDeleted = false;
+        result.requiresReauth = true;
       } else {
         result.authDeleted = false;
       }

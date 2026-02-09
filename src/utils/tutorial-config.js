@@ -28,7 +28,7 @@ export const TUTORIAL_STEPS = [
     type: 'info',
     title: 'The Magic of 3 Clicks',
     content:
-      'Here\'s how BlinkBudget transforms expense tracking from a chore into a habit:\n\n**Step 1:** Click "Add Transaction"\n**Step 2:** Enter the amount\n**Step 3:** Choose a category - and you\'re done!\n\n**Pro Tip:** The transaction saves automatically when you pick a category. No save button needed!',
+      'Here\'s how BlinkBudget transforms expense tracking from a chore into a habit:\n\n<br>**Step 1:** Click "Add Transaction"\n<br>**Step 2:** Enter the amount\n<br>**Step 3:** Choose a category - and you\'re done!\n\n**Pro Tip:** The transaction saves automatically when you pick a category. No save button needed!',
     illustration: 'three-clicks',
     actions: [
       {

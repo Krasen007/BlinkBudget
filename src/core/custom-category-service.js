@@ -20,8 +20,11 @@ export const CustomCategoryService = {
    * @returns {Array} List of custom categories
    */
   getAll() {
-    // Check if migration is needed
-    if (!localStorage.getItem('categories_initialized')) {
+    const currentUserId = AuthService.getUserId();
+    const initKey = `categories_initialized_${currentUserId}`;
+
+    // Check if migration is needed for this user
+    if (!localStorage.getItem(initKey)) {
       this._migrateSystemToCustom();
     }
 
@@ -29,7 +32,6 @@ export const CustomCategoryService = {
     const categories = data ? safeJsonParse(data) : [];
 
     // Filter categories for current user
-    const currentUserId = AuthService.getUserId();
     return categories.filter(
       cat => !cat.userId || cat.userId === currentUserId
     );
@@ -40,24 +42,35 @@ export const CustomCategoryService = {
    * @private
    */
   _migrateSystemToCustom() {
-    console.log('[CategoryService] Initializing default categories...');
+    const currentUserId = AuthService.getUserId();
+    console.log(
+      `[CategoryService] Initializing default categories for user: ${currentUserId}...`
+    );
+
     const data = localStorage.getItem(CUSTOM_CATEGORIES_KEY);
     const existingCategories = data ? safeJsonParse(data) : [];
     const systemCategories = this.getSystemCategories('all');
 
     const merged = [...existingCategories];
+
+    // Filter existing categories to only those belonging to current user for duplicate check
+    const currentUserCategories = existingCategories.filter(
+      c => !c.userId || c.userId === currentUserId
+    );
+
     systemCategories.forEach(systemCat => {
-      // Avoid duplication by name
-      const exists = merged.find(
+      // Avoid duplication by name FOR CURRENT USER
+      const exists = currentUserCategories.find(
         c => c.name.toLowerCase() === systemCat.name.toLowerCase()
       );
+
       if (!exists) {
         merged.push({
           ...systemCat,
           id: generateId(), // New real ID
           isSystem: false, // Now editable
           isCustom: true,
-          userId: AuthService.getUserId(),
+          userId: currentUserId,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         });
@@ -65,7 +78,7 @@ export const CustomCategoryService = {
     });
 
     this._persist(merged, false); // Don't sync yet to avoid flood, main sync will pick it up
-    localStorage.setItem('categories_initialized', 'true');
+    localStorage.setItem(`categories_initialized_${currentUserId}`, 'true');
   },
 
   /**
