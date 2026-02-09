@@ -32,9 +32,11 @@
 ### Transaction Management
 
 - **Multiple transaction types**: Expenses, Income, Transfers, Refunds
+- **Custom Category Management** - Create, edit, and manage your own expense categories for personalized tracking
 - **Smart categorization** with visual category chips:
   - Food & Groceries, Dining & Coffee, Housing & Bills
   - Transportation, Leisure & Shopping, Personal Care
+  - Plus your custom categories for complete control
 - **Multi-account support** (Checking, Savings, Credit Card, Cash)
 - **Account-to-account transfers** with automatic balance updates
 - **Filter transactions by category** tap on the name to show

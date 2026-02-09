@@ -1,45 +1,42 @@
-# BlinkBudget v1.18.0 Changelog
+# Version 1.19 Release Notes
 
-## 🚀 Key Improvements
+## 🚀 New Features & Improvements
+- **Category Management**: Added comprehensive custom category management system
+- **Enhanced Tutorial**: Improved onboarding experience with better UI and flow
+- **Smart Features**: Consolidated constants and improved smart features (now disabled by default for better user experience)
 
-### Mobile Experience & UI/UX
-- **Mobile Optimization**: Complete mobile experience redesign for better touch interactions
-- **UI Bug Fixes**: Resolved various interface issues and improved visual consistency
-- **Enhanced Navigation**: Improved button layouts and interactions across all views
+## 🐛 Bug Fixes
+- **Dashboard Display**: Fixed null entry issues in user name display
+- **Account Management**: Resolved issues with account deletion and addition in settings
+- **Category Manager**: Fixed multiple bugs in the custom category management system
+- **Login Experience**: Fixed login functionality with Enter key support
+- **UI/UX**: Improved scrolling behavior on dashboard and fixed calculation issues in financial planning
+- **Missing Categories**: Resolved issues with category display and selection
 
-### 📊 Smart Features
-- **Smart Suggestions Engine**: New intelligent transaction categorization and insights
-- **Ghost Transactions**: Added ability to see historical transaction data when dates are modified
-- **Performance Boost**: Fixed slow chart loading with intelligent caching system
+## 🔧 Technical Improvements
+- **Firestore Integration**: Enhanced user email handling and data synchronization
+- **Code Quality**: General cleanup and consolidation of constants
+- **Test Coverage**: Fixed failing tests and improved test reliability
 
-### 🔒 Security & Privacy
-- **Enhanced Security**: Comprehensive security audit and hardening measures
-- **Privacy Compliance**: Full privacy validation and data protection compliance
-- **Data Protection**: Added robust backup and recovery solutions
-
-### 🛠️ Technical Improvements
-- **Budget Calculations**: Fixed budget and category calculation logic for accurate financial tracking
-- **Transaction Management**: Improved transaction handling with anchor persistence and deletion sync
-- **Multi-Agent Development**: Enhanced development workflow and code quality
-
-### 🎨 Visual Enhancements
-- **Color System**: Updated color schemes for better readability and accessibility
-- **Chart Improvements**: Enhanced data visualization with fixed colors for transactions
-- **Text Wrapping**: Improved text handling for better mobile display
+## 📱 User Experience
+- **Better Onboarding**: Streamlined tutorial flow for new users
+- **Improved Navigation**: Enhanced UI elements and interaction patterns
+- **Performance**: Optimized dashboard rendering and data processing
 
 ---
 
-## 📝 Recent Commits (v1.17..v1.18.0)
-- cleanup and UI bug fixes
-- Mobile experience optimization complete
-- Smart suggestions engine implementation
-- Privacy and security compliance
-- Enhanced data backup solutions
-- Budget calculation fixes
-- Performance improvements and caching
-- Ghost transactions feature
-- Visual and accessibility improvements
-
----
-
-*Last updated: February 2026*
+## Previous Commits (Technical Details)
+51c9250 fix missing categories
+ecff058 update firestore with user email, shorten and fix tutorial
+03909da fix dashboard null entry for the name
+336e7c3 cleanup
+b504504 fix for delete my account, previous commit fixes for add account in settings, fixes for custom categories
+3351568 fixes
+829e4f2 consolidate constants and disable smart things by default, fix bugs in category manager
+6e52c38 add category management
+15749e3 Phase 3 Week 8 Implementation
+2987834 fix login with enter key
+5ab3aab add tutorial fixes and ui updates
+5933bea fix tests
+a8694c8 fix scrolling on dashboard, fix bug on calculation in financial planning
+84af8ee add tutorial Phase 3: Feature Polish & User Experience

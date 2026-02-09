@@ -191,9 +191,12 @@ export class TutorialManager {
     });
 
     // Handle overlay visibility based on step type
-    const usesOverlay = ['welcome', 'info', 'celebration', 'navigation'].includes(
-      step.type
-    );
+    const usesOverlay = [
+      'welcome',
+      'info',
+      'celebration',
+      'navigation',
+    ].includes(step.type);
 
     if (this.overlay) {
       if (usesOverlay) {
