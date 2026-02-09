@@ -1,4 +1,4 @@
-import { auth, firebaseStatus } from './firebase-config.js';
+import { auth, firebaseStatus, getDb } from './firebase-config.js';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -8,6 +8,7 @@ import {
   signInWithPopup,
   sendPasswordResetEmail,
 } from 'firebase/auth';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { rateLimitService } from './rate-limit-service.js';
 import { auditService, auditEvents } from './audit-service.js';
 
@@ -39,11 +40,51 @@ export const AuthService = {
       onAuthStateChanged(auth, async user => {
         // Make user object read-only to prevent manipulation
         this.user = user ? Object.freeze({ ...user }) : null;
+
+        // Update user profile in Firestore if user is logged in
+        if (this.user) {
+          this._updateUserProfile(this.user).catch(err =>
+            console.warn('[Auth] Background profile update failed:', err)
+          );
+        }
+
         this.initialized = true;
         if (onAuthStateChange) await onAuthStateChange(this.user);
         resolve(this.user);
       });
     });
+  },
+
+  async _updateUserProfile(user) {
+    if (!user) return;
+
+    // Check Firebase availability
+    const firebaseCheck = checkFirebaseAvailability();
+    if (!firebaseCheck.available) return;
+
+    try {
+      const userRef = doc(getDb(), 'users', user.uid);
+      await setDoc(
+        userRef,
+        {
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+          lastLogin: serverTimestamp(),
+          metadata: {
+            creationTime: user.metadata?.creationTime,
+            lastSignInTime: user.metadata?.lastSignInTime,
+          },
+        },
+        { merge: true }
+      );
+    } catch (error) {
+      console.warn(
+        '[AuthService] Failed to update user profile in Firestore:',
+        error
+      );
+      // Don't throw, just log. This is a background enhancement.
+    }
   },
 
   async login(email, password) {
@@ -100,6 +141,9 @@ export const AuthService = {
         this.user.uid,
         'low'
       );
+
+      // Update profile in background
+      this._updateUserProfile(this.user).catch(console.warn);
 
       return { user: this.user, error: null };
     } catch (error) {
@@ -201,6 +245,9 @@ export const AuthService = {
         'low'
       );
 
+      // Update profile in background
+      this._updateUserProfile(this.user).catch(console.warn);
+
       return { user: this.user, error: null };
     } catch (error) {
       // Record failed attempt for rate limiting
@@ -263,6 +310,10 @@ export const AuthService = {
       // Make user object read-only to prevent manipulation
       this.user = Object.freeze({ ...userCredential.user });
       localStorage.setItem('auth_hint', 'true');
+
+      // Update profile in background
+      this._updateUserProfile(this.user).catch(console.warn);
+
       return { user: this.user, error: null };
     } catch (error) {
       // Log full error for debugging but return sanitized message

@@ -18,6 +18,7 @@ vi.mock('../src/core/firebase-config.js', () => ({
     isInitialized: true,
     canUseAuth: true,
   },
+  getDb: vi.fn(),
 }));
 
 vi.mock('firebase/auth', () => ({
