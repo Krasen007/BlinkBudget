@@ -43,9 +43,7 @@ export const CustomCategoryService = {
    */
   _migrateSystemToCustom() {
     const currentUserId = AuthService.getUserId();
-    console.log(
-      `[CategoryService] Initializing default categories for user: ${currentUserId}...`
-    );
+    console.log('[CategoryService] Initializing default categories...');
 
     const data = localStorage.getItem(CUSTOM_CATEGORIES_KEY);
     const existingCategories = data ? safeJsonParse(data) : [];

@@ -264,6 +264,28 @@
   .tutorial-action,
   .tutorial-tooltip-action {
     transition: none;
+    transform: none;
+  }
+
+  .tutorial-action.btn--primary:hover,
+  .tutorial-tooltip-action.btn--primary:hover {
+    transform: none;
+  }
+
+  /* Disable keyframe animations */
+  .tutorial-welcome .touch-point-1,
+  .tutorial-welcome .touch-point-2,
+  .tutorial-welcome .touch-point-3 {
+    animation: none;
+  }
+
+  .tutorial-welcome .connection-line {
+    animation: none;
+  }
+
+  .tutorial-celebration .success-circle,
+  .tutorial-celebration .checkmark-path {
+    animation: none;
   }
 }
 

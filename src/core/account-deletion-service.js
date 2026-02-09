@@ -361,22 +361,29 @@ export class AccountDeletionService {
       step.firebaseAccountDeleted = result.authDeleted;
     } catch (error) {
       console.error('[AccountDeletion] Auth deletion failed:', error);
-      step.status = 'failed';
-      step.error = error.message;
-      result.errors.push(`Auth deletion failed: ${error.message}`);
 
       // Check if it's a Firebase auth error
       if (error.code === 'auth/user-not-found') {
         result.warnings.push('User was already deleted from Firebase');
         result.authDeleted = true; // Consider this successful
+        step.status = 'completed';
+        step.firebaseAccountDeleted = true;
       } else if (error.code === 'auth/requires-recent-login') {
+        step.status = 'failed';
+        step.error = error.message;
+        result.errors.push(`Auth deletion failed: ${error.message}`);
         result.warnings.push(
           'Recent login required for account deletion. Please log in again and try.'
         );
         result.authDeleted = false;
         result.requiresReauth = true;
+        step.firebaseAccountDeleted = false;
       } else {
+        step.status = 'failed';
+        step.error = error.message;
+        result.errors.push(`Auth deletion failed: ${error.message}`);
         result.authDeleted = false;
+        step.firebaseAccountDeleted = false;
       }
 
       // Fallback: try to at least sign out

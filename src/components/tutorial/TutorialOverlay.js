@@ -68,16 +68,23 @@ export const TutorialOverlay = {
     // Create welcome illustration
     const illustration = this.createWelcomeIllustration();
 
-    content.innerHTML = `
-      <div class="tutorial-welcome__illustration">
-        ${illustration}
-      </div>
-      <h2 class="tutorial-welcome__title">${options.title}</h2>
-      <p class="tutorial-welcome__description">${options.description}</p>
-      <div class="tutorial-welcome__actions">
-        ${this.createActions(options.primaryAction, options.secondaryAction)}
-      </div>
-    `;
+    const illustrationDiv = document.createElement('div');
+    illustrationDiv.className = 'tutorial-welcome__illustration';
+    illustrationDiv.innerHTML = illustration; // Safe: hardcoded SVG
+
+    const title = document.createElement('h2');
+    title.className = 'tutorial-welcome__title';
+    title.textContent = options.title;
+
+    const description = document.createElement('p');
+    description.className = 'tutorial-welcome__description';
+    description.textContent = options.description;
+
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'tutorial-welcome__actions';
+    actionsDiv.innerHTML = this.createActions(options.primaryAction, options.secondaryAction);
+
+    content.append(illustrationDiv, title, description, actionsDiv);
 
     // Clear overlay and add content
     overlay.innerHTML = '';
@@ -374,14 +381,7 @@ export const TutorialOverlay = {
 
     // Add keyboard navigation
     content.addEventListener('keydown', e => {
-      const focusedButton = content.querySelector(':focus');
-
       switch (e.key) {
-        case 'Enter':
-          if (focusedButton) {
-            focusedButton.click();
-          }
-          break;
         case 'Tab': {
           // Allow default tab behavior but constrain to overlay
           const focusableElements = content.querySelectorAll(

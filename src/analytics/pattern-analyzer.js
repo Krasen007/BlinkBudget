@@ -382,7 +382,7 @@ export class PatternAnalyzer {
         type: 'late_night_spending',
         severity: 'low',
         title: 'Late Night Spending Detected',
-        message: `You spent $${nightSpending.total.toFixed(2)} during late night hours (9PM-5AM)`,
+        message: `You spent €${nightSpending.total.toFixed(2)} during late night hours (9PM-5AM)`,
         recommendation:
           'Track if this is impulsive spending and consider setting evening spending limits',
         data: nightSpending,
@@ -426,7 +426,7 @@ export class PatternAnalyzer {
               type: 'spending_increase',
               severity: 'medium',
               title: `${category} Spending Increased`,
-              message: `Your ${category} spending increased by $${spendingIncrease.toFixed(2)}`,
+              message: `Your ${category} spending increased by €${spendingIncrease.toFixed(2)}`,
               recommendation:
                 'Review your recent transactions to understand the increase',
               data: { current, previous, increase: spendingIncrease },
@@ -508,7 +508,7 @@ export class PatternAnalyzer {
     if (peakPeriod && periodAnalysis[peakPeriod]) {
       const peakData = periodAnalysis[peakPeriod];
       insights.push(
-        `Peak spending occurs during ${periodLabels[peakPeriod]} ($${peakData.total.toFixed(2)})`
+        `Peak spending occurs during ${periodLabels[peakPeriod]} (€${peakData.total.toFixed(2)})`
       );
     }
 

@@ -71,8 +71,8 @@ export const SmartAmountInput = {
         'End',
       ];
 
-      // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-      if (e.ctrlKey && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase())) {
+      // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X (and Cmd on Mac)
+      if ((e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase())) {
         return;
       }
 

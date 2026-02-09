@@ -136,26 +136,31 @@ export const AdvancedFilteringSection = () => {
   `;
   container.appendChild(infoSection);
 
-  // Add CSS styles
-  const style = document.createElement('style');
-  style.textContent = `
-    .advanced-filtering-section {
-      margin-top: var(--spacing-lg);
-      margin-bottom: var(--spacing-lg);
-      padding: var(--spacing-md);
-      background: var(--color-surface);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--color-border);
-    }
+  const STYLE_ID = 'advanced-filtering-section-styles';
 
-    .advanced-filtering-toggle {
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-sm);
-      margin-bottom: var(--spacing-lg);
-    }
-  `;
-  document.head.appendChild(style);
+  // Add CSS styles
+  if (!document.getElementById(STYLE_ID)) {
+    const style = document.createElement('style');
+    style.id = STYLE_ID;
+    style.textContent = `
+      .advanced-filtering-section {
+        margin-top: var(--spacing-lg);
+        margin-bottom: var(--spacing-lg);
+        padding: var(--spacing-md);
+        background: var(--color-surface);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--color-border);
+      }
+
+      .advanced-filtering-toggle {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-lg);
+      }
+    `;
+    document.head.appendChild(style);
+  }
 
   return container;
 };

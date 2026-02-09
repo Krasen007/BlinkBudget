@@ -283,10 +283,12 @@ export class FilteringService {
     if (filters.dateRange) {
       const startDate = new Date(filters.dateRange.startDate);
       const endDate = new Date(filters.dateRange.endDate);
-      summary.descriptions.push(
-        `Date: ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`
-      );
-      summary.hasFilters = true;
+      if (!isNaN(startDate) && !isNaN(endDate)) {
+        summary.descriptions.push(
+          `Date: ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`
+        );
+        summary.hasFilters = true;
+      }
     }
 
     if (filters.categories && filters.categories.length > 0) {

@@ -431,10 +431,9 @@ export class TutorialManager {
         break;
       case 'dashboard':
         this.complete();
-        // Navigate to dashboard (implementation depends on router)
-        if (window.router) {
-          window.router.navigate('/');
-        }
+        import('../../core/router.js').then(({ Router }) => {
+          Router.navigate('dashboard');
+        });
         break;
       default:
         // Custom action handlers

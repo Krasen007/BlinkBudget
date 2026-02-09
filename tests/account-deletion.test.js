@@ -204,7 +204,7 @@ describe('AccountDeletionService', () => {
 
     it('should require authentication', async () => {
       // Arrange
-      AuthService.isAuthenticated.mockReturnValue(false);
+      AuthService.isAuthenticated.mockReturnValueOnce(false);
 
       // Act & Assert
       await expect(service.initiateAccountDeletion()).rejects.toThrow(

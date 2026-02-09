@@ -41,13 +41,6 @@ export const AuthService = {
         // Make user object read-only to prevent manipulation
         this.user = user ? Object.freeze({ ...user }) : null;
 
-        // Update user profile in Firestore if user is logged in
-        if (this.user) {
-          this._updateUserProfile(this.user).catch(err =>
-            console.warn('[Auth] Background profile update failed:', err)
-          );
-        }
-
         this.initialized = true;
         if (onAuthStateChange) await onAuthStateChange(this.user);
         resolve(this.user);
