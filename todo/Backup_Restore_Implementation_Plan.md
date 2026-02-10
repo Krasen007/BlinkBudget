@@ -1,4 +1,25 @@
-# BlinkBudget Backup/Restore Implementation Document
+# BlinkBudget Backup/Restore Implementation Document (Updated Feb 2026)
+
+## Status Audit
+
+The backup/restore system is **~80% complete**. The core infrastructure and UI are in place, but several critical finishing touches are missing to ensure the "Hard Restore" promise is fulfilled.
+
+### **What's Implemented** ✅
+
+- [x] **Core Service**: `src/core/backup-service.js` handles daily backups to Firebase.
+- [x] **UI Component**: `src/components/BackupRestoreSection.js` is integrated into Settings.
+- [x] **Initialization**: `src/main.js` correctly triggers the service on app load.
+- [x] **Transaction Restore**: Basic restoration of transactions works.
+- [x] **Verification**: Sophisticated verification and integrity checks (`verifyBackup`).
+
+### **Identified Gaps** ⚠️
+
+- [ ] **Partial Restore**: `restoreBackup()` currently ignores Accounts, Goals, and Investments.
+- [ ] **AccountService Gaps**: `AccountService.js` lacks a `clear()` or `batchSet()` method required for a "Hard Restore".
+- [ ] **Visibility Listener**: The `visibilitychange` trigger mentioned in the plan is missing from `BackupService.js`.
+- [ ] **Metadata Display**: The UI doesn't show the `lastBackupDate` to the user.
+
+---
 
 ## Overview
 

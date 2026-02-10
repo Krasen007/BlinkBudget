@@ -8,19 +8,19 @@ Transform the current basic goal tracking system into an intelligent, automated 
 
 ### Current State Issues
 
-- ❌ Goals are static and require manual updates
-- ❌ No integration between transactions and goal progress
-- ❌ Sophisticated financial modeling exists but is unused in UI
-- ❌ Users must manually edit goals to track progress
-- ❌ No feasibility analysis or intelligent recommendations
+- ❌ Goals are static and require manual progress updates in the UI
+- ❌ No integration between transactions and goal progress (goalId missing in data model)
+- ❌ Sophisticated financial modeling exists in `GoalPlanner.js` but is underutilized in UI
+- ❌ User must manually enter "Current Savings" to track progress
+- ❌ No feasibility analysis or intelligent recommendations in the main workflow
 
 ### Target State
 
-- ✅ Automatic goal progress updates from transactions
-- ✅ Smart category-based goal detection
-- ✅ Feasibility analysis and recommendations
-- ✅ Seamless user experience with minimal manual intervention
-- ✅ Leverages existing sophisticated financial modeling
+- ✅ [IN CORE] Feasibility analysis and wealth projections (Mathematical foundation)
+- [/] Automatic goal progress updates from transactions (Requires Phase 1)
+- [ ] Smart category-based goal detection
+- [ ] Improved Feasibility UI and proactive recommendations
+- [ ] Seamless user experience with minimal manual intervention
 
 ---
 
@@ -614,38 +614,38 @@ const createGoalInsightsSection = () => {
 
 ### Week 1-2: Foundation
 
-- [ ] Add "Спестявания" category
-- [ ] Extend transaction data model
-- [ ] Implement automatic goal progress updates
-- [ ] Basic testing
+- [ ] Add "Спестявания" category to constants
+- [ ] Extend transaction data model with `goalId`
+- [ ] Implement automatic goal progress updates in `TransactionService`
+- [ ] Unit tests for transaction-goal integration
 
 ### Week 3-4: UI Integration
 
-- [ ] Create GoalSelector component
-- [ ] Integrate in TransactionForm
-- [ ] Build QuickGoalCreation modal
-- [ ] Mobile optimization
+- [ ] Create `GoalSelector` component
+- [ ] Integrate `GoalSelector` in `TransactionForm.js` (Smart & Classic modes)
+- [ ] Build `QuickGoalCreation` modal for one-click goal setting
+- [ ] Mobile optimization for goal selection chips
 
 ### Week 5-6: Advanced Features
 
-- [ ] Feasibility analysis in goal creation
-- [ ] Progress projections chart
-- [ ] "Apply Recent Savings" feature
-- [ ] User testing
+- [/] UI for Feasibility analysis (Logic already in `GoalPlanner.js`)
+- [/] UI for Progress projections chart (Logic already in `GoalPlanner.js`)
+- [ ] "Apply Recent Savings" feature for historical linking
+- [ ] User testing with real transaction data
 
 ### Week 7-8: Intelligence
 
-- [ ] GoalIntelligence service
-- [ ] Pattern analysis
-- [ ] Smart suggestions
-- [ ] Unlinked savings detection
+- [ ] `GoalIntelligence` service creation
+- [ ] Savings pattern analysis logic
+- [ ] Smart suggestions for goal adjustments
+- [ ] Unlinked savings proactively detected
 
 ### Week 9-10: Analytics & Polish
 
-- [ ] Goal insights dashboard
-- [ ] Advanced analytics
-- [ ] Performance optimization
-- [ ] Documentation
+- [/] Basic Goal insights dashboard (Expand current `GoalsSection.js`)
+- [ ] Advanced cohort analytics
+- [ ] Performance optimization for large transaction histories
+- [ ] Documentation and walkthrough
 
 ---
 
