@@ -422,10 +422,22 @@ export const ReportsView = () => {
         // Apply advanced filters if they exist
         transactions = allTransactions;
         if (currentAdvancedFilters) {
-          transactions = FilteringService.applyFilters(
-            transactions,
-            currentAdvancedFilters
-          );
+          try {
+            transactions = FilteringService.applyFilters(
+              transactions,
+              currentAdvancedFilters
+            );
+          } catch (filterError) {
+            console.error('Filter application failed:', filterError);
+            // Fallback to all transactions or handle gracefully
+            // keeping transactions as is might be confusing, so maybe empty?
+            // But usually safe to just show all and warn.
+            // For now, let's just log and proceed with unfiltered (or partial) if applyFilters threw mid-way?
+            // Actually applyFilters returns new array. If it throws, transactions is still allTransactions.
+            console.warn(
+              'Proceeding with unfiltered data due to filter error.'
+            );
+          }
         }
       } catch (storageError) {
         console.error('Storage access error:', storageError);

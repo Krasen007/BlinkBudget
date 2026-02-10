@@ -50,6 +50,18 @@ export const TransactionService = {
   getAllForExport() {
     const transactions = this.getAll();
 
+    // Audit log data export
+    auditService.log(
+      auditEvents.DATA_EXPORT,
+      {
+        entityType: 'transaction',
+        count: transactions.length,
+        format: 'json',
+      },
+      AuthService.getUserId(),
+      'medium'
+    );
+
     return transactions.map(transaction => {
       // Create a copy and remove internal fields
       const exportTx = { ...transaction };

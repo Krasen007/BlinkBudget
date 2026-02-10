@@ -13,39 +13,75 @@ export const TutorialTooltip = {
     position = 'auto',
     actions = [],
     onAction,
+    stepIndicator,
   }) {
     const tooltip = document.createElement('div');
     tooltip.className = 'tutorial-tooltip';
 
-    // Calculate position
-    const placement = this.calculatePosition(target, position);
+    // Position will be set later
+    tooltip.style.opacity = '0';
 
-    tooltip.style.cssText = `
-      position: fixed;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      padding: var(--spacing-lg);
-      max-width: ${TUTORIAL_CONFIG.tooltipMaxWidth}px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-      z-index: 10000;
-      top: ${placement.top}px;
-      left: ${placement.left}px;
-      opacity: 0;
-      transform: scale(0.9);
-      transition: all var(--transition-normal);
-    `;
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'tutorial-tooltip__content';
+
+    if (title) {
+      const titleEl = document.createElement('h3');
+      titleEl.className = 'tutorial-tooltip__title';
+      titleEl.textContent = title;
+      contentDiv.appendChild(titleEl);
+    }
+
+    const body = document.createElement('div');
+    body.className = 'tutorial-tooltip__body';
+    body.appendChild(this.createSafeContent(content));
+    contentDiv.appendChild(body);
+
+    const footer = document.createElement('div');
+    footer.className = 'tutorial-tooltip__footer';
+
+    // Steps indicator (if explicitly passed or needed)
+    if (stepIndicator) {
+      const steps = document.createElement('div');
+      steps.className = 'tutorial-tooltip__steps';
+      steps.textContent = stepIndicator;
+      footer.appendChild(steps);
+    }
+
+    const actionsContainer = document.createElement('div');
+    actionsContainer.className = 'tutorial-tooltip__actions';
+    actionsContainer.appendChild(this.createActions(actions));
+    footer.appendChild(actionsContainer);
+
+    // Only append footer if it has content (actions or steps)
+    if (actions.length > 0 || stepIndicator) {
+      contentDiv.appendChild(footer);
+    }
+
+    tooltip.appendChild(contentDiv);
 
     // Add arrow
-    const arrow = this.createArrow(placement.arrowPosition);
+    const arrow = document.createElement('div');
+    arrow.className = 'tutorial-tooltip__arrow';
     tooltip.appendChild(arrow);
 
-    // Add content
-    tooltip.innerHTML += `
-      <h3 class="tutorial-tooltip__title">${title}</h3>
-      <p class="tutorial-tooltip__content">${content}</p>
-      ${actions.length > 0 ? this.createActionButtons(actions) : ''}
-    `;
+    // Store callback
+    tooltip.onAction = onAction;
+
+    // Calculate initial position
+    const placement = this.calculatePosition(target, position);
+    this.applyPosition(tooltip, placement);
+
+    // Attach listeners
+    this.attachListeners(tooltip);
+
+    // Handle window resize
+    const handleResize = () => {
+      const newPlacement = this.calculatePosition(target, position);
+      this.applyPosition(tooltip, newPlacement);
+    };
+
+    window.addEventListener('resize', handleResize);
+    tooltip._resizeHandler = handleResize;
 
     // Animate in
     requestAnimationFrame(() => {
@@ -53,30 +89,97 @@ export const TutorialTooltip = {
       tooltip.style.transform = 'scale(1)';
     });
 
-    // Store onAction callback
-    tooltip.onAction = onAction;
-
-    // Add event listeners
-    this.attachListeners(tooltip);
-
-    // Handle window resize
-    const handleResize = () => {
-      const newPlacement = this.calculatePosition(target, position);
-      tooltip.style.top = `${newPlacement.top}px`;
-      tooltip.style.left = `${newPlacement.left}px`;
-
-      // Update arrow position
-      const newArrow = this.createArrow(newPlacement.arrowPosition);
-      const existingArrow = tooltip.querySelector('.tutorial-tooltip__arrow');
-      if (existingArrow) {
-        existingArrow.replaceWith(newArrow);
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    tooltip._resizeHandler = handleResize;
-
     return tooltip;
+  },
+
+  applyPosition(tooltip, placement) {
+    tooltip.style.top = `${placement.top}px`;
+    tooltip.style.left = `${placement.left}px`;
+
+    // Update arrow
+    const arrow = tooltip.querySelector('.tutorial-tooltip__arrow');
+    if (arrow) {
+      const arrowStyles = {
+        top: 'bottom: -7px; left: 50%; transform: translateX(-50%) rotate(45deg);',
+        bottom:
+          'top: -7px; left: 50%; transform: translateX(-50%) rotate(45deg);',
+        left: 'right: -7px; top: 50%; transform: translateY(-50%) rotate(45deg);',
+        right:
+          'left: -7px; top: 50%; transform: translateY(-50%) rotate(45deg);',
+      };
+
+      arrow.style.cssText = `
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        ${arrowStyles[placement.arrowPosition]}
+      `;
+
+      // Override border based on position to merge with tooltip border
+      if (placement.arrowPosition === 'top') {
+        arrow.style.borderTop = 'none';
+        arrow.style.borderLeft = 'none';
+      } else if (placement.arrowPosition === 'bottom') {
+        arrow.style.borderBottom = 'none';
+        arrow.style.borderRight = 'none';
+      }
+    }
+  },
+
+  /**
+   * Safely create content with basic formatting support
+   * Supports <br>, \n, and **text**
+   */
+  createSafeContent(text) {
+    const container = document.createDocumentFragment();
+    if (!text) return container;
+
+    // Replace newlines with <br> tag for splitting
+    const normalizedText = text.replace(/\n/g, '<br>');
+
+    // Split by <br> tags (case insensitive)
+    const lines = normalizedText.split(/<br\s*\/?>/i);
+
+    lines.forEach((line, index) => {
+      if (index > 0) {
+        container.appendChild(document.createElement('br'));
+      }
+
+      // Handle bold text (**text**)
+      const parts = line.split(/(\*\*.*?\*\*)/);
+      parts.forEach(part => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          const strong = document.createElement('strong');
+          strong.textContent = part.slice(2, -2);
+          container.appendChild(strong);
+        } else {
+          container.appendChild(document.createTextNode(part));
+        }
+      });
+    });
+
+    return container;
+  },
+
+  createActions(actions = []) {
+    const fragment = document.createDocumentFragment();
+
+    actions.forEach(action => {
+      if (!action) return;
+
+      const variant = action.variant || 'secondary';
+      const button = document.createElement('button');
+      button.className = `btn btn--${variant} tutorial-tooltip-action`;
+      button.dataset.action = action.id;
+      button.style.margin = '0 var(--spacing-xs)';
+      button.textContent = action.text;
+
+      fragment.appendChild(button);
+    });
+
+    return fragment;
   },
 
   calculatePosition(target, preferredPosition) {
@@ -222,52 +325,18 @@ export const TutorialTooltip = {
     };
   },
 
-  createArrow(position) {
+  createArrow(_position) {
+    // Legacy method kept if referenced elsewhere, but applyPosition handles it now for efficiency
+    // Ideally we should remove this if unused, but avoiding potential breakage for now.
     const arrow = document.createElement('div');
-    arrow.className = 'tutorial-tooltip__arrow';
-
-    const arrowStyles = {
-      top: 'bottom: -7px; left: 50%; transform: translateX(-50%) rotate(45deg);',
-      bottom:
-        'top: -7px; left: 50%; transform: translateX(-50%) rotate(45deg);',
-      left: 'right: -7px; top: 50%; transform: translateY(-50%) rotate(45deg);',
-      right: 'left: -7px; top: 50%; transform: translateY(-50%) rotate(45deg);',
-    };
-
-    arrow.style.cssText = `
-      position: absolute;
-      width: 12px;
-      height: 12px;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      ${arrowStyles[position]}
-    `;
-
     return arrow;
-  },
-
-  createActionButtons(actions) {
-    return `
-      <div class="tutorial-tooltip__actions">
-        ${actions
-          .map(
-            action => `
-          <button class="btn btn--${action.variant || 'secondary'} tutorial-tooltip-action" 
-                  data-action="${action.id}"
-                  style="margin: 0 var(--spacing-xs);">
-            ${action.text}
-          </button>
-        `
-          )
-          .join('')}
-      </div>
-    `;
   },
 
   attachListeners(tooltip) {
     // Action buttons
     tooltip.querySelectorAll('.tutorial-tooltip-action').forEach(button => {
-      button.addEventListener('click', () => {
+      button.addEventListener('click', e => {
+        e.stopPropagation(); // Prevent bubbling
         const action = button.dataset.action;
         if (tooltip.onAction) {
           tooltip.onAction(action);
@@ -282,9 +351,9 @@ export const TutorialTooltip = {
           if (tooltip.onAction) tooltip.onAction('dismiss');
           break;
         case 'Enter': {
-          const focusedButton = tooltip.querySelector(':focus');
-          if (focusedButton && tooltip.onAction) {
-            tooltip.onAction(focusedButton.dataset.action);
+          if (e.target.classList.contains('tutorial-tooltip-action')) {
+            const action = e.target.dataset.action;
+            if (tooltip.onAction) tooltip.onAction(action);
           }
           break;
         }

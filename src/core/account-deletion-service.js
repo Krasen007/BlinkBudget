@@ -319,14 +319,25 @@ export class AccountDeletionService {
         } else {
           // Delete the Firebase user account
           const currentUser = auth.currentUser;
+
+          // Verify user identity matches
+          if (currentUser && currentUser.uid !== user.uid) {
+            throw new Error(
+              'Security mismatch: Current session user does not match authenticated user.'
+            );
+          }
+
           if (currentUser) {
             await deleteUser(currentUser);
             result.authDeleted = true;
             console.log('[AccountDeletion] Firebase user deleted successfully');
           } else {
-            console.warn('[AccountDeletion] No current Firebase user found');
-            result.authDeleted = false;
-            result.warnings.push('No current Firebase user found for deletion');
+            console.error(
+              '[AccountDeletion] No current Firebase user found despite active session'
+            );
+            throw new Error(
+              'Authentication state mismatch. Please log in again.'
+            );
           }
         }
       } else {

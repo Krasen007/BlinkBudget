@@ -82,9 +82,7 @@ const initApp = () => {
 
             if (shouldShowTutorial) {
               // Show tutorial after a short delay to let app settle
-              setTimeout(() => {
-                tutorialManager.start();
-              }, 1500);
+              tutorialManager.startWithDelay(1500);
             }
 
             // Store reference globally for potential future use
@@ -104,6 +102,13 @@ const initApp = () => {
       }
     } else {
       console.log('[Main] No user, stopping sync.');
+
+      // Cleanup tutorial manager
+      if (window.tutorialManager) {
+        window.tutorialManager.destroy();
+        window.tutorialManager = null;
+      }
+
       localStorage.removeItem('auth_hint');
       SyncService.stopSync();
       NavigationState.clearState();

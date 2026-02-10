@@ -214,6 +214,11 @@ export class FilteringService {
     let filteredTransactions = [...transactions];
     const includeGhosts = filters.includeGhosts || false;
 
+    // Filter out ghost transactions first if not included
+    if (!includeGhosts) {
+      filteredTransactions = filteredTransactions.filter(t => !t.isGhost);
+    }
+
     // Apply each filter if present
     if (filters.dateRange) {
       filteredTransactions = this.filterByTimePeriod(
@@ -293,8 +298,9 @@ export class FilteringService {
 
     if (filters.categories && filters.categories.length > 0) {
       const type = filters.categoryFilterType || 'include';
-      const action = type === 'include' ? 'Categories' : 'Excluding';
-      summary.descriptions.push(`${action}: ${filters.categories.join(', ')}`);
+      const label =
+        type === 'include' ? 'Categories' : 'Categories (excluding)';
+      summary.descriptions.push(`${label}: ${filters.categories.join(', ')}`);
       summary.hasFilters = true;
     }
 

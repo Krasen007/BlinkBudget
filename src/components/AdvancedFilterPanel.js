@@ -12,6 +12,12 @@ export const AdvancedFilterPanel = ({
   onFiltersChange,
   initialFilters = {},
 }) => {
+  // Safe notification wrapper
+  const notifyFiltersChange = filters => {
+    if (typeof onFiltersChange === 'function') {
+      onFiltersChange(filters);
+    }
+  };
   // Panel container
   const panel = document.createElement('div');
   panel.className = 'advanced-filter-panel';
@@ -61,7 +67,7 @@ export const AdvancedFilterPanel = ({
     onClick: () => {
       currentFilters = FilteringService.clearFilters();
       updateFormValues();
-      onFiltersChange(currentFilters);
+      notifyFiltersChange(currentFilters);
     },
   });
   clearButton.style.fontSize = 'var(--font-size-sm)';
@@ -265,8 +271,14 @@ export const AdvancedFilterPanel = ({
       checkboxWrapper.style.backgroundColor = 'var(--color-surface-hover)';
     });
     checkboxWrapper.addEventListener('mouseleave', () => {
-      if (!checkbox.checked) {
-        checkboxWrapper.style.backgroundColor = 'var(--color-background)';
+      if (checkbox.checked) {
+        checkboxWrapper.style.backgroundColor = 'var(--color-primary)';
+        checkboxWrapper.style.borderColor = 'var(--color-primary)';
+        label.style.color = 'white';
+      } else {
+        checkboxWrapper.style.backgroundColor = 'transparent'; // Original unselected state
+        checkboxWrapper.style.borderColor = 'var(--color-border)'; // Original border
+        label.style.color = 'var(--color-text-main)'; // Original text color
       }
     });
     checkbox.addEventListener('change', () => {
@@ -340,7 +352,7 @@ export const AdvancedFilterPanel = ({
     variant: 'primary',
     onClick: () => {
       updateFiltersFromForm();
-      onFiltersChange(currentFilters);
+      notifyFiltersChange(currentFilters);
     },
   });
   applyButton.style.cssText = `
@@ -400,8 +412,15 @@ export const AdvancedFilterPanel = ({
     currentFilters.categoryFilterType = categoryFilterType.value;
 
     // Amount range
-    const minAmount = parseFloat(minAmountInput.value) || undefined;
-    const maxAmount = parseFloat(maxAmountInput.value) || undefined;
+    const minVal = parseFloat(minAmountInput.value);
+    const maxVal = parseFloat(maxAmountInput.value);
+
+    // Explicitly check for valid numbers, allowing 0
+    const minAmount =
+      minAmountInput.value !== '' && !Number.isNaN(minVal) ? minVal : undefined;
+    const maxAmount =
+      maxAmountInput.value !== '' && !Number.isNaN(maxVal) ? maxVal : undefined;
+
     if (minAmount !== undefined || maxAmount !== undefined) {
       currentFilters.amountRange = { min: minAmount, max: maxAmount };
     } else {
@@ -486,12 +505,30 @@ export const AdvancedFilterPanel = ({
 
     categoryFilterType.addEventListener('change', () => {
       updateFiltersFromForm();
-      onFiltersChange(currentFilters);
+      notifyFiltersChange(currentFilters);
+    });
+
+    // Checkbox listeners for categories
+    categoriesContainer
+      .querySelectorAll('input[type="checkbox"]')
+      .forEach(cb => {
+        cb.addEventListener('change', () => {
+          updateFiltersFromForm();
+          notifyFiltersChange(currentFilters);
+        });
+      });
+
+    // Checkbox listeners for transaction types
+    typesContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        updateFiltersFromForm();
+        notifyFiltersChange(currentFilters);
+      });
     });
 
     caseSensitiveInput.addEventListener('change', () => {
       updateFiltersFromForm();
-      onFiltersChange(currentFilters);
+      notifyFiltersChange(currentFilters);
     });
   }
 

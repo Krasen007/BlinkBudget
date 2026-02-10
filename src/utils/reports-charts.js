@@ -4,7 +4,7 @@
  * Chart creation and rendering functions for reports view.
  */
 
-import { COLORS, SPACING } from './constants.js';
+import { COLORS, SPACING, CATEGORY_COLORS } from './constants.js';
 import { getChartColors } from '../core/chart-config.js';
 import { TransactionService } from '../core/transaction-service.js';
 import { generateMonthlyTrendData } from './reports-utils.js';
@@ -422,7 +422,7 @@ export async function createCategoryTrendsChart(
 //   return button;
 // }
 
-import { CATEGORY_COLORS } from './constants.js';
+// Migrated import to top
 
 /**
  * Get a deterministic color for a category

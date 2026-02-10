@@ -34,13 +34,21 @@ export const AdvancedFilteringSection = () => {
   // Toggle switch
   const toggleSwitch = document.createElement('div');
   toggleSwitch.className = `toggle-switch ${currentSetting ? 'enabled' : 'disabled'}`;
+  toggleSwitch.setAttribute('tabindex', '0');
+  toggleSwitch.setAttribute('role', 'switch');
+  toggleSwitch.setAttribute('aria-checked', currentSetting);
 
   const toggleSlider = document.createElement('div');
   toggleSlider.className = 'toggle-slider';
   toggleSwitch.appendChild(toggleSlider);
 
   // Toggle functionality
-  const toggleFiltering = () => {
+  const toggleFiltering = e => {
+    // Prevent default scrolling for Space
+    if (e && e.type === 'keydown' && e.key === ' ') {
+      e.preventDefault();
+    }
+
     const isEnabled =
       SettingsService.getSetting('advancedFilteringEnabled') === true;
     const newSetting = !isEnabled;
@@ -48,6 +56,7 @@ export const AdvancedFilteringSection = () => {
 
     // Update UI
     toggleSwitch.className = `toggle-switch ${newSetting ? 'enabled' : 'disabled'}`;
+    toggleSwitch.setAttribute('aria-checked', newSetting);
 
     // Update description
     updateDescription(newSetting);
@@ -55,6 +64,13 @@ export const AdvancedFilteringSection = () => {
     // Show feedback
     showFeedback(newSetting);
   };
+
+  // Add keyboard support
+  toggleSwitch.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      toggleFiltering(e);
+    }
+  });
 
   // Update description based on setting
   const updateDescription = isEnabled => {

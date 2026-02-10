@@ -21,12 +21,13 @@ export class MobileViewportManager {
   }
 
   initialize() {
-    // Temporarily disable viewport management to prevent layout jumps
-    // TODO: Re-enable after fixing layout issues
-    console.warn(
-      'Mobile viewport manager temporarily disabled to prevent layout jumps'
-    );
-    return;
+    this.setupViewportListeners();
+    this.setupInputListeners();
+    this.setupCSSCustomProperties();
+
+    if (!this.visualViewport) {
+      this.initializeFallback();
+    }
   }
 
   setupViewportListeners() {

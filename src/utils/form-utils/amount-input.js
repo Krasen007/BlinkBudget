@@ -77,6 +77,42 @@ export const createAmountInput = (options = {}) => {
     }
   });
 
+  // Sanitize paste input
+  input.addEventListener('paste', e => {
+    e.preventDefault();
+    const text = (e.clipboardData || window.clipboardData).getData('text');
+
+    // Allow digits, dots, and commas
+    if (!text) return;
+
+    // Replace comma with dot for consistency if needed, or keep as is
+    // Just sanitize to allowed characters
+    const sanitized = text.replace(/[^0-9.,]/g, '');
+
+    // Insert at cursor position (basic implementation)
+    // or just set value if acceptable. For amount input, appending or replacing selection is safer.
+    // Here we'll take the simple approach of inserting at cursor or replacing selection.
+
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    const currentValue = input.value;
+
+    const newValue =
+      currentValue.substring(0, start) +
+      sanitized +
+      currentValue.substring(end);
+
+    // Validate format (e.g. max one dot/comma) logic could go here,
+    // but the input type="text" allows loose input.
+    // We just ensure chars are valid.
+
+    input.value = newValue;
+
+    // Restore cursor
+    const newCursorPos = start + sanitized.length;
+    input.setSelectionRange(newCursorPos, newCursorPos);
+  });
+
   // Track clicks on amount input
   input.addEventListener('click', () => {
     ClickTracker.recordClick();

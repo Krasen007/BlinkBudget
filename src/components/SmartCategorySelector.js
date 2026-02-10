@@ -99,8 +99,20 @@ export const SmartCategorySelector = {
         CustomCategoryService.getSystemCategories('expense');
       const customCategories = CustomCategoryService.getByType('expense');
 
-      // Combine them
-      const availableCategories = [...allCategoryData, ...customCategories];
+      // Combine and deduplicate by name (preferring custom)
+      const categoryMap = new Map();
+
+      // Add system categories first
+      allCategoryData.forEach(cat =>
+        categoryMap.set(cat.name.toLowerCase(), cat)
+      );
+
+      // Override/Add custom categories
+      customCategories.forEach(cat =>
+        categoryMap.set(cat.name.toLowerCase(), cat)
+      );
+
+      const availableCategories = Array.from(categoryMap.values());
 
       // 2. Get transaction history for frequency data
       const transactions = await this.getTransactionHistory();

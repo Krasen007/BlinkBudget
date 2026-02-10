@@ -69,7 +69,7 @@ export const TUTORIAL_STEPS = [
     target: '[data-tutorial-target="amount-input"]',
     title: 'Your First Transaction',
     content:
-      "Let's log a sample expense together. Notice how simple this is. Enter any amount (try $5.50) and choose where this expense came from.",
+      "Let's log a sample expense together. Notice how simple this is. Enter any amount (try €5.50) and choose where this expense came from.",
     position: 'top',
     delay: 2000, // Wait longer for page to load
     actions: [

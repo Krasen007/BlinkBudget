@@ -22,6 +22,7 @@ export class TutorialManager {
     this.spotlightElement = null;
     this.seenSteps = new Set();
     this.onComplete = null;
+    this.timeouts = new Set(); // Track active timeouts
 
     // Bind methods to maintain context
     this.handleAction = this.handleAction.bind(this);
@@ -109,6 +110,16 @@ export class TutorialManager {
 
     // Show first step
     this.showCurrentStep();
+  }
+
+  /**
+   * Start the tutorial after a delay
+   * @param {number} delay - Delay in milliseconds
+   */
+  startWithDelay(delay) {
+    this.setTimeout(() => {
+      this.start();
+    }, delay);
   }
 
   /**
@@ -202,9 +213,9 @@ export class TutorialManager {
       if (usesOverlay) {
         this.overlay.style.display = 'flex';
         // Ensure opacity is reset if it was hidden
-        requestAnimationFrame(() => {
-          this.overlay.style.opacity = '1';
-        });
+        this.setTimeout(() => {
+          if (this.overlay) this.overlay.style.opacity = '1';
+        }, 0);
       } else {
         this.overlay.style.display = 'none';
       }
@@ -254,7 +265,7 @@ export class TutorialManager {
     const delay = step.delay || 0;
 
     if (delay > 0) {
-      setTimeout(() => {
+      this.setTimeout(() => {
         this.executeSpotlightStep(step);
       }, delay);
     } else {
@@ -268,6 +279,11 @@ export class TutorialManager {
   executeSpotlightStep(step) {
     // Try to find the target element with retries
     this.findTargetWithRetry(step.target, targetElement => {
+      // Check if we are still active and on the correct step before proceeding
+      if (!this.isActive || this.steps[this.currentStep]?.id !== step.id) {
+        return;
+      }
+
       if (!targetElement) {
         console.warn(`Tutorial target not found after retries: ${step.target}`);
         this.emitEvent(TUTORIAL_EVENTS.TARGET_NOT_FOUND, {
@@ -294,7 +310,7 @@ export class TutorialManager {
     if (targetElement) {
       callback(targetElement);
     } else if (retries > 0) {
-      setTimeout(() => {
+      this.setTimeout(() => {
         this.findTargetWithRetry(target, callback, retries - 1, delay);
       }, delay);
     } else {
@@ -385,7 +401,7 @@ export class TutorialManager {
     });
 
     // Navigate to the target route after a short delay
-    setTimeout(() => {
+    this.setTimeout(() => {
       import('../../core/router.js').then(({ Router }) => {
         Router.navigate(step.target);
       });
@@ -477,7 +493,14 @@ export class TutorialManager {
    */
   skip() {
     this.cleanup();
-    this.complete();
+    this.isActive = false;
+
+    // Mark as completed since skipped implies "don't show again"
+    SettingsService.saveSetting(TUTORIAL_CONFIG.completedKey, true);
+
+    this.removeOverlay();
+    this.removeGlobalEventListeners();
+
     this.emitEvent(TUTORIAL_EVENTS.SKIPPED, { stepIndex: this.currentStep });
   }
 
@@ -491,12 +514,7 @@ export class TutorialManager {
     // Mark as dismissed but not completed
     SettingsService.saveSetting(TUTORIAL_CONFIG.dismissedKey, true);
 
-    // Remove overlay
-    if (this.overlay) {
-      this.overlay.remove();
-      this.overlay = null;
-    }
-
+    this.removeOverlay();
     this.removeGlobalEventListeners();
     this.emitEvent(TUTORIAL_EVENTS.DISMISSED, { stepIndex: this.currentStep });
   }
@@ -511,13 +529,9 @@ export class TutorialManager {
     // Mark as completed
     SettingsService.saveSetting(TUTORIAL_CONFIG.completedKey, true);
 
-    // Remove overlay
-    if (this.overlay) {
-      this.overlay.remove();
-      this.overlay = null;
-    }
-
+    this.removeOverlay();
     this.removeGlobalEventListeners();
+
     this.emitEvent(TUTORIAL_EVENTS.COMPLETED, {
       totalSteps: this.steps.length,
       seenSteps: Array.from(this.seenSteps),
@@ -526,6 +540,13 @@ export class TutorialManager {
     // Trigger completion callback
     if (this.onComplete) {
       this.onComplete();
+    }
+  }
+
+  removeOverlay() {
+    if (this.overlay) {
+      this.overlay.remove();
+      this.overlay = null;
     }
   }
 
@@ -544,6 +565,26 @@ export class TutorialManager {
       this.tooltip.remove();
       this.tooltip = null;
     }
+  }
+
+  /**
+   * Wrapper for setTimeout that tracks ID for cleanup
+   */
+  setTimeout(callback, delay) {
+    const id = setTimeout(() => {
+      this.timeouts.delete(id);
+      callback();
+    }, delay);
+    this.timeouts.add(id);
+    return id;
+  }
+
+  /**
+   * Clear all active timeouts
+   */
+  clearTimeouts() {
+    this.timeouts.forEach(clearTimeout);
+    this.timeouts.clear();
   }
 
   /**
@@ -583,6 +624,7 @@ export class TutorialManager {
    * Restart tutorial from beginning
    */
   restart() {
+    this.clearTimeouts();
     this.cleanup();
     this.currentStep = 0;
     this.seenSteps.clear();
@@ -596,12 +638,10 @@ export class TutorialManager {
    * Destroy tutorial manager
    */
   destroy() {
+    this.clearTimeouts();
     this.cleanup();
     this.removeGlobalEventListeners();
-    if (this.overlay) {
-      this.overlay.remove();
-      this.overlay = null;
-    }
+    this.removeOverlay();
     this.isActive = false;
   }
 }

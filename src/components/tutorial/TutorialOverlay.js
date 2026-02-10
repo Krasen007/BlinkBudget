@@ -70,7 +70,7 @@ export const TutorialOverlay = {
 
     const illustrationDiv = document.createElement('div');
     illustrationDiv.className = 'tutorial-welcome__illustration';
-    illustrationDiv.innerHTML = illustration; // Safe: hardcoded SVG
+    illustrationDiv.innerHTML = illustration; // Safe: hardcoded SVG from internal method
 
     const title = document.createElement('h2');
     title.className = 'tutorial-welcome__title';
@@ -82,7 +82,9 @@ export const TutorialOverlay = {
 
     const actionsDiv = document.createElement('div');
     actionsDiv.className = 'tutorial-welcome__actions';
-    actionsDiv.innerHTML = this.createActions(options.primaryAction, options.secondaryAction);
+    actionsDiv.appendChild(
+      this.createActions(options.primaryAction, options.secondaryAction)
+    );
 
     content.append(illustrationDiv, title, description, actionsDiv);
 
@@ -96,7 +98,8 @@ export const TutorialOverlay = {
       content.style.transform = 'scale(1)';
     });
 
-    // Add event listeners
+    // Add event listeners (delegated or attached in createActions)
+    // Note: createActions now attaches listeners directly to buttons
     this.attachActionListeners(content, overlay);
   },
 
@@ -120,16 +123,23 @@ export const TutorialOverlay = {
       options.illustration
     );
 
-    content.innerHTML = `
-      <div class="tutorial-celebration__illustration">
-        ${illustration}
-      </div>
-      <h2 class="tutorial-celebration__title">${options.title}</h2>
-      <p class="tutorial-celebration__description">${options.description}</p>
-      <div class="tutorial-celebration__actions">
-        ${this.createActions(...options.actions)}
-      </div>
-    `;
+    const illustrationDiv = document.createElement('div');
+    illustrationDiv.className = 'tutorial-celebration__illustration';
+    illustrationDiv.innerHTML = illustration; // Safe: hardcoded SVG
+
+    const title = document.createElement('h2');
+    title.className = 'tutorial-celebration__title';
+    title.textContent = options.title;
+
+    const description = document.createElement('div');
+    description.className = 'tutorial-celebration__description';
+    description.appendChild(this.createSafeContent(options.description));
+
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'tutorial-celebration__actions';
+    actionsDiv.appendChild(this.createActions(...(options.actions || [])));
+
+    content.append(illustrationDiv, title, description, actionsDiv);
 
     overlay.innerHTML = '';
     overlay.appendChild(content);
@@ -159,18 +169,28 @@ export const TutorialOverlay = {
     `;
 
     // Create illustration if provided
-    const illustration = options.illustration
-      ? this.createInfoIllustration(options.illustration)
-      : '';
+    if (options.illustration) {
+      const illustration = this.createInfoIllustration(options.illustration);
+      const illustrationDiv = document.createElement('div');
+      illustrationDiv.className = 'tutorial-info__illustration';
+      illustrationDiv.innerHTML = illustration; // Safe: hardcoded SVG
+      content.appendChild(illustrationDiv);
+    }
 
-    content.innerHTML = `
-      ${illustration ? `<div class="tutorial-info__illustration">${illustration}</div>` : ''}
-      <h2 class="tutorial-info__title">${options.title}</h2>
-      <div class="tutorial-info__content">${options.content}</div>
-      <div class="tutorial-info__actions">
-        ${this.createActions(...options.actions)}
-      </div>
-    `;
+    const title = document.createElement('h2');
+    title.className = 'tutorial-info__title';
+    title.textContent = options.title;
+    content.appendChild(title);
+
+    const infoContent = document.createElement('div');
+    infoContent.className = 'tutorial-info__content';
+    infoContent.appendChild(this.createSafeContent(options.content));
+    content.appendChild(infoContent);
+
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'tutorial-info__actions';
+    actionsDiv.appendChild(this.createActions(...(options.actions || [])));
+    content.appendChild(actionsDiv);
 
     overlay.innerHTML = '';
     overlay.appendChild(content);
@@ -182,6 +202,41 @@ export const TutorialOverlay = {
     });
 
     this.attachActionListeners(content, overlay);
+  },
+
+  /**
+   * Safely create content with basic formatting support
+   * Supports <br>, \n, and **text**
+   */
+  createSafeContent(text) {
+    const container = document.createDocumentFragment();
+    if (!text) return container;
+
+    // Replace newlines with <br> tag for splitting
+    const normalizedText = text.replace(/\n/g, '<br>');
+
+    // Split by <br> tags (case insensitive)
+    const lines = normalizedText.split(/<br\s*\/?>/i);
+
+    lines.forEach((line, index) => {
+      if (index > 0) {
+        container.appendChild(document.createElement('br'));
+      }
+
+      // Handle bold text (**text**)
+      const parts = line.split(/(\*\*.*?\*\*)/);
+      parts.forEach(part => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          const strong = document.createElement('strong');
+          strong.textContent = part.slice(2, -2);
+          container.appendChild(strong);
+        } else {
+          container.appendChild(document.createTextNode(part));
+        }
+      });
+    });
+
+    return container;
   },
 
   createWelcomeIllustration() {
@@ -235,21 +290,16 @@ export const TutorialOverlay = {
   },
 
   createInfoIllustration(type) {
+    // Return existing SVG string helpers...
     switch (type) {
       case 'three-clicks':
         return `
           <svg width="120" height="120" viewBox="0 0 120 120" style="margin-bottom: var(--spacing-lg);">
             <g class="three-clicks-animation">
-              <!-- Click circles -->
               <circle cx="30" cy="60" r="8" fill="var(--color-primary)" opacity="0.8"/>
               <circle cx="60" cy="60" r="8" fill="var(--color-primary)" opacity="0.8"/>
               <circle cx="90" cy="60" r="8" fill="var(--color-primary)" opacity="0.8"/>
-              
-              <!-- Connecting lines -->
-              <path d="M38 60 L52 60 M68 60 L82 60" 
-                    stroke="var(--color-primary)" stroke-width="2" opacity="0.5"/>
-              
-              <!-- Numbers -->
+              <path d="M38 60 L52 60 M68 60 L82 60" stroke="var(--color-primary)" stroke-width="2" opacity="0.5"/>
               <text x="30" y="45" text-anchor="middle" fill="var(--color-primary)" font-size="12" font-weight="bold">1</text>
               <text x="60" y="45" text-anchor="middle" fill="var(--color-primary)" font-size="12" font-weight="bold">2</text>
               <text x="90" y="45" text-anchor="middle" fill="var(--color-primary)" font-size="12" font-weight="bold">3</text>
@@ -260,17 +310,11 @@ export const TutorialOverlay = {
         return `
           <svg width="120" height="120" viewBox="0 0 120 120" style="margin-bottom: var(--spacing-lg);">
             <g class="smart-features-animation">
-              <!-- Brain outline -->
               <path d="M60 30 C40 30, 25 45, 25 60 C25 75, 40 90, 60 90 C80 90, 95 75, 95 60 C95 45, 80 30, 60 30 Z" 
                     fill="var(--color-primary)" opacity="0.1"/>
-              
-              <!-- Lightbulb -->
               <circle cx="60" cy="55" r="15" fill="var(--color-primary)" opacity="0.8"/>
               <rect x="50" y="70" width="20" height="8" fill="var(--color-primary)" opacity="0.6"/>
-              
-              <!-- Light rays -->
-              <path d="M60 25 L60 15 M45 35 L35 25 M75 35 L85 25" 
-                    stroke="var(--color-primary)" stroke-width="2" opacity="0.6"/>
+              <path d="M60 25 L60 15 M45 35 L35 25 M75 35 L85 25" stroke="var(--color-primary)" stroke-width="2" opacity="0.6"/>
             </g>
           </svg>
         `;
@@ -278,12 +322,9 @@ export const TutorialOverlay = {
         return `
           <svg width="120" height="120" viewBox="0 0 120 120" style="margin-bottom: var(--spacing-lg);">
             <g class="accounts-animation">
-              <!-- Cards -->
               <rect x="25" y="40" width="35" height="25" rx="4" fill="var(--color-primary)" opacity="0.8"/>
               <rect x="35" y="50" width="35" height="25" rx="4" fill="var(--color-primary)" opacity="0.6"/>
               <rect x="45" y="60" width="35" height="25" rx="4" fill="var(--color-primary)" opacity="0.4"/>
-              
-              <!-- Card chips -->
               <rect x="30" y="47" width="8" height="6" fill="white" opacity="0.8"/>
               <rect x="40" y="57" width="8" height="6" fill="white" opacity="0.8"/>
               <rect x="50" y="67" width="8" height="6" fill="white" opacity="0.8"/>
@@ -294,17 +335,11 @@ export const TutorialOverlay = {
         return `
           <svg width="120" height="120" viewBox="0 0 120 120" style="margin-bottom: var(--spacing-lg);">
             <g class="planning-animation">
-              <!-- Chart bars -->
               <rect x="20" y="70" width="15" height="20" fill="var(--color-primary)" opacity="0.6"/>
               <rect x="40" y="60" width="15" height="30" fill="var(--color-primary)" opacity="0.7"/>
               <rect x="60" y="50" width="15" height="40" fill="var(--color-primary)" opacity="0.8"/>
               <rect x="80" y="40" width="15" height="50" fill="var(--color-primary)" opacity="0.9"/>
-              
-              <!-- Trend line -->
-              <path d="M27 70 L47 60 L67 50 L87 40" 
-                    stroke="var(--color-primary)" stroke-width="2" fill="none"/>
-              
-              <!-- Target -->
+              <path d="M27 70 L47 60 L67 50 L87 40" stroke="var(--color-primary)" stroke-width="2" fill="none"/>
               <circle cx="87" cy="40" r="4" fill="var(--color-primary)"/>
             </g>
           </svg>
@@ -313,19 +348,12 @@ export const TutorialOverlay = {
         return `
           <svg width="120" height="120" viewBox="0 0 120 120" style="margin-bottom: var(--spacing-lg);">
             <g class="mobile-animation">
-              <!-- Phone outline -->
               <rect x="40" y="25" width="40" height="70" rx="8" 
                     fill="var(--color-primary)" opacity="0.1" stroke="var(--color-primary)" stroke-width="2"/>
-              
-              <!-- Screen -->
               <rect x="45" y="35" width="30" height="45" fill="var(--color-primary)" opacity="0.2"/>
-              
-              <!-- Touch indicator -->
               <circle cx="60" cy="57" r="8" fill="var(--color-primary)" opacity="0.8"/>
               <circle cx="60" cy="57" r="12" fill="none" stroke="var(--color-primary)" 
                       stroke-width="2" opacity="0.4" class="touch-ripple"/>
-              
-              <!-- Home button -->
               <rect x="55" y="85" width="10" height="2" rx="1" fill="var(--color-primary)" opacity="0.6"/>
             </g>
           </svg>
@@ -338,20 +366,22 @@ export const TutorialOverlay = {
   },
 
   createActions(...actions) {
-    return actions
-      .map(action => {
-        if (!action) return '';
+    const fragment = document.createDocumentFragment();
 
-        const variant = action.variant || 'primary';
-        return `
-        <button class="btn btn--${variant} tutorial-action" 
-                data-action="${action.id}"
-                style="margin: 0 var(--spacing-xs);">
-          ${action.text}
-        </button>
-      `;
-      })
-      .join('');
+    actions.forEach(action => {
+      if (!action) return;
+
+      const variant = action.variant || 'primary';
+      const button = document.createElement('button');
+      button.className = `btn btn--${variant} tutorial-action`;
+      button.dataset.action = action.id;
+      button.style.margin = '0 var(--spacing-xs)';
+      button.textContent = action.text;
+
+      fragment.appendChild(button);
+    });
+
+    return fragment;
   },
 
   attachActionListeners(content, overlay) {

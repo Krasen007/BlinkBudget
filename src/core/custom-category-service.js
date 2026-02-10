@@ -100,7 +100,21 @@ export const CustomCategoryService = {
       return categories;
     }
     const filterType = type === 'refund' ? 'expense' : type;
-    return categories.filter(cat => cat.type === filterType);
+    const filtered = categories.filter(cat => cat.type === filterType);
+
+    // Deduplicate by name (case-insensitive)
+    const uniqueMap = new Map();
+    filtered.forEach(cat => {
+      // If duplicate exists, prefer the one that is already in the map (stable)
+      // or maybe prefer the one with most info?
+      // For now, simpler is better: first match wins.
+      const key = cat.name.toLowerCase();
+      if (!uniqueMap.has(key)) {
+        uniqueMap.set(key, cat);
+      }
+    });
+
+    return Array.from(uniqueMap.values());
   },
 
   /**
@@ -225,13 +239,13 @@ export const CustomCategoryService = {
   },
 
   /**
+   * Remove a category by ID
+   * @param {string} id - Category ID
+   * @param {boolean} force - Force remove system categories (if they were somehow editable)
+   * @returns {boolean} True if removed, false otherwise
+   */
   remove(id) {
     const categories = this.getAll();
-    const category = categories.find(cat => cat.id === id);
-
-    if (!category) {
-      return false;
-    }
     const category = categories.find(cat => cat.id === id);
 
     if (!category) {
@@ -264,7 +278,7 @@ export const CustomCategoryService = {
   getAllCategoryNames(type = 'all') {
     const categories = this.getByType(type);
 
-    return categories.map(cat => cat.name);
+    return [...new Set(categories.map(cat => cat.name))];
   },
 
   /**
@@ -560,7 +574,14 @@ export const CustomCategoryService = {
     }
 
     const searchTerm = query.toLowerCase();
-    return allCategories.filter(
+
+    // Deduplicate: Create map of unique categories by name
+    const uniqueCategories = new Map();
+    [...systemCategories, ...categories].forEach(cat => {
+      uniqueCategories.set(cat.name.toLowerCase(), cat);
+    });
+
+    return Array.from(uniqueCategories.values()).filter(
       category =>
         category.name.toLowerCase().includes(searchTerm) ||
         (category.description &&
@@ -576,17 +597,37 @@ export const CustomCategoryService = {
     const customCategories = this.getAll();
     const systemCategories = this.getSystemCategories();
 
+    // Deduplicate by name to avoid double counting migrated categories
+    const allUniqueNames = new Set([
+      ...customCategories.map(c => c.name.toLowerCase()),
+      ...systemCategories.map(c => c.name.toLowerCase()),
+    ]);
+
+    const uniqueExpense = new Set([
+      ...customCategories
+        .filter(c => c.type === 'expense')
+        .map(c => c.name.toLowerCase()),
+      ...systemCategories
+        .filter(c => c.type === 'expense')
+        .map(c => c.name.toLowerCase()),
+    ]);
+
+    const uniqueIncome = new Set([
+      ...customCategories
+        .filter(c => c.type === 'income')
+        .map(c => c.name.toLowerCase()),
+      ...systemCategories
+        .filter(c => c.type === 'income')
+        .map(c => c.name.toLowerCase()),
+    ]);
+
     return {
-      totalCategories: customCategories.length + systemCategories.length,
+      totalCategories: allUniqueNames.size,
       customCategories: customCategories.length,
-      systemCategories: systemCategories.length,
-      expenseCategories:
-        customCategories.filter(cat => cat.type === 'expense').length +
-        systemCategories.filter(cat => cat.type === 'expense').length,
-      incomeCategories:
-        customCategories.filter(cat => cat.type === 'income').length +
-        systemCategories.filter(cat => cat.type === 'income').length,
-      mostUsedCategories: [],
+      systemCategories: systemCategories.length, // Raw count of system definitions
+      expenseCategories: uniqueExpense.size,
+      incomeCategories: uniqueIncome.size,
+      mostUsedCategories: [], // TODO: Implement usage tracking
     };
   },
 

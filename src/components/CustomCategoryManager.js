@@ -262,15 +262,29 @@ export const CustomCategoryManager = ({
       width: 100%;
     `;
 
-    const editButton = createActionButton('Edit', () =>
-      showCategoryForm(category)
-    );
-    const deleteButton = createActionButton('Delete', () =>
-      confirmDeleteCategory(category)
-    );
+    // Only show actions for custom categories
+    if (!category.isSystem) {
+      const editButton = createActionButton('Edit', () =>
+        showCategoryForm(category)
+      );
+      const deleteButton = createActionButton('Delete', () =>
+        confirmDeleteCategory(category)
+      );
 
-    actions.appendChild(editButton);
-    actions.appendChild(deleteButton);
+      actions.appendChild(editButton);
+      actions.appendChild(deleteButton);
+    } else {
+      // Optional: Add a visual indicator or placeholder for system categories
+      const systemLabel = document.createElement('div');
+      systemLabel.textContent = 'System Category (Read-only)';
+      systemLabel.style.cssText = `
+        font-size: var(--font-size-xs);
+        color: var(--color-text-muted);
+        font-style: italic;
+        padding: var(--spacing-xs) 0;
+      `;
+      actions.appendChild(systemLabel);
+    }
     card.appendChild(actions);
 
     // Keyboard navigation
@@ -458,7 +472,7 @@ export const CustomCategoryManager = ({
     const cancelButton = Button({
       text: 'Cancel',
       variant: 'ghost',
-      onClick: () => overlay.remove(),
+      onClick: () => closeModal(),
     });
 
     const saveButton = Button({
@@ -492,19 +506,23 @@ export const CustomCategoryManager = ({
     const nameInput = nameGroup.field.querySelector('input');
     nameInput.focus();
 
+    // Helper to close modal and clean up listeners
+    const closeModal = () => {
+      overlay.remove();
+      document.removeEventListener('keydown', handleEscape);
+    };
+
     // Close on overlay click
     overlay.addEventListener('click', e => {
       if (e.target === overlay) {
-        document.removeEventListener('keydown', handleEscape);
-        overlay.remove();
+        closeModal();
       }
     });
 
     // Close on Escape
     const handleEscape = e => {
       if (e.key === 'Escape') {
-        overlay.remove();
-        document.removeEventListener('keydown', handleEscape);
+        closeModal();
       }
     };
     document.addEventListener('keydown', handleEscape);
@@ -546,8 +564,7 @@ export const CustomCategoryManager = ({
           CustomCategoryService.add(formData);
         }
 
-        overlay.remove();
-        document.removeEventListener('keydown', handleEscape);
+        closeModal();
         renderCategories();
         onCategoryChange && onCategoryChange();
       } catch (error) {
@@ -603,6 +620,10 @@ export const CustomCategoryManager = ({
 
     if (type === 'textarea') {
       input.rows = rows;
+    }
+
+    if (type !== 'textarea') {
+      input.type = type;
     }
 
     input.value = value;

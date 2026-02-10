@@ -39,17 +39,9 @@ export class ChartRenderer {
     }
 
     try {
-      console.log('[ChartRenderer] Loading Chart.js...');
-      const startTime = performance.now();
-
       this._initPromise = initializeChartJS();
       this.chartJSModules = await this._initPromise;
       this.isInitialized = true;
-
-      const loadTime = performance.now() - startTime;
-      console.log(
-        `[ChartRenderer] Chart.js initialized in ${loadTime.toFixed(2)}ms`
-      );
 
       return this.chartJSModules;
     } catch (error) {

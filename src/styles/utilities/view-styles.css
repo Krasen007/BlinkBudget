@@ -405,7 +405,7 @@
 }
 
 /* Desktop-specific dashboard scrolling */
-@media (width >= calc(var(--breakpoint-md))) {
+@media (width >= 768px) {
   .view-dashboard .dashboard-transactions-list {
     min-height: 300px; /* Larger minimum on desktop */
     max-height: 50vh; /* Reasonable max height on desktop */
@@ -413,7 +413,7 @@
 }
 
 /* Mobile-specific dashboard scrolling */
-@media (width <= calc(var(--breakpoint-md) - 1px)) {
+@media (width <= 767px) {
   .view-dashboard .dashboard-transactions-list {
     min-height: 250px; /* Ensure minimum touchable area */
     max-height: 70vh; /* Larger max on mobile for better touch experience */
