@@ -10,108 +10,81 @@ Based on the conversation history and codebase analysis, the investment tracking
 
 ### ✅ Completed Features
 
-1. **Basic Investment Form**
-   - Symbol, shares, purchase price, purchase date fields
-   - Asset class selection dropdown (8 categories)
-   - Form validation and error handling
-   - Proper data storage with asset class categorization
+1. **Enhanced Dynamic Investment Form**
+   - Type-specific fields for Stocks, Bonds, ETFs, Real Estate, Crypto, Cash, Commodities.
+   - Field validation per investment type.
+   - Support for symbol/name, shares/units/quantity, purchase price, current price, and notes.
+   - Automatic metadata collection for type-specific attributes.
 
-2. **Portfolio Chart Foundation**
-   - Interactive pie chart with hover tooltips
-   - Click selection functionality with visual feedback
-   - Real-time updates when investments are added
-   - Asset allocation percentage calculations
-   - Selection display with action buttons (View Details, Rebalance)
+2. **Core Investment Portfolio Logic**
+   - `InvestmentTracker` class with full CRUD operations.
+   - Asset allocation, sector allocation, and geographic allocation analysis.
+   - Gains/losses and annualized return calculations.
+   - Caching and cloud sync integration via `StorageService`.
 
-3. **Core Investment Tracking**
-   - InvestmentTracker class with CRUD operations
-   - Asset allocation analysis
-   - Portfolio value calculations
-   - Gains/losses calculations
-   - Top performers tracking
+3. **Portfolio Visualization & Insights**
+   - Interactive portfolio composition chart (Asset Allocation).
+   - Real-time chart/list refresh after additions/edits.
+   - Portfolio insights (Concentration risk analysis).
+   - Sparkline performance charts for individual holdings.
 
-### 🔧 Identified Issues & Gaps
+4. **Basic Management UI**
+   - Investment list with type badges and manual update indicators.
+   - Inline editing for shares and purchase price.
+   - Delete functionality with cloud sync.
 
-1. **UI/UX Limitations**
-   - "View Details" button shows basic alert only
-   - "Rebalance" button has placeholder functionality
-   - No detailed investment views or drill-down capabilities
-   - Limited visual feedback for investment actions
+### 🔧 Remaining Gaps & Refined Strategy
 
-2. **Investment Type Support**
-   - Form doesn't support different investment types adequately
-   - Missing fields for bonds, ETFs, real estate, etc.
-   - No support for different data entry patterns per type
+1. **UX: Transition to Modals**
+   - Inline editing is too limited for complex types (e.g., bonds with maturity dates).
+   - Need `InvestmentDetails.js` modal to view/edit ALL fields.
 
-3. **Chart Display Issues**
-   - Portfolio chart may not reflect manual price updates correctly
-   - Missing visual indicators for different investment types
-   - No way to manually update current prices
+2. **Price Tracking: Quick Update Flow**
+   - No dedicated "Update Price" button for quick daily entries.
+   - Missing bulk price update interface.
+   - No price history array in the data model (only `lastPriceUpdate` timestamp).
 
-4. **Data Management**
-   - No bulk import/export for existing portfolios
-   - Limited editing capabilities for existing investments
-   - No portfolio snapshot or historical tracking
+3. **Advanced Analytics & Tools**
+   - Rebalancing suggestions and target allocation.
+   - Portfolio value over time (Historical snapshots).
+   - CSV Import/Export.
 
-## Implementation Plan
+## Revised Implementation Plan
 
-### Phase 1: Enhanced Investment Form & Types (Priority: High)
+### Phase 2: Interactive UI & Quick Updates (Priority: High)
 
-**Objective**: Improve the investment form to support different investment types with appropriate fields.
+**Objective**: Move beyond inline editing and implement robust price tracking.
 
-#### 1.1 Dynamic Form Fields
+#### 2.1 Detailed Investment Modal
 
-- Create type-specific form fields for each investment category:
-  - **Stocks**: Symbol, shares, purchase price, purchase date
-  - **Bonds**: Face value, coupon rate, maturity date, purchase price
-  - **ETFs**: Symbol, shares, expense ratio, purchase price
-  - **Real Estate**: Property type, address, purchase price, square footage
-  - **Cryptocurrency**: Symbol, units, purchase price, exchange
-  - **Cash**: Currency type, amount, interest rate
-  - **Commodities**: Type (gold, oil, etc.), quantity, purchase price
-  - **Other**: Custom fields with flexible naming
+- Create `src/components/investments/InvestmentDetails.js`.
+- Replace inline edit with a full-featured modal for viewing and editing all type-specific metadata.
 
-#### 1.2 Form Enhancement
+#### 2.2 Quick Price Update Interface
 
-- Add current price field for manual updates
-- Implement form field validation per investment type
-- Add investment notes/description field
-- Create better visual organization with collapsible sections
+- Add a "⚡ Update Price" button to the list items.
+- Create a streamlined mini-modal just for updating the `currentPrice` and adding a note.
+- Implement `priceHistory` array in `InvestmentTracker` to track value changes over time.
 
-#### 1.3 Investment List Improvements
+#### 2.3 Visual Improvements
 
-- Show investment type prominently in list
-- Add quick edit/delete buttons
-- Display manual price update indicators
-- Show last updated timestamp
+- Add price change indicators (Up/Down arrows comparison vs purchase price).
+- Add chart filtering/toggling by investment type.
+- Implement collapsible sections in the "Add Investment" form if it grows further.
 
-### Phase 2: Interactive UI Components (Priority: High)
+### Phase 3: Portfolio Management & Data (Priority: Medium)
 
-**Objective**: Implement meaningful interactions for portfolio management.
+**Objective**: Provide rebalancing and data portability.
 
-#### 2.1 Detailed Investment Views
+#### 3.1 Rebalancing & Targets
 
-- Create `src/components/investments/InvestmentDetails.js`
-- Show complete investment information in modal
-- Add edit functionality for all investment fields
-- Display manual price update history
-- Add delete investment with confirmation
+- Implement manual rebalancing suggestions based on target percentages.
+- Calculate "Buy/Sell" amounts to reach targets.
 
-#### 2.2 Manual Price Update System
+#### 3.2 Data Portability
 
-- Add "Update Price" button for each investment
-- Create bulk price update interface
-- Implement price change indicators (up/down arrows)
-- Add price history tracking for manual entries
-- Show percentage change since purchase
-
-#### 2.3 Enhanced Chart Features
-
-- Fix portfolio chart to reflect manual price updates correctly
-- Add visual indicators for different investment types
-- Implement chart filtering by investment type
-- Add investment count badges to chart segments
-- Create investment type legend with color coding
+- Add CSV export/import for the entire portfolio.
+- Add portfolio snapshotting for historical value tracking.
 
 ### Phase 3: Portfolio Management Tools (Priority: Medium)
 

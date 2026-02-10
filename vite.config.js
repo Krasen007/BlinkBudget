@@ -169,7 +169,7 @@ export default defineConfig({
   },
   optimizeDeps: {
     // Optimize dependencies during build - disable for now to fix Firebase issue
-    include: ['firebase, chart.js'],
+    include: ['firebase', 'chart.js'],
   },
   server: {
     port: 3000,

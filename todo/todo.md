@@ -33,3 +33,4 @@ DO NOT IMPLEMENT: use Ionic's Capacitor or Cordova to make android app
 - [ ] **Task:** Test advanced filtering/search combinations.
 - [ ] **Task:** Test "Interactive Tutorial" flow for breakage/skipping logic.
 - [ ] **Task:** Verify "First Run" experience on fresh accounts.
+      [ ] we should think about possible management UI for the app for the system admin to overview the users and their accounts and other metrics like the audit logs, also other possible things like user management, billing, etc.
