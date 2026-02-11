@@ -27,7 +27,9 @@
   "license": "GPL-3.0-only",
   "devDependencies": {
     "@eslint/js": "^9.39.2",
-    "autoprefixer": "^10.4.22",
+    "@fullhuman/postcss-purgecss": "^8.0.0",
+    "autoprefixer": "^10.4.24",
+    "cssnano": "^7.1.2",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
@@ -35,6 +37,7 @@
     "lightningcss": "^1.30.2",
     "postcss": "^8.5.6",
     "postcss-custom-media": "^11.0.6",
+    "postcss-import": "^16.1.1",
     "prettier": "^3.7.4",
     "stylelint": "^16.26.1",
     "stylelint-config-standard": "^39.0.1",
@@ -45,5 +48,19 @@
   "dependencies": {
     "chart.js": "^4.5.1",
     "firebase": "^12.7.0"
+  },
+  "prettier": {
+    "semi": true,
+    "trailingComma": "es5",
+    "singleQuote": true,
+    "printWidth": 80,
+    "tabWidth": 2,
+    "useTabs": false,
+    "bracketSpacing": true,
+    "arrowParens": "avoid",
+    "endOfLine": "lf",
+    "quoteProps": "as-needed",
+    "bracketSameLine": false,
+    "proseWrap": "preserve"
   }
 }

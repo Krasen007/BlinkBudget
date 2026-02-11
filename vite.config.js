@@ -1,6 +1,12 @@
 import { defineConfig } from 'vite';
+
 import { VitePWA } from 'vite-plugin-pwa';
 import fs from 'fs';
+import postcssImport from 'postcss-import';
+import postcssCustomMedia from 'postcss-custom-media';
+import autoprefixer from 'autoprefixer';
+import purgecss from '@fullhuman/postcss-purgecss';
+import cssnano from 'cssnano';
 
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
 
@@ -168,8 +174,8 @@ export default defineConfig({
     dedupe: ['firebase', 'chart.js'],
   },
   optimizeDeps: {
-    // Optimize dependencies during build - disable for now to fix Firebase issue
-    include: ['firebase', 'chart.js'],
+    // Optimize dependencies during build
+    include: ['chart.js'],
   },
   server: {
     port: 3000,
@@ -180,8 +186,52 @@ export default defineConfig({
     port: 4173, // Default preview port
   },
   css: {
-    // PostCSS configuration will be loaded from postcss.config.js
-    postcss: {},
+    // PostCSS configuration moved from postcss.config.js
+    postcss: {
+      plugins: [
+        postcssImport,
+        postcssCustomMedia,
+        autoprefixer({
+          overrideBrowserslist: [
+            '> 1%',
+            'last 2 versions',
+            'not dead',
+            'not ie 11',
+          ],
+        }),
+        ...(process.env.NODE_ENV === 'production'
+          ? [
+            purgecss({
+              content: ['./index.html', './src/**/*.js', './src/**/*.html'],
+              defaultExtractor: content =>
+                content.match(/[\w-/:]+(?<!:)/g) || [],
+              safelist: [
+                /^(flex|grid|hidden|block|inline|absolute|relative|fixed)/,
+                /^(active|disabled|loading|error|success)/,
+                /^mobile-/,
+                /^(fade|slide|bounce)/,
+                /:hover/,
+                /:focus/,
+                /:active/,
+                /^(sm|md|lg|xl):/,
+              ],
+              variables: true,
+            }),
+            cssnano({
+              preset: [
+                'default',
+                {
+                  cssDeclarationSorter: false,
+                  reduceIdents: false,
+                  zindex: false,
+                  mergeRules: false,
+                },
+              ],
+            }),
+          ]
+          : []),
+      ],
+    },
     // Enable CSS source maps in development
     devSourcemap: true,
   },
