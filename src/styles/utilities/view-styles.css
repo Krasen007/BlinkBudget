@@ -6,10 +6,12 @@
   max-width: var(--container-max-width);
   padding: 0 var(--spacing-sm); /* Mobile-first: 8px */
   height: 100%;
-  overflow: hidden; /* Remove auto to prevent conflicts with child scrolling */
+  overflow-x: hidden;
+  overflow-y: auto; /* Allow vertical scrolling in all standard views */
   display: flex;
   flex-direction: column;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-y; /* Ensure vertical touch scrolling works */
 }
 
 /* View container with fixed content (no scrolling) */
@@ -380,6 +382,8 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 .view-dashboard > div:first-child {
@@ -396,28 +400,11 @@
 
 .view-dashboard .dashboard-transactions-list {
   flex: 1;
-  overflow: hidden auto; /* Transaction list also scrolls independently */
+  overflow: hidden auto; /* Transaction list scrolls inside flex container */
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   touch-action: pan-y;
-  min-height: 200px; /* Minimum scrollable area */
-  max-height: 60vh; /* Reasonable max height */
-}
-
-/* Desktop-specific dashboard scrolling */
-@media (width >= 768px) {
-  .view-dashboard .dashboard-transactions-list {
-    min-height: 300px; /* Larger minimum on desktop */
-    max-height: 50vh; /* Reasonable max height on desktop */
-  }
-}
-
-/* Mobile-specific dashboard scrolling */
-@media (width <= 767px) {
-  .view-dashboard .dashboard-transactions-list {
-    min-height: 250px; /* Ensure minimum touchable area */
-    max-height: 70vh; /* Larger max on mobile for better touch experience */
-  }
+  min-height: 0; /* Let flexbox control height without forcing extra space */
 }
 
 .view-mobile-full-width {
