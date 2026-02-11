@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+/* global require, process, module */
 
 /**
  * Environment Variable Validation Script
@@ -6,7 +6,39 @@
  * This script validates that all required environment variables are set
  * before building or deploying the application. It helps prevent runtime
  * errors due to missing configuration.
+ *
+ * NOTE: This file uses CommonJS (.cjs) to ensure compatibility when run
+ * directly via 'node scripts/validate-env.cjs' regardless of the project's
+ * "type": "module" setting in package.json.
  */
+
+const fs = require('fs');
+const path = require('path');
+
+// Load environment variables from .env file for local development
+const envPath = path.resolve(process.cwd(), '.env');
+if (fs.existsSync(envPath)) {
+  const envConfig = fs.readFileSync(envPath, 'utf8');
+  envConfig.split('\n').forEach(line => {
+    const [key, value] = line.split('=');
+    if (key && value && !key.startsWith('#')) {
+      const cleanKey = key.trim();
+      // Remove quotes from value if present
+      let cleanValue = value.trim();
+      if (
+        (cleanValue.startsWith('"') && cleanValue.endsWith('"')) ||
+        (cleanValue.startsWith("'") && cleanValue.endsWith("'"))
+      ) {
+        cleanValue = cleanValue.slice(1, -1);
+      }
+
+      // Only set if not already set (respect existing process.env)
+      if (!process.env[cleanKey]) {
+        process.env[cleanKey] = cleanValue;
+      }
+    }
+  });
+}
 
 const requiredVars = [
   'VITE_FIREBASE_API_KEY',
@@ -109,8 +141,8 @@ function validateFirebaseConfig() {
 }
 
 // Run validation if script is executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (require.main === module) {
   validateEnvironment();
 }
 
-export { validateEnvironment };
+module.exports = { validateEnvironment };

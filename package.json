@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/validate-env.js && vite build",
+    "build": "node config/validate-env.cjs && vite build",
     "preview": "vite preview",
     "test": "vitest",
     "lint": "eslint .",
@@ -20,7 +20,7 @@
     "format:check": "prettier --check .",
     "check": "npm run lint && npm run lint:css && npm run format:check",
     "fix": "npm run lint:fix && npm run lint:css:fix && npm run format",
-    "validate-env": "node scripts/validate-env.js"
+    "validate-env": "node config/validate-env.cjs"
   },
   "keywords": [],
   "author": "Krasen Ivanov",
