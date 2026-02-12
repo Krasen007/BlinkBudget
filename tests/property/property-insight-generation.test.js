@@ -73,7 +73,9 @@ describe('Property 6: Insight Generation Accuracy', () => {
 
       if (comparison.overallComparison.expenses.comparison > 0) {
         expect(
-          Math.abs(comparison.overallComparison.expenses.changePercent - expectedChange)
+          Math.abs(
+            comparison.overallComparison.expenses.changePercent - expectedChange
+          )
         ).toBeLessThan(0.1);
       }
     }

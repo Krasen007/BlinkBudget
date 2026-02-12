@@ -97,12 +97,38 @@ export const handleFormSubmit = (transactionData, onSubmit, onError = null) => {
       onError(e, errorMessage);
     } else {
       // Import toast notifications dynamically to avoid circular dependencies
-      import('../toast-notifications.js').then(({ showErrorToast }) => {
-        showErrorToast(errorMessage, {
-          duration: 5000,
-          persistent: false
+      import('../toast-notifications.js')
+        .then(({ showErrorToast }) => {
+          showErrorToast(errorMessage, {
+            duration: 5000,
+            persistent: false,
+          });
+        })
+        .catch(importErr => {
+          console.error('Failed to load toast notifications:', importErr);
+          // Fallback: show error using browser alert as last resort
+          console.error('Original error:', errorMessage);
+          // Create a simple DOM-based error message as fallback
+          const fallbackDiv = document.createElement('div');
+          fallbackDiv.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: #ef4444;
+          color: white;
+          padding: 12px 16px;
+          border-radius: 6px;
+          z-index: 10000;
+          max-width: 300px;
+        `;
+          fallbackDiv.textContent = errorMessage;
+          document.body.appendChild(fallbackDiv);
+          setTimeout(() => {
+            if (fallbackDiv.parentNode) {
+              fallbackDiv.parentNode.removeChild(fallbackDiv);
+            }
+          }, 5000);
         });
-      });
     }
   }
 };

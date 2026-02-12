@@ -1,6 +1,6 @@
 /**
  * Toast Notification System
- * 
+ *
  * Centralized notification system to replace browser alerts
  * Provides consistent, accessible user feedback
  */
@@ -14,7 +14,7 @@ export const TOAST_TYPES = {
   SUCCESS: 'success',
   ERROR: 'error',
   WARNING: 'warning',
-  INFO: 'info'
+  INFO: 'info',
 };
 
 /**
@@ -24,7 +24,7 @@ export const TOAST_POSITIONS = {
   TOP_RIGHT: 'top-right',
   TOP_CENTER: 'top-center',
   BOTTOM_RIGHT: 'bottom-right',
-  BOTTOM_CENTER: 'bottom-center'
+  BOTTOM_CENTER: 'bottom-center',
 };
 
 /**
@@ -56,7 +56,7 @@ function initializeContainer() {
     flexDirection: 'column',
     gap: SPACING.SM,
     maxWidth: '400px',
-    width: '100%'
+    width: '100%',
   });
 
   document.body.appendChild(toastContainer);
@@ -72,23 +72,23 @@ function getToastConfig(type) {
     [TOAST_TYPES.SUCCESS]: {
       background: COLORS.SUCCESS,
       icon: '✅',
-      duration: TIMING.NOTIFICATION_SUCCESS || 3000
+      duration: TIMING.NOTIFICATION_SUCCESS || 3000,
     },
     [TOAST_TYPES.ERROR]: {
       background: COLORS.ERROR,
       icon: '❌',
-      duration: TIMING.NOTIFICATION_ERROR || 5000
+      duration: TIMING.NOTIFICATION_ERROR || 5000,
     },
     [TOAST_TYPES.WARNING]: {
       background: COLORS.WARNING,
       icon: '⚠️',
-      duration: TIMING.NOTIFICATION_WARNING || 4000
+      duration: TIMING.NOTIFICATION_WARNING || 4000,
     },
     [TOAST_TYPES.INFO]: {
       background: COLORS.PRIMARY,
       icon: 'ℹ️',
-      duration: TIMING.NOTIFICATION_INFO || 3000
-    }
+      duration: TIMING.NOTIFICATION_INFO || 3000,
+    },
   };
 
   return configs[type] || configs[TOAST_TYPES.INFO];
@@ -101,7 +101,7 @@ function getToastConfig(type) {
  * @param {Object} options - Additional options
  * @returns {HTMLElement} Toast element
  */
-function createToastElement(message, type, _options = {}) {
+function createToastElement(message, type, options = {}) {
   const config = getToastConfig(type);
   const toastId = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -132,7 +132,7 @@ function createToastElement(message, type, _options = {}) {
     transform: 'translateX(100%)',
     opacity: '0',
     transition: `transform ${TIMING.ANIMATION_FAST}ms ease-out, opacity ${TIMING.ANIMATION_FAST}ms ease-out`,
-    willChange: 'transform, opacity'
+    willChange: 'transform, opacity',
   });
 
   // Icon
@@ -176,22 +176,23 @@ function createToastElement(message, type, _options = {}) {
   toast.appendChild(closeButton);
 
   // Event handlers
-  const removeToast = () => {
+  const handleRemove = () => {
     removeToast(toastId);
   };
 
-  closeButton.addEventListener('click', removeToast);
-  toast.addEventListener('click', (e) => {
+  closeButton.addEventListener('click', handleRemove);
+  toast.addEventListener('click', e => {
     if (e.target !== closeButton) {
-      removeToast();
+      handleRemove();
     }
   });
 
-  // Store toast data
+  // Store toast data including onClose callback
   activeToasts.set(toastId, {
     element: toast,
     timeoutId: null,
-    removeFn: removeToast
+    removeFn: removeToast,
+    onClose: options.onClose || null,
   });
 
   return toast;
@@ -217,7 +218,7 @@ function animateToastOut(toastId) {
   const toastData = activeToasts.get(toastId);
   if (!toastData) return;
 
-  const { element, timeoutId } = toastData;
+  const { element, timeoutId, onClose } = toastData;
 
   // Clear auto-remove timeout
   if (timeoutId) {
@@ -228,12 +229,17 @@ function animateToastOut(toastId) {
   element.style.transform = 'translateX(100%)';
   element.style.opacity = '0';
 
-  // Remove after animation
+  // Remove after animation and call onClose callback
   setTimeout(() => {
     if (element.parentNode) {
       element.parentNode.removeChild(element);
     }
     activeToasts.delete(toastId);
+
+    // Call onClose callback if provided
+    if (onClose && typeof onClose === 'function') {
+      onClose();
+    }
   }, TIMING.ANIMATION_FAST);
 }
 
@@ -256,11 +262,7 @@ function removeToast(toastId) {
  * @returns {string} Toast ID for manual removal
  */
 export function showToast(message, type = TOAST_TYPES.INFO, options = {}) {
-  const {
-    duration,
-    persistent = false,
-    onClose
-  } = options;
+  const { duration, persistent = false } = options;
 
   // Initialize container if needed
   initializeContainer();
@@ -282,7 +284,6 @@ export function showToast(message, type = TOAST_TYPES.INFO, options = {}) {
 
     const timeoutId = setTimeout(() => {
       removeToast(toastId);
-      if (onClose) onClose();
     }, finalDuration);
 
     // Update toast data with timeout
@@ -335,7 +336,9 @@ export function showInfoToast(message, options = {}) {
  * Clear all active toasts
  */
 export function clearAllToasts() {
-  activeToasts.forEach((_, toastId) => {
+  // Create snapshot of keys before removing to avoid mutation during iteration
+  const toastIds = Array.from(activeToasts.keys());
+  toastIds.forEach(toastId => {
     removeToast(toastId);
   });
 }
@@ -355,4 +358,3 @@ export function removeToastById(toastId) {
 export function getActiveToastCount() {
   return activeToasts.size;
 }
-

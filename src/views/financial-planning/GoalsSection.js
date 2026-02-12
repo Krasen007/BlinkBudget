@@ -337,7 +337,9 @@ function createGoalsList(chartRenderer, activeCharts, section) {
         targetSpan.className = 'currency-value';
         targetSpan.textContent = targetFormatted;
         meta.appendChild(targetSpan);
-        meta.appendChild(document.createTextNode(` by ${formatDateForDisplay(targetDate)}`));
+        meta.appendChild(
+          document.createTextNode(` by ${formatDateForDisplay(targetDate)}`)
+        );
 
         left.appendChild(titleContainer);
         left.appendChild(meta);
@@ -362,7 +364,10 @@ function createGoalsList(chartRenderer, activeCharts, section) {
           monthlyNeeded.textContent = 'Need ';
           const neededSpan = document.createElement('span');
           neededSpan.className = 'currency-value';
-          neededSpan.textContent = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(needed);
+          neededSpan.textContent = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'EUR',
+          }).format(needed);
           monthlyNeeded.appendChild(neededSpan);
           monthlyNeeded.appendChild(document.createTextNode(' / month'));
           left.appendChild(monthlyNeeded);

@@ -72,7 +72,8 @@ export function defaultChartOptions() {
           generateLabels: function (chart) {
             // Get ChartJS from the chart instance or modules
             const chartJSModules = getChartJSModules();
-            const ChartJSInstance = chartJSModules?.ChartJS || chart.constructor;
+            const ChartJSInstance =
+              chartJSModules?.ChartJS || chart.constructor;
 
             // Check if we can access the default generateLabels function
             if (
@@ -91,7 +92,10 @@ export function defaultChartOptions() {
                   const dataset = chart.data.datasets[0];
                   if (dataset?.data && index < dataset.data.length) {
                     const value = dataset.data[index];
-                    const total = dataset.data.reduce((sum, val) => sum + val, 0);
+                    const total = dataset.data.reduce(
+                      (sum, val) => sum + val,
+                      0
+                    );
                     const percentage =
                       total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
 
@@ -171,7 +175,10 @@ export function defaultChartOptions() {
           afterBody: function (_tooltipItems) {
             const item = _tooltipItems[0];
             if (item.dataset.data && item.dataset.data.length > 1) {
-              const total = item.dataset.data.reduce((sum, val) => sum + val, 0);
+              const total = item.dataset.data.reduce(
+                (sum, val) => sum + val,
+                0
+              );
               // Handle both single values (pie/bar charts) and y values (line charts)
               const value =
                 item.parsed.y !== undefined ? item.parsed.y : item.parsed;
@@ -392,9 +399,9 @@ export function getChartColors(count, highContrast = false, style = 'solid') {
           borderColor: darkenColor(baseColor, 20),
           pattern:
             accessibleColors.patterns[
-            Object.keys(accessibleColors.patterns)[
-            i % Object.keys(accessibleColors.patterns).length
-            ]
+              Object.keys(accessibleColors.patterns)[
+                i % Object.keys(accessibleColors.patterns).length
+              ]
             ],
         });
         break;

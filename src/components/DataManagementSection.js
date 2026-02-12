@@ -101,7 +101,7 @@ export const DataManagementSection = () => {
       if (transactions.length === 0) {
         showWarningToast('No transactions found in this date range.', {
           duration: 4000,
-          persistent: false
+          persistent: false,
         });
         return;
       }

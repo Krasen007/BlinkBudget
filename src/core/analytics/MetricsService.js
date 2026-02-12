@@ -183,7 +183,7 @@ export class MetricsService {
       spendingRate:
         incomeVsExpenses.totalIncome > 0
           ? (incomeVsExpenses.totalExpenses / incomeVsExpenses.totalIncome) *
-          100
+            100
           : 0,
     };
   }

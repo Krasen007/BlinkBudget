@@ -11,7 +11,10 @@ import {
   COLORS,
 } from '../utils/constants.js';
 import { ClickTracker } from '../core/click-tracking-service.js';
-import { createEnhancedEmptyState, EMPTY_STATE_SCENARIOS } from '../utils/enhanced-empty-states.js';
+import {
+  createEnhancedEmptyState,
+  EMPTY_STATE_SCENARIOS,
+} from '../utils/enhanced-empty-states.js';
 
 export const TransactionList = ({
   transactions,
@@ -19,9 +22,9 @@ export const TransactionList = ({
   accounts,
   highlightTransactionIds = null,
   currentDateFilter = null,
-  onDateClick = () => { },
+  onDateClick = () => {},
   currentCategoryFilter = null,
-  onCategoryClick = () => { },
+  onCategoryClick = () => {},
 }) => {
   const listContainer = document.createElement('div');
   listContainer.className = 'dashboard-transactions-container';
@@ -108,16 +111,22 @@ export const TransactionList = ({
     }
 
     const emptyState = createEnhancedEmptyState(scenario, {
-      onAction: (action) => {
+      onAction: action => {
         switch (action) {
           case 'add-transaction':
             // Navigate to add transaction
             window.Router?.navigate?.('add-expense');
             break;
           case 'clear-filters':
-            // Clear filters and refresh
+            // Clear all filters - date, category, and general filter
             if (typeof currentFilter === 'function') {
               currentFilter(null);
+            }
+            if (typeof onDateClick === 'function') {
+              onDateClick(null);
+            }
+            if (typeof onCategoryClick === 'function') {
+              onCategoryClick(null);
             }
             break;
           case 'show-tutorial':
@@ -127,7 +136,7 @@ export const TransactionList = ({
         }
       },
       showTips: true,
-      compact: false
+      compact: false,
     });
 
     listContainer.appendChild(emptyState);

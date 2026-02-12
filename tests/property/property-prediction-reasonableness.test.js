@@ -42,10 +42,7 @@ describe('Property 14: Prediction Reasonableness', () => {
       const avgMonthlyAmount = Math.random() * 500 + 200;
       const transactions = generateHistoricalTransactions(6, avgMonthlyAmount);
 
-      const result = analyticsEngine.predictFutureSpending(
-        transactions,
-        3
-      );
+      const result = analyticsEngine.predictFutureSpending(transactions, 3);
 
       expect(result).toHaveProperty('predictions');
       expect(Array.isArray(result.predictions)).toBe(true);
@@ -75,7 +72,10 @@ describe('Property 14: Prediction Reasonableness', () => {
       const transactions = generateHistoricalTransactions(6, 300);
       const monthsToPredict = Math.floor(Math.random() * 5) + 1;
 
-      const result = analyticsEngine.predictFutureSpending(transactions, monthsToPredict);
+      const result = analyticsEngine.predictFutureSpending(
+        transactions,
+        monthsToPredict
+      );
 
       expect(result.predictions.length).toBeLessThanOrEqual(monthsToPredict);
     }

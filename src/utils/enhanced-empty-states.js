@@ -1,6 +1,6 @@
 /**
  * Enhanced Empty States
- * 
+ *
  * Provides beautiful, engaging empty states with illustrations and CTAs
  * to guide users when they have no data
  */
@@ -15,7 +15,7 @@ export const EMPTY_STATE_SCENARIOS = {
   NO_TRANSACTIONS_PERIOD: 'no-transactions-period',
   NO_DATA: 'no-data',
   FILTER_NO_RESULTS: 'filter-no-results',
-  SYNC_NO_DATA: 'sync-no-data'
+  SYNC_NO_DATA: 'sync-no-data',
 };
 
 /**
@@ -27,7 +27,7 @@ const EMPTY_STATE_ICONS = {
     svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M3 3v18h18"/>
       <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
-    </svg>`
+    </svg>`,
   },
   [EMPTY_STATE_SCENARIOS.NO_TRANSACTIONS_PERIOD]: {
     emoji: '📅',
@@ -36,7 +36,7 @@ const EMPTY_STATE_ICONS = {
       <line x1="16" y1="2" x2="16" y2="6"/>
       <line x1="8" y1="2" x2="8" y2="6"/>
       <line x1="3" y1="10" x2="21" y2="10"/>
-    </svg>`
+    </svg>`,
   },
   [EMPTY_STATE_SCENARIOS.NO_DATA]: {
     emoji: '📋',
@@ -46,21 +46,21 @@ const EMPTY_STATE_ICONS = {
       <line x1="16" y1="13" x2="8" y2="13"/>
       <line x1="16" y1="17" x2="8" y2="17"/>
       <polyline points="10,9 9,9 8,9"/>
-    </svg>`
+    </svg>`,
   },
   [EMPTY_STATE_SCENARIOS.FILTER_NO_RESULTS]: {
     emoji: '🔍',
     svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <circle cx="11" cy="11" r="8"/>
       <path d="m21 21-4.35-4.35"/>
-    </svg>`
+    </svg>`,
   },
   [EMPTY_STATE_SCENARIOS.SYNC_NO_DATA]: {
     emoji: '☁️',
     svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
-    </svg>`
-  }
+    </svg>`,
+  },
 };
 
 /**
@@ -69,90 +69,88 @@ const EMPTY_STATE_ICONS = {
 const EMPTY_STATE_CONTENT = {
   [EMPTY_STATE_SCENARIOS.NO_TRANSACTIONS]: {
     title: 'No Transactions Yet',
-    message: 'Start tracking your expenses to see beautiful insights about your spending patterns.',
+    message:
+      'Start tracking your expenses to see beautiful insights about your spending patterns.',
     primaryAction: {
       text: 'Add Your First Transaction',
-      action: 'add-transaction'
+      action: 'add-transaction',
     },
     secondaryActions: [
       {
         text: 'View Tutorial',
-        action: 'show-tutorial'
-      }
+        action: 'show-tutorial',
+      },
     ],
     tips: [
       'Try to log expenses within 3 clicks',
       'Use categories to organize spending',
-      'Set goals to track your progress'
-    ]
+      'Set goals to track your progress',
+    ],
   },
   [EMPTY_STATE_SCENARIOS.NO_TRANSACTIONS_PERIOD]: {
     title: 'No Transactions This Period',
     message: 'There are no transactions for the selected time period.',
     primaryAction: {
       text: 'Change Time Period',
-      action: 'change-period'
+      action: 'change-period',
     },
     secondaryActions: [
       {
         text: 'Add Transaction',
-        action: 'add-transaction'
-      }
+        action: 'add-transaction',
+      },
     ],
     tips: [
       'Try selecting a different time range',
-      'Check if you have any transactions in other periods'
-    ]
+      'Check if you have any transactions in other periods',
+    ],
   },
   [EMPTY_STATE_SCENARIOS.NO_DATA]: {
     title: 'No Data Available',
-    message: 'There\'s no data to display for this view.',
+    message: "There's no data to display for this view.",
     primaryAction: {
       text: 'Refresh',
-      action: 'refresh'
+      action: 'refresh',
     },
     secondaryActions: [],
-    tips: [
-      'Try refreshing the page',
-      'Check your internet connection'
-    ]
+    tips: ['Try refreshing the page', 'Check your internet connection'],
   },
   [EMPTY_STATE_SCENARIOS.FILTER_NO_RESULTS]: {
     title: 'No Matching Results',
     message: 'No transactions match your current filters.',
     primaryAction: {
       text: 'Clear Filters',
-      action: 'clear-filters'
+      action: 'clear-filters',
     },
     secondaryActions: [
       {
         text: 'Adjust Filters',
-        action: 'adjust-filters'
-      }
+        action: 'adjust-filters',
+      },
     ],
     tips: [
       'Try broadening your search criteria',
-      'Check spelling in search terms'
-    ]
+      'Check spelling in search terms',
+    ],
   },
   [EMPTY_STATE_SCENARIOS.SYNC_NO_DATA]: {
     title: 'No Synced Data',
-    message: 'Your data hasn\'t been synced to the cloud yet.',
+    message: "Your data hasn't been synced to the cloud yet.",
     primaryAction: {
       text: 'Sync Now',
-      action: 'sync'
+      action: 'sync',
     },
     secondaryActions: [
       {
         text: 'Add Transaction',
-        action: 'add-transaction'
-      }
+        action: 'add-transaction',
+      },
     ],
     tips: [
       'Sync to access your data on multiple devices',
-      'Enable auto-sync for convenience'
-    ]
-  }
+      'Enable auto-sync for convenience',
+    ],
+  },
 };
 
 /**
@@ -165,11 +163,7 @@ const EMPTY_STATE_CONTENT = {
  * @returns {HTMLElement} Empty state element
  */
 export function createEnhancedEmptyState(scenario, options = {}) {
-  const {
-    onAction,
-    showTips = true,
-    compact = false
-  } = options;
+  const { onAction, showTips = true, compact = false } = options;
 
   const content = EMPTY_STATE_CONTENT[scenario];
   const icons = EMPTY_STATE_ICONS[scenario];
@@ -194,7 +188,7 @@ export function createEnhancedEmptyState(scenario, options = {}) {
     color: COLORS.TEXT_MUTED,
     opacity: '0',
     transform: 'translateY(20px)',
-    transition: `opacity ${300}ms ease-out, transform ${300}ms ease-out`
+    transition: `opacity ${300}ms ease-out, transform ${300}ms ease-out`,
   });
 
   // Icon container
@@ -204,7 +198,7 @@ export function createEnhancedEmptyState(scenario, options = {}) {
     fontSize: compact ? '3rem' : '4rem',
     marginBottom: SPACING.LG,
     opacity: '0.6',
-    animation: 'float 3s ease-in-out infinite'
+    animation: 'float 3s ease-in-out infinite',
   });
   iconContainer.textContent = icons.emoji;
 
@@ -216,7 +210,7 @@ export function createEnhancedEmptyState(scenario, options = {}) {
     margin: `0 0 ${SPACING.SM} 0`,
     fontSize: compact ? FONT_SIZES.LG : FONT_SIZES.XL,
     fontWeight: '600',
-    color: COLORS.TEXT_MAIN
+    color: COLORS.TEXT_MAIN,
   });
 
   // Message
@@ -227,7 +221,7 @@ export function createEnhancedEmptyState(scenario, options = {}) {
     margin: `0 0 ${SPACING.LG} 0`,
     fontSize: FONT_SIZES.MD,
     lineHeight: '1.5',
-    maxWidth: '400px'
+    maxWidth: '400px',
   });
 
   container.appendChild(iconContainer);
@@ -249,7 +243,7 @@ export function createEnhancedEmptyState(scenario, options = {}) {
       gap: SPACING.SM,
       marginTop: SPACING.MD,
       flexWrap: 'wrap',
-      justifyContent: 'center'
+      justifyContent: 'center',
     });
 
     content.secondaryActions.forEach(action => {
@@ -267,9 +261,9 @@ export function createEnhancedEmptyState(scenario, options = {}) {
     Object.assign(tipsContainer.style, {
       marginTop: SPACING.XL,
       padding: `${SPACING.MD} ${SPACING.LG}`,
-      backgroundColor: `${COLORS.BACKGROUND_MUTED}20`,
+      backgroundColor: `color-mix(in srgb, ${COLORS.BACKGROUND_MUTED} 12.5%, transparent)`,
       borderRadius: '8px',
-      border: `1px solid ${COLORS.BORDER}20`
+      border: `1px solid color-mix(in srgb, ${COLORS.BORDER} 12.5%, transparent)`,
     });
 
     const tipsTitle = document.createElement('h4');
@@ -278,7 +272,7 @@ export function createEnhancedEmptyState(scenario, options = {}) {
       margin: `0 0 ${SPACING.SM} 0`,
       fontSize: FONT_SIZES.SM,
       fontWeight: '600',
-      color: COLORS.TEXT_MAIN
+      color: COLORS.TEXT_MAIN,
     });
 
     const tipsList = document.createElement('ul');
@@ -321,7 +315,7 @@ export function createEnhancedEmptyState(scenario, options = {}) {
       color: isPrimary ? 'white' : COLORS.PRIMARY,
       cursor: 'pointer',
       transition: `all ${200}ms ease`,
-      textDecoration: 'none'
+      textDecoration: 'none',
     });
 
     button.addEventListener('mouseenter', () => {
@@ -372,7 +366,7 @@ function createBasicEmptyState(message) {
     padding: SPACING.XL,
     textAlign: 'center',
     color: COLORS.TEXT_MUTED,
-    fontStyle: 'italic'
+    fontStyle: 'italic',
   });
 
   return container;
@@ -430,5 +424,7 @@ export function addEmptyStateStyles() {
   document.head.appendChild(style);
 }
 
-// Initialize styles when module is imported
-addEmptyStateStyles();
+// Initialize styles when module is imported (browser only)
+if (typeof document !== 'undefined') {
+  addEmptyStateStyles();
+}

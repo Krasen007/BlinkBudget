@@ -1154,7 +1154,10 @@ export const InvestmentsSection = async (chartRenderer, activeCharts) => {
   totalVal.textContent = 'Total: ';
   const valueSpan = document.createElement('span');
   valueSpan.className = 'currency-value';
-  valueSpan.textContent = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(portfolioToRender.totalValue);
+  valueSpan.textContent = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(portfolioToRender.totalValue);
   totalVal.appendChild(valueSpan);
 
   const assetCnt = document.createElement('div');
