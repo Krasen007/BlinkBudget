@@ -10,8 +10,8 @@
  * Requirements: Task 2.2 Spending Pattern Analytics
  */
 
-import { TRANSACTION_TYPES } from '../utils/constants.js';
-import { FilteringService } from '../core/analytics/FilteringService.js';
+import { TRANSACTION_TYPES } from '../../utils/constants.js';
+import { FilteringService } from './FilteringService.js';
 
 export class PatternAnalyzer {
   /**

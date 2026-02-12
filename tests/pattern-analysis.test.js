@@ -10,7 +10,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { PatternAnalyzer } from '../src/analytics/pattern-analyzer.js';
+import { PatternAnalyzer } from '../src/core/analytics/pattern-analyzer.js';
 import { PatternInsights } from '../src/components/PatternInsights.js';
 
 // Sample test data

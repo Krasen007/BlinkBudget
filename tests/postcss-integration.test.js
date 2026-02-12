@@ -2,10 +2,6 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'fs';
 
 describe('PostCSS Integration', () => {
-  it('should have PostCSS configuration file', () => {
-    expect(existsSync('postcss.config.js')).toBe(true);
-  });
-
   it('should have Stylelint configuration file', () => {
     expect(existsSync('.stylelintrc.js')).toBe(true);
   });

@@ -11,7 +11,7 @@
  */
 
 import { COLORS, SPACING, FONT_SIZES } from '../utils/constants.js';
-import { PatternAnalyzer } from '../analytics/pattern-analyzer.js';
+import { PatternAnalyzer } from '../core/analytics/pattern-analyzer.js';
 import { formatDateForDisplay } from '../utils/date-utils.js';
 import { formatCurrency } from '../utils/financial-planning-helpers.js';
 

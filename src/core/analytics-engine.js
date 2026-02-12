@@ -14,7 +14,7 @@ import { AnomalyService } from './analytics/AnomalyService.js';
 import { AnalyticsCache } from './analytics/AnalyticsCache.js';
 import { PredictionService } from './analytics/PredictionService.js';
 import { ComparisonService } from './analytics/ComparisonService.js';
-import { PatternAnalyzer } from '../analytics/pattern-analyzer.js';
+import { PatternAnalyzer } from './analytics/pattern-analyzer.js';
 
 export class AnalyticsEngine {
   constructor() {

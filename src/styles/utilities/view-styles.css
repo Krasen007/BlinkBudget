@@ -6,8 +6,7 @@
   max-width: var(--container-max-width);
   padding: 0 var(--spacing-sm); /* Mobile-first: 8px */
   height: 100%;
-  overflow-x: hidden;
-  overflow-y: auto; /* Allow vertical scrolling in all standard views */
+  overflow: hidden auto; /* Allow vertical scrolling in all standard views */
   display: flex;
   flex-direction: column;
   -webkit-overflow-scrolling: touch;
