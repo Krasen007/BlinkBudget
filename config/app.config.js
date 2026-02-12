@@ -17,7 +17,7 @@ function validateEnvironmentVariables() {
   if (missing.length > 0) {
     throw new Error(
       `Missing required environment variables: ${missing.join(', ')}\n` +
-        'Please check your .env file and ensure all Firebase configuration variables are set.'
+      'Please check your .env file and ensure all Firebase configuration variables are set.'
     );
   }
 
@@ -50,13 +50,21 @@ try {
   console.error('Environment validation failed:', error.message);
   // In development, show a clear error
   if (import.meta.env.DEV) {
-    document.body.innerHTML = `
-      <div style="padding: 20px; font-family: monospace; background: #ffebee; color: #c62828;">
-        <h2>Configuration Error</h2>
-        <p>${error.message}</p>
-        <p>Please check your .env file and restart the development server.</p>
-      </div>
-    `;
+    if (typeof document !== 'undefined' && document.body) {
+      const errorDiv = document.createElement('div');
+      errorDiv.style.cssText = 'padding: 20px; font-family: monospace; background: #ffebee; color: #c62828;';
+      const heading = document.createElement('h2');
+      heading.textContent = 'Configuration Error';
+      const msgPara = document.createElement('p');
+      msgPara.textContent = error.message;
+      const helpPara = document.createElement('p');
+      helpPara.textContent = 'Please check your .env file and restart the development server.';
+      errorDiv.appendChild(heading);
+      errorDiv.appendChild(msgPara);
+      errorDiv.appendChild(helpPara);
+      document.body.innerHTML = '';
+      document.body.appendChild(errorDiv);
+    }
   }
 }
 
@@ -71,24 +79,24 @@ export const config = {
   firebase:
     validationPassed && import.meta.env.MODE !== 'test'
       ? {
-          apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-          authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-          projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-          storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-          messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-          appId: import.meta.env.VITE_FIREBASE_APP_ID,
-          measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
-        }
+        apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+        authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+        projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+        storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+        appId: import.meta.env.VITE_FIREBASE_APP_ID,
+        measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+      }
       : import.meta.env.MODE === 'test'
         ? {
-            // Mock configuration for tests
-            apiKey: 'test-api-key',
-            authDomain: 'test.firebaseapp.com',
-            projectId: 'test-project',
-            storageBucket: 'test.firebasestorage.app',
-            messagingSenderId: '123456789',
-            appId: 'test-app-id',
-            measurementId: 'test-measurement-id',
-          }
+          // Mock configuration for tests
+          apiKey: 'test-api-key',
+          authDomain: 'test.firebaseapp.com',
+          projectId: 'test-project',
+          storageBucket: 'test.firebasestorage.app',
+          messagingSenderId: '123456789',
+          appId: 'test-app-id',
+          measurementId: 'test-measurement-id',
+        }
         : null,
 };

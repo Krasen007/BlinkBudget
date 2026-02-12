@@ -11,6 +11,7 @@ import {
   COLORS,
 } from '../utils/constants.js';
 import { ClickTracker } from '../core/click-tracking-service.js';
+import { createEnhancedEmptyState, EMPTY_STATE_SCENARIOS } from '../utils/enhanced-empty-states.js';
 
 export const TransactionList = ({
   transactions,
@@ -18,9 +19,9 @@ export const TransactionList = ({
   accounts,
   highlightTransactionIds = null,
   currentDateFilter = null,
-  onDateClick = () => {},
+  onDateClick = () => { },
   currentCategoryFilter = null,
-  onCategoryClick = () => {},
+  onCategoryClick = () => { },
 }) => {
   const listContainer = document.createElement('div');
   listContainer.className = 'dashboard-transactions-container';
@@ -100,9 +101,35 @@ export const TransactionList = ({
   listContainer.appendChild(titleContainer);
 
   if (transactions.length === 0) {
-    const emptyState = document.createElement('p');
-    emptyState.textContent = 'No transactions yet.';
-    emptyState.style.color = 'var(--color-text-muted)';
+    // Determine empty state scenario
+    let scenario = EMPTY_STATE_SCENARIOS.NO_TRANSACTIONS;
+    if (currentDateFilter || currentCategoryFilter) {
+      scenario = EMPTY_STATE_SCENARIOS.FILTER_NO_RESULTS;
+    }
+
+    const emptyState = createEnhancedEmptyState(scenario, {
+      onAction: (action) => {
+        switch (action) {
+          case 'add-transaction':
+            // Navigate to add transaction
+            window.Router?.navigate?.('add-expense');
+            break;
+          case 'clear-filters':
+            // Clear filters and refresh
+            if (typeof currentFilter === 'function') {
+              currentFilter(null);
+            }
+            break;
+          case 'show-tutorial':
+            // Show tutorial
+            window.Router?.navigate?.('tutorial');
+            break;
+        }
+      },
+      showTips: true,
+      compact: false
+    });
+
     listContainer.appendChild(emptyState);
   } else {
     const list = document.createElement('ul');

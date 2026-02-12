@@ -96,12 +96,11 @@ export const handleFormSubmit = (transactionData, onSubmit, onError = null) => {
     if (onError) {
       onError(e, errorMessage);
     } else {
-      // Import MobileAlert dynamically to avoid circular dependencies
-      import('../../components/MobileModal.js').then(({ MobileAlert }) => {
-        MobileAlert({
-          title: 'Transaction Error',
-          message: errorMessage,
-          buttonText: 'OK',
+      // Import toast notifications dynamically to avoid circular dependencies
+      import('../toast-notifications.js').then(({ showErrorToast }) => {
+        showErrorToast(errorMessage, {
+          duration: 5000,
+          persistent: false
         });
       });
     }

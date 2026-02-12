@@ -6,7 +6,6 @@
 import { Button } from './Button.js';
 import { DateInput } from './DateInput.js';
 import { TransactionService } from '../core/transaction-service.js';
-import { AlertDialog } from './ConfirmDialog.js';
 import {
   COLORS,
   SPACING,
@@ -14,6 +13,7 @@ import {
   FONT_SIZES,
 } from '../utils/constants.js';
 import { getFirstDayOfMonthISO, getTodayISO } from '../utils/date-utils.js';
+import { showWarningToast } from '../utils/toast-notifications.js';
 
 export const DataManagementSection = () => {
   const section = document.createElement('div');
@@ -99,7 +99,10 @@ export const DataManagementSection = () => {
       });
 
       if (transactions.length === 0) {
-        AlertDialog({ message: 'No transactions found in this date range.' });
+        showWarningToast('No transactions found in this date range.', {
+          duration: 4000,
+          persistent: false
+        });
         return;
       }
 

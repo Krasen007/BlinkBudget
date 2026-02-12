@@ -415,7 +415,7 @@ export const createCategorySelector = (options = {}) => {
                   const dateValue = dateSource.getDate
                     ? dateSource.getDate()
                     : dateSource.value ||
-                      new Date().toISOString().split('T')[0];
+                    new Date().toISOString().split('T')[0];
 
                   onSubmit({
                     amount: amountValidation.value,
@@ -426,13 +426,12 @@ export const createCategorySelector = (options = {}) => {
                   });
                 } catch (e) {
                   console.error('Submit failed:', e);
-                  // Import MobileAlert dynamically to avoid circular dependencies
-                  import('../../components/MobileModal.js').then(
-                    ({ MobileAlert }) => {
-                      MobileAlert({
-                        title: 'Transaction Error',
-                        message: `Error submitting transaction: ${e.message}`,
-                        buttonText: 'OK',
+                  // Import toast notifications dynamically to avoid circular dependencies
+                  import('../toast-notifications.js').then(
+                    ({ showErrorToast }) => {
+                      showErrorToast(`Error submitting transaction: ${e.message}`, {
+                        duration: 5000,
+                        persistent: false
                       });
                     }
                   );
