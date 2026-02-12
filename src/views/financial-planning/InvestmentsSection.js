@@ -1150,7 +1150,12 @@ export const InvestmentsSection = async (chartRenderer, activeCharts) => {
 
   const totalVal = document.createElement('div');
   totalVal.className = 'total-portfolio-value';
-  totalVal.innerHTML = `Total: <span class="currency-value">${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(portfolioToRender.totalValue)}</span>`;
+  // Security: Use safe DOM manipulation instead of innerHTML to prevent XSS
+  totalVal.textContent = 'Total: ';
+  const valueSpan = document.createElement('span');
+  valueSpan.className = 'currency-value';
+  valueSpan.textContent = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(portfolioToRender.totalValue);
+  totalVal.appendChild(valueSpan);
 
   const assetCnt = document.createElement('div');
   assetCnt.className = 'asset-count';

@@ -201,34 +201,34 @@ export default defineConfig({
         }),
         ...(process.env.NODE_ENV === 'production'
           ? [
-              purgecss({
-                content: ['./index.html', './src/**/*.js', './src/**/*.html'],
-                defaultExtractor: content =>
-                  content.match(/[\w-/:]+(?<!:)/g) || [],
-                safelist: [
-                  /^(flex|grid|hidden|block|inline|absolute|relative|fixed)/,
-                  /^(active|disabled|loading|error|success)/,
-                  /^mobile-/,
-                  /^(fade|slide|bounce)/,
-                  /:hover/,
-                  /:focus/,
-                  /:active/,
-                  /^(sm|md|lg|xl):/,
-                ],
-                variables: true,
-              }),
-              cssnano({
-                preset: [
-                  'default',
-                  {
-                    cssDeclarationSorter: false,
-                    reduceIdents: false,
-                    zindex: false,
-                    mergeRules: false,
-                  },
-                ],
-              }),
-            ]
+            purgecss({
+              content: ['./index.html', './src/**/*.js', './src/**/*.html'],
+              defaultExtractor: content =>
+                content.match(/[\w-/:]+(?<!:)/g) || [],
+              safelist: [
+                /^(flex|grid|hidden|block|inline|absolute|relative|fixed)/,
+                /^(active|disabled|loading|error|success)/,
+                /^mobile-/,
+                /^(fade|slide|bounce)/,
+                /:hover/,
+                /:focus/,
+                /:active/,
+                /^(sm|md|lg|xl):/,
+              ],
+              variables: true,
+            }),
+            cssnano({
+              preset: [
+                'default',
+                {
+                  cssDeclarationSorter: false,
+                  reduceIdents: false,
+                  zindex: false,
+                  mergeRules: false,
+                },
+              ],
+            }),
+          ]
           : []),
       ],
     },
@@ -238,5 +238,6 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
+    watch: false,
   },
 });

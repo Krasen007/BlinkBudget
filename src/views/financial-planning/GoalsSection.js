@@ -122,7 +122,8 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
     dateError.style.display = 'none';
 
     if (!name) {
-      nameError.textContent = 'Goal name is required (e.g., "Emergency Fund", "Vacation")';
+      nameError.textContent =
+        'Goal name is required (e.g., "Emergency Fund", "Vacation")';
       nameError.style.display = 'block';
       valid = false;
     }
@@ -184,7 +185,8 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
   // Real-time validation on blur
   goalName.addEventListener('blur', () => {
     if (!goalName.value.trim()) {
-      nameError.textContent = 'Goal name is required (e.g., "Emergency Fund", "Vacation")';
+      nameError.textContent =
+        'Goal name is required (e.g., "Emergency Fund", "Vacation")';
       nameError.style.display = 'block';
     } else {
       nameError.style.display = 'none';
@@ -311,6 +313,7 @@ function createGoalsList(chartRenderer, activeCharts, section) {
         }
 
         const meta = document.createElement('div');
+        meta.className = 'goal-meta';
         meta.style.fontSize = '0.9rem';
         meta.style.color = COLORS.TEXT_MUTED;
 
@@ -323,7 +326,18 @@ function createGoalsList(chartRenderer, activeCharts, section) {
           currency: 'EUR',
         }).format(goal.targetAmount);
 
-        meta.innerHTML = `<span class="currency-value">${currentFormatted}</span> of <span class="currency-value">${targetFormatted}</span> by ${formatDateForDisplay(targetDate)}`;
+        // Security: Use safe DOM manipulation instead of innerHTML to prevent XSS
+        meta.textContent = '';
+        const currentSpan = document.createElement('span');
+        currentSpan.className = 'currency-value';
+        currentSpan.textContent = currentFormatted;
+        meta.appendChild(currentSpan);
+        meta.appendChild(document.createTextNode(' of '));
+        const targetSpan = document.createElement('span');
+        targetSpan.className = 'currency-value';
+        targetSpan.textContent = targetFormatted;
+        meta.appendChild(targetSpan);
+        meta.appendChild(document.createTextNode(` by ${formatDateForDisplay(targetDate)}`));
 
         left.appendChild(titleContainer);
         left.appendChild(meta);
@@ -344,7 +358,13 @@ function createGoalsList(chartRenderer, activeCharts, section) {
           monthlyNeeded.className = 'monthly-savings-needed';
           monthlyNeeded.style.fontSize = '0.8rem';
           monthlyNeeded.style.fontWeight = '500';
-          monthlyNeeded.innerHTML = `Need <span class="currency-value">${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(needed)}</span> / month`;
+          // Security: Use safe DOM manipulation instead of innerHTML
+          monthlyNeeded.textContent = 'Need ';
+          const neededSpan = document.createElement('span');
+          neededSpan.className = 'currency-value';
+          neededSpan.textContent = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(needed);
+          monthlyNeeded.appendChild(neededSpan);
+          monthlyNeeded.appendChild(document.createTextNode(' / month'));
           left.appendChild(monthlyNeeded);
         }
 

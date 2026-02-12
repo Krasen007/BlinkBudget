@@ -1,6 +1,7 @@
 import { TransactionForm } from '../components/TransactionForm.js';
 import { DateInput } from '../components/DateInput.js';
 import { TransactionService } from '../core/transaction-service.js';
+import { AuthService } from '../core/auth-service.js';
 import { Router } from '../core/router.js';
 import {
   SPACING,
@@ -21,6 +22,14 @@ export const EditView = ({ id }) => {
 
   if (!transaction) {
     container.textContent = 'Transaction not found';
+    setTimeout(() => Router.navigate('dashboard'), TIMING.ANIMATION_FAST * 10);
+    return container;
+  }
+
+  // Security: Validate transaction ownership to prevent unauthorized access
+  const currentUserId = AuthService.getUserId();
+  if (transaction.userId && transaction.userId !== currentUserId) {
+    container.textContent = 'Unauthorized access';
     setTimeout(() => Router.navigate('dashboard'), TIMING.ANIMATION_FAST * 10);
     return container;
   }

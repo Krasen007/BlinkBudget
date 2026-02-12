@@ -44,7 +44,6 @@ export const CacheService = (() => {
     store.delete(key);
   }
 
-
   function clear() {
     store.clear();
   }

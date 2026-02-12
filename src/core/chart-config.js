@@ -20,243 +20,245 @@ import {
  * Includes comprehensive accessibility features for WCAG 2.1 AA compliance
  * Enhanced with modern styling and smooth animations
  */
-export const defaultChartOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
+export function defaultChartOptions() {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
 
-  // Enhanced layout with BlinkBudget spacing
-  layout: {
-    padding: {
-      top: 16,
-      right: 16,
-      bottom: 16,
-      left: 16,
-    },
-  },
-
-  // Accessibility configuration
-  accessibility: {
-    enabled: true,
-    announceNewData: {
-      enabled: true,
-      announcementFormatter: function (chart, data) {
-        const datasetLabel = data.dataset.label || 'Dataset';
-        const value = data.parsed || data.raw;
-        const formattedValue = new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'USD',
-        }).format(value);
-        return `${datasetLabel}: ${formattedValue}`;
+    // Enhanced layout with BlinkBudget spacing
+    layout: {
+      padding: {
+        top: 16,
+        right: 16,
+        bottom: 16,
+        left: 16,
       },
     },
-  },
 
-  plugins: {
-    legend: {
-      position: 'bottom',
-      align: 'center',
-      labels: {
-        padding: 20,
-        usePointStyle: true,
-        pointStyle: 'circle',
-        font: {
-          family: 'Inter, system-ui, -apple-system, sans-serif', // BlinkBudget font
-          size: 12,
-          weight: '500',
+    // Accessibility configuration
+    accessibility: {
+      enabled: true,
+      announceNewData: {
+        enabled: true,
+        announcementFormatter: function (chart, data) {
+          const datasetLabel = data.dataset.label || 'Dataset';
+          const value = data.parsed || data.raw;
+          const formattedValue = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+          }).format(value);
+          return `${datasetLabel}: ${formattedValue}`;
         },
-        color: 'hsl(0, 0%, 100%)', // --color-text-main
-        boxWidth: 12,
-        boxHeight: 12,
-        // Enhanced accessibility for legend
-        generateLabels: function (chart) {
-          // Get ChartJS from the chart instance or modules
-          const chartJSModules = getChartJSModules();
-          const ChartJSInstance = chartJSModules?.ChartJS || chart.constructor;
+      },
+    },
 
-          // Check if we can access the default generateLabels function
-          if (
-            ChartJSInstance &&
-            ChartJSInstance.defaults &&
-            ChartJSInstance.defaults.plugins &&
-            ChartJSInstance.defaults.plugins.legend
-          ) {
-            try {
-              const original =
-                ChartJSInstance.defaults.plugins.legend.labels.generateLabels;
-              const labels = original.call(this, chart);
+    plugins: {
+      legend: {
+        position: 'bottom',
+        align: 'center',
+        labels: {
+          padding: 20,
+          usePointStyle: true,
+          pointStyle: 'circle',
+          font: {
+            family: 'Inter, system-ui, -apple-system, sans-serif', // BlinkBudget font
+            size: 12,
+            weight: '500',
+          },
+          color: 'hsl(0, 0%, 100%)', // --color-text-main
+          boxWidth: 12,
+          boxHeight: 12,
+          // Enhanced accessibility for legend
+          generateLabels: function (chart) {
+            // Get ChartJS from the chart instance or modules
+            const chartJSModules = getChartJSModules();
+            const ChartJSInstance = chartJSModules?.ChartJS || chart.constructor;
 
-              // Add accessibility information to labels
-              labels.forEach((label, index) => {
-                const dataset = chart.data.datasets[0];
-                if (dataset?.data && index < dataset.data.length) {
-                  const value = dataset.data[index];
-                  const total = dataset.data.reduce((sum, val) => sum + val, 0);
-                  const percentage =
-                    total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+            // Check if we can access the default generateLabels function
+            if (
+              ChartJSInstance &&
+              ChartJSInstance.defaults &&
+              ChartJSInstance.defaults.plugins &&
+              ChartJSInstance.defaults.plugins.legend
+            ) {
+              try {
+                const original =
+                  ChartJSInstance.defaults.plugins.legend.labels.generateLabels;
+                const labels = original.call(this, chart);
 
-                  // Store accessibility info for screen readers
-                  label.ariaLabel = `${label.text}: ${value} (${percentage}% of total)`;
-                }
-              });
+                // Add accessibility information to labels
+                labels.forEach((label, index) => {
+                  const dataset = chart.data.datasets[0];
+                  if (dataset?.data && index < dataset.data.length) {
+                    const value = dataset.data[index];
+                    const total = dataset.data.reduce((sum, val) => sum + val, 0);
+                    const percentage =
+                      total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
 
-              return labels;
-            } catch (error) {
-              console.warn(
-                '[ChartConfig] Error using default generateLabels, falling back to custom implementation:',
-                error
-              );
+                    // Store accessibility info for screen readers
+                    label.ariaLabel = `${label.text}: ${value} (${percentage}% of total)`;
+                  }
+                });
+
+                return labels;
+              } catch (error) {
+                console.warn(
+                  '[ChartConfig] Error using default generateLabels, falling back to custom implementation:',
+                  error
+                );
+              }
             }
-          }
 
-          // Fallback to basic label generation
-          const data = chart.data;
-          if (data.labels.length && data.datasets.length) {
-            return data.labels.map((label, i) => {
-              const dataset = data.datasets[0];
-              const value = dataset.data[i];
-              const total = dataset.data.reduce((sum, val) => sum + val, 0);
+            // Fallback to basic label generation
+            const data = chart.data;
+            if (data.labels.length && data.datasets.length) {
+              return data.labels.map((label, i) => {
+                const dataset = data.datasets[0];
+                const value = dataset.data[i];
+                const total = dataset.data.reduce((sum, val) => sum + val, 0);
+                const percentage =
+                  total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+
+                return {
+                  text: `${label} (${percentage}%)`,
+                  fillStyle: dataset.backgroundColor[i],
+                  strokeStyle: dataset.borderColor?.[i] || '#fff',
+                  lineWidth: 2,
+                  pointStyle: 'circle',
+                  index: i,
+                  ariaLabel: `${label}: ${value} (${percentage}% of total)`,
+                };
+              });
+            }
+            return [];
+          },
+        },
+      },
+
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.95)', // Enhanced contrast
+        titleColor: '#ffffff',
+        bodyColor: '#ffffff',
+        borderColor: 'hsl(250, 84%, 60%)', // Primary color border
+        borderWidth: 2,
+        cornerRadius: 12, // Rounded corners matching BlinkBudget
+        displayColors: true,
+        padding: 16,
+        titleFont: {
+          family: 'Outfit, system-ui, -apple-system, sans-serif', // BlinkBudget heading font
+          size: 14,
+          weight: '600',
+        },
+        bodyFont: {
+          family: 'Inter, system-ui, -apple-system, sans-serif', // BlinkBudget body font
+          size: 13,
+          weight: '400',
+        },
+        // Position tooltips to prevent overlap with content below
+        position: 'nearest',
+        // Use smart positioning - Chart.js will position tooltips to avoid viewport edges
+        yAlign: 'auto',
+        // Enhanced accessibility for tooltips
+        filter: function (_tooltipItem) {
+          // Always show tooltips for accessibility
+          return true;
+        },
+        callbacks: {
+          // Enhanced tooltip formatting for screen readers
+          beforeTitle: function (_tooltipItems) {
+            return 'Chart data:';
+          },
+          afterBody: function (_tooltipItems) {
+            const item = _tooltipItems[0];
+            if (item.dataset.data && item.dataset.data.length > 1) {
+              const total = item.dataset.data.reduce((sum, val) => sum + val, 0);
+              // Handle both single values (pie/bar charts) and y values (line charts)
+              const value =
+                item.parsed.y !== undefined ? item.parsed.y : item.parsed;
               const percentage =
                 total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
-
-              return {
-                text: `${label} (${percentage}%)`,
-                fillStyle: dataset.backgroundColor[i],
-                strokeStyle: dataset.borderColor?.[i] || '#fff',
-                lineWidth: 2,
-                pointStyle: 'circle',
-                index: i,
-                ariaLabel: `${label}: ${value} (${percentage}% of total)`,
-              };
-            });
-          }
-          return [];
+              return `Percentage of total: ${percentage}%`;
+            }
+            return '';
+          },
         },
       },
     },
 
-    tooltip: {
-      backgroundColor: 'rgba(0, 0, 0, 0.95)', // Enhanced contrast
-      titleColor: '#ffffff',
-      bodyColor: '#ffffff',
-      borderColor: 'hsl(250, 84%, 60%)', // Primary color border
-      borderWidth: 2,
-      cornerRadius: 12, // Rounded corners matching BlinkBudget
-      displayColors: true,
-      padding: 16,
-      titleFont: {
-        family: 'Outfit, system-ui, -apple-system, sans-serif', // BlinkBudget heading font
-        size: 14,
-        weight: '600',
+    // Simplified animation with BlinkBudget timing
+    animation: {
+      duration: function () {
+        // Check for reduced motion preference
+        if (
+          window.matchMedia &&
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ) {
+          return 0; // No animation for users who prefer reduced motion
+        }
+        return 600; // Shorter duration for snappier feel
       },
-      bodyFont: {
-        family: 'Inter, system-ui, -apple-system, sans-serif', // BlinkBudget body font
-        size: 13,
-        weight: '400',
-      },
-      // Position tooltips to prevent overlap with content below
-      position: 'nearest',
-      // Use smart positioning - Chart.js will position tooltips to avoid viewport edges
-      yAlign: 'auto',
-      // Enhanced accessibility for tooltips
-      filter: function (_tooltipItem) {
-        // Always show tooltips for accessibility
-        return true;
-      },
-      callbacks: {
-        // Enhanced tooltip formatting for screen readers
-        beforeTitle: function (_tooltipItems) {
-          return 'Chart data:';
+      easing: 'easeOutQuart', // Simpler easing
+      animateRotate: true,
+      animateScale: false, // Disable scale animation for simplicity
+    },
+
+    // Simplified transitions for smooth interactions
+    transitions: {
+      active: {
+        animation: {
+          duration: 200,
+          easing: 'easeOutQuart',
         },
-        afterBody: function (_tooltipItems) {
-          const item = _tooltipItems[0];
-          if (item.dataset.data && item.dataset.data.length > 1) {
-            const total = item.dataset.data.reduce((sum, val) => sum + val, 0);
-            // Handle both single values (pie/bar charts) and y values (line charts)
-            const value =
-              item.parsed.y !== undefined ? item.parsed.y : item.parsed;
-            const percentage =
-              total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
-            return `Percentage of total: ${percentage}%`;
-          }
-          return '';
+      },
+      resize: {
+        animation: {
+          duration: 300,
+          easing: 'easeInOutQuart',
         },
       },
     },
-  },
 
-  // Simplified animation with BlinkBudget timing
-  animation: {
-    duration: function () {
-      // Check for reduced motion preference
-      if (
-        window.matchMedia &&
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      ) {
-        return 0; // No animation for users who prefer reduced motion
-      }
-      return 600; // Shorter duration for snappier feel
+    // Interaction configuration for accessibility
+    interaction: {
+      intersect: false,
+      mode: 'index',
     },
-    easing: 'easeOutQuart', // Simpler easing
-    animateRotate: true,
-    animateScale: false, // Disable scale animation for simplicity
-  },
 
-  // Simplified transitions for smooth interactions
-  transitions: {
-    active: {
-      animation: {
-        duration: 200,
-        easing: 'easeOutQuart',
-      },
-    },
-    resize: {
-      animation: {
-        duration: 300,
-        easing: 'easeInOutQuart',
-      },
-    },
-  },
-
-  // Interaction configuration for accessibility
-  interaction: {
-    intersect: false,
-    mode: 'index',
-  },
-
-  // Enhanced scale configuration for better readability
-  scales: {
-    x: {
-      grid: {
-        color: 'hsl(240, 5%, 20%)', // Subtle grid lines
-        lineWidth: 1,
-      },
-      ticks: {
-        font: {
-          family: 'Inter, system-ui, -apple-system, sans-serif',
-          size: 12,
-          weight: '400',
+    // Enhanced scale configuration for better readability
+    scales: {
+      x: {
+        grid: {
+          color: 'hsl(240, 5%, 20%)', // Subtle grid lines
+          lineWidth: 1,
         },
-        color: 'hsl(240, 5%, 65%)', // Muted text color
-        maxRotation: 45,
-        minRotation: 0,
-      },
-    },
-    y: {
-      grid: {
-        color: 'hsl(240, 5%, 20%)', // Subtle grid lines
-        lineWidth: 1,
-      },
-      ticks: {
-        font: {
-          family: 'Inter, system-ui, -apple-system, sans-serif',
-          size: 12,
-          weight: '400',
+        ticks: {
+          font: {
+            family: 'Inter, system-ui, -apple-system, sans-serif',
+            size: 12,
+            weight: '400',
+          },
+          color: 'hsl(240, 5%, 65%)', // Muted text color
+          maxRotation: 45,
+          minRotation: 0,
         },
-        color: 'hsl(240, 5%, 65%)', // Muted text color
+      },
+      y: {
+        grid: {
+          color: 'hsl(240, 5%, 20%)', // Subtle grid lines
+          lineWidth: 1,
+        },
+        ticks: {
+          font: {
+            family: 'Inter, system-ui, -apple-system, sans-serif',
+            size: 12,
+            weight: '400',
+          },
+          color: 'hsl(240, 5%, 65%)', // Muted text color
+        },
       },
     },
-  },
-};
+  };
+}
 
 /**
  * BlinkBudget color palette for charts
@@ -390,9 +392,9 @@ export function getChartColors(count, highContrast = false, style = 'solid') {
           borderColor: darkenColor(baseColor, 20),
           pattern:
             accessibleColors.patterns[
-              Object.keys(accessibleColors.patterns)[
-                i % Object.keys(accessibleColors.patterns).length
-              ]
+            Object.keys(accessibleColors.patterns)[
+            i % Object.keys(accessibleColors.patterns).length
+            ]
             ],
         });
         break;
@@ -637,11 +639,12 @@ export function createChartOptions(customOptions = {}) {
     return result;
   };
 
+  const defaultOptions = defaultChartOptions();
   const baseOptions = {
-    ...defaultChartOptions,
+    ...defaultOptions,
     ...customOptions,
     plugins: deepMerge(
-      defaultChartOptions.plugins,
+      defaultOptions.plugins || {},
       customOptions.plugins || {}
     ),
   };
