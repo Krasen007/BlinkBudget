@@ -472,7 +472,7 @@ function createInvestmentFormControls(chartRenderer, activeCharts) {
     invForm.style.flexWrap = 'wrap';
   });
 
-  // Validation function
+  // Validation function with real-time feedback
   function validateInvForm() {
     const investmentType = typeSelect.value;
     const price = Number(priceInput.value) || 0;
@@ -499,33 +499,84 @@ function createInvestmentFormControls(chartRenderer, activeCharts) {
 
     let isValid = investmentType && price >= 0 && currentPrice >= 0;
 
-    // Type-specific validation
+    // Clear all errors first
+    typeError.style.display = 'none';
+    nameError.style.display = 'none';
+    valueError.style.display = 'none';
+    priceError.style.display = 'none';
+    currentPriceError.style.display = 'none';
+
+    // Type-specific validation with helpful messages
     switch (investmentType) {
       case 'stocks':
       case 'etf':
-        isValid = isValid && symbol && shares > 0;
+        if (!symbol) {
+          nameError.textContent = `${investmentType === 'stocks' ? 'Stock' : 'ETF'} symbol required (e.g., ${investmentType === 'stocks' ? 'AAPL' : 'VOO'})`;
+          nameError.style.display = 'block';
+          isValid = false;
+        }
+        if (!(shares > 0)) {
+          valueError.textContent = 'Number of shares must be greater than 0';
+          valueError.style.display = 'block';
+          isValid = false;
+        }
         break;
       case 'crypto':
-        isValid = isValid && symbol && units > 0;
+        if (!symbol) {
+          nameError.textContent = 'Crypto symbol required (e.g., BTC, ETH)';
+          nameError.style.display = 'block';
+          isValid = false;
+        }
+        if (!(units > 0)) {
+          valueError.textContent = 'Number of units must be greater than 0';
+          valueError.style.display = 'block';
+          isValid = false;
+        }
         break;
       case 'commodities':
-        isValid = isValid && quantity > 0;
+        if (!symbol) {
+          nameError.textContent = 'Commodity name is required';
+          nameError.style.display = 'block';
+          isValid = false;
+        }
+        if (!(quantity > 0)) {
+          valueError.textContent = 'Quantity must be greater than 0';
+          valueError.style.display = 'block';
+          isValid = false;
+        }
         break;
       case 'bonds':
       case 'realestate':
       case 'cash':
       case 'other':
-        isValid = isValid && symbol;
+        if (!symbol) {
+          nameError.textContent = 'Name is required';
+          nameError.style.display = 'block';
+          isValid = false;
+        }
         break;
       default:
         isValid = false;
         break;
     }
 
+    // Validate price fields
+    if (price < 0) {
+      priceError.textContent = 'Purchase price cannot be negative';
+      priceError.style.display = 'block';
+      isValid = false;
+    }
+    if (currentPrice < 0) {
+      currentPriceError.textContent = 'Current price cannot be negative';
+      currentPriceError.style.display = 'block';
+      isValid = false;
+    }
+
     saveInvBtn.disabled = !isValid;
+    return isValid;
   }
 
-  // Event listeners for validation
+  // Event listeners for real-time validation
   typeSelect.addEventListener('change', () => {
     generateTypeSpecificFields(
       typeSelect.value,
@@ -537,10 +588,14 @@ function createInvestmentFormControls(chartRenderer, activeCharts) {
 
   basicFieldsContainer.addEventListener('input', validateInvForm);
   basicFieldsContainer.addEventListener('change', validateInvForm);
+  basicFieldsContainer.addEventListener('blur', validateInvForm, true);
   typeSpecificFields.addEventListener('input', validateInvForm);
   typeSpecificFields.addEventListener('change', validateInvForm);
+  typeSpecificFields.addEventListener('blur', validateInvForm, true);
   priceInput.addEventListener('input', validateInvForm);
+  priceInput.addEventListener('blur', validateInvForm);
   currentPriceInput.addEventListener('input', validateInvForm);
+  currentPriceInput.addEventListener('blur', validateInvForm);
 
   // Save handler
   saveInvBtn.addEventListener('click', async () => {

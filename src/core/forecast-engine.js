@@ -598,4 +598,21 @@ export class ForecastEngine {
   clearCache() {
     this.cache.clear();
   }
+
+  /**
+   * Invalidate cache and notify listeners
+   * @param {string} reason - Reason for invalidation (e.g., 'transactions-updated')
+   */
+  invalidateCache(reason = 'manual') {
+    this.clearCache();
+
+    // Emit event for UI components to refresh
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('forecast-invalidate', {
+          detail: { reason, timestamp: Date.now() },
+        })
+      );
+    }
+  }
 }

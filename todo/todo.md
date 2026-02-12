@@ -22,15 +22,7 @@ DO NOT IMPLEMENT: use Ionic's Capacitor or Cordova to make android app
 [x] implement backup solution on server so if needed a user can restore their data up to the previous day, this could be added in the settings. the button will delete all the transactions after the selected date. example: if i select 2025-12-15 it will delete all the transactions after 2025-12-15 and keep the transactions before 2025-12-15, better will be to select range and the backup to restore transactions in the selected period. think of how this will be implemented on the app while keeping it offline first.
 [ ] lazy load older transactions, they should be kept on server and only the transactions for the last 30 days should be cached on the device / PWA
 [ ] add option to mark a transaction as important, maybe a checkbox or a star icon and when the user marks a transaction as important it should be highlighted in the transactions list
-[ ] when visualizing the chart in reports view, make sure to always use the same colors for the same categories
-[ ] fix tutorial, fix delete account properly
-
-- [x] **Task:** Implement advanced filtering logic (date ranges, multi-category).
-- [x] **Task:** Create `CustomCategoryManager` service and UI.
-- [x] **Task:** Add 'Notes' field to Transaction schema and UI forms.
-- [ ] **Task:** Run automated Accessibility audits (Axe/Lighthouse).
-- [ ] **Task:** Manual keyboard navigation testing (Tab order, Focus traps).
-- [ ] **Task:** Test advanced filtering/search combinations.
-- [ ] **Task:** Test "Interactive Tutorial" flow for breakage/skipping logic.
-- [ ] **Task:** Verify "First Run" experience on fresh accounts.
-      [ ] we should think about possible management UI for the app for the system admin to overview the users and their accounts and other metrics like the audit logs, also other possible things like user management, billing, etc.
+[ ] fix tutorial
+[ ]Add 'Notes' field to Transaction schema and UI forms.
+[ ] we should think about possible management UI for the app for the system admin to overview the users and their accounts and other metrics like the audit logs, also other possible things like user management, billing, etc.
+[ ] Update account-service.js and storage.js to implement an optional limit property for accounts, allowing the app to track credit limits and spending thresholds. This change exposes new API methods to calculate available credit and trigger utilization warnings, as originally outlined in the design spec.

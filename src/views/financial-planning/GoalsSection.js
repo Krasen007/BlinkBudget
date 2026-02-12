@@ -20,6 +20,7 @@ import {
   safeParseDate,
 } from '../../utils/financial-planning-helpers.js';
 import { refreshChart } from '../../utils/chart-refresh-helper.js';
+import { formatDateForDisplay } from '../../utils/date-utils.js';
 
 /**
  * Create goal form controls
@@ -114,31 +115,39 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
     const tdate = goalDate.value ? new Date(goalDate.value) : null;
     const current = Number(goalCurrent.value) || 0;
 
-    // Basic validation
+    // Basic validation with improved messages
     let valid = true;
     nameError.style.display = 'none';
     targetError.style.display = 'none';
     dateError.style.display = 'none';
 
     if (!name) {
-      nameError.textContent = 'Goal name is required.';
+      nameError.textContent = 'Goal name is required (e.g., "Emergency Fund", "Vacation")';
       nameError.style.display = 'block';
       valid = false;
     }
     if (!(target > 0)) {
-      targetError.textContent = 'Target amount must be greater than 0.';
+      targetError.textContent = 'Target amount must be greater than 0';
       targetError.style.display = 'block';
       valid = false;
     }
     if (!tdate || isNaN(tdate.getTime())) {
-      dateError.textContent = 'Please choose a valid target date.';
+      dateError.textContent = 'Please choose a valid target date';
       dateError.style.display = 'block';
       valid = false;
     } else if (tdate < new Date(new Date().setHours(0, 0, 0, 0))) {
-      dateError.textContent = 'Deadline must be in the future.';
+      dateError.textContent = 'Target date must be in the future';
       dateError.style.display = 'block';
       valid = false;
     }
+
+    // Validate current savings
+    if (current < 0) {
+      targetError.textContent = 'Current savings cannot be negative';
+      targetError.style.display = 'block';
+      valid = false;
+    }
+
     if (!valid) return;
 
     try {
@@ -162,8 +171,54 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
       goalTarget.value = '';
       goalDate.value = '';
       goalCurrent.value = '';
+
+      // Clear any lingering errors
+      nameError.style.display = 'none';
+      targetError.style.display = 'none';
+      dateError.style.display = 'none';
     } catch (err) {
       console.error('Failed to save goal', err);
+    }
+  });
+
+  // Real-time validation on blur
+  goalName.addEventListener('blur', () => {
+    if (!goalName.value.trim()) {
+      nameError.textContent = 'Goal name is required (e.g., "Emergency Fund", "Vacation")';
+      nameError.style.display = 'block';
+    } else {
+      nameError.style.display = 'none';
+    }
+  });
+
+  goalTarget.addEventListener('blur', () => {
+    const target = Number(goalTarget.value) || 0;
+    if (!(target > 0)) {
+      targetError.textContent = 'Target amount must be greater than 0';
+      targetError.style.display = 'block';
+    } else {
+      targetError.style.display = 'none';
+    }
+  });
+
+  goalDate.addEventListener('blur', () => {
+    const tdate = goalDate.value ? new Date(goalDate.value) : null;
+    if (!tdate || isNaN(tdate.getTime())) {
+      dateError.textContent = 'Please choose a valid target date';
+      dateError.style.display = 'block';
+    } else if (tdate < new Date(new Date().setHours(0, 0, 0, 0))) {
+      dateError.textContent = 'Target date must be in the future';
+      dateError.style.display = 'block';
+    } else {
+      dateError.style.display = 'none';
+    }
+  });
+
+  goalCurrent.addEventListener('blur', () => {
+    const current = Number(goalCurrent.value) || 0;
+    if (current < 0) {
+      targetError.textContent = 'Current savings cannot be negative';
+      targetError.style.display = 'block';
     }
   });
 
@@ -268,7 +323,7 @@ function createGoalsList(chartRenderer, activeCharts, section) {
           currency: 'EUR',
         }).format(goal.targetAmount);
 
-        meta.innerHTML = `<span class="currency-value">${currentFormatted}</span> of <span class="currency-value">${targetFormatted}</span> by ${targetDate.toLocaleDateString()}`;
+        meta.innerHTML = `<span class="currency-value">${currentFormatted}</span> of <span class="currency-value">${targetFormatted}</span> by ${formatDateForDisplay(targetDate)}`;
 
         left.appendChild(titleContainer);
         left.appendChild(meta);

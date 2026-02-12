@@ -23,8 +23,27 @@ export const CacheService = (() => {
   }
 
   function del(key) {
+    // Support wildcard patterns (e.g., 'analytics_*', 'forecast_*')
+    if (key.includes('*')) {
+      const prefix = key.replace('*', '');
+      const keysToDelete = [];
+
+      // Find all keys matching the pattern
+      for (const [storeKey] of store) {
+        if (storeKey.startsWith(prefix)) {
+          keysToDelete.push(storeKey);
+        }
+      }
+
+      // Delete all matching keys
+      keysToDelete.forEach(k => store.delete(k));
+      return;
+    }
+
+    // Exact key deletion
     store.delete(key);
   }
+
 
   function clear() {
     store.clear();
