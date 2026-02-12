@@ -42,7 +42,7 @@ export function defaultChartOptions() {
         enabled: true,
         announcementFormatter: function (chart, data) {
           const datasetLabel = data.dataset.label || 'Dataset';
-          const value = data.parsed || data.raw;
+          const value = data.parsed ?? data.raw; // Use nullish coalescing to preserve 0 values
           const formattedValue = new Intl.NumberFormat('en-US', {
             style: 'currency',
             currency: 'USD',
@@ -115,7 +115,7 @@ export function defaultChartOptions() {
 
             // Fallback to basic label generation
             const data = chart.data;
-            if (data.labels.length && data.datasets.length) {
+            if (data.labels?.length && data.datasets?.length) {
               return data.labels.map((label, i) => {
                 const dataset = data.datasets[0];
                 const value = dataset.data[i];

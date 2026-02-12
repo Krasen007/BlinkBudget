@@ -276,7 +276,7 @@ export const AdvancedFilterPanel = ({
         checkboxWrapper.style.borderColor = 'var(--color-primary)';
         label.style.color = 'white';
       } else {
-        checkboxWrapper.style.backgroundColor = 'transparent'; // Original unselected state
+        checkboxWrapper.style.backgroundColor = 'var(--color-background)'; // Match change handler
         checkboxWrapper.style.borderColor = 'var(--color-border)'; // Original border
         label.style.color = 'var(--color-text-main)'; // Original text color
       }

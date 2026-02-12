@@ -65,19 +65,19 @@ describe('Property 6: Insight Generation Accuracy', () => {
         previousPeriod
       );
 
+      const inputCurrent = 2500; // From fixture
+      const inputComparison = 2000; // From fixture
       const expectedChange =
-        ((comparison.overallComparison.expenses.current -
-          comparison.overallComparison.expenses.comparison) /
-          comparison.overallComparison.expenses.comparison) *
-        100;
+        ((inputCurrent - inputComparison) / inputComparison) * 100;
 
-      if (comparison.overallComparison.expenses.comparison > 0) {
-        expect(
-          Math.abs(
-            comparison.overallComparison.expenses.changePercent - expectedChange
-          )
-        ).toBeLessThan(0.1);
-      }
+      expect(comparison.overallComparison.expenses.comparison).toBe(
+        inputComparison
+      );
+      expect(comparison.overallComparison.expenses.current).toBe(inputCurrent);
+      expect(comparison.overallComparison.expenses.changePercent).toBeCloseTo(
+        expectedChange,
+        0.1
+      );
     }
   });
 
@@ -105,6 +105,12 @@ describe('Property 6: Insight Generation Accuracy', () => {
       );
 
       expect(Array.isArray(insights)).toBe(true);
+      expect(insights.length).toBeGreaterThan(0);
+      // Verify insights have expected structure
+      insights.forEach(insight => {
+        expect(insight).toHaveProperty('type');
+        expect(insight).toHaveProperty('message');
+      });
     }
   });
 

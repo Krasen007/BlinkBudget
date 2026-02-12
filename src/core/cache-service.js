@@ -25,12 +25,28 @@ export const CacheService = (() => {
   function del(key) {
     // Support wildcard patterns (e.g., 'analytics_*', 'forecast_*')
     if (key.includes('*')) {
-      const prefix = key.replace('*', '');
+      if (key === '*') {
+        throw new Error('Use clear() to delete all entries');
+      }
+
+      // Validate pattern - only support suffix wildcards like 'analytics_*'
+      const starIndex = key.indexOf('*');
+      if (starIndex !== key.length - 1) {
+        throw new Error(
+          `Invalid wildcard pattern: ${key}. Only suffix patterns like 'analytics_*' are supported`
+        );
+      }
+
+      const prefix = key.slice(0, starIndex);
       const keysToDelete = [];
+
+      // Build regex pattern for matching
+      const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const pattern = new RegExp(`^${escapedPrefix}.*`);
 
       // Find all keys matching the pattern
       for (const [storeKey] of store) {
-        if (storeKey.startsWith(prefix)) {
+        if (pattern.test(storeKey)) {
           keysToDelete.push(storeKey);
         }
       }

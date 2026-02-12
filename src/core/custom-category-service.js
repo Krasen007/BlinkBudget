@@ -105,11 +105,12 @@ export const CustomCategoryService = {
     // Deduplicate by name (case-insensitive)
     const uniqueMap = new Map();
     filtered.forEach(cat => {
-      // If duplicate exists, prefer the one that is already in the map (stable)
-      // or maybe prefer the one with most info?
-      // For now, simpler is better: first match wins.
       const key = cat.name.toLowerCase();
-      if (!uniqueMap.has(key)) {
+      const existing = uniqueMap.get(key);
+      if (!existing) {
+        uniqueMap.set(key, cat);
+      } else if (cat.updatedAt > existing.updatedAt) {
+        // Prefer most recently updated
         uniqueMap.set(key, cat);
       }
     });
@@ -241,7 +242,6 @@ export const CustomCategoryService = {
   /**
    * Remove a category by ID
    * @param {string} id - Category ID
-   * @param {boolean} force - Force remove system categories (if they were somehow editable)
    * @returns {boolean} True if removed, false otherwise
    */
   remove(id) {

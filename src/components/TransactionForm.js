@@ -37,7 +37,6 @@ export const TransactionForm = ({
   onDelete = null,
 }) => {
   // Check if smart suggestions are enabled
-  // Check if smart suggestions are enabled
   const smartSuggestionsEnabled =
     String(SettingsService.getSetting('smartSuggestionsEnabled')) === 'true'; // Handle string/boolean coercion, default false
 

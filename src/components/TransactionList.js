@@ -25,6 +25,7 @@ export const TransactionList = ({
   onDateClick = () => {},
   currentCategoryFilter = null,
   onCategoryClick = () => {},
+  onFilterClear = () => {}, // New callback for clearing general filter
 }) => {
   const listContainer = document.createElement('div');
   listContainer.className = 'dashboard-transactions-container';
@@ -106,7 +107,7 @@ export const TransactionList = ({
   if (transactions.length === 0) {
     // Determine empty state scenario
     let scenario = EMPTY_STATE_SCENARIOS.NO_TRANSACTIONS;
-    if (currentDateFilter || currentCategoryFilter) {
+    if (currentDateFilter || currentCategoryFilter || currentFilter) {
       scenario = EMPTY_STATE_SCENARIOS.FILTER_NO_RESULTS;
     }
 
@@ -119,8 +120,8 @@ export const TransactionList = ({
             break;
           case 'clear-filters':
             // Clear all filters - date, category, and general filter
-            if (typeof currentFilter === 'function') {
-              currentFilter(null);
+            if (typeof onFilterClear === 'function') {
+              onFilterClear();
             }
             if (typeof onDateClick === 'function') {
               onDateClick(null);

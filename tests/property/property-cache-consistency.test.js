@@ -102,7 +102,7 @@ describe('Property 12: Cache Consistency', () => {
         timePeriod
       );
 
-      // Add more transactions
+      // Add more transactions - test that cache is properly invalidated
       const transactions2 = [...transactions1, ...generateTransactions(10)];
       analyticsEngine.clearCache();
       const result2 = analyticsEngine.calculateCategoryBreakdown(
@@ -112,6 +112,7 @@ describe('Property 12: Cache Consistency', () => {
 
       // Result should be different with more transactions
       expect(result2.totalAmount).toBeGreaterThan(result1.totalAmount);
+      expect(result2).not.toBe(result1); // Should be different object reference
     }
   });
 });

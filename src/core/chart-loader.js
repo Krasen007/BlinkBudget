@@ -35,7 +35,6 @@ export async function loadChartJS() {
   try {
     chartJSModules = await chartJSPromise;
     isChartJSLoaded = true;
-    console.log('[ChartLoader] Chart.js loaded successfully');
     return chartJSModules;
   } catch (error) {
     console.error('[ChartLoader] Failed to load Chart.js:', error);
@@ -99,9 +98,6 @@ async function loadChartJSModules() {
       LineController // For line charts
     );
 
-    const loadTime = performance.now() - startTime;
-    console.log(`[ChartLoader] Chart.js loaded in ${loadTime.toFixed(2)}ms`);
-
     return {
       ChartJS,
       CategoryScale,
@@ -155,9 +151,7 @@ export async function preloadChartJS() {
   }
 
   try {
-    console.log('[ChartLoader] Preloading Chart.js in background');
     await loadChartJS();
-    console.log('[ChartLoader] Chart.js preloaded successfully');
   } catch (error) {
     console.warn('[ChartLoader] Chart.js preloading failed:', error);
     // Don't throw error for preloading failures

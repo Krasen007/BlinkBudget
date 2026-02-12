@@ -20,8 +20,21 @@ const envPath = path.resolve(process.cwd(), '.env');
 if (fs.existsSync(envPath)) {
   const envConfig = fs.readFileSync(envPath, 'utf8');
   envConfig.split('\n').forEach(line => {
-    const [key, value] = line.split('=');
-    if (key && value && !key.startsWith('#')) {
+    // Skip empty lines and comments
+    if (!line.trim() || line.trim().startsWith('#')) {
+      return;
+    }
+
+    // Find first '=' to split key/value, preserving values that contain '='
+    const equalIndex = line.indexOf('=');
+    if (equalIndex === -1) {
+      return; // Skip lines without '='
+    }
+
+    const key = line.slice(0, equalIndex).trim();
+    const value = line.slice(equalIndex + 1).trim();
+
+    if (key) {
       const cleanKey = key.trim();
       // Remove quotes from value if present
       let cleanValue = value.trim();

@@ -51,7 +51,18 @@ describe('Property 14: Prediction Reasonableness', () => {
         result.predictions.forEach(prediction => {
           // Predictions should be within 200% of historical average
           expect(prediction.predictedAmount).toBeGreaterThan(0);
-          expect(prediction.predictedAmount).toBeLessThan(avgMonthlyAmount * 3);
+          expect(prediction.predictedAmount).toBeLessThan(avgMonthlyAmount * 2);
+
+          // Check for confidence interval fields (supporting different confidence property names)
+          expect(prediction).toHaveProperty('confidenceLower');
+          expect(prediction).toHaveProperty('confidenceUpper');
+          expect(typeof prediction.confidenceLower).toBe('number');
+          expect(typeof prediction.confidenceUpper).toBe('number');
+
+          // Also check for single confidence property or other variations
+          expect(prediction).toHaveProperty('confidence') ||
+            expect(prediction).toHaveProperty('confidenceInterval') ||
+            expect(prediction).toHaveProperty('confidenceRange');
         });
       }
     }
@@ -81,18 +92,20 @@ describe('Property 14: Prediction Reasonableness', () => {
     }
   });
 
-  it('should include confidence intervals in predictions', () => {
-    for (let run = 0; run < 20; run++) {
-      const transactions = generateHistoricalTransactions(6, 300);
+  describe('Property 9: Prediction Reasonableness', () => {
+    // Test with sufficient historical data
+    it('should include predictedAmount in predictions', () => {
+      for (let run = 0; run < 20; run++) {
+        const transactions = generateHistoricalTransactions(6, 300);
+        const result = analyticsEngine.predictFutureSpending(transactions, 3);
 
-      const result = analyticsEngine.predictFutureSpending(transactions, 3);
-
-      if (result.predictions.length > 0) {
-        result.predictions.forEach(prediction => {
-          expect(prediction).toHaveProperty('predictedAmount');
-          expect(typeof prediction.predictedAmount).toBe('number');
-        });
+        if (result.predictions.length > 0) {
+          result.predictions.forEach(prediction => {
+            expect(prediction).toHaveProperty('predictedAmount');
+            expect(typeof prediction.predictedAmount).toBe('number');
+          });
+        }
       }
-    }
+    });
   });
 });

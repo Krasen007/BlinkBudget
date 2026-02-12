@@ -258,6 +258,7 @@ export function createEnhancedEmptyState(scenario, options = {}) {
   if (showTips && content.tips && content.tips.length > 0 && !compact) {
     const tipsContainer = document.createElement('div');
     tipsContainer.className = 'empty-state__tips';
+
     Object.assign(tipsContainer.style, {
       marginTop: SPACING.XL,
       padding: `${SPACING.MD} ${SPACING.LG}`,
@@ -345,8 +346,10 @@ export function createEnhancedEmptyState(scenario, options = {}) {
 
   // Animate in
   requestAnimationFrame(() => {
-    container.style.opacity = '1';
-    container.style.transform = 'translateY(0)';
+    requestAnimationFrame(() => {
+      container.style.opacity = '1';
+      container.style.transform = 'translateY(0)';
+    });
   });
 
   return container;
@@ -379,6 +382,10 @@ function createBasicEmptyState(message) {
  * @param {Object} options - Configuration options
  */
 export function updateEmptyState(container, scenario, options = {}) {
+  if (!container || !(container instanceof HTMLElement)) {
+    console.warn('updateEmptyState: Invalid container element');
+    return;
+  }
   container.innerHTML = '';
   const newEmptyState = createEnhancedEmptyState(scenario, options);
   container.appendChild(newEmptyState);

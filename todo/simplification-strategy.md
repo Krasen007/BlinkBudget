@@ -55,7 +55,7 @@ BlinkBudget's unique value is its **speed**. As we add "Pro" features (Investmen
   - **Step 2**: If confidence is high, show "Confirm [Category]".
   - **Step 3**: Hide Notes, Accounts, and Dates under an "Edit Details" accordion. 90% of the time, the defaults are correct.
 
-### **B. Visual Minimalisms**
+### **B. Visual Minimalism**
 
 - **Colors**: Use colors only for _actionable_ signals (Budget exceeded = Red). Avoid "rainbow" category icons that cause visual noise.
 - **Dashboard**: Remove the mini-charts if the user hasn't set a budget. A blank chart is a cognitive load.

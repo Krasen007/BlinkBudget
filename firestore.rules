@@ -6,44 +6,49 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Transactions - enforce userId ownership
+    // Transactions - enforce userId ownership and prevent userId modification
     match /transactions/{transactionId} {
       allow create: if request.auth != null && 
         request.resource.data.userId == request.auth.uid;
       allow read, update, delete: if request.auth != null && 
-        resource.data.userId == request.auth.uid;
+        resource.data.userId == request.auth.uid && 
+        request.resource.data.userId == resource.data.userId;
     }
     
-    // Accounts - enforce userId ownership
+    // Accounts - enforce userId ownership and prevent userId modification
     match /accounts/{accountId} {
       allow create: if request.auth != null && 
         request.resource.data.userId == request.auth.uid;
       allow read, update, delete: if request.auth != null && 
-        resource.data.userId == request.auth.uid;
+        resource.data.userId == request.auth.uid && 
+        request.resource.data.userId == resource.data.userId;
     }
     
-    // Investments - enforce userId ownership
+    // Investments - enforce userId ownership and prevent userId modification
     match /investments/{investmentId} {
       allow create: if request.auth != null && 
         request.resource.data.userId == request.auth.uid;
       allow read, update, delete: if request.auth != null && 
-        resource.data.userId == request.auth.uid;
+        resource.data.userId == request.auth.uid && 
+        request.resource.data.userId == resource.data.userId;
     }
     
-    // Goals - enforce userId ownership
+    // Goals - enforce userId ownership and prevent userId modification
     match /goals/{goalId} {
       allow create: if request.auth != null && 
         request.resource.data.userId == request.auth.uid;
       allow read, update, delete: if request.auth != null && 
-        resource.data.userId == request.auth.uid;
+        resource.data.userId == request.auth.uid && 
+        request.resource.data.userId == resource.data.userId;
     }
     
-    // Budgets - enforce userId ownership
+    // Budgets - enforce userId ownership and prevent userId modification
     match /budgets/{budgetId} {
       allow create: if request.auth != null && 
         request.resource.data.userId == request.auth.uid;
       allow read, update, delete: if request.auth != null && 
-        resource.data.userId == request.auth.uid;
+        resource.data.userId == request.auth.uid && 
+        request.resource.data.userId == resource.data.userId;
     }
     
     // Settings - enforce userId ownership

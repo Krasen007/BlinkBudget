@@ -59,10 +59,10 @@ export const DashboardView = () => {
     const name = u?.displayName || u?.email?.split('@')[0];
     /* global __APP_VERSION__ */
     const version =
-      typeof __APP_VERSION__ !== 'undefined' ? `v${__APP_VERSION__}` : '';
+      typeof __APP_VERSION__ !== 'undefined' ? ` v${__APP_VERSION__}` : '';
     title.textContent = name
-      ? `Welcome back, ${name}! ${version}`
-      : `Welcome back! ${version}`;
+      ? `Welcome back, ${name}!${version}`
+      : `Welcome back!${version}`;
     title.style.margin = '0';
     title.style.fontSize =
       window.innerWidth < BREAKPOINTS.MOBILE ? '1.25rem' : '1.5rem';

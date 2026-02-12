@@ -16,10 +16,11 @@ import {
 
 describe('Property 15: Visual Consistency', () => {
   it('should use consistent color palette across all charts', () => {
-    const colors1 = getChartColors();
-    const colors2 = getChartColors();
+    const colors1 = getChartColors(5);
+    const colors2 = getChartColors(5);
 
     expect(colors1).toEqual(colors2);
+    expect(colors1.length).toBe(5);
   });
 
   it('should provide default chart options', () => {

@@ -84,6 +84,9 @@ export const TutorialTooltip = {
     tooltip._resizeHandler = handleResize;
 
     // Animate in
+    tooltip.style.transform = 'scale(0.9)';
+    tooltip.style.opacity = '0';
+
     requestAnimationFrame(() => {
       tooltip.style.opacity = '1';
       tooltip.style.transform = 'scale(1)';
@@ -124,6 +127,12 @@ export const TutorialTooltip = {
       } else if (placement.arrowPosition === 'bottom') {
         arrow.style.borderBottom = 'none';
         arrow.style.borderRight = 'none';
+      } else if (placement.arrowPosition === 'left') {
+        arrow.style.borderTop = 'none';
+        arrow.style.borderRight = 'none';
+      } else if (placement.arrowPosition === 'right') {
+        arrow.style.borderBottom = 'none';
+        arrow.style.borderLeft = 'none';
       }
     }
   },
@@ -352,6 +361,7 @@ export const TutorialTooltip = {
           break;
         case 'Enter': {
           if (e.target.classList.contains('tutorial-tooltip-action')) {
+            e.preventDefault();
             const action = e.target.dataset.action;
             if (tooltip.onAction) tooltip.onAction(action);
           }

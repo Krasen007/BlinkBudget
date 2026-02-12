@@ -110,6 +110,8 @@ export const handleFormSubmit = (transactionData, onSubmit, onError = null) => {
           console.error('Original error:', errorMessage);
           // Create a simple DOM-based error message as fallback
           const fallbackDiv = document.createElement('div');
+          fallbackDiv.setAttribute('role', 'alert');
+          fallbackDiv.setAttribute('aria-live', 'assertive');
           fallbackDiv.style.cssText = `
           position: fixed;
           top: 20px;

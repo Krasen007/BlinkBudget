@@ -273,18 +273,18 @@
   }
 
   /* Disable keyframe animations */
-  .tutorial-welcome .touch-point-1,
-  .tutorial-welcome .touch-point-2,
-  .tutorial-welcome .touch-point-3 {
+  .welcome-animation .touch-point-1,
+  .welcome-animation .touch-point-2,
+  .welcome-animation .touch-point-3 {
     animation: none;
   }
 
-  .tutorial-welcome .connection-line {
+  .welcome-animation .connection-line {
     animation: none;
   }
 
-  .tutorial-celebration .success-circle,
-  .tutorial-celebration .checkmark-path {
+  .success-animation .success-circle,
+  .success-animation .checkmark-path {
     animation: none;
   }
 }

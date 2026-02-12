@@ -23,6 +23,6 @@ DO NOT IMPLEMENT: use Ionic's Capacitor or Cordova to make android app
 [ ] lazy load older transactions, they should be kept on server and only the transactions for the last 30 days should be cached on the device / PWA
 [ ] add option to mark a transaction as important, maybe a checkbox or a star icon and when the user marks a transaction as important it should be highlighted in the transactions list
 [ ] fix tutorial
-[ ]Add 'Notes' field to Transaction schema and UI forms.
+[ ] Add 'Notes' field to Transaction schema and UI forms.
 [ ] we should think about possible management UI for the app for the system admin to overview the users and their accounts and other metrics like the audit logs, also other possible things like user management, billing, etc.
 [ ] Update account-service.js and storage.js to implement an optional limit property for accounts, allowing the app to track credit limits and spending thresholds. This change exposes new API methods to calculate available credit and trigger utilization warnings, as originally outlined in the design spec.

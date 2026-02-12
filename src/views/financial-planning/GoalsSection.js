@@ -80,12 +80,12 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
   nameError.style.fontSize = '0.8rem';
   nameError.style.display = 'none';
 
-  const targetError = document.createElement('div');
-  targetError.className = 'error';
-  targetError.setAttribute('name', 'target');
-  targetError.style.color = COLORS.ERROR;
-  targetError.style.fontSize = '0.8rem';
-  targetError.style.display = 'none';
+  const currentError = document.createElement('div');
+  currentError.className = 'error';
+  currentError.setAttribute('name', 'current');
+  currentError.style.color = COLORS.ERROR;
+  currentError.style.fontSize = '0.8rem';
+  currentError.style.display = 'none';
 
   const dateError = document.createElement('div');
   dateError.className = 'error';
@@ -96,9 +96,10 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
 
   goalForm.appendChild(goalName);
   goalForm.appendChild(nameError);
+  goalForm.appendChild(goalName);
+  goalForm.appendChild(nameError);
   goalForm.appendChild(goalTarget);
-  goalForm.appendChild(targetError);
-  goalForm.appendChild(goalDate);
+  goalForm.appendChild(currentError);
   goalForm.appendChild(dateError);
   goalForm.appendChild(goalCurrent);
   goalForm.appendChild(saveGoalBtn);
@@ -118,7 +119,7 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
     // Basic validation with improved messages
     let valid = true;
     nameError.style.display = 'none';
-    targetError.style.display = 'none';
+    currentError.style.display = 'none';
     dateError.style.display = 'none';
 
     if (!name) {
@@ -128,8 +129,8 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
       valid = false;
     }
     if (!(target > 0)) {
-      targetError.textContent = 'Target amount must be greater than 0';
-      targetError.style.display = 'block';
+      currentError.textContent = 'Target amount must be greater than 0';
+      currentError.style.display = 'block';
       valid = false;
     }
     if (!tdate || isNaN(tdate.getTime())) {
@@ -144,8 +145,8 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
 
     // Validate current savings
     if (current < 0) {
-      targetError.textContent = 'Current savings cannot be negative';
-      targetError.style.display = 'block';
+      currentError.textContent = 'Current savings cannot be negative';
+      currentError.style.display = 'block';
       valid = false;
     }
 
@@ -175,7 +176,7 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
 
       // Clear any lingering errors
       nameError.style.display = 'none';
-      targetError.style.display = 'none';
+      currentError.style.display = 'none';
       dateError.style.display = 'none';
     } catch (err) {
       console.error('Failed to save goal', err);
@@ -196,31 +197,19 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
   goalTarget.addEventListener('blur', () => {
     const target = Number(goalTarget.value) || 0;
     if (!(target > 0)) {
-      targetError.textContent = 'Target amount must be greater than 0';
-      targetError.style.display = 'block';
+      currentError.textContent = 'Target amount must be greater than 0';
+      currentError.style.display = 'block';
     } else {
-      targetError.style.display = 'none';
-    }
-  });
-
-  goalDate.addEventListener('blur', () => {
-    const tdate = goalDate.value ? new Date(goalDate.value) : null;
-    if (!tdate || isNaN(tdate.getTime())) {
-      dateError.textContent = 'Please choose a valid target date';
+      currentError.style.display = 'none';
       dateError.style.display = 'block';
-    } else if (tdate < new Date(new Date().setHours(0, 0, 0, 0))) {
-      dateError.textContent = 'Target date must be in the future';
-      dateError.style.display = 'block';
-    } else {
-      dateError.style.display = 'none';
     }
   });
 
   goalCurrent.addEventListener('blur', () => {
     const current = Number(goalCurrent.value) || 0;
     if (current < 0) {
-      targetError.textContent = 'Current savings cannot be negative';
-      targetError.style.display = 'block';
+      currentError.textContent = 'Current savings cannot be negative';
+      currentError.style.display = 'block';
     }
   });
 

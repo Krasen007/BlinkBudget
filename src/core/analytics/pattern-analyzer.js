@@ -77,18 +77,12 @@ export class PatternAnalyzer {
 
     // Calculate percentage difference
     const totalDays = weekdayDays.size + weekendDays.size;
+    const totalSpending = weekdaySpending.total + weekendSpending.total;
+
     const weekdayPercentage =
-      totalDays > 0
-        ? (weekdaySpending.total /
-            (weekdaySpending.total + weekendSpending.total)) *
-          100
-        : 0;
+      totalSpending > 0 ? (weekdaySpending.total / totalSpending) * 100 : 0;
     const weekendPercentage =
-      totalDays > 0
-        ? (weekendSpending.total /
-            (weekdaySpending.total + weekendSpending.total)) *
-          100
-        : 0;
+      totalSpending > 0 ? (weekendSpending.total / totalSpending) * 100 : 0;
 
     const dailyAverageDiff =
       weekdaySpending.dailyAverage > 0
@@ -528,7 +522,7 @@ export class PatternAnalyzer {
 
     if (metrics.averageVisitsPerWeek > 5) {
       insights.push(
-        `High frequency for - ${metrics.averageVisitsPerWeek.toFixed(1)} visits per week`
+        `High frequency: ${metrics.averageVisitsPerWeek.toFixed(1)} visits per week`
       );
     }
 

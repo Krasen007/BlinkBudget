@@ -98,8 +98,7 @@ export const TutorialOverlay = {
       content.style.transform = 'scale(1)';
     });
 
-    // Add event listeners (delegated or attached in createActions)
-    // Note: createActions now attaches listeners directly to buttons
+    // Attach click listeners to action buttons via delegation
     this.attachActionListeners(content, overlay);
   },
 

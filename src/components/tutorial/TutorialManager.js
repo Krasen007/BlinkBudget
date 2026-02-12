@@ -492,6 +492,7 @@ export class TutorialManager {
    * Skip tutorial
    */
   skip() {
+    this.clearTimeouts();
     this.cleanup();
     this.isActive = false;
 

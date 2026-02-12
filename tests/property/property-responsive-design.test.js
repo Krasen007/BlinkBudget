@@ -55,7 +55,7 @@ describe('Property 10: Responsive Design Consistency', () => {
     const desktopWidths = [1280, 1440, 1920];
 
     desktopWidths.forEach(width => {
-      const config = getResponsiveChartConfig(width, 800);
+      const config = getResponsiveChartConfig(width);
 
       expect(config.responsive).toBe(true);
       expect(config.maintainAspectRatio).toBe(true);
@@ -65,7 +65,7 @@ describe('Property 10: Responsive Design Consistency', () => {
   });
 
   it('should hide legend on very small screens', () => {
-    const smallWidths = [320, 375, 414];
+    const smallWidths = [320, 375, 414, 480];
 
     smallWidths.forEach(width => {
       const config = getResponsiveChartConfig(width);

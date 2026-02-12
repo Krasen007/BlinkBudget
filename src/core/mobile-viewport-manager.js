@@ -21,13 +21,13 @@ export class MobileViewportManager {
   }
 
   initialize() {
-    this.setupViewportListeners();
-    this.setupInputListeners();
-    this.setupCSSCustomProperties();
-
     if (!this.visualViewport) {
       this.initializeFallback();
+    } else {
+      this.setupViewportListeners();
     }
+    this.setupInputListeners();
+    this.setupCSSCustomProperties();
   }
 
   setupViewportListeners() {
