@@ -235,7 +235,7 @@ export class AnalyticsEngine {
 
   // Cache management (proxied to AnalyticsCache)
   clearCache() {
-    this.cache.clear();
+    this.cache.clearAll();
   }
   invalidateCache(pattern) {
     this.cache.invalidate(pattern);

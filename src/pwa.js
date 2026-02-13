@@ -1,4 +1,5 @@
 import { registerSW } from 'virtual:pwa-register';
+import { offlineDataManager } from './core/offline-data-manager.js';
 
 registerSW({
   onNeedRefresh() {
@@ -8,5 +9,20 @@ registerSW({
   },
   onOfflineReady() {
     console.log('App is ready to work offline.');
+
+    // Load any pending sync operations
+    offlineDataManager.loadSyncQueue();
+
+    // Process sync queue if online
+    if (offlineDataManager.isOnline) {
+      offlineDataManager.processSyncQueue();
+    }
   },
 });
+
+// Initialize offline data manager
+console.log('[PWA] Initializing offline data manager...');
+console.log(
+  '[PWA] Offline status:',
+  offlineDataManager.isOnline ? 'Online' : 'Offline'
+);

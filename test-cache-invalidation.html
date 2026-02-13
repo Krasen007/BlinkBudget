@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cache Invalidation Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .cache-hit {
+            background: #d4edda;
+            color: #155724;
+        }
+        .cache-miss {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cache Invalidation Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Cache Invalidation</h2>
+        <p>Click the buttons below to test cache invalidation when transactions are added/updated/deleted.</p>
+        
+        <button onclick="testCacheInvalidation()">Test Cache Invalidation</button>
+        <button onclick="clearCache()">Clear Cache</button>
+        <button onclick="checkCacheStatus()">Check Cache Status</button>
+        
+        <div id="status" class="status"></div>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script type="module">
+        import { getAnalyticsEngine } from './src/core/analytics/AnalyticsInstance.js';
+        import { TransactionService } from './src/core/transaction-service.js';
+
+        const analyticsEngine = getAnalyticsEngine();
+
+        function updateStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+        }
+
+        function log(message) {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logEl.textContent += `[${timestamp}] ${message}\n`;
+        }
+
+        async function testCacheInvalidation() {
+            log('Starting cache invalidation test...');
+            
+            // Get initial cache stats
+            const initialStats = analyticsEngine.getCacheStats();
+            log(`Initial cache stats: ${JSON.stringify(initialStats, null, 2)}`);
+            
+            // Create a test transaction
+            const testTransaction = {
+                amount: 100,
+                category: 'Test Category',
+                type: 'expense',
+                date: new Date().toISOString().split('T')[0],
+                accountId: 'main'
+            };
+
+            // Add transaction - should invalidate cache
+            log('Adding test transaction...');
+            const added = TransactionService.add(testTransaction);
+            log(`Transaction added: ${JSON.stringify(added)}`);
+            
+            // Check cache after adding
+            const afterAddStats = analyticsEngine.getCacheStats();
+            log(`Cache stats after add: ${JSON.stringify(afterAddStats, null, 2)}`);
+            
+            // Update the transaction - should invalidate cache again
+            log('Updating test transaction...');
+            const updated = TransactionService.update(added.id, { amount: 150 });
+            log(`Transaction updated: ${JSON.stringify(updated)}`);
+            
+            // Check cache after updating
+            const afterUpdateStats = analyticsEngine.getCacheStats();
+            log(`Cache stats after update: ${JSON.stringify(afterUpdateStats, null, 2)}`);
+            
+            // Delete the transaction - should invalidate cache again
+            log('Deleting test transaction...');
+            const deleted = TransactionService.remove(added.id);
+            log(`Transaction deleted: ${deleted}`);
+            
+            // Check cache after deleting
+            const afterDeleteStats = analyticsEngine.getCacheStats();
+            log(`Cache stats after delete: ${JSON.stringify(afterDeleteStats, null, 2)}`);
+            
+            // Test a cache operation to see if cache is working
+            const timePeriod = {
+                startDate: new Date().toISOString().split('T')[0],
+                endDate: new Date().toISOString().split('T')[0]
+            };
+            
+            log('Testing cache operation...');
+            const result = analyticsEngine.calculateCategoryBreakdown([testTransaction], timePeriod);
+            log(`Cache operation result: ${JSON.stringify(result)}`);
+            
+            updateStatus('Test completed! Check the log for details.', 'cache-hit');
+        }
+
+        function clearCache() {
+            log('Clearing cache...');
+            analyticsEngine.clearCache();
+            const stats = analyticsEngine.getCacheStats();
+            log(`Cache stats after clear: ${JSON.stringify(stats, null, 2)}`);
+            updateStatus('Cache cleared', 'cache-miss');
+        }
+
+        function checkCacheStatus() {
+            const stats = analyticsEngine.getCacheStats();
+            log(`Current cache stats: ${JSON.stringify(stats, null, 2)}`);
+            updateStatus(`Cache status: ${stats.size} entries, ${stats.hits} hits, ${stats.misses} misses`, 'info');
+        }
+
+        // Initialize
+        updateStatus('Ready to test cache invalidation');
+    </script>
+</body>
+</html>

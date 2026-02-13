@@ -12,6 +12,7 @@ import { generateId } from '../utils/id-utils.js';
 import { safeJsonParse } from '../utils/security-utils.js';
 import { auditService, auditEvents } from './audit-service.js';
 import { PrivacyService } from './privacy-service.js';
+import { getAnalyticsEngine } from './analytics/AnalyticsInstance.js';
 
 const TRANSACTIONS_KEY = STORAGE_KEYS.TRANSACTIONS;
 
@@ -114,13 +115,19 @@ export const TransactionService = {
       {
         entityType: 'transaction',
         entityId: sanitizedTransaction.id,
-        amount: sanitizedTransaction.amount,
-        category: sanitizedTransaction.category,
-        accountId: sanitizedTransaction.accountId,
-      },
-      AuthService.getUserId(),
-      'low'
+        details: {
+          amount: sanitizedTransaction.amount,
+          category: sanitizedTransaction.category,
+          accountId: sanitizedTransaction.accountId,
+        },
+        userId: AuthService.getUserId(),
+        severity: 'low',
+      }
     );
+
+    // Invalidate analytics cache when new transaction is added
+    const analyticsEngine = getAnalyticsEngine();
+    analyticsEngine.invalidateCacheOnDataUpdate();
 
     return sanitizedTransaction;
   },
@@ -166,6 +173,10 @@ export const TransactionService = {
     };
     this._persist(transactions);
 
+    // Invalidate analytics cache when transaction is updated
+    const analyticsEngine = getAnalyticsEngine();
+    analyticsEngine.invalidateCacheOnDataUpdate();
+
     // Audit log transaction update
     auditService.log(
       auditEvents.DATA_UPDATE,
@@ -200,18 +211,26 @@ export const TransactionService = {
     transactions = transactions.filter(t => t.id !== id);
     this._persist(transactions);
 
+    // Invalidate analytics cache when transaction is deleted
+    const analyticsEngine = getAnalyticsEngine();
+    analyticsEngine.invalidateCacheOnDataUpdate();
+
     // Audit log transaction deletion
     auditService.log(
       auditEvents.DATA_DELETE,
       {
         entityType: 'transaction',
         entityId: id,
-        amount: transaction.amount,
-        category: transaction.category,
-      },
-      AuthService.getUserId(),
-      'medium'
+        details: {
+          amount: transaction.amount,
+          category: transaction.category,
+        },
+        userId: AuthService.getUserId(),
+        severity: 'medium',
+      }
     );
+
+    return true;
   },
 
   /**
@@ -258,8 +277,13 @@ export const TransactionService = {
    * Clear all transactions
    */
   clear() {
-    const transactionCount = this.getAll().length;
+    const transactions = this.getAll();
+    const transactionCount = transactions.length;
     localStorage.removeItem(TRANSACTIONS_KEY);
+
+    // Invalidate analytics cache when transactions are bulk deleted
+    const analyticsEngine = getAnalyticsEngine();
+    analyticsEngine.invalidateCacheOnDataUpdate();
 
     // Audit log bulk transaction deletion
     auditService.log(
@@ -270,8 +294,12 @@ export const TransactionService = {
         count: transactionCount,
       },
       AuthService.getUserId(),
-      'high'
+      'medium'
     );
+
+    this._persist([]);
+
+    return transactionCount;
   },
 
   /**

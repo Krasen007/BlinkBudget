@@ -94,7 +94,11 @@ export const CustomCategoryManager = ({
     border-radius: var(--radius-md);
   `;
 
-  const expenseButton = createTypeButton('Expense', 'expense', 'expense-button');
+  const expenseButton = createTypeButton(
+    'Expense',
+    'expense',
+    'expense-button'
+  );
   const incomeButton = createTypeButton('Income', 'income', 'income-button');
 
   typeSelector.appendChild(expenseButton);
@@ -106,7 +110,10 @@ export const CustomCategoryManager = ({
   categoriesList.className = 'categories-list';
   categoriesList.id = 'categories-panel';
   categoriesList.setAttribute('role', 'tabpanel');
-  categoriesList.setAttribute('aria-labelledby', 'expense-button income-button');
+  categoriesList.setAttribute(
+    'aria-labelledby',
+    'expense-button income-button'
+  );
   categoriesList.style.cssText = `
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));

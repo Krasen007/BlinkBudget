@@ -49,6 +49,34 @@ export default defineConfig({
               },
             },
           },
+          // Cache reports and planning data for offline access
+          {
+            urlPattern: /^https:\/\/.*\/api\/(reports|planning).*/,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'reports-data',
+              networkTimeoutSeconds: 3,
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+              expiration: {
+                maxEntries: 20,
+                maxAgeSeconds: 60 * 60 * 24, // 24 hours
+              },
+            },
+          },
+          // Cache Chart.js from CDN for offline chart rendering
+          {
+            urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/npm\/chart\.js/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'chart-js',
+              expiration: {
+                maxEntries: 5,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+              },
+            },
+          },
         ],
       },
       includeAssets: ['favicon.png', 'favicon.ico', 'offline.html'],

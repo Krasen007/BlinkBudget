@@ -13,6 +13,8 @@ describe('AnalyticsEngine', () => {
 
   beforeEach(() => {
     analyticsEngine = new AnalyticsEngine();
+    // Clear any existing cache data for clean test state
+    analyticsEngine.clearCache();
 
     // Sample transaction data for testing
     sampleTransactions = [

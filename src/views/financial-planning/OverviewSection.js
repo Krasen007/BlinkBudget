@@ -19,6 +19,7 @@ import {
   createPlaceholder,
   createUsageNote,
 } from '../../utils/financial-planning-helpers.js';
+import { offlineDataManager } from '../../core/offline-data-manager.js';
 
 /**
  * Overview Section Component
@@ -33,19 +34,37 @@ export const OverviewSection = (planningData, riskAssessor) => {
     '📊'
   );
 
+  // Check for cached data first
+  const cachedData = offlineDataManager.getCachedPlanningData('overview');
+  const isOffline = !offlineDataManager.isOnline;
+  let dataToUse = planningData;
+
+  if (cachedData && (!planningData || isOffline)) {
+    console.log('[OverviewSection] Using cached planning data');
+    dataToUse = cachedData.data;
+  }
+
   section.appendChild(
     createUsageNote(
       'At-a-glance health summary: shows current balance, monthly expense averages, savings rate and emergency fund advice.'
     )
   );
 
-  if (!planningData) {
+  if (!dataToUse) {
     const placeholder = createPlaceholder(
-      'Loading Financial Data',
-      'Please wait while we analyze your financial information.',
-      '⏳'
+      isOffline ? 'No Offline Data Available' : 'Loading Financial Data',
+      isOffline
+        ? 'Connect to the internet to load your financial overview for the first time.'
+        : 'Please wait while we analyze your financial information.',
+      isOffline ? '📡' : '⏳'
     );
     section.appendChild(placeholder);
+
+    // Cache the section state for offline access
+    if (!isOffline) {
+      offlineDataManager.cachePlanningData('overview', null);
+    }
+
     return section;
   }
 
@@ -58,10 +77,11 @@ export const OverviewSection = (planningData, riskAssessor) => {
   statsGrid.style.marginBottom = SPACING.XL;
 
   // Calculate real stats from transaction data - SAME LOGIC AS DASHBOARD
-  const { transactions } = planningData;
+  const { transactions } = dataToUse;
   let allTimeIncome = 0;
   let allTimeExpense = 0;
   let monthlyExpenses = 0;
+  let allTimeTransfers = 0;
 
   // Filter out ghost transactions for totals calculation (same as dashboard)
   const validTransactionsForStats = transactions.filter(t => !t.isGhost);
@@ -75,10 +95,8 @@ export const OverviewSection = (planningData, riskAssessor) => {
     } else if (t.type === 'refund') {
       allTimeExpense -= t.amount; // Refunds reduce expenses
     } else if (t.type === 'transfer') {
-      // For transfers, money moves between accounts, so net effect is 0 for overall balance
-      // But we track the movement for individual account calculations
-      allTimeExpense += t.amount; // Money out of source
-      allTimeIncome += t.amount; // Money into destination
+      // Track transfers separately - don't include in income/expense totals for savings rate
+      allTimeTransfers += t.amount;
     }
   });
 
@@ -104,7 +122,9 @@ export const OverviewSection = (planningData, riskAssessor) => {
 
   const savingsRate =
     allTimeIncome > 0
-      ? ((allTimeIncome - allTimeExpense) / allTimeIncome) * 100
+      ? ((allTimeIncome - allTimeExpense) /
+          (allTimeIncome - allTimeTransfers)) *
+        100
       : 0;
 
   // Generate risk assessments
@@ -130,6 +150,21 @@ export const OverviewSection = (planningData, riskAssessor) => {
     riskScore = riskAssessor.calculateOverallRiskScore(riskFactors);
   } catch (error) {
     console.error('Error calculating risk assessments:', error);
+  }
+
+  // Cache the calculated data for offline access
+  if (!isOffline) {
+    offlineDataManager.cachePlanningData('overview', {
+      data: dataToUse,
+      timestamp: Date.now(),
+      stats: {
+        currentBalance,
+        monthlyExpenses,
+        savingsRate,
+        emergencyFundAssessment,
+        riskScore,
+      },
+    });
   }
 
   const stats = [
