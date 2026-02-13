@@ -2,8 +2,9 @@ gemini -m gemini-2.5-flash-lite -p "bump @package.json version with +0.1.0 and a
 pause
 
 bump @package.json version with +0.1.0 (or to the next major version, e.g. 1.35 do not use 3 signs) 
-bump @src/views/DashboardView.js with +0.1 title.textContent to the next major version
 bump @gitlog.bat with +0.1
+
+run cd "c:\Users\krase\repos\BlinkBudget" && gitlog.bat
 
 read @changelog.txt and update it for github changelog page, 
 summarize it in few notes but reword it so it's more easily understood, 

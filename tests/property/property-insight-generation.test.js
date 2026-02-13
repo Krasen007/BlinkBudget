@@ -67,17 +67,16 @@ describe('Property 6: Insight Generation Accuracy', () => {
 
       const inputCurrent = 2500; // From fixture
       const inputComparison = 2000; // From fixture
-      const expectedChange =
-        ((inputCurrent - inputComparison) / inputComparison) * 100;
-
+      // Test that the analytics engine correctly calculates the values
       expect(comparison.overallComparison.expenses.comparison).toBe(
         inputComparison
       );
       expect(comparison.overallComparison.expenses.current).toBe(inputCurrent);
-      expect(comparison.overallComparison.expenses.changePercent).toBeCloseTo(
-        expectedChange,
-        0.1
-      );
+
+      // Verify the change percent calculation
+      const actualChange = comparison.overallComparison.expenses.changePercent;
+      const calculatedChange = ((inputCurrent - inputComparison) / inputComparison) * 100;
+      expect(actualChange).toBeCloseTo(calculatedChange, 0.1);
     }
   });
 
@@ -110,6 +109,23 @@ describe('Property 6: Insight Generation Accuracy', () => {
       insights.forEach(insight => {
         expect(insight).toHaveProperty('type');
         expect(insight).toHaveProperty('message');
+
+        // Check for confidence interval fields (supporting different confidence property names)
+        // Note: Some prediction models may not include confidence intervals
+        if (insight.confidenceLower !== undefined) {
+          expect(typeof insight.confidenceLower).toBe('number');
+        }
+        if (insight.confidenceUpper !== undefined) {
+          expect(typeof insight.confidenceUpper).toBe('number');
+        }
+
+        // Also check for single confidence property or other variations
+        const hasConfidence = insight.confidence !== undefined ||
+          insight.confidenceInterval !== undefined ||
+          insight.confidenceRange !== undefined;
+
+        // At least one confidence-related property should exist or confidence intervals should be optional
+        expect(hasConfidence || insight.confidenceLower === undefined).toBe(true);
       });
     }
   });

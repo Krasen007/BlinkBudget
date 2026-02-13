@@ -1,42 +1,27 @@
-# Version 1.19 Release Notes
+# Version 1.20 - Latest Release
 
 ## 🚀 New Features & Improvements
-- **Category Management**: Added comprehensive custom category management system
-- **Enhanced Tutorial**: Improved onboarding experience with better UI and flow
-- **Smart Features**: Consolidated constants and improved smart features (now disabled by default for better user experience)
+- **Enhanced User Experience**: Polished interface with improved interactions and visual feedback
+- **Financial Planning Updates**: Optimized file structure and performance for better forecasting
+- **Mobile Experience**: Fixed scrolling issues and improved view limits for better mobile navigation
+- **Documentation Cleanup**: Removed outdated documentation and reorganized project structure
 
 ## 🐛 Bug Fixes
-- **Dashboard Display**: Fixed null entry issues in user name display
-- **Account Management**: Resolved issues with account deletion and addition in settings
-- **Category Manager**: Fixed multiple bugs in the custom category management system
-- **Login Experience**: Fixed login functionality with Enter key support
-- **UI/UX**: Improved scrolling behavior on dashboard and fixed calculation issues in financial planning
-- **Missing Categories**: Resolved issues with category display and selection
+- **Caching System**: Fixed date display issues in financial planning tab
+- **Performance**: Optimized application loading and data processing
+- **Security**: Enhanced security measures and privacy compliance
+- **Testing**: Improved test coverage and fixed failing tests
 
 ## 🔧 Technical Improvements
-- **Firestore Integration**: Enhanced user email handling and data synchronization
-- **Code Quality**: General cleanup and consolidation of constants
-- **Test Coverage**: Fixed failing tests and improved test reliability
-
-## 📱 User Experience
-- **Better Onboarding**: Streamlined tutorial flow for new users
-- **Improved Navigation**: Enhanced UI elements and interaction patterns
-- **Performance**: Optimized dashboard rendering and data processing
+- **Code Organization**: Streamlined file structure for better maintainability
+- **Performance**: Optimized rendering and data processing
+- **Cleanup**: Removed legacy code and improved overall code quality
 
 ---
 
-## Previous Commits (Technical Details)
-51c9250 fix missing categories
-ecff058 update firestore with user email, shorten and fix tutorial
-03909da fix dashboard null entry for the name
-336e7c3 cleanup
-b504504 fix for delete my account, previous commit fixes for add account in settings, fixes for custom categories
-3351568 fixes
-829e4f2 consolidate constants and disable smart things by default, fix bugs in category manager
-6e52c38 add category management
-15749e3 Phase 3 Week 8 Implementation
-2987834 fix login with enter key
-5ab3aab add tutorial fixes and ui updates
-5933bea fix tests
-a8694c8 fix scrolling on dashboard, fix bug on calculation in financial planning
-84af8ee add tutorial Phase 3: Feature Polish & User Experience
+## Previous Commits Summary
+- Documentation reorganization and cleanup
+- Security enhancements and privacy improvements  
+- Performance optimizations and caching improvements
+- Mobile experience enhancements and scrolling fixes
+- Financial planning feature optimizations
