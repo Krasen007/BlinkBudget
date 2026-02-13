@@ -112,7 +112,7 @@ export const CustomCategoryManager = ({
   categoriesList.setAttribute('role', 'tabpanel');
   categoriesList.setAttribute(
     'aria-labelledby',
-    'expense-button income-button'
+    'expense-button' // Start with expense button as active
   );
   categoriesList.style.cssText = `
     display: grid;
@@ -179,6 +179,10 @@ export const CustomCategoryManager = ({
       button.style.color = isSelected ? 'white' : 'var(--color-text-muted)';
       button.setAttribute('aria-selected', isSelected ? 'true' : 'false');
     });
+
+    // Update aria-labelledby to reference only the active tab
+    const activeButtonId = currentType === 'expense' ? 'expense-button' : 'income-button';
+    categoriesList.setAttribute('aria-labelledby', activeButtonId);
   }
 
   function createCategoryCard(category) {

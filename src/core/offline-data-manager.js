@@ -17,6 +17,9 @@ export class OfflineDataManager {
 
     // Load cached data on initialization
     this.hydrateFromStorage();
+
+    // Restore pending sync operations
+    this.loadSyncQueue();
   }
 
   /**
@@ -46,16 +49,13 @@ export class OfflineDataManager {
     );
   }
 
-  /**
-   * Hydrate in-memory cache from localStorage
-   */
   hydrateFromStorage() {
     try {
       const cachedReports = this.getFromStorage('reports_data');
       const cachedPlanning = this.getFromStorage('planning_data');
 
       if (cachedReports) {
-        this.reportsCache = cachedReports;
+        this.reportsCache = new Map(Object.entries(cachedReports));
       }
       if (cachedPlanning) {
         this.planningCache = cachedPlanning;
@@ -116,6 +116,18 @@ export class OfflineDataManager {
     } catch (error) {
       console.warn(`[OfflineDataManager] Failed to retrieve ${key}:`, error);
       return null;
+    }
+  }
+
+  /**
+   * Remove data from localStorage
+   */
+  removeFromStorage(key) {
+    try {
+      const storageKey = this.CACHE_PREFIX + key;
+      localStorage.removeItem(storageKey);
+    } catch (error) {
+      console.warn(`[OfflineDataManager] Failed to remove ${key}:`, error);
     }
   }
 
@@ -228,9 +240,14 @@ export class OfflineDataManager {
     for (const item of this.syncQueue) {
       try {
         await this.executeOperation(item.operation);
-        console.log(`[OfflineDataManager] Synced operation:`, item.operation);
+        console.log(
+          `[OfflineDataManager] Synced operation: ${item.operation.type}${item.operation.id ? ` (ID: ${item.operation.id})` : ''}`
+        );
       } catch (error) {
-        console.error(`[OfflineDataManager] Failed to sync operation:`, error);
+        console.error(
+          `[OfflineDataManager] Failed to sync operation: ${item.operation.type}${item.operation.id ? ` (ID: ${item.operation.id})` : ''
+          } - ${error.message}`
+        );
         item.retries++;
 
         if (item.retries < 3) {
@@ -243,16 +260,13 @@ export class OfflineDataManager {
     this.persistSyncQueue();
   }
 
-  /**
-   * Execute queued operation
-   */
   async executeOperation(operation) {
     const { type, data } = operation;
+    const { StorageService } = await import('./storage.js');
 
     switch (type) {
       case 'saveGoal': {
-        const { StorageService } = await import('./storage.js');
-        StorageService.createGoal(
+        await StorageService.createGoal(
           data.name,
           data.targetAmount,
           data.targetDate,
@@ -263,14 +277,12 @@ export class OfflineDataManager {
       }
 
       case 'updateGoal': {
-        const { StorageService: Storage } = await import('./storage.js');
-        Storage.updateGoal(data.goalId, data.updates);
+        await StorageService.updateGoal(data.goalId, data.updates);
         break;
       }
 
       case 'deleteGoal': {
-        const { StorageService: StorageDel } = await import('./storage.js');
-        StorageDel.deleteGoal(data.goalId);
+        await StorageService.deleteGoal(data.goalId);
         break;
       }
 
@@ -302,8 +314,19 @@ export class OfflineDataManager {
 
   /**
    * Clear all cached data
+   * @param {boolean} force - Force clear even if there are pending sync operations
+   * @returns {boolean} - Whether cache was cleared
    */
-  clearCache() {
+  clearCache(force = false) {
+    // Check for pending sync operations
+    if (this.syncQueue.length > 0 && !force) {
+      console.warn(
+        '[OfflineDataManager] Cannot clear cache - there are pending sync operations. ' +
+        `Found ${this.syncQueue.length} pending operations. Use clearCache(true) to force clear.`
+      );
+      return false;
+    }
+
     try {
       Object.keys(localStorage).forEach(key => {
         if (key.startsWith(this.CACHE_PREFIX)) {
@@ -314,8 +337,12 @@ export class OfflineDataManager {
       this.reportsCache = new Map();
       this.planningCache = {};
       this.syncQueue = [];
+
+      console.log('[OfflineDataManager] Cache cleared successfully');
+      return true;
     } catch (error) {
       console.warn('[OfflineDataManager] Failed to clear cache:', error);
+      return false;
     }
   }
 

@@ -254,7 +254,7 @@ describe('AnalyticsEngine', () => {
         timePeriod
       );
       const stats = analyticsEngine.getCacheStats();
-      expect(stats.invalidations).toBe(1);
+      expect(stats.invalidations).toBe(2); // One from invalidateCacheOnDataUpdate, one from the next calculation
     });
 
     it('should clear all cache', () => {

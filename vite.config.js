@@ -71,6 +71,9 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'chart-js',
+              cacheableResponse: {
+                statuses: [200], // Only cache successful responses
+              },
               expiration: {
                 maxEntries: 5,
                 maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
@@ -229,34 +232,34 @@ export default defineConfig({
         }),
         ...(process.env.NODE_ENV === 'production'
           ? [
-              purgecss({
-                content: ['./index.html', './src/**/*.js', './src/**/*.html'],
-                defaultExtractor: content =>
-                  content.match(/[\w-/:]+(?<!:)/g) || [],
-                safelist: [
-                  /^(flex|grid|hidden|block|inline|absolute|relative|fixed)/,
-                  /^(active|disabled|loading|error|success)/,
-                  /^mobile-/,
-                  /^(fade|slide|bounce)/,
-                  /:hover/,
-                  /:focus/,
-                  /:active/,
-                  /^(sm|md|lg|xl):/,
-                ],
-                variables: true,
-              }),
-              cssnano({
-                preset: [
-                  'default',
-                  {
-                    cssDeclarationSorter: false,
-                    reduceIdents: false,
-                    zindex: false,
-                    mergeRules: false,
-                  },
-                ],
-              }),
-            ]
+            purgecss({
+              content: ['./index.html', './src/**/*.js', './src/**/*.html'],
+              defaultExtractor: content =>
+                content.match(/[\w-/:]+(?<!:)/g) || [],
+              safelist: [
+                /^(flex|grid|hidden|block|inline|absolute|relative|fixed)/,
+                /^(active|disabled|loading|error|success)/,
+                /^mobile-/,
+                /^(fade|slide|bounce)/,
+                /:hover/,
+                /:focus/,
+                /:active/,
+                /^(sm|md|lg|xl):/,
+              ],
+              variables: true,
+            }),
+            cssnano({
+              preset: [
+                'default',
+                {
+                  cssDeclarationSorter: false,
+                  reduceIdents: false,
+                  zindex: false,
+                  mergeRules: false,
+                },
+              ],
+            }),
+          ]
           : []),
       ],
     },

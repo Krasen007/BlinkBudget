@@ -594,7 +594,8 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
   let goalsFromStorage = [];
   const cachedGoals = offlineDataManager.getCachedPlanningData('goals');
 
-  if (cachedGoals && cachedGoals.data) {
+  if (isOffline && cachedGoals && cachedGoals.data) {
+    // Use cache only when offline
     console.log('[GoalsSection] Using cached goals data');
     goalsFromStorage = cachedGoals.data;
   } else {
@@ -610,7 +611,8 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
       });
     } catch (err) {
       console.warn('Error fetching goals from StorageService:', err);
-      goalsFromStorage = [];
+      // Fallback to cache if StorageService fails
+      goalsFromStorage = cachedGoals?.data || [];
     }
   }
 

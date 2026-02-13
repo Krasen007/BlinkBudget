@@ -61,8 +61,10 @@ export const OverviewSection = (planningData, riskAssessor) => {
     section.appendChild(placeholder);
 
     // Cache the section state for offline access
-    if (!isOffline) {
-      offlineDataManager.cachePlanningData('overview', null);
+    if (!isOffline && dataToUse) {
+      offlineDataManager.cachePlanningData('overview', dataToUse);
+    } else if (cachedData) {
+      dataToUse = cachedData.data;
     }
 
     return section;
@@ -77,7 +79,7 @@ export const OverviewSection = (planningData, riskAssessor) => {
   statsGrid.style.marginBottom = SPACING.XL;
 
   // Calculate real stats from transaction data - SAME LOGIC AS DASHBOARD
-  const { transactions } = dataToUse;
+  const { transactions = [] } = dataToUse;
   let allTimeIncome = 0;
   let allTimeExpense = 0;
   let monthlyExpenses = 0;
@@ -120,11 +122,10 @@ export const OverviewSection = (planningData, riskAssessor) => {
     monthlyExpenses = recentExpenses / monthsOfData;
   }
 
+  const effectiveIncome = allTimeIncome - allTimeTransfers;
   const savingsRate =
-    allTimeIncome > 0
-      ? ((allTimeIncome - allTimeExpense) /
-          (allTimeIncome - allTimeTransfers)) *
-        100
+    effectiveIncome > 0
+      ? ((allTimeIncome - allTimeExpense) / effectiveIncome) * 100
       : 0;
 
   // Generate risk assessments
@@ -153,7 +154,7 @@ export const OverviewSection = (planningData, riskAssessor) => {
   }
 
   // Cache the calculated data for offline access
-  if (!isOffline) {
+  if (!isOffline && dataToUse) {
     offlineDataManager.cachePlanningData('overview', {
       data: dataToUse,
       timestamp: Date.now(),

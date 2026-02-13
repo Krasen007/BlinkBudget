@@ -244,7 +244,7 @@ export class AnalyticsEngine {
     return this.cache.getStats();
   }
   invalidateCacheOnDataUpdate() {
-    this.cache.clear();
+    this.cache.clearAll();
   }
 
   // Legacy/Internal methods - mostly proxied if still needed by other services

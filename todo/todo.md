@@ -13,7 +13,7 @@ DO NOT IMPLEMENT: use Ionic's Capacitor or Cordova to make android app
 
 ---
 
-[x] Implement offline first loading for charts to be available on PWA evene when there is no internet
+[x] Implement offline first loading for charts to be available on PWA even when there is no internet
 [ ] there is a white bar when using the PWA in light mode i must check how it is on the browser
 [ ] Chrome browser detects the app core and switches to dark or white mode but when I use the PWA it detects that I'm using light theme and it makes my bar white
 [ ] lazy load older transactions, they should be kept on server and only the transactions for the last 30 days should be cached on the device / PWA
