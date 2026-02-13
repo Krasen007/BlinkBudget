@@ -11,3 +11,6 @@ summarize it in few notes but reword it so it's more easily understood,
 update the changelog.txt file itself
 
 Update @readme.md with the new features from the changelog.txt
+
+commit bump with message "bump version %VERSION%"
+push all changes to remote repository

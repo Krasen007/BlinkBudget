@@ -26,3 +26,5 @@ DO NOT IMPLEMENT: use Ionic's Capacitor or Cordova to make android app
 [ ] Add 'Notes' field to Transaction schema and UI forms.
 [ ] we should think about possible management UI for the app for the system admin to overview the users and their accounts and other metrics like the audit logs, also other possible things like user management, billing, etc.
 [ ] Update account-service.js and storage.js to implement an optional limit property for accounts, allowing the app to track credit limits and spending thresholds. This change exposes new API methods to calculate available credit and trigger utilization warnings, as originally outlined in the design spec.
+[ ] fix smart suggestions ui and integration
+[ ] fix advanced filtering ui

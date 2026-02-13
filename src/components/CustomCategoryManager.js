@@ -21,6 +21,16 @@ export const CustomCategoryManager = ({
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     padding: var(--spacing-lg);
+    width: 100%;
+    max-width: var(--container-max-width);
+    padding: 0 var(--spacing-sm);
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
   `;
 
   // Current state
@@ -74,6 +84,7 @@ export const CustomCategoryManager = ({
 
   // Type selector
   const typeSelector = document.createElement('div');
+  typeSelector.setAttribute('role', 'tablist');
   typeSelector.style.cssText = `
     display: flex;
     gap: var(--spacing-sm);
@@ -83,8 +94,8 @@ export const CustomCategoryManager = ({
     border-radius: var(--radius-md);
   `;
 
-  const expenseButton = createTypeButton('Expense', 'expense');
-  const incomeButton = createTypeButton('Income', 'income');
+  const expenseButton = createTypeButton('Expense', 'expense', 'expense-button');
+  const incomeButton = createTypeButton('Income', 'income', 'income-button');
 
   typeSelector.appendChild(expenseButton);
   typeSelector.appendChild(incomeButton);
@@ -93,18 +104,27 @@ export const CustomCategoryManager = ({
   // Categories list
   const categoriesList = document.createElement('div');
   categoriesList.className = 'categories-list';
+  categoriesList.id = 'categories-panel';
+  categoriesList.setAttribute('role', 'tabpanel');
+  categoriesList.setAttribute('aria-labelledby', 'expense-button income-button');
   categoriesList.style.cssText = `
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: var(--spacing-md);
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-sm);
+    padding-bottom: var(--spacing-lg);
+    align-content: start;
   `;
 
   container.appendChild(categoriesList);
 
   // Helper functions
-  function createTypeButton(text, type) {
+  function createTypeButton(text, type, id) {
     const button = document.createElement('button');
     button.textContent = text;
+    button.id = id;
     button.className = 'type-button';
     button.setAttribute('role', 'tab');
     button.setAttribute(
@@ -173,7 +193,7 @@ export const CustomCategoryManager = ({
       background: var(--color-background);
       transition: all var(--transition-fast);
       position: relative;
-      height: 100%;
+      min-height: 160px;
       justify-content: space-between;
       align-items: flex-start; /* Override center alignment from CSS */
       text-align: left; /* Override center text alignment from CSS */
@@ -620,9 +640,7 @@ export const CustomCategoryManager = ({
 
     if (type === 'textarea') {
       input.rows = rows;
-    }
-
-    if (type !== 'textarea') {
+    } else {
       input.type = type;
     }
 
