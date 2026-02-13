@@ -56,7 +56,7 @@ You may not use BlinkBudget to:
 - Engage in illegal activities or money laundering
 - Store false or fraudulent financial information
 - Attempt to compromise the security or integrity of the service
-- Reverse engineer the service for malicious purposes
+- Exploit the service or its source code for malicious purposes
 - Use automated scripts to abuse the service
 
 ## 5. Data and Privacy

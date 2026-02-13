@@ -70,17 +70,6 @@ The application includes CORS headers in `netlify.toml`:
 
 Update your Firebase project with appropriate CORS rules:
 
-```javascript
-// Firebase Cloud Functions CORS configuration
-const cors = require('cors')({ origin: true });
-
-exports.yourFunction = functions.https.onRequest((req, res) => {
-  cors(req, res, () => {
-    // Your function logic here
-  });
-});
-```
-
 ## Security Headers
 
 The application implements comprehensive security headers:

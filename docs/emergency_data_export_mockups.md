@@ -13,6 +13,8 @@
 **I want to** quickly export all my financial data in case of emergency or app migration  
 **So that** I never lose my valuable financial information and can maintain control over my data
 
+**Note:** Emergency export works completely offline for core data. Network connectivity is only required for optional cloud features like remote sharing or sync.
+
 ---
 
 ## Design Principles
@@ -165,12 +167,13 @@ Export Progress → Download Complete → Confirmation
 │ ✅ Categories & Settings            │
 │ 🔄 Reports & Analytics...           │
 │                                     │
-│ 📁 File: blinkbudget-export.csv    │
+│ 📁 File: blinkbudget-export-2025-02-02.csv │
 │ 📊 Size: ~2.3 MB                   │
 │                                     │
 │ ⏱️ Estimated time: 15 seconds      │
 │                                     │
 │    Please don't close this app     │
+│    (exports continue in background) │
 │                                     │
 └─────────────────────────────────────┘
 ```
@@ -345,19 +348,19 @@ Export Progress → Download Complete → Confirmation
 │ │  📡 Connection Issue           │ │
 │ └─────────────────────────────────┘ │
 │                                     │
-│ Having trouble with the export:     │
+│ Emergency export works offline:     │
 │                                     │
-│ 📶 Weak or unstable connection      │
+│ 📶 Cloud features unavailable      │
 │                                     │
 │ Options:                            │
-│ • Wait and retry automatically      │
+│ • Continue offline export only     │
+│ • Wait and retry cloud features    │
 │ • Try basic CSV format (smaller)    │
-│ • Export to device storage only   │
 │                                     │
 │ 🔄 Retrying in 5... 4... 3...      │
 │                                     │
 │ ┌─────────────────────────────────┐ │
-│ │        SKIP ONLINE FEATURES     │ │
+│ │  Skip Cloud/Online Features     │ │
 │ └─────────────────────────────────┘ │
 └─────────────────────────────────────┘
 ```
@@ -410,7 +413,13 @@ date,amount,category,type,description,account
 - **No sensitive data in URLs**
 - **Secure file generation**
 - **Automatic cleanup of temporary files**
-- **Encryption options for future versions**
+- **Required encryption** for all exported files
+  - **Algorithm:** AES-256-GCM
+  - **Configuration:** enable_export_encryption=true
+  - **Key Management:** Secure key rotation policy required
+  - **Temporary Files:** Encrypted during generation, auto-deleted
+  - **Fallback:** If encryption cannot be enabled, user must acknowledge security risks
+  - **Critical:** Required for public release
 
 ---
 
@@ -433,7 +442,7 @@ date,amount,category,type,description,account
 ### Visual Accessibility
 
 - **High contrast** colors (WCAG AA compliant)
-- **Large touch targets** (44px minimum)
+- **Large touch targets** (56px minimum)
 - **Clear focus indicators** (3px outline)
 - **Text alternatives** for icons
 
@@ -498,7 +507,12 @@ date,amount,category,type,description,account
 - **Settings Service** - Entry point integration
 - **Transaction Service** - Data access
 - **Storage Service** - File management
-- **Analytics Service** - Usage tracking (optional)
+- **Analytics Service** - Usage tracking (optional, privacy-controlled)
+  - **Tracked Events:** Export initiated, completed, failed, format selected
+  - **Privacy:** All telemetry anonymized and aggregated (no PII/account IDs)
+  - **Opt-in:** User consent required for analytics collection
+  - **Data Retention:** 90 days maximum, access-controlled storage
+  - **Security:** Encrypted transmission and storage
 
 ---
 

@@ -1,7 +1,7 @@
 # Privacy Policy
 
-**Last Updated:** [Date]  
-**Effective Date:** [Date]
+**Last Updated:** January 15, 2025  
+**Effective Date:** January 15, 2025
 
 BlinkBudget is committed to protecting your privacy and ensuring the security of your financial data. This Privacy Policy explains how we collect, use, store, and protect your information when you use our expense tracking application.
 
@@ -23,7 +23,7 @@ BlinkBudget is committed to protecting your privacy and ensuring the security of
 ### 1.3 Application Usage Data
 
 - **Settings and Preferences:** User-configured app settings and display preferences
-- **Analytics Data:** Aggregated, anonymized usage patterns for improving the app
+- **Analytics Data:** Aggregated, anonymized usage patterns (via [Analytics Provider]) for improving the app. IP addresses are anonymized and no personally identifiable information is collected.
 - **Error Logs:** Technical information for debugging and performance improvement (no personal data)
 
 ## 2. How We Use Your Information
@@ -53,6 +53,12 @@ BlinkBudget uses a hybrid local-cloud architecture designed for privacy and perf
 - Data remains on your device and is accessible offline
 - No data is transmitted to cloud servers without explicit user action
 
+**Security Limitations of localStorage:**
+
+- localStorage is not encrypted and is stored in plain text on your device
+- Data is accessible to any script running on the same origin (vulnerable to XSS attacks)
+- Anyone with physical access to your device can potentially access stored data
+
 **Cloud Storage (Optional):**
 
 - Cloud synchronization is only available when you create an account and log in
@@ -62,7 +68,7 @@ BlinkBudget uses a hybrid local-cloud architecture designed for privacy and perf
 ### 3.2 Data Encryption and Security
 
 - **Local Data:** Stored in browser localStorage (accessible only to the app)
-- **Cloud Data:** Encrypted in transit using HTTPS/TLS
+- **Cloud Data:** Encrypted in transit using HTTPS/TLS and at rest in Firebase Firestore
 - **Authentication:** Managed by Firebase Authentication with industry-standard security
 - **Access Control:** User data is isolated by user ID with strict access controls
 
@@ -79,6 +85,7 @@ BlinkBudget uses a hybrid local-cloud architecture designed for privacy and perf
 - **Firebase (Google):** Used for authentication and optional cloud storage
 - **Netlify:** Used for application hosting
 - These providers have strict data protection agreements and access only to the minimum data necessary
+- GDPR-compliant Data Processing Agreements (DPAs) are in place with both Firebase and Netlify under GDPR Article 28, governing all data processing and limiting access to necessary data only. Users may request a copy of these DPAs by contacting privacy@blinkbudget.app
 
 ### 4.3 Legal Requirements
 
@@ -98,7 +105,7 @@ BlinkBudget uses a hybrid local-cloud architecture designed for privacy and perf
 
 - Cloud data is retained as long as your account is active
 - You can delete your account and all associated data at any time through the Settings > Account Deletion section
-- Deleted accounts are removed from our servers within 30 days
+- Active data is deleted immediately, while backup copies are purged within 30 days as part of our backup rotation cycle
 - **Account Deletion Process:** When you delete your account, the following occurs:
   - A final data export is automatically generated and downloaded for your records
   - All transactions, accounts, goals, investments, budgets, and settings are permanently deleted
@@ -150,11 +157,11 @@ BlinkBudget uses a hybrid local-cloud architecture designed for privacy and perf
 
 ## 8. Children's Privacy
 
-BlinkBudget is not intended for use by children under 13 years of age. We do not knowingly collect personal information from children under 13. If we become aware that we have collected such information, we will delete it promptly.
+BlinkBudget is not intended for use by children under the applicable age limit in their jurisdiction (typically 13 in the US under COPPA, or 13-16 in the EU under GDPR). We do not knowingly collect personal information from children under the applicable age limit. If we become aware that we have collected such information, we will delete it promptly.
 
 ## 9. International Data Transfers
 
-If you use cloud synchronization, your data may be stored and processed in data centers located outside your country. Firebase provides appropriate safeguards for international data transfers in accordance with applicable laws.
+If you use cloud synchronization, your data may be stored and processed in data centers located outside your country. Firebase implements appropriate safeguards for international data transfers, including Standard Contractual Clauses (SCCs) and other mechanisms in accordance with GDPR and applicable laws.
 
 ## 10. Changes to This Privacy Policy
 

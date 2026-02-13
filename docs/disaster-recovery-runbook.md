@@ -101,8 +101,52 @@ This runbook provides step-by-step procedures for handling disaster recovery sce
 
    ```bash
    # If security breach suspected, rotate secrets immediately
-   # Update Firebase API keys
-   # Change Netlify environment variables
+
+   # Rotate Firebase API keys and service accounts
+   gcloud auth login  # Authenticate with required permissions
+   gcloud config set project PROJECT_ID  # Set target project
+
+   # Revoke existing service account keys
+   gcloud iam service-accounts keys list --iam-account=SERVICE_ACCOUNT_EMAIL
+   gcloud iam service-accounts keys delete KEY_ID --iam-account=SERVICE_ACCOUNT_EMAIL
+
+   # Create new service account key
+   gcloud iam service-accounts keys create KEY_NAME.json --iam-account=SERVICE_ACCOUNT_EMAIL
+
+   # Update Firebase API keys in console
+   # Visit: https://console.firebase.google.com/project/PROJECT_ID/settings/serviceaccounts
+   # Generate new web API key and update all client applications
+
+   # Update Netlify environment variables
+   netlify login  # Authenticate with required permissions
+   netlify switch SITE_ID  # Set target site
+
+   # Update environment variables
+   netlify env:set VAR_NAME "new_value" --context=production
+   netlify env:set VAR_NAME "new_value" --context=deploy-preview
+
+   # Trigger redeploy to apply new environment variables
+   netlify trigger deploy --prod
+
+   # Generic secret rotation (example with AWS Secrets Manager)
+   aws configure set profile.admin  # Use admin profile with required permissions
+
+   # Create new secret version
+   aws secretsmanager create-secret-version --secret-id SECRET_ARN \
+     --secret-string '{"API_KEY":"new_key_value"}' --version-stage AWSCURRENT
+
+   # Update dependent services to use new secret version
+   # Update application code to fetch latest secret version
+
+   # Disable old secret version after verification
+   aws secretsmanager update-secret-version-stage --secret-id SECRET_ARN \
+     --version-stage AWSPREVIOUS --move-to-version-id PREVIOUS_VERSION_ID
+
+   # Verify secret propagation
+   aws secretsmanager get-secret-value --secret-id SECRET_ARN --version-stage AWSCURRENT
+
+   # Rollback command (if needed)
+   aws secretsmanager restore-secret-version --secret-id SECRET_ARN --version-id PREVIOUS_VERSION_ID
    ```
 
 2. **Activate Monitoring**
@@ -140,11 +184,19 @@ This runbook provides step-by-step procedures for handling disaster recovery sce
 3. **Restore from Backup**
 
    ```javascript
-   // Using the BackupService
-   import { BackupService } from './src/core/backup-service.js';
+   // Using the BackupService (wrapped in async function)
+   (async () => {
+     try {
+       // Dynamic import for CommonJS compatibility
+       const { BackupService } = await import('./src/core/backup-service.js');
 
-   const result = await BackupService.restoreBackup();
-   console.log(`Restored ${result} transactions`);
+       const result = await BackupService.restoreBackup();
+       console.log(`Restored ${result} transactions`);
+     } catch (error) {
+       console.error('Backup restoration failed:', error);
+       process.exit(1);
+     }
+   })();
    ```
 
 4. **Verify Data Integrity**
