@@ -19,23 +19,17 @@ export const NetworkStatus = () => {
     transform: 'translateX(-50%) translateY(150%)',
     backgroundColor: 'transparent',
     color: '#fff',
-    padding: `${SPACING.SM} ${SPACING.LG}`,
-    borderRadius: '12px',
-    fontSize: '0.875rem',
+    padding: `${SPACING.XS} ${SPACING.MD}`,
+    borderRadius: '8px',
+    fontSize: '0.8rem',
     fontWeight: '500',
     zIndex: '9999',
     display: 'flex',
     alignItems: 'center',
-    gap: SPACING.SM,
+    gap: SPACING.XS,
     backdropFilter: 'blur(10px)',
     WebkitBackdropFilter: 'blur(10px)',
     border: '1px solid rgba(255, 236, 218, 0.2)',
-    // boxShadow: `
-    //     0 0 20px rgba(255, 159, 67, 0.3),
-    //     0 0 40px rgba(255, 159, 67, 0.2),
-    //     0 0 60px rgba(255, 159, 67, 0.1),
-    //     0 4px 16px rgba(0, 0, 0, 0.2)
-    // `,
     transition:
       'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease',
     pointerEvents: 'none',
@@ -44,11 +38,11 @@ export const NetworkStatus = () => {
 
   const icon = document.createElement('span');
   icon.textContent = '📡';
-  icon.style.fontSize = '1.2rem';
+  icon.style.fontSize = '1rem';
   icon.style.filter = 'drop-shadow(0 0 8px rgba(255, 159, 67, 0.5))';
 
   const text = document.createElement('span');
-  text.textContent = 'Offline - Using local data';
+  text.textContent = 'Offline';
   text.style.color = '#fff';
   text.style.textShadow = `
         0 0 10px rgba(255, 159, 67, 0.8),
@@ -57,26 +51,6 @@ export const NetworkStatus = () => {
 
   container.appendChild(icon);
   container.appendChild(text);
-
-  // Add a subtext for more info
-  const subtext = document.createElement('div');
-  subtext.textContent = 'Changes will sync when online';
-  Object.assign(subtext.style, {
-    fontSize: '0.7rem',
-    color: 'rgba(255, 255, 255, 0.7)',
-    marginTop: '2px',
-    fontWeight: '400',
-  });
-
-  const textContainer = document.createElement('div');
-  textContainer.style.display = 'flex';
-  textContainer.style.flexDirection = 'column';
-  textContainer.appendChild(text);
-  textContainer.appendChild(subtext);
-
-  container.innerHTML = '';
-  container.appendChild(icon);
-  container.appendChild(textContainer);
 
   // Update status based on network
   const updateStatus = () => {

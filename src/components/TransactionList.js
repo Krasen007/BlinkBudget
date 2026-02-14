@@ -15,6 +15,7 @@ import {
   createEnhancedEmptyState,
   EMPTY_STATE_SCENARIOS,
 } from '../utils/enhanced-empty-states.js';
+import { Router } from '../core/router.js';
 
 export const TransactionList = ({
   transactions,
@@ -22,10 +23,10 @@ export const TransactionList = ({
   accounts,
   highlightTransactionIds = null,
   currentDateFilter = null,
-  onDateClick = () => {},
+  onDateClick = () => { },
   currentCategoryFilter = null,
-  onCategoryClick = () => {},
-  onFilterClear = () => {}, // New callback for clearing general filter
+  onCategoryClick = () => { },
+  onFilterClear = () => { }, // New callback for clearing general filter
 }) => {
   const listContainer = document.createElement('div');
   listContainer.className = 'dashboard-transactions-container';
@@ -116,7 +117,7 @@ export const TransactionList = ({
         switch (action) {
           case 'add-transaction':
             // Navigate to add transaction
-            window.Router?.navigate?.('add-expense');
+            Router.navigate('add-expense');
             break;
           case 'clear-filters':
             // Clear all filters - date, category, and general filter
@@ -131,8 +132,12 @@ export const TransactionList = ({
             }
             break;
           case 'show-tutorial':
-            // Show tutorial
-            window.Router?.navigate?.('tutorial');
+            // Show tutorial using the global tutorial manager
+            if (window.tutorialManager) {
+              window.tutorialManager.restart();
+            } else {
+              console.warn('Tutorial manager not available');
+            }
             break;
         }
       },

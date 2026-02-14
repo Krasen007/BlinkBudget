@@ -97,12 +97,11 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
 
   goalForm.appendChild(goalName);
   goalForm.appendChild(nameError);
-  goalForm.appendChild(goalName);
-  goalForm.appendChild(nameError);
   goalForm.appendChild(goalTarget);
-  goalForm.appendChild(currentError);
+  goalForm.appendChild(goalDate);
   goalForm.appendChild(dateError);
   goalForm.appendChild(goalCurrent);
+  goalForm.appendChild(currentError);
   goalForm.appendChild(saveGoalBtn);
 
   addGoalBtn.addEventListener('click', () => {
@@ -546,6 +545,48 @@ function createGoalsList(chartRenderer, activeCharts, section) {
           });
         });
 
+        // Delete handler
+        delBtn.addEventListener('click', async () => {
+          // Import ConfirmDialog dynamically
+          const { ConfirmDialog } = await import('../../components/ConfirmDialog.js');
+
+          ConfirmDialog({
+            title: 'Delete Goal',
+            message: `Are you sure you want to delete the goal "${goal.name}"? This action cannot be undone.`,
+            confirmText: 'Delete',
+            variant: 'danger',
+            onConfirm: async () => {
+              try {
+                // Import StorageService dynamically
+                const { StorageService } = await import('../../core/storage.js');
+                StorageService.deleteGoal(goal.id);
+
+                // Refresh chart using helper
+                const updatedGoals = StorageService.getGoals();
+                await refreshChart({
+                  createChartFn: createGoalProgressChart,
+                  chartRenderer,
+                  data: updatedGoals,
+                  section,
+                  chartType: 'goal-progress',
+                  activeCharts,
+                });
+
+                // Cache updated goals for offline access
+                offlineDataManager.cachePlanningData('goals', {
+                  data: updatedGoals,
+                  timestamp: Date.now(),
+                });
+
+                // Refresh the list
+                refreshGoalsList();
+              } catch (err) {
+                console.error('Failed to delete goal', err);
+              }
+            },
+          });
+        });
+
         goalsList.appendChild(ul);
       });
     } catch (err) {
@@ -578,17 +619,6 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
   );
 
   const isOffline = !offlineDataManager.isOnline;
-
-  // Add offline indicators if needed
-  if (isOffline) {
-    section.appendChild(
-      createPlaceholder(
-        'Offline Mode',
-        'Goal management is limited when offline. Changes will sync when you reconnect.',
-        '📡'
-      )
-    );
-  }
 
   // Try to load goals from cache first, then StorageService
   let goalsFromStorage = [];

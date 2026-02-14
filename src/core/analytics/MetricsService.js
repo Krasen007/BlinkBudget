@@ -48,16 +48,21 @@ export class MetricsService {
       totalExpenses += amount;
     });
 
-    // Ensure total expenses don't go negative for percentages (though rare)
-    const normalizedTotal = Math.max(0, totalExpenses);
+    // Filter out categories with negative or zero amounts (refunds exceeded expenses)
+    const validCategories = Object.values(categoryTotals).filter(
+      category => category.amount > 0
+    );
+
+    // Recalculate total from valid categories only
+    const validTotal = validCategories.reduce(
+      (sum, cat) => sum + cat.amount,
+      0
+    );
 
     // Convert to array and calculate percentages
-    const categories = Object.values(categoryTotals).map(category => ({
+    const categories = validCategories.map(category => ({
       ...category,
-      percentage:
-        normalizedTotal > 0
-          ? (Math.max(0, category.amount) / normalizedTotal) * 100
-          : 0,
+      percentage: validTotal > 0 ? (category.amount / validTotal) * 100 : 0,
     }));
 
     // Sort by amount (highest first)
@@ -65,7 +70,7 @@ export class MetricsService {
 
     return {
       categories,
-      totalAmount: totalExpenses,
+      totalAmount: validTotal,
       timePeriod,
       transactionCount: relevantTransactions.length,
     };
@@ -183,7 +188,7 @@ export class MetricsService {
       spendingRate:
         incomeVsExpenses.totalIncome > 0
           ? (incomeVsExpenses.totalExpenses / incomeVsExpenses.totalIncome) *
-            100
+          100
           : 0,
     };
   }
