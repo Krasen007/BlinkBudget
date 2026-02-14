@@ -326,9 +326,7 @@ describe('Privacy Validation - Focused Tests', () => {
 
     it('should use secure communication for sensitive operations', () => {
       // Mock Firebase config
-      // snyk-ignore: javascript/HardcodedNonCryptoSecret/test - Test fixture API key
       const firebaseConfig = {
-        apiKey: 'test-key',
         authDomain: 'test.firebaseapp.com',
         projectId: 'test-project',
       };

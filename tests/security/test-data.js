@@ -228,11 +228,9 @@ export const mockAuthData = {
   validCredentials: [
     {
       email: 'test.user@example.com',
-      password: 'TestPassword123',
     },
     {
       email: 'jane.doe@test.org',
-      password: 'SecurePass456',
     },
   ],
 

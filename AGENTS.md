@@ -106,6 +106,7 @@ The following documents provide additional context and detailed specifications:
 
 - **`docs/prd.md`**: Product Requirements Document (for product vision, user journey, and high-level requirements).
 - **`docs/tech_design.md`**: Technical Design Document (for detailed technical architecture, stack rationale, and implementation considerations).
+- **`DEVELOPMENT_SETUP.md`**: Development setup and configuration guide.
 
 ```
 
