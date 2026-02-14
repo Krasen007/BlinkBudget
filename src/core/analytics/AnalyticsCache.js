@@ -183,8 +183,8 @@ export class AnalyticsCache {
       hitRate:
         this.cacheStats.hits + this.cacheStats.misses > 0
           ? (this.cacheStats.hits /
-            (this.cacheStats.hits + this.cacheStats.misses)) *
-          100
+              (this.cacheStats.hits + this.cacheStats.misses)) *
+            100
           : 0,
     };
   }
@@ -236,7 +236,9 @@ export class AnalyticsCache {
     this.cacheStats = {
       hits: 0,
       misses: 0,
-      invalidations: hadContent ? this.cacheStats.invalidations + 1 : this.cacheStats.invalidations,
+      invalidations: hadContent
+        ? this.cacheStats.invalidations + 1
+        : this.cacheStats.invalidations,
       evictions: 0,
       offlineHits: 0,
     };

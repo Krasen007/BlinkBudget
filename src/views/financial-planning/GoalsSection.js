@@ -548,7 +548,8 @@ function createGoalsList(chartRenderer, activeCharts, section) {
         // Delete handler
         delBtn.addEventListener('click', async () => {
           // Import ConfirmDialog dynamically
-          const { ConfirmDialog } = await import('../../components/ConfirmDialog.js');
+          const { ConfirmDialog } =
+            await import('../../components/ConfirmDialog.js');
 
           ConfirmDialog({
             title: 'Delete Goal',
@@ -558,7 +559,8 @@ function createGoalsList(chartRenderer, activeCharts, section) {
             onConfirm: async () => {
               try {
                 // Import StorageService dynamically
-                const { StorageService } = await import('../../core/storage.js');
+                const { StorageService } =
+                  await import('../../core/storage.js');
                 StorageService.deleteGoal(goal.id);
 
                 // Refresh chart using helper

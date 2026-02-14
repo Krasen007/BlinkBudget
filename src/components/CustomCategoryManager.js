@@ -181,11 +181,12 @@ export const CustomCategoryManager = ({
     });
 
     // Update aria-labelledby to reference only the active tab
-    const activeButtonId = currentType === 'expense' ? 'expense-button' : 'income-button';
+    const activeButtonId =
+      currentType === 'expense' ? 'expense-button' : 'income-button';
     categoriesList.setAttribute('aria-labelledby', activeButtonId);
   }
 
-  function createCategoryCard(category) {
+  function createCategoryCard(category, index, totalCount) {
     const card = document.createElement('div');
     card.className = 'category-card';
     card.setAttribute('tabindex', '0');
@@ -194,6 +195,7 @@ export const CustomCategoryManager = ({
       'aria-label',
       `${category.name} category, ${category.type}`
     );
+    card.setAttribute('data-category-id', category.id);
     card.style.cssText = `
       display: flex;
       flex-direction: column;
@@ -206,8 +208,8 @@ export const CustomCategoryManager = ({
       position: relative;
       min-height: 160px;
       justify-content: space-between;
-      align-items: flex-start; /* Override center alignment from CSS */
-      text-align: left; /* Override center text alignment from CSS */
+      align-items: flex-start;
+      text-align: left;
     `;
 
     // Info section (top)
@@ -219,13 +221,23 @@ export const CustomCategoryManager = ({
       width: 100%;
     `;
 
-    // Header within card (color + name)
+    // Header within card (color + name + reorder buttons)
     const cardHeader = document.createElement('div');
     cardHeader.style.cssText = `
       display: flex;
       align-items: center;
       gap: var(--spacing-sm);
       margin-bottom: var(--spacing-xs);
+      justify-content: space-between;
+    `;
+
+    // Left side: color + name
+    const leftHeader = document.createElement('div');
+    leftHeader.style.cssText = `
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      flex: 1;
     `;
 
     // Category color indicator
@@ -246,8 +258,94 @@ export const CustomCategoryManager = ({
       font-size: var(--font-size-base);
     `;
 
-    cardHeader.appendChild(colorIndicator);
-    cardHeader.appendChild(name);
+    leftHeader.appendChild(colorIndicator);
+    leftHeader.appendChild(name);
+
+    // Right side: reorder buttons
+    const reorderButtons = document.createElement('div');
+    reorderButtons.style.cssText = `
+      display: flex;
+      gap: var(--spacing-xs);
+      flex-shrink: 0;
+    `;
+
+    // Up button
+    const upButton = document.createElement('button');
+    upButton.innerHTML = '↑';
+    upButton.title = 'Move up';
+    upButton.setAttribute('aria-label', 'Move category up');
+    upButton.disabled = index === 0;
+    upButton.style.cssText = `
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background: var(--color-surface);
+      color: var(--color-text-main);
+      font-size: 14px;
+      cursor: ${index === 0 ? 'not-allowed' : 'pointer'};
+      opacity: ${index === 0 ? '0.3' : '1'};
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    `;
+
+    if (index > 0) {
+      upButton.addEventListener('click', e => {
+        e.stopPropagation();
+        moveCategory(category.id, 'up');
+      });
+      upButton.addEventListener('mouseenter', () => {
+        upButton.style.backgroundColor = 'var(--color-surface-hover)';
+      });
+      upButton.addEventListener('mouseleave', () => {
+        upButton.style.backgroundColor = 'var(--color-surface)';
+      });
+    }
+
+    // Down button
+    const downButton = document.createElement('button');
+    downButton.innerHTML = '↓';
+    downButton.title = 'Move down';
+    downButton.setAttribute('aria-label', 'Move category down');
+    downButton.disabled = index === totalCount - 1;
+    downButton.style.cssText = `
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background: var(--color-surface);
+      color: var(--color-text-main);
+      font-size: 14px;
+      cursor: ${index === totalCount - 1 ? 'not-allowed' : 'pointer'};
+      opacity: ${index === totalCount - 1 ? '0.3' : '1'};
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    `;
+
+    if (index < totalCount - 1) {
+      downButton.addEventListener('click', e => {
+        e.stopPropagation();
+        moveCategory(category.id, 'down');
+      });
+      downButton.addEventListener('mouseenter', () => {
+        downButton.style.backgroundColor = 'var(--color-surface-hover)';
+      });
+      downButton.addEventListener('mouseleave', () => {
+        downButton.style.backgroundColor = 'var(--color-surface)';
+      });
+    }
+
+    reorderButtons.appendChild(upButton);
+    reorderButtons.appendChild(downButton);
+
+    cardHeader.appendChild(leftHeader);
+    cardHeader.appendChild(reorderButtons);
     infoArea.appendChild(cardHeader);
 
     const meta = document.createElement('div');
@@ -698,6 +796,18 @@ export const CustomCategoryManager = ({
     });
   }
 
+  function moveCategory(categoryId, direction) {
+    try {
+      const success = CustomCategoryService.move(categoryId, direction);
+      if (success) {
+        renderCategories();
+        onCategoryChange && onCategoryChange();
+      }
+    } catch (error) {
+      console.error('Error moving category:', error);
+    }
+  }
+
   function renderCategories() {
     categories = CustomCategoryService.getByType(currentType);
 
@@ -718,8 +828,8 @@ export const CustomCategoryManager = ({
       return;
     }
 
-    categories.forEach(category => {
-      const card = createCategoryCard(category);
+    categories.forEach((category, index) => {
+      const card = createCategoryCard(category, index, categories.length);
       categoriesList.appendChild(card);
     });
   }

@@ -27,7 +27,6 @@ export class MetricsService {
     );
 
     const categoryTotals = Object.create(null);
-    let totalExpenses = 0;
 
     relevantTransactions.forEach(transaction => {
       const category = transaction.category || 'Uncategorized';
@@ -45,7 +44,6 @@ export class MetricsService {
 
       categoryTotals[category].amount += amount;
       categoryTotals[category].transactionCount += 1;
-      totalExpenses += amount;
     });
 
     // Filter out categories with negative or zero amounts (refunds exceeded expenses)
@@ -188,7 +186,7 @@ export class MetricsService {
       spendingRate:
         incomeVsExpenses.totalIncome > 0
           ? (incomeVsExpenses.totalExpenses / incomeVsExpenses.totalIncome) *
-          100
+            100
           : 0,
     };
   }

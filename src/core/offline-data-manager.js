@@ -245,7 +245,8 @@ export class OfflineDataManager {
         );
       } catch (error) {
         console.error(
-          `[OfflineDataManager] Failed to sync operation: ${item.operation.type}${item.operation.id ? ` (ID: ${item.operation.id})` : ''
+          `[OfflineDataManager] Failed to sync operation: ${item.operation.type}${
+            item.operation.id ? ` (ID: ${item.operation.id})` : ''
           } - ${error.message}`
         );
         item.retries++;
@@ -322,7 +323,7 @@ export class OfflineDataManager {
     if (this.syncQueue.length > 0 && !force) {
       console.warn(
         '[OfflineDataManager] Cannot clear cache - there are pending sync operations. ' +
-        `Found ${this.syncQueue.length} pending operations. Use clearCache(true) to force clear.`
+          `Found ${this.syncQueue.length} pending operations. Use clearCache(true) to force clear.`
       );
       return false;
     }

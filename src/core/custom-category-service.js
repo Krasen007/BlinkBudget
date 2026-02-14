@@ -16,6 +16,111 @@ const CUSTOM_CATEGORIES_KEY =
 
 export const CustomCategoryService = {
   /**
+   * Reorder categories
+   * @param {Array<string>} orderedIds - Array of category IDs in desired order
+   * @returns {boolean} True if successful
+   */
+  reorder(orderedIds) {
+    if (!Array.isArray(orderedIds)) {
+      throw new Error('orderedIds must be an array');
+    }
+
+    const categories = this.getAll();
+    const categoryMap = new Map(categories.map(cat => [cat.id, cat]));
+
+    // Validate that all IDs exist
+    const invalidIds = orderedIds.filter(id => !categoryMap.has(id));
+    if (invalidIds.length > 0) {
+      throw new Error(`Invalid category IDs: ${invalidIds.join(', ')}`);
+    }
+
+    // Create reordered array with sortOrder property
+    const reordered = orderedIds.map((id, index) => ({
+      ...categoryMap.get(id),
+      sortOrder: index,
+      updatedAt: new Date().toISOString(),
+    }));
+
+    // Add any categories not in the orderedIds array at the end
+    const includedIds = new Set(orderedIds);
+    const remaining = categories
+      .filter(cat => !includedIds.has(cat.id))
+      .map((cat, index) => ({
+        ...cat,
+        sortOrder: orderedIds.length + index,
+      }));
+
+    const allCategories = [...reordered, ...remaining];
+    this._persist(allCategories);
+
+    // Audit log category reordering
+    auditService.log(
+      auditEvents.DATA_UPDATE,
+      {
+        entityType: 'categories',
+        action: 'reorder',
+        count: orderedIds.length,
+      },
+      AuthService.getUserId(),
+      'low'
+    );
+
+    return true;
+  },
+
+  /**
+   * Move a category up or down in the list
+   * @param {string} id - Category ID
+   * @param {string} direction - 'up' or 'down'
+   * @returns {boolean} True if successful
+   */
+  move(id, direction) {
+    if (!['up', 'down'].includes(direction)) {
+      throw new Error('Direction must be "up" or "down"');
+    }
+
+    const categories = this.getAll();
+
+    // Sort by current sortOrder (or by creation date if no sortOrder)
+    const sorted = categories.sort((a, b) => {
+      const orderA = a.sortOrder ?? Number.MAX_SAFE_INTEGER;
+      const orderB = b.sortOrder ?? Number.MAX_SAFE_INTEGER;
+      if (orderA !== orderB) return orderA - orderB;
+      return new Date(a.createdAt) - new Date(b.createdAt);
+    });
+
+    const currentIndex = sorted.findIndex(cat => cat.id === id);
+    if (currentIndex === -1) {
+      throw new Error('Category not found');
+    }
+
+    // Calculate new index
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
+    // Check bounds
+    if (newIndex < 0 || newIndex >= sorted.length) {
+      return false; // Already at the edge
+    }
+
+    // Swap positions
+    [sorted[currentIndex], sorted[newIndex]] = [
+      sorted[newIndex],
+      sorted[currentIndex],
+    ];
+
+    // Update sortOrder for all categories
+    const reordered = sorted.map((cat, index) => ({
+      ...cat,
+      sortOrder: index,
+      updatedAt: new Date().toISOString(),
+    }));
+
+    this._persist(reordered);
+
+    return true;
+  },
+
+  /**
    * Get all custom categories
    * @returns {Array} List of custom categories
    */
@@ -31,10 +136,16 @@ export const CustomCategoryService = {
     const data = localStorage.getItem(CUSTOM_CATEGORIES_KEY);
     const categories = data ? safeJsonParse(data) : [];
 
-    // Filter categories for current user
-    return categories.filter(
-      cat => !cat.userId || cat.userId === currentUserId
-    );
+    // Filter categories for current user and sort by sortOrder
+    return categories
+      .filter(cat => !cat.userId || cat.userId === currentUserId)
+      .sort((a, b) => {
+        const orderA = a.sortOrder ?? Number.MAX_SAFE_INTEGER;
+        const orderB = b.sortOrder ?? Number.MAX_SAFE_INTEGER;
+        if (orderA !== orderB) return orderA - orderB;
+        // Fallback to creation date if sortOrder is the same
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      });
   },
 
   /**
