@@ -774,7 +774,7 @@ export const CustomCategoryManager = ({
           onCategoryChange && onCategoryChange();
         } catch (error) {
           console.error('Error deleting category:', error);
-          // Show error in a user-friendly way
+          // Show generic error message (error details logged to console)
           const errorDiv = document.createElement('div');
           errorDiv.style.cssText = `
             position: fixed;
@@ -788,7 +788,7 @@ export const CustomCategoryManager = ({
             font-size: var(--font-size-sm);
             max-width: 300px;
           `;
-          errorDiv.textContent = error.message || 'Failed to delete category';
+          errorDiv.textContent = 'Failed to delete category. Please try again.';
           document.body.appendChild(errorDiv);
           setTimeout(() => errorDiv.remove(), 5000);
         }
@@ -805,7 +805,7 @@ export const CustomCategoryManager = ({
       }
     } catch (error) {
       console.error('Error moving category:', error);
-      // Show error in a user-friendly way
+      // Show generic error message (error details logged to console)
       const errorDiv = document.createElement('div');
       errorDiv.style.cssText = `
         position: fixed;
@@ -819,7 +819,7 @@ export const CustomCategoryManager = ({
         font-size: var(--font-size-sm);
         max-width: 300px;
       `;
-      errorDiv.textContent = `Error moving category: ${error.message || 'Unknown error'}`;
+      errorDiv.textContent = 'Error moving category. Please try again.';
       document.body.appendChild(errorDiv);
       setTimeout(() => errorDiv.remove(), 5000);
     }

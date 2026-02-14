@@ -106,9 +106,8 @@ export const handleFormSubmit = (transactionData, onSubmit, onError = null) => {
         })
         .catch(importErr => {
           console.error('Failed to load toast notifications:', importErr);
-          // Fallback: show error using browser alert as last resort
           console.error('Original error:', errorMessage);
-          // Create a simple DOM-based error message as fallback
+          // Create a simple DOM-based error message as fallback with generic message
           const fallbackDiv = document.createElement('div');
           fallbackDiv.setAttribute('role', 'alert');
           fallbackDiv.setAttribute('aria-live', 'assertive');
@@ -123,7 +122,7 @@ export const handleFormSubmit = (transactionData, onSubmit, onError = null) => {
           z-index: 10000;
           max-width: 300px;
         `;
-          fallbackDiv.textContent = errorMessage;
+          fallbackDiv.textContent = 'An error occurred. Please try again.';
           document.body.appendChild(fallbackDiv);
           setTimeout(() => {
             if (fallbackDiv.parentNode) {

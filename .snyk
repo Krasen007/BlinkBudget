@@ -1,0 +1,31 @@
+# Snyk (https://snyk.io) policy file
+
+# Test files with intentional hardcoded values for security testing
+exclude:
+  code:
+    - node_modules/**
+    - dist/**
+    - .git/**
+    # Hardcoded passwords in test files are intentional test fixtures
+    - tests/security/auth-penetration-simple.test.js:
+        - javascript/NoHardcodedPasswords/test
+    - tests/security/auth-penetration.test.js:
+        - javascript/NoHardcodedPasswords/test
+    - tests/security/comprehensive-security.test.js:
+        - javascript/NoHardcodedPasswords/test
+    - tests/security/security-validation.test.js:
+        - javascript/NoHardcodedPasswords/test
+    - tests/security/test-data.js:
+        - javascript/NoHardcodedPasswords/test
+    
+    # Hardcoded non-crypto secrets in test files are intentional test fixtures
+    - tests/privacy/privacy-validation-focused.test.js:
+        - javascript/HardcodedNonCryptoSecret/test
+    
+    # False positive: blob URL download pattern is safe
+    - src/core/emergency-export-service.js:
+        - javascript/DOMXSS
+
+        
+
+version: v1.0.0

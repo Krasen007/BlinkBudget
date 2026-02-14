@@ -62,6 +62,7 @@ describe('Security Validation Tests', () => {
 
   describe('Password Validation', () => {
     it('should validate password strength correctly', () => {
+      // snyk-ignore: javascript/NoHardcodedPasswords/test - Test fixture passwords
       const testCases = [
         { password: '', valid: false },
         { password: '123', valid: false },

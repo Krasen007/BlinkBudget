@@ -206,6 +206,7 @@ describe('Comprehensive Security Tests - OWASP Top 10', () => {
   describe('A07: Identification and Authentication Failures', () => {
     describe('Password Security', () => {
       it('should enforce minimum password requirements', () => {
+        // snyk-ignore: javascript/NoHardcodedPasswords/test - Test fixture passwords
         const testCases = [
           { password: '', valid: false },
           { password: '123', valid: false },

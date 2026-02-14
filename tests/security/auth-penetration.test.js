@@ -59,6 +59,7 @@ describe('Authentication Penetration Testing', () => {
 
   describe('Authentication Bypass Attempts', () => {
     it('should reject null/undefined credentials', async () => {
+      // snyk-ignore: javascript/NoHardcodedPasswords/test - Test fixture passwords
       const testCases = [
         { email: null, password: 'password123' },
         { email: 'test@example.com', password: null },

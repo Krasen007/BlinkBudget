@@ -607,7 +607,9 @@ function createGoalsList(chartRenderer, activeCharts, section) {
                   font-size: var(--font-size-sm);
                   max-width: 300px;
                 `;
-                errorDiv.textContent = `Failed to delete goal: ${err.message || 'Unknown error'}`;
+                console.error('Failed to delete goal:', err);
+                errorDiv.textContent =
+                  'Failed to delete goal. Please try again.';
                 document.body.appendChild(errorDiv);
                 setTimeout(() => errorDiv.remove(), 5000);
               }

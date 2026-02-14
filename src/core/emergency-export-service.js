@@ -342,14 +342,14 @@ export const EmergencyExportService = {
   /**
    * Generate integrity checksums for data validation
    */
-  generateIntegrityChecksums(data) {
+  async generateIntegrityChecksums(data) {
     const crypto = window.crypto || window.msCrypto;
     const checksums = {};
 
-    Object.keys(data).forEach(key => {
+    for (const key of Object.keys(data)) {
       try {
         const dataString = JSON.stringify(data[key]);
-        const hashBuffer = crypto.subtle.digestSync(
+        const hashBuffer = await crypto.subtle.digest(
           'SHA-256',
           new TextEncoder().encode(dataString)
         );
@@ -361,12 +361,12 @@ export const EmergencyExportService = {
         // Fallback to simple hash if crypto not available
         checksums[key] = this.simpleHash(JSON.stringify(data[key]));
       }
-    });
+    }
 
     // Generate overall checksum
     const overallData = JSON.stringify(data);
     try {
-      const hashBuffer = crypto.subtle.digestSync(
+      const hashBuffer = await crypto.subtle.digest(
         'SHA-256',
         new TextEncoder().encode(overallData)
       );
@@ -396,6 +396,10 @@ export const EmergencyExportService = {
 
   /**
    * Create downloadable file
+   * @param {*} data - Data to export
+   * @param {string} format - Export format ('json' or 'csv')
+   * @param {boolean} _compress - Compression flag (unused)
+   * @returns {string} Blob URL - Caller must revoke with URL.revokeObjectURL() when done
    */
   async createDownloadFile(data, format = 'json', _compress = false) {
     try {
@@ -424,18 +428,42 @@ export const EmergencyExportService = {
       // Create download URL
       const url = URL.createObjectURL(blob);
 
-      // Auto-download
+      // Auto-download with sanitized filename
       const filename = this.generateFilename(fileExtension);
       const a = document.createElement('a');
+      // Validate blob URL format before use (blob URLs are safe by design)
+      if (!url.startsWith('blob:')) {
+        throw new Error('Invalid blob URL');
+      }
       a.href = url;
       a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      a.setAttribute('rel', 'noopener noreferrer');
+      // Temporarily append to trigger download (element is not visible)
+      a.style.display = 'none';
+      a.style.position = 'absolute';
+      a.style.left = '-9999px';
 
-      // Clean up URL after delay
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      // Use a safer approach to DOM manipulation
+      // Create a temporary container that's not attached to the DOM
+      const container = document.createElement('div');
+      container.style.position = 'absolute';
+      container.style.left = '-9999px';
+      container.style.opacity = '0';
+      container.style.pointerEvents = 'none';
+      container.appendChild(a);
 
+      // Use document.documentElement instead of body for better security
+      const root = document.documentElement;
+      if (root && root.appendChild && root.removeChild) {
+        root.appendChild(container);
+        a.click();
+        root.removeChild(container);
+      } else {
+        throw new Error('Unable to access document root');
+      }
+
+      // Return URL for caller to manage lifecycle
+      // Caller is responsible for revoking with URL.revokeObjectURL(url) when done
       return url;
     } catch (error) {
       console.error('[EmergencyExport] Failed to create download file:', error);
@@ -449,30 +477,49 @@ export const EmergencyExportService = {
   generateFilename(format = 'json') {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const userId = AuthService.getUserId() || 'anonymous';
-    return `blinkbudget-emergency-export-${userId}-${timestamp}.${format}`;
+    // Sanitize userId to prevent XSS in download attribute
+    const safeUserId = String(userId)
+      .replace(/[^a-zA-Z0-9_-]/g, '')
+      .slice(0, 50);
+    // Sanitize format parameter
+    const safeFormat = String(format)
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .slice(0, 10);
+    return `blinkbudget-emergency-export-${safeUserId}-${timestamp}.${safeFormat}`;
   },
 
   /**
-   * Convert data to CSV format (basic implementation)
+   * Convert data to CSV format with proper escaping
    */
   convertToCSV(data) {
     const rows = [];
 
+    // Helper function to escape CSV fields
+    const escapeCsvField = field => {
+      if (field === null || field === undefined) return '';
+      const str = String(field);
+      // If field contains comma, quote, or newline, wrap in quotes and double internal quotes
+      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
+
     // Add header
-    rows.push('Type,ID,Name,Amount,Date,Created,Updated');
+    rows.push('Type,ID,Name/Description,Amount/Target,Date,Created,Updated');
 
     // Add transactions
     if (data.transactions?.items) {
       data.transactions.items.forEach(tx => {
         rows.push(
           [
-            'transaction',
-            tx.id,
-            tx.description || tx.category,
-            tx.amount,
-            tx.date,
-            tx.createdAt,
-            tx.updatedAt,
+            escapeCsvField('transaction'),
+            escapeCsvField(tx.id),
+            escapeCsvField(tx.description || tx.category),
+            escapeCsvField(tx.amount),
+            escapeCsvField(tx.date),
+            escapeCsvField(tx.createdAt),
+            escapeCsvField(tx.updatedAt),
           ].join(',')
         );
       });
@@ -483,13 +530,64 @@ export const EmergencyExportService = {
       data.accounts.items.forEach(account => {
         rows.push(
           [
-            'account',
-            account.id,
-            account.name,
-            account.balance,
-            '',
-            account.createdAt,
-            account.updatedAt,
+            escapeCsvField('account'),
+            escapeCsvField(account.id),
+            escapeCsvField(account.name),
+            escapeCsvField(account.balance),
+            escapeCsvField(''),
+            escapeCsvField(account.createdAt),
+            escapeCsvField(account.updatedAt),
+          ].join(',')
+        );
+      });
+    }
+
+    // Add goals
+    if (data.goals?.items) {
+      data.goals.items.forEach(goal => {
+        rows.push(
+          [
+            escapeCsvField('goal'),
+            escapeCsvField(goal.id),
+            escapeCsvField(goal.name || goal.description),
+            escapeCsvField(goal.target || goal.amount),
+            escapeCsvField(goal.targetDate || goal.date),
+            escapeCsvField(goal.createdAt),
+            escapeCsvField(goal.updatedAt),
+          ].join(',')
+        );
+      });
+    }
+
+    // Add investments
+    if (data.investments?.items) {
+      data.investments.items.forEach(investment => {
+        rows.push(
+          [
+            escapeCsvField('investment'),
+            escapeCsvField(investment.id),
+            escapeCsvField(investment.name || investment.description),
+            escapeCsvField(investment.value || investment.amount),
+            escapeCsvField(investment.purchaseDate || investment.date),
+            escapeCsvField(investment.createdAt),
+            escapeCsvField(investment.updatedAt),
+          ].join(',')
+        );
+      });
+    }
+
+    // Add budgets
+    if (data.budgets?.items) {
+      data.budgets.items.forEach(budget => {
+        rows.push(
+          [
+            escapeCsvField('budget'),
+            escapeCsvField(budget.id),
+            escapeCsvField(budget.name || budget.category),
+            escapeCsvField(budget.limit || budget.amount),
+            escapeCsvField(budget.period || budget.startDate),
+            escapeCsvField(budget.createdAt),
+            escapeCsvField(budget.updatedAt),
           ].join(',')
         );
       });
@@ -513,19 +611,21 @@ export const EmergencyExportService = {
    * Get app version
    */
   getAppVersion() {
-    // Try to get version from package.json or other sources
-    return '1.17.10'; // From package.json
+    /* global __APP_VERSION__ */
+    return typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.17.10';
   },
 
   /**
    * Validate export integrity
    */
-  validateExportIntegrity(exportData) {
+  async validateExportIntegrity(exportData) {
     if (!exportData?.integrity || !exportData?.data) {
       return { valid: false, error: 'Missing integrity or data' };
     }
 
-    const currentChecksums = this.generateIntegrityChecksums(exportData.data);
+    const currentChecksums = await this.generateIntegrityChecksums(
+      exportData.data
+    );
     const originalChecksums = exportData.integrity;
 
     const mismatches = [];

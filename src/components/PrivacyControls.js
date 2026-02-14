@@ -548,8 +548,9 @@ export function initializePrivacyControls(container) {
           PrivacyService.updatePrivacySettings(newSettings);
           showNotification('Privacy settings saved successfully!', 'success');
         } catch (error) {
+          console.error('Failed to save privacy settings:', error);
           showNotification(
-            `Failed to save privacy settings: ${error.message} `,
+            'Failed to save privacy settings. Please try again.',
             'error'
           );
         }
@@ -583,7 +584,8 @@ export function initializePrivacyControls(container) {
         a.click();
         URL.revokeObjectURL(url);
       } catch (error) {
-        showNotification(`Failed to export data: ${error.message} `, 'error');
+        console.error('Export failed:', error);
+        showNotification('Failed to export data. Please try again.', 'error');
       }
     });
 
@@ -608,7 +610,8 @@ export function initializePrivacyControls(container) {
             PrivacyService.performDataRetentionCleanup();
             showNotification('Data cleanup completed successfully!', 'success');
           } catch (error) {
-            showNotification(`Data cleanup failed: ${error.message} `, 'error');
+            console.error('Data cleanup failed:', error);
+            showNotification('Data cleanup failed. Please try again.', 'error');
           }
         }
       });

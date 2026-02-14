@@ -946,37 +946,91 @@ export const ReportsView = () => {
         currentData.transactions.length.toString()
       );
 
-      fallback.innerHTML = `
-                <div style="margin-bottom: ${SPACING.LG};">
-                    <h3 style="color: ${COLORS.ERROR}; margin-bottom: ${SPACING.MD};">⚠️ Chart Rendering Failed</h3>
-                    <p style="color: ${COLORS.TEXT_MUTED}; margin-bottom: ${SPACING.LG};">
-                        Unable to render interactive charts. Showing basic financial summary instead.
-                    </p>
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: ${SPACING.MD};">
-                    <div style="padding: ${SPACING.MD}; background: ${COLORS.BACKGROUND}; border-radius: var(--radius-md);">
-                        <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED}; margin-bottom: ${SPACING.XS};">Total Expenses</div>
-                        <div style="font-size: 1.5rem; font-weight: bold; color: ${COLORS.ERROR};">€${totalExpenses}</div>
-                    </div>
-                    <div style="padding: ${SPACING.MD}; background: ${COLORS.BACKGROUND}; border-radius: var(--radius-md);">
-                        <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED}; margin-bottom: ${SPACING.XS};">Total Income</div>
-                        <div style="font-size: 1.5rem; font-weight: bold; color: ${COLORS.SUCCESS};">€${totalIncome}</div>
-                    </div>
-                    <div style="padding: ${SPACING.MD}; background: ${COLORS.BACKGROUND}; border-radius: var(--radius-md);">
-                        <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED}; margin-bottom: ${SPACING.XS};">Net Balance</div>
-                        <div style="font-size: 1.5rem; font-weight: bold; color: ${currentData.incomeVsExpenses.netBalance >= 0 ? COLORS.SUCCESS : COLORS.ERROR};">€${netBalance}</div>
-                    </div>
-                    <div style="padding: ${SPACING.MD}; background: ${COLORS.BACKGROUND}; border-radius: var(--radius-md);">
-                        <div style="font-size: 0.875rem; color: ${COLORS.TEXT_MUTED}; margin-bottom: ${SPACING.XS};">Transactions</div>
-                        <div style="font-size: 1.5rem; font-weight: bold; color: ${COLORS.PRIMARY};">${transactionCount}</div>
-                    </div>
-                </div>
-                <div style="margin-top: ${SPACING.LG};">
-                    <button onclick="location.reload()" style="padding: ${SPACING.MD} ${SPACING.LG}; background: ${COLORS.PRIMARY}; color: white; border: none; border-radius: var(--radius-md); cursor: pointer;">
-                        Refresh Page
-                    </button>
-                </div>
-            `;
+      // Build fallback UI using DOM methods to avoid XSS
+      const headerDiv = document.createElement('div');
+      headerDiv.style.marginBottom = SPACING.LG;
+
+      const title = document.createElement('h3');
+      title.style.color = COLORS.ERROR;
+      title.style.marginBottom = SPACING.MD;
+      title.textContent = '⚠️ Chart Rendering Failed';
+
+      const description = document.createElement('p');
+      description.style.color = COLORS.TEXT_MUTED;
+      description.style.marginBottom = SPACING.LG;
+      description.textContent =
+        'Unable to render interactive charts. Showing basic financial summary instead.';
+
+      headerDiv.appendChild(title);
+      headerDiv.appendChild(description);
+
+      const gridDiv = document.createElement('div');
+      gridDiv.style.display = 'grid';
+      gridDiv.style.gridTemplateColumns =
+        'repeat(auto-fit, minmax(200px, 1fr))';
+      gridDiv.style.gap = SPACING.MD;
+
+      // Helper to create stat card
+      const createStatCard = (label, value, color) => {
+        const card = document.createElement('div');
+        card.style.padding = SPACING.MD;
+        card.style.background = COLORS.BACKGROUND;
+        card.style.borderRadius = 'var(--radius-md)';
+
+        const labelDiv = document.createElement('div');
+        labelDiv.style.fontSize = '0.875rem';
+        labelDiv.style.color = COLORS.TEXT_MUTED;
+        labelDiv.style.marginBottom = SPACING.XS;
+        labelDiv.textContent = label;
+
+        const valueDiv = document.createElement('div');
+        valueDiv.style.fontSize = '1.5rem';
+        valueDiv.style.fontWeight = 'bold';
+        valueDiv.style.color = color;
+        valueDiv.textContent = value;
+
+        card.appendChild(labelDiv);
+        card.appendChild(valueDiv);
+        return card;
+      };
+
+      gridDiv.appendChild(
+        createStatCard('Total Expenses', `€${totalExpenses}`, COLORS.ERROR)
+      );
+      gridDiv.appendChild(
+        createStatCard('Total Income', `€${totalIncome}`, COLORS.SUCCESS)
+      );
+      gridDiv.appendChild(
+        createStatCard(
+          'Net Balance',
+          `€${netBalance}`,
+          currentData.incomeVsExpenses.netBalance >= 0
+            ? COLORS.SUCCESS
+            : COLORS.ERROR
+        )
+      );
+      gridDiv.appendChild(
+        createStatCard('Transactions', transactionCount, COLORS.PRIMARY)
+      );
+
+      const buttonDiv = document.createElement('div');
+      buttonDiv.style.marginTop = SPACING.LG;
+
+      const refreshButton = document.createElement('button');
+      refreshButton.style.padding = `${SPACING.MD} ${SPACING.LG}`;
+      refreshButton.style.background = COLORS.PRIMARY;
+      refreshButton.style.color = 'white';
+      refreshButton.style.border = 'none';
+      refreshButton.style.borderRadius = 'var(--radius-md)';
+      refreshButton.style.cursor = 'pointer';
+      refreshButton.textContent = 'Refresh Page';
+      refreshButton.onclick = () => location.reload();
+
+      buttonDiv.appendChild(refreshButton);
+
+      fallback.appendChild(headerDiv);
+      fallback.appendChild(gridDiv);
+      fallback.appendChild(buttonDiv);
       chartContainer.appendChild(fallback);
     }
   }

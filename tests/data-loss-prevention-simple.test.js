@@ -117,7 +117,7 @@ describe('Week 2: Data Loss Prevention - Simple Tests', () => {
       );
     });
 
-    it('should validate integrity with mocked crypto', () => {
+    it('should validate integrity with mocked crypto', async () => {
       const exportData = {
         data: {
           transactions: { count: 1, items: [] },
@@ -131,14 +131,14 @@ describe('Week 2: Data Loss Prevention - Simple Tests', () => {
       };
 
       const validation =
-        EmergencyExportService.validateExportIntegrity(exportData);
+        await EmergencyExportService.validateExportIntegrity(exportData);
 
       expect(validation).toHaveProperty('valid');
       expect(validation).toHaveProperty('mismatches');
       expect(validation).toHaveProperty('checksums');
     });
 
-    it('should detect integrity mismatches', () => {
+    it('should detect integrity mismatches', async () => {
       const exportData = {
         data: {
           transactions: { count: 1, items: [] },
@@ -152,7 +152,7 @@ describe('Week 2: Data Loss Prevention - Simple Tests', () => {
       };
 
       const validation =
-        EmergencyExportService.validateExportIntegrity(exportData);
+        await EmergencyExportService.validateExportIntegrity(exportData);
 
       expect(validation.valid).toBe(false);
       expect(validation.mismatches).toContain('transactions');

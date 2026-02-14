@@ -96,7 +96,7 @@ describe('Week 2: Data Loss Prevention', () => {
   });
 
   describe('Emergency Export Service', () => {
-    it('should detect integrity mismatches', () => {
+    it('should detect integrity mismatches', async () => {
       const exportData = {
         data: {
           transactions: { count: 1, items: [] },
@@ -110,7 +110,7 @@ describe('Week 2: Data Loss Prevention', () => {
       };
 
       const validation =
-        EmergencyExportService.validateExportIntegrity(exportData);
+        await EmergencyExportService.validateExportIntegrity(exportData);
 
       expect(validation.valid).toBe(false);
       expect(validation.mismatches).toContain('transactions');
