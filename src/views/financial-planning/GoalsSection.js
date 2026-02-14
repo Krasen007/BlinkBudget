@@ -445,7 +445,6 @@ function createGoalsList(chartRenderer, activeCharts, section) {
         li.appendChild(progressContainer);
 
         ul.appendChild(li);
-
         // Edit handler
         editBtn.addEventListener('click', () => {
           if (li._editing) return;
@@ -561,10 +560,10 @@ function createGoalsList(chartRenderer, activeCharts, section) {
                 // Import StorageService dynamically
                 const { StorageService } =
                   await import('../../core/storage.js');
-                StorageService.deleteGoal(goal.id);
+                await StorageService.deleteGoal(goal.id);
 
                 // Refresh chart using helper
-                const updatedGoals = StorageService.getGoals();
+                const updatedGoals = await StorageService.getGoals();
                 await refreshChart({
                   createChartFn: createGoalProgressChart,
                   chartRenderer,
@@ -580,17 +579,44 @@ function createGoalsList(chartRenderer, activeCharts, section) {
                   timestamp: Date.now(),
                 });
 
+                // Queue deletion for offline sync
+                if (!offlineDataManager.isOnline) {
+                  offlineDataManager.addToSyncQueue({
+                    type: 'deleteGoal',
+                    data: {
+                      goalId: goal.id,
+                    },
+                  });
+                }
+
                 // Refresh the list
-                refreshGoalsList();
+                await refreshGoalsList();
               } catch (err) {
                 console.error('Failed to delete goal', err);
+                // Show error notification to user
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = `
+                  position: fixed;
+                  top: 20px;
+                  right: 20px;
+                  background: #ef4444;
+                  color: white;
+                  padding: var(--spacing-sm);
+                  border-radius: var(--radius-sm);
+                  z-index: 10000;
+                  font-size: var(--font-size-sm);
+                  max-width: 300px;
+                `;
+                errorDiv.textContent = `Failed to delete goal: ${err.message || 'Unknown error'}`;
+                document.body.appendChild(errorDiv);
+                setTimeout(() => errorDiv.remove(), 5000);
               }
             },
           });
         });
-
-        goalsList.appendChild(ul);
       });
+
+      goalsList.appendChild(ul);
     } catch (err) {
       console.warn('Error loading goals for list:', err);
       const empty = document.createElement('div');

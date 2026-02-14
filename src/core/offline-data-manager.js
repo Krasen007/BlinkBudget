@@ -244,10 +244,11 @@ export class OfflineDataManager {
           `[OfflineDataManager] Synced operation: ${item.operation.type}${item.operation.id ? ` (ID: ${item.operation.id})` : ''}`
         );
       } catch (error) {
+        const errText = (error && error.message) || String(error);
         console.error(
           `[OfflineDataManager] Failed to sync operation: ${item.operation.type}${
             item.operation.id ? ` (ID: ${item.operation.id})` : ''
-          } - ${error.message}`
+          } - ${errText}`
         );
         item.retries++;
 

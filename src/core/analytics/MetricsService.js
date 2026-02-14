@@ -57,6 +57,12 @@ export class MetricsService {
       0
     );
 
+    // Recalculate transaction count from valid categories only
+    const validTransactionCount = validCategories.reduce(
+      (sum, cat) => sum + cat.transactionCount,
+      0
+    );
+
     // Convert to array and calculate percentages
     const categories = validCategories.map(category => ({
       ...category,
@@ -70,7 +76,7 @@ export class MetricsService {
       categories,
       totalAmount: validTotal,
       timePeriod,
-      transactionCount: relevantTransactions.length,
+      transactionCount: validTransactionCount,
     };
   }
 

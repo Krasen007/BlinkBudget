@@ -805,6 +805,23 @@ export const CustomCategoryManager = ({
       }
     } catch (error) {
       console.error('Error moving category:', error);
+      // Show error in a user-friendly way
+      const errorDiv = document.createElement('div');
+      errorDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #ef4444;
+        color: white;
+        padding: var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        z-index: 10000;
+        font-size: var(--font-size-sm);
+        max-width: 300px;
+      `;
+      errorDiv.textContent = `Error moving category: ${error.message || 'Unknown error'}`;
+      document.body.appendChild(errorDiv);
+      setTimeout(() => errorDiv.remove(), 5000);
     }
   }
 

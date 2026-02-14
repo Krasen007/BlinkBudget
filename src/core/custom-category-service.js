@@ -25,8 +25,18 @@ export const CustomCategoryService = {
       throw new Error('orderedIds must be an array');
     }
 
-    const categories = this.getAll();
-    const categoryMap = new Map(categories.map(cat => [cat.id, cat]));
+    const currentUserId = AuthService.getUserId();
+
+    // Load ALL categories from storage (not just current user's)
+    const data = localStorage.getItem(CUSTOM_CATEGORIES_KEY);
+    const allCategories = data ? safeJsonParse(data) : [];
+
+    // Get only current user's categories for reordering
+    const userCategories = allCategories.filter(
+      cat => !cat.userId || cat.userId === currentUserId
+    );
+
+    const categoryMap = new Map(userCategories.map(cat => [cat.id, cat]));
 
     // Validate that all IDs exist
     const invalidIds = orderedIds.filter(id => !categoryMap.has(id));
@@ -43,15 +53,26 @@ export const CustomCategoryService = {
 
     // Add any categories not in the orderedIds array at the end
     const includedIds = new Set(orderedIds);
-    const remaining = categories
+    const remaining = userCategories
       .filter(cat => !includedIds.has(cat.id))
       .map((cat, index) => ({
         ...cat,
         sortOrder: orderedIds.length + index,
       }));
 
-    const allCategories = [...reordered, ...remaining];
-    this._persist(allCategories);
+    const updatedUserCategories = [...reordered, ...remaining];
+
+    // Merge back: remove old user categories and add updated ones
+    const otherUsersCategories = allCategories.filter(
+      cat => cat.userId && cat.userId !== currentUserId
+    );
+
+    const mergedCategories = [
+      ...otherUsersCategories,
+      ...updatedUserCategories,
+    ];
+
+    this._persist(mergedCategories);
 
     // Audit log category reordering
     auditService.log(
@@ -79,10 +100,19 @@ export const CustomCategoryService = {
       throw new Error('Direction must be "up" or "down"');
     }
 
-    const categories = this.getAll();
+    const currentUserId = AuthService.getUserId();
+
+    // Load ALL categories from storage
+    const data = localStorage.getItem(CUSTOM_CATEGORIES_KEY);
+    const allCategories = data ? safeJsonParse(data) : [];
+
+    // Get only current user's categories for moving
+    const userCategories = allCategories.filter(
+      cat => !cat.userId || cat.userId === currentUserId
+    );
 
     // Sort by current sortOrder (or by creation date if no sortOrder)
-    const sorted = categories.sort((a, b) => {
+    const sorted = userCategories.sort((a, b) => {
       const orderA = a.sortOrder ?? Number.MAX_SAFE_INTEGER;
       const orderB = b.sortOrder ?? Number.MAX_SAFE_INTEGER;
       if (orderA !== orderB) return orderA - orderB;
@@ -108,14 +138,34 @@ export const CustomCategoryService = {
       sorted[currentIndex],
     ];
 
-    // Update sortOrder for all categories
+    // Update sortOrder for all user categories
     const reordered = sorted.map((cat, index) => ({
       ...cat,
       sortOrder: index,
       updatedAt: new Date().toISOString(),
     }));
 
-    this._persist(reordered);
+    // Merge back with other users' categories
+    const otherUsersCategories = allCategories.filter(
+      cat => cat.userId && cat.userId !== currentUserId
+    );
+
+    const mergedCategories = [...otherUsersCategories, ...reordered];
+
+    this._persist(mergedCategories);
+
+    // Audit log category move
+    auditService.log(
+      auditEvents.DATA_UPDATE,
+      {
+        entityType: 'category',
+        action: 'move',
+        categoryId: id,
+        direction,
+      },
+      AuthService.getUserId(),
+      'low'
+    );
 
     return true;
   },

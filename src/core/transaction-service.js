@@ -110,17 +110,18 @@ export const TransactionService = {
     this._persist(transactions);
 
     // Audit log transaction creation
-    auditService.log(auditEvents.DATA_CREATE, {
-      entityType: 'transaction',
-      entityId: sanitizedTransaction.id,
-      details: {
+    auditService.log(
+      auditEvents.DATA_CREATE,
+      {
+        entityType: 'transaction',
+        entityId: sanitizedTransaction.id,
         amount: sanitizedTransaction.amount,
         category: sanitizedTransaction.category,
         accountId: sanitizedTransaction.accountId,
       },
-      userId: AuthService.getUserId(),
-      severity: 'low',
-    });
+      AuthService.getUserId(),
+      'low'
+    );
 
     // Invalidate analytics cache when new transaction is added
     const analyticsEngine = getAnalyticsEngine();
@@ -213,16 +214,17 @@ export const TransactionService = {
     analyticsEngine.invalidateCacheOnDataUpdate();
 
     // Audit log transaction deletion
-    auditService.log(auditEvents.DATA_DELETE, {
-      entityType: 'transaction',
-      entityId: id,
-      details: {
+    auditService.log(
+      auditEvents.DATA_DELETE,
+      {
+        entityType: 'transaction',
+        entityId: id,
         amount: transaction.amount,
         category: transaction.category,
       },
-      userId: AuthService.getUserId(),
-      severity: 'medium',
-    });
+      AuthService.getUserId(),
+      'medium'
+    );
 
     return true;
   },
