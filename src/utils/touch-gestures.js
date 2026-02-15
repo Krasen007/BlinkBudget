@@ -16,13 +16,13 @@ export class TouchGestures {
     let startY = 0;
     let isDragging = false;
 
-    const handleTouchStart = (e) => {
+    const handleTouchStart = e => {
       startX = e.touches[0].clientX;
       startY = e.touches[0].clientY;
       isDragging = true;
     };
 
-    const handleTouchMove = (e) => {
+    const handleTouchMove = e => {
       if (!isDragging) return;
 
       const currentX = e.touches[0].clientX;
@@ -36,7 +36,7 @@ export class TouchGestures {
       }
     };
 
-    const handleTouchEnd = (_e) => {
+    const handleTouchEnd = _e => {
       if (!isDragging) return;
 
       const endX = _e.changedTouches[0].clientX;
@@ -48,7 +48,10 @@ export class TouchGestures {
       const minSwipeDistance = 50;
 
       // Check if it's a horizontal swipe
-      if (Math.abs(diffX) > minSwipeDistance && Math.abs(diffY) < minSwipeDistance) {
+      if (
+        Math.abs(diffX) > minSwipeDistance &&
+        Math.abs(diffY) < minSwipeDistance
+      ) {
         if (diffX > 0) {
           // Swipe left - next period
           onSwipeLeft();
@@ -61,7 +64,9 @@ export class TouchGestures {
       isDragging = false;
     };
 
-    element.addEventListener('touchstart', handleTouchStart, { passive: false });
+    element.addEventListener('touchstart', handleTouchStart, {
+      passive: false,
+    });
     element.addEventListener('touchmove', handleTouchMove, { passive: false });
     element.addEventListener('touchend', handleTouchEnd);
 
@@ -79,11 +84,11 @@ export class TouchGestures {
   static setupChartTouchInteractions(chartElement, onTap) {
     let touchStartTime = 0;
 
-    const handleTouchStart = (_e) => {
+    const handleTouchStart = _e => {
       touchStartTime = Date.now();
     };
 
-    const handleTouchEnd = (_e) => {
+    const handleTouchEnd = _e => {
       const touchDuration = Date.now() - touchStartTime;
 
       // Only register taps (quick touches)
@@ -149,24 +154,51 @@ export class TouchGestures {
       userSelect: 'none',
       WebkitUserSelect: 'none',
       WebkitTouchCallout: 'none',
-      ...options.styles
+      ...options.styles,
     };
 
     Object.assign(button.style, defaultStyles);
 
-    // Add touch feedback
-    button.addEventListener('touchstart', () => {
+    // Add touch feedback with a short-lived isTouch flag to avoid double haptics
+    let isTouch = false;
+
+    const touchStartHandler = () => {
+      isTouch = true;
       button.style.transform = 'scale(0.95)';
       button.style.opacity = '0.8';
       this.triggerHapticFeedback('light');
-    });
+    };
 
-    button.addEventListener('touchend', () => {
+    const touchEndHandler = () => {
+      // Restore visual state and clear touch flag
       button.style.transform = 'scale(1)';
       button.style.opacity = '1';
-    });
+      isTouch = false;
+      // Optionally trigger a stronger haptic on release if desired
+      // this.triggerHapticFeedback('medium');
+    };
 
-    button.addEventListener('click', (_e) => {
+    const touchCancelHandler = () => {
+      // Reset visual state and clear flag on cancel
+      button.style.transform = 'scale(1)';
+      button.style.opacity = '1';
+      isTouch = false;
+    };
+
+    button.addEventListener('touchstart', touchStartHandler);
+    button.addEventListener('touchend', touchEndHandler);
+    button.addEventListener('touchcancel', touchCancelHandler);
+
+    button.addEventListener('click', _e => {
+      // If the click comes from a recent touch, treat it as the same interaction
+      if (isTouch) {
+        isTouch = false;
+        onClick(_e);
+        // Do NOT trigger medium haptic here (we already gave a light haptic on touchstart)
+        return;
+      }
+
+      // Regular mouse/keyboard click
       onClick(_e);
       this.triggerHapticFeedback('medium');
     });
@@ -182,11 +214,52 @@ export class TouchGestures {
     chartCanvas.style.minHeight = '300px';
     chartCanvas.style.touchAction = 'pan-y'; // Allow vertical scrolling but prevent horizontal
 
-    // Add touch-friendly tooltips
-    chartCanvas.addEventListener('touchstart', (_e) => {
-      _e.preventDefault();
+    // Named handlers so they can be removed by callers via the attached cleanup
+    let startX = null;
+    let startY = null;
+
+    const touchStartHandler = e => {
+      // Prevent default only for gestures that would conflict with native scrolling
+      if (!e || !e.touches) return;
+
+      if (e.touches.length > 1) {
+        // Multi-touch (pinch/zoom) — prevent default to allow chart to handle it
+        e.preventDefault();
+        return;
+      }
+
+      // Track starting position for later horizontal-swipe detection in touchmove
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    };
+
+    const touchMoveHandler = e => {
+      if (!startX || !e || !e.touches || e.touches.length === 0) return;
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+      const diffX = Math.abs(currentX - startX);
+      const diffY = Math.abs(currentY - startY);
+
+      // If horizontal movement predominates, prevent native horizontal scrolling
+      if (diffX > diffY && diffX > 10) {
+        e.preventDefault();
+      }
+    };
+
+    chartCanvas.addEventListener('touchstart', touchStartHandler, {
+      passive: false,
+    });
+    chartCanvas.addEventListener('touchmove', touchMoveHandler, {
+      passive: false,
     });
 
+    const cleanup = () => {
+      chartCanvas.removeEventListener('touchstart', touchStartHandler);
+      chartCanvas.removeEventListener('touchmove', touchMoveHandler);
+    };
+
+    // Attach cleanup for callers and return chartCanvas for backward compatibility
+    chartCanvas._optimizeTouchCleanup = cleanup;
     return chartCanvas;
   }
 
@@ -251,7 +324,7 @@ export class TouchGestures {
         if (container.contains(navBar)) {
           container.removeChild(navBar);
         }
-      }
+      },
     };
   }
 }

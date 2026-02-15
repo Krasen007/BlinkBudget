@@ -20,6 +20,10 @@ export class AnalyticsCache {
       offlineHits: 0,
     };
 
+    // Guard to serialize cleanup calls and avoid TOCTOU races
+    this._cleanupInProgress = false;
+    this._cleanupPromise = null;
+
     // Don't hydrate in test environment - let tests control cache state
     if (typeof globalThis !== 'undefined' && globalThis.__VITEST__) {
       console.log(
@@ -76,11 +80,18 @@ export class AnalyticsCache {
     // Also persist to storage for offline access
     this.setToPersistentStorage(key, result);
 
-    // Prevent memory leaks by limiting cache size
+    // Prevent memory leaks by limiting cache size. Serialize cleanup calls
+    // so concurrent set() calls don't start multiple cleanupOldest executions.
     if (this.cache.size > 100) {
-      this.cleanupOldest(20).catch(error => {
-        console.error('[AnalyticsCache] Cache cleanup failed:', error);
-      });
+      if (!this._cleanupInProgress && !this._cleanupPromise) {
+        this._cleanupPromise = this.cleanupOldest(20)
+          .catch(error => {
+            console.error('[AnalyticsCache] Cache cleanup failed:', error);
+          })
+          .finally(() => {
+            this._cleanupPromise = null;
+          });
+      }
     }
   }
 
@@ -89,37 +100,48 @@ export class AnalyticsCache {
    * @param {number} count - Number of entries to remove
    */
   async cleanupOldest(count) {
-    const entries = Array.from(this.cacheTimestamps.entries())
-      .sort((a, b) => a[1] - b[1]) // Sort by timestamp (oldest first)
-      .slice(0, count);
-
-    // Remove from in-memory cache first
-    entries.forEach(([key]) => {
-      this.cache.delete(key);
-      this.cacheTimestamps.delete(key);
-    });
-
-    // Remove from persistent storage in batch
+    // Prevent concurrent cleanup runs (serialize TOCTOU-prone operations)
+    if (this._cleanupInProgress) return;
+    this._cleanupInProgress = true;
     try {
-      const cached = offlineDataManager.getFromStorage('analytics_cache') || {};
-      const keysToRemove = entries.map(([key]) => key);
+      const entries = Array.from(this.cacheTimestamps.entries())
+        .sort((a, b) => a[1] - b[1]) // Sort by timestamp (oldest first)
+        .slice(0, count);
 
-      keysToRemove.forEach(key => {
-        delete cached[key];
+      // Remove from in-memory cache first
+      entries.forEach(([key]) => {
+        this.cache.delete(key);
+        this.cacheTimestamps.delete(key);
       });
 
-      await offlineDataManager.setInStorage(
-        'analytics_cache',
-        cached,
-        this.PERSISTENT_CACHE_DURATION
-      );
+      // Remove from persistent storage in batch
+      try {
+        const cached =
+          offlineDataManager.getFromStorage('analytics_cache') || {};
+        const keysToRemove = entries.map(([key]) => key);
 
-      // Update eviction stats after successful persistent removal
-      this.cacheStats.evictions += entries.length;
-    } catch (error) {
-      // Still increment evictions for in-memory cleanup but log persistent storage failure
-      this.cacheStats.evictions += entries.length;
-      console.error('[AnalyticsCache] Failed to cleanup persistent storage:', error);
+        keysToRemove.forEach(key => {
+          delete cached[key];
+        });
+
+        await offlineDataManager.setInStorage(
+          'analytics_cache',
+          cached,
+          this.PERSISTENT_CACHE_DURATION
+        );
+
+        // Update eviction stats after successful persistent removal
+        this.cacheStats.evictions += entries.length;
+      } catch (error) {
+        // Still increment evictions for in-memory cleanup but log persistent storage failure
+        this.cacheStats.evictions += entries.length;
+        console.error(
+          '[AnalyticsCache] Failed to cleanup persistent storage:',
+          error
+        );
+      }
+    } finally {
+      this._cleanupInProgress = false;
     }
   }
 
@@ -208,8 +230,8 @@ export class AnalyticsCache {
       hitRate:
         this.cacheStats.hits + this.cacheStats.misses > 0
           ? (this.cacheStats.hits /
-            (this.cacheStats.hits + this.cacheStats.misses)) *
-          100
+              (this.cacheStats.hits + this.cacheStats.misses)) *
+            100
           : 0,
     };
   }

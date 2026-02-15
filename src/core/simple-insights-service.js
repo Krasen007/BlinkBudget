@@ -23,7 +23,7 @@ export class SimpleInsightsService {
           amount: topCategory.amount,
           percentage: topCategory.percentage,
           action: 'View transactions',
-          priority: 'high'
+          priority: 'high',
         });
       }
 
@@ -37,7 +37,7 @@ export class SimpleInsightsService {
           amount: trend.change,
           percentage: trend.percentage,
           direction: trend.direction,
-          priority: 'medium'
+          priority: 'medium',
         });
       }
 
@@ -52,7 +52,7 @@ export class SimpleInsightsService {
           percentage: budgetAlert.percentage,
           severity: budgetAlert.severity,
           action: 'Adjust budget',
-          priority: 'high'
+          priority: 'high',
         });
       }
 
@@ -65,10 +65,9 @@ export class SimpleInsightsService {
           description: unusualSpending.description,
           amount: unusualSpending.amount,
           category: unusualSpending.category,
-          priority: 'medium'
+          priority: 'medium',
         });
       }
-
     } catch (error) {
       console.error('Error generating simple insights:', error);
     }
@@ -103,15 +102,16 @@ export class SimpleInsightsService {
 
     if (totalSpending === 0) return null;
 
-    const topCategory = Object.entries(categoryTotals)
-      .sort((a, b) => b[1] - a[1])[0];
+    const topCategory = Object.entries(categoryTotals).sort(
+      (a, b) => b[1] - a[1]
+    )[0];
 
     if (!topCategory) return null;
 
     return {
       category: topCategory[0],
       amount: topCategory[1],
-      percentage: Math.round((topCategory[1] / totalSpending) * 100)
+      percentage: Math.round((topCategory[1] / totalSpending) * 100),
     };
   }
 
@@ -147,7 +147,7 @@ export class SimpleInsightsService {
       description,
       change,
       percentage,
-      direction
+      direction,
     };
   }
 
@@ -155,6 +155,9 @@ export class SimpleInsightsService {
    * Get budget alert if overspending
    */
   static getBudgetAlert(transactions, _currentPeriod) {
+    // Guard against invalid input
+    if (!Array.isArray(transactions) || transactions.length === 0) return null;
+
     // This would integrate with BudgetService
     // For now, return a simple alert if spending is high
     const currentSpending = transactions
@@ -167,7 +170,7 @@ export class SimpleInsightsService {
         description: `High spending detected: €${currentSpending.toFixed(2)} this month`,
         amount: currentSpending,
         percentage: Math.round((currentSpending / 2000) * 100),
-        severity: 'warning'
+        severity: 'warning',
       };
     }
 
@@ -182,18 +185,22 @@ export class SimpleInsightsService {
 
     // Find transactions that are unusually large
     const expenses = transactions.filter(t => t.amount < 0);
+    if (expenses.length === 0) return null; // avoid divide-by-zero when no expenses
+
     const amounts = expenses.map(t => Math.abs(t.amount));
     const average = amounts.reduce((sum, a) => sum + a, 0) / amounts.length;
     const threshold = average * 3; // 3x average is unusual
 
-    const unusualTransactions = expenses.filter(t => Math.abs(t.amount) > threshold);
+    const unusualTransactions = expenses.filter(
+      t => Math.abs(t.amount) > threshold
+    );
 
     if (unusualTransactions.length > 0) {
       const unusual = unusualTransactions[0]; // Get first unusual transaction
       return {
         description: `Unusual expense: €${Math.abs(unusual.amount).toFixed(2)} for ${unusual.category || 'Uncategorized'}`,
         amount: Math.abs(unusual.amount),
-        category: unusual.category || 'Uncategorized'
+        category: unusual.category || 'Uncategorized',
       };
     }
 
@@ -209,7 +216,7 @@ export class SimpleInsightsService {
     date.setMonth(date.getMonth() - 1);
     return {
       startDate: date,
-      endDate: new Date(date.getFullYear(), date.getMonth() + 1, 0)
+      endDate: new Date(date.getFullYear(), date.getMonth() + 1, 0),
     };
   }
 
@@ -221,7 +228,9 @@ export class SimpleInsightsService {
 
     return transactions.filter(t => {
       const transactionDate = new Date(t.date);
-      return transactionDate >= period.startDate && transactionDate <= period.endDate;
+      return (
+        transactionDate >= period.startDate && transactionDate <= period.endDate
+      );
     });
   }
 }

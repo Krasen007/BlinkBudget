@@ -44,7 +44,21 @@ export const CustomCategoryService = {
       throw new Error(`Invalid category IDs: ${invalidIds.join(', ')}`);
     }
 
-    // Create reordered array with sortOrder property
+    // Detect duplicate IDs in the provided order list
+    const seen = new Set();
+    const duplicates = orderedIds.filter(id => {
+      if (seen.has(id)) return true;
+      seen.add(id);
+      return false;
+    });
+    if (duplicates.length > 0) {
+      const uniqueDups = Array.from(new Set(duplicates));
+      throw new Error(
+        `Duplicate category IDs in orderedIds: ${uniqueDups.join(', ')}`
+      );
+    }
+
+    // Create reordered array with sortOrder property (updatedAt left to existing entries)
     const reordered = orderedIds.map((id, index) => ({
       ...categoryMap.get(id),
       sortOrder: index,
@@ -138,12 +152,18 @@ export const CustomCategoryService = {
       sorted[currentIndex],
     ];
 
-    // Update sortOrder for all user categories
-    const reordered = sorted.map((cat, index) => ({
-      ...cat,
-      sortOrder: index,
-      updatedAt: new Date().toISOString(),
-    }));
+    // Update sortOrder for all user categories but only touch updatedAt
+    // when the sortOrder actually changes (so only swapped items get new timestamps)
+    const reordered = sorted.map((cat, index) => {
+      if (cat.sortOrder !== index) {
+        return {
+          ...cat,
+          sortOrder: index,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      return cat;
+    });
 
     // Merge back with other users' categories
     const otherUsersCategories = allCategories.filter(

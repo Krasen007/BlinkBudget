@@ -592,8 +592,7 @@ function createGoalsList(chartRenderer, activeCharts, section) {
                 // Refresh the list
                 await refreshGoalsList();
               } catch (err) {
-                console.error('Failed to delete goal', err);
-                // Show error notification to user
+                // Show error notification to user and log once
                 const errorDiv = document.createElement('div');
                 errorDiv.style.cssText = `
                   position: fixed;

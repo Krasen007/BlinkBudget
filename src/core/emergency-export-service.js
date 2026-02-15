@@ -550,8 +550,9 @@ export const EmergencyExportService = {
             escapeCsvField('goal'),
             escapeCsvField(goal.id),
             escapeCsvField(goal.name || goal.description),
-            escapeCsvField(goal.target || goal.amount),
-            escapeCsvField(goal.targetDate || goal.date),
+            // Use collected-model field names
+            escapeCsvField(goal.targetAmount),
+            escapeCsvField(goal.deadline || goal.date),
             escapeCsvField(goal.createdAt),
             escapeCsvField(goal.updatedAt),
           ].join(',')
@@ -567,7 +568,8 @@ export const EmergencyExportService = {
             escapeCsvField('investment'),
             escapeCsvField(investment.id),
             escapeCsvField(investment.name || investment.description),
-            escapeCsvField(investment.value || investment.amount),
+            // Prefer purchasePrice, fall back to currentPrice
+            escapeCsvField(investment.purchasePrice || investment.currentPrice),
             escapeCsvField(investment.purchaseDate || investment.date),
             escapeCsvField(investment.createdAt),
             escapeCsvField(investment.updatedAt),
@@ -584,7 +586,8 @@ export const EmergencyExportService = {
             escapeCsvField('budget'),
             escapeCsvField(budget.id),
             escapeCsvField(budget.name || budget.category),
-            escapeCsvField(budget.limit || budget.amount),
+            // Use `amount` as the canonical field in the collected model
+            escapeCsvField(budget.amount),
             escapeCsvField(budget.period || budget.startDate),
             escapeCsvField(budget.createdAt),
             escapeCsvField(budget.updatedAt),

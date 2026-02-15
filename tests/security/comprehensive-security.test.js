@@ -172,7 +172,11 @@ describe('Comprehensive Security Tests - OWASP Top 10', () => {
 
       it('should enforce password strength requirements', () => {
         const { weakPasswords } = mockAuthData;
-        const strongPasswords = ['TestPass123!', 'SecurePass456@', 'MyStr0ngP#ss'];
+        const strongPasswords = [
+          'TestPass123!',
+          'SecurePass456@',
+          'MyStr0ngP#ss',
+        ];
 
         // Weak passwords should be rejected
         weakPasswords.forEach(password => {
@@ -306,7 +310,7 @@ describe('Comprehensive Security Tests - OWASP Top 10', () => {
 
     it('should not log sensitive information', () => {
       // Mock console to check what's being logged
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
       // Perform operations with sensitive data
       AuthService.login('test@example.com', 'password123');

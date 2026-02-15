@@ -86,6 +86,10 @@ export class MetricsService {
    * @param {Object} timePeriod - Time period configuration
    * @returns {Object} Income vs expense summary with totals and net balance
    */
+  // Calculate income vs expense summary
+  // Counting rule: expenseCount counts transactions that contribute to the
+  // net expense totals. Pure refunds reduce totalExpenses but are NOT counted
+  // as expense transactions so that counts align with category breakdowns.
   static calculateIncomeVsExpenses(transactions, timePeriod) {
     const filteredTransactions = FilteringService.filterByTimePeriod(
       transactions,
@@ -110,9 +114,8 @@ export class MetricsService {
           expenseCount += 1;
           break;
         case TRANSACTION_TYPES.REFUND:
-          // Refunds reduce expenses
+          // Refunds reduce expenses but do not increment expenseCount (see counting rule)
           totalExpenses -= amount;
-          expenseCount += 1;
           break;
         case TRANSACTION_TYPES.TRANSFER:
           // Transfers don't affect income/expense calculation

@@ -285,8 +285,8 @@ describe('Authentication Penetration Testing - Simple', () => {
       const testCases = [
         { email: Object.create(null), password: 'password' },
         { email: 'test@example.com', password: Object.create(null) },
-        { email: () => { }, password: 'password' },
-        { email: 'test@example.com', password: () => { } },
+        { email: () => {}, password: 'password' },
+        { email: 'test@example.com', password: () => {} },
       ];
 
       for (const credentials of testCases) {

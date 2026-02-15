@@ -19,6 +19,7 @@ import {
   createUsageNote,
 } from '../../utils/financial-planning-helpers.js';
 import { refreshChart } from '../../utils/chart-refresh-helper.js';
+import { AlertDialog } from '../../components/ConfirmDialog.js';
 
 /**
  * Transform portfolio data from StorageService to the format expected by the chart
@@ -1035,40 +1036,57 @@ function createInvestmentsList(chartRenderer, activeCharts) {
 
         // Delete handler
         delBtn.addEventListener('click', () => {
-          // Import ConfirmDialog directly
-          import('../../components/ConfirmDialog.js').then(({ ConfirmDialog }) => {
-            ConfirmDialog({
-              title: 'Delete Investment',
-              message: `Are you sure you want to delete ${inv.symbol}? This action cannot be undone.`,
-              confirmText: 'Delete',
-              variant: 'danger',
-              onConfirm: async () => {
-                try {
-                  const { StorageService } = await import('../../core/storage.js');
-                  StorageService.removeInvestment(inv.symbol);
+          // Import ConfirmDialog directly and surface import failures to the user
+          import('../../components/ConfirmDialog.js')
+            .then(({ ConfirmDialog }) => {
+              ConfirmDialog({
+                title: 'Delete Investment',
+                message: `Are you sure you want to delete ${inv.symbol}? This action cannot be undone.`,
+                confirmText: 'Delete',
+                variant: 'danger',
+                onConfirm: async () => {
+                  try {
+                    const { StorageService } =
+                      await import('../../core/storage.js');
+                    // StorageService.removeInvestment expects a symbol (API documented in storage.js)
+                    StorageService.removeInvestment(inv.symbol);
 
-                  // Refresh chart and list using helper
-                  const updated = StorageService.calculatePortfolioSummary();
-                  const portfolioToRender = transformPortfolioData(updated);
-                  await refreshChart({
-                    createChartFn: createPortfolioCompositionChart,
-                    chartRenderer,
-                    data: portfolioToRender,
-                    section: document.querySelector('.investments-section'),
-                    chartType: 'portfolio-composition',
-                    activeCharts,
-                  });
+                    // Refresh chart and list using helper
+                    const updated = StorageService.calculatePortfolioSummary();
+                    const portfolioToRender = transformPortfolioData(updated);
+                    await refreshChart({
+                      createChartFn: createPortfolioCompositionChart,
+                      chartRenderer,
+                      data: portfolioToRender,
+                      section: document.querySelector('.investments-section'),
+                      chartType: 'portfolio-composition',
+                      activeCharts,
+                    });
 
-                  refreshInvestmentsList();
-                } catch (err) {
-                  console.error('Failed to remove investment', err);
-                }
-              },
-              onCancel: () => {
-                console.log(`[InvestmentsSection] Cancelled deletion of: ${inv.symbol}`);
-              }
+                    refreshInvestmentsList();
+                  } catch (err) {
+                    console.error('Failed to remove investment', err);
+                    // Show user-visible error when deletion fails
+                    AlertDialog({
+                      title: 'Error',
+                      message: 'Could not remove investment. Please try again.',
+                    });
+                  }
+                },
+                onCancel: () => {
+                  console.log(
+                    `[InvestmentsSection] Cancelled deletion of: ${inv.symbol}`
+                  );
+                },
+              });
+            })
+            .catch(err => {
+              console.error('Failed to load confirmation dialog:', err);
+              AlertDialog({
+                title: 'Error',
+                message: 'Unable to open confirmation dialog — please try again.',
+              });
             });
-          });
         });
       });
 
@@ -1087,11 +1105,11 @@ function createInvestmentsList(chartRenderer, activeCharts) {
 }
 
 /**
-   * Investments Section Component
-   * @param {Object} chartRenderer - Chart renderer service instance
-   * @param {Map} activeCharts - Map to track active chart instances
-   * @returns {HTMLElement} DOM element containing investments section content
-   */
+ * Investments Section Component
+ * @param {Object} chartRenderer - Chart renderer service instance
+ * @param {Map} activeCharts - Map to track active chart instances
+ * @returns {HTMLElement} DOM element containing investments section content
+ */
 export const InvestmentsSection = async (chartRenderer, activeCharts) => {
   const section = createSectionContainer(
     'investments',

@@ -45,11 +45,23 @@ function createInsightCard(insight) {
       icon.style.background = 'rgba(59, 130, 246, 0.1)';
       icon.style.color = '#3b82f6';
       break;
-    case 'spending_trend':
-      icon.textContent = insight.direction === 'up' ? '📈' : insight.direction === 'down' ? '📉' : '➡️';
-      icon.style.background = insight.direction === 'up' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)';
-      icon.style.color = insight.direction === 'up' ? '#ef4444' : '#22c55e';
+    case 'spending_trend': {
+      // Explicitly handle three directions: up (red), down (green), neutral (muted gray)
+      if (insight.direction === 'up') {
+        icon.textContent = '📈';
+        icon.style.background = 'rgba(239, 68, 68, 0.1)';
+        icon.style.color = '#ef4444';
+      } else if (insight.direction === 'down') {
+        icon.textContent = '📉';
+        icon.style.background = 'rgba(34, 197, 94, 0.1)';
+        icon.style.color = '#22c55e';
+      } else {
+        icon.textContent = '➡️';
+        icon.style.background = 'rgba(107, 114, 128, 0.08)';
+        icon.style.color = '#6b7280';
+      }
       break;
+    }
     case 'budget_alert':
       icon.textContent = '⚠️';
       icon.style.background = 'rgba(251, 191, 36, 0.1)';
@@ -90,26 +102,31 @@ function createInsightCard(insight) {
     line-height: 1.4;
   `;
 
-  // Amount if available
+  // Amount if available — create now but append after title & description
+  let amountEl = null;
   if (insight.amount !== undefined) {
-    const amount = document.createElement('div');
-    amount.textContent = new Intl.NumberFormat('en-US', {
+    amountEl = document.createElement('div');
+    amountEl.textContent = new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'EUR'
+      currency: 'EUR',
     }).format(insight.amount);
-    amount.style.cssText = `
+    amountEl.style.cssText = `
       font-weight: 600;
       font-size: 0.875rem;
       color: ${insight.type === 'budget_alert' ? COLORS.ERROR : COLORS.TEXT_MAIN};
       margin-top: ${SPACING.XS};
     `;
-    content.appendChild(amount);
   }
 
+  // Title and description should come before the amount (visual order: title → description → amount)
   content.appendChild(title);
   content.appendChild(description);
+  if (amountEl) content.appendChild(amountEl);
 
-  // Action button if available
+  card.appendChild(icon);
+  card.appendChild(content);
+
+  // Action button if available — append after icon & content so layout is [icon] [content] [action]
   if (insight.action) {
     const actionBtn = document.createElement('button');
     actionBtn.textContent = insight.action;
@@ -124,7 +141,7 @@ function createInsightCard(insight) {
       white-space: nowrap;
       transition: all 0.2s ease;
     `;
-    
+
     actionBtn.addEventListener('click', () => {
       // Handle action based on insight type
       if (insight.type === 'top_category') {
@@ -138,9 +155,6 @@ function createInsightCard(insight) {
 
     card.appendChild(actionBtn);
   }
-
-  card.appendChild(icon);
-  card.appendChild(content);
 
   // Hover effect
   card.addEventListener('mouseenter', () => {
@@ -169,7 +183,10 @@ export const SimpleInsights = (transactions, currentPeriod) => {
   `;
 
   // Generate simple insights
-  const insights = SimpleInsightsService.generateSimpleInsights(transactions, currentPeriod);
+  const insights = SimpleInsightsService.generateSimpleInsights(
+    transactions,
+    currentPeriod
+  );
 
   if (insights.length === 0) {
     const emptyState = document.createElement('div');

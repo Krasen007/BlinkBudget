@@ -26,7 +26,8 @@ export class AnalyticsEngine {
   /**
    * Memoize expensive calculations with TTL
    */
-  memoize(key, calculation, ttlMs = 300000) { // 5 minutes default TTL
+  memoize(key, calculation, ttlMs = 300000) {
+    // 5 minutes default TTL
     const cached = this.memoizedCalculations.get(key);
     if (cached && Date.now() - cached.timestamp < ttlMs) {
       return cached.result;
@@ -35,7 +36,7 @@ export class AnalyticsEngine {
     const result = calculation();
     this.memoizedCalculations.set(key, {
       result,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
     return result;
   }
@@ -51,6 +52,24 @@ export class AnalyticsEngine {
     return `${baseKey}_${paramHash}_${this.dataVersion}`;
   }
 
+  // Create a short, deterministic signature for a transactions array to include
+  // in cache keys without embedding the full payload. This avoids very large
+  // cache keys while still ensuring different transaction sets produce
+  // different keys.
+  _transactionsSignature(transactions) {
+    if (!Array.isArray(transactions) || transactions.length === 0)
+      return 'none';
+    let h = 0;
+    for (const t of transactions) {
+      const s = `${t.id || ''}|${t.date || t.timestamp || ''}|${t.amount ?? t.value ?? 0}`;
+      for (let i = 0; i < s.length; i++) {
+        h = (h << 5) - h + s.charCodeAt(i);
+        h |= 0; // force 32-bit int
+      }
+    }
+    return `${transactions.length}_${Math.abs(h).toString(36)}`;
+  }
+
   /**
    * Filter transactions by time period
    */
@@ -62,15 +81,22 @@ export class AnalyticsEngine {
    * Calculate category breakdown for expenses (optimized)
    */
   calculateCategoryBreakdown(transactions, timePeriod) {
-    const cacheKey = this.generateOptimizedCacheKey('categoryBreakdown', { timePeriod });
-    const cached = this.cache.get(cacheKey);
-    if (cached) return cached;
-
-    const result = this.memoize(cacheKey, () => {
-      return MetricsService.calculateCategoryBreakdown(transactions, timePeriod);
+    // Use a transactions signature in the key so different datasets don't collide.
+    // Use memoize(...) exclusively here to avoid duplicate TTL semantics with
+    // AnalyticsCache (memoize handles short-lived in-memory TTLs reliably).
+    const txSig = this._transactionsSignature(transactions);
+    const cacheKey = this.generateOptimizedCacheKey('categoryBreakdown', {
+      timePeriod,
+      txSig,
     });
 
-    this.cache.set(cacheKey, result);
+    const result = this.memoize(cacheKey, () => {
+      return MetricsService.calculateCategoryBreakdown(
+        transactions,
+        timePeriod
+      );
+    });
+
     return result;
   }
 
@@ -78,7 +104,11 @@ export class AnalyticsEngine {
    * Calculate income vs expense summary (optimized)
    */
   calculateIncomeVsExpenses(transactions, timePeriod) {
-    const cacheKey = this.generateOptimizedCacheKey('incomeVsExpenses', { timePeriod });
+    const txSig = this._transactionsSignature(transactions);
+    const cacheKey = this.generateOptimizedCacheKey('incomeVsExpenses', {
+      timePeriod,
+      txSig,
+    });
     const cached = this.cache.get(cacheKey);
     if (cached) return cached;
 
@@ -110,12 +140,21 @@ export class AnalyticsEngine {
    * Generate spending insights (optimized)
    */
   generateSpendingInsights(transactions, currentPeriod, previousPeriod = null) {
-    const cacheKey = this.generateOptimizedCacheKey('insights', { currentPeriod, previousPeriod });
+    const txSig = this._transactionsSignature(transactions);
+    const cacheKey = this.generateOptimizedCacheKey('insights', {
+      currentPeriod,
+      previousPeriod,
+      txSig,
+    });
     const cached = this.cache.get(cacheKey);
     if (cached) return cached;
 
     const result = this.memoize(cacheKey, () => {
-      return InsightsService.generateSpendingInsights(transactions, currentPeriod, previousPeriod);
+      return InsightsService.generateSpendingInsights(
+        transactions,
+        currentPeriod,
+        previousPeriod
+      );
     });
 
     this.cache.set(cacheKey, result);
