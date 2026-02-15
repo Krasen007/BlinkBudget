@@ -1034,27 +1034,41 @@ function createInvestmentsList(chartRenderer, activeCharts) {
         });
 
         // Delete handler
-        delBtn.addEventListener('click', async () => {
-          try {
-            const { StorageService } = await import('../../core/storage.js');
-            StorageService.removeInvestment(inv.symbol);
+        delBtn.addEventListener('click', () => {
+          // Import ConfirmDialog directly
+          import('../../components/ConfirmDialog.js').then(({ ConfirmDialog }) => {
+            ConfirmDialog({
+              title: 'Delete Investment',
+              message: `Are you sure you want to delete ${inv.symbol}? This action cannot be undone.`,
+              confirmText: 'Delete',
+              variant: 'danger',
+              onConfirm: async () => {
+                try {
+                  const { StorageService } = await import('../../core/storage.js');
+                  StorageService.removeInvestment(inv.symbol);
 
-            // Refresh chart using helper
-            const updated = StorageService.calculatePortfolioSummary();
-            const portfolioToRender = transformPortfolioData(updated);
-            await refreshChart({
-              createChartFn: createPortfolioCompositionChart,
-              chartRenderer,
-              data: portfolioToRender,
-              section: document.querySelector('.investments-section'),
-              chartType: 'portfolio-composition',
-              activeCharts,
+                  // Refresh chart and list using helper
+                  const updated = StorageService.calculatePortfolioSummary();
+                  const portfolioToRender = transformPortfolioData(updated);
+                  await refreshChart({
+                    createChartFn: createPortfolioCompositionChart,
+                    chartRenderer,
+                    data: portfolioToRender,
+                    section: document.querySelector('.investments-section'),
+                    chartType: 'portfolio-composition',
+                    activeCharts,
+                  });
+
+                  refreshInvestmentsList();
+                } catch (err) {
+                  console.error('Failed to remove investment', err);
+                }
+              },
+              onCancel: () => {
+                console.log(`[InvestmentsSection] Cancelled deletion of: ${inv.symbol}`);
+              }
             });
-
-            refreshInvestmentsList();
-          } catch (err) {
-            console.error('Failed to remove investment', err);
-          }
+          });
         });
       });
 
@@ -1062,7 +1076,7 @@ function createInvestmentsList(chartRenderer, activeCharts) {
     } catch (err) {
       console.warn('Error loading investments for list:', err);
       const empty = document.createElement('div');
-      empty.textContent = 'Error loading investments.';
+      empty.textContent = 'Error loading investments. Please try again later.';
       empty.style.color = COLORS.ERROR;
       investmentsList.appendChild(empty);
     }
@@ -1073,11 +1087,11 @@ function createInvestmentsList(chartRenderer, activeCharts) {
 }
 
 /**
- * Investments Section Component
- * @param {Object} chartRenderer - Chart renderer service instance
- * @param {Map} activeCharts - Map to track active chart instances
- * @returns {HTMLElement} DOM element containing investments section content
- */
+   * Investments Section Component
+   * @param {Object} chartRenderer - Chart renderer service instance
+   * @param {Map} activeCharts - Map to track active chart instances
+   * @returns {HTMLElement} DOM element containing investments section content
+   */
 export const InvestmentsSection = async (chartRenderer, activeCharts) => {
   const section = createSectionContainer(
     'investments',

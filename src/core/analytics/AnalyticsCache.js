@@ -78,7 +78,9 @@ export class AnalyticsCache {
 
     // Prevent memory leaks by limiting cache size
     if (this.cache.size > 100) {
-      this.cleanupOldest(20);
+      this.cleanupOldest(20).catch(error => {
+        console.error('[AnalyticsCache] Cache cleanup failed:', error);
+      });
     }
   }
 
@@ -86,16 +88,39 @@ export class AnalyticsCache {
    * Remove oldest entries from cache
    * @param {number} count - Number of entries to remove
    */
-  cleanupOldest(count) {
+  async cleanupOldest(count) {
     const entries = Array.from(this.cacheTimestamps.entries())
       .sort((a, b) => a[1] - b[1]) // Sort by timestamp (oldest first)
       .slice(0, count);
 
+    // Remove from in-memory cache first
     entries.forEach(([key]) => {
       this.cache.delete(key);
       this.cacheTimestamps.delete(key);
-      this.cacheStats.evictions++;
     });
+
+    // Remove from persistent storage in batch
+    try {
+      const cached = offlineDataManager.getFromStorage('analytics_cache') || {};
+      const keysToRemove = entries.map(([key]) => key);
+
+      keysToRemove.forEach(key => {
+        delete cached[key];
+      });
+
+      await offlineDataManager.setInStorage(
+        'analytics_cache',
+        cached,
+        this.PERSISTENT_CACHE_DURATION
+      );
+
+      // Update eviction stats after successful persistent removal
+      this.cacheStats.evictions += entries.length;
+    } catch (error) {
+      // Still increment evictions for in-memory cleanup but log persistent storage failure
+      this.cacheStats.evictions += entries.length;
+      console.error('[AnalyticsCache] Failed to cleanup persistent storage:', error);
+    }
   }
 
   /**
@@ -183,8 +208,8 @@ export class AnalyticsCache {
       hitRate:
         this.cacheStats.hits + this.cacheStats.misses > 0
           ? (this.cacheStats.hits /
-              (this.cacheStats.hits + this.cacheStats.misses)) *
-            100
+            (this.cacheStats.hits + this.cacheStats.misses)) *
+          100
           : 0,
     };
   }

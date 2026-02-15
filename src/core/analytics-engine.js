@@ -19,6 +19,36 @@ import { PatternAnalyzer } from './analytics/pattern-analyzer.js';
 export class AnalyticsEngine {
   constructor() {
     this.cache = new AnalyticsCache();
+    this.memoizedCalculations = new Map();
+    this.dataVersion = Date.now(); // Track data changes for cache invalidation
+  }
+
+  /**
+   * Memoize expensive calculations with TTL
+   */
+  memoize(key, calculation, ttlMs = 300000) { // 5 minutes default TTL
+    const cached = this.memoizedCalculations.get(key);
+    if (cached && Date.now() - cached.timestamp < ttlMs) {
+      return cached.result;
+    }
+
+    const result = calculation();
+    this.memoizedCalculations.set(key, {
+      result,
+      timestamp: Date.now()
+    });
+    return result;
+  }
+
+  /**
+   * Generate optimized cache key with better hit rates
+   */
+  generateOptimizedCacheKey(baseKey, params = {}) {
+    const paramHash = Object.keys(params)
+      .sort()
+      .map(key => `${key}:${JSON.stringify(params[key])}`)
+      .join('|');
+    return `${baseKey}_${paramHash}_${this.dataVersion}`;
   }
 
   /**
@@ -29,33 +59,33 @@ export class AnalyticsEngine {
   }
 
   /**
-   * Calculate category breakdown for expenses
+   * Calculate category breakdown for expenses (optimized)
    */
   calculateCategoryBreakdown(transactions, timePeriod) {
-    const cacheKey = `categoryBreakdown_${JSON.stringify(timePeriod)}`;
+    const cacheKey = this.generateOptimizedCacheKey('categoryBreakdown', { timePeriod });
     const cached = this.cache.get(cacheKey);
     if (cached) return cached;
 
-    const result = MetricsService.calculateCategoryBreakdown(
-      transactions,
-      timePeriod
-    );
+    const result = this.memoize(cacheKey, () => {
+      return MetricsService.calculateCategoryBreakdown(transactions, timePeriod);
+    });
+
     this.cache.set(cacheKey, result);
     return result;
   }
 
   /**
-   * Calculate income vs expense summary
+   * Calculate income vs expense summary (optimized)
    */
   calculateIncomeVsExpenses(transactions, timePeriod) {
-    const cacheKey = `incomeVsExpenses_${JSON.stringify(timePeriod)}`;
+    const cacheKey = this.generateOptimizedCacheKey('incomeVsExpenses', { timePeriod });
     const cached = this.cache.get(cacheKey);
     if (cached) return cached;
 
-    const result = MetricsService.calculateIncomeVsExpenses(
-      transactions,
-      timePeriod
-    );
+    const result = this.memoize(cacheKey, () => {
+      return MetricsService.calculateIncomeVsExpenses(transactions, timePeriod);
+    });
+
     this.cache.set(cacheKey, result);
     return result;
   }
@@ -77,18 +107,17 @@ export class AnalyticsEngine {
   }
 
   /**
-   * Generate spending insights
+   * Generate spending insights (optimized)
    */
   generateSpendingInsights(transactions, currentPeriod, previousPeriod = null) {
-    const cacheKey = `insights_${JSON.stringify(currentPeriod)}_${JSON.stringify(previousPeriod)}`;
+    const cacheKey = this.generateOptimizedCacheKey('insights', { currentPeriod, previousPeriod });
     const cached = this.cache.get(cacheKey);
     if (cached) return cached;
 
-    const result = InsightsService.generateSpendingInsights(
-      transactions,
-      currentPeriod,
-      previousPeriod
-    );
+    const result = this.memoize(cacheKey, () => {
+      return InsightsService.generateSpendingInsights(transactions, currentPeriod, previousPeriod);
+    });
+
     this.cache.set(cacheKey, result);
     return result;
   }
@@ -235,9 +264,12 @@ export class AnalyticsEngine {
 
   // Cache management (proxied to AnalyticsCache)
   clearCache() {
+    this.memoizedCalculations.clear();
     this.cache.clearAll();
   }
   invalidateCache(pattern) {
+    this.dataVersion = Date.now();
+    this.memoizedCalculations.clear();
     this.cache.invalidate(pattern);
   }
   getCacheStats() {

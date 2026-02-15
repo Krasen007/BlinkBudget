@@ -63,7 +63,6 @@ import { InsightsSection } from '../components/InsightsSection.js';
 import { PatternInsights } from '../components/PatternInsights.js';
 import { BudgetSummaryCard } from '../components/BudgetSummaryCard.js';
 import { BudgetPlanner } from '../core/budget-planner.js';
-import { escapeHtml } from '../utils/security-utils.js';
 
 export const ReportsView = () => {
   const container = document.createElement('div');
@@ -715,8 +714,8 @@ export const ReportsView = () => {
     }
   }
 
-  /**
-   * Render beautiful charts
+  /******************* UI OF APP ***********************************
+   * Render beautiful charts with progressive loading
    */
   async function renderCharts(chartContainer) {
     try {
@@ -727,194 +726,29 @@ export const ReportsView = () => {
       chartsSection.style.gap = SPACING.XL;
       chartsSection.style.position = 'relative';
 
-      // Budget Summary
-      try {
-        const budgetsSummary = BudgetPlanner.getSummary(
-          currentData.transactions,
-          currentTimePeriod
-        );
-        if (budgetsSummary.totalBudgets > 0) {
-          const summaryCard = BudgetSummaryCard(
-            budgetsSummary,
-            currentTimePeriod
-          );
-          summaryCard.style.marginBottom = SPACING.LG;
-          chartsSection.appendChild(summaryCard);
-        }
-      } catch (budgetError) {
-        console.warn(
-          '[ReportsView] Failed to render budget summary:',
-          budgetError
-        );
-      }
-
       const chartRenderResults = [];
 
-      // Category Breakdown Chart
-      try {
-        const categoryResult = await createCategoryBreakdownChart(
-          chartRenderer,
-          currentData,
-          categoryColorMap,
-          categories => getCategoryColors(categories, categoryColorMap),
-          handleCategoryChartClick
-        );
-        categoryResult.section.style.borderBottom = `2px solid ${COLORS.BORDER}`;
-        categoryResult.section.style.paddingBottom = `calc(${SPACING.LG} * 1.5)`;
-        categoryResult.section.style.marginBottom = `calc(${SPACING.XL} * 1.5)`;
-        chartsSection.appendChild(categoryResult.section);
-        if (categoryResult.chart)
-          activeCharts.set('category-breakdown', categoryResult.chart);
-        chartRenderResults.push({ name: 'Category Breakdown', success: true });
-      } catch (categoryError) {
-        console.error(
-          'Failed to render category breakdown chart:',
-          categoryError
-        );
-        chartRenderResults.push({
-          name: 'Category Breakdown',
-          success: false,
-          error: categoryError,
-        });
-      }
+      // Budget Summary / This Month
+      await renderBudgetSummary(chartsSection, chartRenderResults);
 
-      // Category Selector
-      try {
-        // Generate frequency analysis data
-        const frequencyData = analyticsEngine.analyzeFrequencyPatterns(
-          currentData.transactions,
-          currentTimePeriod
-        );
+      // Spending by category PIE CHART
+      await renderCategoryBreakdown(chartsSection, chartsSection, chartRenderResults);
 
-        const categorySelectorSection = CategorySelector(
-          currentData,
-          categoryColorMap,
-          categories => getCategoryColors(categories, categoryColorMap),
-          handleCategoryCardClick,
-          frequencyData.categories
-        );
-        categorySelectorSection.style.marginTop = `calc(${SPACING.XL} * 2)`;
-        categorySelectorSection.style.clear = 'both';
-        categorySelectorSection.style.position = 'relative';
-        categorySelectorSection.style.zIndex = '2';
-        chartsSection.appendChild(categorySelectorSection);
-        chartRenderResults.push({ name: 'Category Selector', success: true });
-      } catch (selectorError) {
-        console.error('Failed to render category selector:', selectorError);
-        chartRenderResults.push({
-          name: 'Category Selector',
-          success: false,
-          error: selectorError,
-        });
-      }
+      // Explore Categories
+      await renderCategorySelector(chartsSection, chartRenderResults);
 
-      // Income vs Expenses Chart
-      try {
-        const incomeExpenseContainer = document.createElement('div');
-        incomeExpenseContainer.className = 'income-expense-container';
-        incomeExpenseContainer.style.setProperty(
-          'margin-top',
-          SPACING.XL,
-          'important'
-        );
-        incomeExpenseContainer.style.setProperty(
-          'margin-bottom',
-          SPACING.SM,
-          'important'
-        );
-        incomeExpenseContainer.style.position = 'relative';
-        incomeExpenseContainer.style.zIndex = '1';
-        incomeExpenseContainer.style.clear = 'both';
+      // Financial Insights 
+      await renderFinancialInsights(chartsSection, chartRenderResults);
 
-        const incomeResult = await createIncomeExpenseChart(
-          chartRenderer,
-          currentData
-        );
-        incomeExpenseContainer.appendChild(incomeResult.section);
-        chartsSection.appendChild(incomeExpenseContainer);
-        if (incomeResult.chart)
-          activeCharts.set('income-expense', incomeResult.chart);
-        chartRenderResults.push({ name: 'Income vs Expenses', success: true });
-      } catch (incomeExpenseError) {
-        console.error(
-          'Failed to render income vs expense chart:',
-          incomeExpenseError
-        );
-        chartRenderResults.push({
-          name: 'Income vs Expenses',
-          success: false,
-          error: incomeExpenseError,
-        });
-      }
+      // Income vs Expenses
+      await renderIncomeExpense(chartsSection, chartRenderResults);
 
-      // Category Trends Chart
-      try {
-        const trendsResult = await createCategoryTrendsChart(
-          chartRenderer,
-          currentData,
-          categoryColorMap
-        );
-        if (trendsResult) {
-          chartsSection.appendChild(trendsResult.section);
-          if (trendsResult.chart)
-            activeCharts.set('category-trends', trendsResult.chart);
-          chartRenderResults.push({ name: 'Category Trends', success: true });
-        }
-      } catch (trendsError) {
-        console.error('Failed to render category trends chart:', trendsError);
-        chartRenderResults.push({
-          name: 'Category Trends',
-          success: false,
-          error: trendsError,
-        });
-      }
+      // Spending patterns
+      await renderPatternInsights(chartsSection, chartRenderResults);
 
-      // Spending Pattern Analysis Section
-      try {
-        const patternInsightsSection = PatternInsights(
-          currentData.transactions,
-          currentTimePeriod,
-          null // previousPeriod - could be implemented later
-        );
-        patternInsightsSection.style.marginTop = `${SPACING.XL} !important`;
-        patternInsightsSection.style.borderBottom = `2px solid ${COLORS.BORDER}`;
-        patternInsightsSection.style.paddingBottom = `${SPACING.LG}`;
-        chartsSection.appendChild(patternInsightsSection);
-        chartRenderResults.push({
-          name: 'Spending Pattern Analysis',
-          success: true,
-        });
-      } catch (patternError) {
-        console.error(
-          'Failed to render pattern insights section:',
-          patternError
-        );
-        chartRenderResults.push({
-          name: 'Spending Pattern Analysis',
-          success: false,
-          error: patternError,
-        });
-      }
+      // Category Trends
+      await renderCategoryTrends(chartsSection, chartRenderResults);
 
-      // Financial Insights Section
-      if (currentData.insights && currentData.insights.length > 0) {
-        try {
-          const insightsSection = InsightsSection(currentData);
-          insightsSection.style.marginTop = `${SPACING.LG} !important`;
-          chartsSection.appendChild(insightsSection);
-          chartRenderResults.push({
-            name: 'Financial Insights',
-            success: true,
-          });
-        } catch (insightsError) {
-          console.error('Failed to render insights section:', insightsError);
-          chartRenderResults.push({
-            name: 'Financial Insights',
-            success: false,
-            error: insightsError,
-          });
-        }
-      }
 
       chartContainer.appendChild(chartsSection);
 
@@ -924,114 +758,171 @@ export const ReportsView = () => {
       }
     } catch (error) {
       console.error('Error rendering charts:', error);
+      throw error;
+    }
+  }
 
-      const fallback = document.createElement('div');
-      fallback.style.padding = SPACING.LG;
-      fallback.style.textAlign = 'center';
-      fallback.style.background = COLORS.SURFACE;
-      fallback.style.borderRadius = 'var(--radius-lg)';
-      fallback.style.border = `1px solid ${COLORS.BORDER}`;
-
-      // Sanitize financial data before display
-      const totalExpenses = escapeHtml(
-        currentData.incomeVsExpenses.totalExpenses.toFixed(2)
+  /**
+   * Render budget summary with error handling
+   */
+  async function renderBudgetSummary(chartsSection, chartRenderResults) {
+    try {
+      const budgetsSummary = BudgetPlanner.getSummary(
+        currentData.transactions,
+        currentTimePeriod
       );
-      const totalIncome = escapeHtml(
-        currentData.incomeVsExpenses.totalIncome.toFixed(2)
+      if (budgetsSummary.totalBudgets > 0) {
+        const summaryCard = BudgetSummaryCard(
+          budgetsSummary,
+          currentTimePeriod
+        );
+        summaryCard.style.marginBottom = SPACING.LG;
+        chartsSection.appendChild(summaryCard);
+      }
+      chartRenderResults.push({ name: 'Budget Summary', success: true });
+    } catch (budgetError) {
+      console.warn('[ReportsView] Failed to render budget summary:', budgetError);
+      chartRenderResults.push({ name: 'Budget Summary', success: false, error: budgetError });
+    }
+  }
+
+  /**
+   * Render category breakdown chart with error handling
+   */
+  async function renderCategoryBreakdown(chartContainer, chartsSection, chartRenderResults) {
+    try {
+      const categoryResult = await createCategoryBreakdownChart(
+        chartRenderer,
+        currentData,
+        categoryColorMap,
+        categories => getCategoryColors(categories, categoryColorMap),
+        handleCategoryChartClick
       );
-      const netBalance = escapeHtml(
-        currentData.incomeVsExpenses.netBalance.toFixed(2)
-      );
-      const transactionCount = escapeHtml(
-        currentData.transactions.length.toString()
-      );
+      categoryResult.section.style.borderBottom = `2px solid ${COLORS.BORDER}`;
+      categoryResult.section.style.paddingBottom = `calc(${SPACING.LG} * 1.5)`;
+      categoryResult.section.style.marginBottom = `calc(${SPACING.XL} * 1.5)`;
+      chartsSection.appendChild(categoryResult.section);
+      if (categoryResult.chart)
+        activeCharts.set('category-breakdown', categoryResult.chart);
+      chartRenderResults.push({ name: 'Category Breakdown', success: true });
+    } catch (categoryError) {
+      console.error('Failed to render category breakdown chart:', categoryError);
+      chartRenderResults.push({ name: 'Category Breakdown', success: false, error: categoryError });
+    }
+  }
 
-      // Build fallback UI using DOM methods to avoid XSS
-      const headerDiv = document.createElement('div');
-      headerDiv.style.marginBottom = SPACING.LG;
+  /**
+   * Render income vs expenses chart with error handling
+   */
+  async function renderIncomeExpense(chartsSection, chartRenderResults) {
+    try {
+      const incomeExpenseContainer = document.createElement('div');
+      incomeExpenseContainer.className = 'income-expense-container';
+      incomeExpenseContainer.style.setProperty('margin-top', SPACING.XL, 'important');
+      incomeExpenseContainer.style.setProperty('margin-bottom', SPACING.SM, 'important');
+      incomeExpenseContainer.style.position = 'relative';
+      incomeExpenseContainer.style.zIndex = '1';
+      incomeExpenseContainer.style.clear = 'both';
 
-      const title = document.createElement('h3');
-      title.style.color = COLORS.ERROR;
-      title.style.marginBottom = SPACING.MD;
-      title.textContent = '⚠️ Chart Rendering Failed';
+      const incomeResult = await createIncomeExpenseChart(chartRenderer, currentData);
+      incomeExpenseContainer.appendChild(incomeResult.section);
+      chartsSection.appendChild(incomeExpenseContainer);
+      if (incomeResult.chart)
+        activeCharts.set('income-expense', incomeResult.chart);
+      chartRenderResults.push({ name: 'Income vs Expenses', success: true });
+    } catch (incomeExpenseError) {
+      console.error('Failed to render income vs expense chart:', incomeExpenseError);
+      chartRenderResults.push({ name: 'Income vs Expenses', success: false, error: incomeExpenseError });
+    }
+  }
 
-      const description = document.createElement('p');
-      description.style.color = COLORS.TEXT_MUTED;
-      description.style.marginBottom = SPACING.LG;
-      description.textContent =
-        'Unable to render interactive charts. Showing basic financial summary instead.';
-
-      headerDiv.appendChild(title);
-      headerDiv.appendChild(description);
-
-      const gridDiv = document.createElement('div');
-      gridDiv.style.display = 'grid';
-      gridDiv.style.gridTemplateColumns =
-        'repeat(auto-fit, minmax(200px, 1fr))';
-      gridDiv.style.gap = SPACING.MD;
-
-      // Helper to create stat card
-      const createStatCard = (label, value, color) => {
-        const card = document.createElement('div');
-        card.style.padding = SPACING.MD;
-        card.style.background = COLORS.BACKGROUND;
-        card.style.borderRadius = 'var(--radius-md)';
-
-        const labelDiv = document.createElement('div');
-        labelDiv.style.fontSize = '0.875rem';
-        labelDiv.style.color = COLORS.TEXT_MUTED;
-        labelDiv.style.marginBottom = SPACING.XS;
-        labelDiv.textContent = label;
-
-        const valueDiv = document.createElement('div');
-        valueDiv.style.fontSize = '1.5rem';
-        valueDiv.style.fontWeight = 'bold';
-        valueDiv.style.color = color;
-        valueDiv.textContent = value;
-
-        card.appendChild(labelDiv);
-        card.appendChild(valueDiv);
-        return card;
-      };
-
-      gridDiv.appendChild(
-        createStatCard('Total Expenses', `€${totalExpenses}`, COLORS.ERROR)
-      );
-      gridDiv.appendChild(
-        createStatCard('Total Income', `€${totalIncome}`, COLORS.SUCCESS)
-      );
-      gridDiv.appendChild(
-        createStatCard(
-          'Net Balance',
-          `€${netBalance}`,
-          currentData.incomeVsExpenses.netBalance >= 0
-            ? COLORS.SUCCESS
-            : COLORS.ERROR
-        )
-      );
-      gridDiv.appendChild(
-        createStatCard('Transactions', transactionCount, COLORS.PRIMARY)
+  /**
+   * Render category selector with error handling
+   */
+  async function renderCategorySelector(chartsSection, chartRenderResults) {
+    try {
+      // Generate frequency analysis data
+      const frequencyData = analyticsEngine.analyzeFrequencyPatterns(
+        currentData.transactions,
+        currentTimePeriod
       );
 
-      const buttonDiv = document.createElement('div');
-      buttonDiv.style.marginTop = SPACING.LG;
+      const categorySelectorSection = CategorySelector(
+        currentData,
+        categoryColorMap,
+        categories => getCategoryColors(categories, categoryColorMap),
+        handleCategoryCardClick,
+        frequencyData.categories
+      );
+      categorySelectorSection.style.marginTop = `calc(${SPACING.XL} * 2)`;
+      categorySelectorSection.style.clear = 'both';
+      categorySelectorSection.style.position = 'relative';
+      categorySelectorSection.style.zIndex = '2';
+      chartsSection.appendChild(categorySelectorSection);
+      chartRenderResults.push({ name: 'Category Selector', success: true });
+    } catch (selectorError) {
+      console.error('Failed to render category selector:', selectorError);
+      chartRenderResults.push({ name: 'Category Selector', success: false, error: selectorError });
+    }
+  }
 
-      const refreshButton = document.createElement('button');
-      refreshButton.style.padding = `${SPACING.MD} ${SPACING.LG}`;
-      refreshButton.style.background = COLORS.PRIMARY;
-      refreshButton.style.color = 'white';
-      refreshButton.style.border = 'none';
-      refreshButton.style.borderRadius = 'var(--radius-md)';
-      refreshButton.style.cursor = 'pointer';
-      refreshButton.textContent = 'Refresh Page';
-      refreshButton.onclick = () => location.reload();
+  /**
+   * Render category trends chart with error handling
+   */
+  async function renderCategoryTrends(chartsSection, chartRenderResults) {
+    try {
+      const trendsResult = await createCategoryTrendsChart(
+        chartRenderer,
+        currentData,
+        categoryColorMap
+      );
+      if (trendsResult) {
+        chartsSection.appendChild(trendsResult.section);
+        if (trendsResult.chart)
+          activeCharts.set('category-trends', trendsResult.chart);
+        chartRenderResults.push({ name: 'Category Trends', success: true });
+      }
+    } catch (trendsError) {
+      console.error('Failed to render category trends chart:', trendsError);
+      chartRenderResults.push({ name: 'Category Trends', success: false, error: trendsError });
+    }
+  }
 
-      buttonDiv.appendChild(refreshButton);
+  /**
+   * Render pattern insights with error handling
+   */
+  async function renderPatternInsights(chartsSection, chartRenderResults) {
+    try {
+      const patternInsightsSection = PatternInsights(
+        currentData.transactions,
+        currentTimePeriod,
+        null // previousPeriod - could be implemented later
+      );
+      patternInsightsSection.style.marginTop = `${SPACING.XL} !important`;
+      patternInsightsSection.style.borderBottom = `2px solid ${COLORS.BORDER}`;
+      patternInsightsSection.style.paddingBottom = `${SPACING.LG}`;
+      chartsSection.appendChild(patternInsightsSection);
+      chartRenderResults.push({ name: 'Spending Pattern Analysis', success: true });
+    } catch (patternError) {
+      console.error('Failed to render pattern insights section:', patternError);
+      chartRenderResults.push({ name: 'Spending Pattern Analysis', success: false, error: patternError });
+    }
+  }
 
-      fallback.appendChild(headerDiv);
-      fallback.appendChild(gridDiv);
-      fallback.appendChild(buttonDiv);
-      chartContainer.appendChild(fallback);
+  /**
+   * Render financial insights with error handling
+   */
+  async function renderFinancialInsights(chartsSection, chartRenderResults) {
+    if (currentData.insights && currentData.insights.length > 0) {
+      try {
+        const insightsSection = InsightsSection(currentData);
+        insightsSection.style.marginTop = `${SPACING.LG} !important`;
+        chartsSection.appendChild(insightsSection);
+        chartRenderResults.push({ name: 'Financial Insights', success: true });
+      } catch (insightsError) {
+        console.error('Failed to render insights section:', insightsError);
+        chartRenderResults.push({ name: 'Financial Insights', success: false, error: insightsError });
+      }
     }
   }
 

@@ -338,7 +338,43 @@ export async function createCategoryTrendsChart(
   );
 
   if (monthsOfData < 3) {
-    return null; // Not enough data for trends
+    // Render informative message instead of null
+    const messageDiv = document.createElement('div');
+    messageDiv.style.cssText = `
+      text-align: center;
+      padding: ${SPACING.XL};
+      color: ${COLORS.TEXT_MUTED};
+      font-size: 0.875rem;
+      line-height: 1.5;
+    `;
+
+    const icon = document.createElement('div');
+    icon.style.cssText = `
+      font-size: 2rem;
+      margin-bottom: ${SPACING.MD};
+    `;
+    icon.textContent = '📈';
+
+    const title = document.createElement('h3');
+    title.textContent = 'Category Trends';
+    title.style.cssText = `
+      margin: 0 0 ${SPACING.SM} 0;
+      color: ${COLORS.TEXT_MAIN};
+      font-weight: 600;
+    `;
+
+    const message = document.createElement('p');
+    message.textContent = `Category trends will appear here after ${3 - monthsOfData} more month${3 - monthsOfData === 1 ? '' : 's'} of transaction data. Trends need at least 3 months of history to show meaningful patterns.`;
+    message.style.cssText = `
+      margin: 0;
+      line-height: 1.6;
+    `;
+
+    messageDiv.appendChild(icon);
+    messageDiv.appendChild(title);
+    messageDiv.appendChild(message);
+
+    return { section: messageDiv, chart: null };
   }
 
   const section = document.createElement('div');
