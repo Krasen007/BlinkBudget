@@ -1,3 +1,11 @@
+/* Reports Header Container - Match the app's container width */
+.reports-header-container {
+  max-width: var(--container-max-width);
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 auto;
+}
+
 /* CSS Custom Properties for Reports Layout */
 .category-selector-section {
   /* Force it to be outside any parent containers */
