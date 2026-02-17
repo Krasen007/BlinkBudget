@@ -14,7 +14,6 @@ import {
   FONT_SIZES,
 } from '../utils/constants.js';
 
-import { COLORS } from '../utils/constants.js';
 import { createButton } from '../utils/dom-factory.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
 
@@ -25,7 +24,7 @@ export const SettingsView = () => {
   // Header - similar to FinancialPlanningView with back button
   const header = document.createElement('div');
   header.className = 'view-header view-sticky view-header-container';
-  header.style.background = COLORS.BACKGROUND;
+
 
 
   const topRow = document.createElement('div');

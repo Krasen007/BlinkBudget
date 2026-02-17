@@ -10,7 +10,6 @@ import { Router } from '../core/router.js';
 import {
   COLORS,
   SPACING,
-  BREAKPOINTS,
   STORAGE_KEYS,
 } from '../utils/constants.js';
 
@@ -29,7 +28,7 @@ export const DashboardView = () => {
   // Header with sticky positioning
   const header = document.createElement('div');
   header.className = 'view-header view-sticky view-header-container';
-  header.style.background = COLORS.BACKGROUND; // Override surface with background if needed
+
 
   const topRow = document.createElement('div');
   topRow.className = 'view-header-row';
@@ -52,15 +51,11 @@ export const DashboardView = () => {
     title.textContent = name
       ? `Welcome back, ${name}!${version}`
       : `Welcome back!${version}`;
-    title.style.margin = '0';
-    title.style.fontSize =
-      window.innerWidth < BREAKPOINTS.MOBILE ? '1.25rem' : '1.5rem';
-    title.style.fontWeight = 'bold';
-    title.style.color = COLORS.TEXT_MAIN;
   };
   updateTitle();
   leftSide.appendChild(title);
   title.className = 'view-title';
+
 
 
   // Right side controls - use navigation helper

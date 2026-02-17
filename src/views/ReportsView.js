@@ -66,7 +66,7 @@ import { BudgetPlanner } from '../core/budget-planner.js';
 
 export const ReportsView = () => {
   const container = document.createElement('div');
-  container.className = 'view-reports view-container reports-view-container';
+  container.className = 'view-reports view-container';
 
   // ... remaining state logic ...
   const handleGlobalError = (error, context = 'Unknown') => {
@@ -146,11 +146,16 @@ export const ReportsView = () => {
   let advancedFilterPanelComponent = null;
   const categoryColorMap = new Map();
 
+  // Create header Container
+  const headerContainer = createHeader();
+  container.appendChild(headerContainer);
+
   // Main content area
   const content = document.createElement('div');
   content.className = 'view-content';
   content.id = 'reports-content';
   container.appendChild(content);
+
 
 
   // State components
@@ -180,18 +185,8 @@ export const ReportsView = () => {
     backButton.title = 'Back to Dashboard';
 
 
-    // Hover effects
-    backButton.addEventListener('mouseenter', () => {
-      backButton.style.background = COLORS.SURFACE_HOVER;
-      backButton.style.borderColor = COLORS.PRIMARY;
-    });
-
-    backButton.addEventListener('mouseleave', () => {
-      backButton.style.background = COLORS.SURFACE;
-      backButton.style.borderColor = COLORS.BORDER;
-    });
-
     backButton.addEventListener('click', () => Router.navigate('dashboard'));
+
 
     // Title
     const title = document.createElement('h2');
@@ -233,7 +228,7 @@ export const ReportsView = () => {
     // Create header container that includes both header and time period selector
     const headerContainer = document.createElement('div');
     headerContainer.className = 'view-header view-sticky view-header-container';
-    headerContainer.style.background = COLORS.BACKGROUND;
+
 
 
     headerContainer.appendChild(header);

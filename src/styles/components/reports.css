@@ -20,22 +20,20 @@
 
 
 /* Charts Section - Match financial planning sections */
-.reports-view-container .charts-section {
+.view-reports .charts-section {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
-  padding: 0;
 }
 
 /* Chart Section Base Styles - Match financial planning sections */
-.reports-view-container .chart-section {
+.view-reports .chart-section {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: 0;
 }
 
 /* Specific styling for different chart sections */
@@ -404,13 +402,13 @@
     gap: var(--spacing-md);
   }
 
-  /* Ensure proper scrolling on mobile - override responsive styles */
+  /* Ensure proper scrolling on mobile - respect global variables */
   .view-reports {
-    min-height: 100vh !important;
-    overflow-y: auto !important;
+    min-height: 100vh;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 0 var(--spacing-sm) !important; /* Override responsive padding */
   }
+
 
   .reports-content {
     overflow-y: auto !important;
@@ -756,7 +754,7 @@
 }
 
 /* Consolidate all .income-expense-section definitions */
-.reports-view-container .income-expense-section {
+.view-reports .income-expense-section {
   /* Layout and positioning */
   position: relative;
   z-index: 2;
@@ -788,12 +786,12 @@
 }
 
 /* Nested container variant */
-.reports-view-container .income-expense-container .income-expense-section {
+.view-reports .income-expense-container .income-expense-section {
   z-index: 1;
 }
 
 /* Content styling within income-expense section */
-.reports-view-container .income-expense-section > div[style*='height'] {
+.view-reports .income-expense-section > div[style*='height'] {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
@@ -803,14 +801,14 @@
   border: 1px solid rgb(255, 255, 255, 0.1);
 }
 
-.reports-view-container .income-expense-section h3 {
+.view-reports .income-expense-section h3 {
   margin: 0 0 var(--spacing-md) 0;
   padding: 0;
   width: 100%;
   box-sizing: border-box;
 }
 
-.reports-view-container .income-expense-section * {
+.view-reports .income-expense-section * {
   max-width: 100%;
   box-sizing: border-box;
 }
@@ -825,7 +823,7 @@
 }
 
 /* Category Breakdown Section - Ensure it's clearly separated and handles expansion gracefully */
-.reports-view-container .category-breakdown-section {
+.view-reports .category-breakdown-section {
   border-bottom: 1px solid var(--color-border);
   margin-bottom: var(--spacing-lg);
   padding-bottom: var(--spacing-md);
@@ -841,29 +839,29 @@
 }
 
 /* Expansion states */
-.reports-view-container .category-breakdown-section.expanded {
+.view-reports .category-breakdown-section.expanded {
   margin-bottom: calc(var(--spacing-xl) * 4);
   padding-bottom: calc(var(--spacing-lg) * 3);
 }
 
-.reports-view-container
+.view-reports
   .category-breakdown-section.expanded
   + .income-expense-section {
   margin-top: calc(var(--spacing-xl) * 4);
 }
 
-.reports-view-container
+.view-reports
   .category-breakdown-section.expanded
   ~ .category-selector-section {
   margin-top: calc(var(--spacing-xl) * 5);
 }
 
 /* Ensure category selector is always pushed down when content above expands */
-.reports-view-container .income-expense-section ~ .category-selector-section {
+.view-reports .income-expense-section ~ .category-selector-section {
   margin-top: calc(var(--spacing-xl) * 4);
 }
 /* Income vs Expenses Container - Separate container with proper isolation */
-.reports-view-container .income-expense-container {
+.view-reports .income-expense-container {
   margin-top: var(--spacing-xl);
   margin-bottom: var(--spacing-lg);
   position: relative;
@@ -881,7 +879,7 @@
 }
 
 /* Category Selector Section Styles */
-.reports-view-container .category-selector-section {
+.view-reports .category-selector-section {
   margin-top: calc(var(--spacing-xl) * 1.5);
   margin-bottom: calc(var(--spacing-xl) * 1.5);
   position: relative;
@@ -897,13 +895,13 @@
 }
 
 /* Force separation between income-expense and category sections */
-.reports-view-container .income-expense-section + .category-selector-section {
+.view-reports .income-expense-section + .category-selector-section {
   margin-top: calc(var(--spacing-xl) * 2);
   clear: both;
 }
 
 /* Force separation between different section types */
-.reports-view-container .income-expense-section + * {
+.view-reports .income-expense-section + * {
   margin-top: var(--spacing-lg);
   clear: both;
 }
