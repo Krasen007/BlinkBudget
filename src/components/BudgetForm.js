@@ -48,14 +48,19 @@ export const BudgetForm = ({
   inputGroup.style.flexDirection = 'column';
   inputGroup.style.gap = SPACING.XS;
 
+  const inputId = `budget-limit-${categoryName.replace(/\s+/g, '-').toLowerCase()}`;
+
   const label = document.createElement('label');
   label.textContent = 'Monthly Limit (€)';
+  label.setAttribute('for', inputId);
   label.style.fontSize = FONT_SIZES.SM;
   label.style.color = COLORS.TEXT_MUTED;
   inputGroup.appendChild(label);
 
   const input = document.createElement('input');
+  input.id = inputId;
   input.type = 'number';
+
   input.value = initialLimit || '';
   input.placeholder = '0.00';
   input.step = '10';

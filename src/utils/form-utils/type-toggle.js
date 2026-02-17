@@ -126,11 +126,20 @@ export const createTypeToggleGroup = (options = {}) => {
 
   let currentType = initialType;
 
-  const typeGroup = document.createElement('div');
+  const typeGroup = document.createElement('fieldset');
   typeGroup.className = 'type-toggle-group';
   typeGroup.style.display = 'grid';
   typeGroup.style.gap = 'var(--spacing-sm)';
   typeGroup.style.marginBottom = 'var(--spacing-xs)';
+  typeGroup.style.border = 'none';
+  typeGroup.style.padding = '0';
+  typeGroup.style.margin = '0';
+
+  const legend = document.createElement('legend');
+  legend.textContent = 'Transaction Type';
+  legend.className = 'visually-hidden';
+  typeGroup.appendChild(legend);
+
 
   // Responsive grid: 4 columns on larger screens, 2 rows of 2 on very small screens
   const updateGridLayout = () => {

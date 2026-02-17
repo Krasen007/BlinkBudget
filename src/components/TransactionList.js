@@ -23,13 +23,16 @@ export const TransactionList = ({
   accounts,
   highlightTransactionIds = null,
   currentDateFilter = null,
-  onDateClick = () => {},
+  onDateClick = () => { },
   currentCategoryFilter = null,
-  onCategoryClick = () => {},
-  onFilterClear = () => {}, // New callback for clearing general filter
+  onCategoryClick = () => { },
+  onFilterClear = () => { }, // New callback for clearing general filter
 }) => {
   const listContainer = document.createElement('div');
   listContainer.className = 'dashboard-transactions-container';
+  listContainer.setAttribute('role', 'region');
+  listContainer.setAttribute('aria-label', 'Recent Transactions');
+
   listContainer.style.flex = '1';
   listContainer.style.display = 'flex';
   listContainer.style.flexDirection = 'column';
@@ -149,6 +152,8 @@ export const TransactionList = ({
   } else {
     const list = document.createElement('ul');
     list.className = 'dashboard-transactions-list';
+    list.setAttribute('role', 'list');
+
     list.style.flex = '1';
     list.style.overflowY = 'auto'; // Enable vertical scrolling
     list.style.overflowX = 'hidden'; // Prevent horizontal scrolling

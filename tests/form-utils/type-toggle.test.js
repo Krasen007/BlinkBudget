@@ -41,11 +41,13 @@ describe('Type Toggle Group', () => {
     test('creates container with correct structure', () => {
       const result = createTypeToggleGroup();
 
-      expect(document.createElement).toHaveBeenCalledWith('div');
+      expect(document.createElement).toHaveBeenCalledWith('fieldset');
+      expect(document.createElement).toHaveBeenCalledWith('legend');
       expect(result.container).toBeDefined();
       expect(result.container.style.display).toBe('grid');
       expect(result.container.style.gap).toBe('var(--spacing-sm)');
     });
+
 
     test('sets responsive grid layout for desktop', () => {
       window.innerWidth = 800;

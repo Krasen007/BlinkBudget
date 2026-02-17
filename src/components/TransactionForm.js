@@ -68,7 +68,15 @@ export const TransactionForm = ({
   const accountGroup = document.createElement('div');
   accountGroup.style.flex = '1';
 
+  const accLabel = document.createElement('label');
+  accLabel.textContent = 'Account';
+  accLabel.setAttribute('for', 'source-account-select');
+  accLabel.className = 'visually-hidden';
+  accountGroup.appendChild(accLabel);
+
   const accSelect = createSelect({
+
+
     id: 'source-account-select',
     name: 'source_account',
     options: accounts.map(acc => ({
@@ -154,7 +162,15 @@ export const TransactionForm = ({
   const amountGroup = document.createElement('div');
   amountGroup.style.flex = '1.5';
   amountGroup.style.marginBottom = '0';
+
+  const amountLabel = document.createElement('label');
+  amountLabel.textContent = 'Amount';
+  amountLabel.setAttribute('for', 'transaction-amount-input');
+  amountLabel.className = 'visually-hidden';
+  amountGroup.appendChild(amountLabel);
+
   amountGroup.appendChild(amountInput);
+
 
   // Add tutorial data attribute to amount input
   if (smartAmountInput) {
@@ -309,11 +325,30 @@ export const TransactionForm = ({
 
   // 7. Layout Assembly
   form.appendChild(amountAccountRow);
+
+  // Category Label
+  const catLabel = document.createElement('label');
+  catLabel.textContent = 'Category';
+  catLabel.setAttribute('for', 'category-selector-container');
+  catLabel.className = 'visually-hidden';
+  form.appendChild(catLabel);
+  categorySelector.container.id = 'category-selector-container';
   form.appendChild(categorySelector.container);
+
+  // Type Toggle (Label handled by fieldset/legend in utility later)
   form.appendChild(typeToggle.container);
+
   if (noteField) {
+    // Note Label
+    const noteLabel = document.createElement('label');
+    noteLabel.textContent = 'Notes';
+    noteLabel.setAttribute('for', 'note-field-input');
+    noteLabel.className = 'visually-hidden';
+    form.appendChild(noteLabel);
+    noteField.id = 'note-field-input';
     form.appendChild(noteField);
   }
+
 
   // 7.5. Cancel Button (for Add mode)
   if (showCancelButton && onCancel) {
