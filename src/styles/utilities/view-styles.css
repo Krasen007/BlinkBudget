@@ -4,14 +4,15 @@
 .view-container {
   width: 100%;
   max-width: var(--container-max-width);
-  padding: 0 var(--spacing-sm); /* Mobile-first: 8px */
-  height: 100%;
-  overflow: hidden auto; /* Allow vertical scrolling in all standard views */
+  padding: 0 var(--spacing-sm);
+  height: 100%; /* Full height of #app */
+  overflow: hidden auto; /* Enable vertical scroll */
   display: flex;
   flex-direction: column;
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-y; /* Ensure vertical touch scrolling works */
 }
+
+
 
 /* View container with fixed content (no scrolling) */
 .view-container.view-fixed {
@@ -37,10 +38,11 @@
 .view-header.view-sticky {
   position: sticky;
   top: 0;
-  background: var(--color-surface);
+  background: var(--color-background); /* Use background to mesh with body */
   z-index: 10;
-  border-bottom: 1px solid var(--color-border);
+  padding: var(--spacing-sm) 0;
 }
+
 
 .view-header.view-compact {
   margin-bottom: var(--spacing-sm);
@@ -56,9 +58,9 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  overflow: hidden;
   gap: var(--spacing-lg);
 }
+
 
 /* Enhanced content variants */
 .view-content.view-scrollable {
@@ -317,15 +319,59 @@
 .view-back-btn:hover {
   background: var(--color-surface-hover);
   border-color: var(--color-primary);
+  transform: none; /* No movement */
 }
+
+/* Standardized Select Input */
+.view-select {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-main);
+  border: 1px solid var(--color-border);
+  outline: none;
+  font-size: var(--font-size-base);
+  appearance: auto;
+  min-height: var(--touch-target-min);
+  cursor: pointer;
+}
+
+.view-select:focus {
+  border-color: var(--color-primary);
+}
+
+/* Header Grid/Row for Dashboard/Reports */
+.view-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-md);
+  width: 100%;
+}
+
+.view-header-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
 
 /* View Title - Standard title styling */
 .view-title {
   margin: 0;
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: bold;
   color: var(--color-text-main);
+  line-height: var(--line-height-tight);
 }
+
+@media (--lg) {
+  .view-title {
+    font-size: 2rem;
+  }
+}
+
 
 @media (--sm) {
   .view-title {
@@ -352,14 +398,15 @@
 .view-tab {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-xs);
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-xl);
   border: none;
   border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-text-main);
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 500;
   white-space: nowrap;
   transition: all 0.2s ease;
@@ -390,21 +437,15 @@
 }
 
 .view-dashboard .dashboard-transactions-container {
-  flex: 1;
-  overflow: hidden; /* Container should not scroll, child should */
-  min-height: 0; /* Allow flex child to shrink */
   display: flex;
   flex-direction: column;
 }
 
 .view-dashboard .dashboard-transactions-list {
-  flex: 1;
-  overflow: hidden auto; /* Transaction list scrolls inside flex container */
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  touch-action: pan-y;
-  min-height: 0; /* Let flexbox control height without forcing extra space */
+  display: flex;
+  flex-direction: column;
 }
+
 
 .view-mobile-full-width {
   width: 100%;

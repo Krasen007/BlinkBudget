@@ -3,7 +3,7 @@
  * Provides subtle visual confirmation for newly added/updated transactions
  */
 
-import { COLORS } from './constants.js';
+
 
 /**
  * Highlight a transaction item with subtle success animation
@@ -13,25 +13,15 @@ import { COLORS } from './constants.js';
 export const highlightTransactionSuccess = (element, duration = 1500) => {
   if (!element) return;
 
-  // Store original styles
-  const originalBackground = element.style.backgroundColor;
-  const originalTransition = element.style.transition;
+  // Add the highlight class
+  element.classList.add('success-highlight', 'success-highlight-active');
 
-  // Apply subtle success highlight - very light green
-  element.style.transition = 'background-color 0.3s ease';
-  element.style.backgroundColor = COLORS.SUCCESS_LIGHT;
-
-  // Fade back to original after 1 second
+  // Fade back to original
   setTimeout(() => {
-    element.style.transition = 'background-color 0.5s ease';
-    element.style.backgroundColor = originalBackground;
-
-    // Restore original transition after fade completes
-    setTimeout(() => {
-      element.style.transition = originalTransition;
-    }, 500);
+    element.classList.remove('success-highlight-active');
   }, duration);
 };
+
 
 /**
  * Store the ID of the last added transaction for highlighting

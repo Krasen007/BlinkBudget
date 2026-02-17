@@ -33,12 +33,9 @@ export const TransactionList = ({
   listContainer.setAttribute('role', 'region');
   listContainer.setAttribute('aria-label', 'Recent Transactions');
 
-  listContainer.style.flex = '1';
   listContainer.style.display = 'flex';
   listContainer.style.flexDirection = 'column';
-  listContainer.style.minHeight = '0'; // Allow flex child to shrink
-  listContainer.style.overflow = 'hidden'; // Container should not scroll, child should
-  listContainer.style.position = 'relative'; // For proper overflow handling
+
 
   // Title container with metrics
   const titleContainer = document.createElement('div');
@@ -154,19 +151,15 @@ export const TransactionList = ({
     list.className = 'dashboard-transactions-list';
     list.setAttribute('role', 'list');
 
-    list.style.flex = '1';
-    list.style.overflowY = 'auto'; // Enable vertical scrolling
-    list.style.overflowX = 'hidden'; // Prevent horizontal scrolling
-    list.style.webkitOverflowScrolling = 'touch'; // Smooth scrolling on iOS
-    list.style.overscrollBehavior = 'contain'; // Prevent bounce scrolling on mobile
-    list.style.touchAction = 'pan-y'; // Allow only vertical panning on touch
-    list.style.minHeight = '0'; // Allow flex item to shrink properly
+    list.style.display = 'flex';
+    list.style.flexDirection = 'column';
     Object.assign(list.style, {
       listStyle: 'none',
       padding: 0,
       margin: 0,
       borderTop: '1px solid var(--color-surface-hover)',
     });
+
 
     transactions.forEach(transaction => {
       const shouldHighlight =

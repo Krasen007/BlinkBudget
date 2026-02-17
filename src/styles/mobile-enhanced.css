@@ -396,8 +396,9 @@ body.keyboard-visible {
 
 body.keyboard-hidden {
   height: 100vh;
-  overflow: auto;
+  overflow: hidden; /* View container handles scrolling */
 }
+
 
 /* Input-specific keyboard behaviors */
 body.input-focused {

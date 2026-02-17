@@ -11,7 +11,7 @@
   border-radius: var(--radius-md);
   border: 1px solid transparent;
   cursor: pointer;
-  /* Remove transition animation */
+  transition: none; /* Instant feedback */
   text-decoration: none;
   font-size: var(--font-size-base);
   position: relative;
@@ -143,13 +143,92 @@
   }
 }
 
-/* cards.css */
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
-  transition: border-color var(--transition-normal);
+  transition: border-color var(--transition-fast);
+}
+
+/* Toast Notification Styles */
+.toast-container {
+  position: fixed;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  z-index: 10000;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  max-width: 400px;
+  width: 100%;
+}
+
+.toast {
+  color: white;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgb(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  line-height: var(--line-height-normal);
+  min-width: 250px;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  pointer-events: auto;
+  cursor: pointer;
+  transform: translateX(100%);
+  opacity: 0;
+  transition: transform var(--transition-fast) ease-out, opacity var(--transition-fast) ease-out;
+  will-change: transform, opacity;
+}
+
+.toast.active {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.toast-success { background-color: var(--color-success); }
+.toast-error { background-color: var(--color-error); }
+.toast-warning { background-color: var(--color-warning); }
+.toast-info { background-color: var(--color-primary); }
+
+.toast-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.toast-message {
+  flex: 1;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  margin-left: var(--spacing-xs);
+  opacity: 0.8;
+  transition: opacity var(--transition-fast);
+}
+
+.toast-close:hover {
+  opacity: 1;
+}
+
+/* Success Feedback Highlight */
+.success-highlight {
+  transition: background-color var(--transition-normal);
+}
+
+.success-highlight-active {
+  background-color: var(--color-success-light) !important;
 }
 
 .card:hover {
@@ -161,10 +240,9 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  transition:
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast);
+  transition: none; /* Blazing fast */
 }
+
 
 @media (width <= calc(var(--breakpoint-md) - 1px)) {
   .dashboard-stat-card {
@@ -436,4 +514,6 @@
   font-size: var(--font-size-sm);
   margin: 0;
 }
+
+
 

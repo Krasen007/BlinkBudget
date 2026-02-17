@@ -1,10 +1,4 @@
-/* Reports Header Container - Match the app's container width */
-.reports-header-container {
-  max-width: var(--container-max-width);
-  width: 100%;
-  box-sizing: border-box;
-  margin: 0 auto;
-}
+
 
 /* CSS Custom Properties for Reports Layout */
 .category-selector-section {
@@ -21,26 +15,9 @@
   --tooltip-padding: 80px;
 }
 
-/* Reports View Container - Match financial planning view */
-.reports-view-container {
-  height: 100%;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-y;
-}
 
-/* Reports Content Area - Match financial planning view */
-.reports-view-container .reports-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  overflow: auto;
-  gap: var(--spacing-lg);
-  -webkit-overflow-scrolling: touch;
-}
+
+
 
 /* Charts Section - Match financial planning sections */
 .reports-view-container .charts-section {
@@ -559,38 +536,13 @@
   outline-offset: 2px;
 }
 
-/* Simplified chart animations and micro-interactions */
-@keyframes chart-entrance {
-  0% {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Focus management for accessibility */
+.charts-section:focus-within {
+  outline: 2px solid
+    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light));
+  outline-offset: 2px;
 }
 
-@keyframes loading-pulse {
-  0%,
-  100% {
-    opacity: 0.6;
-  }
-
-  50% {
-    opacity: 1;
-  }
-}
-
-/* Chart Section Animations */
-.charts-section {
-  animation: chart-entrance 0.4s ease-out;
-}
-
-.charts-section.loading {
-  animation: loading-pulse 2s ease-in-out infinite;
-}
 
 /* Chart Canvas Interactions - Simplified */
 .charts-section canvas {

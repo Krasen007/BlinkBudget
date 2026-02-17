@@ -11,11 +11,11 @@ import {
   COLORS,
   SPACING,
   BREAKPOINTS,
-  TIMING,
   STORAGE_KEYS,
 } from '../utils/constants.js';
 
-import { debounce } from '../utils/touch-utils.js';
+
+
 import { getTransactionToHighlight } from '../utils/success-feedback.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
 import { AdvancedFilterPanel } from '../components/AdvancedFilterPanel.js';
@@ -25,26 +25,15 @@ export const DashboardView = () => {
   container.className = 'view-dashboard view-container';
   container.setAttribute('data-tutorial-target', 'dashboard');
 
-  // Make container fill the viewport height
-  container.style.minHeight = '100vh';
-  container.style.display = 'flex';
-  container.style.flexDirection = 'column';
 
   // Header with sticky positioning
   const header = document.createElement('div');
-  header.style.marginBottom = SPACING.MD;
-  header.style.flexShrink = '0';
-  header.style.position = 'sticky'; // Sticky positioning
-  header.style.top = '0'; // Stick to top
-  header.style.width = '100%';
-  header.style.background = COLORS.BACKGROUND; // Ensure background covers content
-  header.style.zIndex = '10'; // Above content
-  header.style.padding = `${SPACING.SM} 0`; // Vertical padding, horizontal handled by container
+  header.className = 'view-header view-sticky view-header-container';
+  header.style.background = COLORS.BACKGROUND; // Override surface with background if needed
 
   const topRow = document.createElement('div');
-  topRow.style.display = 'flex';
-  topRow.style.justifyContent = 'space-between';
-  topRow.style.alignItems = 'center';
+  topRow.className = 'view-header-row';
+
 
   // Left side with title and category manager button
   const leftSide = document.createElement('div');
@@ -71,6 +60,8 @@ export const DashboardView = () => {
   };
   updateTitle();
   leftSide.appendChild(title);
+  title.className = 'view-title';
+
 
   // Right side controls - use navigation helper
   const rightControls = createNavigationButtons('dashboard');
@@ -85,19 +76,12 @@ export const DashboardView = () => {
   const accountSelect = document.createElement('select');
   accountSelect.id = 'account-filter-select';
   accountSelect.name = 'account-filter';
-  Object.assign(accountSelect.style, {
-    padding: `${SPACING.SM} ${SPACING.MD}`,
-    borderRadius: 'var(--radius-md)',
-    background: COLORS.SURFACE,
-    color: COLORS.TEXT_MAIN,
-    border: `1px solid ${COLORS.BORDER}`,
-    outline: 'none',
-    minWidth: '150px',
-    appearance: 'auto',
-    width: '100%',
-    marginTop: SPACING.SM,
-  });
-  accountSelect.className = 'input-select';
+  accountSelect.id = 'account-filter-select';
+  accountSelect.name = 'account-filter';
+  accountSelect.className = 'view-select';
+  accountSelect.style.marginTop = SPACING.SM;
+  accountSelect.style.width = '100%';
+
 
   // Account Options Logic
   let currentAccountFilter =
@@ -148,16 +132,12 @@ export const DashboardView = () => {
     accountSelect.value = currentVal;
   };
 
-  // Main Content Wrapper
+  // Main Content Area
   const content = document.createElement('div');
-  content.style.flex = '1';
-  content.style.display = 'flex';
-  content.style.flexDirection = 'column';
-  content.style.minHeight = '0'; // Allow flex child to shrink below content size
-  content.style.overflow = 'visible'; // Allow child to scroll
-  content.style.position = 'relative'; // For proper overflow handling
-
+  content.className = 'view-content';
+  content.id = 'dashboard-content';
   container.appendChild(content);
+
 
   // Advanced Filter Panel (Conditional)
   const advancedFilteringEnabled =
@@ -283,17 +263,8 @@ export const DashboardView = () => {
 
     // Statistics Cards Container
     const statsContainer = document.createElement('div');
-    statsContainer.className = 'dashboard-stats-container';
-    statsContainer.style.flexShrink = '0'; // Prevent stats from shrinking
-    const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
-    Object.assign(statsContainer.style, {
-      display: 'grid',
-      gap: SPACING.MD,
-      marginBottom: SPACING.XL,
-      gridTemplateColumns: isMobile
-        ? '1fr 1fr'
-        : 'repeat(auto-fit, minmax(250px, 1fr))',
-    });
+    statsContainer.className = 'view-stats-container';
+
 
     // Get current month name for the label
     const monthNames = [
@@ -391,25 +362,10 @@ export const DashboardView = () => {
     content.appendChild(transactionList);
   };
 
-  // Cache DOM element references to prevent excessive queries
-  let statsContainer = null;
 
-  // Responsive layout updates
-  const updateResponsiveLayout = debounce(() => {
-    const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
-    if (!statsContainer) {
-      statsContainer = document.querySelector('.dashboard-stats-container');
-    }
-    if (!statsContainer) return;
-    statsContainer.style.gridTemplateColumns = isMobile
-      ? '1fr 1fr'
-      : 'repeat(auto-fit, minmax(250px, 1fr))';
-  }, TIMING.DEBOUNCE_RESIZE);
 
-  window.addEventListener('resize', updateResponsiveLayout);
-  window.addEventListener('orientationchange', () => {
-    setTimeout(updateResponsiveLayout, TIMING.DEBOUNCE_ORIENTATION);
-  });
+
+
 
   renderDashboard();
 
@@ -436,11 +392,10 @@ export const DashboardView = () => {
 
   // Cleanup function for event listeners
   container.cleanup = () => {
-    window.removeEventListener('resize', updateResponsiveLayout);
-    window.removeEventListener('orientationchange', updateResponsiveLayout);
     window.removeEventListener('storage-updated', handleStorageUpdate);
     window.removeEventListener('auth-state-changed', handleAuthChange);
   };
+
 
   return container;
 };

@@ -5,7 +5,8 @@
  * Provides consistent, accessible user feedback
  */
 
-import { COLORS, SPACING, TIMING } from './constants.js';
+import { TIMING, COLORS } from './constants.js';
+
 
 /**
  * Toast notification types
@@ -45,22 +46,9 @@ function initializeContainer() {
   toastContainer.setAttribute('aria-live', 'polite');
   toastContainer.setAttribute('aria-label', 'Notifications');
 
-  // Position container
-  Object.assign(toastContainer.style, {
-    position: 'fixed',
-    top: SPACING.MD,
-    right: SPACING.MD,
-    zIndex: '10000',
-    pointerEvents: 'none',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: SPACING.SM,
-    maxWidth: '400px',
-    width: '100%',
-  });
-
   document.body.appendChild(toastContainer);
 }
+
 
 /**
  * Get toast configuration by type
@@ -111,69 +99,27 @@ function createToastElement(message, type, options = {}) {
   toast.setAttribute('role', 'alert');
   toast.setAttribute('aria-live', 'assertive');
 
-  // Toast styles
-  Object.assign(toast.style, {
-    background: config.background,
-    color: 'white',
-    padding: `${SPACING.SM} ${SPACING.MD}`,
-    borderRadius: '8px',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-    display: 'flex',
-    alignItems: 'center',
-    gap: SPACING.SM,
-    fontSize: '14px',
-    fontWeight: '500',
-    lineHeight: '1.4',
-    minWidth: '250px',
-    maxWidth: '100%',
-    wordWrap: 'break-word',
-    pointerEvents: 'auto',
-    cursor: 'pointer',
-    transform: 'translateX(100%)',
-    opacity: '0',
-    transition: `transform ${TIMING.ANIMATION_FAST}ms ease-out, opacity ${TIMING.ANIMATION_FAST}ms ease-out`,
-    willChange: 'transform, opacity',
-  });
-
   // Icon
   const icon = document.createElement('span');
+  icon.className = 'toast-icon';
   icon.textContent = config.icon;
-  icon.style.fontSize = '16px';
-  icon.style.flexShrink = '0';
 
   // Message
   const messageElement = document.createElement('div');
+  messageElement.className = 'toast-message';
   messageElement.textContent = message;
-  messageElement.style.flex = '1';
 
   // Close button
   const closeButton = document.createElement('button');
+  closeButton.className = 'toast-close';
   closeButton.textContent = '×';
   closeButton.setAttribute('aria-label', 'Close notification');
-  closeButton.style.cssText = `
-    background: none;
-    border: none;
-    color: white;
-    font-size: 18px;
-    cursor: pointer;
-    padding: 0;
-    margin-left: ${SPACING.XS};
-    opacity: 0.8;
-    transition: opacity 0.2s ease;
-  `;
-
-  closeButton.addEventListener('mouseenter', () => {
-    closeButton.style.opacity = '1';
-  });
-
-  closeButton.addEventListener('mouseleave', () => {
-    closeButton.style.opacity = '0.8';
-  });
 
   // Assemble toast
   toast.appendChild(icon);
   toast.appendChild(messageElement);
   toast.appendChild(closeButton);
+
 
   // Event handlers
   const handleRemove = () => {
@@ -203,12 +149,12 @@ function createToastElement(message, type, options = {}) {
  * @param {HTMLElement} toast - Toast element
  */
 function animateToastIn(toast) {
-  // Trigger animation
+  // Trigger animation using class
   requestAnimationFrame(() => {
-    toast.style.transform = 'translateX(0)';
-    toast.style.opacity = '1';
+    toast.classList.add('active');
   });
 }
+
 
 /**
  * Animate toast out and remove
@@ -225,9 +171,9 @@ function animateToastOut(toastId) {
     clearTimeout(timeoutId);
   }
 
-  // Animate out
-  element.style.transform = 'translateX(100%)';
-  element.style.opacity = '0';
+  // Animate out using class
+  element.classList.remove('active');
+
 
   // Remove after animation and call onClose callback
   setTimeout(() => {

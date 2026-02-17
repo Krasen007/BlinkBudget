@@ -24,10 +24,10 @@ import { ChartRenderer } from '../components/ChartRenderer.js';
 import {
   COLORS,
   SPACING,
-  BREAKPOINTS,
   TIMING,
   STORAGE_KEYS,
 } from '../utils/constants.js';
+
 import { debounce } from '../utils/touch-utils.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
 
@@ -81,46 +81,28 @@ export const FinancialPlanningView = () => {
 
   // Create header container that includes both header and navigation
   const headerContainer = document.createElement('div');
-  headerContainer.className = 'financial-planning-header-container';
-  headerContainer.style.background = COLORS.BACKGROUND;
-  headerContainer.style.zIndex = '10';
-  headerContainer.style.position = 'sticky'; // Sticky positioning
-  headerContainer.style.top = '0'; // Stick to top
-  headerContainer.style.width = '100%';
-  headerContainer.style.display = 'flex';
-  headerContainer.style.flexDirection = 'column';
-  headerContainer.style.gap = SPACING.SM;
-  headerContainer.style.flexShrink = '0';
-  headerContainer.style.padding = `${SPACING.SM} 0`; // Vertical padding, horizontal handled by container
-
   headerContainer.appendChild(header);
   headerContainer.appendChild(navigation);
+  headerContainer.className = 'view-header view-sticky view-header-container';
   container.appendChild(headerContainer);
 
+
+
   // Main content area
-  const content = document.createElement('main');
-  content.className = 'financial-planning-content';
-  content.id = 'financial-planning-main-content';
-  content.setAttribute('role', 'main');
-  content.setAttribute('aria-labelledby', 'financial-planning-title');
-  content.style.flex = '1';
-  content.style.display = 'flex';
-  content.style.flexDirection = 'column';
-  content.style.minHeight = '0';
-  content.style.gap = SPACING.LG;
+  const content = document.createElement('div');
+  content.className = 'view-content';
+  content.id = 'financial-planning-content';
 
   container.appendChild(content);
+
 
   /**
    * Create header with title and back button
    */
   function createHeader() {
     const header = document.createElement('header');
-    header.className = 'financial-planning-header';
-    header.style.display = 'flex';
-    header.style.justifyContent = 'space-between';
-    header.style.alignItems = 'center';
-    header.style.flexShrink = '0';
+    header.className = 'view-header-row';
+
 
     // Left side with back button and title
     const leftSide = document.createElement('div');
@@ -131,28 +113,9 @@ export const FinancialPlanningView = () => {
     // Back button (always visible)
     const backButton = document.createElement('button');
     backButton.innerHTML = '← Back';
-    backButton.className = 'btn btn-ghost financial-planning-back-btn';
-    backButton.style.fontSize = '1rem';
-    backButton.style.padding = `${SPACING.SM} ${SPACING.MD}`;
-    backButton.style.border = `1px solid ${COLORS.BORDER}`;
-    backButton.style.borderRadius = 'var(--radius-md)';
-    backButton.style.background = COLORS.SURFACE;
-    backButton.style.color = COLORS.TEXT_MAIN;
-    backButton.style.cursor = 'pointer';
-    backButton.style.fontWeight = '500';
-    backButton.style.transition = 'all 0.2s ease';
+    backButton.className = 'view-back-btn';
     backButton.title = 'Back to Dashboard';
 
-    // Hover effects
-    backButton.addEventListener('mouseenter', () => {
-      backButton.style.background = COLORS.SURFACE_HOVER;
-      backButton.style.borderColor = COLORS.PRIMARY;
-    });
-
-    backButton.addEventListener('mouseleave', () => {
-      backButton.style.background = COLORS.SURFACE;
-      backButton.style.borderColor = COLORS.BORDER;
-    });
 
     backButton.addEventListener('click', () => Router.navigate('dashboard'));
 
@@ -160,11 +123,8 @@ export const FinancialPlanningView = () => {
     const title = document.createElement('h2');
     title.id = 'financial-planning-title';
     title.textContent = 'Financial Planning';
-    title.style.margin = '0';
-    title.style.fontSize =
-      window.innerWidth < BREAKPOINTS.MOBILE ? '1.25rem' : 'h2';
-    title.style.fontWeight = 'bold';
-    title.style.color = COLORS.TEXT_MAIN;
+    title.className = 'view-title';
+
 
     leftSide.appendChild(backButton);
     leftSide.appendChild(title);
@@ -183,23 +143,18 @@ export const FinancialPlanningView = () => {
    */
   function createNavigation() {
     const nav = document.createElement('nav');
-    nav.className = 'financial-planning-nav';
+    nav.className = 'view-tabs financial-planning-nav';
     nav.setAttribute('role', 'tablist');
-    nav.style.display = 'grid';
-    nav.style.gridTemplateColumns = 'repeat(3, 1fr)';
-    nav.style.gap = SPACING.SM;
-    nav.style.marginBottom = SPACING.LG;
-    nav.style.flexWrap = 'wrap'; // Allow wrapping
-    nav.style.maxWidth = '100%';
 
-    // Hide scrollbar for webkit browsers
-    const style = document.createElement('style');
-    style.textContent = `
-      .financial-planning-nav::-webkit-scrollbar {
-        display: none;
-      }
-    `;
-    document.head.appendChild(style);
+    // Apply 3-per-row grid layout
+    Object.assign(nav.style, {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(3, 1fr)',
+      gap: 'var(--spacing-sm)',
+      width: '100%',
+    });
+
+
 
     const sections = [
       { id: 'overview', label: 'Overview', icon: '📊' },
@@ -211,9 +166,10 @@ export const FinancialPlanningView = () => {
       { id: 'budgets', label: 'Budgets', icon: '📉' },
     ];
 
+
     sections.forEach(section => {
       const tab = document.createElement('button');
-      tab.className = 'financial-planning-tab';
+      tab.className = 'view-tab';
       tab.setAttribute('role', 'tab');
       tab.setAttribute(
         'aria-selected',
@@ -227,40 +183,7 @@ export const FinancialPlanningView = () => {
         <span class="tab-label">${section.label}</span>
       `;
 
-      // Tab styling - use btn-primary sized padding
-      Object.assign(tab.style, {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: SPACING.XS,
-        padding: `${SPACING.MD} ${SPACING.XL}`,
-        minHeight: 'var(--touch-target-min)',
-        minWidth: 'var(--touch-target-min)',
-        border: 'none',
-        borderRadius: 'var(--radius-md)',
-        background:
-          section.id === currentSection ? COLORS.PRIMARY : COLORS.SURFACE,
-        color: section.id === currentSection ? 'white' : COLORS.TEXT_MAIN,
-        cursor: 'pointer',
-        fontSize: 'var(--font-size-md)',
-        fontWeight: '500',
-        whiteSpace: 'nowrap',
-        transition: 'all 0.2s ease',
-        flex: '1 0 auto', // Grow to fill space, but respect content size
-      });
 
-      // Hover effects
-      tab.addEventListener('mouseenter', () => {
-        if (section.id !== currentSection) {
-          tab.style.background = COLORS.SURFACE_HOVER;
-        }
-      });
-
-      tab.addEventListener('mouseleave', () => {
-        if (section.id !== currentSection) {
-          tab.style.background = COLORS.SURFACE;
-        }
-      });
 
       // Click handler
       tab.addEventListener('click', () => {
@@ -459,50 +382,9 @@ export const FinancialPlanningView = () => {
     }
   }
   const updateResponsiveLayout = debounce(() => {
-    const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
-
-    // Layout updates for mobile
-
-    // Update header layout for mobile
-    const header = container.querySelector('.financial-planning-header');
-    if (header) {
-      const leftSide = header.querySelector('div:first-child');
-      const title = header.querySelector('h1');
-      const backButton = header.querySelector('.financial-planning-back-btn');
-
-      if (isMobile) {
-        // Mobile: smaller title, more compact back button
-        if (title) title.style.fontSize = '1.5rem';
-        if (backButton) {
-          backButton.style.padding = `${SPACING.XS} ${SPACING.SM}`;
-          backButton.style.fontSize = '0.875rem';
-        }
-        if (leftSide) leftSide.style.gap = SPACING.SM;
-      } else {
-        // Desktop: larger title, normal back button
-        if (title) title.style.fontSize = '2rem';
-        if (backButton) {
-          backButton.style.padding = `${SPACING.SM} ${SPACING.MD}`;
-          backButton.style.fontSize = '1rem';
-        }
-        if (leftSide) leftSide.style.gap = SPACING.MD;
-      }
-    }
-
-    // Update stats grid for mobile
-    const statsGrid = content.querySelector('.stats-grid');
-    if (statsGrid) {
-      statsGrid.style.gridTemplateColumns = isMobile
-        ? 'repeat(2, 1fr)'
-        : 'repeat(auto-fit, minmax(250px, 1fr))';
-    }
-
-    // Update quick actions for mobile
-    const actionsContainer = content.querySelector('.quick-actions');
-    if (actionsContainer) {
-      actionsContainer.style.flexDirection = isMobile ? 'column' : 'row';
-    }
+    // Shared title update etc
   }, TIMING.DEBOUNCE_RESIZE);
+
 
   // Event listeners
   window.addEventListener('resize', updateResponsiveLayout);
@@ -579,9 +461,7 @@ export const FinancialPlanningView = () => {
   // Initialize
   updateResponsiveLayout();
   loadPlanningData();
-  (async () => {
-    await renderSection(currentSection);
-  })();
+
 
   return container;
 };

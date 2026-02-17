@@ -26,10 +26,11 @@ describe('Success Feedback', () => {
 
     highlightTransactionSuccess(element, 100);
 
-    // Should have subtle success background color
-    expect(element.style.backgroundColor).toBe('rgba(16, 185, 129, 0.1)');
-    expect(element.style.transition).toBe('background-color 0.3s ease');
+    // Should have subtle success background color via classes
+    expect(element.classList.contains('success-highlight')).toBe(true);
+    expect(element.classList.contains('success-highlight-active')).toBe(true);
   });
+
 
   it('should handle null element gracefully in highlight function', () => {
     expect(() => {

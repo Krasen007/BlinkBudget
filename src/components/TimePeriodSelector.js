@@ -201,8 +201,9 @@ export const TimePeriodSelector = (options = {}) => {
     }
 
     const button = document.createElement('button');
-    button.className = 'financial-planning-tab'; // Use same class name as FinancialPlanningView
+    button.className = 'view-tab'; // Standardized class
     button.dataset.period = period.key;
+
 
     // Initialize month offset for last month button and year offset for year button
     if (period.key === 'lastMonth') {
@@ -236,9 +237,10 @@ export const TimePeriodSelector = (options = {}) => {
       const arrowContainer = document.createElement('div');
       arrowContainer.style.display = 'flex';
       arrowContainer.style.alignItems = 'center';
-      arrowContainer.style.justifyContent = 'flex-start'; // Anchor to left
+      arrowContainer.style.justifyContent = 'center'; // Center the text
       arrowContainer.style.width = '100%';
       arrowContainer.style.position = 'relative';
+
 
       // Left arrow for navigation - fixed position
       const leftArrow = document.createElement('span');
@@ -283,11 +285,11 @@ export const TimePeriodSelector = (options = {}) => {
         }
       });
 
-      // Text container with left padding for arrow
+      // Text container
       const textContainer = document.createElement('span');
-      textContainer.style.paddingLeft = '28px'; // Space for arrow
       textContainer.style.display = 'block';
       textContainer.appendChild(labelSpan);
+
 
       arrowContainer.appendChild(leftArrow);
       arrowContainer.appendChild(textContainer);
@@ -296,26 +298,9 @@ export const TimePeriodSelector = (options = {}) => {
       button.appendChild(labelSpan);
     }
 
-    // Exact same styling as FinancialPlanningView tabs
-    Object.assign(button.style, {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: SPACING.XS,
-      padding: `${SPACING.MD} ${SPACING.XL}`,
-      minHeight: 'var(--touch-target-min)',
-      minWidth: 'var(--touch-target-min)',
-      border: 'none',
-      borderRadius: 'var(--radius-md)',
-      background: period.key === initialKey ? COLORS.PRIMARY : COLORS.SURFACE,
-      color: period.key === initialKey ? 'white' : COLORS.TEXT_MAIN,
-      cursor: 'pointer',
-      fontSize: 'var(--font-size-md)',
-      fontWeight: '500',
-      whiteSpace: 'nowrap',
-      transition: 'all 0.2s ease',
-      flex: '1 0 auto', // Grow to fill space, but respect content size
-    });
+    // Use global .view-tab styling instead of inline styles
+    button.style.flex = '1 0 auto'; // Just keep the flex property
+
     button.addEventListener('click', () => {
       if (period.key === 'custom') {
         handleCustomPeriodSelection();
@@ -324,18 +309,12 @@ export const TimePeriodSelector = (options = {}) => {
       }
     });
 
-    // Add hover effects matching FinancialPlanningView
-    button.addEventListener('mouseenter', () => {
-      if (period.key !== initialKey) {
-        button.style.background = COLORS.SURFACE_HOVER;
-      }
-    });
+    // Standardize hover/active in CSS, but handle active state here for JS logic
+    if (period.key === initialKey) {
+      button.style.background = COLORS.PRIMARY;
+      button.style.color = 'white';
+    }
 
-    button.addEventListener('mouseleave', () => {
-      if (period.key !== initialKey) {
-        button.style.background = COLORS.SURFACE;
-      }
-    });
 
     return button;
   }

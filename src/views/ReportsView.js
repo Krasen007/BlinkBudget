@@ -68,8 +68,6 @@ export const ReportsView = () => {
   const container = document.createElement('div');
   container.className = 'view-reports view-container reports-view-container';
 
-  container.style.display = 'flex';
-  container.style.flexDirection = 'column';
   // ... remaining state logic ...
   const handleGlobalError = (error, context = 'Unknown') => {
     console.error(`[ReportsView] Global error in ${context}:`, error);
@@ -148,16 +146,12 @@ export const ReportsView = () => {
   let advancedFilterPanelComponent = null;
   const categoryColorMap = new Map();
 
-  // Main content area - match FinancialPlanningView structure
-  const content = document.createElement('main');
-  content.className = 'reports-content';
-  content.id = 'reports-main-content';
-  content.setAttribute('role', 'main');
-  content.setAttribute('aria-labelledby', 'reports-title');
-  content.style.flex = '1';
-  content.style.display = 'flex';
-  content.style.flexDirection = 'column';
-  content.style.minHeight = '0';
+  // Main content area
+  const content = document.createElement('div');
+  content.className = 'view-content';
+  content.id = 'reports-content';
+  container.appendChild(content);
+
 
   // State components
   const loadingState = createLoadingState();
@@ -170,13 +164,8 @@ export const ReportsView = () => {
   function createHeader() {
     // Main header with back button and title
     const header = document.createElement('header');
-    header.className = 'reports-header';
-    header.style.display = 'flex';
-    header.style.justifyContent = 'space-between';
-    header.style.alignItems = 'center';
-    header.style.marginBottom = SPACING.MD;
-    header.style.flexShrink = '0';
-    header.style.padding = `${SPACING.XS} 0`;
+    header.className = 'view-header-row';
+
 
     // Left side with back button and title
     const leftSide = document.createElement('div');
@@ -187,17 +176,9 @@ export const ReportsView = () => {
     // Back button (always visible)
     const backButton = document.createElement('button');
     backButton.innerHTML = '← Back';
-    backButton.className = 'btn btn-ghost reports-back-btn';
-    backButton.style.fontSize = '1rem';
-    backButton.style.padding = `${SPACING.SM} ${SPACING.MD}`;
-    backButton.style.border = `1px solid ${COLORS.BORDER}`;
-    backButton.style.borderRadius = 'var(--radius-md)';
-    backButton.style.background = COLORS.SURFACE;
-    backButton.style.color = COLORS.TEXT_MAIN;
-    backButton.style.cursor = 'pointer';
-    backButton.style.fontWeight = '500';
-    backButton.style.transition = 'all 0.2s ease';
+    backButton.className = 'view-back-btn';
     backButton.title = 'Back to Dashboard';
+
 
     // Hover effects
     backButton.addEventListener('mouseenter', () => {
@@ -216,11 +197,9 @@ export const ReportsView = () => {
     const title = document.createElement('h2');
     title.id = 'reports-title';
     title.textContent = 'Reports';
-    title.style.margin = '0';
-    title.style.fontSize =
-      window.innerWidth < BREAKPOINTS.MOBILE ? '1.25rem' : 'h2';
-    title.style.fontWeight = 'bold';
-    title.style.color = COLORS.TEXT_MAIN;
+    title.className = 'view-title';
+
+
 
     leftSide.appendChild(backButton);
     leftSide.appendChild(title);
@@ -253,17 +232,9 @@ export const ReportsView = () => {
 
     // Create header container that includes both header and time period selector
     const headerContainer = document.createElement('div');
-    headerContainer.className = 'reports-header-container';
+    headerContainer.className = 'view-header view-sticky view-header-container';
     headerContainer.style.background = COLORS.BACKGROUND;
-    headerContainer.style.zIndex = '10';
-    headerContainer.style.position = 'sticky'; // Sticky positioning
-    headerContainer.style.top = '0'; // Stick to top
-    headerContainer.style.width = '100%';
-    headerContainer.style.display = 'flex';
-    headerContainer.style.flexDirection = 'column';
-    headerContainer.style.gap = SPACING.SM;
-    headerContainer.style.flexShrink = '0';
-    headerContainer.style.padding = `${SPACING.SM} 0`; // Vertical padding, horizontal handled by container
+
 
     headerContainer.appendChild(header);
     headerContainer.appendChild(timePeriodSelectorComponent);

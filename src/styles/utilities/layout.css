@@ -420,16 +420,8 @@
 }
 
 /* View container layout - prevents main scrolling on mobile */
-[class^='view-'],
-[class*=' view-'] {
-  padding: var(--spacing-md);
-  height: 100%;
-  overflow: hidden auto;
-  display: flex;
-  flex-direction: column;
-  -webkit-overflow-scrolling: touch;
-  /* Smooth scrolling on iOS */
-}
+/* Removed aggressive [class^='view-'] selector that was breaking layouts */
+
 
 /* Touch-friendly utilities */
 .touch-target {

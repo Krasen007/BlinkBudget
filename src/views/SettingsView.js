@@ -12,8 +12,8 @@ import {
   SPACING,
   TOUCH_TARGETS,
   FONT_SIZES,
-  BREAKPOINTS,
 } from '../utils/constants.js';
+
 import { COLORS } from '../utils/constants.js';
 import { createButton } from '../utils/dom-factory.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
@@ -24,20 +24,13 @@ export const SettingsView = () => {
 
   // Header - similar to FinancialPlanningView with back button
   const header = document.createElement('div');
-  header.style.marginBottom = SPACING.MD;
-  header.style.flexShrink = '0';
+  header.className = 'view-header view-sticky view-header-container';
+  header.style.background = COLORS.BACKGROUND;
 
-  header.style.position = 'sticky'; // Sticky positioning
-  header.style.top = '0'; // Stick to top
-  header.style.width = '100%';
-  header.style.background = COLORS.BACKGROUND; // Ensure background covers content
-  header.style.zIndex = '10'; // Above content
-  header.style.padding = `${SPACING.SM} 0`; // Vertical padding, horizontal handled by container
 
   const topRow = document.createElement('div');
-  topRow.style.display = 'flex';
-  topRow.style.justifyContent = 'space-between';
-  topRow.style.alignItems = 'center';
+  topRow.className = 'view-header-row';
+
 
   // Left side with back button and title
   const leftSide = document.createElement('div');
@@ -48,39 +41,17 @@ export const SettingsView = () => {
   // Back button
   const backButton = document.createElement('button');
   backButton.innerHTML = '← Back';
-  backButton.className = 'btn btn-ghost settings-back-btn';
-  backButton.style.fontSize = '1rem';
-  backButton.style.padding = `${SPACING.SM} ${SPACING.MD}`;
-  backButton.style.border = `1px solid ${COLORS.BORDER}`;
-  backButton.style.borderRadius = 'var(--radius-md)';
-  backButton.style.background = COLORS.SURFACE;
-  backButton.style.color = COLORS.TEXT_MAIN;
-  backButton.style.cursor = 'pointer';
-  backButton.style.fontWeight = '500';
-  backButton.style.transition = 'all 0.2s ease';
+  backButton.className = 'view-back-btn';
   backButton.title = 'Back to Dashboard';
 
-  // Hover effects
-  backButton.addEventListener('mouseenter', () => {
-    backButton.style.background = COLORS.SURFACE_HOVER;
-    backButton.style.borderColor = COLORS.PRIMARY;
-  });
-
-  backButton.addEventListener('mouseleave', () => {
-    backButton.style.background = COLORS.SURFACE;
-    backButton.style.borderColor = COLORS.BORDER;
-  });
 
   backButton.addEventListener('click', () => Router.navigate('dashboard'));
 
   // Title
   const title = document.createElement('h2');
   title.textContent = 'Settings';
-  title.style.margin = '0';
-  title.style.fontSize =
-    window.innerWidth < BREAKPOINTS.MOBILE ? '1.25rem' : 'h2';
-  title.style.fontWeight = 'bold';
-  title.style.color = COLORS.TEXT_MAIN;
+  title.className = 'view-title';
+
 
   leftSide.appendChild(backButton);
   leftSide.appendChild(title);
@@ -109,14 +80,15 @@ export const SettingsView = () => {
   header.appendChild(topRow);
   container.appendChild(header);
 
-  // Main content wrapper
-  const contentWrapper = document.createElement('div');
-
-  container.appendChild(contentWrapper);
+  // Main content area - scrollable
+  const content = document.createElement('div');
+  content.className = 'view-content';
+  content.id = 'settings-content';
+  container.appendChild(content);
 
   // Account Section
   const accountSection = AccountSection();
-  contentWrapper.appendChild(accountSection);
+  content.appendChild(accountSection);
 
   // Date Format Section
   const dateFormatSection = DateFormatSection({
@@ -129,19 +101,19 @@ export const SettingsView = () => {
       }
     },
   });
-  contentWrapper.appendChild(dateFormatSection);
+  content.appendChild(dateFormatSection);
 
   // Data Management Section
   const dataSection = DataManagementSection();
-  contentWrapper.appendChild(dataSection);
+  content.appendChild(dataSection);
 
   // Backup & Restore Section
   const backupSection = BackupRestoreSection();
-  contentWrapper.appendChild(backupSection);
+  content.appendChild(backupSection);
 
   // General Section
   const generalSection = GeneralSection();
-  contentWrapper.appendChild(generalSection);
+  content.appendChild(generalSection);
 
   // Category Management Section
   const categoryManagementSection = document.createElement('div');
@@ -159,24 +131,15 @@ export const SettingsView = () => {
   });
   manageCategoriesBtn.style.width = '100%';
   categoryManagementSection.appendChild(manageCategoriesBtn);
-  contentWrapper.appendChild(categoryManagementSection);
+  content.appendChild(categoryManagementSection);
 
   // Smart Suggestions Section
   const smartSuggestionsSection = SmartSuggestionsSection();
-  contentWrapper.appendChild(smartSuggestionsSection);
+  content.appendChild(smartSuggestionsSection);
 
   // Advanced Filtering Section
   const advancedFilteringSection = AdvancedFilteringSection();
-  contentWrapper.appendChild(advancedFilteringSection);
-
-  /// Privacy system disabled for now, to be implemented backend later
-  // import { createPrivacyControls, initializePrivacyControls } from '../components/PrivacyControls.js';
-  // // Privacy Controls Section
-  // const privacySection = createPrivacyControls();
-  // contentWrapper.appendChild(privacySection);
-
-  // // Initialize privacy controls functionality
-  // initializePrivacyControls(privacySection);
+  content.appendChild(advancedFilteringSection);
 
   // Done Button
   const doneBtn = Button({
@@ -195,11 +158,13 @@ export const SettingsView = () => {
     minHeight: TOUCH_TARGETS.MIN_HEIGHT,
     fontWeight: '600',
   });
-  contentWrapper.appendChild(doneBtn);
+  content.appendChild(doneBtn);
 
   // Account Deletion Section
-  const deletionSection = AccountDeletionSection();
-  contentWrapper.appendChild(deletionSection);
+  const accountDeletionSection = AccountDeletionSection();
+  content.appendChild(accountDeletionSection);
+
+
 
   const handleStorageUpdate = e => {
     console.log(

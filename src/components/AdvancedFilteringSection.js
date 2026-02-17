@@ -4,6 +4,8 @@
  */
 
 import { SettingsService } from '../core/settings-service.js';
+import { showSuccessToast, showInfoToast } from '../utils/toast-notifications.js';
+
 
 export const AdvancedFilteringSection = () => {
   const container = document.createElement('div');
@@ -85,27 +87,13 @@ export const AdvancedFilteringSection = () => {
 
   // Show feedback toast
   const showFeedback = isEnabled => {
-    const toast = document.createElement('div');
-    toast.className = 'settings-toast';
-    toast.textContent = isEnabled
-      ? '✅ Advanced Filtering enabled'
-      : '⏹️ Advanced Filtering disabled';
-
-    document.body.appendChild(toast);
-
-    // Animate in
-    setTimeout(() => toast.classList.add('show'), 10);
-
-    // Remove after 2 seconds
-    setTimeout(() => {
-      toast.classList.remove('show');
-      setTimeout(() => {
-        if (toast.parentNode) {
-          toast.parentNode.removeChild(toast);
-        }
-      }, 300);
-    }, 2000);
+    if (isEnabled) {
+      showSuccessToast('Advanced Filtering enabled');
+    } else {
+      showInfoToast('Advanced Filtering disabled');
+    }
   };
+
 
   // Description
   const description = document.createElement('div');
@@ -152,28 +140,7 @@ export const AdvancedFilteringSection = () => {
   `;
   container.appendChild(infoSection);
 
-  const STYLE_ID = 'advanced-filtering-section-styles';
 
-  // Add CSS styles
-  if (!document.getElementById(STYLE_ID)) {
-    const style = document.createElement('style');
-    style.id = STYLE_ID;
-    style.textContent = `
-      .advanced-filtering-section {
-        margin-bottom: var(--spacing-lg);
-        padding: var(--spacing-lg);
-      }
-
-
-      .advanced-filtering-toggle {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-sm);
-        margin-bottom: var(--spacing-lg);
-      }
-    `;
-    document.head.appendChild(style);
-  }
 
   return container;
 };
