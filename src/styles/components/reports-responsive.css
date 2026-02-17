@@ -3,19 +3,22 @@
 
 /* Base mobile styles (default) */
 .view-reports {
-  padding: var(--spacing-sm);
+  padding: 0 var(--spacing-sm);
   min-height: 100vh;
   min-height: var(--visual-viewport-height);
+  display: flex;
+  flex-direction: column;
 }
+
 
 /* Chart section mobile optimizations */
 .view-reports .charts-section {
   padding: 0;
-  margin: 0 calc(-1 * var(--spacing-sm));
+  margin: 0;
   border-radius: 0;
-  border-left: none;
-  border-right: none;
+  border: none;
 }
+
 
 /* Mobile chart sizing */
 .view-reports canvas {
@@ -100,8 +103,9 @@
 
   .view-reports .charts-section {
     padding: 0;
-    margin: 0 calc(-1 * var(--spacing-xs));
+    margin: 0;
   }
+
 
   .view-reports canvas {
     min-height: 200px;

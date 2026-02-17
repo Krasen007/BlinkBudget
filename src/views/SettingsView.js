@@ -24,8 +24,9 @@ export const SettingsView = () => {
 
   // Header - similar to FinancialPlanningView with back button
   const header = document.createElement('div');
-  header.style.marginBottom = SPACING.SM;
+  header.style.marginBottom = SPACING.MD;
   header.style.flexShrink = '0';
+
   header.style.position = 'sticky'; // Sticky positioning
   header.style.top = '0'; // Stick to top
   header.style.width = '100%';
@@ -188,8 +189,8 @@ export const SettingsView = () => {
   doneBtn.className += ' touch-target';
   Object.assign(doneBtn.style, {
     width: '100%',
-    marginTop: SPACING.SM,
-    marginBottom: 0,
+    marginTop: 0,
+    marginBottom: SPACING.LG,
     padding: SPACING.SM,
     minHeight: TOUCH_TARGETS.MIN_HEIGHT,
     fontWeight: '600',

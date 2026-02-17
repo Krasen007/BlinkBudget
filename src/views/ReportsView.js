@@ -66,7 +66,8 @@ import { BudgetPlanner } from '../core/budget-planner.js';
 
 export const ReportsView = () => {
   const container = document.createElement('div');
-  container.className = 'view-reports view-container';
+  container.className = 'view-reports view-container reports-view-container';
+
   container.style.display = 'flex';
   container.style.flexDirection = 'column';
   // ... remaining state logic ...

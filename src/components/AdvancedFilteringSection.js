@@ -160,13 +160,10 @@ export const AdvancedFilteringSection = () => {
     style.id = STYLE_ID;
     style.textContent = `
       .advanced-filtering-section {
-        margin-top: var(--spacing-lg);
         margin-bottom: var(--spacing-lg);
-        padding: var(--spacing-md);
-        background: var(--color-surface);
-        border-radius: var(--radius-lg);
-        border: 1px solid var(--color-border);
+        padding: var(--spacing-lg);
       }
+
 
       .advanced-filtering-toggle {
         display: flex;

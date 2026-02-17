@@ -22,7 +22,7 @@
 }
 
 /* Reports View Container - Match financial planning view */
-.reports-view-container .view-reports.view-container {
+.reports-view-container {
   height: 100%;
   overflow: hidden;
   display: flex;

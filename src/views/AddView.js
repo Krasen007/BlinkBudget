@@ -21,9 +21,15 @@ export const AddView = ({ accountId } = {}) => {
 
   const header = document.createElement('div');
   header.style.marginBottom = SPACING.MD;
+  header.style.position = 'sticky';
+  header.style.top = '0';
+  header.style.zIndex = '10';
+  header.style.background = 'var(--color-background)'; // Use CSS variable
+  header.style.padding = `${SPACING.SM} 0`;
   header.style.flexDirection = 'column';
   header.style.alignItems = 'stretch';
   header.style.gap = SPACING.SM;
+
 
   const topRow = document.createElement('div');
   topRow.style.display = 'flex';

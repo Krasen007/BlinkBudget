@@ -391,8 +391,9 @@ export const TransactionForm = ({
       okBtn.style.padding = 'var(--spacing-sm)';
       okBtn.style.fontSize = FONT_SIZES.BASE;
       okBtn.style.height = 'auto';
-      okBtn.style.minHeight = '30px'; // Match delete button height
+      okBtn.style.minHeight = '44px'; // Accessible touch target
     }
+
 
     okBtn.addEventListener('click', () => {
       // Validate amount
@@ -466,8 +467,9 @@ export const TransactionForm = ({
         deleteBtn.style.padding = 'var(--spacing-sm)';
         deleteBtn.style.fontSize = FONT_SIZES.BASE;
         deleteBtn.style.height = 'auto';
-        deleteBtn.style.minHeight = '30px'; // Compact but clickable
+        deleteBtn.style.minHeight = '44px'; // Compact but clickable
       }
+
 
       // Remove hover effects (animations)
 
