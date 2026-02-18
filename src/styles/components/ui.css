@@ -183,7 +183,9 @@
   cursor: pointer;
   transform: translateX(100%);
   opacity: 0;
-  transition: transform var(--transition-fast) ease-out, opacity var(--transition-fast) ease-out;
+  transition:
+    transform var(--transition-fast) ease-out,
+    opacity var(--transition-fast) ease-out;
   will-change: transform, opacity;
 }
 
@@ -192,10 +194,18 @@
   opacity: 1;
 }
 
-.toast-success { background-color: var(--color-success); }
-.toast-error { background-color: var(--color-error); }
-.toast-warning { background-color: var(--color-warning); }
-.toast-info { background-color: var(--color-primary); }
+.toast-success {
+  background-color: var(--color-success);
+}
+.toast-error {
+  background-color: var(--color-error);
+}
+.toast-warning {
+  background-color: var(--color-warning);
+}
+.toast-info {
+  background-color: var(--color-primary);
+}
 
 .toast-icon {
   font-size: 16px;
@@ -242,7 +252,6 @@
   justify-content: center;
   transition: none; /* Blazing fast */
 }
-
 
 @media (width <= calc(var(--breakpoint-md) - 1px)) {
   .dashboard-stat-card {
@@ -514,6 +523,3 @@
   font-size: var(--font-size-sm);
   margin: 0;
 }
-
-
-

@@ -187,7 +187,11 @@ function createInsightCard(insight, currency = 'EUR') {
 /**
  * Simple Insights Component
  */
-export const SimpleInsights = (transactions, currentPeriod, currency = 'EUR') => {
+export const SimpleInsights = (
+  transactions,
+  currentPeriod,
+  currency = 'EUR'
+) => {
   const container = document.createElement('div');
   container.className = 'simple-insights';
   container.style.cssText = `

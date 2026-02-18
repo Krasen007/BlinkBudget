@@ -97,4 +97,3 @@ function getInsightBackgroundColor(type) {
   };
   return colors[type] || 'rgba(156, 163, 175, 0.05)';
 }
-

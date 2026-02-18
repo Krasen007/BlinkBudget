@@ -23,10 +23,10 @@ export const TransactionList = ({
   accounts,
   highlightTransactionIds = null,
   currentDateFilter = null,
-  onDateClick = () => { },
+  onDateClick = () => {},
   currentCategoryFilter = null,
-  onCategoryClick = () => { },
-  onFilterClear = () => { }, // New callback for clearing general filter
+  onCategoryClick = () => {},
+  onFilterClear = () => {}, // New callback for clearing general filter
 }) => {
   const listContainer = document.createElement('div');
   listContainer.className = 'dashboard-transactions-container';
@@ -35,7 +35,6 @@ export const TransactionList = ({
 
   listContainer.style.display = 'flex';
   listContainer.style.flexDirection = 'column';
-
 
   // Title container with metrics
   const titleContainer = document.createElement('div');
@@ -117,7 +116,11 @@ export const TransactionList = ({
         switch (action) {
           case 'add-transaction':
             // Navigate to add transaction
-            if (typeof window !== 'undefined' && window.Router && typeof window.Router.navigate === 'function') {
+            if (
+              typeof window !== 'undefined' &&
+              window.Router &&
+              typeof window.Router.navigate === 'function'
+            ) {
               Router.navigate('add-expense');
             } else {
               console.warn('Router.navigate not available');
@@ -163,7 +166,6 @@ export const TransactionList = ({
       margin: 0,
       borderTop: '1px solid var(--color-surface-hover)',
     });
-
 
     transactions.forEach(transaction => {
       const shouldHighlight =

@@ -82,7 +82,7 @@ describe('Progressive Data Loading', () => {
     for (let i = 0; i < 1000; i++) {
       const randomDate = new Date(
         testStartDate.getTime() +
-        Math.random() * (testEndDate.getTime() - testStartDate.getTime())
+          Math.random() * (testEndDate.getTime() - testStartDate.getTime())
       );
       mockTransactions.push({
         id: `transaction-${i}`,

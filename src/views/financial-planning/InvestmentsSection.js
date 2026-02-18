@@ -1084,7 +1084,8 @@ function createInvestmentsList(chartRenderer, activeCharts) {
               console.error('Failed to load confirmation dialog:', err);
               AlertDialog({
                 title: 'Error',
-                message: 'Unable to open confirmation dialog — please try again.',
+                message:
+                  'Unable to open confirmation dialog — please try again.',
               });
             });
         });

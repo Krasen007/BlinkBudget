@@ -54,7 +54,10 @@ export class AnalyticsEngine {
         .catch(error => {
           // Remove cache entry on rejection to avoid caching failures
           this.memoizedCalculations.delete(key);
-          console.warn('Memoized calculation failed, cache entry removed:', error);
+          console.warn(
+            'Memoized calculation failed, cache entry removed:',
+            error
+          );
         });
 
       return result;

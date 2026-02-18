@@ -36,7 +36,6 @@ body {
   align-items: center;
 }
 
-
 #app {
   width: 100%;
   max-width: var(--container-max-width);
@@ -47,7 +46,6 @@ body {
   overflow: hidden;
   height: 100%; /* Force height to fill parent */
 }
-
 
 input {
   appearance: none;

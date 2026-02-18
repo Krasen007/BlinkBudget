@@ -21,12 +21,7 @@ import { RiskAssessor } from '../core/risk-assessor.js';
 import { GoalPlanner } from '../core/goal-planner.js';
 import { ChartRenderer } from '../components/ChartRenderer.js';
 
-import {
-  COLORS,
-  SPACING,
-  TIMING,
-  STORAGE_KEYS,
-} from '../utils/constants.js';
+import { COLORS, SPACING, TIMING, STORAGE_KEYS } from '../utils/constants.js';
 
 import { debounce } from '../utils/touch-utils.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
@@ -86,8 +81,6 @@ export const FinancialPlanningView = () => {
   headerContainer.className = 'view-header view-sticky view-header-container';
   container.appendChild(headerContainer);
 
-
-
   // Main content area
   const content = document.createElement('div');
   content.className = 'view-content';
@@ -95,14 +88,12 @@ export const FinancialPlanningView = () => {
 
   container.appendChild(content);
 
-
   /**
    * Create header with title and back button
    */
   function createHeader() {
     const header = document.createElement('header');
     header.className = 'view-header-row';
-
 
     // Left side with back button and title
     const leftSide = document.createElement('div');
@@ -116,7 +107,6 @@ export const FinancialPlanningView = () => {
     backButton.className = 'view-back-btn';
     backButton.title = 'Back to Dashboard';
 
-
     backButton.addEventListener('click', () => Router.navigate('dashboard'));
 
     // Title
@@ -124,7 +114,6 @@ export const FinancialPlanningView = () => {
     title.id = 'financial-planning-title';
     title.textContent = 'Financial Planning';
     title.className = 'view-title';
-
 
     leftSide.appendChild(backButton);
     leftSide.appendChild(title);
@@ -154,8 +143,6 @@ export const FinancialPlanningView = () => {
       width: '100%',
     });
 
-
-
     const sections = [
       { id: 'overview', label: 'Overview', icon: '📊' },
       { id: 'forecasts', label: 'Forecasts', icon: '🔮' },
@@ -165,7 +152,6 @@ export const FinancialPlanningView = () => {
       { id: 'scenarios', label: 'Scenarios', icon: '🔄' },
       { id: 'budgets', label: 'Budgets', icon: '📉' },
     ];
-
 
     sections.forEach(section => {
       const tab = document.createElement('button');
@@ -182,8 +168,6 @@ export const FinancialPlanningView = () => {
         <span class="tab-icon">${section.icon}</span>
         <span class="tab-label">${section.label}</span>
       `;
-
-
 
       // Click handler
       tab.addEventListener('click', () => {
@@ -385,7 +369,6 @@ export const FinancialPlanningView = () => {
     // Shared title update etc
   }, TIMING.DEBOUNCE_RESIZE);
 
-
   // Event listeners
   window.addEventListener('resize', updateResponsiveLayout);
 
@@ -461,7 +444,6 @@ export const FinancialPlanningView = () => {
   // Initialize
   updateResponsiveLayout();
   loadPlanningData();
-
 
   return container;
 };

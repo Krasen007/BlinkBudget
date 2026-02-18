@@ -75,8 +75,6 @@ export const TransactionForm = ({
   accountGroup.appendChild(accLabel);
 
   const accSelect = createSelect({
-
-
     id: 'source-account-select',
     name: 'source_account',
     options: accounts.map(acc => ({
@@ -172,7 +170,6 @@ export const TransactionForm = ({
   amountGroup.appendChild(amountLabel);
 
   amountGroup.appendChild(amountInput);
-
 
   // Add tutorial data attribute to amount input
   if (smartAmountInput) {
@@ -352,7 +349,6 @@ export const TransactionForm = ({
     form.appendChild(noteField);
   }
 
-
   // 7.5. Cancel Button (for Add mode)
   if (showCancelButton && onCancel) {
     const cancelBtn = document.createElement('button');
@@ -396,7 +392,6 @@ export const TransactionForm = ({
       okBtn.style.height = 'auto';
       okBtn.style.minHeight = '44px'; // Accessible touch target
     }
-
 
     okBtn.addEventListener('click', () => {
       // Validate amount
@@ -472,7 +467,6 @@ export const TransactionForm = ({
         deleteBtn.style.height = 'auto';
         deleteBtn.style.minHeight = '44px'; // Compact but clickable
       }
-
 
       // Remove hover effects (animations)
 

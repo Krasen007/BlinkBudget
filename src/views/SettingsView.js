@@ -8,11 +8,7 @@ import { BackupRestoreSection } from '../components/BackupRestoreSection.js';
 import { AccountDeletionSection } from '../components/AccountDeletionSection.js';
 import { SmartSuggestionsSection } from '../components/SmartSuggestionsSection.js';
 import { AdvancedFilteringSection } from '../components/AdvancedFilteringSection.js';
-import {
-  SPACING,
-  TOUCH_TARGETS,
-  FONT_SIZES,
-} from '../utils/constants.js';
+import { SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
 
 import { createButton } from '../utils/dom-factory.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
@@ -25,11 +21,8 @@ export const SettingsView = () => {
   const header = document.createElement('div');
   header.className = 'view-header view-sticky view-header-container';
 
-
-
   const topRow = document.createElement('div');
   topRow.className = 'view-header-row';
-
 
   // Left side with back button and title
   const leftSide = document.createElement('div');
@@ -43,14 +36,12 @@ export const SettingsView = () => {
   backButton.className = 'view-back-btn';
   backButton.title = 'Back to Dashboard';
 
-
   backButton.addEventListener('click', () => Router.navigate('dashboard'));
 
   // Title
   const title = document.createElement('h2');
   title.textContent = 'Settings';
   title.className = 'view-title';
-
 
   leftSide.appendChild(backButton);
   leftSide.appendChild(title);
@@ -162,8 +153,6 @@ export const SettingsView = () => {
   // Account Deletion Section
   const accountDeletionSection = AccountDeletionSection();
   content.appendChild(accountDeletionSection);
-
-
 
   const handleStorageUpdate = e => {
     console.log(

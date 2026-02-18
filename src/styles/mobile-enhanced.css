@@ -399,7 +399,6 @@ body.keyboard-hidden {
   overflow: hidden; /* View container handles scrolling */
 }
 
-
 /* Input-specific keyboard behaviors */
 body.input-focused {
   /* General input focused state */

@@ -110,7 +110,10 @@ export const CategoryCard = (
   // Add frequency if available
   if (frequencyData && frequencyData[category.name]) {
     const frequency = frequencyData[category.name];
-    if (frequency.averageVisitsPerWeek !== undefined && frequency.averageVisitsPerWeek !== null) {
+    if (
+      frequency.averageVisitsPerWeek !== undefined &&
+      frequency.averageVisitsPerWeek !== null
+    ) {
       const freqDisplay = document.createElement('div');
       freqDisplay.style.fontSize = '0.75rem';
       freqDisplay.style.color = COLORS.TEXT_MUTED;

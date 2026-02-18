@@ -132,7 +132,10 @@ export class SimpleInsightsService {
     if (currentPeriod) {
       try {
         const previousPeriod = this.getPreviousPeriod(currentPeriod);
-        const previousTransactions = this.getTransactionsForPeriod(transactions, previousPeriod);
+        const previousTransactions = this.getTransactionsForPeriod(
+          transactions,
+          previousPeriod
+        );
         previousSpending = previousTransactions
           .filter(t => t.amount < 0)
           .reduce((sum, t) => sum + Math.abs(t.amount), 0);
@@ -152,9 +155,10 @@ export class SimpleInsightsService {
         change: currentSpending,
         percentage: currentSpending > 0 ? 100 : 0,
         direction: currentSpending > 0 ? 'up' : 'stable',
-        description: currentSpending > 0
-          ? `Current spending: ${Math.abs(currentSpending)} (no previous data for comparison)`
-          : 'No spending in current period',
+        description:
+          currentSpending > 0
+            ? `Current spending: ${Math.abs(currentSpending)} (no previous data for comparison)`
+            : 'No spending in current period',
       };
     }
 

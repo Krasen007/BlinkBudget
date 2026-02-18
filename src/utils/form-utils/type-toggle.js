@@ -139,7 +139,6 @@ export const createTypeToggleGroup = (options = {}) => {
   legend.className = 'visually-hidden';
   typeGroup.appendChild(legend);
 
-
   // Responsive grid: 4 columns on larger screens, 2 rows of 2 on very small screens
   const updateGridLayout = () => {
     if (window.innerWidth < 400) {

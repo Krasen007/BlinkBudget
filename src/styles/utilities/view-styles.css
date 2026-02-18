@@ -12,8 +12,6 @@
   -webkit-overflow-scrolling: touch;
 }
 
-
-
 /* View container with fixed content (no scrolling) */
 .view-container.view-fixed {
   overflow: hidden;
@@ -43,7 +41,6 @@
   padding: var(--spacing-sm) 0;
 }
 
-
 .view-header.view-compact {
   margin-bottom: var(--spacing-sm);
 }
@@ -60,7 +57,6 @@
   min-height: 0;
   gap: var(--spacing-lg);
 }
-
 
 /* Enhanced content variants */
 .view-content.view-scrollable {
@@ -361,8 +357,6 @@
   margin-bottom: var(--spacing-md); /* Consistent gap to content */
 }
 
-
-
 /* View Title - Standard title styling */
 .view-title {
   margin: 0;
@@ -377,7 +371,6 @@
     font-size: 2rem;
   }
 }
-
 
 @media (--sm) {
   .view-title {
@@ -400,7 +393,6 @@
   margin-bottom: 0; /* Let view-header-container handle the gap */
   flex-shrink: 0;
 }
-
 
 .view-tab {
   display: flex;
@@ -452,7 +444,6 @@
   display: flex;
   flex-direction: column;
 }
-
 
 .view-mobile-full-width {
   width: 100%;

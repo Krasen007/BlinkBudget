@@ -62,9 +62,10 @@ describe('Success Feedback Integration', () => {
 
     // Verify highlight was applied (classes should be set)
     expect(transactionItem.classList.contains('success-highlight')).toBe(true);
-    expect(transactionItem.classList.contains('success-highlight-active')).toBe(true);
+    expect(transactionItem.classList.contains('success-highlight-active')).toBe(
+      true
+    );
   });
-
 
   it('should not highlight transaction when no highlight ID is set', () => {
     const mockTransaction = {
@@ -89,9 +90,10 @@ describe('Success Feedback Integration', () => {
     document.body.appendChild(transactionItem);
 
     // Verify no highlight styles are applied
-    expect(transactionItem.classList.contains('success-highlight-active')).toBe(false);
+    expect(transactionItem.classList.contains('success-highlight-active')).toBe(
+      false
+    );
   });
-
 
   it('should handle transfer transactions with highlighting', async () => {
     const mockTransferTransaction = {
@@ -133,7 +135,8 @@ describe('Success Feedback Integration', () => {
     await new Promise(resolve => setTimeout(resolve, 150));
 
     // Verify highlight was applied
-    expect(transactionItem.classList.contains('success-highlight-active')).toBe(true);
+    expect(transactionItem.classList.contains('success-highlight-active')).toBe(
+      true
+    );
   });
-
 });

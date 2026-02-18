@@ -204,7 +204,6 @@ export const TimePeriodSelector = (options = {}) => {
     button.className = 'view-tab'; // Standardized class
     button.dataset.period = period.key;
 
-
     // Initialize month offset for last month button and year offset for year button
     if (period.key === 'lastMonth') {
       button.dataset.monthOffset = '-1';
@@ -240,7 +239,6 @@ export const TimePeriodSelector = (options = {}) => {
       arrowContainer.style.justifyContent = 'center'; // Center the text
       arrowContainer.style.width = '100%';
       arrowContainer.style.position = 'relative';
-
 
       // Left arrow for navigation - fixed position
       const leftArrow = document.createElement('span');
@@ -290,7 +288,6 @@ export const TimePeriodSelector = (options = {}) => {
       textContainer.style.display = 'block';
       textContainer.appendChild(labelSpan);
 
-
       arrowContainer.appendChild(leftArrow);
       arrowContainer.appendChild(textContainer);
       button.appendChild(arrowContainer);
@@ -314,7 +311,6 @@ export const TimePeriodSelector = (options = {}) => {
       button.style.background = COLORS.PRIMARY;
       button.style.color = 'white';
     }
-
 
     return button;
   }

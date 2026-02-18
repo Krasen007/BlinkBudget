@@ -178,7 +178,8 @@ describe('AccountDeletionService', () => {
 
     it('should handle Firebase unavailability gracefully', async () => {
       // Arrange
-      const { firebaseStatus } = await import('../../src/core/firebase-config.js');
+      const { firebaseStatus } =
+        await import('../../src/core/firebase-config.js');
       firebaseStatus.canUseAuth = false;
 
       // Act
@@ -317,7 +318,8 @@ describe('AccountDeletionService', () => {
   describe('local-only mode', () => {
     it('should work without Firebase', async () => {
       // Arrange
-      const { firebaseStatus } = await import('../../src/core/firebase-config.js');
+      const { firebaseStatus } =
+        await import('../../src/core/firebase-config.js');
       firebaseStatus.isInitialized = false;
       firebaseStatus.canUseAuth = false;
 

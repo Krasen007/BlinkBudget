@@ -162,9 +162,9 @@ export const EmergencyExportService = {
         lastUpdated:
           transactions.length > 0
             ? transactions.reduce((max, tx) => {
-              const time = new Date(tx.updatedAt || tx.createdAt).getTime();
-              return time > max ? time : max;
-            }, 0)
+                const time = new Date(tx.updatedAt || tx.createdAt).getTime();
+                return time > max ? time : max;
+              }, 0)
             : null,
       };
     } catch (error) {
@@ -195,10 +195,10 @@ export const EmergencyExportService = {
         lastUpdated:
           accounts.length > 0
             ? Math.max(
-              ...accounts.map(acc =>
-                new Date(acc.updatedAt || acc.createdAt).getTime()
+                ...accounts.map(acc =>
+                  new Date(acc.updatedAt || acc.createdAt).getTime()
+                )
               )
-            )
             : null,
       };
     } catch (error) {
@@ -248,10 +248,10 @@ export const EmergencyExportService = {
         lastUpdated:
           goals.length > 0
             ? Math.max(
-              ...goals.map(goal =>
-                new Date(goal.updatedAt || goal.createdAt).getTime()
+                ...goals.map(goal =>
+                  new Date(goal.updatedAt || goal.createdAt).getTime()
+                )
               )
-            )
             : null,
       };
     } catch (error) {
@@ -278,7 +278,10 @@ export const EmergencyExportService = {
           quantity: investment.quantity || 0,
           purchasePrice: investment.purchasePrice || 0,
           currentPrice: investment.currentPrice || 0,
-          purchaseDate: investment.purchaseDate || investment.createdAt || new Date().toISOString(),
+          purchaseDate:
+            investment.purchaseDate ||
+            investment.createdAt ||
+            new Date().toISOString(),
           type: investment.type || 'stock',
           createdAt: investment.createdAt || new Date().toISOString(),
           updatedAt:
@@ -289,10 +292,10 @@ export const EmergencyExportService = {
         lastUpdated:
           investments.length > 0
             ? Math.max(
-              ...investments.map(inv =>
-                new Date(inv.updatedAt || inv.createdAt).getTime()
+                ...investments.map(inv =>
+                  new Date(inv.updatedAt || inv.createdAt).getTime()
+                )
               )
-            )
             : null,
       };
     } catch (error) {
@@ -328,10 +331,10 @@ export const EmergencyExportService = {
         lastUpdated:
           budgets.length > 0
             ? Math.max(
-              ...budgets.map(budget =>
-                new Date(budget.updatedAt || budget.createdAt).getTime()
+                ...budgets.map(budget =>
+                  new Date(budget.updatedAt || budget.createdAt).getTime()
+                )
               )
-            )
             : null,
       };
     } catch (error) {

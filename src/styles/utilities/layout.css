@@ -422,7 +422,6 @@
 /* View container layout - prevents main scrolling on mobile */
 /* Removed aggressive [class^='view-'] selector that was breaking layouts */
 
-
 /* Touch-friendly utilities */
 .touch-target {
   min-height: var(--touch-target-min);

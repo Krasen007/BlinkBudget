@@ -1,5 +1,3 @@
-
-
 /* CSS Custom Properties for Reports Layout */
 .category-selector-section {
   /* Force it to be outside any parent containers */
@@ -14,10 +12,6 @@
   --tooltip-space: 100px;
   --tooltip-padding: 80px;
 }
-
-
-
-
 
 /* Charts Section - Match financial planning sections */
 .view-reports .charts-section {
@@ -391,7 +385,6 @@
     -webkit-overflow-scrolling: touch;
   }
 
-
   .reports-content {
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
@@ -513,7 +506,6 @@
     hsl(var(--primary-hue), var(--primary-sat), var(--primary-light));
   outline-offset: 2px;
 }
-
 
 /* Chart Canvas Interactions - Simplified */
 .charts-section canvas {
@@ -817,9 +809,7 @@
   padding-bottom: calc(var(--spacing-lg) * 3);
 }
 
-.view-reports
-  .category-breakdown-section.expanded
-  + .income-expense-section {
+.view-reports .category-breakdown-section.expanded + .income-expense-section {
   margin-top: calc(var(--spacing-xl) * 4);
 }
 

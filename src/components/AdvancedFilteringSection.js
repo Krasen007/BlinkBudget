@@ -4,8 +4,10 @@
  */
 
 import { SettingsService } from '../core/settings-service.js';
-import { showSuccessToast, showInfoToast } from '../utils/toast-notifications.js';
-
+import {
+  showSuccessToast,
+  showInfoToast,
+} from '../utils/toast-notifications.js';
 
 export const AdvancedFilteringSection = () => {
   const container = document.createElement('div');
@@ -94,7 +96,6 @@ export const AdvancedFilteringSection = () => {
     }
   };
 
-
   // Description
   const description = document.createElement('div');
   description.className = 'toggle-description';
@@ -139,8 +140,6 @@ export const AdvancedFilteringSection = () => {
     </div>
   `;
   container.appendChild(infoSection);
-
-
 
   return container;
 };

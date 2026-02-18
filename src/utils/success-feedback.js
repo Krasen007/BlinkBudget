@@ -3,8 +3,6 @@
  * Provides subtle visual confirmation for newly added/updated transactions
  */
 
-
-
 /**
  * Highlight a transaction item with subtle success animation
  * @param {HTMLElement} element - Element to highlight
@@ -21,7 +19,6 @@ export const highlightTransactionSuccess = (element, duration = 1500) => {
     element.classList.remove('success-highlight-active');
   }, duration);
 };
-
 
 /**
  * Store the ID of the last added transaction for highlighting

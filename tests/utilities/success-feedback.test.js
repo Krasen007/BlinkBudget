@@ -31,7 +31,6 @@ describe('Success Feedback', () => {
     expect(element.classList.contains('success-highlight-active')).toBe(true);
   });
 
-
   it('should handle null element gracefully in highlight function', () => {
     expect(() => {
       highlightTransactionSuccess(null);

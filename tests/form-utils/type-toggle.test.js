@@ -48,7 +48,6 @@ describe('Type Toggle Group', () => {
       expect(result.container.style.gap).toBe('var(--spacing-sm)');
     });
 
-
     test('sets responsive grid layout for desktop', () => {
       window.innerWidth = 800;
       const result = createTypeToggleGroup();

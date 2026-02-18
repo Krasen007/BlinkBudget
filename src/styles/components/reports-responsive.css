@@ -3,7 +3,9 @@
 
 /* Base mobile styles (default) */
 .view-reports {
-  --view-reports-horizontal-padding: var(--spacing-sm); /* Reduced from md/lg (8px) */
+  --view-reports-horizontal-padding: var(
+    --spacing-sm
+  ); /* Reduced from md/lg (8px) */
 
   padding: 0 var(--view-reports-horizontal-padding);
   min-height: 100vh;
@@ -52,7 +54,6 @@
 .view-reports .chart-section {
   padding: var(--spacing-md) !important; /* 12px instead of 16px */
 }
-
 
 /* Mobile chart sizing */
 .view-reports canvas {
@@ -139,7 +140,6 @@
     padding: 0;
     margin: 0;
   }
-
 
   .view-reports canvas {
     min-height: 200px;
@@ -462,7 +462,6 @@
 }
 
 /* Safe area support for devices with notches */
-
 
 /* Keyboard navigation enhancements for different screen sizes */
 @media (width <= 767px) {

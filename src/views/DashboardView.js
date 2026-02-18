@@ -7,13 +7,7 @@ import { FilteringService } from '../core/analytics/FilteringService.js';
 import { AuthService } from '../core/auth-service.js';
 import { SettingsService } from '../core/settings-service.js';
 import { Router } from '../core/router.js';
-import {
-  COLORS,
-  SPACING,
-  STORAGE_KEYS,
-} from '../utils/constants.js';
-
-
+import { COLORS, SPACING, STORAGE_KEYS } from '../utils/constants.js';
 
 import { getTransactionToHighlight } from '../utils/success-feedback.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
@@ -24,15 +18,12 @@ export const DashboardView = () => {
   container.className = 'view-dashboard view-container';
   container.setAttribute('data-tutorial-target', 'dashboard');
 
-
   // Header with sticky positioning
   const header = document.createElement('div');
   header.className = 'view-header view-sticky view-header-container';
 
-
   const topRow = document.createElement('div');
   topRow.className = 'view-header-row';
-
 
   // Left side with title and category manager button
   const leftSide = document.createElement('div');
@@ -56,8 +47,6 @@ export const DashboardView = () => {
   leftSide.appendChild(title);
   title.className = 'view-title';
 
-
-
   // Right side controls - use navigation helper
   const rightControls = createNavigationButtons('dashboard');
 
@@ -74,7 +63,6 @@ export const DashboardView = () => {
   accountSelect.className = 'view-select';
   accountSelect.style.marginTop = SPACING.SM;
   accountSelect.style.width = '100%';
-
 
   // Account Options Logic
   let currentAccountFilter =
@@ -130,7 +118,6 @@ export const DashboardView = () => {
   content.className = 'view-content';
   content.id = 'dashboard-content';
   container.appendChild(content);
-
 
   // Advanced Filter Panel (Conditional)
   const advancedFilteringEnabled =
@@ -258,7 +245,6 @@ export const DashboardView = () => {
     const statsContainer = document.createElement('div');
     statsContainer.className = 'view-stats-container';
 
-
     // Get current month name for the label
     const monthNames = [
       'January',
@@ -355,11 +341,6 @@ export const DashboardView = () => {
     content.appendChild(transactionList);
   };
 
-
-
-
-
-
   renderDashboard();
 
   const handleStorageUpdate = e => {
@@ -388,7 +369,6 @@ export const DashboardView = () => {
     window.removeEventListener('storage-updated', handleStorageUpdate);
     window.removeEventListener('auth-state-changed', handleAuthChange);
   };
-
 
   return container;
 };

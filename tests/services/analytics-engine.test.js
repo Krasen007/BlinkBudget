@@ -239,20 +239,14 @@ describe('AnalyticsEngine', () => {
       };
 
       // Cache a result using calculateIncomeVsExpenses (which uses the cache)
-      analyticsEngine.calculateIncomeVsExpenses(
-        sampleTransactions,
-        timePeriod
-      );
+      analyticsEngine.calculateIncomeVsExpenses(sampleTransactions, timePeriod);
       expect(analyticsEngine.getCacheStats().size).toBe(1);
 
       // Invalidate cache
       analyticsEngine.invalidateCacheOnDataUpdate();
 
       // Next call should miss cache
-      analyticsEngine.calculateIncomeVsExpenses(
-        sampleTransactions,
-        timePeriod
-      );
+      analyticsEngine.calculateIncomeVsExpenses(sampleTransactions, timePeriod);
       const stats = analyticsEngine.getCacheStats();
       // Cache was cleared and recalculated = 1 entry in cache
       expect(stats.size).toBe(1);
@@ -266,7 +260,10 @@ describe('AnalyticsEngine', () => {
 
       // Cache some results using methods that use the cache
       analyticsEngine.calculateIncomeVsExpenses(sampleTransactions, timePeriod);
-      analyticsEngine.calculateCategoryBreakdown(sampleTransactions, timePeriod);
+      analyticsEngine.calculateCategoryBreakdown(
+        sampleTransactions,
+        timePeriod
+      );
       // Only calculateIncomeVsExpenses uses the cache (not memoize)
       expect(analyticsEngine.getCacheStats().size).toBe(1);
 

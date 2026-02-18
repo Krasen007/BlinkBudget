@@ -156,8 +156,6 @@ export const ReportsView = () => {
   content.id = 'reports-content';
   container.appendChild(content);
 
-
-
   // State components
   const loadingState = createLoadingState();
   const emptyState = createEmptyState();
@@ -171,7 +169,6 @@ export const ReportsView = () => {
     const header = document.createElement('header');
     header.className = 'view-header-row';
 
-
     // Left side with back button and title
     const leftSide = document.createElement('div');
     leftSide.style.display = 'flex';
@@ -184,17 +181,13 @@ export const ReportsView = () => {
     backButton.className = 'view-back-btn';
     backButton.title = 'Back to Dashboard';
 
-
     backButton.addEventListener('click', () => Router.navigate('dashboard'));
-
 
     // Title
     const title = document.createElement('h2');
     title.id = 'reports-title';
     title.textContent = 'Reports';
     title.className = 'view-title';
-
-
 
     leftSide.appendChild(backButton);
     leftSide.appendChild(title);
@@ -228,8 +221,6 @@ export const ReportsView = () => {
     // Create header container that includes both header and time period selector
     const headerContainer = document.createElement('div');
     headerContainer.className = 'view-header view-sticky view-header-container';
-
-
 
     headerContainer.appendChild(header);
     headerContainer.appendChild(timePeriodSelectorComponent);
@@ -890,11 +881,7 @@ export const ReportsView = () => {
         currentTimePeriod,
         null // previousPeriod - could be implemented later
       );
-      patternInsightsSection.style.setProperty(
-        'margin-top',
-        '0',
-        'important'
-      );
+      patternInsightsSection.style.setProperty('margin-top', '0', 'important');
       chartsSection.appendChild(patternInsightsSection);
       chartRenderResults.push({
         name: 'Spending Pattern Analysis',
@@ -917,11 +904,7 @@ export const ReportsView = () => {
     if (currentData.insights && currentData.insights.length > 0) {
       try {
         const insightsSection = InsightsSection(currentData);
-        insightsSection.style.setProperty(
-          'margin-top',
-          '0',
-          'important'
-        );
+        insightsSection.style.setProperty('margin-top', '0', 'important');
         chartsSection.appendChild(insightsSection);
         chartRenderResults.push({ name: 'Financial Insights', success: true });
       } catch (insightsError) {

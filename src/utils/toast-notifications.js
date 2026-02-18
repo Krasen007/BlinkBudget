@@ -7,7 +7,6 @@
 
 import { TIMING, COLORS } from './constants.js';
 
-
 /**
  * Toast notification types
  */
@@ -48,7 +47,6 @@ function initializeContainer() {
 
   document.body.appendChild(toastContainer);
 }
-
 
 /**
  * Get toast configuration by type
@@ -120,7 +118,6 @@ function createToastElement(message, type, options = {}) {
   toast.appendChild(messageElement);
   toast.appendChild(closeButton);
 
-
   // Event handlers
   const handleRemove = () => {
     removeToast(toastId);
@@ -155,7 +152,6 @@ function animateToastIn(toast) {
   });
 }
 
-
 /**
  * Animate toast out and remove
  * @param {string} toastId - Toast ID
@@ -173,7 +169,6 @@ function animateToastOut(toastId) {
 
   // Animate out using class
   element.classList.remove('active');
-
 
   // Remove after animation and call onClose callback
   setTimeout(() => {

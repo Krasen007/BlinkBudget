@@ -30,7 +30,6 @@ export const AddView = ({ accountId } = {}) => {
   header.style.alignItems = 'stretch';
   header.style.gap = SPACING.SM;
 
-
   const topRow = document.createElement('div');
   topRow.style.display = 'flex';
   topRow.style.justifyContent = 'space-between';
