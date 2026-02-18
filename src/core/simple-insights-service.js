@@ -28,7 +28,7 @@ export class SimpleInsightsService {
       }
 
       // 2. Spending trend
-      const trend = this.getSpendingTrend(transactions);
+      const trend = this.getSpendingTrend(transactions, currentPeriod);
       if (trend) {
         insights.push({
           type: 'spending_trend',
@@ -37,6 +37,7 @@ export class SimpleInsightsService {
           amount: trend.change,
           percentage: trend.percentage,
           direction: trend.direction,
+          action: 'View trends',
           priority: 'medium',
         });
       }
@@ -118,7 +119,7 @@ export class SimpleInsightsService {
   /**
    * Get spending trend compared to previous period
    */
-  static getSpendingTrend(transactions) {
+  static getSpendingTrend(transactions, currentPeriod) {
     if (!transactions || transactions.length === 0) return null;
 
     // Get current period spending
@@ -126,28 +127,55 @@ export class SimpleInsightsService {
       .filter(t => t.amount < 0)
       .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
-    // Simplified approach: just compare to a basic threshold or average
-    // Since we don't have currentPeriod, we'll use a simple comparison
-    const monthlyThreshold = 1000; // Simple threshold for comparison
+    // Get previous period spending for comparison
+    let previousSpending = 0;
+    if (currentPeriod) {
+      try {
+        const previousPeriod = this.getPreviousPeriod(currentPeriod);
+        const previousTransactions = this.getTransactionsForPeriod(transactions, previousPeriod);
+        previousSpending = previousTransactions
+          .filter(t => t.amount < 0)
+          .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+      } catch (error) {
+        console.warn('Could not calculate previous period spending:', error);
+        // Fall back to simple threshold if previous period calculation fails
+        previousSpending = 1000;
+      }
+    } else {
+      // Fall back to simple threshold if no current period provided
+      previousSpending = 1000;
+    }
 
-    const change = currentSpending - monthlyThreshold;
-    const percentage = Math.round((change / monthlyThreshold) * 100);
+    // Handle edge case where previousSpending is 0
+    if (previousSpending === 0) {
+      return {
+        change: currentSpending,
+        percentage: currentSpending > 0 ? 100 : 0,
+        direction: currentSpending > 0 ? 'up' : 'stable',
+        description: currentSpending > 0
+          ? `Current spending: ${Math.abs(currentSpending)} (no previous data for comparison)`
+          : 'No spending in current period',
+      };
+    }
+
+    const change = currentSpending - previousSpending;
+    const percentage = Math.round((change / previousSpending) * 100);
     const direction = change > 0 ? 'up' : change < 0 ? 'down' : 'stable';
 
     let description = '';
     if (direction === 'up') {
-      description = `Spending increased by ${Math.abs(percentage)}% compared to average`;
+      description = `Spending increased by ${Math.abs(percentage)}% compared to previous period`;
     } else if (direction === 'down') {
-      description = `Spending decreased by ${Math.abs(percentage)}% compared to average`;
+      description = `Spending decreased by ${Math.abs(percentage)}% compared to previous period`;
     } else {
-      description = 'Spending remained stable this month';
+      description = 'Spending remained stable compared to previous period';
     }
 
     return {
-      description,
       change,
       percentage,
       direction,
+      description,
     };
   }
 
@@ -211,8 +239,17 @@ export class SimpleInsightsService {
    * Helper to get previous period
    */
   static getPreviousPeriod(currentPeriod) {
-    // Simplified - just subtract one month
+    // Validate input
+    if (!currentPeriod || !currentPeriod.startDate) {
+      throw new Error('Invalid currentPeriod: missing startDate');
+    }
+
     const date = new Date(currentPeriod.startDate);
+    if (isNaN(date.getTime())) {
+      throw new Error('Invalid currentPeriod.startDate: not a valid date');
+    }
+
+    // Simplified - just subtract one month
     date.setMonth(date.getMonth() - 1);
     return {
       startDate: date,

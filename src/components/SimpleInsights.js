@@ -11,7 +11,7 @@ import { SimpleInsightsService } from '../core/simple-insights-service.js';
 /**
  * Create insight card component
  */
-function createInsightCard(insight) {
+function createInsightCard(insight, currency = 'EUR') {
   const card = document.createElement('div');
   card.className = 'insight-card';
   card.style.cssText = `
@@ -108,7 +108,7 @@ function createInsightCard(insight) {
     amountEl = document.createElement('div');
     amountEl.textContent = new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'EUR',
+      currency: currency,
     }).format(insight.amount);
     amountEl.style.cssText = `
       font-weight: 600;
@@ -150,6 +150,20 @@ function createInsightCard(insight) {
       } else if (insight.type === 'budget_alert') {
         // Navigate to budget settings
         console.log('Navigate to budget settings');
+      } else if (insight.type === 'spending_trend') {
+        // Navigate to reports/trends view
+        console.log('Navigate to spending trends:', insight.message);
+      } else if (insight.type === 'unusual_spending') {
+        // Navigate to detailed analysis
+        console.log('Navigate to unusual spending analysis:', insight.message);
+      } else if (insight.action && typeof insight.action === 'function') {
+        // Generic action callback
+        insight.action(insight);
+      } else {
+        // Default/fallback case
+        console.warn('Unhandled insight type:', insight.type);
+        actionBtn.disabled = true;
+        actionBtn.textContent = 'No Action';
       }
     });
 
@@ -173,7 +187,7 @@ function createInsightCard(insight) {
 /**
  * Simple Insights Component
  */
-export const SimpleInsights = (transactions, currentPeriod) => {
+export const SimpleInsights = (transactions, currentPeriod, currency = 'EUR') => {
   const container = document.createElement('div');
   container.className = 'simple-insights';
   container.style.cssText = `
@@ -203,7 +217,7 @@ export const SimpleInsights = (transactions, currentPeriod) => {
 
   // Add insight cards
   insights.forEach(insight => {
-    const card = createInsightCard(insight);
+    const card = createInsightCard(insight, currency);
     container.appendChild(card);
   });
 

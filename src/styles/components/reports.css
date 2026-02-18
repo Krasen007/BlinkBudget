@@ -514,13 +514,6 @@
   outline-offset: 2px;
 }
 
-/* Focus management for accessibility */
-.charts-section:focus-within {
-  outline: 2px solid
-    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light));
-  outline-offset: 2px;
-}
-
 
 /* Chart Canvas Interactions - Simplified */
 .charts-section canvas {

@@ -1,11 +1,11 @@
-import { COLORS } from './constants.js';
-
 /**
  * Touch Gestures Utility
  *
  * Provides swipe gesture support for mobile navigation.
  * Optimized for one-handed operation and large tap targets.
  */
+
+import { COLORS } from './constants.js';
 
 export class TouchGestures {
   /**
@@ -101,12 +101,19 @@ export class TouchGestures {
       }
     };
 
+    const handleTouchCancel = () => {
+      // Reset touch state on cancel
+      touchStartTime = 0;
+    };
+
     chartElement.addEventListener('touchstart', handleTouchStart);
     chartElement.addEventListener('touchend', handleTouchEnd);
+    chartElement.addEventListener('touchcancel', handleTouchCancel);
 
     return () => {
       chartElement.removeEventListener('touchstart', handleTouchStart);
       chartElement.removeEventListener('touchend', handleTouchEnd);
+      chartElement.removeEventListener('touchcancel', handleTouchCancel);
     };
   }
 
@@ -190,7 +197,7 @@ export class TouchGestures {
     button.addEventListener('touchcancel', touchCancelHandler);
 
     button.addEventListener('click', _e => {
-      // If the click comes from a recent touch, treat it as the same interaction
+      // If click comes from a recent touch, treat it as the same interaction
       if (isTouch) {
         isTouch = false;
         onClick(_e);
@@ -218,7 +225,7 @@ export class TouchGestures {
     let startX = null;
     let startY = null;
 
-    const touchStartHandler = e => {
+    const handleTouchStart = e => {
       // Prevent default only for gestures that would conflict with native scrolling
       if (!e || !e.touches) return;
 
@@ -233,8 +240,9 @@ export class TouchGestures {
       startY = e.touches[0].clientY;
     };
 
-    const touchMoveHandler = e => {
+    const handleTouchMove = e => {
       if (!startX || !e || !e.touches || e.touches.length === 0) return;
+
       const currentX = e.touches[0].clientX;
       const currentY = e.touches[0].clientY;
       const diffX = Math.abs(currentX - startX);
@@ -246,16 +254,16 @@ export class TouchGestures {
       }
     };
 
-    chartCanvas.addEventListener('touchstart', touchStartHandler, {
+    chartCanvas.addEventListener('touchstart', handleTouchStart, {
       passive: false,
     });
-    chartCanvas.addEventListener('touchmove', touchMoveHandler, {
+    chartCanvas.addEventListener('touchmove', handleTouchMove, {
       passive: false,
     });
 
     const cleanup = () => {
-      chartCanvas.removeEventListener('touchstart', touchStartHandler);
-      chartCanvas.removeEventListener('touchmove', touchMoveHandler);
+      chartCanvas.removeEventListener('touchstart', handleTouchStart);
+      chartCanvas.removeEventListener('touchmove', handleTouchMove);
     };
 
     // Attach cleanup for callers and return chartCanvas for backward compatibility

@@ -117,7 +117,11 @@ export const TransactionList = ({
         switch (action) {
           case 'add-transaction':
             // Navigate to add transaction
-            Router.navigate('add-expense');
+            if (typeof window !== 'undefined' && window.Router && typeof window.Router.navigate === 'function') {
+              Router.navigate('add-expense');
+            } else {
+              console.warn('Router.navigate not available');
+            }
             break;
           case 'clear-filters':
             // Clear all filters - date, category, and general filter

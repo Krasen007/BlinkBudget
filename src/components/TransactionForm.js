@@ -148,6 +148,7 @@ export const TransactionForm = ({
       initialValue: initialValues.amount?.toString() || '',
     });
     amountInput = smartAmountInput;
+    amountInput.id = 'transaction-amount-input';
     // Add touch target classes
     smartAmountInput.classList.add('touch-target-primary');
   } else {
@@ -157,6 +158,7 @@ export const TransactionForm = ({
       externalDateInput,
     });
     amountInput = amountState.input;
+    amountInput.id = 'transaction-amount-input';
   }
 
   const amountGroup = document.createElement('div');
@@ -327,12 +329,13 @@ export const TransactionForm = ({
   form.appendChild(amountAccountRow);
 
   // Category Label
+  const catLabelId = 'category-selector-label';
   const catLabel = document.createElement('label');
   catLabel.textContent = 'Category';
-  catLabel.setAttribute('for', 'category-selector-container');
+  catLabel.id = catLabelId;
   catLabel.className = 'visually-hidden';
   form.appendChild(catLabel);
-  categorySelector.container.id = 'category-selector-container';
+  categorySelector.container.setAttribute('aria-labelledby', catLabelId);
   form.appendChild(categorySelector.container);
 
   // Type Toggle (Label handled by fieldset/legend in utility later)

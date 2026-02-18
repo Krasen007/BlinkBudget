@@ -71,8 +71,6 @@ export const DashboardView = () => {
   const accountSelect = document.createElement('select');
   accountSelect.id = 'account-filter-select';
   accountSelect.name = 'account-filter';
-  accountSelect.id = 'account-filter-select';
-  accountSelect.name = 'account-filter';
   accountSelect.className = 'view-select';
   accountSelect.style.marginTop = SPACING.SM;
   accountSelect.style.width = '100%';

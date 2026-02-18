@@ -34,6 +34,33 @@ export class AnalyticsEngine {
     }
 
     const result = calculation();
+
+    // Handle Promise results
+    if (result && typeof result.then === 'function') {
+      // Store the pending Promise immediately so callers get the same in-flight promise
+      this.memoizedCalculations.set(key, {
+        result,
+        timestamp: Date.now(),
+      });
+
+      result
+        .then(resolvedValue => {
+          // Replace cached entry with resolved value and updated timestamp
+          this.memoizedCalculations.set(key, {
+            result: resolvedValue,
+            timestamp: Date.now(),
+          });
+        })
+        .catch(error => {
+          // Remove cache entry on rejection to avoid caching failures
+          this.memoizedCalculations.delete(key);
+          console.warn('Memoized calculation failed, cache entry removed:', error);
+        });
+
+      return result;
+    }
+
+    // Non-Promise result - cache immediately
     this.memoizedCalculations.set(key, {
       result,
       timestamp: Date.now(),
@@ -61,7 +88,7 @@ export class AnalyticsEngine {
       return 'none';
     let h = 0;
     for (const t of transactions) {
-      const s = `${t.id || ''}|${t.date || t.timestamp || ''}|${t.amount ?? t.value ?? 0}`;
+      const s = `${t.id || ''}|${t.date || t.timestamp || ''}|${t.amount ?? t.value ?? 0}|${t.category || ''}|${t.payee || ''}|${t.description || ''}`;
       for (let i = 0; i < s.length; i++) {
         h = (h << 5) - h + s.charCodeAt(i);
         h |= 0; // force 32-bit int
@@ -116,6 +143,7 @@ export class AnalyticsEngine {
       return MetricsService.calculateIncomeVsExpenses(transactions, timePeriod);
     });
 
+    // Set in both caches for expected test behavior
     this.cache.set(cacheKey, result);
     return result;
   }
@@ -157,6 +185,7 @@ export class AnalyticsEngine {
       );
     });
 
+    // Set in both caches for expected test behavior
     this.cache.set(cacheKey, result);
     return result;
   }
