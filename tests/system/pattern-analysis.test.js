@@ -432,7 +432,7 @@ describe('Integration Tests', () => {
       // Daily coffee habit
       ...Array.from({ length: 5 }, (_, i) => ({
         id: `coffee-${i}`,
-        timestamp: `2024-01-0${8 + i}T08:30:00Z`,
+        timestamp: `2024-01-${String(8 + i).padStart(2, '0')}T08:30:00Z`,
         amount: 5.5,
         type: 'expense',
         category: 'Coffee',

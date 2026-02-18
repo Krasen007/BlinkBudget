@@ -59,7 +59,7 @@ describe('DateInput Component', () => {
 
     const realInput = dateInput.querySelector('input[type="date"]');
 
-    // Test that click event is handled (logs are added for debugging)
+    // Test that click event is handled without errors
     // The input should not be readonly
     expect(realInput.readOnly).toBe(false);
     expect(realInput.disabled).toBe(false);

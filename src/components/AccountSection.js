@@ -6,20 +6,13 @@
 import { Button } from './Button.js';
 import { AccountService } from '../core/account-service.js';
 import { generateId } from '../utils/id-utils.js';
-import { ConfirmDialog, AlertDialog, PromptDialog } from './ConfirmDialog.js';
 import {
   COLORS,
   SPACING,
   TOUCH_TARGETS,
   FONT_SIZES,
-  ACCOUNT_TYPES,
 } from '../utils/constants.js';
-import {
-  createInput,
-  createSelect,
-  createFlexContainer,
-} from '../utils/dom-factory.js';
-import { sanitizeInput, escapeHtml } from '../utils/security-utils.js';
+import { sanitizeInput } from '../utils/security-utils.js';
 
 export const AccountSection = () => {
   const section = document.createElement('div');
@@ -30,247 +23,223 @@ export const AccountSection = () => {
   title.textContent = 'Accounts';
   title.className = 'mobile-settings-title';
   title.style.marginBottom = SPACING.MD;
+
   section.appendChild(title);
 
-  const accountList = document.createElement('div');
-  accountList.className = 'mobile-account-list';
-  Object.assign(accountList.style, {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: SPACING.MD,
-    marginBottom: SPACING.MD,
-  });
+  // Account List Container
+  const accountListContainer = document.createElement('div');
+  accountListContainer.style.display = 'flex';
+  accountListContainer.style.flexDirection = 'column';
+  accountListContainer.style.gap = SPACING.SM;
 
-  const renderAccounts = () => {
-    accountList.innerHTML = '';
-    const accounts = AccountService.getAccounts();
-
-    accounts.forEach(acc => {
-      const item = document.createElement('div');
-      item.className = 'mobile-account-item';
-      Object.assign(item.style, {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: SPACING.XS,
-        padding: SPACING.MD,
-        border: `1px solid ${COLORS.BORDER}`,
-        borderRadius: 'var(--radius-md)',
-        background: COLORS.SURFACE_HOVER,
-        minHeight: TOUCH_TARGETS.MIN_HEIGHT,
-      });
-
-      const info = document.createElement('div');
-      info.className = 'mobile-account-info';
-      Object.assign(info.style, {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'baseline',
-        gap: SPACING.MD,
-        width: '100%',
-      });
-
-      const name = document.createElement('div');
-      name.className = 'mobile-account-name-container';
-      name.textContent = acc.name + (acc.isDefault ? ' (Default)' : '');
-      Object.assign(name.style, {
-        fontWeight: '600',
-        fontSize: FONT_SIZES.BASE,
-        color: acc.isDefault ? COLORS.PRIMARY_LIGHT : COLORS.TEXT_MAIN,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-        flex: '1',
-      });
-
-      const type = document.createElement('div');
-      type.textContent = acc.type.charAt(0).toUpperCase() + acc.type.slice(1);
-      Object.assign(type.style, {
-        fontSize: '0.75rem',
-        color: COLORS.TEXT_MUTED,
-        flexShrink: '0',
-      });
-
-      info.appendChild(name);
-      info.appendChild(type);
-
-      const actions = document.createElement('div');
-      actions.className = 'mobile-account-actions';
-      actions.style.marginTop = SPACING.SM;
-
-      // Rename button
-      const renameBtn = document.createElement('button');
-      renameBtn.textContent = 'Rename';
-      renameBtn.className = 'btn btn-ghost touch-target mobile-action-btn';
-      renameBtn.onclick = () => {
+  // Add Account Button
+  const addAccountBtn = Button({
+    text: 'Add Account',
+    variant: 'primary',
+    onClick: () => {
+      import('./ConfirmDialog.js').then(({ PromptDialog }) => {
         PromptDialog({
-          title: 'Rename Account',
-          initialValue: acc.name,
-          placeholder: 'Account Name',
-          onSave: newName => {
-            if (newName && newName.trim() !== '') {
-              const trimmedName = sanitizeInput(newName.trim(), 50); // Typical account name limit
-              if (
-                AccountService.isAccountDuplicate(trimmedName, acc.type, acc.id)
-              ) {
-                AlertDialog({
-                  message: `An account named "${escapeHtml(trimmedName)}" of type "${escapeHtml(acc.type)}" already exists.`,
-                });
-                return;
-              }
-              acc.name = trimmedName;
-              AccountService.saveAccount(acc);
+          title: 'Add New Account',
+          message: 'Enter account name:',
+          placeholder: 'e.g., Checking, Savings, Credit Card',
+          confirmText: 'Add',
+          onConfirm: async (accountName) => {
+            if (!accountName || accountName.trim().length === 0) {
+              return;
+            }
+
+            const sanitized = sanitizeInput(accountName.trim());
+            const newAccount = {
+              id: generateId(),
+              name: sanitized,
+              type: 'bank',
+              balance: 0,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            };
+
+            try {
+              AccountService.add(newAccount);
               renderAccounts();
+            } catch (error) {
+              console.error('Error adding account:', error);
             }
           },
         });
-      };
-      actions.appendChild(renameBtn);
-
-      if (!acc.isDefault) {
-        // Set Default button
-        const makeDefaultBtn = document.createElement('button');
-        makeDefaultBtn.textContent = 'Set Default';
-        makeDefaultBtn.className =
-          'btn btn-ghost touch-target mobile-action-btn';
-        makeDefaultBtn.onclick = () => {
-          acc.isDefault = true;
-          AccountService.saveAccount(acc);
-          renderAccounts();
-        };
-        actions.appendChild(makeDefaultBtn);
-
-        // Delete button
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = 'Delete';
-        deleteBtn.className =
-          'btn btn-ghost touch-target mobile-action-btn mobile-delete-btn';
-        deleteBtn.onclick = () => {
-          ConfirmDialog({
-            title: `Delete account "${escapeHtml(acc.name)}"?`,
-            message:
-              'Transactions will remain but might be orphaned if not handled.',
-            onConfirm: () => {
-              if (AccountService.deleteAccount(acc.id)) {
-                renderAccounts();
-              } else {
-                AlertDialog({ message: 'Cannot delete the last account.' });
-              }
-            },
-          });
-        };
-        actions.appendChild(deleteBtn);
-      }
-
-      item.appendChild(info);
-      item.appendChild(actions);
-      accountList.appendChild(item);
-    });
-  };
-
-  renderAccounts();
-  section.appendChild(accountList);
-
-  // Add Account Form
-  const addContainer = createFlexContainer({
-    className: 'mobile-add-account-form',
-    direction: 'column',
-    gap: SPACING.MD,
-    style: {
-      marginTop: SPACING.MD,
+      }).catch(error => {
+        console.error('Error loading ConfirmDialog:', error);
+      });
     },
   });
 
-  const nameInput = createInput({
-    id: 'new-account-name',
-    name: 'new-account-name',
-    autocomplete: 'off',
-    placeholder: 'Account Name',
-    className: 'touch-target mobile-form-input',
-    style: {
-      fontSize: FONT_SIZES.PREVENT_ZOOM,
-      caretColor: COLORS.TEXT_MAIN, // Ensure cursor is visible
-      cursor: 'text', // Ensure text cursor on hover
-    },
-  });
-
-  const typeSelect = createSelect({
-    id: 'new-account-type',
-    name: 'new-account-type',
-    className: 'touch-target mobile-form-select input-select',
-    style: {
-      fontSize: FONT_SIZES.PREVENT_ZOOM,
-    },
-    options: [
-      { value: ACCOUNT_TYPES.CHECKING, text: 'Checking' },
-      { value: ACCOUNT_TYPES.SAVINGS, text: 'Savings' },
-      { value: ACCOUNT_TYPES.CREDIT_CARD, text: 'Credit Card' },
-      { value: ACCOUNT_TYPES.CASH, text: 'Cash' },
-    ],
-  });
-
-  // Add mobile focus handling
-  [nameInput, typeSelect].forEach(input => {
-    input.addEventListener('focus', () => {
-      if (window.mobileUtils?.isMobile()) {
-        window.mobileUtils.preventInputZoom(input);
-        window.mobileUtils.scrollIntoViewAboveKeyboard(input);
-      }
-    });
-  });
-
-  const errorMsg = document.createElement('div');
-  Object.assign(errorMsg.style, {
-    color: COLORS.ERROR,
-    fontSize: FONT_SIZES.SM,
-    marginTop: `-${SPACING.SM}`,
-    marginBottom: SPACING.SM,
-    display: 'none',
-  });
-
-  // Clear error on input
-  nameInput.addEventListener('input', () => {
-    errorMsg.style.display = 'none';
-    nameInput.style.borderColor = COLORS.BORDER;
-  });
-
-  const addBtn = Button({
-    text: 'Add Account',
-    variant: 'secondary',
-    onClick: () => {
-      const name = sanitizeInput(nameInput.value.trim(), 50);
-      const type = typeSelect.value;
-      if (name) {
-        if (AccountService.isAccountDuplicate(name, type)) {
-          errorMsg.textContent = `An account named "${name}" of type "${type}" already exists.`;
-          errorMsg.style.display = 'block';
-          nameInput.style.borderColor = COLORS.ERROR;
-          return;
-        }
-        AccountService.saveAccount({
-          id: generateId(),
-          name: name,
-          type: type,
-          isDefault: false,
-        });
-        nameInput.value = '';
-        errorMsg.style.display = 'none';
-        renderAccounts();
-      }
-    },
-  });
-  addBtn.className += ' touch-target mobile-form-button';
-  Object.assign(addBtn.style, {
+  addAccountBtn.className += ' touch-target mobile-form-button';
+  Object.assign(addAccountBtn.style, {
     width: '100%',
     minHeight: TOUCH_TARGETS.MIN_HEIGHT,
     padding: SPACING.MD,
     fontSize: FONT_SIZES.BASE,
   });
 
-  addContainer.appendChild(nameInput);
-  addContainer.appendChild(errorMsg);
-  addContainer.appendChild(typeSelect);
-  addContainer.appendChild(addBtn);
-  section.appendChild(addContainer);
+  section.appendChild(addAccountBtn);
+
+  // Render accounts
+  const renderAccounts = () => {
+    // Clear existing accounts
+    while (accountListContainer.firstChild) {
+      accountListContainer.removeChild(accountListContainer.firstChild);
+    }
+
+    try {
+      const accounts = AccountService.getAccounts();
+
+      if (accounts.length === 0) {
+        const emptyState = document.createElement('div');
+        emptyState.style.cssText = `
+          text-align: center;
+          padding: ${SPACING.LG};
+          color: ${COLORS.TEXT_MUTED};
+          font-size: var(--font-size-sm);
+        `;
+        emptyState.textContent = 'No accounts yet. Add your first account above.';
+        accountListContainer.appendChild(emptyState);
+        return;
+      }
+
+      accounts.forEach(account => {
+        const accountItem = document.createElement('div');
+        accountItem.style.cssText = `
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: ${SPACING.SM} ${SPACING.MD};
+          background: ${COLORS.SURFACE};
+          border: 1px solid ${COLORS.BORDER};
+          border-radius: 8px;
+          margin-bottom: ${SPACING.XS};
+        `;
+
+        const accountInfo = document.createElement('div');
+        accountInfo.style.cssText = `
+          flex: 1;
+        `;
+
+        const accountName = document.createElement('div');
+        accountName.textContent = account.name;
+        accountName.style.cssText = `
+          font-weight: 500;
+          color: ${COLORS.TEXT_PRIMARY};
+          margin-bottom: 2px;
+        `;
+
+        const accountType = document.createElement('div');
+        accountType.textContent = account.type || 'bank';
+        accountType.style.cssText = `
+          font-size: var(--font-size-sm);
+          color: ${COLORS.TEXT_MUTED};
+        `;
+
+        accountInfo.appendChild(accountName);
+        accountInfo.appendChild(accountType);
+
+        const actionsContainer = document.createElement('div');
+        actionsContainer.style.display = 'flex';
+        actionsContainer.style.gap = SPACING.XS;
+
+        // Rename Button
+        const renameBtn = document.createElement('button');
+        renameBtn.textContent = 'Rename';
+        renameBtn.style.cssText = `
+          padding: ${SPACING.XS} ${SPACING.SM};
+          background: ${COLORS.PRIMARY};
+          color: white;
+          border: none;
+          border-radius: 4px;
+          font-size: ${FONT_SIZES.SM};
+          cursor: pointer;
+          min-height: 32px;
+        `;
+        renameBtn.addEventListener('click', () => {
+          import('./ConfirmDialog.js').then(({ PromptDialog }) => {
+            PromptDialog({
+              title: 'Rename Account',
+              message: 'Enter new name:',
+              placeholder: account.name,
+              confirmText: 'Rename',
+              onConfirm: async (newName) => {
+                if (!newName || newName.trim().length === 0) {
+                  return;
+                }
+
+                try {
+                  AccountService.update(account.id, {
+                    ...account,
+                    name: sanitizeInput(newName.trim()),
+                    updatedAt: new Date().toISOString(),
+                  });
+                  renderAccounts();
+                } catch (error) {
+                  console.error('Error renaming account:', error);
+                }
+              },
+            });
+          }).catch(error => {
+            console.error('Error loading ConfirmDialog:', error);
+          });
+        });
+
+        // Delete Button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.style.cssText = `
+          padding: ${SPACING.XS} ${SPACING.SM};
+          background: ${COLORS.DANGER};
+          color: white;
+          border: none;
+          border-radius: 4px;
+          font-size: ${FONT_SIZES.SM};
+          cursor: pointer;
+          min-height: 32px;
+        `;
+        deleteBtn.addEventListener('click', () => {
+          import('./ConfirmDialog.js').then(({ ConfirmDialog, AlertDialog }) => {
+            ConfirmDialog({
+              title: 'Delete Account',
+              message: `Are you sure you want to delete "${account.name}"? This action cannot be undone.`,
+              confirmText: 'Delete',
+              cancelText: 'Cancel',
+              onConfirm: async () => {
+                try {
+                  AccountService.remove(account.id);
+                  renderAccounts();
+                } catch (error) {
+                  console.error('Error deleting account:', error);
+                  AlertDialog({
+                    message: 'Failed to delete account. Please try again.',
+                  });
+                }
+              },
+            });
+          }).catch(error => {
+            console.error('Error loading ConfirmDialog:', error);
+          });
+        });
+
+        actionsContainer.appendChild(renameBtn);
+        actionsContainer.appendChild(deleteBtn);
+
+        accountItem.appendChild(accountInfo);
+        accountItem.appendChild(actionsContainer);
+        accountListContainer.appendChild(accountItem);
+      });
+    } catch (error) {
+      console.error('Error loading accounts:', error);
+    }
+  };
+
+  // Initial render
+  renderAccounts();
+
+  section.appendChild(accountListContainer);
 
   return section;
 };

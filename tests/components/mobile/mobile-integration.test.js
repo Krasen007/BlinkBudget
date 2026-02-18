@@ -60,6 +60,7 @@ describe('Mobile Navigation Integration', () => {
 
   it('should provide proper accessibility attributes', () => {
     const nav = MobileNavigation({ currentRoute: 'reports' });
+    document.body.appendChild(nav);
 
     expect(nav.getAttribute('role')).toBe('navigation');
     expect(nav.getAttribute('aria-label')).toBe('Main navigation');

@@ -33,7 +33,7 @@ vi.mock('../../src/utils/constants.js', () => ({
   },
 }));
 
-vi.mock('../src/utils/financial-planning-helpers.js', () => ({
+vi.mock('../../src/utils/financial-planning-helpers.js', () => ({
   createSectionContainer: vi.fn((id, title, icon) => {
     const section = document.createElement('section');
     section.id = id;
@@ -66,7 +66,7 @@ vi.mock('../src/utils/financial-planning-helpers.js', () => ({
 }));
 
 // Mock InsightsGenerator - added static methods that were causing crashes
-vi.mock('../src/core/insights-generator.js', () => ({
+vi.mock('../../src/core/insights-generator.js', () => ({
   InsightsGenerator: {
     topMovers: vi.fn(() => ({ topGainers: [], topLosers: [] })),
     compareTimelines: vi.fn(() => ({ timeline: [], totalChange: 0 })),
@@ -118,7 +118,7 @@ describe('InsightsSection', () => {
 
   it('should display placeholder when no planning data provided', () => {
     const section = InsightsSection(null, mockChartRenderer, mockActiveCharts);
-    const placeholder = section.querySelector('.section-placeholder');
+    const placeholder = section.querySelector('.placeholder');
     expect(placeholder).toBeTruthy();
   });
 });

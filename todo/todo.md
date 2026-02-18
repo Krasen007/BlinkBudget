@@ -7,7 +7,7 @@ DO NOT IMPLEMENT: Local data encryption for sensitive information in localStorag
 DO NOT IMPLEMENT: Mask technical error messages from Firestore operations
 DO NOT IMPLEMENT: make security.md following all the security best practices
 DO NOT IMPLEMENT: add possibility to import transactions from a csv file
-DO NOT IMPLEMENT: add possible language selection with preloaded categories of the perefered language
+DO NOT IMPLEMENT: add possible language selection with preloaded categories of the preferred language
 
 DO NOT IMPLEMENT: release as windows store app https://learn.microsoft.com/en-us/microsoft-edge/progressive-web-apps/how-to/microsoft-store
 DO NOT IMPLEMENT: use Ionic's Capacitor or Cordova to make android app

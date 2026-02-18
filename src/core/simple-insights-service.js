@@ -254,10 +254,16 @@ export class SimpleInsightsService {
     }
 
     // Simplified - just subtract one month
-    date.setMonth(date.getMonth() - 1);
+    const previousMonth = date.getMonth() - 1;
+    const year = previousMonth < 0 ? date.getFullYear() - 1 : date.getFullYear();
+    const month = previousMonth < 0 ? 11 : previousMonth;
+    // Get last day of target month to avoid overflow
+    const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
+    const day = Math.min(date.getDate(), lastDayOfMonth);
+    const startDate = new Date(year, month, day);
     return {
-      startDate: date,
-      endDate: new Date(date.getFullYear(), date.getMonth() + 1, 0),
+      startDate: startDate,
+      endDate: new Date(year, month + 1, 0),
     };
   }
 

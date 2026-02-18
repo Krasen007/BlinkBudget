@@ -93,7 +93,7 @@ export const CategoryCard = (
   freq.style.fontSize = '0.75rem';
   freq.style.color = COLORS.TEXT_MUTED;
   freq.style.textAlign = 'center';
-  const transactionCount = category.count || 1;
+  const transactionCount = category.count ?? 1;
   freq.textContent = `${transactionCount} transaction${transactionCount > 1 ? 's' : ''}`;
   card.appendChild(freq);
 

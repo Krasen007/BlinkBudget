@@ -6,7 +6,6 @@
 
 import { CustomCategoryService } from '../core/custom-category-service.js';
 import { Button } from './Button.js';
-import { ConfirmDialog } from './ConfirmDialog.js';
 import { Router } from '../core/router.js';
 
 export const CustomCategoryManager = ({
@@ -762,21 +761,22 @@ export const CustomCategoryManager = ({
   }
 
   function confirmDeleteCategory(category) {
-    ConfirmDialog({
-      title: 'Delete Category',
-      message: `Are you sure you want to delete "${category.name}"? This action cannot be undone.`,
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-      onConfirm: () => {
-        try {
-          CustomCategoryService.remove(category.id, true);
-          renderCategories();
-          onCategoryChange && onCategoryChange();
-        } catch (error) {
-          console.error('Error deleting category:', error);
-          // Show generic error message (error details logged to console)
-          const errorDiv = document.createElement('div');
-          errorDiv.style.cssText = `
+    import('./ConfirmDialog.js').then(({ ConfirmDialog }) => {
+      ConfirmDialog({
+        title: 'Delete Category',
+        message: `Are you sure you want to delete "${category.name}"? This action cannot be undone.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        onConfirm: () => {
+          try {
+            CustomCategoryService.remove(category.id, true);
+            renderCategories();
+            onCategoryChange && onCategoryChange();
+          } catch (error) {
+            console.error('Error deleting category:', error);
+            // Show generic error message (error details logged to console)
+            const errorDiv = document.createElement('div');
+            errorDiv.style.cssText = `
             position: fixed;
             top: 20px;
             right: 20px;
@@ -788,11 +788,14 @@ export const CustomCategoryManager = ({
             font-size: var(--font-size-sm);
             max-width: 300px;
           `;
-          errorDiv.textContent = 'Failed to delete category. Please try again.';
-          document.body.appendChild(errorDiv);
-          setTimeout(() => errorDiv.remove(), 5000);
-        }
-      },
+            errorDiv.textContent = 'Failed to delete category. Please try again.';
+            document.body.appendChild(errorDiv);
+            setTimeout(() => errorDiv.remove(), 5000);
+          }
+        },
+      });
+    }).catch(error => {
+      console.error('Error loading ConfirmDialog:', error);
     });
   }
 
@@ -802,6 +805,8 @@ export const CustomCategoryManager = ({
       if (success) {
         renderCategories();
         onCategoryChange && onCategoryChange();
+      } else {
+        console.warn('Move operation returned false for category:', categoryId);
       }
     } catch (error) {
       console.error('Error moving category:', error);

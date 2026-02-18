@@ -55,15 +55,17 @@ describe('Success Feedback', () => {
 
   it('should handle missing mobileUtils gracefully', () => {
     const originalMobileUtils = window.mobileUtils;
-    window.mobileUtils = null;
+    try {
+      window.mobileUtils = null;
 
-    const element = document.createElement('div');
-    document.body.appendChild(element);
+      const element = document.createElement('div');
+      document.body.appendChild(element);
 
-    expect(() => {
-      highlightTransactionSuccess(element);
-    }).not.toThrow();
-
-    window.mobileUtils = originalMobileUtils;
+      expect(() => {
+        highlightTransactionSuccess(element);
+      }).not.toThrow();
+    } finally {
+      window.mobileUtils = originalMobileUtils;
+    }
   });
 });

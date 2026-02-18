@@ -42,7 +42,7 @@ vi.mock('../../src/components/financial-planning/StatsCard.js', () => ({
   }),
 }));
 
-vi.mock('../src/components/financial-planning/EmergencyFundCard.js', () => ({
+vi.mock('../../src/components/financial-planning/EmergencyFundCard.js', () => ({
   EmergencyFundCard: vi.fn(assessment => {
     const card = document.createElement('div');
     card.className = 'emergency-fund-card';
@@ -55,7 +55,7 @@ vi.mock('../src/components/financial-planning/EmergencyFundCard.js', () => ({
   }),
 }));
 
-vi.mock('../src/utils/financial-planning-helpers.js', () => ({
+vi.mock('../../src/utils/financial-planning-helpers.js', () => ({
   createSectionContainer: vi.fn((id, title, icon) => {
     const section = document.createElement('section');
     section.id = id;

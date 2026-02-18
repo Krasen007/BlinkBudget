@@ -212,7 +212,6 @@ export class AnalyticsCache {
    */
   async invalidate(pattern) {
     await this._acquireLock();
-    await this._acquireLock();
 
     try {
       const keysToDelete = [];

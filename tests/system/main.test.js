@@ -1,4 +1,4 @@
-// tests/main.test.js
+// tests/system/main.test.js
 import { describe, it, expect } from 'vitest';
 
 describe('BlinkBudget Core', () => {

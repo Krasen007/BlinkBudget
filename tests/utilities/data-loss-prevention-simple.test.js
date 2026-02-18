@@ -21,7 +21,7 @@ vi.mock('../../src/core/transaction-service.js', () => ({
   },
 }));
 
-vi.mock('../src/core/account-service.js', () => ({
+vi.mock('../../src/core/account-service.js', () => ({
   AccountService: {
     getAccounts: vi.fn(() => [
       {
@@ -37,7 +37,7 @@ vi.mock('../src/core/account-service.js', () => ({
   },
 }));
 
-vi.mock('../src/core/settings-service.js', () => ({
+vi.mock('../../src/core/settings-service.js', () => ({
   SettingsService: {
     getAllSettings: vi.fn(() => ({
       theme: 'dark',
@@ -47,13 +47,13 @@ vi.mock('../src/core/settings-service.js', () => ({
   },
 }));
 
-vi.mock('../src/core/auth-service.js', () => ({
+vi.mock('../../src/core/auth-service.js', () => ({
   AuthService: {
     getUserId: vi.fn(() => 'test-user-123'),
   },
 }));
 
-vi.mock('../src/core/audit-service.js', () => ({
+vi.mock('../../src/core/audit-service.js', () => ({
   auditService: {
     log: vi.fn(),
   },
@@ -68,9 +68,9 @@ global.URL.createObjectURL = vi.fn(() => 'mock-url');
 global.URL.revokeObjectURL = vi.fn();
 
 // Mock Blob
-global.Blob = vi.fn((content, options) => ({
+global.Blob = vi.fn((content, options = {}) => ({
   content,
-  type: options.type,
+  type: options?.type,
 }));
 
 // Mock crypto API to avoid issues in test environment

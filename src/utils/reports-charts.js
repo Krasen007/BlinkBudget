@@ -337,12 +337,15 @@ export async function createCategoryTrendsChart(
   if (monthsOfData < 3) {
     // Render informative message instead of null
     const messageDiv = document.createElement('div');
+    messageDiv.className = 'chart-section';
     messageDiv.style.cssText = `
       text-align: center;
       padding: ${SPACING.XL};
       color: ${COLORS.TEXT_MUTED};
       font-size: 0.875rem;
       line-height: 1.5;
+      background: ${COLORS.SURFACE};
+      border-radius: var(--radius-lg);
     `;
 
     const icon = document.createElement('div');

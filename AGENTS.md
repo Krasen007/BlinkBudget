@@ -93,10 +93,12 @@ Adherence to these standards is crucial for maintaining code quality, consistenc
   - Minimize complexity; favor simple, direct DOM manipulation where straightforward.
 - **Performance**:
   - Optimize for fast loading times and smooth interactions (3 clicks rule).
-    Important:
-    DOM-based Cross-site Scripting (XSS): Unsanitized input from browser storage flows
-    Hardcoded Non-Cryptographic Secret: Avoid hardcoding values that are meant to be secret.
-    Use of Hardcoded Passwords: Do not hardcode passwords in code.
+- **Performance**:
+  - Optimize for fast loading times and smooth interactions (3 clicks rule).
+- **Security**:
+  - **DOM-based XSS Prevention**: Sanitize all user input and data from browser storage before rendering to the DOM to prevent cross-site scripting attacks.
+  - **Secret Management**: Never hardcode secrets, API keys, or credentials in source code. Use environment variables or secure configuration management.
+  - **Password Security**: Never hardcode passwords in code. Use secure authentication mechanisms and credential storage.
 
 ---
 

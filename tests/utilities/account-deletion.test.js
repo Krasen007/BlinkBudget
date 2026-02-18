@@ -90,7 +90,7 @@ vi.mock('../../src/core/budget-service.js', () => ({
   },
 }));
 
-vi.mock('../src/core/emergency-export-service.js', () => ({
+vi.mock('../../src/core/emergency-export-service.js', () => ({
   EmergencyExportService: {
     createEmergencyExport: vi.fn().mockResolvedValue({
       success: true,

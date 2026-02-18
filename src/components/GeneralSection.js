@@ -7,7 +7,6 @@ import { Button } from './Button.js';
 import { Router } from '../core/router.js';
 import { AuthService } from '../core/auth-service.js';
 import { InstallService } from '../core/install.js';
-import { PWAInstructionsDialog } from './ConfirmDialog.js';
 import { SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
 
 export const GeneralSection = () => {
@@ -57,7 +56,9 @@ export const GeneralSection = () => {
         }
       } else {
         // Show manual instructions
-        PWAInstructionsDialog();
+        import('./ConfirmDialog.js').then(({ PWAInstructionsDialog }) => {
+          PWAInstructionsDialog();
+        });
       }
     },
   });

@@ -1,4 +1,4 @@
-// tests/button.test.js
+// tests/components/button.test.js
 import { describe, it, expect, vi } from 'vitest';
 import { Button } from '../../src/components/Button.js';
 
