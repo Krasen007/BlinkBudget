@@ -127,9 +127,9 @@ function createInsightCard(insight, currency = 'EUR') {
   card.appendChild(content);
 
   // Action button if available — append after icon & content so layout is [icon] [content] [action]
-  if (insight.action) {
+  if (insight.action || insight.onAction) {
     const actionBtn = document.createElement('button');
-    actionBtn.textContent = insight.action;
+    actionBtn.textContent = insight.action || 'Action';
     actionBtn.style.cssText = `
       background: ${COLORS.PRIMARY};
       color: white;
@@ -141,6 +141,12 @@ function createInsightCard(insight, currency = 'EUR') {
       white-space: nowrap;
       transition: all 0.2s ease;
     `;
+
+    // Disable button if no valid action is available
+    if (!insight.action && !insight.onAction) {
+      actionBtn.disabled = true;
+      actionBtn.textContent = 'No Action';
+    }
 
     actionBtn.addEventListener('click', () => {
       // Handle action based on insight type
@@ -156,14 +162,12 @@ function createInsightCard(insight, currency = 'EUR') {
       } else if (insight.type === 'unusual_spending') {
         // Navigate to detailed analysis
         console.log('Navigate to unusual spending analysis:', insight.message);
-      } else if (insight.action && typeof insight.action === 'function') {
+      } else if (typeof insight.onAction === 'function') {
         // Generic action callback
-        insight.action(insight);
+        insight.onAction(insight);
       } else {
         // Default/fallback case
         console.warn('Unhandled insight type:', insight.type);
-        actionBtn.disabled = true;
-        actionBtn.textContent = 'No Action';
       }
     });
 

@@ -107,7 +107,7 @@ describe('OverviewSection', () => {
 
   it('should display placeholder when no planning data provided', () => {
     const section = OverviewSection(null, mockRiskAssessor);
-    const placeholder = section.querySelector('.section-placeholder');
+    const placeholder = section.querySelector('.placeholder');
     expect(placeholder).toBeTruthy();
   });
 

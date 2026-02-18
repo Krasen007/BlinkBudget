@@ -35,9 +35,9 @@ export class AnalyticsCache {
       await this._lockPromise;
     }
 
-    // Create a new lock promise
-    this._lockPromise = new Promise(_resolve => {
-      // The lock will be resolved when the current operation completes
+    // Create a new lock promise and capture resolve function
+    this._lockPromise = new Promise(resolve => {
+      this._lockResolve = resolve;
     });
 
     return this._lockPromise;
@@ -47,10 +47,10 @@ export class AnalyticsCache {
    * Release mutex lock
    */
   _releaseLock() {
-    if (this._lockPromise) {
-      const _resolve = this._lockPromise;
+    if (this._lockResolve) {
+      this._lockResolve();
+      this._lockResolve = null;
       this._lockPromise = null;
-      _resolve();
     }
   }
 
@@ -82,7 +82,6 @@ export class AnalyticsCache {
     }
 
     // Check persistent storage
-    this.cacheStats.misses++;
     const cached = offlineDataManager.getFromStorage('analytics_cache');
     if (cached && cached[key]) {
       // Update in-memory cache with persistent data
@@ -91,6 +90,8 @@ export class AnalyticsCache {
       return cached[key].data;
     }
 
+    // Only increment miss counter if key is not found in either cache
+    this.cacheStats.misses++;
     return null;
   }
 
@@ -115,10 +116,12 @@ export class AnalyticsCache {
    * Set data in persistent storage with mutex protection
    */
   async setToPersistentStorage(key, result) {
+    // Read existing persistent data first without acquiring lock
+    const cached = offlineDataManager.getFromStorage('analytics_cache') || {};
+
     await this._acquireLock();
 
     try {
-      const cached = await this._getFromPersistentStorage('analytics_cache');
       const updated = { ...cached, [key]: result };
 
       await offlineDataManager.setInStorage(
@@ -140,6 +143,7 @@ export class AnalyticsCache {
    */
   async cleanupOldest(count) {
     await this._acquireLock();
+    this._cleanupInProgress = true;
 
     try {
       const entries = Array.from(this.cacheTimestamps.entries())
@@ -180,6 +184,7 @@ export class AnalyticsCache {
       }
     } finally {
       this._cleanupInProgress = false;
+      this._releaseLock();
     }
   }
 
@@ -231,17 +236,17 @@ export class AnalyticsCache {
       // Also clear from persistent storage
       try {
         const cached = offlineDataManager.getFromStorage('analytics_cache');
-        if (cached) {
+        if (cached && typeof cached === 'object') {
           keysToDelete.forEach(key => {
             delete cached[key];
           });
-        }
 
-        await offlineDataManager.setInStorage(
-          'analytics_cache',
-          cached,
-          this.PERSISTENT_CACHE_DURATION
-        );
+          await offlineDataManager.setInStorage(
+            'analytics_cache',
+            cached,
+            this.PERSISTENT_CACHE_DURATION
+          );
+        }
       } catch (error) {
         console.error(
           '[AnalyticsCache] Failed to invalidate persistent cache:',

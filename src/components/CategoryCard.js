@@ -4,7 +4,6 @@
  */
 
 import { COLORS, SPACING, FONT_SIZES } from '../utils/constants.js';
-import { getChartColors } from '../core/chart-config.js';
 import { formatCurrency } from '../utils/financial-planning-helpers.js';
 
 /**
@@ -12,14 +11,12 @@ import { formatCurrency } from '../utils/financial-planning-helpers.js';
  * @param {Object} category - Category breakdown data
  * @param {number} index - Index for color assignment
  * @param {Map} categoryColorMap - Consistent color mapping
- * @param {Function} getCategoryColors - Logic for colors
  * @param {Function} onClick - Click handler for details
  */
 export const CategoryCard = (
   category,
   index,
   categoryColorMap,
-  getCategoryColors,
   onClick,
   frequencyData = null,
   insights = []
@@ -43,8 +40,7 @@ export const CategoryCard = (
   card.style.minWidth = '0';
   card.style.overflow = 'hidden';
 
-  const categoryColor =
-    categoryColorMap.get(category.name) || getChartColors(1)[0];
+  const categoryColor = categoryColorMap.get(category.name) || COLORS.PRIMARY;
   card.style.setProperty('--category-color', categoryColor);
 
   card.addEventListener('mouseenter', () => {

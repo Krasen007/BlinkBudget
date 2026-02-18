@@ -43,26 +43,28 @@ export const BackupRestoreSection = () => {
     text: 'Restore From Last Backup',
     variant: 'secondary',
     onClick: () => {
-      import('./ConfirmDialog.js').then(({ ConfirmDialog, AlertDialog }) => {
-        ConfirmDialog({
-          message:
-            'WARNING: This will replace your current data with the last backup. Any changes made since the last backup will be LOST. Continue?',
-          confirmText: 'Restore & Replace',
-          cancelText: 'Cancel',
-          onConfirm: async () => {
-            try {
-              await BackupService.restoreBackup();
-              AlertDialog({
-                message: `Successfully restored app state from backup.`,
-              });
-            } catch (error) {
-              AlertDialog({ message: `Restore failed: ${error.message}` });
-            }
-          },
+      import('./ConfirmDialog.js')
+        .then(({ ConfirmDialog, AlertDialog }) => {
+          ConfirmDialog({
+            message:
+              'WARNING: This will replace your current data with the last backup. Any changes made since the last backup will be LOST. Continue?',
+            confirmText: 'Restore & Replace',
+            cancelText: 'Cancel',
+            onConfirm: async () => {
+              try {
+                await BackupService.restoreBackup();
+                AlertDialog({
+                  message: `Successfully restored app state from backup.`,
+                });
+              } catch (error) {
+                AlertDialog({ message: `Restore failed: ${error.message}` });
+              }
+            },
+          });
+        })
+        .catch(error => {
+          console.error('Error loading ConfirmDialog:', error);
         });
-      }).catch(error => {
-        console.error('Error loading ConfirmDialog:', error);
-      });
     },
   });
   restoreBtn.className += ' touch-target mobile-form-button';

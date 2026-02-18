@@ -8,7 +8,7 @@
 
 ## 📊 Executive Summary
 
-This comprehensive UX audit identified **significant visual inconsistencies** across the BlinkBudget application, particularly in button sizing, layout margins, and CSS class usage. While the design tokens are well-defined in `tokens.css`, many components deviate from these standards, leading to an inconsistent user experience.
+This comprehensive UX audit identified **significant visual inconsistencies** across BlinkBudget application, particularly in button sizing, layout margins, and CSS class usage. While design tokens are well-defined in `src/styles/tokens.css`, many components deviate from these standards, leading to an inconsistent user experience.
 
 ---
 
@@ -59,7 +59,7 @@ The class `.settings-section` is used in JavaScript (SettingsView.js) but has **
 
 #### Recommended Fix
 
-- Create CSS definition for `.settings-section` in `components/ui.css`
+- Create CSS definition for `.settings-section` in `src/styles/components/ui.css`
 - OR consolidate to use existing `.card.mobile-settings-card` class
 
 ---

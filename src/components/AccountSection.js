@@ -37,38 +37,40 @@ export const AccountSection = () => {
     text: 'Add Account',
     variant: 'primary',
     onClick: () => {
-      import('./ConfirmDialog.js').then(({ PromptDialog }) => {
-        PromptDialog({
-          title: 'Add New Account',
-          message: 'Enter account name:',
-          placeholder: 'e.g., Checking, Savings, Credit Card',
-          confirmText: 'Add',
-          onConfirm: async (accountName) => {
-            if (!accountName || accountName.trim().length === 0) {
-              return;
-            }
+      import('./ConfirmDialog.js')
+        .then(({ PromptDialog }) => {
+          PromptDialog({
+            title: 'Add New Account',
+            message: 'Enter account name:',
+            placeholder: 'e.g., Checking, Savings, Credit Card',
+            confirmText: 'Add',
+            onConfirm: async accountName => {
+              if (!accountName || accountName.trim().length === 0) {
+                return;
+              }
 
-            const sanitized = sanitizeInput(accountName.trim());
-            const newAccount = {
-              id: generateId(),
-              name: sanitized,
-              type: 'bank',
-              balance: 0,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            };
+              const sanitized = sanitizeInput(accountName.trim());
+              const newAccount = {
+                id: generateId(),
+                name: sanitized,
+                type: 'bank',
+                balance: 0,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              };
 
-            try {
-              AccountService.add(newAccount);
-              renderAccounts();
-            } catch (error) {
-              console.error('Error adding account:', error);
-            }
-          },
+              try {
+                AccountService.add(newAccount);
+                renderAccounts();
+              } catch (error) {
+                console.error('Error adding account:', error);
+              }
+            },
+          });
+        })
+        .catch(error => {
+          console.error('Error loading ConfirmDialog:', error);
         });
-      }).catch(error => {
-        console.error('Error loading ConfirmDialog:', error);
-      });
     },
   });
 
@@ -100,7 +102,8 @@ export const AccountSection = () => {
           color: ${COLORS.TEXT_MUTED};
           font-size: var(--font-size-sm);
         `;
-        emptyState.textContent = 'No accounts yet. Add your first account above.';
+        emptyState.textContent =
+          'No accounts yet. Add your first account above.';
         accountListContainer.appendChild(emptyState);
         return;
       }
@@ -159,32 +162,34 @@ export const AccountSection = () => {
           min-height: 32px;
         `;
         renameBtn.addEventListener('click', () => {
-          import('./ConfirmDialog.js').then(({ PromptDialog }) => {
-            PromptDialog({
-              title: 'Rename Account',
-              message: 'Enter new name:',
-              placeholder: account.name,
-              confirmText: 'Rename',
-              onConfirm: async (newName) => {
-                if (!newName || newName.trim().length === 0) {
-                  return;
-                }
+          import('./ConfirmDialog.js')
+            .then(({ PromptDialog }) => {
+              PromptDialog({
+                title: 'Rename Account',
+                message: 'Enter new name:',
+                placeholder: account.name,
+                confirmText: 'Rename',
+                onConfirm: async newName => {
+                  if (!newName || newName.trim().length === 0) {
+                    return;
+                  }
 
-                try {
-                  AccountService.update(account.id, {
-                    ...account,
-                    name: sanitizeInput(newName.trim()),
-                    updatedAt: new Date().toISOString(),
-                  });
-                  renderAccounts();
-                } catch (error) {
-                  console.error('Error renaming account:', error);
-                }
-              },
+                  try {
+                    AccountService.update(account.id, {
+                      ...account,
+                      name: sanitizeInput(newName.trim()),
+                      updatedAt: new Date().toISOString(),
+                    });
+                    renderAccounts();
+                  } catch (error) {
+                    console.error('Error renaming account:', error);
+                  }
+                },
+              });
+            })
+            .catch(error => {
+              console.error('Error loading ConfirmDialog:', error);
             });
-          }).catch(error => {
-            console.error('Error loading ConfirmDialog:', error);
-          });
         });
 
         // Delete Button
@@ -201,27 +206,29 @@ export const AccountSection = () => {
           min-height: 32px;
         `;
         deleteBtn.addEventListener('click', () => {
-          import('./ConfirmDialog.js').then(({ ConfirmDialog, AlertDialog }) => {
-            ConfirmDialog({
-              title: 'Delete Account',
-              message: `Are you sure you want to delete "${account.name}"? This action cannot be undone.`,
-              confirmText: 'Delete',
-              cancelText: 'Cancel',
-              onConfirm: async () => {
-                try {
-                  AccountService.remove(account.id);
-                  renderAccounts();
-                } catch (error) {
-                  console.error('Error deleting account:', error);
-                  AlertDialog({
-                    message: 'Failed to delete account. Please try again.',
-                  });
-                }
-              },
+          import('./ConfirmDialog.js')
+            .then(({ ConfirmDialog, AlertDialog }) => {
+              ConfirmDialog({
+                title: 'Delete Account',
+                message: `Are you sure you want to delete "${account.name}"? This action cannot be undone.`,
+                confirmText: 'Delete',
+                cancelText: 'Cancel',
+                onConfirm: async () => {
+                  try {
+                    AccountService.remove(account.id);
+                    renderAccounts();
+                  } catch (error) {
+                    console.error('Error deleting account:', error);
+                    AlertDialog({
+                      message: 'Failed to delete account. Please try again.',
+                    });
+                  }
+                },
+              });
+            })
+            .catch(error => {
+              console.error('Error loading ConfirmDialog:', error);
             });
-          }).catch(error => {
-            console.error('Error loading ConfirmDialog:', error);
-          });
         });
 
         actionsContainer.appendChild(renameBtn);

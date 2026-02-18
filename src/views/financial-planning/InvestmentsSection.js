@@ -13,7 +13,11 @@
 
 import { COLORS, SPACING } from '../../utils/constants.js';
 import { createPortfolioCompositionChart } from '../../utils/financial-planning-charts.js';
-import { createUsageNote, createSectionContainer, createPlaceholder } from '../../utils/financial-planning-helpers.js';
+import {
+  createUsageNote,
+  createSectionContainer,
+  createPlaceholder,
+} from '../../utils/financial-planning-helpers.js';
 import { refreshChart } from '../../utils/chart-refresh-helper.js';
 
 /**
@@ -1062,14 +1066,17 @@ function createInvestmentsList(chartRenderer, activeCharts) {
                   } catch (err) {
                     console.error('Failed to remove investment', err);
                     // Show user-visible error when deletion fails
-                    import('../../components/ConfirmDialog.js').then(({ AlertDialog }) => {
-                      AlertDialog({
-                        title: 'Error',
-                        message: 'Could not remove investment. Please try again.',
+                    import('../../components/ConfirmDialog.js')
+                      .then(({ AlertDialog }) => {
+                        AlertDialog({
+                          title: 'Error',
+                          message:
+                            'Could not remove investment. Please try again.',
+                        });
+                      })
+                      .catch(error => {
+                        console.error('Error loading AlertDialog:', error);
                       });
-                    }).catch(error => {
-                      console.error('Error loading AlertDialog:', error);
-                    });
                   }
                 },
                 onCancel: () => {
@@ -1081,15 +1088,17 @@ function createInvestmentsList(chartRenderer, activeCharts) {
             })
             .catch(err => {
               console.error('Failed to load confirmation dialog:', err);
-              import('../../components/ConfirmDialog.js').then(({ AlertDialog }) => {
-                AlertDialog({
-                  title: 'Error',
-                  message:
-                    'Unable to open confirmation dialog — please try again.',
+              import('../../components/ConfirmDialog.js')
+                .then(({ AlertDialog }) => {
+                  AlertDialog({
+                    title: 'Error',
+                    message:
+                      'Unable to open confirmation dialog — please try again.',
+                  });
+                })
+                .catch(error => {
+                  console.error('Error loading AlertDialog:', error);
                 });
-              }).catch(error => {
-                console.error('Error loading AlertDialog:', error);
-              });
             });
         });
       });

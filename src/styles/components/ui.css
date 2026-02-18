@@ -197,12 +197,15 @@
 .toast-success {
   background-color: var(--color-success);
 }
+
 .toast-error {
   background-color: var(--color-error);
 }
+
 .toast-warning {
   background-color: var(--color-warning);
 }
+
 .toast-info {
   background-color: var(--color-primary);
 }

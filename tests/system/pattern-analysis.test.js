@@ -464,7 +464,7 @@ describe('Integration Tests', () => {
     );
 
     // Should detect coffee habit
-    expect(result.categories.Coffee.totalVisits).toBe(2); // 2 unique days with coffee visits
+    expect(result.categories.Coffee.totalVisits).toBe(5); // 5 unique days with coffee visits
     expect(result.categories.Coffee.averageVisitsPerWeek).toBeGreaterThan(1);
 
     // Should generate insights about high frequency

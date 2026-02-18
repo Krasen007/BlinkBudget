@@ -141,16 +141,16 @@ export class SimpleInsightsService {
           .reduce((sum, t) => sum + Math.abs(t.amount), 0);
       } catch (error) {
         console.warn('Could not calculate previous period spending:', error);
-        // Fall back to simple threshold if previous period calculation fails
-        previousSpending = 1000;
+        // Set to null to indicate no prior data available
+        previousSpending = null;
       }
     } else {
-      // Fall back to simple threshold if no current period provided
-      previousSpending = 1000;
+      // Set to null to indicate no prior data available
+      previousSpending = null;
     }
 
-    // Handle edge case where previousSpending is 0
-    if (previousSpending === 0) {
+    // Handle edge case where previousSpending is 0 or null
+    if (previousSpending === null || previousSpending === 0) {
       return {
         change: currentSpending,
         percentage: currentSpending > 0 ? 100 : 0,
@@ -255,7 +255,8 @@ export class SimpleInsightsService {
 
     // Simplified - just subtract one month
     const previousMonth = date.getMonth() - 1;
-    const year = previousMonth < 0 ? date.getFullYear() - 1 : date.getFullYear();
+    const year =
+      previousMonth < 0 ? date.getFullYear() - 1 : date.getFullYear();
     const month = previousMonth < 0 ? 11 : previousMonth;
     // Get last day of target month to avoid overflow
     const lastDayOfMonth = new Date(year, month + 1, 0).getDate();

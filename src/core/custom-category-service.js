@@ -67,11 +67,13 @@ export const CustomCategoryService = {
 
     // Add any categories not in the orderedIds array at the end
     const includedIds = new Set(orderedIds);
+    const updatedAt = new Date().toISOString();
     const remaining = userCategories
       .filter(cat => !includedIds.has(cat.id))
       .map((cat, index) => ({
         ...cat,
         sortOrder: orderedIds.length + index,
+        updatedAt,
       }));
 
     const updatedUserCategories = [...reordered, ...remaining];

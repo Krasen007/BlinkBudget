@@ -180,17 +180,23 @@ describe('AccountDeletionService', () => {
       // Arrange
       const { firebaseStatus } =
         await import('../../src/core/firebase-config.js');
+      const originalCanUseAuth = firebaseStatus.canUseAuth;
       firebaseStatus.canUseAuth = false;
 
-      // Act
-      const result = await service.initiateAccountDeletion();
+      try {
+        // Act
+        const result = await service.initiateAccountDeletion();
 
-      // Assert
-      expect(result.success).toBe(true);
-      expect(result.authDeleted).toBe(false);
-      expect(result.warnings).toContain(
-        'Firebase not available, skipping authentication deletion'
-      );
+        // Assert
+        expect(result.success).toBe(true);
+        expect(result.authDeleted).toBe(false);
+        expect(result.warnings).toContain(
+          'Firebase not available, skipping authentication deletion'
+        );
+      } finally {
+        // Restore original state
+        firebaseStatus.canUseAuth = originalCanUseAuth;
+      }
     });
 
     it('should prevent concurrent deletions', async () => {

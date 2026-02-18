@@ -24,12 +24,22 @@ describe('CSS Architecture Foundation', () => {
   it('should have proper import structure in main.css', () => {
     const mainCss = readFileSync(join(stylesDir, 'main.css'), 'utf-8');
 
-    // Check that imports are in correct order
-    expect(mainCss).toContain("@import './tokens.css'");
-    expect(mainCss).toContain("@import './base.css'");
-    expect(mainCss).toContain("@import './components/ui.css'");
-    expect(mainCss).toContain("@import './mobile.css'");
-    expect(mainCss).toContain("@import './utilities/layout.css'");
+    // Check that imports are in correct order by verifying their positions
+    const imports = [
+      "@import './tokens.css'",
+      "@import './base.css'",
+      "@import './components/ui.css'",
+      "@import './mobile.css'",
+      "@import './utilities/layout.css'",
+    ];
+
+    let lastIndex = -1;
+    imports.forEach(importStr => {
+      const currentIndex = mainCss.indexOf(importStr);
+      expect(currentIndex).toBeGreaterThan(-1);
+      expect(currentIndex).toBeGreaterThan(lastIndex);
+      lastIndex = currentIndex;
+    });
   });
 
   it('should have CSS custom properties defined in tokens', () => {

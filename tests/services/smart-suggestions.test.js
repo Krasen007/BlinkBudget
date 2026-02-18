@@ -605,18 +605,26 @@ describe('Smart Suggestions Service', () => {
     });
 
     it('should handle memory allocation errors', async () => {
-      // Mock a scenario where memory allocation fails
-      const originalMap = Map.prototype.set;
-      Map.prototype.set = function () {
-        throw new Error('Out of memory');
+      // Mock a scenario where memory allocation fails by creating a Map that throws
+      const originalMap = Map;
+      const MockMap = function () {
+        this.set = function () {
+          throw new Error('Out of memory');
+        };
+        this.get = function () {
+          return undefined;
+        };
       };
 
       try {
+        // Temporarily replace Map constructor for this test
+        global.Map = MockMap;
         TransactionService.getAll.mockReturnValue([]);
         const suggestions = await service.getAmountSuggestions();
         expect(Array.isArray(suggestions)).toBe(true);
       } finally {
-        Map.prototype.set = originalMap;
+        // Restore original Map
+        global.Map = originalMap;
       }
     });
 

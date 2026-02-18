@@ -57,8 +57,8 @@ export class MetricsService {
       0
     );
 
-    // Recalculate transaction count from valid categories only
-    const validTransactionCount = validCategories.reduce(
+    // Recalculate transaction count from all categories to match calculateIncomeVsExpenses
+    const validTransactionCount = Object.values(categoryTotals).reduce(
       (sum, cat) => sum + cat.transactionCount,
       0
     );

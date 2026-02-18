@@ -396,7 +396,13 @@ body.keyboard-visible {
 
 body.keyboard-hidden {
   height: 100vh;
-  overflow: hidden; /* View container handles scrolling */
+  overflow: auto; /* Ensure scrolling is always possible */
+}
+
+/* Ensure transaction form can scroll when keyboard is hidden */
+.transaction-form {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Input-specific keyboard behaviors */

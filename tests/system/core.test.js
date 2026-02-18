@@ -1,4 +1,4 @@
-// tests/core.test.js
+// tests/system/core.test.js
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { StorageService } from '../../src/core/storage';
 import { Router } from '../../src/core/router';

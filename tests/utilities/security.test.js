@@ -70,6 +70,12 @@ describe('Security Utilities', () => {
 describe('Router Guard Integration', () => {
   beforeEach(() => {
     Router.beforeHook = null;
+    // Clear any registered routes
+    if (Router.reset) {
+      Router.reset();
+    }
+    // Reset window hash
+    window.location.hash = '';
   });
 
   it('should respect the before hook', async () => {
@@ -97,6 +103,27 @@ describe('Router Guard Integration', () => {
   });
 });
 describe('Advanced Security', () => {
+  beforeEach(() => {
+    // Reset AuthService user
+    if (AuthService.user) {
+      AuthService.user = null;
+    }
+    // Clear StorageService
+    if (StorageService.clear) {
+      StorageService.clear();
+    }
+  });
+
+  afterEach(() => {
+    // Cleanup after each test
+    if (AuthService.user) {
+      AuthService.user = null;
+    }
+    if (StorageService.clear) {
+      StorageService.clear();
+    }
+  });
+
   test('Transaction Ownership (IDOR Protection)', () => {
     // Setup mock user
     AuthService.user = { uid: 'user-1' };

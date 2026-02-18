@@ -30,7 +30,8 @@ export class AnalyticsEngine {
     // 5 minutes default TTL
     const cached = this.memoizedCalculations.get(key);
     if (cached && Date.now() - cached.timestamp < ttlMs) {
-      return cached.result;
+      // Return Promise for async calculations, raw value for sync
+      return cached.isPromise ? Promise.resolve(cached.result) : cached.result;
     }
 
     const result = calculation();
@@ -41,6 +42,7 @@ export class AnalyticsEngine {
       this.memoizedCalculations.set(key, {
         result,
         timestamp: Date.now(),
+        isPromise: true,
       });
 
       result
@@ -49,6 +51,7 @@ export class AnalyticsEngine {
           this.memoizedCalculations.set(key, {
             result: resolvedValue,
             timestamp: Date.now(),
+            isPromise: true,
           });
         })
         .catch(error => {
@@ -67,6 +70,7 @@ export class AnalyticsEngine {
     this.memoizedCalculations.set(key, {
       result,
       timestamp: Date.now(),
+      isPromise: false,
     });
     return result;
   }
@@ -89,15 +93,28 @@ export class AnalyticsEngine {
   _transactionsSignature(transactions) {
     if (!Array.isArray(transactions) || transactions.length === 0)
       return 'none';
-    let h = 0;
+
+    // Use a stronger hash algorithm than the original djb2-style
+    let combinedData = '';
+
+    // Serialize each transaction into a consistent string format
     for (const t of transactions) {
       const s = `${t.id || ''}|${t.date || t.timestamp || ''}|${t.amount ?? t.value ?? 0}|${t.category || ''}|${t.payee || ''}|${t.description || ''}`;
-      for (let i = 0; i < s.length; i++) {
-        h = (h << 5) - h + s.charCodeAt(i);
-        h |= 0; // force 32-bit int
-      }
+      combinedData += s;
     }
-    return `${transactions.length}_${Math.abs(h).toString(36)}`;
+
+    // Improved hash algorithm for browser compatibility - stronger than original
+    let hash = 5381;
+    for (let i = 0; i < combinedData.length; i++) {
+      hash = ((hash << 5) + hash) ^ combinedData.charCodeAt(i);
+    }
+
+    // Convert to hex and truncate to first 16 characters
+    const hashHex = Math.abs(hash)
+      .toString(16)
+      .padStart(8, '0')
+      .substring(0, 16);
+    return `${transactions.length}_${hashHex}`;
   }
 
   /**

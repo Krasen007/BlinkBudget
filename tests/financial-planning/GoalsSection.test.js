@@ -78,6 +78,27 @@ describe('GoalsSection', () => {
     vi.clearAllMocks();
   });
 
+  afterEach(() => {
+    // Cleanup globals to prevent test pollution
+    if (dom && dom.window) {
+      dom.window.close();
+    }
+    delete global.window;
+    delete global.document;
+    delete global.HTMLElement;
+    delete global.HTMLCanvasElement;
+    delete global.CustomEvent;
+    delete global.navigator;
+
+    // Reset mock objects
+    dom = null;
+    mockActiveCharts = null;
+    mockChartRenderer = null;
+    mockStorageService = null;
+
+    vi.clearAllMocks();
+  });
+
   it('should create goals section with correct structure', async () => {
     mockStorageService.getGoals.mockReturnValue([]);
 

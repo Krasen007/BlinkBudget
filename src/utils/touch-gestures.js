@@ -168,6 +168,7 @@ export class TouchGestures {
 
     // Add touch feedback with a short-lived isTouch flag to avoid double haptics
     let isTouch = false;
+    let touchFlagTimeout = null;
 
     const touchStartHandler = () => {
       isTouch = true;
@@ -177,10 +178,15 @@ export class TouchGestures {
     };
 
     const touchEndHandler = () => {
-      // Restore visual state and clear touch flag
+      // Restore visual state
       button.style.transform = 'scale(1)';
       button.style.opacity = '1';
-      isTouch = false;
+
+      // Use delayed reset to prevent double haptics
+      touchFlagTimeout = setTimeout(() => {
+        isTouch = false;
+        touchFlagTimeout = null;
+      }, 50);
       // Optionally trigger a stronger haptic on release if desired
       // this.triggerHapticFeedback('medium');
     };
@@ -189,6 +195,12 @@ export class TouchGestures {
       // Reset visual state and clear flag on cancel
       button.style.transform = 'scale(1)';
       button.style.opacity = '1';
+
+      // Clear any pending timeout and reset flag immediately
+      if (touchFlagTimeout) {
+        clearTimeout(touchFlagTimeout);
+        touchFlagTimeout = null;
+      }
       isTouch = false;
     };
 

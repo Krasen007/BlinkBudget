@@ -224,7 +224,6 @@ export const mockFinancialData = {
 // Authentication Test Data
 export const mockAuthData = {
   // Valid test credentials (using example.com as per RFC 2606)
-  // snyk-ignore: javascript/NoHardcodedPasswords/test - Test fixture passwords
   validCredentials: [
     {
       email: 'test.user@example.com',

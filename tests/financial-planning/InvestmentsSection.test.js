@@ -74,6 +74,24 @@ describe('InvestmentsSection', () => {
     vi.clearAllMocks();
   });
 
+  afterEach(() => {
+    // Cleanup globals to prevent test pollution
+    if (dom && dom.window) {
+      dom.window.close();
+    }
+    delete global.window;
+    delete global.document;
+    delete global.HTMLElement;
+    delete global.HTMLCanvasElement;
+
+    // Reset mock objects
+    dom = null;
+    mockActiveCharts = null;
+    mockChartRenderer = null;
+
+    vi.clearAllMocks();
+  });
+
   it('should create investments section', async () => {
     StorageService.getInvestments.mockReturnValue([]);
     const section = await InvestmentsSection(
