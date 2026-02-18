@@ -33,6 +33,7 @@
 
 - **Multiple transaction types**: Expenses, Income, Transfers, Refunds
 - **Custom Category Management** - Create, edit, and manage your own expense categories for personalized tracking
+- **Category Reordering** - Organize your expense categories in the order that works best for you
 - **Smart categorization** with visual category chips:
   - Food & Groceries, Dining & Coffee, Housing & Bills
   - Transportation, Leisure & Shopping, Personal Care
@@ -49,8 +50,9 @@
 - **Transaction history** with edit/delete capabilities
 - **Visual feedback** for recently added transactions
 - **Dashboard layout** with improved spacing and optimized action buttons
-- **Fast chart loading** with intelligent caching system
+- **Fast chart loading** with intelligent caching system and cache invalidation
 - **Enhanced data visualization** with consistent colors for transactions
+- **Improved reports view** with informative messages for insufficient data and modular chart rendering
 
 ### Financial Planning & Insights
 
@@ -75,7 +77,8 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 - **Keyboard shortcut (Escape key)** to exit Settings and return to dashboard
 - **Helpful tips on each section**
 - **Enhanced security** with comprehensive privacy compliance
-- **Improved accessibility** with updated color schemes and better text handling
+- **Improved accessibility** with "Skip to Content" links, ARIA roles, and proper form label associations
+- **Enhanced color schemes** and better text handling for improved readability
 
 ### Backup & Restore
 

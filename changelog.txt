@@ -1,27 +1,36 @@
-# Version 1.20 - Latest Release
+# Version 1.30 - Latest Release
 
 ## 🚀 New Features & Improvements
-- **Enhanced User Experience**: Polished interface with improved interactions and visual feedback
-- **Financial Planning Updates**: Optimized file structure and performance for better forecasting
-- **Mobile Experience**: Fixed scrolling issues and improved view limits for better mobile navigation
-- **Documentation Cleanup**: Removed outdated documentation and reorganized project structure
+- **Category Reordering**: Added ability to reorder expense categories for better organization
+- **Enhanced Reports View**: Improved chart rendering with informative messages for insufficient data
+- **Cache Invalidation System**: Implemented robust cache management to prevent data inconsistencies
+- **Analytics Performance**: Optimized analytics cache with mutex-based solution to prevent race conditions
+- **UI Polish**: Comprehensive UI/UX optimization across Dashboard, Financial Planning, Reports, and Settings
+- **Accessibility Improvements**: Added "Skip to Content" links, ARIA roles, and proper form label associations
+- **Firebase Update**: Upgraded Firebase from 12.7.0 to 12.8.0 for latest features and security
 
 ## 🐛 Bug Fixes
-- **Caching System**: Fixed date display issues in financial planning tab
-- **Performance**: Optimized application loading and data processing
-- **Security**: Enhanced security measures and privacy compliance
-- **Testing**: Improved test coverage and fixed failing tests
+- **Category Cards**: Fixed border display issues for better visual consistency
+- **Reports View**: Removed horizontal lines and fixed shrinking issues
+- **Navigation**: Fixed UI back button functionality
+- **Financial Planning**: Resolved caching and date display issues
+- **Goals & Budgets**: Fixed calculation errors and improved accuracy
+- **Custom Categories**: Resolved duplicate ID detection and data handling
+- **Mobile Experience**: Fixed scrolling issues and view limits for better mobile navigation
 
 ## 🔧 Technical Improvements
-- **Code Organization**: Streamlined file structure for better maintainability
-- **Performance**: Optimized rendering and data processing
-- **Cleanup**: Removed legacy code and improved overall code quality
+- **Memory Management**: Enhanced analytics cache cleanup logic and memory optimization
+- **Security**: Enhanced security measures with comprehensive authentication tests
+- **Code Organization**: Restructured test files into organized folders
+- **Performance**: Optimized touch gesture handling and error handling throughout the app
+- **Documentation**: Clean up and reorganization of project documentation
 
 ---
 
 ## Previous Commits Summary
-- Documentation reorganization and cleanup
-- Security enhancements and privacy improvements  
-- Performance optimizations and caching improvements
-- Mobile experience enhancements and scrolling fixes
-- Financial planning feature optimizations
+- Major UI/UX optimization across all application views
+- Enhanced accessibility and compliance with web standards
+- Performance improvements in analytics and caching systems
+- Security enhancements and dependency updates
+- Mobile experience improvements and bug fixes
+- Code organization and testing improvements
