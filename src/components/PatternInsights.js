@@ -41,7 +41,7 @@ export function PatternInsights(
   container.style.cssText = `
     display: flex;
     flex-direction: column;
-    gap: ${SPACING.LG};
+    gap: ${SPACING.MD};
     padding: ${SPACING.MD};
   `;
 
@@ -158,7 +158,7 @@ function createAlertElement(alert, type) {
     gap: ${SPACING.SM};
     padding: ${SPACING.SM};
     background: ${color.bg};
-    border-left: 4px solid ${color.border};
+    border-left: none;
     border-radius: ${SPACING.XS};
     margin-bottom: ${SPACING.XS};
   `;
@@ -225,6 +225,7 @@ function createWeekdayWeekendSection(analysis) {
     background: ${COLORS.SURFACE};
     border-radius: ${SPACING.MD};
     padding: ${SPACING.MD};
+    border: none;
   `;
 
   const title = document.createElement('h3');
@@ -322,6 +323,7 @@ function createSpendingColumn(label, amount, maxAmount, color, uniqueDays) {
     border-radius: ${SPACING.XS};
     position: relative;
     overflow: hidden;
+    border: none;
   `;
 
   const bar = document.createElement('div');
@@ -370,6 +372,7 @@ function createTimeOfDaySection(analysis) {
     background: ${COLORS.SURFACE};
     border-radius: ${SPACING.MD};
     padding: ${SPACING.MD};
+    border: none;
   `;
 
   const title = document.createElement('h3');
@@ -425,7 +428,7 @@ function createTimeOfDaySection(analysis) {
     insightsEl.style.cssText = `
       margin-top: ${SPACING.MD};
       padding-top: ${SPACING.MD};
-      border-top: 1px solid ${COLORS.BORDER};
+      border-top: none;
     `;
 
     const insightsTitle = document.createElement('div');
@@ -481,6 +484,7 @@ function createTimePeriodBar(period, data, color) {
     border-radius: ${SPACING.XS};
     position: relative;
     overflow: hidden;
+    border: none;
   `;
 
   // Use the global maxPeriodTotal passed in, or fallback to internal calculation if missing (though it shouldn't be)

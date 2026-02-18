@@ -32,7 +32,7 @@
   flex-direction: column;
   gap: var(--spacing-sm);
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: var(--radius-lg);
 }
 
@@ -102,31 +102,14 @@
 }
 
 .chart-title::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 3px;
-  background: linear-gradient(
-    90deg,
-    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light)) 0%,
-    hsl(
-        var(--primary-hue),
-        var(--primary-sat),
-        calc(var(--primary-light) + 15%)
-      )
-      100%
-  );
-  border-radius: var(--radius-full);
+  display: none;
 }
 
 /* Chart Legend Enhancements */
 .charts-section .chartjs-legend {
   margin-top: var(--spacing-sm);
   padding-top: var(--spacing-sm);
-  border-top: 1px solid var(--color-border);
+  border-top: none;
 }
 
 .charts-section .chartjs-legend ul {
@@ -280,7 +263,7 @@
     hsl(0, 50%, 10%) 0%,
     hsl(0, 30%, 8%) 100%
   );
-  border: 1px solid hsl(0, 50%, 20%);
+  border: none;
   border-radius: var(--radius-lg);
   padding: var(--spacing-3xl);
   text-align: center;
@@ -300,7 +283,7 @@
     var(--color-surface) 0%,
     hsl(240, 10%, 12%) 100%
   );
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   text-align: center;
@@ -773,7 +756,7 @@
     var(--color-surface) 0%,
     rgb(59, 130, 246, 0.02) 100%
   );
-  border-top: 3px solid var(--color-border);
+  border-top: none;
 
   /* Layout control */
   overflow: visible;
@@ -795,7 +778,7 @@
   overflow: hidden;
   border-radius: var(--radius-md);
   background: rgb(255, 255, 255, 0.02);
-  border: 1px solid rgb(255, 255, 255, 0.1);
+  border: none;
 }
 
 .view-reports .income-expense-section h3 {
@@ -815,13 +798,13 @@
 .chart-section.category-breakdown,
 .chart-section:first-child {
   margin-bottom: var(--spacing-lg) !important;
-  border-bottom: 2px solid var(--color-border) !important;
+  border-bottom: none !important;
   padding-bottom: var(--spacing-md) !important;
 }
 
 /* Category Breakdown Section - Ensure it's clearly separated and handles expansion gracefully */
 .view-reports .category-breakdown-section {
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: none;
   margin-bottom: var(--spacing-lg);
   padding-bottom: var(--spacing-md);
   overflow: visible;
@@ -866,7 +849,7 @@
   clear: both;
   display: block;
   width: 100%;
-  border-top: 2px solid var(--color-border);
+  border-top: none;
   padding-top: var(--spacing-lg);
   padding-bottom: 0;
   contain: layout style;
@@ -884,8 +867,8 @@
   clear: both;
   display: block;
   width: 100%;
-  border-top: 1px solid rgb(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgb(255, 255, 255, 0.1);
+  border-top: none;
+  border-bottom: none;
   contain: layout style;
   isolation: isolate;
   min-height: 0;

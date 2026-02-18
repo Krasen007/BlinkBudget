@@ -20,7 +20,6 @@ export const BudgetSummaryCard = (summary, timePeriod = null) => {
   Object.assign(card.style, {
     background: COLORS.SURFACE,
     borderRadius: 'var(--radius-lg)',
-    border: `1px solid ${COLORS.BORDER}`,
     padding: SPACING.MD,
     display: 'flex',
     flexDirection: 'column',

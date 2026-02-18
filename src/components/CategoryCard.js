@@ -1,37 +1,33 @@
 /**
  * CategoryCard Component
- * Displays spending summary and frequency patterns for a specific category.
+ * Provides a detailed card for a single spending category.
  */
 
 import { COLORS, SPACING, FONT_SIZES } from '../utils/constants.js';
+import { getChartColors } from '../core/chart-config.js';
 import { formatCurrency } from '../utils/financial-planning-helpers.js';
-import { BudgetService } from '../core/budget-service.js';
-import { BudgetProgress } from './BudgetProgress.js';
 
 /**
- * Create individual category card
- * @param {Object} category - Category data
- * @param {number} index - Index for animation
- * @param {Map} categoryColorMap - Map of category names to colors
- * @param {Function} getChartColors - Logic for fallback colors
- * @param {Function} onCategoryClick - Click callback
- * @param {Object} frequencyData - Optional frequency analysis data
- * @returns {HTMLElement}
+ * Create a detailed category card
+ * @param {Object} category - Category breakdown data
+ * @param {number} index - Index for color assignment
+ * @param {Map} categoryColorMap - Consistent color mapping
+ * @param {Function} getCategoryColors - Logic for colors
+ * @param {Function} onClick - Click handler for details
  */
 export const CategoryCard = (
   category,
   index,
   categoryColorMap,
-  getChartColors,
-  onCategoryClick,
-  frequencyData = null,
-  allInsights = []
+  getCategoryColors,
+  onClick
 ) => {
   const card = document.createElement('button');
   card.className = 'category-card';
   card.setAttribute('data-category', category.name);
   card.style.background = COLORS.SURFACE;
-  card.style.border = `2px solid ${COLORS.BORDER}`;
+  card.style.border = 'none';
+  card.style.borderLeft = 'none';
   card.style.borderRadius = 'var(--radius-md)';
   card.style.padding = SPACING.MD;
   card.style.cursor = 'pointer';
@@ -41,143 +37,98 @@ export const CategoryCard = (
   card.style.display = 'flex';
   card.style.flexDirection = 'column';
   card.style.gap = SPACING.XS;
-  card.style.minWidth = '0'; // Allow flex items to shrink
-  card.style.overflow = 'hidden'; // Prevent content overflow
+  card.style.minWidth = '0';
+  card.style.overflow = 'hidden';
 
   const categoryColor =
     categoryColorMap.get(category.name) || getChartColors(1)[0];
   card.style.setProperty('--category-color', categoryColor);
-  card.style.borderLeft = `6px solid ${categoryColor}`; // Visual indicator consistent with BudgetForm
 
   card.addEventListener('mouseenter', () => {
-    card.style.borderColor = COLORS.PRIMARY;
     card.style.transform = 'translateY(-2px)';
     card.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
   });
 
   card.addEventListener('mouseleave', () => {
-    card.style.borderColor = COLORS.BORDER;
     card.style.transform = 'translateY(0)';
     card.style.boxShadow = 'none';
   });
 
+  card.addEventListener('click', () => onClick(category));
+
+  // Content
   const name = document.createElement('div');
+  name.className = 'category-name';
   name.textContent = category.name;
-  name.style.fontWeight = '600';
+  name.style.fontSize = FONT_SIZES.SM;
+  name.style.fontWeight = 'bold';
   name.style.color = COLORS.TEXT_MAIN;
+  name.style.textAlign = 'center';
+  card.appendChild(name);
 
   const amount = document.createElement('div');
+  amount.className = 'category-amount';
   amount.textContent = formatCurrency(category.amount);
-  amount.style.fontSize = FONT_SIZES.TITLE_DESKTOP;
+  amount.style.fontSize = FONT_SIZES.LG;
   amount.style.fontWeight = 'bold';
   amount.style.color = COLORS.PRIMARY;
+  amount.style.textAlign = 'center';
+  card.appendChild(amount);
 
   const percentage = document.createElement('div');
-  percentage.textContent = `${typeof category.percentage === 'string' ? category.percentage : category.percentage.toFixed(1)}% of expenses`;
-  percentage.style.fontSize = FONT_SIZES.STAT_LABEL_DESKTOP;
+  percentage.className = 'category-percentage';
+  percentage.textContent = `${category.percentage.toFixed(1)}% of expenses`;
+  percentage.style.fontSize = '0.75rem';
   percentage.style.color = COLORS.TEXT_MUTED;
-
-  const transactionCount = document.createElement('div');
-  transactionCount.textContent = `${category.transactionCount} transaction${category.transactionCount !== 1 ? 's' : ''}`;
-  transactionCount.style.fontSize = FONT_SIZES.BASE;
-  transactionCount.style.color = COLORS.TEXT_MUTED;
-
-  // Calculate and display average amount
-  const averageAmount =
-    category.transactionCount > 0
-      ? category.amount / category.transactionCount
-      : 0;
-  const averageElement = document.createElement('div');
-  averageElement.textContent = `Avg: ${formatCurrency(averageAmount)}`;
-  averageElement.style.fontSize = FONT_SIZES.SM;
-  averageElement.style.color = COLORS.TEXT_MUTED;
-
-  card.appendChild(name);
-  card.appendChild(amount);
+  percentage.style.textAlign = 'center';
   card.appendChild(percentage);
-  card.appendChild(transactionCount);
-  card.appendChild(averageElement);
 
-  // Add frequency analysis if available
-  if (frequencyData && frequencyData[category.name]) {
-    const freqData = frequencyData[category.name];
+  const freq = document.createElement('div');
+  freq.style.fontSize = '0.75rem';
+  freq.style.color = COLORS.TEXT_MUTED;
+  freq.style.textAlign = 'center';
+  const transactionCount = category.count || 1;
+  freq.textContent = `${transactionCount} transaction${transactionCount > 1 ? 's' : ''}`;
+  card.appendChild(freq);
 
-    const visitsPerWeek = document.createElement('div');
-    visitsPerWeek.textContent = `${freqData.averageVisitsPerWeek.toFixed(1)} visits per week`;
-    visitsPerWeek.style.fontSize = FONT_SIZES.SM;
-    visitsPerWeek.style.color = COLORS.TEXT_MUTED;
-
-    card.appendChild(visitsPerWeek);
-
-    // Gather all insights for this category
-    const categoryInsights = [];
-
-    // 1. Add frequency insights
-    if (freqData.insights) {
-      categoryInsights.push(...freqData.insights);
-    }
-
-    // 2. Add matching insights from global InsightsService (Anomalies, Trends, etc.)
-    const matchingInsights = allInsights.filter(insight => {
-      // Skip budget-related insights as they are redundant with the progress bar
-      if (
-        insight.id &&
-        (insight.id.startsWith('budget_exceeded_') ||
-          insight.id.startsWith('budget_warning_'))
-      ) {
-        return false;
-      }
-
-      // Direct category match
-      if (insight.category === category.name) return true;
-
-      return false;
-    });
-
-    categoryInsights.push(...matchingInsights.map(i => i.message));
-
-    // Display unique insights
-    const uniqueInsights = [...new Set(categoryInsights)];
-
-    if (uniqueInsights.length > 0) {
-      const insightsSection = document.createElement('div');
-      insightsSection.style.marginTop = SPACING.XS;
-
-      uniqueInsights.forEach(insight => {
-        const insightEl = document.createElement('div');
-        insightEl.textContent = `💡 ${insight}`;
-        insightEl.style.fontSize = FONT_SIZES.BASE;
-        insightEl.style.color = COLORS.TEXT_MUTED;
-        insightEl.style.fontStyle = 'italic';
-        insightEl.style.textDecoration = 'underline';
-        insightsSection.appendChild(insightEl);
-      });
-
-      card.appendChild(insightsSection);
-    }
+  // Add average per visit if available
+  if (category.amount && transactionCount > 0) {
+    const avg = document.createElement('div');
+    avg.style.fontSize = '0.75rem';
+    avg.style.color = COLORS.TEXT_MUTED;
+    avg.style.textAlign = 'center';
+    avg.textContent = `Avg: ${formatCurrency(category.amount / transactionCount)}`;
+    card.appendChild(avg);
   }
 
-  // Add Budget Progress if budget exists
-  const budget = BudgetService.getByCategory(category.name);
-  if (budget) {
-    const utilization =
-      budget.amountLimit > 0 ? (category.amount / budget.amountLimit) * 100 : 0;
-    const progress = BudgetProgress({
-      utilization,
-      isExceeded: category.amount > budget.amountLimit,
-      isWarning: utilization >= 80 && utilization <= 100,
-      label: `Budget (${formatCurrency(budget.amountLimit)})`,
-      secondaryLabel: `${((category.amount / budget.amountLimit) * 100).toFixed(0)}%`,
-    });
-    progress.style.marginTop = SPACING.SM;
-    card.appendChild(progress);
+  // Add frequency if available
+  if (arguments[5] && arguments[5][category.name]) {
+    const frequency = arguments[5][category.name];
+    const freqDisplay = document.createElement('div');
+    freqDisplay.style.fontSize = '0.75rem';
+    freqDisplay.style.color = COLORS.TEXT_MUTED;
+    freqDisplay.style.textAlign = 'center';
+    freqDisplay.textContent = `${frequency.avgVisitsPerWeek.toFixed(1)} visits per week`;
+    card.appendChild(freqDisplay);
   }
 
-  card.addEventListener('click', () => {
-    if (onCategoryClick) {
-      onCategoryClick(category.name, category.amount, category.percentage);
+  // Insights snippet
+  if (arguments[6]) {
+    const relevantInsight = arguments[6].find(
+      i => i.category === category.name || i.message.includes(category.name)
+    );
+    if (relevantInsight) {
+      const insightEl = document.createElement('div');
+      insightEl.style.fontSize = '0.75rem';
+      insightEl.style.color =
+        relevantInsight.type === 'warning' ? COLORS.WARNING : COLORS.SUCCESS;
+      insightEl.style.marginTop = SPACING.XS;
+      insightEl.style.fontStyle = 'italic';
+      insightEl.style.textAlign = 'center';
+      insightEl.textContent = `💡 ${relevantInsight.message.split('.')[0]}`;
+      card.appendChild(insightEl);
     }
-  });
+  }
 
   return card;
 };

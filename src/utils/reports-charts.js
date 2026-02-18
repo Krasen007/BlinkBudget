@@ -95,8 +95,7 @@ export async function createCategoryBreakdownChart(
   section.setAttribute('data-chart-type', 'category-breakdown');
   section.style.background = COLORS.SURFACE;
   section.style.borderRadius = 'var(--radius-lg)';
-  section.style.border = `1px solid ${COLORS.BORDER}`;
-  section.style.padding = SPACING.LG;
+  section.style.padding = SPACING.MD;
 
   // Section header
   const header = document.createElement('div');
@@ -166,7 +165,6 @@ export async function createCategoryBreakdownChart(
   detailsContainer.style.borderRadius = 'var(--radius-md)';
   detailsContainer.style.padding = SPACING.MD;
   detailsContainer.style.marginTop = SPACING.SM;
-  detailsContainer.style.border = '1px solid var(--color-border)';
   detailsContainer.style.display = 'block'; // Always visible
   detailsContainer.style.minHeight = '60px'; // Prevent jumping
 
@@ -192,8 +190,8 @@ export async function createCategoryBreakdownChart(
       {
         data: categoryData.categories.map(cat => cat.amount),
         backgroundColor: categoryColors,
-        borderColor: '#ffffff',
-        borderWidth: 2,
+        borderColor: COLORS.SURFACE,
+        borderWidth: 0,
       },
     ],
   };
@@ -230,8 +228,7 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   section.setAttribute('data-chart-type', 'income-expense');
   section.style.background = COLORS.SURFACE;
   section.style.borderRadius = 'var(--radius-lg)';
-  section.style.border = `1px solid ${COLORS.BORDER}`;
-  section.style.padding = SPACING.LG;
+  section.style.padding = SPACING.MD;
   section.style.marginBottom = '0 !important';
   section.style.paddingBottom = `calc(${SPACING.MD}) !important`;
   section.style.position = 'relative';
@@ -381,8 +378,7 @@ export async function createCategoryTrendsChart(
   section.className = 'chart-section';
   section.style.background = COLORS.SURFACE;
   section.style.borderRadius = 'var(--radius-lg)';
-  section.style.border = `1px solid ${COLORS.BORDER}`;
-  section.style.padding = SPACING.LG;
+  section.style.padding = SPACING.MD;
 
   const title = document.createElement('h3');
   title.textContent = 'Category Trends Over Time';

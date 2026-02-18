@@ -15,7 +15,7 @@ export const InsightCard = (insight, _index) => {
   const card = document.createElement('div');
   card.className = 'insight-card';
   card.style.background = getInsightBackgroundColor(insight.type);
-  card.style.border = `1px solid ${getInsightBorderColor(insight.type)}`;
+  card.style.border = 'none';
   card.style.borderRadius = 'var(--radius-md)';
   card.style.padding = SPACING.MD;
   card.style.position = 'relative';
@@ -50,7 +50,7 @@ export const InsightCard = (insight, _index) => {
     recommendation.style.fontStyle = 'italic';
     recommendation.style.marginTop = SPACING.SM;
     recommendation.style.paddingTop = SPACING.SM;
-    recommendation.style.borderTop = `1px solid ${COLORS.BORDER}`;
+    recommendation.style.borderTop = 'none';
     messageContainer.appendChild(recommendation);
   }
 
@@ -98,14 +98,3 @@ function getInsightBackgroundColor(type) {
   return colors[type] || 'rgba(156, 163, 175, 0.05)';
 }
 
-function getInsightBorderColor(type) {
-  const colors = {
-    positive: 'rgba(34, 197, 94, 0.2)',
-    warning: 'rgba(251, 191, 36, 0.2)',
-    pattern: 'rgba(59, 130, 246, 0.2)',
-    anomaly: 'rgba(239, 68, 68, 0.2)',
-    increase: 'rgba(251, 191, 36, 0.2)',
-    decrease: 'rgba(34, 197, 94, 0.2)',
-  };
-  return colors[type] || 'rgba(156, 163, 175, 0.2)';
-}

@@ -1023,11 +1023,11 @@ export const ReportsView = () => {
           ? `${SPACING.XS} ${SPACING.SM}`
           : `${SPACING.SM} ${SPACING.SM}`;
       } else if (isTablet) {
-        // Vertical padding only (MD), horizontal removed to match app width
-        cs.style.padding = `${SPACING.MD} 0`;
+        // Vertical and horizontal padding removed to rely on container gaps and match app width
+        cs.style.padding = '0';
       } else {
-        // Vertical padding only (MD), horizontal removed to match app width
-        cs.style.padding = `${SPACING.MD} 0`;
+        // Vertical and horizontal padding removed to rely on container gaps and match app width
+        cs.style.padding = '0';
       }
     });
 

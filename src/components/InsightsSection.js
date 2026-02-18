@@ -17,7 +17,6 @@ export const InsightsSection = currentData => {
   section.className = 'insights-section';
   section.style.background = COLORS.SURFACE;
   section.style.borderRadius = 'var(--radius-lg)';
-  section.style.border = `1px solid ${COLORS.BORDER}`;
   section.style.padding = SPACING.MD;
 
   const title = document.createElement('h3');

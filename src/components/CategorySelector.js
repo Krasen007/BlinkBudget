@@ -26,8 +26,8 @@ export const CategorySelector = (
   section.className = 'category-selector-section';
   section.style.background = COLORS.SURFACE;
   section.style.borderRadius = 'var(--radius-lg)';
-  section.style.border = `1px solid ${COLORS.BORDER}`;
-  section.style.padding = SPACING.LG;
+  section.style.borderRadius = 'var(--radius-lg)';
+  section.style.padding = SPACING.MD;
   section.style.marginTop = SPACING.XL;
   section.style.marginBottom = SPACING.XL;
 
