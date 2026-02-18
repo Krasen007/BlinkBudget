@@ -389,7 +389,6 @@
 /* Mobile optimizations */
 @media (width <= 768px) {
   .charts-section {
-    padding: var(--spacing-md);
     margin-bottom: var(--spacing-sm);
   }
 
@@ -437,7 +436,6 @@
 /* Tablet optimizations */
 @media (width >= 769px) and (width <= 1023px) {
   .charts-section {
-    padding: var(--spacing-xl);
     margin-bottom: var(--spacing-md);
   }
 
@@ -458,7 +456,6 @@
 /* Desktop optimizations */
 @media (width >= 1024px) {
   .charts-section {
-    padding: var(--spacing-xl);
     margin-bottom: var(--spacing-md);
   }
 

@@ -978,6 +978,7 @@ export const ReportsView = () => {
       container.removeChild(errorState);
     }
     content.style.display = 'flex';
+    updateResponsiveLayout();
   }
 
   /**
@@ -1038,9 +1039,11 @@ export const ReportsView = () => {
           ? `${SPACING.XS} ${SPACING.SM}`
           : `${SPACING.SM} ${SPACING.SM}`;
       } else if (isTablet) {
-        cs.style.padding = `${SPACING.MD} ${SPACING.LG}`;
+        // Vertical padding only (MD), horizontal removed to match app width
+        cs.style.padding = `${SPACING.MD} 0`;
       } else {
-        cs.style.padding = `${SPACING.MD} ${SPACING.XL}`;
+        // Vertical padding only (MD), horizontal removed to match app width
+        cs.style.padding = `${SPACING.MD} 0`;
       }
     });
 

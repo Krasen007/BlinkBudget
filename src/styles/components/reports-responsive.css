@@ -3,7 +3,9 @@
 
 /* Base mobile styles (default) */
 .view-reports {
-  padding: 0 var(--spacing-sm);
+  --view-reports-horizontal-padding: var(--spacing-sm);
+
+  padding: 0 var(--view-reports-horizontal-padding);
   min-height: 100vh;
   min-height: var(--visual-viewport-height);
   display: flex;
@@ -98,7 +100,7 @@
 /* Small mobile devices (< 480px) */
 @media (width <= 479px) {
   .view-reports {
-    padding: var(--spacing-xs);
+    --view-reports-horizontal-padding: var(--spacing-xs);
   }
 
   .view-reports .charts-section {
@@ -194,10 +196,6 @@
 
 /* Tablet styles (768px - 1023px) */
 @media (width >= 768px) and (width <= 1023px) {
-  .view-reports {
-    padding: var(--spacing-md) var(--spacing-lg);
-  }
-
   .view-reports .charts-section {
     padding: 0;
     margin: 0;
@@ -248,12 +246,6 @@
 
 /* Desktop styles (1024px+) */
 @media (width >= 1024px) {
-  .view-reports {
-    padding: var(--spacing-lg) var(--spacing-xl);
-    max-width: var(--container-max-width);
-    margin: 0 auto;
-  }
-
   .view-reports .charts-section {
     padding: 0;
   }
@@ -309,10 +301,6 @@
 
 /* Large desktop styles (1280px+) */
 @media (width >= 1280px) {
-  .view-reports {
-    max-width: 1200px;
-  }
-
   .view-reports .chart-grid {
     grid-template-columns: 2fr 1fr;
   }
@@ -442,21 +430,7 @@
 }
 
 /* Safe area support for devices with notches */
-.view-reports {
-  padding: max(var(--spacing-sm), var(--safe-area-inset-top))
-    max(var(--spacing-sm), var(--safe-area-inset-right))
-    max(var(--spacing-sm), var(--safe-area-inset-bottom))
-    max(var(--spacing-sm), var(--safe-area-inset-left));
-}
 
-@media (width >= 768px) {
-  .view-reports {
-    padding: max(var(--spacing-md), var(--safe-area-inset-top))
-      max(var(--spacing-lg), var(--safe-area-inset-right))
-      max(var(--spacing-md), var(--safe-area-inset-bottom))
-      max(var(--spacing-lg), var(--safe-area-inset-left));
-  }
-}
 
 /* Keyboard navigation enhancements for different screen sizes */
 @media (width <= 767px) {
@@ -472,5 +446,16 @@
   .view-reports *:focus-visible {
     outline-width: 2px;
     outline-offset: 2px;
+  }
+}
+
+/* Safe area support for devices with notches */
+@supports (padding: env(safe-area-inset-left)) {
+  .view-reports {
+    --view-reports-horizontal-padding: max(
+      var(--spacing-sm),
+      env(safe-area-inset-left),
+      env(safe-area-inset-right)
+    );
   }
 }
