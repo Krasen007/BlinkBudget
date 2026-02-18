@@ -20,13 +20,16 @@ export const CategoryCard = (
   index,
   categoryColorMap,
   getCategoryColors,
-  onClick
+  onClick,
+  frequencyData = null,
+  insights = []
 ) => {
   const card = document.createElement('button');
   card.className = 'category-card';
   card.setAttribute('data-category', category.name);
   card.style.background = COLORS.SURFACE;
-  card.style.border = 'none';
+  card.style.border = `2px solid ${COLORS.BORDER}`;
+
   card.style.borderLeft = 'none';
   card.style.borderRadius = 'var(--radius-md)';
   card.style.padding = SPACING.MD;
@@ -75,13 +78,16 @@ export const CategoryCard = (
   amount.style.textAlign = 'center';
   card.appendChild(amount);
 
-  const percentage = document.createElement('div');
-  percentage.className = 'category-percentage';
-  percentage.textContent = `${category.percentage.toFixed(1)}% of expenses`;
-  percentage.style.fontSize = '0.75rem';
-  percentage.style.color = COLORS.TEXT_MUTED;
-  percentage.style.textAlign = 'center';
-  card.appendChild(percentage);
+  // Add percentage if available
+  if (category.percentage !== undefined && category.percentage !== null) {
+    const percentage = document.createElement('div');
+    percentage.className = 'category-percentage';
+    percentage.textContent = `${category.percentage.toFixed(1)}% of expenses`;
+    percentage.style.fontSize = '0.75rem';
+    percentage.style.color = COLORS.TEXT_MUTED;
+    percentage.style.textAlign = 'center';
+    card.appendChild(percentage);
+  }
 
   const freq = document.createElement('div');
   freq.style.fontSize = '0.75rem';
@@ -102,19 +108,21 @@ export const CategoryCard = (
   }
 
   // Add frequency if available
-  if (arguments[5] && arguments[5][category.name]) {
-    const frequency = arguments[5][category.name];
-    const freqDisplay = document.createElement('div');
-    freqDisplay.style.fontSize = '0.75rem';
-    freqDisplay.style.color = COLORS.TEXT_MUTED;
-    freqDisplay.style.textAlign = 'center';
-    freqDisplay.textContent = `${frequency.avgVisitsPerWeek.toFixed(1)} visits per week`;
-    card.appendChild(freqDisplay);
+  if (frequencyData && frequencyData[category.name]) {
+    const frequency = frequencyData[category.name];
+    if (frequency.averageVisitsPerWeek !== undefined && frequency.averageVisitsPerWeek !== null) {
+      const freqDisplay = document.createElement('div');
+      freqDisplay.style.fontSize = '0.75rem';
+      freqDisplay.style.color = COLORS.TEXT_MUTED;
+      freqDisplay.style.textAlign = 'center';
+      freqDisplay.textContent = `${frequency.averageVisitsPerWeek.toFixed(1)} visits per week`;
+      card.appendChild(freqDisplay);
+    }
   }
 
   // Insights snippet
-  if (arguments[6]) {
-    const relevantInsight = arguments[6].find(
+  if (insights && insights.length > 0) {
+    const relevantInsight = insights.find(
       i => i.category === category.name || i.message.includes(category.name)
     );
     if (relevantInsight) {
