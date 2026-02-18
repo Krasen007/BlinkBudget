@@ -1063,49 +1063,49 @@ function createInvestmentsList(chartRenderer, activeCharts) {
                     console.error('Failed to remove investment', err);
                     // Show user-visible error when deletion fails
                     import('../../components/ConfirmDialog.js').then(({ AlertDialog }) => {
-                      await refreshInvestmentsList();
-                      title: 'Error',
+                      AlertDialog({
+                        title: 'Error',
                         message: 'Could not remove investment. Please try again.',
                       });
-                  }).catch(error => {
-                    console.error('Error loading AlertDialog:', error);
-                  });
-            }
+                    }).catch(error => {
+                      console.error('Error loading AlertDialog:', error);
+                    });
+                  }
                 },
-          onCancel: () => {
-            console.log(
-              `[InvestmentsSection] Cancelled deletion of: ${inv.symbol}`
-            );
-          },
+                onCancel: () => {
+                  console.log(
+                    `[InvestmentsSection] Cancelled deletion of: ${inv.symbol}`
+                  );
+                },
               });
-    })
-            .catch (err => {
-      console.error('Failed to load confirmation dialog:', err);
-      import('../../components/ConfirmDialog.js').then(({ AlertDialog }) => {
-        AlertDialog({
-          title: 'Error',
-          message:
-            'Unable to open confirmation dialog — please try again.',
+            })
+            .catch(err => {
+              console.error('Failed to load confirmation dialog:', err);
+              import('../../components/ConfirmDialog.js').then(({ AlertDialog }) => {
+                AlertDialog({
+                  title: 'Error',
+                  message:
+                    'Unable to open confirmation dialog — please try again.',
+                });
+              }).catch(error => {
+                console.error('Error loading AlertDialog:', error);
+              });
+            });
         });
-      }).catch(error => {
-        console.error('Error loading AlertDialog:', error);
       });
-    });
-  });
-});
 
-investmentsList.appendChild(ul);
+      investmentsList.appendChild(ul);
     } catch (err) {
-  console.warn('Error loading investments for list:', err);
-  const empty = document.createElement('div');
-  empty.textContent = 'Error loading investments. Please try again later.';
-  empty.style.color = COLORS.ERROR;
-  investmentsList.appendChild(empty);
-}
+      console.warn('Error loading investments for list:', err);
+      const empty = document.createElement('div');
+      empty.textContent = 'Error loading investments. Please try again later.';
+      empty.style.color = COLORS.ERROR;
+      investmentsList.appendChild(empty);
+    }
   }
 
-// Return both the element and a way to populate it
-return { investmentsList, refreshInvestmentsList };
+  // Return both the element and a way to populate it
+  return { investmentsList, refreshInvestmentsList };
 }
 
 /**
