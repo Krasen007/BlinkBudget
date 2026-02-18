@@ -690,7 +690,7 @@ export const ReportsView = () => {
       chartsSection.className = 'charts-section';
       chartsSection.style.display = 'flex';
       chartsSection.style.flexDirection = 'column';
-      chartsSection.style.gap = SPACING.XL;
+      chartsSection.style.gap = SPACING.MD;
       chartsSection.style.position = 'relative';
 
       const chartRenderResults = [];
@@ -771,9 +771,6 @@ export const ReportsView = () => {
         categories => getCategoryColors(categories, categoryColorMap),
         handleCategoryChartClick
       );
-      categoryResult.section.style.borderBottom = `2px solid ${COLORS.BORDER}`;
-      categoryResult.section.style.paddingBottom = `calc(${SPACING.LG} * 1.5)`;
-      categoryResult.section.style.marginBottom = `calc(${SPACING.XL} * 1.5)`;
       chartsSection.appendChild(categoryResult.section);
       if (categoryResult.chart)
         activeCharts.set('category-breakdown', categoryResult.chart);
@@ -798,16 +795,6 @@ export const ReportsView = () => {
     try {
       const incomeExpenseContainer = document.createElement('div');
       incomeExpenseContainer.className = 'income-expense-container';
-      incomeExpenseContainer.style.setProperty(
-        'margin-top',
-        SPACING.XL,
-        'important'
-      );
-      incomeExpenseContainer.style.setProperty(
-        'margin-bottom',
-        SPACING.SM,
-        'important'
-      );
       incomeExpenseContainer.style.position = 'relative';
       incomeExpenseContainer.style.zIndex = '1';
       incomeExpenseContainer.style.clear = 'both';
@@ -852,7 +839,6 @@ export const ReportsView = () => {
         handleCategoryCardClick,
         frequencyData.categories
       );
-      categorySelectorSection.style.marginTop = `calc(${SPACING.XL} * 2)`;
       categorySelectorSection.style.clear = 'both';
       categorySelectorSection.style.position = 'relative';
       categorySelectorSection.style.zIndex = '2';
@@ -906,11 +892,9 @@ export const ReportsView = () => {
       );
       patternInsightsSection.style.setProperty(
         'margin-top',
-        SPACING.XL,
+        '0',
         'important'
       );
-      patternInsightsSection.style.borderBottom = `2px solid ${COLORS.BORDER}`;
-      patternInsightsSection.style.paddingBottom = `${SPACING.LG}`;
       chartsSection.appendChild(patternInsightsSection);
       chartRenderResults.push({
         name: 'Spending Pattern Analysis',
@@ -935,7 +919,7 @@ export const ReportsView = () => {
         const insightsSection = InsightsSection(currentData);
         insightsSection.style.setProperty(
           'margin-top',
-          SPACING.LG,
+          '0',
           'important'
         );
         chartsSection.appendChild(insightsSection);
@@ -1029,7 +1013,7 @@ export const ReportsView = () => {
 
     content.style.maxWidth = '100%';
     content.style.boxSizing = 'border-box';
-    content.style.gap = isMobile ? SPACING.MD : SPACING.LG;
+    content.style.gap = SPACING.MD;
 
     // Sync charts-section horizontal padding with header
     const chartsSections = content.querySelectorAll('.charts-section');

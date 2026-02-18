@@ -3,7 +3,7 @@
 
 /* Base mobile styles (default) */
 .view-reports {
-  --view-reports-horizontal-padding: var(--spacing-sm);
+  --view-reports-horizontal-padding: var(--spacing-sm); /* Reduced from md/lg (8px) */
 
   padding: 0 var(--view-reports-horizontal-padding);
   min-height: 100vh;
@@ -12,13 +12,45 @@
   flex-direction: column;
 }
 
+/* Tighten standard view container for reports specifically */
+.view-reports.view-container {
+  padding: 0 var(--spacing-sm) !important; /* Force 8px horizontal padding */
+}
 
-/* Chart section mobile optimizations */
+/* Compact sticky header - No bottom padding to bring buttons closer to content */
+.view-reports .view-header.view-sticky {
+  padding-top: var(--spacing-xs) !important;
+  padding-bottom: 0 !important;
+}
+
+/* Eliminate gap in header container and section margins */
+.view-reports .view-header-container {
+  gap: var(--spacing-xs) !important;
+  margin-bottom: 0 !important;
+}
+
+/* Remove margin below the time selector itself */
+.view-reports .time-period-selector {
+  margin-bottom: 0 !important;
+}
+
+/* Keep the original size for buttons as requested */
+.view-reports .view-tab {
+  /* Reverting to standard sizes (padding: var(--spacing-md) var(--spacing-xl), font-size: 1rem) */
+}
+
+/* Chart section optimizations */
 .view-reports .charts-section {
   padding: 0;
   margin: 0;
   border-radius: 0;
   border: none;
+  gap: var(--spacing-md) !important; /* 12px gap instead of 24px */
+}
+
+/* Reduce individual card padding */
+.view-reports .chart-section {
+  padding: var(--spacing-md) !important; /* 12px instead of 16px */
 }
 
 

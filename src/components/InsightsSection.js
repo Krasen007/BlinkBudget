@@ -18,7 +18,7 @@ export const InsightsSection = currentData => {
   section.style.background = COLORS.SURFACE;
   section.style.borderRadius = 'var(--radius-lg)';
   section.style.border = `1px solid ${COLORS.BORDER}`;
-  section.style.padding = SPACING.LG;
+  section.style.padding = SPACING.MD;
 
   const title = document.createElement('h3');
   title.textContent = 'Financial Insights';

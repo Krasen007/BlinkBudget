@@ -21,7 +21,7 @@ export const BudgetSummaryCard = (summary, timePeriod = null) => {
     background: COLORS.SURFACE,
     borderRadius: 'var(--radius-lg)',
     border: `1px solid ${COLORS.BORDER}`,
-    padding: SPACING.LG,
+    padding: SPACING.MD,
     display: 'flex',
     flexDirection: 'column',
     gap: SPACING.MD,
