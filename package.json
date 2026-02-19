@@ -25,6 +25,10 @@
   "keywords": [],
   "author": "Krasen Ivanov",
   "license": "GPL-3.0-only",
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=11.0.0"
+  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@fullhuman/postcss-purgecss": "^8.0.0",
