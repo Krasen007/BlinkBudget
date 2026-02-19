@@ -236,6 +236,22 @@ export const ACCOUNT_TYPES = {
   CASH: 'cash',
 };
 
+// Account type labels for display
+export const ACCOUNT_TYPE_LABELS = {
+  checking: 'Checking Account',
+  bank: 'Bank Account',
+  credit: 'Credit Card',
+  savings: 'Savings Account',
+  investment: 'Investment Account',
+  cash: 'Cash',
+  other: 'Other',
+};
+
+// Helper function to get account type label
+export const getAccountTypeLabel = (type) => {
+  return ACCOUNT_TYPE_LABELS[type] || 'Other';
+};
+
 // Transaction types
 export const TRANSACTION_TYPES = {
   EXPENSE: 'expense',

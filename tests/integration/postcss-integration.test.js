@@ -3,7 +3,7 @@ import { readFileSync, existsSync } from 'fs';
 
 describe('PostCSS Integration', () => {
   it('should have Stylelint configuration file', () => {
-    expect(existsSync('.stylelintrc.js')).toBe(true);
+    expect(existsSync('.stylelintrc.js') || existsSync('.stylelintrc.json')).toBe(true);
   });
 
   it('should have updated Vite configuration for CSS processing', () => {

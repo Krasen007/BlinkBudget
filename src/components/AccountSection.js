@@ -13,6 +13,7 @@ import {
   FONT_SIZES,
 } from '../utils/constants.js';
 import { sanitizeInput } from '../utils/security-utils.js';
+import { getAccountTypeLabel } from '../utils/constants.js';
 
 export const AccountSection = () => {
   const section = document.createElement('div');
@@ -37,40 +38,222 @@ export const AccountSection = () => {
     text: 'Add Account',
     variant: 'primary',
     onClick: () => {
-      import('./ConfirmDialog.js')
-        .then(({ PromptDialog }) => {
-          PromptDialog({
-            title: 'Add New Account',
-            message: 'Enter account name:',
-            placeholder: 'e.g., Checking, Savings, Credit Card',
-            confirmText: 'Add',
-            onConfirm: async accountName => {
-              if (!accountName || accountName.trim().length === 0) {
-                return;
-              }
+      const showAccountCreationDialog = () => {
+        const overlay = document.createElement('div');
+        overlay.className = 'dialog-overlay';
+        overlay.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+        `;
 
-              const sanitized = sanitizeInput(accountName.trim());
+        const card = document.createElement('div');
+        card.className = 'dialog-card';
+        card.style.cssText = `
+          background: var(--color-surface);
+          border: 1px solid var(--color-border);
+          padding: var(--spacing-lg);
+          border-radius: var(--radius-lg);
+          max-width: 400px;
+          width: 90%;
+          max-height: 80vh;
+          overflow-y: auto;
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        `;
+
+        const titleEl = document.createElement('h3');
+        titleEl.textContent = 'Add New Account';
+        titleEl.style.cssText = `
+          margin-bottom: var(--spacing-md);
+          text-align: center;
+          color: var(--color-text-main);
+          font-size: var(--font-size-lg);
+          font-weight: 600;
+        `;
+
+        // Name input
+        const nameLabel = document.createElement('label');
+        nameLabel.textContent = 'Account Name:';
+        nameLabel.style.cssText = `
+          display: block;
+          margin-bottom: var(--spacing-xs);
+          font-weight: 500;
+          color: var(--color-text-main);
+        `;
+
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.placeholder = 'e.g., Checking, Cash, Credit Card';
+        nameInput.style.cssText = `
+          width: 100%;
+          padding: var(--spacing-md);
+          margin-bottom: var(--spacing-md);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-md);
+          font-size: var(--font-size-base);
+          background: var(--color-background);
+          color: var(--color-text-main);
+          box-sizing: border-box;
+          transition: border-color 0.2s ease;
+        `;
+
+        // Add focus styles
+        nameInput.addEventListener('focus', () => {
+          nameInput.style.borderColor = 'var(--color-primary)';
+          nameInput.style.outline = 'none';
+          nameInput.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+        });
+
+        nameInput.addEventListener('blur', () => {
+          nameInput.style.borderColor = 'var(--color-border)';
+          nameInput.style.boxShadow = 'none';
+        });
+
+        // Account type selection
+        const typeLabel = document.createElement('label');
+        typeLabel.textContent = 'Account Type:';
+        typeLabel.style.cssText = `
+          display: block;
+          margin-bottom: var(--spacing-xs);
+          font-weight: 500;
+          color: var(--color-text-main);
+        `;
+
+        const typeSelect = document.createElement('select');
+        typeSelect.style.cssText = `
+          width: 100%;
+          padding: var(--spacing-md);
+          margin-bottom: var(--spacing-lg);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-md);
+          font-size: var(--font-size-base);
+          background: var(--color-background);
+          color: var(--color-text-main);
+          box-sizing: border-box;
+          transition: border-color 0.2s ease;
+          cursor: pointer;
+        `;
+
+        // Add focus styles for select
+        typeSelect.addEventListener('focus', () => {
+          typeSelect.style.borderColor = 'var(--color-primary)';
+          typeSelect.style.outline = 'none';
+          typeSelect.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+        });
+
+        typeSelect.addEventListener('blur', () => {
+          typeSelect.style.borderColor = 'var(--color-border)';
+          typeSelect.style.boxShadow = 'none';
+        });
+
+        const accountTypes = [
+          { value: 'checking', label: 'Checking Account' },
+          { value: 'bank', label: 'Bank Account' },
+          { value: 'credit', label: 'Credit Card' },
+          { value: 'savings', label: 'Savings Account' },
+          { value: 'investment', label: 'Investment Account' },
+          { value: 'cash', label: 'Cash' },
+          { value: 'other', label: 'Other' }
+        ];
+
+        accountTypes.forEach(type => {
+          const option = document.createElement('option');
+          option.value = type.value;
+          option.textContent = type.label;
+          option.style.background = 'var(--color-background)';
+          option.style.color = 'var(--color-text-main)';
+          typeSelect.appendChild(option);
+        });
+
+        const btnGroup = document.createElement('div');
+        btnGroup.style.display = 'flex';
+        btnGroup.style.gap = 'var(--spacing-md)';
+
+        const cancelBtn = Button({
+          text: 'Cancel',
+          variant: 'secondary',
+          onClick: () => {
+            document.body.removeChild(overlay);
+          },
+        });
+
+        const saveBtn = Button({
+          text: 'Add Account',
+          variant: 'primary',
+          onClick: async () => {
+            const accountName = nameInput.value.trim();
+            const accountType = typeSelect.value;
+
+            if (!accountName) {
+              nameInput.focus();
+              return;
+            }
+
+            try {
+              const sanitized = sanitizeInput(accountName);
               const newAccount = {
                 id: generateId(),
                 name: sanitized,
-                type: 'bank',
+                type: accountType,
                 balance: 0,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
               };
 
-              try {
-                AccountService.add(newAccount);
-                renderAccounts();
-              } catch (error) {
-                console.error('Error adding account:', error);
-              }
-            },
-          });
-        })
-        .catch(error => {
-          console.error('Error loading ConfirmDialog:', error);
+              AccountService.saveAccount(newAccount);
+              renderAccounts();
+              document.body.removeChild(overlay);
+            } catch (error) {
+              console.error('Error adding account:', error);
+            }
+          },
         });
+
+        cancelBtn.style.flex = '1';
+        saveBtn.style.flex = '1';
+
+        btnGroup.appendChild(cancelBtn);
+        btnGroup.appendChild(saveBtn);
+
+        card.appendChild(titleEl);
+        card.appendChild(nameLabel);
+        card.appendChild(nameInput);
+        card.appendChild(typeLabel);
+        card.appendChild(typeSelect);
+        card.appendChild(btnGroup);
+        overlay.appendChild(card);
+
+        document.body.appendChild(overlay);
+        setTimeout(() => nameInput.focus(), 100);
+
+        // Close on overlay click
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) {
+            document.body.removeChild(overlay);
+          }
+        });
+
+        // Close on Escape key
+        const handleEscape = (e) => {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            if (document.body.contains(overlay)) {
+              document.body.removeChild(overlay);
+            }
+            document.removeEventListener('keydown', handleEscape);
+          }
+        };
+        document.addEventListener('keydown', handleEscape);
+      };
+
+      showAccountCreationDialog();
     },
   });
 
@@ -135,7 +318,7 @@ export const AccountSection = () => {
         `;
 
         const accountType = document.createElement('div');
-        accountType.textContent = account.type || 'bank';
+        accountType.textContent = getAccountTypeLabel(account.type);
         accountType.style.cssText = `
           font-size: var(--font-size-sm);
           color: ${COLORS.TEXT_MUTED};
@@ -150,7 +333,7 @@ export const AccountSection = () => {
 
         // Rename Button
         const renameBtn = document.createElement('button');
-        renameBtn.textContent = 'Rename';
+        renameBtn.textContent = 'Edit';
         renameBtn.style.cssText = `
           padding: ${SPACING.XS} ${SPACING.SM};
           background: ${COLORS.PRIMARY};
@@ -162,34 +345,220 @@ export const AccountSection = () => {
           min-height: 32px;
         `;
         renameBtn.addEventListener('click', () => {
-          import('./ConfirmDialog.js')
-            .then(({ PromptDialog }) => {
-              PromptDialog({
-                title: 'Rename Account',
-                message: 'Enter new name:',
-                placeholder: account.name,
-                confirmText: 'Rename',
-                onConfirm: async newName => {
-                  if (!newName || newName.trim().length === 0) {
-                    return;
-                  }
+          const showAccountEditDialog = () => {
+            const overlay = document.createElement('div');
+            overlay.className = 'dialog-overlay';
+            overlay.style.cssText = `
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              background: rgba(0, 0, 0, 0.5);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              z-index: 1000;
+            `;
 
-                  try {
-                    AccountService.update(account.id, {
-                      ...account,
-                      name: sanitizeInput(newName.trim()),
-                      updatedAt: new Date().toISOString(),
-                    });
-                    renderAccounts();
-                  } catch (error) {
-                    console.error('Error renaming account:', error);
-                  }
-                },
-              });
-            })
-            .catch(error => {
-              console.error('Error loading ConfirmDialog:', error);
+            const card = document.createElement('div');
+            card.className = 'dialog-card';
+            card.style.cssText = `
+              background: var(--color-surface);
+              border: 1px solid var(--color-border);
+              padding: var(--spacing-lg);
+              border-radius: var(--radius-lg);
+              max-width: 400px;
+              width: 90%;
+              max-height: 80vh;
+              overflow-y: auto;
+              box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            `;
+
+            const titleEl = document.createElement('h3');
+            titleEl.textContent = 'Edit Account';
+            titleEl.style.cssText = `
+              margin-bottom: var(--spacing-md);
+              text-align: center;
+              color: var(--color-text-main);
+              font-size: var(--font-size-lg);
+              font-weight: 600;
+            `;
+
+            // Name input
+            const nameLabel = document.createElement('label');
+            nameLabel.textContent = 'Account Name:';
+            nameLabel.style.cssText = `
+              display: block;
+              margin-bottom: var(--spacing-xs);
+              font-weight: 500;
+              color: var(--color-text-main);
+            `;
+
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.value = account.name;
+            nameInput.style.cssText = `
+              width: 100%;
+              padding: var(--spacing-md);
+              margin-bottom: var(--spacing-md);
+              border: 1px solid var(--color-border);
+              border-radius: var(--radius-md);
+              font-size: var(--font-size-base);
+              background: var(--color-background);
+              color: var(--color-text-main);
+              box-sizing: border-box;
+              transition: border-color 0.2s ease;
+            `;
+
+            // Add focus styles
+            nameInput.addEventListener('focus', () => {
+              nameInput.style.borderColor = 'var(--color-primary)';
+              nameInput.style.outline = 'none';
+              nameInput.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
             });
+
+            nameInput.addEventListener('blur', () => {
+              nameInput.style.borderColor = 'var(--color-border)';
+              nameInput.style.boxShadow = 'none';
+            });
+
+            // Account type selection
+            const typeLabel = document.createElement('label');
+            typeLabel.textContent = 'Account Type:';
+            typeLabel.style.cssText = `
+              display: block;
+              margin-bottom: var(--spacing-xs);
+              font-weight: 500;
+              color: var(--color-text-main);
+            `;
+
+            const typeSelect = document.createElement('select');
+            typeSelect.style.cssText = `
+              width: 100%;
+              padding: var(--spacing-md);
+              margin-bottom: var(--spacing-lg);
+              border: 1px solid var(--color-border);
+              border-radius: var(--radius-md);
+              font-size: var(--font-size-base);
+              background: var(--color-background);
+              color: var(--color-text-main);
+              box-sizing: border-box;
+              transition: border-color 0.2s ease;
+              cursor: pointer;
+            `;
+
+            const accountTypes = [
+              { value: 'checking', label: 'Checking Account' },
+              { value: 'bank', label: 'Bank Account' },
+              { value: 'credit', label: 'Credit Card' },
+              { value: 'savings', label: 'Savings Account' },
+              { value: 'investment', label: 'Investment Account' },
+              { value: 'cash', label: 'Cash' },
+              { value: 'other', label: 'Other' }
+            ];
+
+            accountTypes.forEach(type => {
+              const option = document.createElement('option');
+              option.value = type.value;
+              option.textContent = type.label;
+              option.style.background = 'var(--color-background)';
+              option.style.color = 'var(--color-text-main)';
+              if (type.value === account.type) {
+                option.selected = true;
+              }
+              typeSelect.appendChild(option);
+            });
+
+            // Add focus styles for select
+            typeSelect.addEventListener('focus', () => {
+              typeSelect.style.borderColor = 'var(--color-primary)';
+              typeSelect.style.outline = 'none';
+              typeSelect.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+            });
+
+            typeSelect.addEventListener('blur', () => {
+              typeSelect.style.borderColor = 'var(--color-border)';
+              typeSelect.style.boxShadow = 'none';
+            });
+
+            const btnGroup = document.createElement('div');
+            btnGroup.style.display = 'flex';
+            btnGroup.style.gap = 'var(--spacing-md)';
+
+            const cancelBtn = Button({
+              text: 'Cancel',
+              variant: 'secondary',
+              onClick: () => {
+                document.body.removeChild(overlay);
+              },
+            });
+
+            const saveBtn = Button({
+              text: 'Save Changes',
+              variant: 'primary',
+              onClick: async () => {
+                const accountName = nameInput.value.trim();
+                const accountType = typeSelect.value;
+
+                if (!accountName) {
+                  nameInput.focus();
+                  return;
+                }
+
+                try {
+                  AccountService.saveAccount({
+                    ...account,
+                    name: sanitizeInput(accountName),
+                    type: accountType,
+                    updatedAt: new Date().toISOString(),
+                  });
+                  renderAccounts();
+                  document.body.removeChild(overlay);
+                } catch (error) {
+                  console.error('Error updating account:', error);
+                }
+              },
+            });
+
+            cancelBtn.style.flex = '1';
+            saveBtn.style.flex = '1';
+
+            btnGroup.appendChild(cancelBtn);
+            btnGroup.appendChild(saveBtn);
+
+            card.appendChild(titleEl);
+            card.appendChild(nameLabel);
+            card.appendChild(nameInput);
+            card.appendChild(typeLabel);
+            card.appendChild(typeSelect);
+            card.appendChild(btnGroup);
+            overlay.appendChild(card);
+
+            document.body.appendChild(overlay);
+            setTimeout(() => nameInput.focus(), 100);
+
+            // Close on overlay click
+            overlay.addEventListener('click', (e) => {
+              if (e.target === overlay) {
+                document.body.removeChild(overlay);
+              }
+            });
+
+            // Close on Escape key
+            const handleEscape = (e) => {
+              if (e.key === 'Escape') {
+                e.preventDefault();
+                if (document.body.contains(overlay)) {
+                  document.body.removeChild(overlay);
+                }
+                document.removeEventListener('keydown', handleEscape);
+              }
+            };
+            document.addEventListener('keydown', handleEscape);
+          };
+
+          showAccountEditDialog();
         });
 
         // Delete Button
@@ -215,7 +584,7 @@ export const AccountSection = () => {
                 cancelText: 'Cancel',
                 onConfirm: async () => {
                   try {
-                    AccountService.remove(account.id);
+                    AccountService.deleteAccount(account.id);
                     renderAccounts();
                   } catch (error) {
                     console.error('Error deleting account:', error);
