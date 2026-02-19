@@ -40,7 +40,7 @@ export const DashboardView = () => {
     const version =
       typeof __APP_VERSION__ !== 'undefined' ? ` v${__APP_VERSION__}` : '';
     title.textContent = name
-      ? `Welcome back, ${name}!${version}`
+      ? `Hi, ${name}!${version}`
       : `Welcome back!${version}`;
   };
   updateTitle();

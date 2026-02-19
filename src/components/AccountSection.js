@@ -160,7 +160,7 @@ export const AccountSection = () => {
           { value: 'savings', label: 'Savings Account' },
           { value: 'investment', label: 'Investment Account' },
           { value: 'cash', label: 'Cash' },
-          { value: 'other', label: 'Other' }
+          { value: 'other', label: 'Other' },
         ];
 
         accountTypes.forEach(type => {
@@ -234,14 +234,14 @@ export const AccountSection = () => {
         setTimeout(() => nameInput.focus(), 100);
 
         // Close on overlay click
-        overlay.addEventListener('click', (e) => {
+        overlay.addEventListener('click', e => {
           if (e.target === overlay) {
             document.body.removeChild(overlay);
           }
         });
 
         // Close on Escape key
-        const handleEscape = (e) => {
+        const handleEscape = e => {
           if (e.key === 'Escape') {
             e.preventDefault();
             if (document.body.contains(overlay)) {
@@ -455,7 +455,7 @@ export const AccountSection = () => {
               { value: 'savings', label: 'Savings Account' },
               { value: 'investment', label: 'Investment Account' },
               { value: 'cash', label: 'Cash' },
-              { value: 'other', label: 'Other' }
+              { value: 'other', label: 'Other' },
             ];
 
             accountTypes.forEach(type => {
@@ -539,14 +539,14 @@ export const AccountSection = () => {
             setTimeout(() => nameInput.focus(), 100);
 
             // Close on overlay click
-            overlay.addEventListener('click', (e) => {
+            overlay.addEventListener('click', e => {
               if (e.target === overlay) {
                 document.body.removeChild(overlay);
               }
             });
 
             // Close on Escape key
-            const handleEscape = (e) => {
+            const handleEscape = e => {
               if (e.key === 'Escape') {
                 e.preventDefault();
                 if (document.body.contains(overlay)) {

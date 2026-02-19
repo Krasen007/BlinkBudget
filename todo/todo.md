@@ -8,7 +8,6 @@ DO NOT IMPLEMENT: Mask technical error messages from Firestore operations
 DO NOT IMPLEMENT: make security.md following all the security best practices
 DO NOT IMPLEMENT: add possibility to import transactions from a csv file
 DO NOT IMPLEMENT: add possible language selection with preloaded categories of the preferred language
-
 DO NOT IMPLEMENT: release as windows store app https://learn.microsoft.com/en-us/microsoft-edge/progressive-web-apps/how-to/microsoft-store
 DO NOT IMPLEMENT: use Ionic's Capacitor or Cordova to make android app
 
@@ -25,3 +24,4 @@ DO NOT IMPLEMENT: use Ionic's Capacitor or Cordova to make android app
 [ ] Update account-service.js and storage.js to implement an optional limit property for accounts, allowing the app to track credit limits and spending thresholds. This change exposes new API methods to calculate available credit and trigger utilization warnings, as originally outlined in the design spec.
 [ ] fix smart suggestions ui and integration
 [ ] fix advanced filtering ui
+[ ] add tests for Settings components (DateFormatSection, DataManagementSection, GeneralSection, BackupRestoreSection, AccountDeletionSection, SmartSuggestionsSection, AdvancedFilteringSection)

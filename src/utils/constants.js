@@ -248,7 +248,7 @@ export const ACCOUNT_TYPE_LABELS = {
 };
 
 // Helper function to get account type label
-export const getAccountTypeLabel = (type) => {
+export const getAccountTypeLabel = type => {
   return ACCOUNT_TYPE_LABELS[type] || 'Other';
 };
 
