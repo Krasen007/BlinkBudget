@@ -48,6 +48,10 @@
   /* Enhanced from 20% for WCAG AA compliance */
   --color-border-strong: hsl(240, 5%, 40%); /* New token for stronger borders */
 
+  /* Success colors */
+  --color-success: hsl(150, 100%, 35%);
+  --color-success-light: rgba(16, 185, 129, 0.1);
+
   /* Enhanced accessibility tokens */
   --focus-color: hsl(250, 84%, 60%); /* Same as primary for consistency */
   --focus-color-light: hsl(250, 84%, 75%); /* Lighter variant */

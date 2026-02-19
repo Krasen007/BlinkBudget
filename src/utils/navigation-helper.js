@@ -11,6 +11,8 @@ export const createNavigationButtons = currentView => {
   rightControls.style.display = 'flex';
   rightControls.style.alignItems = 'center';
   rightControls.style.gap = SPACING.SM;
+  rightControls.style.flexShrink = '1';
+  rightControls.style.minWidth = '0';
 
   // Define all views and their properties
   const views = [
@@ -52,7 +54,6 @@ export const createNavigationButtons = currentView => {
       settingsButton.style.fontSize = '1.5rem';
       settingsButton.style.padding = SPACING.XS;
       settingsButton.style.border = 'none';
-      settingsButton.style.marginRight = SPACING.SM;
       settingsButton.title = settingsView.title;
       settingsButton.style.transition = 'all 0.2s ease';
 
@@ -79,7 +80,6 @@ export const createNavigationButtons = currentView => {
     button.style.fontSize = '1.5rem';
     button.style.padding = SPACING.XS;
     button.style.border = 'none';
-    button.style.marginRight = SPACING.SM;
     button.title = view.title;
     button.style.transition = 'all 0.2s ease';
 

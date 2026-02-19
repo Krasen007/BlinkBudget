@@ -23,8 +23,10 @@ export const DashboardStatsCard = ({ label, value, color }) => {
     minHeight: TOUCH_TARGETS.MIN_HEIGHT,
 
     display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
+    flexDirection: isMobile ? 'row' : 'column',
+    justifyContent: 'space-between',
+    alignItems: isMobile ? 'center' : 'flex-start',
+    gap: isMobile ? SPACING.MD : 0,
   });
 
   const lbl = document.createElement('p');
@@ -34,7 +36,7 @@ export const DashboardStatsCard = ({ label, value, color }) => {
     fontSize: isMobile
       ? FONT_SIZES.STAT_LABEL_MOBILE
       : FONT_SIZES.STAT_LABEL_DESKTOP,
-    marginBottom: SPACING.XS,
+    marginBottom: isMobile ? 0 : SPACING.XS,
     color: COLORS.TEXT_MUTED,
     lineHeight: 'var(--line-height-normal)',
     fontWeight: '500',

@@ -21,7 +21,7 @@ import { RiskAssessor } from '../core/risk-assessor.js';
 import { GoalPlanner } from '../core/goal-planner.js';
 import { ChartRenderer } from '../components/ChartRenderer.js';
 
-import { COLORS, SPACING, TIMING, STORAGE_KEYS } from '../utils/constants.js';
+import { COLORS, SPACING, TIMING, STORAGE_KEYS, BREAKPOINTS } from '../utils/constants.js';
 
 import { debounce } from '../utils/touch-utils.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
@@ -100,6 +100,8 @@ export const FinancialPlanningView = () => {
     leftSide.style.display = 'flex';
     leftSide.style.alignItems = 'center';
     leftSide.style.gap = SPACING.MD;
+    leftSide.style.minWidth = '0';
+    leftSide.style.flexShrink = '1';
 
     // Back button (always visible)
     const backButton = document.createElement('button');
@@ -114,6 +116,16 @@ export const FinancialPlanningView = () => {
     title.id = 'financial-planning-title';
     title.textContent = 'Financial Planning';
     title.className = 'view-title';
+    // Add mobile text truncation styles
+    const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
+    if (isMobile) {
+      Object.assign(title.style, {
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        minWidth: '0',
+      });
+    }
 
     leftSide.appendChild(backButton);
     leftSide.appendChild(title);

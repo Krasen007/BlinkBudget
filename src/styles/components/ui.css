@@ -260,6 +260,10 @@
   .dashboard-stat-card {
     padding: var(--spacing-md);
     min-height: 80px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-md);
   }
 }
 
@@ -273,6 +277,7 @@
 @media (width <= calc(var(--breakpoint-md) - 1px)) {
   .dashboard-stat-label {
     font-size: var(--font-size-sm);
+    margin-bottom: 0;
   }
 }
 
@@ -297,7 +302,7 @@
 
 @media (width <= calc(var(--breakpoint-md) - 1px)) {
   .dashboard-stats-container {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: var(--spacing-sm);
   }
 }

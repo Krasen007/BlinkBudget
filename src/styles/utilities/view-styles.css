@@ -125,7 +125,7 @@
 
   /* Mobile stats container */
   .view-stats-container {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr !important;
   }
 
   /* Mobile form adjustments */
@@ -267,13 +267,16 @@
 /* View Stats Container - For dashboard-style statistics */
 .view-stats-container {
   display: grid;
-  gap: var(--spacing-md);
+  grid-template-columns: 1fr 1fr; /* Default to 2 columns for mobile */
+  gap: var(--spacing-sm);
   margin-bottom: var(--spacing-xl);
 }
 
-@media (--sm) {
+/* Ensure 2 columns on all mobile screens */
+@media (max-width: 767px) {
   .view-stats-container {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr !important;
+    gap: var(--spacing-sm) !important;
   }
 }
 
@@ -349,6 +352,21 @@
   width: 100%;
 }
 
+@media (width <= calc(var(--breakpoint-md) - 1px)) {
+  .view-header-row {
+    overflow-x: hidden;
+    min-width: 0;
+  }
+
+  .view-header-row > div {
+    min-width: 0;
+  }
+
+  .view-header-row > div:last-child {
+    flex-shrink: 1;
+  }
+}
+
 .view-header-container {
   display: flex;
   flex-direction: column;
@@ -364,6 +382,15 @@
   font-weight: bold;
   color: var(--color-text-main);
   line-height: var(--line-height-tight);
+}
+
+@media (width <= calc(var(--breakpoint-md) - 1px)) {
+  .view-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
 }
 
 @media (--lg) {
