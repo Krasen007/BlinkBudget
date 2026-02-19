@@ -273,10 +273,11 @@
 }
 
 /* Ensure 2 columns on all mobile screens */
-@media (max-width: 767px) {
+@media (width <= 767px) {
   .view-stats-container {
     grid-template-columns: 1fr 1fr !important;
-    gap: var(--spacing-sm) !important;
+    gap: var(--spacing-xs) !important;
+    margin-bottom: var(--spacing-xs) !important;
   }
 }
 
@@ -341,6 +342,23 @@
 
 .view-select:focus {
   border-color: var(--color-primary);
+}
+
+@media (width <= 767px) {
+  /* Reduce spacing below account selector on mobile */
+  #account-filter-select {
+    margin-top: var(--spacing-xs) !important;
+  }
+
+  /* Reduce spacing above Add Transaction button (stats container margin-bottom) */
+  .view-dashboard .view-stats-container {
+    margin-bottom: var(--spacing-xs) !important;
+  }
+
+  /* Reduce spacing below Add Transaction button on mobile */
+  .view-dashboard .btn-primary {
+    margin-bottom: var(--spacing-xs) !important;
+  }
 }
 
 /* Header Grid/Row for Dashboard/Reports */

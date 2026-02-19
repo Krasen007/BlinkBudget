@@ -1,0 +1,57 @@
+{
+  "extends": ["stylelint-config-standard"],
+  "rules": {
+    "custom-property-pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+    "selector-class-pattern": [
+      "^([a-z0-9-]+:)*[a-z0-9\\\\/\\._-]+$",
+      {
+        "message": "Selector should be kebab-case, BEM-style, or a utility-style class like \"md:w-1/2\" or \"focus-visible:outline-none\""
+      }
+    ],
+    "no-descending-specificity": null,
+    "declaration-block-no-duplicate-properties": [
+      true,
+      {
+        "ignoreProperties": [
+          "appearance",
+          "backdrop-filter",
+          "background-clip",
+          "height",
+          "min-height",
+          "image-rendering"
+        ]
+      }
+    ],
+    "media-feature-name-no-unknown": [
+      true,
+      {
+        "ignoreMediaFeatureNames": [
+          "min-device-pixel-ratio",
+          "prefers-contrast"
+        ]
+      }
+    ],
+    "media-feature-name-value-no-unknown": null,
+    "keyframes-name-pattern": null,
+    "color-no-hex": null,
+    "declaration-block-single-line-max-declarations": null,
+    "number-max-precision": 6,
+    "media-query-no-invalid": null,
+    "declaration-no-important": null,
+    "no-empty-source": null,
+    "at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": ["import", "custom-media"]
+      }
+    ],
+    "import-notation": null,
+    "color-function-notation": null,
+    "hue-degree-notation": null,
+    "alpha-value-notation": null,
+    "no-duplicate-selectors": null,
+    "comment-empty-line-before": null,
+    "selector-id-pattern": null,
+    "value-keyword-case": null
+  }
+}

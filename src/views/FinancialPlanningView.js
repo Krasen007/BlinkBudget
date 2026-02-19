@@ -21,7 +21,13 @@ import { RiskAssessor } from '../core/risk-assessor.js';
 import { GoalPlanner } from '../core/goal-planner.js';
 import { ChartRenderer } from '../components/ChartRenderer.js';
 
-import { COLORS, SPACING, TIMING, STORAGE_KEYS, BREAKPOINTS } from '../utils/constants.js';
+import {
+  COLORS,
+  SPACING,
+  TIMING,
+  STORAGE_KEYS,
+  BREAKPOINTS,
+} from '../utils/constants.js';
 
 import { debounce } from '../utils/touch-utils.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';

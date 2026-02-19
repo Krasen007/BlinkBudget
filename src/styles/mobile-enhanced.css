@@ -431,7 +431,7 @@ body.input-search-focused {
 
   .suggestion-chip {
     min-width: 60px;
-    min-height: 40px;
+    min-height: 44px;
     padding: var(--mobile-spacing-xs) var(--mobile-spacing-sm);
     font-size: 12px;
   }
@@ -454,7 +454,7 @@ body.input-search-focused {
     min-height: var(--touch-target-min);
     max-height: 60px; /* Even smaller on very small screens */
     padding: var(--mobile-spacing-sm) var(--mobile-spacing-md);
-    font-size: 14px; /* Smaller font on small screens */
+    font-size: 16px; /* Smaller font on small screens */
   }
 }
 
@@ -557,26 +557,20 @@ body.input-search-focused {
   }
 }
 
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .suggestion-chip,
-  .category-card,
-  .smart-amount-input,
-  .smart-note-input,
-  .mobile-btn-primary {
-    transition: none;
+/* Mobile layout fixes for Financial Planning */
+@media (width <= 767px) {
+  /* Financial Planning Overview Stats Grid - 2 per row on mobile */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: var(--mobile-spacing-md) !important;
   }
 
-  .suggestion-chip:hover,
-  .category-card:hover {
-    transform: none;
-  }
-
-  body.keyboard-visible .transaction-form,
-  body.keyboard-visible .form-section,
-  body.keyboard-visible .smart-suggestions-container,
-  body.keyboard-visible .smart-match-container,
-  body.keyboard-visible .category-grid {
-    transition: none;
+  /* Financial Planning Navigation Tabs - prevent clipping on mobile */
+  .financial-planning-nav {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: var(--mobile-spacing-xs) !important;
+    overflow-x: hidden !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 }
