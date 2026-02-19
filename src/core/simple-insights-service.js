@@ -128,7 +128,7 @@ export class SimpleInsightsService {
       .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
     // Get previous period spending for comparison
-    let previousSpending = 0;
+    let previousSpending;
     if (currentPeriod) {
       try {
         const previousPeriod = this.getPreviousPeriod(currentPeriod);
@@ -166,7 +166,7 @@ export class SimpleInsightsService {
     const percentage = Math.round((change / previousSpending) * 100);
     const direction = change > 0 ? 'up' : change < 0 ? 'down' : 'stable';
 
-    let description = '';
+    let description;
     if (direction === 'up') {
       description = `Spending increased by ${Math.abs(percentage)}% compared to previous period`;
     } else if (direction === 'down') {

@@ -120,7 +120,9 @@ async function loadChartJSModules() {
       `[ChartLoader] Chart.js loading failed after ${loadTime.toFixed(2)}ms:`,
       error
     );
-    throw new Error(`Failed to load Chart.js: ${error.message}`);
+    throw new Error(`Failed to load Chart.js: ${error.message}`, {
+      cause: error,
+    });
   }
 }
 

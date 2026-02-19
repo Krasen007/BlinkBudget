@@ -406,7 +406,8 @@ export const ReportsView = () => {
         } catch (recoveryError) {
           console.error('Storage recovery failed:', recoveryError);
           throw new Error(
-            'Unable to access transaction data. Please check your browser storage settings and try refreshing the page.'
+            'Unable to access transaction data. Please check your browser storage settings and try refreshing the page.',
+            { cause: recoveryError }
           );
         }
       }
@@ -454,7 +455,8 @@ export const ReportsView = () => {
               minimalProcessingError
             );
             throw new Error(
-              'Unable to process your financial data. This might be due to corrupted data or a browser compatibility issue.'
+              'Unable to process your financial data. This might be due to corrupted data or a browser compatibility issue.',
+              { cause: minimalProcessingError }
             );
           }
         }
@@ -475,7 +477,8 @@ export const ReportsView = () => {
             secondValidationError
           );
           throw new Error(
-            'The processed financial data appears to be invalid. Please try refreshing the page or contact support if the issue persists.'
+            'The processed financial data appears to be invalid. Please try refreshing the page or contact support if the issue persists.',
+            { cause: secondValidationError }
           );
         }
       }

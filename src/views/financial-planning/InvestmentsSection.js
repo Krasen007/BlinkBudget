@@ -789,7 +789,7 @@ function createInvestmentsList(chartRenderer, activeCharts) {
 
   async function refreshInvestmentsList() {
     investmentsList.innerHTML = '';
-    let items = [];
+    let items;
     try {
       // Import StorageService dynamically
       const { StorageService } = await import('../../core/storage.js');

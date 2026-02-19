@@ -58,7 +58,7 @@ export class ChartRenderer {
         errorMessage = 'Browser compatibility issue with chart library';
       }
 
-      throw new Error(`${errorMessage}: ${error.message}`);
+      throw new Error(`${errorMessage}: ${error.message}`, { cause: error });
     }
   }
 

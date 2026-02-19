@@ -97,7 +97,7 @@ export class ProgressiveDataLoader {
       console.error('[ProgressiveLoader] Progressive loading failed:', error);
 
       if (error.message === 'Data loading was cancelled') {
-        throw new Error('Data loading was cancelled');
+        throw new Error('Data loading was cancelled', { cause: error });
       }
 
       // Fallback to direct processing

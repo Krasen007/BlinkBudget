@@ -188,8 +188,8 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
 
     const now = new Date();
     const keys = [];
-    let labelFormat = {};
-    let title = '';
+    let labelFormat;
+    let title;
     let sumFunction = null;
 
     if (mode === 'monthly') {
@@ -266,7 +266,7 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
       const y = parts[0];
       const m = parts[1];
       const d = parts[2]; // undefined if monthly
-      let prevKey = '';
+      let prevKey;
       if (mode === 'monthly') {
         // Previous month: subtract 1 month
         if (m === 1) {

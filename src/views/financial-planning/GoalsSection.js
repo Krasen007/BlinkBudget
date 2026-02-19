@@ -249,7 +249,7 @@ function createGoalsList(chartRenderer, activeCharts, section) {
 
   async function refreshGoalsList() {
     goalsList.innerHTML = '';
-    let items = [];
+    let items;
     try {
       // Import StorageService dynamically
       const { StorageService } = await import('../../core/storage.js');
@@ -650,7 +650,7 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
   const isOffline = !offlineDataManager.isOnline;
 
   // Try to load goals from cache first, then StorageService
-  let goalsFromStorage = [];
+  let goalsFromStorage;
   const cachedGoals = offlineDataManager.getCachedPlanningData('goals');
 
   if (isOffline && cachedGoals && cachedGoals.data) {

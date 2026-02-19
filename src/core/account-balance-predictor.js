@@ -290,7 +290,7 @@ export class AccountBalancePredictor {
         const adjustedNetFlow = adjustedIncome - adjustedExpenses;
 
         // Recalculate running balance
-        let adjustedBalance = projection.projectedBalance;
+        let adjustedBalance;
         if (index === 0) {
           // First month: start with original balance and apply changes
           const originalNetFlow = projection.income - projection.expenses;

@@ -59,15 +59,11 @@ export const OverviewSection = (planningData, riskAssessor) => {
       isOffline ? '📡' : '⏳'
     );
     section.appendChild(placeholder);
-
+  } else {
     // Cache the section state for offline access
-    if (!isOffline && dataToUse) {
+    if (!isOffline) {
       offlineDataManager.cachePlanningData('overview', dataToUse);
-    } else if (cachedData) {
-      dataToUse = cachedData.data;
     }
-
-    return section;
   }
 
   // Quick stats cards
@@ -79,6 +75,11 @@ export const OverviewSection = (planningData, riskAssessor) => {
   statsGrid.style.marginBottom = SPACING.XL;
 
   // Calculate real stats from transaction data - SAME LOGIC AS DASHBOARD
+  if (!dataToUse) {
+    section.appendChild(statsGrid);
+    return section;
+  }
+
   const { transactions = [] } = dataToUse;
   let allTimeIncome = 0;
   let allTimeExpense = 0;

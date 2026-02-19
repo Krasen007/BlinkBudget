@@ -180,7 +180,7 @@ export const TimePeriodSelector = (options = {}) => {
 
     // Set active state for initial period
     // For monthly periods, we need to check if it's last month vs current month
-    let initialKey = 'month'; // default
+    let initialKey;
     if (initialPeriod.type === 'monthly') {
       // Check if this is last month by comparing dates
       const now = new Date();
