@@ -241,48 +241,82 @@ export const TimePeriodSelector = (options = {}) => {
       arrowContainer.style.justifyContent = 'center'; // Center the text
       arrowContainer.style.width = '100%';
 
-      // Left arrow for navigation - perfectly fixed to the left edge of the button
-      const leftArrow = document.createElement('span');
-      leftArrow.innerHTML = '←';
-      leftArrow.style.fontSize = '1.2em';
-      leftArrow.style.position = 'absolute';
-      leftArrow.style.left = '0';
-      leftArrow.style.top = '0';
-      leftArrow.style.bottom = '0'; // stretch full height of button
-      leftArrow.style.display = 'flex';
-      leftArrow.style.alignItems = 'center';
-      leftArrow.style.padding = `0 ${SPACING.SM}`; // healthy click area
-      leftArrow.style.cursor = 'pointer';
-      leftArrow.style.borderTopLeftRadius = 'var(--radius-md)';
-      leftArrow.style.borderBottomLeftRadius = 'var(--radius-md)';
-      leftArrow.style.transition = 'background 0.2s ease';
-      leftArrow.style.zIndex = '1';
+      // Helper: create an arrow (left or right)
+      function createArrow(direction) {
+        const arrow = document.createElement('span');
+        arrow.innerHTML = direction === 'left' ? '←' : '→';
+        arrow.style.fontSize = '1em';
+        arrow.style.position = 'absolute';
+        arrow.style[direction === 'left' ? 'left' : 'right'] = '0';
+        arrow.style.top = '0';
+        arrow.style.bottom = '0';
+        arrow.style.display = 'flex';
+        arrow.style.alignItems = 'center';
+        arrow.style.padding = `0 ${SPACING.SM}`;
+        arrow.style.cursor = 'pointer';
+        arrow.style[direction === 'left' ? 'borderTopLeftRadius' : 'borderTopRightRadius'] = 'var(--radius-md)';
+        arrow.style[direction === 'left' ? 'borderBottomLeftRadius' : 'borderBottomRightRadius'] = 'var(--radius-md)';
+        arrow.style.transition = 'background 0.2s ease';
+        arrow.style.zIndex = '1';
+        arrow.addEventListener('mouseenter', () => {
+          arrow.style.background = 'rgba(255, 255, 255, 0.1)';
+        });
+        arrow.addEventListener('mouseleave', () => {
+          arrow.style.background = 'transparent';
+        });
+        return arrow;
+      }
 
-      // Add hover effect for arrow
-      leftArrow.addEventListener('mouseenter', () => {
-        leftArrow.style.background = 'rgba(255, 255, 255, 0.1)';
-      });
-      leftArrow.addEventListener('mouseleave', () => {
-        leftArrow.style.background = 'transparent';
-      });
+      // Helper: update right arrow visibility based on current offset
+      function updateRightArrowVisibility(rightArrow, currentOffset) {
+        // Only show right arrow if we're in the past (offset < 0 for months, < 0 for years)
+        rightArrow.style.display = currentOffset < 0 ? 'flex' : 'none';
+      }
 
-      // Arrow click handler for navigation
+      const leftArrow = createArrow('left');
+      const rightArrow = createArrow('right');
+
+      // Right arrow starts hidden (we start at offset -1 for month, 0 for year)
+      const initialMonthOffset = period.key === 'lastMonth' ? -1 : 0;
+      const initialYearOffset = period.key === 'year' ? 0 : 0;
+      updateRightArrowVisibility(rightArrow, period.key === 'lastMonth' ? initialMonthOffset : initialYearOffset);
+
+      // Left arrow click — go further back
       leftArrow.addEventListener('click', e => {
-        e.stopPropagation(); // Prevent button click
-
+        e.stopPropagation();
         if (period.key === 'lastMonth') {
-          // Handle month navigation
           const currentOffset = parseInt(button.dataset.monthOffset || '-1');
           const newOffset = currentOffset - 1;
           button.dataset.monthOffset = newOffset.toString();
           const newPeriod = getSpecificMonthPeriod(newOffset);
+          updateRightArrowVisibility(rightArrow, newOffset);
           handleMonthNavigation(newPeriod);
         } else if (period.key === 'year') {
-          // Handle year navigation
           const currentOffset = parseInt(button.dataset.yearOffset || '0');
           const newOffset = currentOffset - 1;
           button.dataset.yearOffset = newOffset.toString();
           const newPeriod = getSpecificYearPeriod(newOffset);
+          updateRightArrowVisibility(rightArrow, newOffset);
+          handleYearNavigation(newPeriod);
+        }
+      });
+
+      // Right arrow click — go forward (only when in the past)
+      rightArrow.addEventListener('click', e => {
+        e.stopPropagation();
+        if (period.key === 'lastMonth') {
+          const currentOffset = parseInt(button.dataset.monthOffset || '-1');
+          const newOffset = currentOffset + 1;
+          button.dataset.monthOffset = newOffset.toString();
+          const newPeriod = getSpecificMonthPeriod(newOffset);
+          updateRightArrowVisibility(rightArrow, newOffset);
+          handleMonthNavigation(newPeriod);
+        } else if (period.key === 'year') {
+          const currentOffset = parseInt(button.dataset.yearOffset || '0');
+          const newOffset = currentOffset + 1;
+          button.dataset.yearOffset = newOffset.toString();
+          const newPeriod = getSpecificYearPeriod(newOffset);
+          updateRightArrowVisibility(rightArrow, newOffset);
           handleYearNavigation(newPeriod);
         }
       });
@@ -294,6 +328,7 @@ export const TimePeriodSelector = (options = {}) => {
 
       arrowContainer.appendChild(leftArrow);
       arrowContainer.appendChild(textContainer);
+      arrowContainer.appendChild(rightArrow);
       button.appendChild(arrowContainer);
     } else {
       button.appendChild(labelSpan);
