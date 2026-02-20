@@ -12,8 +12,6 @@
 @import './components/smart-suggestions.css';
 @import './components/tutorial.css';
 @import './mobile-enhanced.css';
-@import './components/reports-responsive.css';
-@import './components/reports-accessibility.css';
 @import './components/reports.css';
 
 /* 4. Mobile-specific styles (depends on tokens, base, components) */

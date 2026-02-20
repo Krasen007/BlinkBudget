@@ -52,7 +52,7 @@ export const CustomCategoryManager = ({
   leftSide.style.gap = 'var(--spacing-md)';
 
   const backButton = Button({
-    text: '←',
+    text: '← Back',
     variant: 'ghost',
     onClick: () => Router.navigate('settings'),
   });

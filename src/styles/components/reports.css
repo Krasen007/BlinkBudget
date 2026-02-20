@@ -79,8 +79,6 @@
   box-shadow: none;
 }
 
-
-
 /* Income vs expense chart focus disable */
 .chart-section[data-section='income-expense'] canvas:focus,
 .chart-section.income-expense-section canvas:focus,
@@ -108,8 +106,6 @@
     max-width: 85vw !important;
     line-height: 1.3 !important;
   }
-  
-
 }
 
 /* Disable focus for all charts sections */
