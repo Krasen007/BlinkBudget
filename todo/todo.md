@@ -25,3 +25,5 @@ DO NOT IMPLEMENT: use Ionic's Capacitor or Cordova to make android app
 [ ] fix smart suggestions ui and integration
 [ ] fix advanced filtering ui
 [ ] add tests for Settings components (DateFormatSection, DataManagementSection, GeneralSection, BackupRestoreSection, AccountDeletionSection, SmartSuggestionsSection, AdvancedFilteringSection)
+[ ] possible remove googleapis for fonts
+[ ] in settings data integrity check is adding some kind of another label to the categories when it is fixed why?

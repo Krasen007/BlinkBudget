@@ -122,8 +122,8 @@
 /* typography.css (Tokens) */
 :root {
   /* Font families */
-  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-heading: 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+  --font-heading: 'Outfit', "Century Gothic", Futura, "Trebuchet MS", system-ui, sans-serif;
 
   /* Mobile-first font size scale */
   --font-size-xs: 0.75rem; /* 12px */

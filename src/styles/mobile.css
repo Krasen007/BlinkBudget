@@ -38,13 +38,7 @@
   cursor: pointer;
   padding: var(--spacing-sm);
   border-radius: var(--radius-md);
-  /* Remove transition animation */
-  min-width: var(--touch-target-min);
-  min-height: var(--touch-target-min);
   position: relative;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  user-select: none;
 }
 
 .mobile-nav-item.active {
@@ -55,10 +49,6 @@
     var(--primary-light),
     0.1
   );
-}
-
-.mobile-nav-item.touch-active {
-  background: var(--color-surface-hover);
 }
 
 .mobile-nav-icon {
@@ -87,23 +77,9 @@
   cursor: pointer;
   padding: var(--spacing-md);
   border-radius: var(--radius-md);
-  /* Remove transition animation */
-  min-height: var(--touch-target-min);
   font-size: var(--font-size-base);
   font-weight: 500;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  user-select: none;
   margin-bottom: var(--spacing-md);
-}
-
-.mobile-back-btn.touch-active {
-  background: hsl(
-    var(--primary-hue),
-    var(--primary-sat),
-    var(--primary-light),
-    0.1
-  );
 }
 
 .mobile-back-icon {

@@ -9,17 +9,11 @@
 /* 3. Component styles (depends on tokens and base) */
 @import './components/ui.css';
 @import './components/forms-dialogs.css';
-@import './components/smart-suggestions.css';
 @import './components/tutorial.css';
-@import './mobile-enhanced.css';
 @import './components/reports.css';
 
 /* 4. Mobile-specific styles (depends on tokens, base, components) */
 @import './mobile.css';
 
 /* 5. Utility classes (depends on tokens) */
-@import './utilities/layout.css';
-@import './utilities/spacing.css';
-@import './utilities/text-access.css';
-@import './utilities/responsive.css';
 @import './utilities/view-styles.css';

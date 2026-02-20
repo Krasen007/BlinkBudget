@@ -80,6 +80,29 @@ export default defineConfig({
               },
             },
           },
+          // Cache Google Fonts stylesheets
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'google-fonts-stylesheets',
+            },
+          },
+          // Cache the actual font files
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-webfonts',
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+              expiration: {
+                maxAgeSeconds: 60 * 60 * 24 * 365, // Cache for 1 year
+                maxEntries: 10,
+              },
+            },
+          },
         ],
       },
       includeAssets: ['favicon.png', 'favicon.ico', 'offline.html'],
@@ -232,34 +255,34 @@ export default defineConfig({
         }),
         ...(process.env.NODE_ENV === 'production'
           ? [
-              purgecss({
-                content: ['./index.html', './src/**/*.js', './src/**/*.html'],
-                defaultExtractor: content =>
-                  content.match(/[\w-/:]+(?<!:)/g) || [],
-                safelist: [
-                  /^(flex|grid|hidden|block|inline|absolute|relative|fixed)/,
-                  /^(active|disabled|loading|error|success)/,
-                  /^mobile-/,
-                  /^(fade|slide|bounce)/,
-                  /:hover/,
-                  /:focus/,
-                  /:active/,
-                  /^(sm|md|lg|xl):/,
-                ],
-                variables: true,
-              }),
-              cssnano({
-                preset: [
-                  'default',
-                  {
-                    cssDeclarationSorter: false,
-                    reduceIdents: false,
-                    zindex: false,
-                    mergeRules: false,
-                  },
-                ],
-              }),
-            ]
+            purgecss({
+              content: ['./index.html', './src/**/*.js', './src/**/*.html'],
+              defaultExtractor: content =>
+                content.match(/[\w-/:]+(?<!:)/g) || [],
+              safelist: [
+                /^(flex|grid|hidden|block|inline|absolute|relative|fixed)/,
+                /^(active|disabled|loading|error|success)/,
+                /^mobile-/,
+                /^(fade|slide|bounce)/,
+                /:hover/,
+                /:focus/,
+                /:active/,
+                /^(sm|md|lg|xl):/,
+              ],
+              variables: true,
+            }),
+            cssnano({
+              preset: [
+                'default',
+                {
+                  cssDeclarationSorter: false,
+                  reduceIdents: false,
+                  zindex: false,
+                  mergeRules: false,
+                },
+              ],
+            }),
+          ]
           : []),
       ],
     },
