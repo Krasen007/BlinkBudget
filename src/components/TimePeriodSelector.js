@@ -232,24 +232,29 @@ export const TimePeriodSelector = (options = {}) => {
 
     // Add arrow for Last Month and Year buttons
     if (period.key === 'lastMonth' || period.key === 'year') {
+      // Add relative position to the parent button so the absolute arrow docks cleanly to the button's bounds
+      button.style.position = 'relative';
+
       const arrowContainer = document.createElement('div');
       arrowContainer.style.display = 'flex';
       arrowContainer.style.alignItems = 'center';
       arrowContainer.style.justifyContent = 'center'; // Center the text
       arrowContainer.style.width = '100%';
-      arrowContainer.style.position = 'relative';
 
-      // Left arrow for navigation - fixed position
+      // Left arrow for navigation - perfectly fixed to the left edge of the button
       const leftArrow = document.createElement('span');
       leftArrow.innerHTML = '←';
       leftArrow.style.fontSize = '1.2em';
       leftArrow.style.position = 'absolute';
-      leftArrow.style.left = '-5px'; // Why is -5px? it is not fixed exactly on the left side
-      leftArrow.style.top = '50%';
-      leftArrow.style.transform = 'translateY(-50%)';
+      leftArrow.style.left = '0';
+      leftArrow.style.top = '0';
+      leftArrow.style.bottom = '0'; // stretch full height of button
+      leftArrow.style.display = 'flex';
+      leftArrow.style.alignItems = 'center';
+      leftArrow.style.padding = `0 ${SPACING.SM}`; // healthy click area
       leftArrow.style.cursor = 'pointer';
-      leftArrow.style.padding = `${SPACING.XS}`;
-      leftArrow.style.borderRadius = 'var(--radius-sm)';
+      leftArrow.style.borderTopLeftRadius = 'var(--radius-md)';
+      leftArrow.style.borderBottomLeftRadius = 'var(--radius-md)';
       leftArrow.style.transition = 'background 0.2s ease';
       leftArrow.style.zIndex = '1';
 

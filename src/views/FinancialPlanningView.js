@@ -134,15 +134,16 @@ export const FinancialPlanningView = () => {
    */
   function createNavigation() {
     const nav = document.createElement('nav');
-    nav.className = 'view-tabs financial-planning-nav';
     nav.setAttribute('role', 'tablist');
 
-    // Apply 3-per-row grid layout
+    // Apply exact 3-per-row grid layout as TimePeriodSelector
     Object.assign(nav.style, {
       display: 'grid',
       gridTemplateColumns: 'repeat(3, 1fr)',
-      gap: 'var(--spacing-sm)',
+      gap: SPACING.SM,
       width: '100%',
+      maxWidth: '100%',
+      flexWrap: 'wrap',
     });
 
     const sections = [
