@@ -75,13 +75,8 @@
 }
 
 .charts-section canvas:focus {
-  outline: 3px solid
-    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light));
-  outline-offset: 4px;
-  box-shadow:
-    0 0 0 4px
-      hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2),
-    0 8px 24px rgb(0, 0, 0, 0.2);
+  outline: none;
+  box-shadow: none;
 }
 
 /* Chart Title Styling */
@@ -576,11 +571,9 @@
   animation: chart-entrance 0.4s ease-out;
 }
 
-/* Focus animations - Simplified */
+/* Focus animations - Disabled */
 .charts-section canvas:focus {
-  outline: 2px solid
-    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light));
-  outline-offset: 2px;
+  outline: none;
 }
 
 /* Error and empty state animations */
@@ -675,8 +668,7 @@
 }
 
 .category-card:focus {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+  outline: none;
 }
 
 /* Add a subtle left border that matches the category color */

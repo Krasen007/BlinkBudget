@@ -57,8 +57,8 @@ export const CategorySelector = (
       category,
       index,
       categoryColorMap,
-      getCategoryColors,
       onCategoryClick,
+      getCategoryColors,
       frequencyData,
       currentData.insights
     );

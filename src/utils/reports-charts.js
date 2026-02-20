@@ -489,6 +489,12 @@ export function getColorForCategory(categoryName) {
  * Get consistent colors for categories across all charts and UI elements
  */
 export function getCategoryColors(categories, categoryColorMap) {
+  // Ensure categories is an array
+  if (!Array.isArray(categories)) {
+    console.warn('getCategoryColors: categories is not an array', categories);
+    return [];
+  }
+
   // Update map with colors for all categories
   categories.forEach(category => {
     if (!categoryColorMap.has(category.name)) {

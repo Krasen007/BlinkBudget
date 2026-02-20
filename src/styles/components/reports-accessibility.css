@@ -2,20 +2,27 @@
 /* Comprehensive accessibility enhancements for the reports and charts feature */
 
 /* WCAG 2.1 AA Compliant Focus Indicators */
-.view-reports *:focus,
-.view-reports *:focus-visible {
+.view-reports button:focus,
+.view-reports button:focus-visible,
+.view-reports input:focus,
+.view-reports input:focus-visible,
+.view-reports select:focus,
+.view-reports select:focus-visible,
+.view-reports textarea:focus,
+.view-reports textarea:focus-visible {
   outline: 3px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
 
-/* Enhanced focus for interactive chart elements */
-.view-reports canvas:focus,
-.view-reports canvas:focus-visible {
-  outline: 3px solid var(--color-primary);
-  outline-offset: 4px;
-  box-shadow: 0 0 0 6px
-    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.2);
+/* Disable focus outlines for containers and non-interactive elements */
+.view-reports div:focus,
+.view-reports div:focus-visible,
+.view-reports section:focus,
+.view-reports section:focus-visible,
+.view-reports article:focus,
+.view-reports article:focus-visible {
+  outline: none;
 }
 
 /* High contrast mode support */

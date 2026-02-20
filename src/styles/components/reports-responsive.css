@@ -465,16 +465,28 @@
 
 /* Keyboard navigation enhancements for different screen sizes */
 @media (width <= 767px) {
-  .view-reports *:focus,
-  .view-reports *:focus-visible {
+  .view-reports button:focus,
+  .view-reports button:focus-visible,
+  .view-reports input:focus,
+  .view-reports input:focus-visible,
+  .view-reports select:focus,
+  .view-reports select:focus-visible,
+  .view-reports textarea:focus,
+  .view-reports textarea:focus-visible {
     outline-width: 3px;
     outline-offset: 2px;
   }
 }
 
 @media (width >= 768px) {
-  .view-reports *:focus,
-  .view-reports *:focus-visible {
+  .view-reports button:focus,
+  .view-reports button:focus-visible,
+  .view-reports input:focus,
+  .view-reports input:focus-visible,
+  .view-reports select:focus,
+  .view-reports select:focus-visible,
+  .view-reports textarea:focus,
+  .view-reports textarea:focus-visible {
     outline-width: 2px;
     outline-offset: 2px;
   }
