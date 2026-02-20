@@ -132,7 +132,7 @@ export const createTypeToggleGroup = (options = {}) => {
   typeGroup.style.gap = 'var(--spacing-sm)';
   typeGroup.style.border = 'none';
   typeGroup.style.padding = '0';
-  typeGroup.style.marginBottom = 'var(--spacing-xs)';
+  typeGroup.style.marginBottom = '0';
 
   const legend = document.createElement('legend');
   legend.textContent = 'Transaction Type';

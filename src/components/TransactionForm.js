@@ -50,9 +50,7 @@ export const TransactionForm = ({
   form.className = 'transaction-form mobile-optimized';
   form.style.display = 'flex';
   form.style.flexDirection = 'column';
-  form.style.gap = window.mobileUtils?.isMobile()
-    ? 'var(--mobile-spacing-md)'
-    : 'var(--spacing-sm)';
+  form.style.gap = 'var(--spacing-xs)';
   form.style.width = '100%';
   form.style.position = 'relative';
 
@@ -185,6 +183,7 @@ export const TransactionForm = ({
   amountAccountRow.style.width = '100%';
   amountAccountRow.appendChild(amountGroup);
   amountAccountRow.appendChild(accountGroup);
+  amountAccountRow.style.marginBottom = 'var(--spacing-xs)';
 
   // 6. Category Selector (Smart or Classic based on setting)
   let categorySelector;
@@ -356,7 +355,7 @@ export const TransactionForm = ({
     cancelBtn.type = 'button';
     cancelBtn.className = 'btn btn-secondary';
     cancelBtn.style.width = '100%';
-    cancelBtn.style.marginTop = 'var(--spacing-sm)';
+    cancelBtn.style.marginTop = 'var(--spacing-xs)';
     cancelBtn.style.padding = 'var(--spacing-md)';
     cancelBtn.style.fontSize = 'var(--font-size-base)';
     cancelBtn.style.fontWeight = '500';
@@ -386,7 +385,7 @@ export const TransactionForm = ({
 
     // Adjust OK button for mobile devices
     if (isMobile) {
-      okBtn.style.marginTop = '0';
+      okBtn.style.marginTop = 'var(--spacing-xs)';
       okBtn.style.padding = 'var(--spacing-sm)';
       okBtn.style.fontSize = FONT_SIZES.BASE;
       okBtn.style.height = 'auto';

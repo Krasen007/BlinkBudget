@@ -20,12 +20,11 @@ export const AddView = ({ accountId } = {}) => {
   container.className = 'view-add view-container';
 
   const header = document.createElement('div');
-  header.style.marginBottom = SPACING.MD;
   header.style.position = 'sticky';
   header.style.top = '0';
   header.style.zIndex = '10';
   header.style.background = 'var(--color-background)'; // Use CSS variable
-  header.style.padding = `${SPACING.SM} 0`;
+  header.style.padding = `${SPACING.XS} 0`;
   header.style.flexDirection = 'column';
   header.style.alignItems = 'stretch';
   header.style.gap = SPACING.SM;
@@ -41,7 +40,7 @@ export const AddView = ({ accountId } = {}) => {
   title.style.marginRight = SPACING.MD;
 
   // Date Input with enhanced context
-  const dateInput = DateInput({ showLabel: true });
+  const dateInput = DateInput({ showLabel: false });
 
   // Back button
   const rightControls = document.createElement('div');

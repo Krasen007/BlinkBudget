@@ -35,7 +35,7 @@ export const EditView = ({ id }) => {
   }
 
   const header = document.createElement('div');
-  header.style.marginBottom = SPACING.MD;
+  header.style.marginBottom = SPACING.XS;
   header.style.flexDirection = 'column';
   header.style.alignItems = 'stretch';
   header.style.gap = SPACING.SM;
@@ -43,7 +43,7 @@ export const EditView = ({ id }) => {
   header.style.top = '0';
   header.style.zIndex = '10';
   header.style.background = COLORS.BACKGROUND;
-  header.style.padding = `${SPACING.SM} 0`;
+  header.style.padding = `${SPACING.XS} 0`;
 
   const topRow = document.createElement('div');
   topRow.style.display = 'flex';
@@ -58,7 +58,7 @@ export const EditView = ({ id }) => {
   // Date Input with transaction date and enhanced context
   const dateInput = DateInput({
     value: transaction.timestamp,
-    showLabel: true,
+    showLabel: false,
   });
 
   // Back button

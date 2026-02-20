@@ -160,8 +160,17 @@ const createCategoryContainer = () => {
   container.style.overflowY = 'hidden';
   container.style.webkitOverflowScrolling = 'touch';
   container.style.scrollSnapType = 'x mandatory';
-  container.style.marginBottom = SPACING.MD;
+  container.style.scrollbarWidth = 'none'; // Firefox: hide scrollbar
+  container.style.marginBottom = SPACING.XS;
   container.style.maxHeight = 'none'; // Override CSS max-height to prevents vertical clipping
+
+  // Hide scrollbar for WebKit browsers (Chrome, Safari) without disabling scroll
+  if (!document.getElementById('category-chip-scrollbar-hide')) {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'category-chip-scrollbar-hide';
+    styleEl.textContent = '.category-chip-container::-webkit-scrollbar { display: none; }';
+    document.head.appendChild(styleEl);
+  }
 
   // Remove dynamic height calculation as we use fixed rows now
 
@@ -415,7 +424,7 @@ export const createCategorySelector = (options = {}) => {
                   const dateValue = dateSource.getDate
                     ? dateSource.getDate()
                     : dateSource.value ||
-                      new Date().toISOString().split('T')[0];
+                    new Date().toISOString().split('T')[0];
 
                   onSubmit({
                     amount: amountValidation.value,
