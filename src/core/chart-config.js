@@ -202,10 +202,10 @@ export function defaultChartOptions() {
         ) {
           return 0; // No animation for users who prefer reduced motion
         }
-        return 600; // Shorter duration for snappier feel
+        return 0; // Disabled for faster view switching
       },
       easing: 'easeOutQuart', // Simpler easing
-      animateRotate: true,
+      animateRotate: false, // Disabled for faster loading
       animateScale: false, // Disable scale animation for simplicity
     },
 
@@ -213,13 +213,13 @@ export function defaultChartOptions() {
     transitions: {
       active: {
         animation: {
-          duration: 200,
+          duration: 0, // Disabled for faster view switching
           easing: 'easeOutQuart',
         },
       },
       resize: {
         animation: {
-          duration: 300,
+          duration: 0, // Disabled for faster view switching
           easing: 'easeInOutQuart',
         },
       },
@@ -399,9 +399,9 @@ export function getChartColors(count, highContrast = false, style = 'solid') {
           borderColor: darkenColor(baseColor, 20),
           pattern:
             accessibleColors.patterns[
-              Object.keys(accessibleColors.patterns)[
-                i % Object.keys(accessibleColors.patterns).length
-              ]
+            Object.keys(accessibleColors.patterns)[
+            i % Object.keys(accessibleColors.patterns).length
+            ]
             ],
         });
         break;
