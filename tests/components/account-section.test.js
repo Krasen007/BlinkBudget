@@ -52,6 +52,8 @@ describe('Account Type Labels', () => {
     });
 
     it('should have checking as the first option', () => {
+      const keys = Object.keys(ACCOUNT_TYPE_LABELS);
+      expect(keys[0]).toBe('checking');
       expect(ACCOUNT_TYPE_LABELS.checking).toBe('Checking Account');
     });
   });
@@ -146,30 +148,41 @@ describe('AccountSection Component Display', () => {
     document.body.innerHTML = '';
   });
 
-  it('should use getAccountTypeLabel for displaying account types', () => {
-    // This test verifies that AccountSection uses getAccountTypeLabel
-    // instead of displaying raw account.type values
+  it('renders accounts and displays friendly account type labels (not raw types)', async () => {
+    const accountModule = await import('../../src/core/account-service.js');
+    accountModule.AccountService.getAccounts.mockReturnValue([
+      { id: 'a1', name: 'Main Checking', type: 'checking', balance: 100 },
+      { id: 'a2', name: 'My Savings', type: 'savings', balance: 200 },
+    ]);
 
-    // Test the helper function returns proper labels
-    const testCases = [
-      { type: 'checking', expectedLabel: 'Checking Account' },
-      { type: 'bank', expectedLabel: 'Bank Account' },
-      { type: 'credit', expectedLabel: 'Credit Card' },
-      { type: 'savings', expectedLabel: 'Savings Account' },
-      { type: 'investment', expectedLabel: 'Investment Account' },
-      { type: 'cash', expectedLabel: 'Cash' },
-      { type: 'other', expectedLabel: 'Other' },
-    ];
+    const { AccountSection } =
+      await import('../../src/components/AccountSection.js');
+    document.body.appendChild(AccountSection());
 
-    testCases.forEach(({ type, expectedLabel }) => {
-      expect(getAccountTypeLabel(type)).toBe(expectedLabel);
-    });
+    // Friendly labels should be present
+    expect(document.body.textContent).toContain('Checking Account');
+    expect(document.body.textContent).toContain('Savings Account');
+
+    // Ensure the type shown next to the account name is the friendly label
+    const nameEl = Array.from(document.querySelectorAll('div')).find(
+      d => d.textContent === 'Main Checking'
+    );
+    expect(nameEl).toBeTruthy();
+    const typeEl = nameEl.parentElement.querySelector('div:nth-child(2)');
+    expect(typeEl.textContent).toBe('Checking Account');
   });
 
-  it('should handle accounts without type gracefully', () => {
-    // Accounts without a type should show "Other" as default
-    expect(getAccountTypeLabel(undefined)).toBe('Other');
-    expect(getAccountTypeLabel(null)).toBe('Other');
-    expect(getAccountTypeLabel('')).toBe('Other');
+  it('shows "Other" when account.type is missing', async () => {
+    const accountModule = await import('../../src/core/account-service.js');
+    accountModule.AccountService.getAccounts.mockReturnValue([
+      { id: 'a3', name: 'Mystery Account', balance: 0 },
+    ]);
+
+    const { AccountSection } =
+      await import('../../src/components/AccountSection.js');
+    document.body.appendChild(AccountSection());
+
+    expect(document.body.textContent).toContain('Mystery Account');
+    expect(document.body.textContent).toContain('Other');
   });
 });

@@ -397,7 +397,7 @@
 /* High DPI displays */
 @media (min-device-pixel-ratio: 2), (resolution >= 192dpi) {
   .view-reports canvas {
-    image-rendering: optimize-contrast;
+    image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
   }
 }

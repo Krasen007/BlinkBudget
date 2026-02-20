@@ -123,10 +123,7 @@
     gap: var(--spacing-md);
   }
 
-  /* Mobile stats container */
-  .view-stats-container {
-    grid-template-columns: 1fr 1fr !important;
-  }
+  /* Mobile stats container - controlled by consolidated rules later to avoid duplication */
 
   /* Mobile form adjustments */
   .view-form-container {
@@ -170,6 +167,10 @@
   /* Mobile titles */
   .view-title {
     font-size: 1.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
   }
 
   /* Mobile tabs */
@@ -272,12 +273,12 @@
   margin-bottom: var(--spacing-xl);
 }
 
-/* Ensure 2 columns on all mobile screens */
-@media (width <= 767px) {
+/* Ensure 2 columns on small screens (mobile) */
+@media (--sm) {
   .view-stats-container {
-    grid-template-columns: 1fr 1fr !important;
-    gap: var(--spacing-xs) !important;
-    margin-bottom: var(--spacing-xs) !important;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
   }
 }
 
@@ -344,20 +345,20 @@
   border-color: var(--color-primary);
 }
 
-@media (width <= 767px) {
+@media (--sm) {
   /* Reduce spacing below account selector on mobile */
   #account-filter-select {
-    margin-top: var(--spacing-xs) !important;
+    margin-top: var(--spacing-xs);
   }
 
   /* Reduce spacing above Add Transaction button (stats container margin-bottom) */
   .view-dashboard .view-stats-container {
-    margin-bottom: var(--spacing-xs) !important;
+    margin-bottom: var(--spacing-xs);
   }
 
   /* Reduce spacing below Add Transaction button on mobile */
   .view-dashboard .btn-primary {
-    margin-bottom: var(--spacing-xs) !important;
+    margin-bottom: var(--spacing-xs);
   }
 }
 
@@ -408,7 +409,7 @@
     text-overflow: ellipsis;
     white-space: normal;
     min-width: 0;
-    word-break: break-word;
+    overflow-wrap: break-word;
   }
 }
 

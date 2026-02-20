@@ -180,7 +180,7 @@ export const AccountSection = () => {
           text: 'Cancel',
           variant: 'secondary',
           onClick: () => {
-            document.body.removeChild(overlay);
+            cleanupOverlay();
           },
         });
 
@@ -209,7 +209,7 @@ export const AccountSection = () => {
 
               AccountService.saveAccount(newAccount);
               renderAccounts();
-              document.body.removeChild(overlay);
+              cleanupOverlay();
             } catch (error) {
               console.error('Error adding account:', error);
             }
@@ -233,23 +233,28 @@ export const AccountSection = () => {
         document.body.appendChild(overlay);
         setTimeout(() => nameInput.focus(), 100);
 
-        // Close on overlay click
+        // Centralized cleanup for this overlay and the Escape listener
+        function cleanupOverlay() {
+          if (document.body.contains(overlay)) {
+            document.body.removeChild(overlay);
+          }
+          document.removeEventListener('keydown', handleEscape);
+        }
+
+        // Close overlay when clicking outside (uses centralized cleanup)
         overlay.addEventListener('click', e => {
           if (e.target === overlay) {
-            document.body.removeChild(overlay);
+            cleanupOverlay();
           }
         });
 
         // Close on Escape key
-        const handleEscape = e => {
+        function handleEscape(e) {
           if (e.key === 'Escape') {
             e.preventDefault();
-            if (document.body.contains(overlay)) {
-              document.body.removeChild(overlay);
-            }
-            document.removeEventListener('keydown', handleEscape);
+            cleanupOverlay();
           }
-        };
+        }
         document.addEventListener('keydown', handleEscape);
       };
 
@@ -490,7 +495,7 @@ export const AccountSection = () => {
               text: 'Cancel',
               variant: 'secondary',
               onClick: () => {
-                document.body.removeChild(overlay);
+                cleanupOverlay();
               },
             });
 
@@ -514,7 +519,7 @@ export const AccountSection = () => {
                     updatedAt: new Date().toISOString(),
                   });
                   renderAccounts();
-                  document.body.removeChild(overlay);
+                  cleanupOverlay();
                 } catch (error) {
                   console.error('Error updating account:', error);
                 }
@@ -538,23 +543,28 @@ export const AccountSection = () => {
             document.body.appendChild(overlay);
             setTimeout(() => nameInput.focus(), 100);
 
-            // Close on overlay click
+            // Centralized cleanup for this overlay and the Escape listener
+            function cleanupOverlay() {
+              if (document.body.contains(overlay)) {
+                document.body.removeChild(overlay);
+              }
+              document.removeEventListener('keydown', handleEscape);
+            }
+
+            // Close overlay when clicking outside (uses centralized cleanup)
             overlay.addEventListener('click', e => {
               if (e.target === overlay) {
-                document.body.removeChild(overlay);
+                cleanupOverlay();
               }
             });
 
             // Close on Escape key
-            const handleEscape = e => {
+            function handleEscape(e) {
               if (e.key === 'Escape') {
                 e.preventDefault();
-                if (document.body.contains(overlay)) {
-                  document.body.removeChild(overlay);
-                }
-                document.removeEventListener('keydown', handleEscape);
+                cleanupOverlay();
               }
-            };
+            }
             document.addEventListener('keydown', handleEscape);
           };
 

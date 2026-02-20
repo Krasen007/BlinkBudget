@@ -698,7 +698,7 @@
 }
 
 /* Mobile responsive styles for category cards */
-@media (width <= calc(var(--breakpoint-md) - 1px)) {
+@media (width <= 768px) {
   .category-selector-section .category-grid {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: var(--spacing-sm) !important;

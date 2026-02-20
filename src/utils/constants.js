@@ -232,8 +232,10 @@ export const DATE_FORMATS = {
 export const ACCOUNT_TYPES = {
   CHECKING: 'checking',
   SAVINGS: 'savings',
-  CREDIT_CARD: 'credit card',
+  CREDIT_CARD: 'credit',
   CASH: 'cash',
+  BANK: 'bank',
+  INVESTMENT: 'investment',
 };
 
 // Account type labels for display

@@ -454,7 +454,7 @@ body.input-search-focused {
     min-height: var(--touch-target-min);
     max-height: 60px; /* Even smaller on very small screens */
     padding: var(--mobile-spacing-sm) var(--mobile-spacing-md);
-    font-size: 16px; /* Smaller font on small screens */
+    font-size: 16px; /* Prevent iOS zoom on focus */
   }
 }
 
