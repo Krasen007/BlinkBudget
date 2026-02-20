@@ -70,7 +70,7 @@ export const OverviewSection = (planningData, riskAssessor) => {
   const statsGrid = document.createElement('div');
   statsGrid.className = 'stats-grid';
   statsGrid.style.display = 'grid';
-  statsGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
+  statsGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
   statsGrid.style.gap = SPACING.MD;
   statsGrid.style.marginBottom = SPACING.XL;
 
