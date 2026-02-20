@@ -17,7 +17,7 @@ function validateEnvironmentVariables() {
   if (missing.length > 0) {
     throw new Error(
       `Missing required environment variables: ${missing.join(', ')}\n` +
-      'Please check your .env file and ensure all Firebase configuration variables are set.'
+        'Please check your .env file and ensure all Firebase configuration variables are set.'
     );
   }
 
@@ -81,24 +81,24 @@ export const config = {
   firebase:
     validationPassed && import.meta.env.MODE !== 'test'
       ? {
-        apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-        authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-        projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-        storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-        messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-        appId: import.meta.env.VITE_FIREBASE_APP_ID,
-        measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
-      }
+          apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+          authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+          projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+          storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+          messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+          appId: import.meta.env.VITE_FIREBASE_APP_ID,
+          measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+        }
       : import.meta.env.MODE === 'test'
         ? {
-          // Mock configuration for tests
-          apiKey: 'test-api-key',
-          authDomain: 'test.firebaseapp.com',
-          projectId: 'test-project',
-          storageBucket: 'test.firebasestorage.app',
-          messagingSenderId: '123456789',
-          appId: 'test-app-id',
-          measurementId: 'test-measurement-id',
-        }
+            // Mock configuration for tests
+            apiKey: 'test-api-key',
+            authDomain: 'test.firebaseapp.com',
+            projectId: 'test-project',
+            storageBucket: 'test.firebasestorage.app',
+            messagingSenderId: '123456789',
+            appId: 'test-app-id',
+            measurementId: 'test-measurement-id',
+          }
         : null,
 };

@@ -30,7 +30,7 @@ describe('CSS Architecture Foundation', () => {
       "@import './base.css'",
       "@import './components/ui.css'",
       "@import './mobile.css'",
-      "@import './utilities/layout.css'",
+      "@import './utilities/view-styles.css'",
     ];
 
     let lastIndex = -1;
