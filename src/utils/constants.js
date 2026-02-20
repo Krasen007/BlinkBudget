@@ -232,7 +232,7 @@ export const DATE_FORMATS = {
 export const ACCOUNT_TYPES = {
   CHECKING: 'checking',
   SAVINGS: 'savings',
-  CREDIT_CARD: 'credit',
+  CREDIT_CARD: 'credit card',
   CASH: 'cash',
   BANK: 'bank',
   INVESTMENT: 'investment',

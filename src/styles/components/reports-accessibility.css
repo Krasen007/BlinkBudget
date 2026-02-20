@@ -124,14 +124,15 @@
     padding: var(--spacing-sm) var(--spacing-md);
   }
 
-  /* Enhanced focus indicators on mobile */
   /* Enhanced focus indicators on mobile - limit to interactive elements */
   .view-reports button:focus,
   .view-reports button:focus-visible,
   .view-reports input:focus,
   .view-reports input:focus-visible,
   .view-reports select:focus,
-  .view-reports select:focus-visible {
+  .view-reports select:focus-visible,
+  .view-reports textarea:focus,
+  .view-reports textarea:focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
   }
@@ -221,8 +222,6 @@
 /* Disable focus for chart and content sections */
 .view-reports .category-breakdown-chart:focus,
 .view-reports .category-breakdown-chart:focus-visible,
-.view-reports canvas:focus,
-.view-reports canvas:focus-visible,
 .view-reports .chart-section:focus,
 .view-reports .chart-section:focus-visible,
 .view-reports .category-breakdown-section:focus,
@@ -235,6 +234,13 @@
 .view-reports .view-content:focus-visible {
   outline: none !important;
   box-shadow: none !important;
+}
+
+/* Subtle focus for interactive canvases */
+.view-reports canvas:focus,
+.view-reports canvas:focus-visible {
+  outline: 2px solid var(--color-border);
+  outline-offset: 2px;
 }
 
 /* Error and loading states with better accessibility */

@@ -472,7 +472,13 @@
   .view-reports select:focus,
   .view-reports select:focus-visible,
   .view-reports textarea:focus,
-  .view-reports textarea:focus-visible {
+  .view-reports textarea:focus-visible,
+  .view-reports a:focus,
+  .view-reports a:focus-visible,
+  .view-reports [tabindex]:focus,
+  .view-reports [tabindex]:focus-visible,
+  .view-reports [role="button"]:focus,
+  .view-reports [role="button"]:focus-visible {
     outline-width: 3px;
     outline-offset: 2px;
   }
@@ -486,7 +492,13 @@
   .view-reports select:focus,
   .view-reports select:focus-visible,
   .view-reports textarea:focus,
-  .view-reports textarea:focus-visible {
+  .view-reports textarea:focus-visible,
+  .view-reports a:focus,
+  .view-reports a:focus-visible,
+  .view-reports [tabindex]:focus,
+  .view-reports [tabindex]:focus-visible,
+  .view-reports [role="button"]:focus,
+  .view-reports [role="button"]:focus-visible {
     outline-width: 2px;
     outline-offset: 2px;
   }

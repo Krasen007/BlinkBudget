@@ -56,6 +56,10 @@ export const AccountSection = () => {
 
         const card = document.createElement('div');
         card.className = 'dialog-card';
+        card.setAttribute('role', 'dialog');
+        card.setAttribute('aria-modal', 'true');
+        card.setAttribute('aria-labelledby', 'add-account-title');
+        card.tabIndex = -1;
         card.style.cssText = `
           background: var(--color-surface);
           border: 1px solid var(--color-border);
@@ -69,6 +73,7 @@ export const AccountSection = () => {
         `;
 
         const titleEl = document.createElement('h3');
+        titleEl.id = 'add-account-title';
         titleEl.textContent = 'Add New Account';
         titleEl.style.cssText = `
           margin-bottom: var(--spacing-md);
@@ -94,7 +99,7 @@ export const AccountSection = () => {
         nameInput.style.cssText = `
           width: 100%;
           padding: var(--spacing-md);
-          margin-bottom: var(--spacing-md);
+          margin-bottom: var(--spacing-xs);
           border: 1px solid var(--color-border);
           border-radius: var(--radius-md);
           font-size: var(--font-size-base);
@@ -104,16 +109,36 @@ export const AccountSection = () => {
           transition: border-color 0.2s ease;
         `;
 
+        const errorText = document.createElement('span');
+        errorText.style.cssText = `
+          display: block;
+          color: var(--color-danger, #ef4444);
+          font-size: var(--font-size-sm);
+          margin-bottom: var(--spacing-md);
+          min-height: 20px;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+        `;
+
         // Add focus styles
         nameInput.addEventListener('focus', () => {
-          nameInput.style.borderColor = 'var(--color-primary)';
+          nameInput.style.borderColor = nameInput.getAttribute('aria-invalid') === 'true' ? 'var(--color-danger, #ef4444)' : 'var(--color-primary)';
           nameInput.style.outline = 'none';
-          nameInput.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+          nameInput.style.boxShadow = nameInput.getAttribute('aria-invalid') === 'true'
+            ? '0 0 0 3px rgba(239, 68, 68, 0.1)'
+            : '0 0 0 3px rgba(59, 130, 246, 0.1)';
         });
 
         nameInput.addEventListener('blur', () => {
-          nameInput.style.borderColor = 'var(--color-border)';
+          nameInput.style.borderColor = nameInput.getAttribute('aria-invalid') === 'true' ? 'var(--color-danger, #ef4444)' : 'var(--color-border)';
           nameInput.style.boxShadow = 'none';
+        });
+
+        nameInput.addEventListener('input', () => {
+          nameInput.setAttribute('aria-invalid', 'false');
+          nameInput.style.borderColor = 'var(--color-primary)';
+          errorText.opacity = '0';
+          errorText.textContent = '';
         });
 
         // Account type selection
@@ -192,6 +217,10 @@ export const AccountSection = () => {
             const accountType = typeSelect.value;
 
             if (!accountName) {
+              nameInput.setAttribute('aria-invalid', 'true');
+              nameInput.style.borderColor = 'var(--color-danger, #ef4444)';
+              errorText.textContent = 'Account name is required';
+              errorText.style.opacity = '1';
               nameInput.focus();
               return;
             }
@@ -225,13 +254,17 @@ export const AccountSection = () => {
         card.appendChild(titleEl);
         card.appendChild(nameLabel);
         card.appendChild(nameInput);
+        card.appendChild(errorText);
         card.appendChild(typeLabel);
         card.appendChild(typeSelect);
         card.appendChild(btnGroup);
         overlay.appendChild(card);
 
         document.body.appendChild(overlay);
-        setTimeout(() => nameInput.focus(), 100);
+        setTimeout(() => {
+          card.focus();
+          nameInput.focus();
+        }, 100);
 
         // Centralized cleanup for this overlay and the Escape listener
         function cleanupOverlay() {
@@ -368,6 +401,10 @@ export const AccountSection = () => {
 
             const card = document.createElement('div');
             card.className = 'dialog-card';
+            card.setAttribute('role', 'dialog');
+            card.setAttribute('aria-modal', 'true');
+            card.setAttribute('aria-labelledby', 'edit-account-title');
+            card.tabIndex = -1;
             card.style.cssText = `
               background: var(--color-surface);
               border: 1px solid var(--color-border);
@@ -381,6 +418,7 @@ export const AccountSection = () => {
             `;
 
             const titleEl = document.createElement('h3');
+            titleEl.id = 'edit-account-title';
             titleEl.textContent = 'Edit Account';
             titleEl.style.cssText = `
               margin-bottom: var(--spacing-md);
@@ -406,7 +444,7 @@ export const AccountSection = () => {
             nameInput.style.cssText = `
               width: 100%;
               padding: var(--spacing-md);
-              margin-bottom: var(--spacing-md);
+              margin-bottom: var(--spacing-xs);
               border: 1px solid var(--color-border);
               border-radius: var(--radius-md);
               font-size: var(--font-size-base);
@@ -416,16 +454,36 @@ export const AccountSection = () => {
               transition: border-color 0.2s ease;
             `;
 
+            const errorText = document.createElement('span');
+            errorText.style.cssText = `
+              display: block;
+              color: var(--color-danger, #ef4444);
+              font-size: var(--font-size-sm);
+              margin-bottom: var(--spacing-md);
+              min-height: 20px;
+              opacity: 0;
+              transition: opacity 0.2s ease;
+            `;
+
             // Add focus styles
             nameInput.addEventListener('focus', () => {
-              nameInput.style.borderColor = 'var(--color-primary)';
+              nameInput.style.borderColor = nameInput.getAttribute('aria-invalid') === 'true' ? 'var(--color-danger, #ef4444)' : 'var(--color-primary)';
               nameInput.style.outline = 'none';
-              nameInput.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+              nameInput.style.boxShadow = nameInput.getAttribute('aria-invalid') === 'true'
+                ? '0 0 0 3px rgba(239, 68, 68, 0.1)'
+                : '0 0 0 3px rgba(59, 130, 246, 0.1)';
             });
 
             nameInput.addEventListener('blur', () => {
-              nameInput.style.borderColor = 'var(--color-border)';
+              nameInput.style.borderColor = nameInput.getAttribute('aria-invalid') === 'true' ? 'var(--color-danger, #ef4444)' : 'var(--color-border)';
               nameInput.style.boxShadow = 'none';
+            });
+
+            nameInput.addEventListener('input', () => {
+              nameInput.setAttribute('aria-invalid', 'false');
+              nameInput.style.borderColor = 'var(--color-primary)';
+              errorText.opacity = '0';
+              errorText.textContent = '';
             });
 
             // Account type selection
@@ -507,6 +565,10 @@ export const AccountSection = () => {
                 const accountType = typeSelect.value;
 
                 if (!accountName) {
+                  nameInput.setAttribute('aria-invalid', 'true');
+                  nameInput.style.borderColor = 'var(--color-danger, #ef4444)';
+                  errorText.textContent = 'Account name is required';
+                  errorText.style.opacity = '1';
                   nameInput.focus();
                   return;
                 }
@@ -535,13 +597,17 @@ export const AccountSection = () => {
             card.appendChild(titleEl);
             card.appendChild(nameLabel);
             card.appendChild(nameInput);
+            card.appendChild(errorText);
             card.appendChild(typeLabel);
             card.appendChild(typeSelect);
             card.appendChild(btnGroup);
             overlay.appendChild(card);
 
             document.body.appendChild(overlay);
-            setTimeout(() => nameInput.focus(), 100);
+            setTimeout(() => {
+              card.focus();
+              nameInput.focus();
+            }, 100);
 
             // Centralized cleanup for this overlay and the Escape listener
             function cleanupOverlay() {

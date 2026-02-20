@@ -164,7 +164,7 @@
     font-size: 0.875rem;
   }
 
-  /* Mobile titles */
+  /* Mobile titles - always truncate with ellipsis */
   .view-title {
     font-size: 1.5rem;
     overflow: hidden;
@@ -403,15 +403,7 @@
   line-height: var(--line-height-tight);
 }
 
-@media (width <= calc(var(--breakpoint-md) - 1px)) {
-  .view-title {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: normal;
-    min-width: 0;
-    overflow-wrap: break-word;
-  }
-}
+/* Media query overridden by specific truncation rule */
 
 @media (--lg) {
   .view-title {

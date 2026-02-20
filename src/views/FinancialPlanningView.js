@@ -194,7 +194,7 @@ export const FinancialPlanningView = () => {
     currentSection = sectionId;
 
     // Update tab states
-    const tabs = navigation.querySelectorAll('.financial-planning-tab');
+    const tabs = navigation.querySelectorAll('.view-tab');
     tabs.forEach(tab => {
       const isActive = tab.id === `${sectionId}-tab`;
       tab.setAttribute('aria-selected', isActive ? 'true' : 'false');

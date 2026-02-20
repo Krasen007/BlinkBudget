@@ -100,22 +100,21 @@ export const TimePeriodSelector = (options = {}) => {
   let customStartDate = null;
   let customEndDate = null;
 
-  // Create main selector buttons container - exact match to FinancialPlanningView
+  // Create main selector buttons container
   const buttonsContainer = document.createElement('nav');
-  buttonsContainer.className = 'financial-planning-nav'; // Use same class name
+
   buttonsContainer.setAttribute('role', 'tablist');
   buttonsContainer.style.display = 'grid';
   buttonsContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
 
   buttonsContainer.style.gap = SPACING.SM;
-  buttonsContainer.style.marginBottom = SPACING.LG;
   buttonsContainer.style.flexWrap = 'wrap'; // Allow wrapping
   buttonsContainer.style.maxWidth = '100%';
 
-  // Hide scrollbar for webkit browsers - exact match to FinancialPlanningView
+  // Hide scrollbar for webkit browsers
   const style = document.createElement('style');
   style.textContent = `
-    .financial-planning-nav::-webkit-scrollbar {
+    .time-period-selector::-webkit-scrollbar {
       display: none;
     }
   `;

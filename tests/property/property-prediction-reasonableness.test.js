@@ -50,11 +50,12 @@ describe('Property 14: Prediction Reasonableness', () => {
       if (result.predictions.length > 0) {
         result.predictions.forEach(prediction => {
           // Predictions should be within reasonable bounds
-          // Due to trend and seasonal adjustments, predictions can exceed the simple average
-          // We use a higher multiplier (10x) to account for positive trends and seasonal peaks
+          // We use a tightened multiplier (4x) which is more realistic for consumer spending
+          // based on the artificial variance injected (0.3x) during data generation
+          // A 10x multiplier previously allowed catastrophic predictions to pass the test
           expect(prediction.predictedAmount).toBeGreaterThan(0);
           expect(prediction.predictedAmount).toBeLessThan(
-            avgMonthlyAmount * 10
+            avgMonthlyAmount * 4
           );
 
           // Check for confidence interval fields (supporting different confidence property names)

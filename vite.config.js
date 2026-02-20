@@ -38,6 +38,51 @@ export default defineConfig({
               },
             },
           },
+          // Cache all JavaScript modules for offline functionality
+          {
+            urlPattern: /^https:\/\/.*\.js$/,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'js-modules',
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+              },
+            },
+          },
+          // Cache local JavaScript modules
+          {
+            urlPattern: /^\/src\/.*\.js$/,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'local-js',
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+              },
+            },
+          },
+          // Cache CSS files
+          {
+            urlPattern: /^\/src\/.*\.css$/,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'local-css',
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+              },
+            },
+          },
           {
             urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
             handler: 'CacheFirst',
@@ -255,34 +300,34 @@ export default defineConfig({
         }),
         ...(process.env.NODE_ENV === 'production'
           ? [
-              purgecss({
-                content: ['./index.html', './src/**/*.js', './src/**/*.html'],
-                defaultExtractor: content =>
-                  content.match(/[\w-/:]+(?<!:)/g) || [],
-                safelist: [
-                  /^(flex|grid|hidden|block|inline|absolute|relative|fixed)/,
-                  /^(active|disabled|loading|error|success)/,
-                  /^mobile-/,
-                  /^(fade|slide|bounce)/,
-                  /:hover/,
-                  /:focus/,
-                  /:active/,
-                  /^(sm|md|lg|xl):/,
-                ],
-                variables: true,
-              }),
-              cssnano({
-                preset: [
-                  'default',
-                  {
-                    cssDeclarationSorter: false,
-                    reduceIdents: false,
-                    zindex: false,
-                    mergeRules: false,
-                  },
-                ],
-              }),
-            ]
+            purgecss({
+              content: ['./index.html', './src/**/*.js', './src/**/*.html'],
+              defaultExtractor: content =>
+                content.match(/[\w-/:]+(?<!:)/g) || [],
+              safelist: [
+                /^(flex|grid|hidden|block|inline|absolute|relative|fixed)/,
+                /^(active|disabled|loading|error|success)/,
+                /^mobile-/,
+                /^(fade|slide|bounce)/,
+                /:hover/,
+                /:focus/,
+                /:active/,
+                /^(sm|md|lg|xl):/,
+              ],
+              variables: true,
+            }),
+            cssnano({
+              preset: [
+                'default',
+                {
+                  cssDeclarationSorter: false,
+                  reduceIdents: false,
+                  zindex: false,
+                  mergeRules: false,
+                },
+              ],
+            }),
+          ]
           : []),
       ],
     },

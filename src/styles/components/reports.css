@@ -75,17 +75,17 @@
 }
 
 .charts-section canvas:focus {
-  outline: none;
-  box-shadow: none;
+  outline: 2px solid var(--color-border);
+  outline-offset: 2px;
 }
 
-/* Income vs expense chart focus disable */
+/* Income vs expense chart focus */
 .chart-section[data-section='income-expense'] canvas:focus,
 .chart-section.income-expense-section canvas:focus,
 .income-expense-section canvas:focus,
 .income-expense-container canvas:focus {
-  outline: none !important;
-  box-shadow: none !important;
+  outline: 2px solid var(--color-border);
+  outline-offset: 2px;
 }
 
 /* Optimize tooltips for mobile */
@@ -108,12 +108,10 @@
   }
 }
 
-/* Disable focus for all charts sections */
+/* Ensure specific non-interactive containers do not have focus rings */
 .charts-section:focus,
-.charts-section:focus-visible,
-.charts-section *:focus,
-.charts-section *:focus-visible {
-  outline: none !important;
+.charts-section:focus-visible {
+  outline: none;
 }
 
 /* Chart Title Styling */
@@ -534,7 +532,7 @@
 
 /* Focus management for accessibility */
 .charts-section:focus-within {
-  outline: none !important;
+  /* Maintain native focus visibility inside charts container */
 }
 
 /* Chart Canvas Interactions - Simplified */
@@ -702,10 +700,9 @@
   box-shadow: 0 4px 12px rgb(0, 0, 0, 0.1);
 }
 
-.category-card:focus,
 .category-card:focus-visible {
-  outline: none !important;
-  box-shadow: none !important;
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 /* Add a subtle left border that matches the category color */
