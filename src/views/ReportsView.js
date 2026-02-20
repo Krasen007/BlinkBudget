@@ -136,8 +136,7 @@ export const ReportsView = () => {
   });
 
   // State management
-  let currentTimePeriod =
-    NavigationState.restoreTimePeriod() || getCurrentMonthPeriod();
+  let currentTimePeriod = getCurrentMonthPeriod();
   let currentAdvancedFilters = null;
   let isLoading = false;
   let currentData = null;
