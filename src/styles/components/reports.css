@@ -79,6 +79,47 @@
   box-shadow: none;
 }
 
+
+
+/* Income vs expense chart focus disable */
+.chart-section[data-section='income-expense'] canvas:focus,
+.chart-section.income-expense-section canvas:focus,
+.income-expense-section canvas:focus,
+.income-expense-container canvas:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Optimize tooltips for mobile */
+.chartjs-tooltip {
+  max-width: 90vw !important;
+  font-size: 0.875rem !important;
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  z-index: 1000 !important;
+}
+
+/* Mobile-specific tooltip optimizations */
+@media (width <= 768px) {
+  .chartjs-tooltip {
+    font-size: 0.8125rem !important;
+    padding: 6px 10px !important;
+    max-width: 85vw !important;
+    line-height: 1.3 !important;
+  }
+  
+
+}
+
+/* Disable focus for all charts sections */
+.charts-section:focus,
+.charts-section:focus-visible,
+.charts-section *:focus,
+.charts-section *:focus-visible {
+  outline: none !important;
+}
+
 /* Chart Title Styling */
 .chart-title {
   font-family: var(--font-heading);
@@ -497,9 +538,7 @@
 
 /* Focus management for accessibility */
 .charts-section:focus-within {
-  outline: 2px solid
-    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light));
-  outline-offset: 2px;
+  outline: none !important;
 }
 
 /* Chart Canvas Interactions - Simplified */
@@ -667,8 +706,10 @@
   box-shadow: 0 4px 12px rgb(0, 0, 0, 0.1);
 }
 
-.category-card:focus {
-  outline: none;
+.category-card:focus,
+.category-card:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* Add a subtle left border that matches the category color */
@@ -728,11 +769,7 @@
   padding-bottom: calc(var(--spacing-lg) * 2 + var(--tooltip-padding));
 
   /* Visual styling */
-  background: linear-gradient(
-    145deg,
-    var(--color-surface) 0%,
-    rgb(59, 130, 246, 0.02) 100%
-  );
+  background: var(--color-surface);
   border-top: none;
 
   /* Layout control */
@@ -754,7 +791,7 @@
   box-sizing: border-box;
   overflow: hidden;
   border-radius: var(--radius-md);
-  background: rgb(255, 255, 255, 0.02);
+  background: transparent;
   border: none;
 }
 

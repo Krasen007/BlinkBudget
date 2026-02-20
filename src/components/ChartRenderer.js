@@ -458,8 +458,8 @@ export class ChartRenderer {
           clientX: touch.clientX,
           clientY: touch.clientY,
           target: canvas,
-          preventDefault: () => {},
-          stopPropagation: () => {},
+          preventDefault: () => { },
+          stopPropagation: () => { },
         };
 
         // Get elements at touch position
@@ -667,8 +667,8 @@ export class ChartRenderer {
       originalBorderWidth
     )
       ? originalBorderWidth.map((width, i) =>
-          i === activeElement.index ? width + 2 : width
-        )
+        i === activeElement.index ? width + 2 : width
+      )
       : originalBorderWidth + 2;
 
     chart.update('none');
@@ -788,8 +788,8 @@ export class ChartRenderer {
 
     // Enhanced focus/blur handlers
     const focusHandler = () => {
-      canvas.style.outline = '3px solid var(--color-primary)';
-      canvas.style.outlineOffset = '0px'; // Changed from 2px to 0px to prevent overlap with text
+      canvas.style.outline = 'none';
+      canvas.style.outlineOffset = '0px';
       this.focusSegment(chart, currentIndex);
 
       // Announce chart entry

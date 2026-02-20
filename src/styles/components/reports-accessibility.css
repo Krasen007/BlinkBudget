@@ -25,6 +25,13 @@
   outline: none;
 }
 
+/* Disable focus outlines for category cards specifically */
+.view-reports .category-card:focus,
+.view-reports .category-card:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 /* High contrast mode support */
 @media (prefers-contrast: high) {
   .view-reports {
@@ -118,9 +125,14 @@
   }
 
   /* Enhanced focus indicators on mobile */
-  .view-reports *:focus,
-  .view-reports *:focus-visible {
-    outline: 4px solid var(--color-primary);
+  /* Enhanced focus indicators on mobile - limit to interactive elements */
+  .view-reports button:focus,
+  .view-reports button:focus-visible,
+  .view-reports input:focus,
+  .view-reports input:focus-visible,
+  .view-reports select:focus,
+  .view-reports select:focus-visible {
+    outline: 2px solid var(--color-primary);
     outline-offset: 2px;
   }
 
@@ -192,6 +204,37 @@
   width: 1px;
   height: 1px;
   overflow: hidden;
+}
+
+/* Disable focus for live regions */
+.view-reports .live-region:focus,
+.view-reports .live-region:focus-visible {
+  outline: none !important;
+}
+
+/* Disable focus for main reports container */
+.view-reports.view-container:focus,
+.view-reports.view-container:focus-visible {
+  outline: none !important;
+}
+
+/* Disable focus for chart and content sections */
+.view-reports .category-breakdown-chart:focus,
+.view-reports .category-breakdown-chart:focus-visible,
+.view-reports canvas:focus,
+.view-reports canvas:focus-visible,
+.view-reports .chart-section:focus,
+.view-reports .chart-section:focus-visible,
+.view-reports .category-breakdown-section:focus,
+.view-reports .category-breakdown-section:focus-visible,
+.view-reports .charts-section:focus,
+.view-reports .charts-section:focus-visible,
+.view-reports .chart-section-title:focus,
+.view-reports .chart-section-title:focus-visible,
+.view-reports .view-content:focus,
+.view-reports .view-content:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* Error and loading states with better accessibility */
@@ -271,8 +314,7 @@
 /* Android TalkBack optimizations */
 @media screen and (min-device-pixel-ratio: 0) and (resolution >= .001dpcm) {
   .view-reports canvas:focus {
-    outline: 3px solid var(--color-primary);
-    outline-offset: 1px;
+    outline: none !important;
   }
 }
 
