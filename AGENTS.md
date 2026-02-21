@@ -30,6 +30,7 @@ This document serves as the single source of truth for all AI coding agents work
 
 The project is a web (browser) application, leveraging a modern, lightweight stack optimized for speed and a compelling user interface.
 
+### **Core Stack**
 - **Frontend**: Vanilla JavaScript (ES Modules) + Vite
   - Chosen for maximum performance, zero-bundle-overhead (initial), and "closer to the metal" understanding of web fundamentals.
   - Utilizes a custom Router and functional component pattern (returning DOM elements).
@@ -38,9 +39,71 @@ The project is a web (browser) application, leveraging a modern, lightweight sta
   - Clean, semantic CSS without heavy framework overhead
   - PostCSS provides: nesting, custom media, future CSS features, calc optimization, logical properties, and property sorting
   - CSS modules architecture with `@import` organization
+- **State Management**: Standard DOM Events (addEventListener/dispatchEvent)
+- **Routing**: Custom Hash-based Router
 - **Deployment**: Netlify + Firebase for Auth and Database.
 - **Data Persistence**: `localStorage` (via `StorageService`) for instant, offline-capable data storage. Also Firebase for cloud sync.
-- **System**: Use Windows and Powershell commands when developing locally on Windows for the terminal, do not try to use Linux tools and commands.
+- **System**: Use Windows and Powershell commands when developing locally on Windows for the terminal, DO NOT use Linux or UNIX tools and commands.
+
+### **Key Design Principles**
+1. **Zero Dependencies**: Minimal external libraries. No React, Vue, or heavy UI kits.
+2. **Instant Interaction**: 3-click max workflow.
+3. **Local First**: All data lives in the user's browser for privacy and speed.
+
+### **Project Structure**
+```text
+src/
+├── core/           # Core services and utilities
+├── components/     # Reusable UI components
+├── views/          # Page-level components
+├── styles/         # CSS files and styling
+├── utils/          # Utility functions
+├── router/         # Routing configuration
+├── main.js         # Application entry point
+└── pwa.js          # Progressive Web App setup
+```
+
+### **Data Model (LocalStorage)**
+Data is stored as JSON strings in `localStorage`.
+
+#### `transactions` (Array)
+List of all financial entries.
+```javascript
+[
+  {
+    id: 'uuid-v4',
+    amount: 15.5,
+    category: 'Food & Drink',
+    type: 'expense', // 'expense' | 'income' | 'transfer'
+    accountId: 'acc-1',
+    toAccountId: null, // if transfer
+    timestamp: '2025-12-13T10:00:00.000Z',
+    note: 'Lunch',
+  },
+];
+```
+
+#### `accounts` (Array)
+User defined accounts.
+```javascript
+[
+  {
+    id: 'acc-1',
+    name: 'Main Checking',
+    type: 'checking',
+    isDefault: true,
+  },
+];
+```
+
+#### `settings` (Object)
+App preferences.
+```javascript
+{
+  "dateFormat": "US", // 'US' | 'EU' | 'ISO'
+  "theme": "dark"
+}
+```
 
 ---
 
@@ -126,6 +189,16 @@ Adherence to these standards is crucial for maintaining code quality, consistenc
   - **Props**: Passed as arguments to the function.
   - **State**: Managed via DOM manipulation or simple event listeners within the closure.
   - Components should be modular, reusable, and focused on single responsibilities.
+  - **Example Component**:
+    ```javascript
+    export const MyComponent = ({ label, onClick }) => {
+      const el = document.createElement('button');
+      el.className = 'btn';
+      el.textContent = label;
+      el.onclick = onClick;
+      return el;
+    };
+    ```
 - **Styling**:
   - Use **Vanilla CSS, postcss** in `style.css`.
   - leverage **CSS Variables** defined in `:root` for colors, spacing, and typography.
@@ -154,11 +227,9 @@ Adherence to these standards is crucial for maintaining code quality, consistenc
 
 ## 6. Documentation Index
 
-The following documents provide additional context and detailed specifications:
+The following documents provide additional context and detailed specifications of the current implementation and future enhancements:
 
 - **`docs/prd.md`**: Product Requirements Document (for product vision, user journey, and high-level requirements).
-- **`docs/tech_design.md`**: Technical Design Document (for detailed technical architecture, stack rationale, and implementation considerations).
-- **`DEVELOPMENT_SETUP.md`**: Development setup and configuration guide (now merged into this AGENTS.md).
 
 ---
 
