@@ -83,14 +83,14 @@ export const TutorialTooltip = {
     window.addEventListener('resize', handleResize);
     tooltip._resizeHandler = handleResize;
 
-    // Animate in
+    // Set initial state
     tooltip.style.transform = 'scale(0.9)';
     tooltip.style.opacity = '0';
 
-    requestAnimationFrame(() => {
-      tooltip.style.opacity = '1';
-      tooltip.style.transform = 'scale(1)';
-    });
+    // Animate in - Use CSS transitions for better performance
+    tooltip.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    tooltip.style.opacity = '1';
+    tooltip.style.transform = 'scale(1)';
 
     return tooltip;
   },

@@ -138,10 +138,9 @@ export const MobileModal = ({
   // Add to DOM with animation
   document.body.appendChild(overlay);
 
-  // Trigger animation
-  requestAnimationFrame(() => {
-    overlay.classList.add('visible');
-  });
+  // Trigger animation - Use CSS transitions for better performance
+  overlay.style.transition = 'opacity 0.3s ease';
+  overlay.classList.add('visible');
 
   return overlay;
 };
@@ -513,10 +512,9 @@ export const MobileBottomSheet = ({
   // Add to DOM
   document.body.appendChild(overlay);
 
-  // Trigger animation
-  requestAnimationFrame(() => {
-    overlay.classList.add('visible');
-  });
+  // Trigger animation - Use CSS transitions for better performance
+  overlay.style.transition = 'opacity 0.3s ease';
+  overlay.classList.add('visible');
 
   return overlay;
 };

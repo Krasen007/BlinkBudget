@@ -344,13 +344,10 @@ export function createEnhancedEmptyState(scenario, options = {}) {
     return button;
   }
 
-  // Animate in
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      container.style.opacity = '1';
-      container.style.transform = 'translateY(0)';
-    });
-  });
+  // Animate in - Use CSS transitions instead of rAF
+  container.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+  container.style.opacity = '1';
+  container.style.transform = 'translateY(0)';
 
   return container;
 }

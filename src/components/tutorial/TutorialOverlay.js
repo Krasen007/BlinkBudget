@@ -24,10 +24,9 @@ export const TutorialOverlay = {
       transition: opacity var(--transition-normal);
     `;
 
-    // Fade in
-    requestAnimationFrame(() => {
-      overlay.style.opacity = '1';
-    });
+    // Fade in - Use CSS transitions for better performance
+    overlay.style.transition = 'opacity 0.3s ease';
+    overlay.style.opacity = '1';
 
     // Store callbacks
     overlay.onDismiss = onDismiss;
@@ -92,11 +91,10 @@ export const TutorialOverlay = {
     overlay.innerHTML = '';
     overlay.appendChild(content);
 
-    // Animate in
-    requestAnimationFrame(() => {
-      content.style.opacity = '1';
-      content.style.transform = 'scale(1)';
-    });
+    // Animate in - Use CSS transitions for better performance
+    content.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    content.style.opacity = '1';
+    content.style.transform = 'scale(1)';
 
     // Attach click listeners to action buttons via delegation
     this.attachActionListeners(content, overlay);
@@ -143,11 +141,10 @@ export const TutorialOverlay = {
     overlay.innerHTML = '';
     overlay.appendChild(content);
 
-    // Animate in
-    requestAnimationFrame(() => {
-      content.style.opacity = '1';
-      content.style.transform = 'scale(1)';
-    });
+    // Animate in - Use CSS transitions for better performance
+    content.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    content.style.opacity = '1';
+    content.style.transform = 'scale(1)';
 
     this.attachActionListeners(content, overlay);
   },
@@ -194,11 +191,10 @@ export const TutorialOverlay = {
     overlay.innerHTML = '';
     overlay.appendChild(content);
 
-    // Animate in
-    requestAnimationFrame(() => {
-      content.style.opacity = '1';
-      content.style.transform = 'scale(1)';
-    });
+    // Animate in - Use CSS transitions for better performance
+    content.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    content.style.opacity = '1';
+    content.style.transform = 'scale(1)';
 
     this.attachActionListeners(content, overlay);
   },

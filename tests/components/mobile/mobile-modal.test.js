@@ -23,7 +23,7 @@ describe('MobileModal', () => {
       content: 'Test content',
     });
 
-    expect(modal.className).toBe('mobile-modal-overlay');
+    expect(modal.className).toBe('mobile-modal-overlay visible');
     expect(modal.getAttribute('role')).toBe('dialog');
     expect(modal.getAttribute('aria-modal')).toBe('true');
 
@@ -91,7 +91,7 @@ describe('MobileConfirmDialog', () => {
       onCancel,
     });
 
-    expect(dialog.className).toBe('mobile-modal-overlay');
+    expect(dialog.className).toBe('mobile-modal-overlay visible');
 
     const message = dialog.querySelector('.mobile-confirm-message');
     expect(message.textContent).toBe('Are you sure?');
@@ -129,7 +129,7 @@ describe('MobileBottomSheet', () => {
       content: 'Sheet content',
     });
 
-    expect(sheet.className).toBe('mobile-bottom-sheet-overlay');
+    expect(sheet.className).toBe('mobile-bottom-sheet-overlay visible');
 
     const sheetContent = sheet.querySelector('.mobile-bottom-sheet');
     expect(sheetContent).toBeTruthy();

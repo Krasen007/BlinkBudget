@@ -165,7 +165,11 @@ const createCategoryContainer = () => {
   container.style.maxHeight = 'none'; // Override CSS max-height to prevents vertical clipping
 
   // Hide scrollbar for WebKit browsers (Chrome, Safari) without disabling scroll
-  if (!document.getElementById('category-chip-scrollbar-hide')) {
+  if (
+    typeof document !== 'undefined' &&
+    document.getElementById &&
+    !document.getElementById('category-chip-scrollbar-hide')
+  ) {
     const styleEl = document.createElement('style');
     styleEl.id = 'category-chip-scrollbar-hide';
     styleEl.textContent =

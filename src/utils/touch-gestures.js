@@ -333,14 +333,24 @@ export class TouchGestures {
       }
     };
 
-    window.addEventListener('scroll', onScroll);
+    // Throttle scroll events to improve performance
+    let scrollTimeout;
+    const throttledOnScroll = () => {
+      if (scrollTimeout) return;
+      scrollTimeout = setTimeout(() => {
+        onScroll();
+        scrollTimeout = null;
+      }, 16); // ~60fps
+    };
+
+    window.addEventListener('scroll', throttledOnScroll);
 
     container.appendChild(navBar);
 
     return {
       navBar,
       cleanup: () => {
-        window.removeEventListener('scroll', onScroll);
+        window.removeEventListener('scroll', throttledOnScroll);
         if (container.contains(navBar)) {
           container.removeChild(navBar);
         }
