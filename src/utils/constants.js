@@ -242,7 +242,7 @@ export const ACCOUNT_TYPES = {
 export const ACCOUNT_TYPE_LABELS = {
   checking: 'Checking Account',
   bank: 'Bank Account',
-  credit: 'Credit Card',
+  'credit card': 'Credit Card',
   savings: 'Savings Account',
   investment: 'Investment Account',
   cash: 'Cash',

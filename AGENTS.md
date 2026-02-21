@@ -33,38 +33,86 @@ The project is a web (browser) application, leveraging a modern, lightweight sta
 - **Frontend**: Vanilla JavaScript (ES Modules) + Vite
   - Chosen for maximum performance, zero-bundle-overhead (initial), and "closer to the metal" understanding of web fundamentals.
   - Utilizes a custom Router and functional component pattern (returning DOM elements).
-- **Styling**: Vanilla CSS
-  - Uses CSS Custom Properties (Variables) for theming (HSL color space).
-  - Clean, semantic CSS without heavy framework overhead.
+- **Styling**: Vanilla CSS with advanced PostCSS pipeline
+  - Uses CSS Custom Properties (Variables) for theming (HSL color space)
+  - Clean, semantic CSS without heavy framework overhead
+  - PostCSS provides: nesting, custom media, future CSS features, calc optimization, logical properties, and property sorting
+  - CSS modules architecture with `@import` organization
 - **Deployment**: Netlify + Firebase for Auth and Database.
 - **Data Persistence**: `localStorage` (via `StorageService`) for instant, offline-capable data storage. Also Firebase for cloud sync.
 - **System**: Use Windows and Powershell commands when developing locally on Windows for the terminal, do not try to use Linux tools and commands.
 
 ---
 
-## 4. Development Setup
+## 4. Development Setup & Tooling
 
-Standard commands for setting up and running the project locally:
+### **Core Development Commands**
+- **Install Dependencies**: `npm install`
+- **Development Server**: `npm run dev` (Vite dev server at `http://localhost:3000`)
+- **Production Build**: `npm run build` (Optimized build in `/dist`)
+- **Unit Tests**: `npm test` (Vitest framework)
+- **Preview Build**: `npm run preview` (Production preview)
 
-- **Install Dependencies**:
-  ```bash
-  npm install
-  ```
-- **Run Development Server**:
-  ```bash
-  npm run dev
-  ```
-  (Starts the Vite development server, typically accessible at `http://localhost:5173`).
-- **Build for Production**:
-  ```bash
-  npm run build
-  ```
-  (Creates an optimized production build of the application in `/dist`).
-- **Run Unit Tests**:
-  ```bash
-  npm test
-  ```
-  (Runs Vitest).
+### **Code Quality & Formatting Tools**
+- **ESLint**: JavaScript linting with vanilla JS optimized rules (`eslint.config.js`)
+  - Browser globals included (window, document, etc.)
+  - Separate configs for Node.js files and tests
+  - Optimized rules for ES modules
+- **Prettier**: Code formatting for consistent style (configuration in `package.json`)
+  - Single quotes, semicolons, 2-space indentation
+  - Optimized for vanilla JS/CSS projects
+- **Stylelint**: CSS linting for vanilla CSS (`.stylelintrc.json`)
+  - Standard CSS rules with BlinkBudget-specific customizations
+  - Allows hex colors and utility patterns
+  - Supports CSS custom properties and PostCSS features
+  - PostCSS-aware configuration
+
+### **Build & Performance Tools**
+- **Vite**: Fast build tool and development server with:
+  - PostCSS integration with 11 optimized plugins
+  - CSS source maps for development
+  - Code splitting and tree shaking
+  - PWA capabilities via vite-plugin-pwa
+- **PostCSS Pipeline** (configured in `vite.config.js`):
+  1. `postcss-import` - Module resolution
+  2. `postcss-nested` - SCSS-like nesting
+  3. `postcss-custom-media` - Custom media queries
+  4. `postcss-preset-env` - Future CSS polyfills (Stage 3)
+  5. `postcss-calc` - Calc() optimization
+  6. `postcss-logical-properties` - Internationalization support
+  7. `postcss-color-functional-notation` - Modern color syntax
+  8. `postcss-sorting` - Property organization (dev only)
+  9. `autoprefixer` - Browser compatibility
+  10. `purgecss` - Unused CSS removal (prod only)
+  11. `cssnano` - Minification (prod only)
+
+### **Quality Assurance Scripts**
+```bash
+npm run lint         # Lint JavaScript files
+npm run lint:fix     # Auto-fix JavaScript issues
+npm run lint:css     # Lint CSS files
+npm run lint:css:fix # Auto-fix CSS issues
+npm run format       # Format all files with Prettier
+npm run format:check # Check if files are formatted
+npm run check        # Run all linting and format checks
+npm run fix          # Auto-fix all issues (JS, CSS, formatting)
+```
+
+### **IDE Integration (VS Code Recommended)**
+Install extensions: ESLint, Prettier, Stylelint
+```json
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+    "source.fixAll.stylelint": true
+  }
+}
+```
+
+### **Pre-commit Workflow**
+Before committing: `npm run check` → `npm run fix`
 
 ---
 
@@ -93,8 +141,10 @@ Adherence to these standards is crucial for maintaining code quality, consistenc
   - Minimize complexity; favor simple, direct DOM manipulation where straightforward.
 - **Performance**:
   - Optimize for fast loading times and smooth interactions (3 clicks rule).
-- **Performance**:
-  - Optimize for fast loading times and smooth interactions (3 clicks rule).
+  - Use CSS transitions over requestAnimationFrame for better performance
+  - Throttle scroll events to 60fps (16ms) to prevent jank
+  - Hardware-accelerate animations with CSS transforms and opacity
+  - Eliminate layout thrashing with proper DOM batching
 - **Security**:
   - **DOM-based XSS Prevention**: Sanitize all user input and data from browser storage before rendering to the DOM to prevent cross-site scripting attacks.
   - **Secret Management**: Never hardcode secrets, API keys, or credentials in source code. Use environment variables or secure configuration management.
@@ -108,8 +158,23 @@ The following documents provide additional context and detailed specifications:
 
 - **`docs/prd.md`**: Product Requirements Document (for product vision, user journey, and high-level requirements).
 - **`docs/tech_design.md`**: Technical Design Document (for detailed technical architecture, stack rationale, and implementation considerations).
-- **`DEVELOPMENT_SETUP.md`**: Development setup and configuration guide.
+- **`DEVELOPMENT_SETUP.md`**: Development setup and configuration guide (now merged into this AGENTS.md).
 
-```
+---
 
-```
+## 7. Configuration Files Reference
+
+### **Key Configuration Files**
+- **`vite.config.js`**: Main build configuration with PostCSS pipeline
+- **`eslint.config.js`**: JavaScript linting rules and browser globals
+- **`.stylelintrc.json`**: CSS linting with PostCSS-aware rules
+- **`.postcsssortrc.json`**: CSS property ordering for consistent code style
+- **`package.json`**: Dependencies, scripts, and Prettier configuration
+
+### **PostCSS Plugin Configuration**
+The project uses an industry-leading 11-plugin PostCSS pipeline:
+- **Development**: Source maps, property sorting, future CSS features
+- **Production**: Unused CSS removal, minification, optimization
+- **Performance**: Calc optimization, logical properties, hardware acceleration
+
+This comprehensive setup ensures BlinkBudget maintains high code quality, optimal performance, and developer productivity while adhering to the 3-click user experience goal.
