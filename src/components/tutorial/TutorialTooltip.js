@@ -87,8 +87,8 @@ export const TutorialTooltip = {
     tooltip.style.transform = 'scale(0.9)';
     tooltip.style.opacity = '0';
 
-    // Animate in - Use CSS transitions for better performance
-    tooltip.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    // Animate in - Force reflow before changing styles to ensure transition runs
+    void tooltip.offsetHeight;
     tooltip.style.opacity = '1';
     tooltip.style.transform = 'scale(1)';
 

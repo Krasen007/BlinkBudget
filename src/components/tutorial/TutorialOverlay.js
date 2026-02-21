@@ -25,7 +25,8 @@ export const TutorialOverlay = {
     `;
 
     // Fade in - Use CSS transitions for better performance
-    overlay.style.transition = 'opacity 0.3s ease';
+    // Force reflow before changing opacity to ensure transition runs
+    void overlay.offsetHeight;
     overlay.style.opacity = '1';
 
     // Store callbacks
@@ -91,8 +92,8 @@ export const TutorialOverlay = {
     overlay.innerHTML = '';
     overlay.appendChild(content);
 
-    // Animate in - Use CSS transitions for better performance
-    content.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    // Animate in - Force reflow before changing styles to ensure transition runs
+    void content.offsetHeight;
     content.style.opacity = '1';
     content.style.transform = 'scale(1)';
 
@@ -141,8 +142,8 @@ export const TutorialOverlay = {
     overlay.innerHTML = '';
     overlay.appendChild(content);
 
-    // Animate in - Use CSS transitions for better performance
-    content.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    // Animate in - Force reflow before changing styles to ensure transition runs
+    void content.offsetHeight;
     content.style.opacity = '1';
     content.style.transform = 'scale(1)';
 
@@ -191,8 +192,8 @@ export const TutorialOverlay = {
     overlay.innerHTML = '';
     overlay.appendChild(content);
 
-    // Animate in - Use CSS transitions for better performance
-    content.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    // Animate in - Force reflow before changing styles to ensure transition runs
+    void content.offsetHeight;
     content.style.opacity = '1';
     content.style.transform = 'scale(1)';
 

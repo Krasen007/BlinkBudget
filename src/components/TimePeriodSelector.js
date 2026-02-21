@@ -264,12 +264,30 @@ export const TimePeriodSelector = (options = {}) => {
         ] = 'var(--radius-md)';
         arrow.style.transition = 'background 0.2s ease';
         arrow.style.zIndex = '1';
+
+        // ARIA and keyboard support
+        arrow.tabIndex = 0;
+        arrow.setAttribute('role', 'button');
+        arrow.setAttribute(
+          'aria-label',
+          direction === 'left' ? 'Previous period' : 'Next period'
+        );
+
         arrow.addEventListener('mouseenter', () => {
           arrow.style.background = 'rgba(255, 255, 255, 0.1)';
         });
         arrow.addEventListener('mouseleave', () => {
           arrow.style.background = 'transparent';
         });
+
+        // Keyboard support
+        arrow.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+            e.preventDefault();
+            arrow.click();
+          }
+        });
+
         return arrow;
       }
 
@@ -284,7 +302,7 @@ export const TimePeriodSelector = (options = {}) => {
 
       // Right arrow starts hidden (we start at offset -1 for month, 0 for year)
       const initialMonthOffset = period.key === 'lastMonth' ? -1 : 0;
-      const initialYearOffset = period.key === 'year' ? 0 : 0;
+      const initialYearOffset = 0;
       updateRightArrowVisibility(
         rightArrow,
         period.key === 'lastMonth' ? initialMonthOffset : initialYearOffset

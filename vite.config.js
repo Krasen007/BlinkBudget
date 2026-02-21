@@ -59,9 +59,9 @@ export default defineConfig({
               },
             },
           },
-          // Cache local JavaScript modules
+          // Cache local JavaScript modules (both /src/ dev and /assets/ prod paths)
           {
-            urlPattern: /^\/src\/.*\.js$/,
+            urlPattern: /^\/(src|assets)\/.*\.js$/,
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'local-js',
@@ -74,9 +74,9 @@ export default defineConfig({
               },
             },
           },
-          // Cache CSS files
+          // Cache CSS files (both /src/ dev and /assets/ prod paths)
           {
-            urlPattern: /^\/src\/.*\.css$/,
+            urlPattern: /^\/(src|assets)\/.*\.css$/,
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'local-css',
@@ -322,31 +322,31 @@ export default defineConfig({
         // 8. Sorting - consistent property ordering (development only for readability)
         ...(process.env.NODE_ENV !== 'production'
           ? [
-              postcssSorting({
-                'sort-order': [
-                  'position',
-                  'display',
-                  'box-sizing',
-                  'flex',
-                  'grid',
-                  'width',
-                  'height',
-                  'margin',
-                  'padding',
-                  'border',
-                  'background',
-                  'color',
-                  'font',
-                  'text',
-                  'transition',
-                  'transform',
-                  'animation',
-                  'other',
-                ],
-                'sort-order-separator': '\n',
-                'unspecified-properties-position': 'bottom',
-              }),
-            ]
+            postcssSorting({
+              'sort-order': [
+                'position',
+                'display',
+                'box-sizing',
+                'flex',
+                'grid',
+                'width',
+                'height',
+                'margin',
+                'padding',
+                'border',
+                'background',
+                'color',
+                'font',
+                'text',
+                'transition',
+                'transform',
+                'animation',
+                'other',
+              ],
+              'sort-order-separator': '\n',
+              'unspecified-properties-position': 'bottom',
+            }),
+          ]
           : []),
         // 9. Autoprefixer - add vendor prefixes based on browserslist
         autoprefixer({
@@ -360,36 +360,36 @@ export default defineConfig({
         // Production-only plugins
         ...(process.env.NODE_ENV === 'production'
           ? [
-              // 10. PurgeCSS - remove unused CSS selectors
-              purgecss({
-                content: ['./index.html', './src/**/*.js', './src/**/*.html'],
-                defaultExtractor: content =>
-                  content.match(/[\w-/:]+(?<!:)/g) || [],
-                safelist: [
-                  /^(flex|grid|hidden|block|inline|absolute|relative|fixed)/,
-                  /^(active|disabled|loading|error|success)/,
-                  /^mobile-/,
-                  /^(fade|slide|bounce)/,
-                  /:hover/,
-                  /:focus/,
-                  /:active/,
-                  /^(sm|md|lg|xl):/,
-                ],
-                variables: true,
-              }),
-              // 11. CSSNano - minify CSS
-              cssnano({
-                preset: [
-                  'default',
-                  {
-                    cssDeclarationSorter: false,
-                    reduceIdents: false,
-                    zindex: false,
-                    mergeRules: false,
-                  },
-                ],
-              }),
-            ]
+            // 10. PurgeCSS - remove unused CSS selectors
+            purgecss({
+              content: ['./index.html', './src/**/*.js', './src/**/*.html'],
+              defaultExtractor: content =>
+                content.match(/[\w-/:]+(?<!:)/g) || [],
+              safelist: [
+                /^(flex|grid|hidden|block|inline|absolute|relative|fixed)/,
+                /^(active|disabled|loading|error|success)/,
+                /^mobile-/,
+                /^(fade|slide|bounce)/,
+                /:hover/,
+                /:focus/,
+                /:active/,
+                /^(sm|md|lg|xl):/,
+              ],
+              variables: true,
+            }),
+            // 11. CSSNano - minify CSS
+            cssnano({
+              preset: [
+                'default',
+                {
+                  cssDeclarationSorter: false,
+                  reduceIdents: false,
+                  zindex: false,
+                  mergeRules: false,
+                },
+              ],
+            }),
+          ]
           : []),
       ],
       // Source maps for development debugging

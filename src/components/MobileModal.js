@@ -139,7 +139,9 @@ export const MobileModal = ({
   document.body.appendChild(overlay);
 
   // Trigger animation - Use CSS transitions for better performance
+  // Force reflow before adding visible class to ensure transition runs
   overlay.style.transition = 'opacity 0.3s ease';
+  void overlay.offsetHeight; // Force reflow
   overlay.classList.add('visible');
 
   return overlay;
@@ -513,7 +515,9 @@ export const MobileBottomSheet = ({
   document.body.appendChild(overlay);
 
   // Trigger animation - Use CSS transitions for better performance
+  // Force reflow before adding visible class to ensure transition runs
   overlay.style.transition = 'opacity 0.3s ease';
+  void overlay.offsetHeight; // Force reflow
   overlay.classList.add('visible');
 
   return overlay;

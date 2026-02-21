@@ -366,7 +366,8 @@
   width: 100%;
 }
 
-@media (width <= calc(var(--breakpoint-md) - 1px)) {
+/* Use static pixel value for media query (CSS variables not supported in media queries) */
+@media (width <= 767px) {
   .view-header-row {
     overflow-x: hidden;
     min-width: 0;

@@ -146,8 +146,8 @@ function createToastElement(message, type, options = {}) {
  * @param {HTMLElement} toast - Toast element
  */
 function animateToastIn(toast) {
-  // Use CSS transitions instead of requestAnimationFrame
-  toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+  // Force reflow before adding class to ensure transition runs
+  void toast.offsetHeight;
   toast.classList.add('active');
 }
 

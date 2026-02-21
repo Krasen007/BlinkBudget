@@ -546,6 +546,12 @@
   transform: translateY(-1px);
 }
 
+/* Ensure focus visibility for chart canvases */
+.charts-section canvas:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 .charts-section canvas:active {
   transform: translateY(0) scale(0.99);
   transition: transform 0.1s ease-out;
@@ -602,11 +608,6 @@
 .charts-section[data-chart-type='bar'] canvas,
 .charts-section[data-chart-type='line'] canvas {
   animation: chart-entrance 0.4s ease-out;
-}
-
-/* Focus animations - Disabled */
-.charts-section canvas:focus {
-  outline: none;
 }
 
 /* Error and empty state animations */

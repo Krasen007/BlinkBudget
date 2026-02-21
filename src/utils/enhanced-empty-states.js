@@ -344,8 +344,8 @@ export function createEnhancedEmptyState(scenario, options = {}) {
     return button;
   }
 
-  // Animate in - Use CSS transitions instead of rAF
-  container.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+  // Animate in - Force reflow before changing styles to ensure transition runs
+  void container.offsetHeight;
   container.style.opacity = '1';
   container.style.transform = 'translateY(0)';
 

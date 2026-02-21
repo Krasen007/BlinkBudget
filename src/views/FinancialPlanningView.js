@@ -143,7 +143,6 @@ export const FinancialPlanningView = () => {
       gap: SPACING.SM,
       width: '100%',
       maxWidth: '100%',
-      flexWrap: 'wrap',
     });
 
     const sections = [

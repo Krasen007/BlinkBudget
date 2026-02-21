@@ -144,7 +144,7 @@ export const AccountSection = () => {
         nameInput.addEventListener('input', () => {
           nameInput.setAttribute('aria-invalid', 'false');
           nameInput.style.borderColor = 'var(--color-primary)';
-          errorText.opacity = '0';
+          errorText.style.opacity = '0';
           errorText.textContent = '';
         });
 
@@ -248,6 +248,17 @@ export const AccountSection = () => {
               cleanupOverlay();
             } catch (error) {
               console.error('Error adding account:', error);
+              // Show error dialog to user
+              import('./ConfirmDialog.js')
+                .then(({ AlertDialog }) => {
+                  AlertDialog({
+                    message: 'Failed to add account. Please try again.',
+                  });
+                })
+                .catch(() => {
+                  errorText.textContent = 'Failed to add account. Please try again.';
+                  errorText.style.opacity = '1';
+                });
             }
           },
         });
@@ -496,7 +507,7 @@ export const AccountSection = () => {
             nameInput.addEventListener('input', () => {
               nameInput.setAttribute('aria-invalid', 'false');
               nameInput.style.borderColor = 'var(--color-primary)';
-              errorText.opacity = '0';
+              errorText.style.opacity = '0';
               errorText.textContent = '';
             });
 
@@ -598,6 +609,9 @@ export const AccountSection = () => {
                   cleanupOverlay();
                 } catch (error) {
                   console.error('Error updating account:', error);
+                  // Show error inline in the dialog
+                  errorText.textContent = 'Failed to update account. Please try again.';
+                  errorText.style.opacity = '1';
                 }
               },
             });

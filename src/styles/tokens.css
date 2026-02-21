@@ -50,7 +50,7 @@
 
   /* Success colors */
   --color-success: hsl(150, 100%, 35%);
-  --color-success-light: rgb(16, 185, 129, 0.1);
+  --color-success-light: hsla(150, 100%, 35%, 0.1);
 
   /* Enhanced accessibility tokens */
   --focus-color: hsl(250, 84%, 60%); /* Same as primary for consistency */

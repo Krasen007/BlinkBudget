@@ -57,6 +57,23 @@
         background: #444;
         cursor: not-allowed;
       }
+      .retry-btn:focus {
+        outline: 2px solid #818cf8;
+        outline-offset: 2px;
+      }
+      .retry-btn:focus:not(:focus-visible) {
+        outline: none;
+      }
+      .retry-btn:focus-visible {
+        outline: 2px solid #818cf8;
+        outline-offset: 2px;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.3);
+      }
+      .retry-btn:disabled:focus,
+      .retry-btn:disabled:focus-visible {
+        outline: none;
+        box-shadow: none;
+      }
     </style>
   </head>
   <body>
