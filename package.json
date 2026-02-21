@@ -1,6 +1,6 @@
 {
   "name": "blinkbudget",
-  "version": "1.21",
+  "version": "1.22",
   "type": "module",
   "description": "Making expense tracking effortless, all in 3 moves.",
   "main": "index.js",

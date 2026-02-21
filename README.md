@@ -79,6 +79,9 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 - **Enhanced security** with comprehensive privacy compliance
 - **Improved accessibility** with "Skip to Content" links, ARIA roles, and proper form label associations
 - **Enhanced color schemes** and better text handling for improved readability
+- **Smoother animations** with fixed CSS transitions throughout the app (v1.22)
+- **Faster rendering** with frame times under 16ms for buttery-smooth performance (v1.22)
+- **Consistent button styling** across all views for a cohesive experience (v1.22)
 
 ### Backup & Restore
 
