@@ -1,0 +1,215 @@
+/* Critical CSS for above-the-fold content - Minimal styles for initial render */
+
+/* Critical tokens */
+:root {
+  /* Force dark color scheme for PWA */
+  color-scheme: dark;
+
+  /* Primary color variants */
+  --color-primary: hsl(250, 84%, 60%);
+  --color-background: hsl(240, 10%, 4%);
+  --color-surface: hsl(240, 10%, 10%);
+  --color-text-main: hsl(0, 0%, 100%);
+  --color-text-muted: hsl(220, 10%, 75%); /* Improved contrast */
+  --color-border: hsl(240, 5%, 30%);
+
+  /* Typography */
+  --font-body:
+    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading:
+    'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-size-base: 16px;
+  --line-height-normal: 1.5;
+
+  /* Spacing */
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+
+  /* Layout */
+  --container-max-width: 480px;
+  --safe-area-inset-top: env(safe-area-inset-top);
+  --safe-area-inset-right: env(safe-area-inset-right);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom);
+  --safe-area-inset-left: env(safe-area-inset-left);
+}
+
+/* Critical reset and base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--font-size-base);
+  background-color: var(--color-background);
+  color: var(--color-text-main);
+  line-height: var(--line-height-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  display: flex;
+  flex-direction: column;
+  text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  padding: var(--safe-area-inset-top) var(--safe-area-inset-right)
+    var(--safe-area-inset-bottom) var(--safe-area-inset-left);
+  align-items: center;
+}
+
+#app {
+  width: 100%;
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* Critical layout components */
+.view-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: var(--spacing-md);
+}
+
+.view-header {
+  flex-shrink: 0;
+  margin-bottom: var(--spacing-lg);
+}
+
+.view-title {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin-bottom: var(--spacing-sm);
+}
+
+/* Critical button styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+/* Critical loading state */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+  color: var(--color-text-muted);
+}
+
+/* Critical form styles */
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-main);
+  margin-bottom: 4px;
+}
+
+.view-select {
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-surface);
+  color: var(--color-text-main);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  min-height: 44px;
+}
+
+/* Mobile navigation */
+.mobile-nav {
+  display: flex;
+  justify-content: space-around;
+  padding: var(--spacing-sm);
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-sm);
+  border: none;
+  background: none;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-size: 0.75rem;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.mobile-nav-item.active {
+  color: var(--color-primary);
+}
+
+/* Accessibility */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--color-primary);
+  color: white;
+  padding: 8px;
+  text-decoration: none;
+  border-radius: 4px;
+  z-index: 1000;
+}
+
+.skip-link:focus {
+  top: 6px;
+}

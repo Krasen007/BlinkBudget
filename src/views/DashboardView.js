@@ -57,10 +57,21 @@ export const DashboardView = () => {
 
   // Account Selector
   const leftHeader = document.createElement('div');
+
+  // Add accessible label for the account filter
+  const accountFilterLabel = document.createElement('label');
+  accountFilterLabel.htmlFor = 'account-filter-select';
+  accountFilterLabel.textContent = 'Filter by account:';
+  accountFilterLabel.className = 'form-label';
+  accountFilterLabel.style.display = 'block';
+  accountFilterLabel.style.marginBottom = '4px';
+  accountFilterLabel.style.fontSize = 'var(--font-size-sm)';
+
   const accountSelect = document.createElement('select');
   accountSelect.id = 'account-filter-select';
   accountSelect.name = 'account-filter';
   accountSelect.className = 'view-select';
+  accountSelect.setAttribute('aria-label', 'Filter transactions by account');
   accountSelect.style.marginTop = SPACING.SM;
   accountSelect.style.width = '100%';
 
@@ -89,6 +100,7 @@ export const DashboardView = () => {
     accountSelect.appendChild(opt);
   });
 
+  leftHeader.appendChild(accountFilterLabel);
   leftHeader.appendChild(accountSelect);
   header.appendChild(leftHeader);
   container.appendChild(header);

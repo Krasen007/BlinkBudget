@@ -82,12 +82,15 @@ export class MobileUtils {
   updateCSSCustomProperties() {
     const root = document.documentElement;
 
+    // Cache window dimensions to avoid forced reflows
+    const viewportWidth = window.innerWidth;
+
     root.style.setProperty('--viewport-height', `${this.viewportHeight}px`);
     root.style.setProperty(
       '--visual-viewport-height',
       `${this.visualViewportHeight}px`
     );
-    root.style.setProperty('--viewport-width', `${window.innerWidth}px`);
+    root.style.setProperty('--viewport-width', `${viewportWidth}px`);
   }
 
   /**

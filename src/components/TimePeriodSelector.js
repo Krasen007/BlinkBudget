@@ -215,7 +215,7 @@ export const TimePeriodSelector = (options = {}) => {
       'aria-selected',
       period.key === initialKey ? 'true' : 'false'
     );
-    button.setAttribute('aria-controls', `${period.key}-panel`);
+    // Remove aria-controls since the target panel doesn't exist
     button.id = `${period.key}-tab`;
 
     const labelSpan = document.createElement('span');

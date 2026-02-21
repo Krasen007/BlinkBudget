@@ -41,7 +41,11 @@
 
   /* Text colors */
   --color-text-main: hsl(0, 0%, 100%);
-  --color-text-muted: hsl(240, 5%, 65%);
+  --color-text-muted: hsl(
+    220,
+    10%,
+    75%
+  ); /* Lightened from 65% for better contrast */
 
   /* Border colors */
   --color-border: hsl(240, 5%, 30%);

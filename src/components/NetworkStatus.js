@@ -8,8 +8,9 @@ export const NetworkStatus = () => {
   const container = document.createElement('div');
   container.className = 'network-status';
 
-  // Mobile nav is ~60px tall, so position above it on mobile
-  const isMobile = window.innerWidth < 768;
+  // Cache viewport width to avoid forced reflow
+  const viewportWidth = window.innerWidth;
+  const isMobile = viewportWidth < 768;
   const bottomOffset = isMobile ? '80px' : SPACING.MD;
 
   Object.assign(container.style, {

@@ -223,7 +223,7 @@ export default defineConfig({
       },
     },
     // CSS optimization settings
-    cssCodeSplit: false, // Combine all CSS into single file for production
+    cssCodeSplit: true, // Split CSS by chunk for better caching and parallel loading
     rollupOptions: {
       output: {
         // Manual chunking for better optimization
@@ -245,6 +245,16 @@ export default defineConfig({
           }
           if (id.includes('FinancialPlanningView')) {
             return 'planning-view';
+          }
+          // Split out analytics and heavy services
+          if (
+            id.includes('analytics-engine') ||
+            id.includes('AnalyticsInstance')
+          ) {
+            return 'analytics';
+          }
+          if (id.includes('tutorial') || id.includes('TutorialManager')) {
+            return 'tutorial';
           }
           // Other vendor dependencies
           if (id.includes('node_modules')) {
@@ -322,31 +332,31 @@ export default defineConfig({
         // 8. Sorting - consistent property ordering (development only for readability)
         ...(process.env.NODE_ENV !== 'production'
           ? [
-            postcssSorting({
-              'sort-order': [
-                'position',
-                'display',
-                'box-sizing',
-                'flex',
-                'grid',
-                'width',
-                'height',
-                'margin',
-                'padding',
-                'border',
-                'background',
-                'color',
-                'font',
-                'text',
-                'transition',
-                'transform',
-                'animation',
-                'other',
-              ],
-              'sort-order-separator': '\n',
-              'unspecified-properties-position': 'bottom',
-            }),
-          ]
+              postcssSorting({
+                'sort-order': [
+                  'position',
+                  'display',
+                  'box-sizing',
+                  'flex',
+                  'grid',
+                  'width',
+                  'height',
+                  'margin',
+                  'padding',
+                  'border',
+                  'background',
+                  'color',
+                  'font',
+                  'text',
+                  'transition',
+                  'transform',
+                  'animation',
+                  'other',
+                ],
+                'sort-order-separator': '\n',
+                'unspecified-properties-position': 'bottom',
+              }),
+            ]
           : []),
         // 9. Autoprefixer - add vendor prefixes based on browserslist
         autoprefixer({
@@ -360,36 +370,47 @@ export default defineConfig({
         // Production-only plugins
         ...(process.env.NODE_ENV === 'production'
           ? [
-            // 10. PurgeCSS - remove unused CSS selectors
-            purgecss({
-              content: ['./index.html', './src/**/*.js', './src/**/*.html'],
-              defaultExtractor: content =>
-                content.match(/[\w-/:]+(?<!:)/g) || [],
-              safelist: [
-                /^(flex|grid|hidden|block|inline|absolute|relative|fixed)/,
-                /^(active|disabled|loading|error|success)/,
-                /^mobile-/,
-                /^(fade|slide|bounce)/,
-                /:hover/,
-                /:focus/,
-                /:active/,
-                /^(sm|md|lg|xl):/,
-              ],
-              variables: true,
-            }),
-            // 11. CSSNano - minify CSS
-            cssnano({
-              preset: [
-                'default',
-                {
-                  cssDeclarationSorter: false,
-                  reduceIdents: false,
-                  zindex: false,
-                  mergeRules: false,
-                },
-              ],
-            }),
-          ]
+              // 10. PurgeCSS - remove unused CSS selectors
+              purgecss({
+                content: ['./index.html', './src/**/*.js', './src/**/*.html'],
+                defaultExtractor: content =>
+                  content.match(/[\w-/:]+(?<!:)/g) || [],
+                safelist: [
+                  // Core layout classes
+                  /^(flex|grid|hidden|block|inline|absolute|relative|fixed|sticky)/,
+                  // State classes
+                  /^(active|disabled|loading|error|success|warning|info)/,
+                  // Mobile-specific classes
+                  /^mobile-/,
+                  // Animation classes
+                  /^(fade|slide|bounce|pulse|spin)/,
+                  // Pseudo-classes (keep minimal)
+                  /:hover/,
+                  /:focus/,
+                  /:active/,
+                  // Responsive prefixes
+                  /^(sm|md|lg|xl):/,
+                  // Form states
+                  /^(checked|invalid|valid)/,
+                ],
+                variables: true,
+                // More aggressive purging - only keep explicitly used classes
+                keyframes: true,
+                fontFace: true,
+              }),
+              // 11. CSSNano - minify CSS
+              cssnano({
+                preset: [
+                  'default',
+                  {
+                    cssDeclarationSorter: false,
+                    reduceIdents: false,
+                    zindex: false,
+                    mergeRules: false,
+                  },
+                ],
+              }),
+            ]
           : []),
       ],
       // Source maps for development debugging

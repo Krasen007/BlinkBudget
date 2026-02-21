@@ -12,14 +12,21 @@ import './core/mobile.js'; // Initialize mobile utilities
 import './pwa.js'; // Register PWA service worker
 import { InstallService } from './core/install.js';
 import { CacheInvalidator } from './core/cache-invalidator.js';
-import { PrivacyService } from './core/privacy-service.js';
 import './core/mobile-viewport-manager.js';
 import './core/mobile-form-optimizer.js';
 
 InstallService.init();
 
-// Initialize privacy service
-PrivacyService.init();
+// Lazy load privacy service after app initialization
+const initPrivacyService = () => {
+  import('./core/privacy-service.js')
+    .then(({ PrivacyService }) => {
+      PrivacyService.init();
+    })
+    .catch(error => {
+      console.warn('[Main] Failed to load privacy service:', error);
+    });
+};
 
 const initApp = () => {
   const app = document.querySelector('#app');
@@ -125,6 +132,8 @@ const initApp = () => {
   NavigationState.init();
   // Initialize centralized cache invalidator
   CacheInvalidator.init();
+  // Lazy load privacy service after app is ready
+  initPrivacyService();
   console.log('[Main] App initialized, starting router.');
   Router.init();
 };

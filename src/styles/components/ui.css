@@ -435,6 +435,8 @@
   text-align: right;
   flex-shrink: 0;
   color: var(--color-text-main);
+  min-width: 80px; /* Prevent layout shift during font loading */
+  font-display: swap; /* Use fallback font during loading */
 }
 
 @media (width <= calc(var(--breakpoint-md) - 1px)) {

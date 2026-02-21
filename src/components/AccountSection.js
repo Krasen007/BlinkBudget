@@ -256,7 +256,8 @@ export const AccountSection = () => {
                   });
                 })
                 .catch(() => {
-                  errorText.textContent = 'Failed to add account. Please try again.';
+                  errorText.textContent =
+                    'Failed to add account. Please try again.';
                   errorText.style.opacity = '1';
                 });
             }
@@ -610,7 +611,8 @@ export const AccountSection = () => {
                 } catch (error) {
                   console.error('Error updating account:', error);
                   // Show error inline in the dialog
-                  errorText.textContent = 'Failed to update account. Please try again.';
+                  errorText.textContent =
+                    'Failed to update account. Please try again.';
                   errorText.style.opacity = '1';
                 }
               },

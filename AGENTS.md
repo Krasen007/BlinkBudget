@@ -31,6 +31,7 @@ This document serves as the single source of truth for all AI coding agents work
 The project is a web (browser) application, leveraging a modern, lightweight stack optimized for speed and a compelling user interface.
 
 ### **Core Stack**
+
 - **Frontend**: Vanilla JavaScript (ES Modules) + Vite
   - Chosen for maximum performance, zero-bundle-overhead (initial), and "closer to the metal" understanding of web fundamentals.
   - Utilizes a custom Router and functional component pattern (returning DOM elements).
@@ -46,11 +47,13 @@ The project is a web (browser) application, leveraging a modern, lightweight sta
 - **System**: Use Windows and Powershell commands when developing locally on Windows for the terminal, DO NOT use Linux or UNIX tools and commands.
 
 ### **Key Design Principles**
+
 1. **Zero Dependencies**: Minimal external libraries. No React, Vue, or heavy UI kits.
 2. **Instant Interaction**: 3-click max workflow.
 3. **Local First**: All data lives in the user's browser for privacy and speed.
 
 ### **Project Structure**
+
 ```text
 src/
 ├── core/           # Core services and utilities
@@ -64,10 +67,13 @@ src/
 ```
 
 ### **Data Model (LocalStorage)**
+
 Data is stored as JSON strings in `localStorage`.
 
 #### `transactions` (Array)
+
 List of all financial entries.
+
 ```javascript
 [
   {
@@ -84,7 +90,9 @@ List of all financial entries.
 ```
 
 #### `accounts` (Array)
+
 User defined accounts.
+
 ```javascript
 [
   {
@@ -97,7 +105,9 @@ User defined accounts.
 ```
 
 #### `settings` (Object)
+
 App preferences.
+
 ```javascript
 {
   "dateFormat": "US", // 'US' | 'EU' | 'ISO'
@@ -110,6 +120,7 @@ App preferences.
 ## 4. Development Setup & Tooling
 
 ### **Core Development Commands**
+
 - **Install Dependencies**: `npm install`
 - **Development Server**: `npm run dev` (Vite dev server at `http://localhost:3000`)
 - **Production Build**: `npm run build` (Optimized build in `/dist`)
@@ -117,6 +128,7 @@ App preferences.
 - **Preview Build**: `npm run preview` (Production preview)
 
 ### **Code Quality & Formatting Tools**
+
 - **ESLint**: JavaScript linting with vanilla JS optimized rules (`eslint.config.js`)
   - Browser globals included (window, document, etc.)
   - Separate configs for Node.js files and tests
@@ -131,6 +143,7 @@ App preferences.
   - PostCSS-aware configuration
 
 ### **Build & Performance Tools**
+
 - **Vite**: Fast build tool and development server with:
   - PostCSS integration with 11 optimized plugins
   - CSS source maps for development
@@ -150,6 +163,7 @@ App preferences.
   11. `cssnano` - Minification (prod only)
 
 ### **Quality Assurance Scripts**
+
 ```bash
 npm run lint         # Lint JavaScript files
 npm run lint:fix     # Auto-fix JavaScript issues
@@ -162,7 +176,9 @@ npm run fix          # Auto-fix all issues (JS, CSS, formatting)
 ```
 
 ### **IDE Integration (VS Code Recommended)**
+
 Install extensions: ESLint, Prettier, Stylelint
+
 ```json
 {
   "editor.formatOnSave": true,
@@ -175,6 +191,7 @@ Install extensions: ESLint, Prettier, Stylelint
 ```
 
 ### **Pre-commit Workflow**
+
 Before committing: `npm run check` → `npm run fix`
 
 ---
@@ -236,6 +253,7 @@ The following documents provide additional context and detailed specifications o
 ## 7. Configuration Files Reference
 
 ### **Key Configuration Files**
+
 - **`vite.config.js`**: Main build configuration with PostCSS pipeline
 - **`eslint.config.js`**: JavaScript linting rules and browser globals
 - **`.stylelintrc.json`**: CSS linting with PostCSS-aware rules
@@ -243,7 +261,9 @@ The following documents provide additional context and detailed specifications o
 - **`package.json`**: Dependencies, scripts, and Prettier configuration
 
 ### **PostCSS Plugin Configuration**
+
 The project uses an industry-leading 11-plugin PostCSS pipeline:
+
 - **Development**: Source maps, property sorting, future CSS features
 - **Production**: Unused CSS removal, minification, optimization
 - **Performance**: Calc optimization, logical properties, hardware acceleration

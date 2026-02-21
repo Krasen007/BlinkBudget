@@ -449,6 +449,8 @@
   transition: all 0.2s ease;
   min-width: 0;
   width: 100%;
+  min-height: 44px;
+  font-family: var(--font-body);
 }
 
 @media (--md) {

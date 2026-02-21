@@ -70,7 +70,7 @@ export const CategoryCard = (
   amount.textContent = formatCurrency(category.amount);
   amount.style.fontSize = FONT_SIZES.LG;
   amount.style.fontWeight = 'bold';
-  amount.style.color = COLORS.PRIMARY;
+  amount.style.color = 'var(--color-text-main)'; // Ensure proper contrast
   amount.style.textAlign = 'center';
   card.appendChild(amount);
 
