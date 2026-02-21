@@ -28,46 +28,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://blinkbudget-sync.firebaseapp.com" />
 
-    <!-- Preload critical fonts with font-display=swap -->
-    <link
-      rel="preload"
-      href="https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      href="https://fonts.gstatic.com/s/outfit/v5/QGYyz_MVcBeNP7IrFLDjc3lQtGPlYwZe.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-
-    <!-- Prefetch Google Fonts stylesheet for faster font loading -->
-    <link
-      rel="prefetch"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700&display=swap"
-    />
-
     <!-- Critical CSS for above-the-fold content -->
     <link rel="stylesheet" href="/src/styles/critical.css" />
 
-    <!-- Google Fonts stylesheet with font-display=swap for non-blocking font loading -->
+    <!-- Google Fonts stylesheet with font-display=swap -->
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700&display=swap"
-      media="print"
-      onload="this.media = 'all'"
     />
-    <noscript>
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700&display=swap"
-      />
-    </noscript>
-
-    <!-- Defer non-critical CSS with high priority -->
     <link
       rel="preload"
       href="/src/styles/main.css"
@@ -76,7 +44,7 @@
         this.onload = null;
         this.rel = 'stylesheet';
       "
-      importance="high"
+      fetchpriority="high"
     />
     <noscript><link rel="stylesheet" href="/src/styles/main.css" /></noscript>
   </head>

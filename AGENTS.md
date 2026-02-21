@@ -83,7 +83,7 @@ List of all financial entries.
     type: 'expense', // 'expense' | 'income' | 'transfer'
     accountId: 'acc-1',
     toAccountId: null, // if transfer
-    timestamp: '2025-12-13T10:00:00.000Z',
+    timestamp: '2026-02-21T10:00:00.000Z',
     note: 'Lunch',
   },
 ];
@@ -217,7 +217,7 @@ Adherence to these standards is crucial for maintaining code quality, consistenc
     };
     ```
 - **Styling**:
-  - Use **Vanilla CSS, postcss** in `style.css`.
+  - Use **Vanilla CSS, PostCSS** in `style.css`.
   - leverage **CSS Variables** defined in `:root` for colors, spacing, and typography.
   - Avoid inline styles for static values; use classes.
 - **Accessibility (a11y)**:
