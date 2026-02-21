@@ -54,9 +54,7 @@ describe('Property 14: Prediction Reasonableness', () => {
           // based on the artificial variance injected (0.3x) during data generation
           // A 10x multiplier previously allowed catastrophic predictions to pass the test
           expect(prediction.predictedAmount).toBeGreaterThan(0);
-          expect(prediction.predictedAmount).toBeLessThan(
-            avgMonthlyAmount * 4
-          );
+          expect(prediction.predictedAmount).toBeLessThan(avgMonthlyAmount * 4);
 
           // Check for confidence interval fields (supporting different confidence property names)
           // Note: Some prediction models may not include confidence intervals

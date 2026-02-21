@@ -122,15 +122,22 @@ export const AccountSection = () => {
 
         // Add focus styles
         nameInput.addEventListener('focus', () => {
-          nameInput.style.borderColor = nameInput.getAttribute('aria-invalid') === 'true' ? 'var(--color-danger, #ef4444)' : 'var(--color-primary)';
+          nameInput.style.borderColor =
+            nameInput.getAttribute('aria-invalid') === 'true'
+              ? 'var(--color-danger, #ef4444)'
+              : 'var(--color-primary)';
           nameInput.style.outline = 'none';
-          nameInput.style.boxShadow = nameInput.getAttribute('aria-invalid') === 'true'
-            ? '0 0 0 3px rgba(239, 68, 68, 0.1)'
-            : '0 0 0 3px rgba(59, 130, 246, 0.1)';
+          nameInput.style.boxShadow =
+            nameInput.getAttribute('aria-invalid') === 'true'
+              ? '0 0 0 3px rgba(239, 68, 68, 0.1)'
+              : '0 0 0 3px rgba(59, 130, 246, 0.1)';
         });
 
         nameInput.addEventListener('blur', () => {
-          nameInput.style.borderColor = nameInput.getAttribute('aria-invalid') === 'true' ? 'var(--color-danger, #ef4444)' : 'var(--color-border)';
+          nameInput.style.borderColor =
+            nameInput.getAttribute('aria-invalid') === 'true'
+              ? 'var(--color-danger, #ef4444)'
+              : 'var(--color-border)';
           nameInput.style.boxShadow = 'none';
         });
 
@@ -467,15 +474,22 @@ export const AccountSection = () => {
 
             // Add focus styles
             nameInput.addEventListener('focus', () => {
-              nameInput.style.borderColor = nameInput.getAttribute('aria-invalid') === 'true' ? 'var(--color-danger, #ef4444)' : 'var(--color-primary)';
+              nameInput.style.borderColor =
+                nameInput.getAttribute('aria-invalid') === 'true'
+                  ? 'var(--color-danger, #ef4444)'
+                  : 'var(--color-primary)';
               nameInput.style.outline = 'none';
-              nameInput.style.boxShadow = nameInput.getAttribute('aria-invalid') === 'true'
-                ? '0 0 0 3px rgba(239, 68, 68, 0.1)'
-                : '0 0 0 3px rgba(59, 130, 246, 0.1)';
+              nameInput.style.boxShadow =
+                nameInput.getAttribute('aria-invalid') === 'true'
+                  ? '0 0 0 3px rgba(239, 68, 68, 0.1)'
+                  : '0 0 0 3px rgba(59, 130, 246, 0.1)';
             });
 
             nameInput.addEventListener('blur', () => {
-              nameInput.style.borderColor = nameInput.getAttribute('aria-invalid') === 'true' ? 'var(--color-danger, #ef4444)' : 'var(--color-border)';
+              nameInput.style.borderColor =
+                nameInput.getAttribute('aria-invalid') === 'true'
+                  ? 'var(--color-danger, #ef4444)'
+                  : 'var(--color-border)';
               nameInput.style.boxShadow = 'none';
             });
 

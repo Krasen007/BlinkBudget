@@ -3,7 +3,13 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import fs from 'fs';
 import postcssImport from 'postcss-import';
+import postcssNested from 'postcss-nested';
 import postcssCustomMedia from 'postcss-custom-media';
+import postcssPresetEnv from 'postcss-preset-env';
+import postcssCalc from 'postcss-calc';
+import postcssSorting from 'postcss-sorting';
+import postcssLogicalProperties from 'postcss-logical-properties';
+import postcssColorFunctionalNotation from 'postcss-color-functional-notation';
 import autoprefixer from 'autoprefixer';
 import purgecss from '@fullhuman/postcss-purgecss';
 import cssnano from 'cssnano';
@@ -285,11 +291,64 @@ export default defineConfig({
     port: 4173, // Default preview port
   },
   css: {
-    // PostCSS configuration moved from postcss.config.js
+    // PostCSS configuration - plugins execute in order
     postcss: {
       plugins: [
+        // 1. Import - resolve @import statements first
         postcssImport,
+        // 2. Nested - unfold nested rules (like SCSS)
+        postcssNested,
+        // 3. Custom Media - transform custom media queries
         postcssCustomMedia,
+        // 4. Preset Env - polyfill future CSS features (Stage 3 for stability)
+        postcssPresetEnv({
+          stage: 3,
+          features: {
+            'nesting-rules': false, // Using postcss-nested instead
+            'custom-media-queries': false, // Using postcss-custom-media instead
+            'custom-properties': true, // Better custom property support
+            'color-function': true, // Modern color functions
+            clamp: true, // CSS clamp() support
+          },
+        }),
+        // 5. Calc - reduce calc() expressions where possible
+        postcssCalc({
+          preserve: false, // Replace calc() with computed values
+        }),
+        // 6. Logical Properties - enable logical positioning for internationalization
+        postcssLogicalProperties(),
+        // 7. Color Functional Notation - modern color syntax support
+        postcssColorFunctionalNotation(),
+        // 8. Sorting - consistent property ordering (development only for readability)
+        ...(process.env.NODE_ENV !== 'production'
+          ? [
+              postcssSorting({
+                'sort-order': [
+                  'position',
+                  'display',
+                  'box-sizing',
+                  'flex',
+                  'grid',
+                  'width',
+                  'height',
+                  'margin',
+                  'padding',
+                  'border',
+                  'background',
+                  'color',
+                  'font',
+                  'text',
+                  'transition',
+                  'transform',
+                  'animation',
+                  'other',
+                ],
+                'sort-order-separator': '\n',
+                'unspecified-properties-position': 'bottom',
+              }),
+            ]
+          : []),
+        // 9. Autoprefixer - add vendor prefixes based on browserslist
         autoprefixer({
           overrideBrowserslist: [
             '> 1%',
@@ -298,38 +357,43 @@ export default defineConfig({
             'not ie 11',
           ],
         }),
+        // Production-only plugins
         ...(process.env.NODE_ENV === 'production'
           ? [
-            purgecss({
-              content: ['./index.html', './src/**/*.js', './src/**/*.html'],
-              defaultExtractor: content =>
-                content.match(/[\w-/:]+(?<!:)/g) || [],
-              safelist: [
-                /^(flex|grid|hidden|block|inline|absolute|relative|fixed)/,
-                /^(active|disabled|loading|error|success)/,
-                /^mobile-/,
-                /^(fade|slide|bounce)/,
-                /:hover/,
-                /:focus/,
-                /:active/,
-                /^(sm|md|lg|xl):/,
-              ],
-              variables: true,
-            }),
-            cssnano({
-              preset: [
-                'default',
-                {
-                  cssDeclarationSorter: false,
-                  reduceIdents: false,
-                  zindex: false,
-                  mergeRules: false,
-                },
-              ],
-            }),
-          ]
+              // 10. PurgeCSS - remove unused CSS selectors
+              purgecss({
+                content: ['./index.html', './src/**/*.js', './src/**/*.html'],
+                defaultExtractor: content =>
+                  content.match(/[\w-/:]+(?<!:)/g) || [],
+                safelist: [
+                  /^(flex|grid|hidden|block|inline|absolute|relative|fixed)/,
+                  /^(active|disabled|loading|error|success)/,
+                  /^mobile-/,
+                  /^(fade|slide|bounce)/,
+                  /:hover/,
+                  /:focus/,
+                  /:active/,
+                  /^(sm|md|lg|xl):/,
+                ],
+                variables: true,
+              }),
+              // 11. CSSNano - minify CSS
+              cssnano({
+                preset: [
+                  'default',
+                  {
+                    cssDeclarationSorter: false,
+                    reduceIdents: false,
+                    zindex: false,
+                    mergeRules: false,
+                  },
+                ],
+              }),
+            ]
           : []),
       ],
+      // Source maps for development debugging
+      map: process.env.NODE_ENV !== 'production' ? { inline: true } : false,
     },
     // Enable CSS source maps in development
     devSourcemap: true,

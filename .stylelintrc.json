@@ -42,7 +42,24 @@
     "at-rule-no-unknown": [
       true,
       {
-        "ignoreAtRules": ["import", "custom-media"]
+        "ignoreAtRules": [
+          "import",
+          "custom-media",
+          "tailwind",
+          "apply",
+          "layer",
+          "config",
+          "use",
+          "forward",
+          "mixin",
+          "include",
+          "function",
+          "return",
+          "if",
+          "each",
+          "for",
+          "while"
+        ]
       }
     ],
     "import-notation": null,
@@ -52,6 +69,26 @@
     "no-duplicate-selectors": null,
     "comment-empty-line-before": null,
     "selector-id-pattern": null,
-    "value-keyword-case": null
+    "value-keyword-case": null,
+    "rule-empty-line-before": [
+      "always-multi-line",
+      {
+        "except": ["first-nested"],
+        "ignore": ["after-comment"]
+      }
+    ],
+    "at-rule-empty-line-before": [
+      "always",
+      {
+        "except": ["blockless-after-same-name-blockless", "first-nested"],
+        "ignore": ["after-comment"]
+      }
+    ],
+    "no-invalid-position-at-import-rule": [
+      true,
+      {
+        "ignoreAtRules": ["tailwind", "use", "forward"]
+      }
+    ]
   }
 }

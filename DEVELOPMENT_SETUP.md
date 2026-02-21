@@ -2,7 +2,7 @@
 
 ## Overview
 
-Your BlinkBudget project now includes a professional development setup with ESLint, Prettier, Stylelint, and optional Lightning CSS for optimal performance and code quality.
+Your BlinkBudget project now includes a professional development setup with ESLint, Prettier, Stylelint, for optimal performance and code quality.
 
 ## Tools Installed
 
@@ -17,7 +17,6 @@ Your BlinkBudget project now includes a professional development setup with ESLi
 - **Vite**: Fast build tool and dev server
 - **Vitest**: Unit testing framework
 - **PWA Plugin**: Progressive Web App capabilities
-- **Lightning CSS**: Optional high-performance CSS processor (alternative to PostCSS)
 
 ## Available Scripts
 
@@ -63,21 +62,6 @@ npm run fix          # Auto-fix all issues (JS, CSS, formatting)
 - Allows hex colors and utility patterns
 - Supports CSS custom properties
 
-## Lightning CSS (Optional)
-
-To use Lightning CSS instead of PostCSS for better performance:
-
-1. Rename your current `vite.config.js` to `vite.config.postcss.js`
-2. Rename `vite.config.lightning.js` to `vite.config.js`
-3. Restart your dev server
-
-Lightning CSS provides:
-
-- Faster CSS processing
-- Better browser compatibility
-- Smaller bundle sizes
-- Native CSS nesting and custom media queries
-
 ## Pre-commit Workflow
 
 Before committing code, run:
@@ -117,7 +101,6 @@ Add to your VS Code settings.json:
 ✅ ESLint configured and working
 ✅ Prettier configured and working  
 ✅ Stylelint configured and working
-✅ Lightning CSS ready as alternative
 ✅ All scripts working properly
 
 The setup is now complete and ready for development!

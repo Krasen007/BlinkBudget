@@ -168,7 +168,8 @@ const createCategoryContainer = () => {
   if (!document.getElementById('category-chip-scrollbar-hide')) {
     const styleEl = document.createElement('style');
     styleEl.id = 'category-chip-scrollbar-hide';
-    styleEl.textContent = '.category-chip-container::-webkit-scrollbar { display: none; }';
+    styleEl.textContent =
+      '.category-chip-container::-webkit-scrollbar { display: none; }';
     document.head.appendChild(styleEl);
   }
 
@@ -424,7 +425,7 @@ export const createCategorySelector = (options = {}) => {
                   const dateValue = dateSource.getDate
                     ? dateSource.getDate()
                     : dateSource.value ||
-                    new Date().toISOString().split('T')[0];
+                      new Date().toISOString().split('T')[0];
 
                   onSubmit({
                     amount: amountValidation.value,

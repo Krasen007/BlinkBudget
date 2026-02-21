@@ -254,8 +254,14 @@ export const TimePeriodSelector = (options = {}) => {
         arrow.style.alignItems = 'center';
         arrow.style.padding = `0 ${SPACING.SM}`;
         arrow.style.cursor = 'pointer';
-        arrow.style[direction === 'left' ? 'borderTopLeftRadius' : 'borderTopRightRadius'] = 'var(--radius-md)';
-        arrow.style[direction === 'left' ? 'borderBottomLeftRadius' : 'borderBottomRightRadius'] = 'var(--radius-md)';
+        arrow.style[
+          direction === 'left' ? 'borderTopLeftRadius' : 'borderTopRightRadius'
+        ] = 'var(--radius-md)';
+        arrow.style[
+          direction === 'left'
+            ? 'borderBottomLeftRadius'
+            : 'borderBottomRightRadius'
+        ] = 'var(--radius-md)';
         arrow.style.transition = 'background 0.2s ease';
         arrow.style.zIndex = '1';
         arrow.addEventListener('mouseenter', () => {
@@ -279,7 +285,10 @@ export const TimePeriodSelector = (options = {}) => {
       // Right arrow starts hidden (we start at offset -1 for month, 0 for year)
       const initialMonthOffset = period.key === 'lastMonth' ? -1 : 0;
       const initialYearOffset = period.key === 'year' ? 0 : 0;
-      updateRightArrowVisibility(rightArrow, period.key === 'lastMonth' ? initialMonthOffset : initialYearOffset);
+      updateRightArrowVisibility(
+        rightArrow,
+        period.key === 'lastMonth' ? initialMonthOffset : initialYearOffset
+      );
 
       // Left arrow click — go further back
       leftArrow.addEventListener('click', e => {
