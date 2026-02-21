@@ -10,6 +10,6 @@ update the changelog.txt file itself.
 
 5. Update @readme.md with the new features from the changelog.txt
 
-6. commit bump with message "bump version %VERSION%"
+6. WAIT for commit bump with message "bump version %VERSION%"
 
 7. WAIT for confirmation before you push all changes to remote repository
