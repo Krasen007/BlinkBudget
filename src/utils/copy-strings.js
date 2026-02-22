@@ -13,6 +13,7 @@ export const COPY_STRINGS = {
     tapToUse: 'tap to use',
     quickAmount: 'Quick amount',
     advancedOptions: 'Advanced Options',
+    notes: 'Notes (optional)',
   },
   reports: {
     dataStaysOnDevice: 'Your data stays on this device',

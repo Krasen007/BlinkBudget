@@ -241,7 +241,16 @@ export const TransactionForm = ({
       amountInput,
       externalDateInput,
       onSubmit: data => {
-        handleFormSubmit(data, onSubmit);
+        // Include note field in the data for Add mode
+        const completeData = {
+          ...data,
+          description: noteField
+            ? smartNoteField
+              ? smartNoteField.getNote()
+              : noteField.value
+            : '',
+        };
+        handleFormSubmit(completeData, onSubmit);
       },
     });
     // Add tutorial data attribute to classic category selector
