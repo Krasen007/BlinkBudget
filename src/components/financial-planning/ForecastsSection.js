@@ -215,9 +215,9 @@ function createForecastTable(incomeForecasts, expenseForecasts) {
     const row = [
       income.period
         ? income.period.toLocaleDateString('en-US', {
-          month: 'short',
-          year: 'numeric',
-        })
+            month: 'short',
+            year: 'numeric',
+          })
         : `Month ${i + 1}`,
       `€${income.predictedAmount.toFixed(2)}`,
       `€${expense.predictedAmount.toFixed(2)}`,

@@ -251,7 +251,7 @@ export const DataCleanupService = {
    */
   async getAllAccounts() {
     try {
-      const { AccountService } = await import('./account-service.js');
+      const { AccountService } = await import('./Account/account-service.js');
       return AccountService.getAccounts();
     } catch (error) {
       console.warn('Failed to get accounts:', error);
@@ -271,7 +271,7 @@ export const DataCleanupService = {
     };
 
     try {
-      const { AccountService } = await import('./account-service.js');
+      const { AccountService } = await import('./Account/account-service.js');
       const accounts = AccountService.getAccounts();
 
       for (const account of accounts) {

@@ -173,7 +173,7 @@ describe('AccountSection Component Display', () => {
   });
 
   it('shows "Other" when account.type is missing', async () => {
-    const accountModule = await import('../../src/core/account-service.js');
+    const accountModule = await import('../../src/core/Account/account-service.js');
     accountModule.AccountService.getAccounts.mockReturnValue([
       { id: 'a3', name: 'Mystery Account', balance: 0 },
     ]);

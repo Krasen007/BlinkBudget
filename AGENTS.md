@@ -44,7 +44,8 @@ The project is a web (browser) application, leveraging a modern, lightweight sta
 - **Routing**: Custom Hash-based Router
 - **Deployment**: Netlify + Firebase for Auth and Database.
 - **Data Persistence**: `localStorage` (via `StorageService`) for instant, offline-capable data storage. Also Firebase for cloud sync.
-- **System**: Use Windows and Powershell commands when developing locally on Windows for the terminal, DO NOT use Linux or UNIX tools and commands.
+- **System**: Use Windows and Powershell commands when developing locally on Windows for the terminal, DO NOT use Linux or UNIX tools and commands. (e.g. instead of cd "c:\Users\krase\repos\BlinkBudget" && npm test -- --reporter=verbose 2>&1 | head -50
+  head: The term 'head' is not recognized as a name of a cmdlet, function, script file, or executable program. Use PowerShell Select-Object -First 50)
 
 ### **Key Design Principles**
 

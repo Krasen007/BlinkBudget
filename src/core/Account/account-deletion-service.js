@@ -3,10 +3,10 @@
  * GDPR-compliant account deletion with data handling and audit logging
  */
 
-import { AuthService } from './auth-service.js';
-import { TransactionService } from './transaction-service.js';
-import { auditService, auditEvents } from './audit-service.js';
-import { auth } from './firebase-config.js';
+import { AuthService } from '../auth-service.js';
+import { TransactionService } from '../transaction-service.js';
+import { auditService, auditEvents } from '../audit-service.js';
+import { auth } from '../firebase-config.js';
 import { deleteUser } from 'firebase/auth';
 
 export class AccountDeletionService {
@@ -148,7 +148,7 @@ export class AccountDeletionService {
 
     try {
       const { EmergencyExportService } =
-        await import('./emergency-export-service.js');
+        await import('../emergency-export-service.js');
 
       // Create comprehensive export
       const exportResult = await EmergencyExportService.createEmergencyExport({
@@ -222,7 +222,7 @@ export class AccountDeletionService {
 
       // Delete goals
       try {
-        const { goalPlanner } = await import('./goal-planner.js');
+        const { goalPlanner } = await import('../goal-planner.js');
         const goals = goalPlanner.getAllGoals();
 
         for (const goal of goals) {
@@ -235,7 +235,7 @@ export class AccountDeletionService {
 
       // Delete investments
       try {
-        const { InvestmentTracker } = await import('./investment-tracker.js');
+        const { InvestmentTracker } = await import('../investment-tracker.js');
         const investments = InvestmentTracker.getAllInvestments();
 
         for (const investment of investments) {
@@ -248,7 +248,7 @@ export class AccountDeletionService {
 
       // Delete budgets
       try {
-        const { BudgetService } = await import('./budget-service.js');
+        const { BudgetService } = await import('../budget-service.js');
         const budgets = BudgetService.getAll();
 
         for (const budget of budgets) {
@@ -307,7 +307,7 @@ export class AccountDeletionService {
         );
 
         // Check if Firebase is available before attempting deletion
-        const { firebaseStatus } = await import('./firebase-config.js');
+        const { firebaseStatus } = await import('../firebase-config.js');
         if (!firebaseStatus.isInitialized || !firebaseStatus.canUseAuth) {
           console.warn(
             '[AccountDeletion] Firebase not available, skipping auth deletion'
@@ -491,7 +491,7 @@ export class AccountDeletionService {
 
       // Verify goals are deleted
       try {
-        const { goalPlanner } = await import('./goal-planner.js');
+        const { goalPlanner } = await import('../goal-planner.js');
         const remainingGoals = goalPlanner.getAllGoals();
         const userGoals = remainingGoals.filter(
           goal => !goal.userId || goal.userId === userId
@@ -506,7 +506,7 @@ export class AccountDeletionService {
 
       // Verify investments are deleted
       try {
-        const { InvestmentTracker } = await import('./investment-tracker.js');
+        const { InvestmentTracker } = await import('../investment-tracker.js');
         const remainingInvestments = InvestmentTracker.getAllInvestments();
         const userInvestments = remainingInvestments.filter(
           inv => !inv.userId || inv.userId === userId
@@ -523,7 +523,7 @@ export class AccountDeletionService {
 
       // Verify budgets are deleted
       try {
-        const { BudgetService } = await import('./budget-service.js');
+        const { BudgetService } = await import('../budget-service.js');
         const remainingBudgets = BudgetService.getAll();
         const userBudgets = remainingBudgets.filter(
           budget => !budget.userId || budget.userId === userId
@@ -691,19 +691,19 @@ export class AccountDeletionService {
       summary.accounts = accounts.length;
 
       // Count goals
-      const { goalPlanner } = await import('./goal-planner.js');
+      const { goalPlanner } = await import('../goal-planner.js');
       const goals = goalPlanner.getAllGoals();
       summary.goals = goals.length;
 
       // Count investments
-      const { InvestmentTracker } = await import('./investment-tracker.js');
+      const { InvestmentTracker } = await import('../investment-tracker.js');
       const investments = InvestmentTracker.getAllInvestments
         ? InvestmentTracker.getAllInvestments()
         : [];
       summary.investments = investments.length;
 
       // Count budgets
-      const { BudgetService } = await import('./budget-service.js');
+      const { BudgetService } = await import('../budget-service.js');
       const budgets = BudgetService.getAll();
       summary.budgets = budgets.length;
 

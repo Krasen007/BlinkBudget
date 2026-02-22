@@ -12,7 +12,6 @@ import {
   resetChartLoader,
   preloadChartJS,
 } from "../../src/core/chart-loader.js";
-import { MetricsService } from "../../src/core/analytics/MetricsService.js";
 
 describe("Chart.js Lazy Loading", () => {
   beforeEach(() => {
