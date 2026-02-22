@@ -34,6 +34,9 @@
 - **Multiple transaction types**: Expenses, Income, Transfers, Refunds
 - **Custom Category Management** - Create, edit, and manage your own expense categories for personalized tracking
 - **Category Reordering** - Organize your expense categories in the order that works best for you
+- **Smart Transaction Icons** - Visual indicators for different transaction types:
+  - **Refunds** shown with ↑ arrow (money coming back)
+  - **Transfers** shown with ⇆ arrow (money moving between accounts)
 - **Smart categorization** with visual category chips:
   - Food & Groceries, Dining & Coffee, Housing & Bills
   - Transportation, Leisure & Shopping, Personal Care

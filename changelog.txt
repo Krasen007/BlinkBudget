@@ -1,56 +1,19 @@
-# BlinkBudget v1.22 Changelog
+## v1.23 (2026-02-23)
 
-## 🚀 Performance & Animation Improvements
-- **Smoother animations**: Fixed CSS transition issues across the app for buttery-smooth UI animations
-- **Faster frame rendering**: Reduced frame time from 61ms to under 16ms for better performance
-- **Optimized chart rendering**: Improved Chart.js performance with disabled unnecessary animations
+### New Features
+- Quick Amount Presets - Added one-tap amount buttons for faster transaction entry
+- Enhanced Analytics - Advanced insights, category usage tracking, optimization suggestions, pattern recognition, comparative benchmarking, and predictive budget recommendations
 
-## 🎨 UI/UX Enhancements
-- **Transaction form overhaul**: Cleaner, more intuitive transaction input interface
-- **Mobile layout improvements**: Overview section now displays in 2 rows on mobile devices for better readability
-- **Consistent button styling**: Unified button sizes across all views for a more cohesive experience
-- **Navigation improvements**: Added right arrow indicators to "Last Month" and "This Year" buttons
-- **Financial Planning tabs**: Fixed tab layout issues in the financial planning view
+### Improvements
+- Lighthouse Performance Optimization - Complete performance optimization implementation
+- UI Fixes - Various UI improvements and icon updates
+- Notes/Description Fix - Fixed notes field to display properly in the app theme
+- Code Quality - Fixed multiple issues across security, performance, accessibility, and code quality
 
-## 🐛 Bug Fixes
-- **Reports view**: Fixed error when clicking on categories
-- **Account settings**: Resolved issues with account saving and renaming
-- **Transfer insights**: Fixed transfer display in financial insights
-- **Dashboard mobile**: Fixed layout issues on mobile devices
-- **Month filtering**: Fixed bug that was incorrectly saving the last month filter
-
-## 🔧 Technical Improvements
-- **PostCSS pipeline**: Complete plugin pipeline improvements for better CSS processing
-- **Font loading**: Added font caching and fallbacks for faster initial load
-- **Code cleanup**: Removed unnecessary files and styles for a lighter codebase
-- **Dependencies updated**: Updated npm packages, Node.js requirements, and ESLint 10 compatibility
-- **Focus styling**: Improved focus states in reports view for better accessibility
-
----
-
-**Full commit history:**
-- 70a37fc Animation/Transition Fixes
-- b7105e6 update agents
-- cf995b8 fix frame time 61ms → <16ms
-- 79da397 Complete Plugin Pipeline improvements with postcss
-- 82f2f2a disable animations for charts
-- 13f8131 fix bug in that was saving the last month
-- 63e8878 sort the UI of the transaction form finally!
-- 8d15adf fix overview section to be on 2 rows on mobile
-- 7052288 add Right → arrow on both "Last Month" and "This Year" buttons:
-- 9f98c2e unify button sizes between views
-- 0d24c58 fix tabs on finacial planning view
-- 7a96eaf remove unneded files
-- f3b62ff add font caching and fallbacks, more cleanup of unneded styles
-- 624785a cleanup of unneded files
-- 7a54d71 remove focus border in reports view
-- b29ee8a fix error when clicking on categories on reports view
-- 13bb9fe fix transfer in insights fin view
-- fcad68d fixes for account saving and rename
-- 1b276fe fix account section in settings
-- 8572ef7 fix accounts in settings and fix stylelint
-- a5f12c9 small fixes
-- f73eaf5 fix dashboard on mobile
-- d2ec42a update npm and node
-- 640de8e update dependencies, eslint 10 fixes, also optimize financial planning caching
-- f0f7a0f update shell commands
+### Technical
+- Removed CSP duplication and fixed caching conflicts
+- Improved keyboard accessibility and restored note field functionality
+- Added date validation, error handling, and type safety
+- Added rate limiting and privacy-preserving audit logging
+- Compressed images to save space
+- Updated agents and PRD documentation

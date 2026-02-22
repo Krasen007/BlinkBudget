@@ -1,7 +1,8 @@
 1. bump @package.json version with +0.1.0 (or to the next major version, e.g. 1.35 do not use 3 signs) reminder: +0.1 not +0.10!
-2. bump @gitlog.bat with +0.1
 
-3. run cd "c:\Users\krase\repos\BlinkBudget" && .\gitlog.bat
+2. run cd "c:\Users\krase\repos\BlinkBudget" && .\gitlog.bat
+
+3. bump @gitlog.bat with +0.1
 
 4. read @changelog.txt and update it for github changelog page, 
 summarize it in few notes but reword it so it's more easily understood, 
