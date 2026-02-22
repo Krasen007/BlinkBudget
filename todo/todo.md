@@ -27,3 +27,4 @@ DO NOT IMPLEMENT: use Ionic's Capacitor or Cordova to make android app
 [ ] add tests for Settings components (DateFormatSection, DataManagementSection, GeneralSection, BackupRestoreSection, AccountDeletionSection, SmartSuggestionsSection, AdvancedFilteringSection)
 [ ] consider removing googleapis for fonts
 [ ] investigate: data integrity check in settings is adding unexpected labels to categories - determine root cause and fix
+[ ] Add basic client-side security monitoring for failed login attempts and unusual data access patterns

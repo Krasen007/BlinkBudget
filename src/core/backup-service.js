@@ -11,7 +11,6 @@ import { SettingsService } from './settings-service.js';
 import { GoalPlanner } from './goal-planner.js';
 import { InvestmentTracker } from './investment-tracker.js';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { securityAuditLogger } from './security-audit-logger.js';
 
 export const BackupService = {
   init() {
@@ -242,27 +241,10 @@ export const BackupService = {
       );
       verificationResult.checks.consistency = consistencyCheck;
 
-      // Overall success if all critical checks pass
-      verificationResult.success =
-        integrityCheck.valid && completenessCheck.valid && freshnessCheck.valid;
-
-      // Log verification result
-      securityAuditLogger.logDataAccess('backup_verification', {
-        userId: targetUserId,
-        success: verificationResult.success,
-        backupDate: backupExists.data?.backupDate,
-        checks: verificationResult.checks,
-      });
-
       return verificationResult;
     } catch (error) {
-      verificationResult.errors.push(`Verification failed: ${error.message}`);
-      securityAuditLogger.logSecurityIncident('backup_verification_failure', {
-        userId: targetUserId,
-        error: error.message,
-        severity: 'medium',
-      });
-
+      console.error('Backup verification failed:', error);
+      verificationResult.errors.push(error.message);
       return verificationResult;
     }
   },

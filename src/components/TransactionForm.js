@@ -334,11 +334,11 @@ export const TransactionForm = ({
       icon: '⚙️',
     });
   } else {
-    // //TODO FIX:
     // // Classic Note Field
     // noteField = document.createElement('textarea');
     // noteField.className = 'form-input';
-    // noteField.placeholder = 'Notes (optional)';
+    // noteField.placeholder =
+    //   getCopyString('transaction.notes') || 'Notes (optional)';
     // noteField.value = initialValues.description || '';
     // noteField.style.minHeight = '80px';
     // noteField.style.resize = 'vertical';
@@ -457,7 +457,9 @@ export const TransactionForm = ({
         toAccountId: categorySelector.selectedToAccount(),
         externalDateInput,
         description: noteField
-          ? (smartNoteField ? smartNoteField.getNote() : noteField.value)
+          ? smartNoteField
+            ? smartNoteField.getNote()
+            : noteField.value
           : initialValues.description || '',
       });
 

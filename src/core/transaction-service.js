@@ -128,8 +128,15 @@ export const TransactionService = {
     analyticsEngine.invalidateCacheOnDataUpdate();
 
     // Record amount for quick presets (only for expenses)
-    if (sanitizedTransaction.type === 'expense' && sanitizedTransaction.amount > 0) {
-      analyticsEngine.recordAmountPreset(sanitizedTransaction.amount);
+    if (
+      sanitizedTransaction.type === 'expense' &&
+      sanitizedTransaction.amount > 0
+    ) {
+      try {
+        analyticsEngine.recordAmountPreset(sanitizedTransaction.amount);
+      } catch (error) {
+        console.warn('Failed to record amount preset:', error);
+      }
     }
 
     return sanitizedTransaction;

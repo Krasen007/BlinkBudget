@@ -2,9 +2,8 @@
  * BenchmarkingSection Tests
  * Placeholder test file - component not found
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it } from 'vitest';
+
 describe('BenchmarkingSection', () => {
-  it('should be implemented - component not found', () => {
-    expect(true).toBe(true);
-  });
+  it.todo('should be implemented - component not found');
 });

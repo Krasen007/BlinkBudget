@@ -9,7 +9,6 @@ import {
   sendPasswordResetEmail,
 } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { rateLimitService } from './rate-limit-service.js';
 import { auditService, auditEvents } from './audit-service.js';
 
 // Helper function to check if Firebase is available
@@ -21,6 +20,60 @@ const checkFirebaseAvailability = () => {
   }
   return { available: true };
 };
+
+// Simple in-memory rate limiter
+const rateLimitStore = new Map();
+
+function checkRateLimit(email, maxAttempts = 5, windowMs = 15 * 60 * 1000) {
+  const now = Date.now();
+  const key = email.toLowerCase().trim();
+  const record = rateLimitStore.get(key);
+
+  if (!record) {
+    rateLimitStore.set(key, { attempts: 1, firstAttempt: now });
+    return { allowed: true };
+  }
+
+  if (now - record.firstAttempt > windowMs) {
+    // Reset window
+    rateLimitStore.set(key, { attempts: 1, firstAttempt: now });
+    return { allowed: true };
+  }
+
+  if (record.attempts >= maxAttempts) {
+    return {
+      allowed: false,
+      error: 'Too many attempts. Please try again later.',
+    };
+  }
+
+  record.attempts++;
+  return { allowed: true };
+}
+
+function clearRateLimit(email) {
+  const key = email.toLowerCase().trim();
+  rateLimitStore.delete(key);
+}
+
+// Privacy-preserving email normalizer for audit logs
+function normalizeForAudit(email) {
+  if (!email || typeof email !== 'string') {
+    return 'unknown';
+  }
+
+  const parts = email.split('@');
+  if (parts.length !== 2) {
+    return 'invalid';
+  }
+
+  const [local, domain] = parts;
+  if (local.length <= 2) {
+    return `${local[0]}***@${domain}`;
+  }
+
+  return `${local[0]}${local[1]}***@${domain}`;
+}
 
 export const AuthService = {
   user: null,
@@ -92,25 +145,24 @@ export const AuthService = {
     }
 
     try {
-      // Check rate limit before attempting login
-      const rateLimitStatus = rateLimitService.checkRateLimit(email);
+      // Check rate limit
+      const rateLimitStatus = checkRateLimit(email);
       if (!rateLimitStatus.allowed) {
-        auditService.log(
-          auditEvents.RATE_LIMIT_EXCEEDED,
-          {
-            email,
-            remainingTime: rateLimitStatus.remainingTime,
-          },
-          null,
-          'high'
-        );
-
         return {
-          user: null,
+          success: false,
           error: rateLimitStatus.error,
-          rateLimitInfo: rateLimitService.getRateLimitInfo(email),
         };
       }
+
+      // Log login attempt
+      auditService.log(
+        auditEvents.LOGIN_ATTEMPT,
+        {
+          email: normalizeForAudit(email),
+        },
+        null,
+        'high'
+      );
 
       const userCredential = await signInWithEmailAndPassword(
         auth,
@@ -121,36 +173,32 @@ export const AuthService = {
       this.user = Object.freeze({ ...userCredential.user });
       localStorage.setItem('auth_hint', 'true');
 
-      // Clear rate limit on successful login
-      rateLimitService.recordSuccessfulAttempt(email);
-
       // Log successful login
       auditService.log(
         auditEvents.LOGIN_SUCCESS,
         {
-          email,
+          email: normalizeForAudit(email),
           method: 'email_password',
         },
         this.user.uid,
         'low'
       );
 
+      // Clear rate limit on successful login
+      clearRateLimit(email);
+
       // Update profile in background
       this._updateUserProfile(this.user).catch(console.warn);
 
       return { user: this.user, error: null };
     } catch (error) {
-      // Record failed attempt for rate limiting
-      rateLimitService.recordFailedAttempt(email);
-
       // Log failed login with full error details for debugging
       auditService.log(
         auditEvents.LOGIN_FAILURE,
         {
-          email,
-          method: 'email_password',
-          errorCode: error.code,
-          errorMessage: error.message,
+          email: normalizeForAudit(email),
+          error: error.message,
+          code: error.code,
         },
         null,
         'medium'
@@ -178,7 +226,6 @@ export const AuthService = {
       return {
         user: null,
         error: message,
-        rateLimitInfo: rateLimitService.getRateLimitInfo(email),
       };
     }
   },
@@ -195,25 +242,15 @@ export const AuthService = {
     }
 
     try {
-      // Check rate limit before attempting signup
-      const rateLimitStatus = rateLimitService.checkRateLimit(email);
-      if (!rateLimitStatus.allowed) {
-        auditService.log(
-          auditEvents.RATE_LIMIT_EXCEEDED,
-          {
-            email,
-            remainingTime: rateLimitStatus.remainingTime,
-          },
-          null,
-          'high'
-        );
-
-        return {
-          user: null,
-          error: rateLimitStatus.error,
-          rateLimitInfo: rateLimitService.getRateLimitInfo(email),
-        };
-      }
+      // Log signup attempt
+      auditService.log(
+        auditEvents.SIGNUP_ATTEMPT,
+        {
+          email: normalizeForAudit(email),
+        },
+        null,
+        'high'
+      );
 
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -223,9 +260,6 @@ export const AuthService = {
       // Make user object read-only to prevent manipulation
       this.user = Object.freeze({ ...userCredential.user });
       localStorage.setItem('auth_hint', 'true');
-
-      // Clear rate limit on successful signup
-      rateLimitService.recordSuccessfulAttempt(email);
 
       // Log successful signup
       auditService.log(
@@ -243,17 +277,13 @@ export const AuthService = {
 
       return { user: this.user, error: null };
     } catch (error) {
-      // Record failed attempt for rate limiting
-      rateLimitService.recordFailedAttempt(email);
-
       // Log failed signup with full error details for debugging
       auditService.log(
         auditEvents.SIGNUP_FAILURE,
         {
           email,
-          method: 'email_password',
-          errorCode: error.code,
-          errorMessage: error.message,
+          error: error.message,
+          code: error.code,
         },
         null,
         'medium'
@@ -281,7 +311,6 @@ export const AuthService = {
       return {
         user: null,
         error: message,
-        rateLimitInfo: rateLimitService.getRateLimitInfo(email),
       };
     }
   },
@@ -399,54 +428,37 @@ export const AuthService = {
     }
 
     try {
-      // Check rate limit before attempting password reset
-      const rateLimitStatus = rateLimitService.checkRateLimit(email);
-      if (!rateLimitStatus.allowed) {
-        auditService.log(
-          auditEvents.RATE_LIMIT_EXCEEDED,
-          {
-            email,
-            remainingTime: rateLimitStatus.remainingTime,
-            action: 'password_reset',
-          },
-          null,
-          'high'
-        );
-
-        return {
-          error: rateLimitStatus.error,
-          rateLimitInfo: rateLimitService.getRateLimitInfo(email),
-        };
-      }
-
-      await sendPasswordResetEmail(auth, email);
-
-      // Clear rate limit on successful password reset request
-      rateLimitService.recordSuccessfulAttempt(email);
-
-      // Log password reset request
+      // Log password reset attempt
       auditService.log(
-        auditEvents.PASSWORD_RESET_REQUEST,
+        auditEvents.PASSWORD_RESET_ATTEMPT,
         {
-          email,
+          email: normalizeForAudit(email),
         },
         null,
         'medium'
       );
 
-      return { error: null };
-    } catch (error) {
-      // Record failed attempt for rate limiting
-      rateLimitService.recordFailedAttempt(email);
+      await sendPasswordResetEmail(auth, email);
 
-      // Log password reset failure with full details for debugging
+      // Log successful password reset request
       auditService.log(
-        auditEvents.PASSWORD_RESET_REQUEST,
+        auditEvents.PASSWORD_RESET_SUCCESS,
         {
           email,
-          errorCode: error.code,
-          errorMessage: error.message,
-          failed: true,
+        },
+        null,
+        'low'
+      );
+
+      return { error: null };
+    } catch (error) {
+      // Log password reset failure with full details
+      auditService.log(
+        auditEvents.PASSWORD_RESET_FAILURE,
+        {
+          email,
+          error: error.message,
+          code: error.code,
         },
         null,
         'medium'
@@ -471,7 +483,6 @@ export const AuthService = {
 
       return {
         error: message,
-        rateLimitInfo: rateLimitService.getRateLimitInfo(email),
       };
     }
   },

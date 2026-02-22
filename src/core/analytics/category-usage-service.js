@@ -169,6 +169,15 @@ export const CategoryUsageService = {
       const amount = Math.abs(transaction.amount || 0);
       const date = transaction.date || transaction.timestamp;
 
+      // Validate date
+      if (!date) {
+        return;
+      }
+      const dateObj = new Date(date);
+      if (isNaN(dateObj.getTime())) {
+        return;
+      }
+
       if (!data.categories[category]) {
         data.categories[category] = {
           transactionCount: 0,

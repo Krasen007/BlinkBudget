@@ -21,7 +21,10 @@ export const ExpandableSection = ({
       }
     } catch (error) {
       // Silently ignore localStorage read errors, use default value
-      console.warn(`[ExpandableSection] Failed to read localStorage key "${storageKey}":`, error);
+      console.warn(
+        `[ExpandableSection] Failed to read localStorage key "${storageKey}":`,
+        error
+      );
     }
   }
 
@@ -57,11 +60,12 @@ export const ExpandableSection = ({
   toggle.style.textAlign = 'left';
   toggle.style.transition =
     'background-color var(--transition-fast), border-color var(--transition-fast)';
-  toggle.style.outline = 'none';
+  toggle.style.outline = '2px solid Highlight';
 
   toggle.addEventListener('focus', () => {
     toggle.style.boxShadow = 'var(--focus-shadow-strong)';
     toggle.style.borderColor = 'var(--focus-color)';
+    toggle.style.outline = '2px solid Highlight';
   });
   toggle.addEventListener('blur', () => {
     toggle.style.boxShadow = 'none';
@@ -141,7 +145,10 @@ export const ExpandableSection = ({
       try {
         localStorage.setItem(storageKey, expanded.toString());
       } catch (error) {
-        console.error(`[ExpandableSection] Failed to write localStorage key "${storageKey}":`, error);
+        console.error(
+          `[ExpandableSection] Failed to write localStorage key "${storageKey}":`,
+          error
+        );
         // Continue without saving - UI still works
       }
     }

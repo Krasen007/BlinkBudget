@@ -72,7 +72,6 @@ export const DashboardView = () => {
   accountSelect.id = 'account-filter-select';
   accountSelect.name = 'account-filter';
   accountSelect.className = 'view-select';
-  accountSelect.setAttribute('aria-label', 'Filter transactions by account');
   accountSelect.style.marginTop = SPACING.SM;
   accountSelect.style.width = '100%';
 

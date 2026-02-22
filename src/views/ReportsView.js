@@ -9,7 +9,6 @@
 
 import { getAnalyticsEngine } from '../core/analytics/AnalyticsInstance.js';
 import { ChartRenderer } from '../components/ChartRenderer.js';
-import { ProgressiveDataLoader } from '../core/progressive-data-loader.js';
 import { preloadChartJS } from '../core/chart-loader.js';
 import { TimePeriodSelector } from '../components/TimePeriodSelector.js';
 import { TransactionService } from '../core/transaction-service.js';
@@ -41,7 +40,6 @@ import {
 
 import {
   createLoadingState,
-  updateLoadingProgress,
   createEmptyState,
   showEmptyState,
   createErrorState,
@@ -119,7 +117,6 @@ export const ReportsView = () => {
   // Initialize services
   const analyticsEngine = getAnalyticsEngine();
   const chartRenderer = new ChartRenderer();
-  const progressiveLoader = new ProgressiveDataLoader();
 
   // Browser compatibility checks
   const browserSupport = checkBrowserSupport();
@@ -415,30 +412,54 @@ export const ReportsView = () => {
 
       let analyticsData;
       try {
-        analyticsData = await progressiveLoader.loadTransactionData(
+        // Use analytics engine directly
+        analyticsData = {
           transactions,
-          currentTimePeriod,
-          {
-            onProgress: (progress, message) => {
-              updateLoadingProgress(loadingState, progress, message);
-            },
-            onChunkProcessed: () => {
-              // Chunk processed callback - currently unused
-            },
-            prioritizeCategories: true,
-            enableCaching: !currentAdvancedFilters, // Disable caching if advanced filters are active
-          }
-        );
+          timePeriod: currentTimePeriod,
+          insights: analyticsEngine.generateSpendingInsights(
+            transactions,
+            currentTimePeriod
+          ),
+          categoryBreakdown: analyticsEngine.calculateCategoryBreakdown(
+            transactions,
+            currentTimePeriod
+          ),
+          incomeVsExpenses: analyticsEngine.calculateIncomeVsExpenses(
+            transactions,
+            currentTimePeriod
+          ),
+          costOfLiving: analyticsEngine.calculateCostOfLiving(
+            transactions,
+            currentTimePeriod
+          ),
+        };
       } catch (analyticsError) {
         console.error('Progressive data loading error:', analyticsError);
 
         console.warn('[ReportsView] Attempting fallback strategies...');
 
         try {
-          analyticsData = progressiveLoader.processDataDirectly(
+          // Fallback: process data directly
+          analyticsData = {
             transactions,
-            currentTimePeriod
-          );
+            timePeriod: currentTimePeriod,
+            insights: analyticsEngine.generateSpendingInsights(
+              transactions,
+              currentTimePeriod
+            ),
+            categoryBreakdown: analyticsEngine.calculateCategoryBreakdown(
+              transactions,
+              currentTimePeriod
+            ),
+            incomeVsExpenses: analyticsEngine.calculateIncomeVsExpenses(
+              transactions,
+              currentTimePeriod
+            ),
+            costOfLiving: analyticsEngine.calculateCostOfLiving(
+              transactions,
+              currentTimePeriod
+            ),
+          };
         } catch (directProcessingError) {
           console.error(
             'Direct processing fallback failed:',
@@ -1062,9 +1083,7 @@ export const ReportsView = () => {
     });
     activeCharts.clear();
 
-    if (progressiveLoader.isCurrentlyLoading()) {
-      progressiveLoader.cancelLoading();
-    }
+    // No progressive loader to cancel
   }
 
   /**

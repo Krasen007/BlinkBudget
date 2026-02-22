@@ -61,6 +61,15 @@ export function getCopyString(path, params = {}) {
       return params[paramKey] !== undefined ? params[paramKey] : match;
     });
   }
+
+  // Enforce returning only strings
+  if (typeof value !== 'string') {
+    console.warn(
+      `Copy string resolved to non-string type ${typeof value} for path: ${path}`
+    );
+    return path;
+  }
+
   return value;
 }
 

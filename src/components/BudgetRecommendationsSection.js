@@ -29,9 +29,6 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
   description.style.margin = '0 0 var(--spacing-md) 0';
   container.appendChild(description);
 
-  // Debug log
-  console.log('[BudgetRecommendationsSection] Received data:', recommendations);
-
   // Handle both array and object input
   let recs = recommendations;
   if (
