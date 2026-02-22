@@ -337,3 +337,101 @@ select.input-select:focus {
     display: none !important;
   }
 }
+
+/* Quick Amount Presets - Feature 3.4.1 */
+.quick-amount-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-sm) 0;
+}
+
+.quick-amount-presets-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: var(--spacing-xs);
+}
+
+.quick-amount-presets-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.quick-amount-presets-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  opacity: 0.7;
+}
+
+.quick-amount-preset-btn {
+  min-width: 60px;
+  min-height: 44px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  font-family: var(--font-body);
+  color: var(--color-primary);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.quick-amount-preset-btn:hover,
+.quick-amount-preset-btn:focus {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-primary);
+}
+
+.quick-amount-preset-btn:focus {
+  box-shadow: var(--focus-shadow-strong);
+}
+
+.quick-amount-preset-btn:active {
+  transform: scale(0.96);
+}
+
+/* Anti-Deterrent Micro-copy */
+.anti-deterrent-copy {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+}
+
+.anti-deterrent-copy span {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+@media (width <= 480px) {
+  .quick-amount-presets {
+    gap: var(--spacing-xs);
+  }
+
+  .quick-amount-preset-btn {
+    min-width: 50px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-sm);
+  }
+
+  .anti-deterrent-copy {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    align-items: center;
+  }
+}

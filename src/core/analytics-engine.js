@@ -1,3 +1,6 @@
+import { optimizationEngine } from './analytics/optimization-engine.js';
+import { trendAnalysisService } from './analytics/trend-analysis-service.js';
+import { budgetRecommendationService } from './analytics/BudgetRecommendationService.js';
 /**
  * Analytics Engine for BlinkBudget Reports & Insights
  *
@@ -14,6 +17,8 @@ import { AnomalyService } from './analytics/AnomalyService.js';
 import { AnalyticsCache } from './analytics/AnalyticsCache.js';
 import { PredictionService } from './analytics/PredictionService.js';
 import { ComparisonService } from './analytics/ComparisonService.js';
+import { CategoryUsageService } from './analytics/category-usage-service.js';
+import { AmountPresetService } from './amount-preset-service.js';
 import { PatternAnalyzer } from './analytics/pattern-analyzer.js';
 
 export class AnalyticsEngine {
@@ -350,6 +355,82 @@ export class AnalyticsEngine {
     return result;
   }
 
+  // ========== Quick Amount Presets (Feature 3.4.1) ==========
+
+  /**
+   * Get the current top 4 amount presets
+   * @returns {Array} Array of preset amounts sorted by frequency
+   */
+  getAmountPresets() {
+    return AmountPresetService.getPresets();
+  }
+
+  /**
+   * Record an amount usage when a transaction is submitted
+   * @param {number} amount - The transaction amount to record
+   */
+  recordAmountPreset(amount) {
+    AmountPresetService.recordAmount(amount);
+  }
+
+  /**
+   * Recalculate presets from transaction history
+   * @returns {Array} Updated presets array
+   */
+  calculateAmountPresets() {
+    return AmountPresetService.calculatePresets();
+  }
+
+  /**
+   * Clear all amount presets
+   */
+  resetAmountPresets() {
+    AmountPresetService.resetPresets();
+  }
+
+  // ========== Category Usage Analytics (Feature 3.2.2) ==========
+
+  /**
+   * Get usage statistics for all categories
+   * @returns {Object} Category usage statistics
+   */
+  getCategoryUsageStats() {
+    return CategoryUsageService.getCategoryUsageStats();
+  }
+
+  /**
+   * Get top N most frequently used categories
+   * @param {number} limit - Number of categories to return
+   * @returns {Array} Top categories by frequency
+   */
+  getMostFrequentCategories(limit = 5) {
+    return CategoryUsageService.getMostFrequentCategories(limit);
+  }
+
+  /**
+   * Get trend data for a specific category
+   * @param {string} categoryId - Category name/ID
+   * @returns {Object} Category trend data
+   */
+  getCategoryTrends(categoryId) {
+    return CategoryUsageService.getCategoryTrends(categoryId);
+  }
+
+  /**
+   * Update category usage from transactions
+   * @param {Array} transactions - Array of transactions to process
+   */
+  updateCategoryUsage(transactions) {
+    CategoryUsageService.updateFromTransactions(transactions);
+  }
+
+  /**
+   * Clear category usage data
+   */
+  resetCategoryUsage() {
+    CategoryUsageService.resetUsageData();
+  }
+
   // Cache management (proxied to AnalyticsCache)
   clearCache() {
     this.memoizedCalculations.clear();
@@ -369,4 +450,168 @@ export class AnalyticsEngine {
 
   // Legacy/Internal methods - mostly proxied if still needed by other services
   // but many are now static in their respective services.
+
+  // ========== Optimization Engine (Feature 3.3.1) ==========
+
+  /**
+   * Generate optimization insights
+   * @param {Array} transactions - Transaction data
+   * @param {Object} timePeriod - Time period
+   * @returns {Array} Optimization insights
+   */
+  getOptimizationInsights(transactions, timePeriod) {
+    return optimizationEngine.getOptimizationInsights(transactions, timePeriod);
+  }
+
+  /**
+   * Get total savings potential
+   * @param {Array} transactions - Transaction data
+   * @param {Object} timePeriod - Time period
+   * @returns {Object} Savings potential breakdown
+   */
+  getSavingsPotential(transactions, timePeriod) {
+    return optimizationEngine.getSavingsPotential(transactions, timePeriod);
+  }
+
+  /**
+   * Get alternative suggestions for a category
+   * @param {string} categoryId - Category name
+   * @param {Array} transactions - Transaction data
+   * @param {Object} timePeriod - Time period
+   * @returns {Array} Alternative suggestions
+   */
+  getAlternativeSuggestions(categoryId, transactions, timePeriod) {
+    return optimizationEngine.getAlternativeSuggestions(
+      categoryId,
+      transactions,
+      timePeriod
+    );
+  }
+
+  /**
+   * Dismiss an optimization insight
+   * @param {string} insightId - Insight ID
+   */
+  dismissOptimizationInsight(insightId) {
+    optimizationEngine.dismissInsight(insightId);
+  }
+
+  /**
+   * Get optimization stats
+   * @returns {Object} Optimization statistics
+   */
+  getOptimizationStats() {
+    return optimizationEngine.getStats();
+  }
+
+  // ========== Trend Analysis Service (Feature 3.3.2) ==========
+
+  /**
+   * Get trend analysis for categories
+   * @param {string|null} categoryId - Category to analyze
+   * @param {Array} transactions - Transaction data
+   * @returns {Object} Trend analysis results
+   */
+  getTrendAnalysis(categoryId, transactions) {
+    return trendAnalysisService.getTrendAnalysis(categoryId, transactions);
+  }
+
+  /**
+   * Get consistency scores
+   * @param {Array} transactions - Transaction data
+   * @returns {Object} Consistency scores
+   */
+  getConsistencyScores(transactions) {
+    return trendAnalysisService.getConsistencyScores(transactions);
+  }
+
+  /**
+   * Detect seasonal patterns
+   * @param {string} categoryId - Category to analyze
+   * @param {Array} transactions - Transaction data
+   * @returns {Object} Seasonal pattern data
+   */
+  detectSeasonalPatterns(categoryId, transactions) {
+    return trendAnalysisService.detectSeasonalPatterns(
+      categoryId,
+      transactions
+    );
+  }
+
+  /**
+   * Get spending direction
+   * @param {string} categoryId - Category to analyze
+   * @param {Array} transactions - Transaction data
+   * @returns {Object} Spending direction
+   */
+  getSpendingDirection(categoryId, transactions) {
+    return trendAnalysisService.getSpendingDirection(categoryId, transactions);
+  }
+
+  // ========== Budget Recommendation Service (Feature 3.3.3 & 3.3.4) ==========
+
+  /**
+   * Get personal benchmarking data - compare current vs historical spending
+   * @param {Array} transactions - Transaction data
+   * @param {Object} timePeriod - Time period
+   * @returns {Array} Benchmarking data
+   */
+  getPersonalBenchmarking(transactions, timePeriod) {
+    return budgetRecommendationService.getPersonalBenchmarking(
+      transactions,
+      timePeriod
+    );
+  }
+
+  /**
+   * Get percentile rankings for categories
+   * @param {Array} transactions - Transaction data
+   * @param {Object} timePeriod - Time period
+   * @returns {Array} Percentile rankings
+   */
+  getPercentileRankings(transactions, timePeriod) {
+    return budgetRecommendationService.getPercentileRankings(
+      transactions,
+      timePeriod
+    );
+  }
+
+  /**
+   * Get budget recommendations based on historical spending
+   * @param {Array} transactions - Transaction data
+   * @param {Object} timePeriod - Time period
+   * @returns {Array} Budget recommendations
+   */
+  getBudgetRecommendations(transactions, timePeriod) {
+    return budgetRecommendationService.getBudgetRecommendations(
+      transactions,
+      timePeriod
+    );
+  }
+
+  /**
+   * Get recommended amount for a specific category
+   * @param {string} categoryId - Category name
+   * @param {Array} transactions - Transaction data
+   * @returns {Object} Recommended amount
+   */
+  getRecommendedAmount(categoryId, transactions) {
+    return budgetRecommendationService.getRecommendedAmount(
+      categoryId,
+      transactions
+    );
+  }
+
+  /**
+   * Get seasonal adjustments for categories
+   * @param {string} categoryId - Category name
+   * @param {Array} transactions - Transaction data
+   * @returns {Object} Seasonal adjustments
+   */
+  getSeasonalAdjustments(categoryId, transactions) {
+    return budgetRecommendationService.getSeasonalAdjustments(
+      categoryId,
+      transactions
+    );
+  }
 }

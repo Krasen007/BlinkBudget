@@ -63,6 +63,8 @@ import { InsightsSection } from '../components/InsightsSection.js';
 import { PatternInsights } from '../components/PatternInsights.js';
 import { BudgetSummaryCard } from '../components/BudgetSummaryCard.js';
 import { BudgetPlanner } from '../core/budget-planner.js';
+import { BenchmarkingSection } from '../components/BenchmarkingSection.js';
+import { BudgetRecommendationsSection } from '../components/BudgetRecommendationsSection.js';
 
 export const ReportsView = () => {
   const container = document.createElement('div');
@@ -709,6 +711,12 @@ export const ReportsView = () => {
       // Category Trends
       await renderCategoryTrends(chartsSection, chartRenderResults);
 
+      // Personal Benchmarking - Feature 3.3.3 Comparative Analytics
+      renderBenchmarkingSection(chartsSection, chartRenderResults);
+
+      // Budget Recommendations - Feature 3.3.4 Predictive Budget
+      renderBudgetRecommendationsSection(chartsSection, chartRenderResults);
+
       chartContainer.appendChild(chartsSection);
 
       const failedCharts = chartRenderResults.filter(result => !result.success);
@@ -917,6 +925,99 @@ export const ReportsView = () => {
           error: insightsError,
         });
       }
+    }
+  }
+
+  /**
+   * Render benchmarking section - Feature 3.3.3 Comparative Analytics
+   */
+  function renderBenchmarkingSection(chartsSection, chartRenderResults) {
+    try {
+      const benchmarkingData = analyticsEngine.getPersonalBenchmarking
+        ? analyticsEngine.getPersonalBenchmarking(
+            currentData.transactions,
+            currentTimePeriod
+          )
+        : null;
+
+      if (benchmarkingData && benchmarkingData.length > 0) {
+        const benchmarkingSection = BenchmarkingSection(
+          benchmarkingData,
+          currentTimePeriod
+        );
+        benchmarkingSection.style.setProperty(
+          'margin-top',
+          'var(--spacing-md)',
+          'important'
+        );
+        chartsSection.appendChild(benchmarkingSection);
+        chartRenderResults.push({
+          name: 'Personal Benchmarking',
+          success: true,
+        });
+      } else {
+        chartRenderResults.push({
+          name: 'Personal Benchmarking',
+          success: true,
+        });
+      }
+    } catch (benchmarkingError) {
+      console.warn(
+        '[ReportsView] Failed to render benchmarking section:',
+        benchmarkingError
+      );
+      chartRenderResults.push({
+        name: 'Personal Benchmarking',
+        success: false,
+        error: benchmarkingError,
+      });
+    }
+  }
+
+  /**
+   * Render budget recommendations section - Feature 3.3.4 Predictive Budget
+   */
+  function renderBudgetRecommendationsSection(
+    chartsSection,
+    chartRenderResults
+  ) {
+    try {
+      const recommendationsData = analyticsEngine.getBudgetRecommendations
+        ? analyticsEngine.getBudgetRecommendations(
+            currentData.transactions,
+            currentTimePeriod
+          )
+        : null;
+
+      if (recommendationsData && recommendationsData.length > 0) {
+        const recommendationsSection =
+          BudgetRecommendationsSection(recommendationsData);
+        recommendationsSection.style.setProperty(
+          'margin-top',
+          'var(--spacing-md)',
+          'important'
+        );
+        chartsSection.appendChild(recommendationsSection);
+        chartRenderResults.push({
+          name: 'Budget Recommendations',
+          success: true,
+        });
+      } else {
+        chartRenderResults.push({
+          name: 'Budget Recommendations',
+          success: true,
+        });
+      }
+    } catch (recommendationsError) {
+      console.warn(
+        '[ReportsView] Failed to render budget recommendations section:',
+        recommendationsError
+      );
+      chartRenderResults.push({
+        name: 'Budget Recommendations',
+        success: false,
+        error: recommendationsError,
+      });
     }
   }
 

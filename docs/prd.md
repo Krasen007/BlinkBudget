@@ -145,7 +145,7 @@ The success of BlinkBudget will be unequivocally measured by its ability to prov
 
 BlinkBudget is implemented as a modern web application leveraging a "closer to the metal" approach for maximum performance.
 
-- **Frontend Framework**: **Vanilla JavaScript (ES Modules)** - Chosen for zero dependencies, maximum performance, and direct web API access. Avoids framework overhead while maintaining modern development practices.
+- **Frontend Framework**: **Vanilla JavaScript (ES Modules)** - Chosen for minimal framework overhead, maximum performance, and direct web API access. Avoids heavy UI framework dependencies while leveraging targeted libraries for specific capabilities (charting, cloud sync).
 - **Build Tool**: **Vite** - Provides fast development server, optimized production builds, and excellent PostCSS integration for advanced styling.
 - **Data Storage**: **LocalStorage with Firebase sync** - Local-first approach using localStorage for instant access and offline capability, with optional Firebase cloud sync for data backup and cross-device access.
 - **Data Backup/Export**: **Emergency Export Service** - Comprehensive export system supporting CSV and JSON formats with privacy controls, background processing, and progress tracking.

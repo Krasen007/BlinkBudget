@@ -1,3 +1,4 @@
+// Phase 2 changes:
 /**
  * TransactionForm Component
  * Refactored to use extracted utilities - now ~180 lines (down from 724)
@@ -15,6 +16,9 @@ import { setupFormKeyboardHandling } from '../utils/form-utils/keyboard.js';
 import { SmartAmountInput } from './SmartAmountInput.js';
 import { SmartCategorySelector } from './SmartCategorySelector.js';
 import { SmartNoteField } from './SmartNoteField.js';
+import { QuickAmountPresets } from './QuickAmountPresets.js';
+import { getCopyString } from '../utils/copy-strings.js';
+import { ExpandableSection } from '../components/ExpandableSection.js';
 import { initializeCategoryIconsCSS } from '../utils/category-icons.js';
 import {
   validateAmount,
@@ -176,6 +180,22 @@ export const TransactionForm = ({
     amountInput.setAttribute('data-tutorial-target', 'amount-input');
   }
 
+  // 4.5 Quick Amount Presets (Feature 3.4.1)
+  const quickAmountPresets = QuickAmountPresets({
+    onPresetSelect: amount => {
+      // Fill the amount field when preset is selected
+      if (smartAmountInput) {
+        smartAmountInput.setAmount(amount.toString());
+      } else {
+        amountInput.value = amount.toString();
+      }
+      // Focus the amount input
+      amountInput.focus();
+    },
+  });
+  quickAmountPresets.style.marginTop = 'var(--spacing-xs)';
+  quickAmountPresets.style.marginBottom = 'var(--spacing-xs)';
+
   // 5. Amount and Account Row
   const amountAccountRow = document.createElement('div');
   amountAccountRow.style.display = 'flex';
@@ -299,8 +319,8 @@ export const TransactionForm = ({
     );
   });
 
-  // 7. Note Field (Smart or Classic based on setting)
-  let noteField = null;
+  // 7. Note Field (Smart or Classic based on setting) - Wrapped in ExpandableSection for progressive disclosure
+  let expandableNoteSection = null;
 
   if (smartSuggestionsEnabled) {
     // Smart Note Field
@@ -316,13 +336,44 @@ export const TransactionForm = ({
       amount: smartAmountInput.getAmount(),
       initialValue: initialValues.description || '',
     });
-    noteField = smartNoteField;
     // Add touch target classes
     smartNoteField.classList.add('touch-target-secondary');
+
+    // Wrap in ExpandableSection for progressive disclosure
+    expandableNoteSection = ExpandableSection({
+      title: getCopyString('transaction.advancedOptions') || 'Advanced Options',
+      defaultExpanded: false,
+      storageKey: 'transaction-note-expanded',
+      content: smartNoteField,
+      icon: '⚙️',
+    });
   }
 
   // 7. Layout Assembly
   form.appendChild(amountAccountRow);
+
+  // Add Quick Amount Presets after amount input (Feature 3.4.1)
+  form.appendChild(quickAmountPresets);
+
+  // Anti-Deterrent Design - Feature 3.5.1
+  const antiDeterrentContainer = document.createElement('div');
+  antiDeterrentContainer.className = 'anti-deterrent';
+  antiDeterrentContainer.style.display = 'flex';
+  antiDeterrentContainer.style.gap = 'var(--spacing-md)';
+  antiDeterrentContainer.style.justifyContent = 'center';
+  antiDeterrentContainer.style.marginTop = 'var(--spacing-xs)';
+  antiDeterrentContainer.style.fontSize = 'var(--font-size-sm)';
+  antiDeterrentContainer.style.color = 'var(--color-text-muted)';
+
+  // Add anti-deterrent micro-copy
+  const quickText = document.createElement('span');
+  quickText.textContent = getCopyString('transaction.takesOnlyThreeSeconds');
+  const savedText = document.createElement('span');
+  savedText.textContent = getCopyString('transaction.savedAutomatically');
+  antiDeterrentContainer.appendChild(quickText);
+  antiDeterrentContainer.appendChild(savedText);
+
+  form.appendChild(antiDeterrentContainer);
 
   // Category Label
   const catLabelId = 'category-selector-label';
@@ -337,15 +388,9 @@ export const TransactionForm = ({
   // Type Toggle (Label handled by fieldset/legend in utility later)
   form.appendChild(typeToggle.container);
 
-  if (noteField) {
-    // Note Label
-    const noteLabel = document.createElement('label');
-    noteLabel.textContent = 'Notes';
-    noteLabel.setAttribute('for', 'note-field-input');
-    noteLabel.className = 'visually-hidden';
-    form.appendChild(noteLabel);
-    noteField.id = 'note-field-input';
-    form.appendChild(noteField);
+  // Add ExpandableSection with note field (if enabled)
+  if (expandableNoteSection) {
+    form.appendChild(expandableNoteSection.container);
   }
 
   // 7.5. Cancel Button (for Add mode)
@@ -429,8 +474,8 @@ export const TransactionForm = ({
         accountId: currentAccountId,
         toAccountId: categorySelector.selectedToAccount(),
         externalDateInput,
-        description: noteField
-          ? noteField.getNote()
+        description: smartNoteField
+          ? smartNoteField.getNote()
           : initialValues.description || '',
       });
 
