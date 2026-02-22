@@ -12,7 +12,7 @@ import {
 import { createButton } from '../utils/dom-factory.js';
 import { markTransactionForHighlight } from '../utils/success-feedback.js';
 
-export const AddView = ({ accountId } = {}) => {
+export const AddView = ({ accountId, amount } = {}) => {
   // Start tracking the transaction flow
   ClickTracker.startTransactionFlow();
 
@@ -71,7 +71,7 @@ export const AddView = ({ accountId } = {}) => {
   container.appendChild(header);
 
   const form = TransactionForm({
-    initialValues: { accountId },
+    initialValues: { accountId, amount },
     externalDateInput: dateInput,
     showCancelButton: true, // Add cancel button to the form
     onSubmit: data => {

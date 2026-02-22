@@ -127,6 +127,11 @@ export const TransactionService = {
     const analyticsEngine = getAnalyticsEngine();
     analyticsEngine.invalidateCacheOnDataUpdate();
 
+    // Record amount for quick presets (only for expenses)
+    if (sanitizedTransaction.type === 'expense' && sanitizedTransaction.amount > 0) {
+      analyticsEngine.recordAmountPreset(sanitizedTransaction.amount);
+    }
+
     return sanitizedTransaction;
   },
 

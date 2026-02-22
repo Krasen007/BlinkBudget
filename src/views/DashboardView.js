@@ -1,6 +1,7 @@
 import { Button } from '../components/Button.js';
 import { DashboardStatsCard } from '../components/DashboardStatsCard.js';
 import { TransactionList } from '../components/TransactionList.js';
+import { QuickAmountPresets } from '../components/QuickAmountPresets.js';
 import { AccountService } from '../core/account-service.js';
 import { TransactionService } from '../core/transaction-service.js';
 import { FilteringService } from '../core/analytics/FilteringService.js';
@@ -290,6 +291,19 @@ export const DashboardView = () => {
     );
 
     content.appendChild(statsContainer);
+
+    // Quick Amount Presets (Feature 3.4.1)
+    const quickAmountPresets = QuickAmountPresets({
+      onPresetSelect: amount => {
+        const params =
+          currentAccountFilter !== 'all'
+            ? { accountId: currentAccountFilter, amount: amount.toString() }
+            : { amount: amount.toString() };
+        Router.navigate('add-expense', params);
+      },
+    });
+    quickAmountPresets.style.marginBottom = SPACING.MD;
+    content.appendChild(quickAmountPresets);
 
     // Action Button
     const addBtn = Button({

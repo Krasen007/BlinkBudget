@@ -16,7 +16,6 @@ import { setupFormKeyboardHandling } from '../utils/form-utils/keyboard.js';
 import { SmartAmountInput } from './SmartAmountInput.js';
 import { SmartCategorySelector } from './SmartCategorySelector.js';
 import { SmartNoteField } from './SmartNoteField.js';
-import { QuickAmountPresets } from './QuickAmountPresets.js';
 import { getCopyString } from '../utils/copy-strings.js';
 import { ExpandableSection } from '../components/ExpandableSection.js';
 import { initializeCategoryIconsCSS } from '../utils/category-icons.js';
@@ -180,22 +179,6 @@ export const TransactionForm = ({
     amountInput.setAttribute('data-tutorial-target', 'amount-input');
   }
 
-  // 4.5 Quick Amount Presets (Feature 3.4.1)
-  const quickAmountPresets = QuickAmountPresets({
-    onPresetSelect: amount => {
-      // Fill the amount field when preset is selected
-      if (smartAmountInput) {
-        smartAmountInput.setAmount(amount.toString());
-      } else {
-        amountInput.value = amount.toString();
-      }
-      // Focus the amount input
-      amountInput.focus();
-    },
-  });
-  quickAmountPresets.style.marginTop = 'var(--spacing-xs)';
-  quickAmountPresets.style.marginBottom = 'var(--spacing-xs)';
-
   // 5. Amount and Account Row
   const amountAccountRow = document.createElement('div');
   amountAccountRow.style.display = 'flex';
@@ -320,7 +303,9 @@ export const TransactionForm = ({
   });
 
   // 7. Note Field (Smart or Classic based on setting) - Wrapped in ExpandableSection for progressive disclosure
+
   let expandableNoteSection = null;
+  let noteField = null;
 
   if (smartSuggestionsEnabled) {
     // Smart Note Field
@@ -338,6 +323,7 @@ export const TransactionForm = ({
     });
     // Add touch target classes
     smartNoteField.classList.add('touch-target-secondary');
+    noteField = smartNoteField;
 
     // Wrap in ExpandableSection for progressive disclosure
     expandableNoteSection = ExpandableSection({
@@ -347,33 +333,29 @@ export const TransactionForm = ({
       content: smartNoteField,
       icon: '⚙️',
     });
+  } else {
+    // //TODO FIX:
+    // // Classic Note Field
+    // noteField = document.createElement('textarea');
+    // noteField.className = 'form-input';
+    // noteField.placeholder = 'Notes (optional)';
+    // noteField.value = initialValues.description || '';
+    // noteField.style.minHeight = '80px';
+    // noteField.style.resize = 'vertical';
+    // noteField.classList.add('touch-target-secondary');
+
+    // // Wrap in ExpandableSection for progressive disclosure
+    // expandableNoteSection = ExpandableSection({
+    //   title: getCopyString('transaction.advancedOptions') || 'Advanced Options',
+    //   defaultExpanded: false,
+    //   storageKey: 'transaction-note-expanded',
+    //   content: noteField,
+    //   icon: '⚙️',
+    // });
   }
 
   // 7. Layout Assembly
   form.appendChild(amountAccountRow);
-
-  // Add Quick Amount Presets after amount input (Feature 3.4.1)
-  form.appendChild(quickAmountPresets);
-
-  // Anti-Deterrent Design - Feature 3.5.1
-  const antiDeterrentContainer = document.createElement('div');
-  antiDeterrentContainer.className = 'anti-deterrent';
-  antiDeterrentContainer.style.display = 'flex';
-  antiDeterrentContainer.style.gap = 'var(--spacing-md)';
-  antiDeterrentContainer.style.justifyContent = 'center';
-  antiDeterrentContainer.style.marginTop = 'var(--spacing-xs)';
-  antiDeterrentContainer.style.fontSize = 'var(--font-size-sm)';
-  antiDeterrentContainer.style.color = 'var(--color-text-muted)';
-
-  // Add anti-deterrent micro-copy
-  const quickText = document.createElement('span');
-  quickText.textContent = getCopyString('transaction.takesOnlyThreeSeconds');
-  const savedText = document.createElement('span');
-  savedText.textContent = getCopyString('transaction.savedAutomatically');
-  antiDeterrentContainer.appendChild(quickText);
-  antiDeterrentContainer.appendChild(savedText);
-
-  form.appendChild(antiDeterrentContainer);
 
   // Category Label
   const catLabelId = 'category-selector-label';
@@ -474,8 +456,8 @@ export const TransactionForm = ({
         accountId: currentAccountId,
         toAccountId: categorySelector.selectedToAccount(),
         externalDateInput,
-        description: smartNoteField
-          ? smartNoteField.getNote()
+        description: noteField
+          ? (smartNoteField ? smartNoteField.getNote() : noteField.value)
           : initialValues.description || '',
       });
 
