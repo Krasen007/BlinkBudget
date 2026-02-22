@@ -7,7 +7,7 @@
  * Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6
  */
 
-import { ForecastEngine } from './forecast-engine.js';
+import { ForecastEngine } from '../forecast-engine.js';
 
 export class AccountBalancePredictor {
   constructor() {

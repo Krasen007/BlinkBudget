@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { AccountDeletionService } from '../../src/core/account-deletion-service.js';
+import { AccountDeletionService } from '../../src/core/Account/account-deletion-service.js';
 import { AuthService } from '../../src/core/auth-service.js';
 import { TransactionService } from '../../src/core/transaction-service.js';
 import { auditService } from '../../src/core/audit-service.js';

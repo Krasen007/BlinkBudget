@@ -4,11 +4,11 @@
  * Handles all account-related operations, persistence, and synchronization.
  */
 
-import { STORAGE_KEYS, DEFAULTS } from '../utils/constants.js';
-import { SyncService } from './sync-service.js';
-import { AuthService } from './auth-service.js';
-import { safeJsonParse } from '../utils/security-utils.js';
-import { auditService, auditEvents } from './audit-service.js';
+import { STORAGE_KEYS, DEFAULTS } from '../../utils/constants.js';
+import { SyncService } from '../sync-service.js';
+import { AuthService } from '../auth-service.js';
+import { safeJsonParse } from '../../utils/security-utils.js';
+import { auditService, auditEvents } from '../audit-service.js';
 
 const ACCOUNTS_KEY = STORAGE_KEYS.ACCOUNTS;
 
@@ -72,6 +72,7 @@ export const AccountService = {
         ...account,
         updatedAt: new Date().toISOString(),
       };
+      account = accounts[index]; // Update the reference to return
     } else {
       account.updatedAt = new Date().toISOString();
       accounts.push(account);

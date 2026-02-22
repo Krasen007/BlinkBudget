@@ -6,7 +6,7 @@
 import { getDb } from './firebase-config.js';
 import { AuthService } from './auth-service.js';
 import { TransactionService } from './transaction-service.js';
-import { AccountService } from './account-service.js';
+import { AccountService } from './Account/account-service.js';
 import { SettingsService } from './settings-service.js';
 import { GoalPlanner } from './goal-planner.js';
 import { InvestmentTracker } from './investment-tracker.js';

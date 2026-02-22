@@ -12,7 +12,7 @@ import { ChartRenderer } from '../components/ChartRenderer.js';
 import { preloadChartJS } from '../core/chart-loader.js';
 import { TimePeriodSelector } from '../components/TimePeriodSelector.js';
 import { TransactionService } from '../core/transaction-service.js';
-import { AccountService } from '../core/account-service.js';
+import { AccountService } from '../core/Account/account-service.js';
 import { Router } from '../core/router.js';
 import { NavigationState } from '../core/navigation-state.js';
 import { SettingsService } from '../core/settings-service.js';
@@ -956,9 +956,9 @@ export const ReportsView = () => {
     try {
       const benchmarkingData = analyticsEngine.getPersonalBenchmarking
         ? analyticsEngine.getPersonalBenchmarking(
-            currentData.transactions,
-            currentTimePeriod
-          )
+          currentData.transactions,
+          currentTimePeriod
+        )
         : null;
 
       if (benchmarkingData && benchmarkingData.length > 0) {
@@ -1005,9 +1005,9 @@ export const ReportsView = () => {
     try {
       const recommendationsData = analyticsEngine.getBudgetRecommendations
         ? analyticsEngine.getBudgetRecommendations(
-            currentData.transactions,
-            currentTimePeriod
-          )
+          currentData.transactions,
+          currentTimePeriod
+        )
         : null;
 
       if (recommendationsData && recommendationsData.length > 0) {

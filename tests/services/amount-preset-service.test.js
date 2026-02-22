@@ -5,11 +5,18 @@ describe('AmountPresetService', () => {
   let mockLocalStorage;
 
   beforeEach(() => {
+    const store = {};
     mockLocalStorage = {
-      getItem: vi.fn().mockReturnValue(null),
-      setItem: vi.fn(),
-      removeItem: vi.fn(),
-      clear: vi.fn(),
+      getItem: vi.fn((key) => store[key] || null),
+      setItem: vi.fn((key, value) => {
+        store[key] = value;
+      }),
+      removeItem: vi.fn((key) => {
+        delete store[key];
+      }),
+      clear: vi.fn(() => {
+        Object.keys(store).forEach(key => delete store[key]);
+      }),
     };
     global.localStorage = mockLocalStorage;
     AmountPresetService.resetPresets();
@@ -45,7 +52,7 @@ describe('AmountPresetService', () => {
     });
   });
 
-  describe('getPresets', () => {
+  describe('getPresets - Advanced Tests', () => {
     it('should return top 4 amounts by frequency', () => {
       AmountPresetService.recordAmount(10);
       AmountPresetService.recordAmount(10);

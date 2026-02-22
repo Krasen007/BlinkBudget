@@ -1,4 +1,4 @@
-import { AccountService } from './account-service.js';
+import { AccountService } from './Account/account-service.js';
 import { TransactionService } from './transaction-service.js';
 import { SettingsService } from './settings-service.js';
 import { InvestmentTracker } from './investment-tracker.js';
@@ -56,7 +56,7 @@ export const StorageService = {
     // keep chain but swallow final rejection so it doesn't break subsequent chains
     this._pushChains.set(
       key,
-      newChain.catch(() => {})
+      newChain.catch(() => { })
     );
     return newChain;
   },

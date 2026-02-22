@@ -14,9 +14,9 @@
 
 import { Router } from '../core/router.js';
 import { TransactionService } from '../core/transaction-service.js';
-import { AccountService } from '../core/account-service.js';
+import { AccountService } from '../core/Account/account-service.js';
 import { ForecastEngine } from '../core/forecast-engine.js';
-import { AccountBalancePredictor } from '../core/account-balance-predictor.js';
+import { AccountBalancePredictor } from '../core/Account/account-balance-predictor.js';
 import { RiskAssessor } from '../core/risk-assessor.js';
 import { GoalPlanner } from '../core/goal-planner.js';
 import { ChartRenderer } from '../components/ChartRenderer.js';

@@ -4,7 +4,7 @@
  */
 
 import { Button } from './Button.js';
-import { AccountService } from '../core/account-service.js';
+import { AccountService } from '../core/Account/account-service.js';
 import { generateId } from '../utils/id-utils.js';
 import {
   COLORS,

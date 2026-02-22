@@ -4,7 +4,7 @@
  * Refactored to use extracted utilities - now ~180 lines (down from 724)
  */
 
-import { AccountService } from '../core/account-service.js';
+import { AccountService } from '../core/Account/account-service.js';
 import { ClickTracker } from '../core/click-tracking-service.js';
 import { SettingsService } from '../core/settings-service.js';
 import { FONT_SIZES, COLORS } from '../utils/constants.js';
@@ -304,6 +304,7 @@ export const TransactionForm = ({
 
   // 7. Note Field (Smart or Classic based on setting) - Wrapped in ExpandableSection for progressive disclosure
 
+  // eslint-disable-next-line no-useless-assignment
   let expandableNoteSection = null;
   let noteField = null;
 
@@ -334,24 +335,24 @@ export const TransactionForm = ({
       icon: '⚙️',
     });
   } else {
-    // // Classic Note Field
-    // noteField = document.createElement('textarea');
-    // noteField.className = 'form-input';
-    // noteField.placeholder =
-    //   getCopyString('transaction.notes') || 'Notes (optional)';
-    // noteField.value = initialValues.description || '';
-    // noteField.style.minHeight = '80px';
-    // noteField.style.resize = 'vertical';
-    // noteField.classList.add('touch-target-secondary');
+    // Classic Note Field
+    noteField = document.createElement('textarea');
+    noteField.className = 'form-input';
+    noteField.placeholder =
+      getCopyString('transaction.notes') || 'Notes (optional)';
+    noteField.value = initialValues.description || '';
+    noteField.style.minHeight = '80px';
+    noteField.style.resize = 'vertical';
+    noteField.classList.add('touch-target-secondary');
 
-    // // Wrap in ExpandableSection for progressive disclosure
-    // expandableNoteSection = ExpandableSection({
-    //   title: getCopyString('transaction.advancedOptions') || 'Advanced Options',
-    //   defaultExpanded: false,
-    //   storageKey: 'transaction-note-expanded',
-    //   content: noteField,
-    //   icon: '⚙️',
-    // });
+    // Wrap in ExpandableSection for progressive disclosure
+    expandableNoteSection = ExpandableSection({
+      title: getCopyString('transaction.advancedOptions') || 'Advanced Options',
+      defaultExpanded: false,
+      storageKey: 'transaction-note-expanded',
+      content: noteField,
+      icon: '⚙️',
+    });
   }
 
   // 7. Layout Assembly

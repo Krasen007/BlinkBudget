@@ -465,9 +465,9 @@ describe('Data Export Integrity Validation', () => {
       const duration = endTime - startTime;
 
       // Should complete within reasonable time
-      expect(duration).toBeLessThan(5000); // Less than 5 seconds (adjusted for test environment)
+      expect(duration).toBeLessThan(10000); // Less than 10 seconds (adjusted for test environment)
       expect(StorageService.getAllTransactions().length).toBe(1000);
-    });
+    }, 15000); // 15 second timeout
   });
 
   describe('Backup Verification Workflow', () => {

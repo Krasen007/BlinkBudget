@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { accountDeletionService } from '../../src/core/account-deletion-service.js';
+import { accountDeletionService } from '../../src/core/Account/account-deletion-service.js';
 import { AuthService } from '../../src/core/auth-service.js';
 import { TransactionService } from '../../src/core/transaction-service.js';
 import { StorageService } from '../../src/core/storage.js';

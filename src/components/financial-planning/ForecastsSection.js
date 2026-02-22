@@ -3,7 +3,7 @@ import { ForecastCard } from './ForecastCard.js';
 import { DataTable } from './DataTable.js';
 import { Placeholder } from './Placeholder.js';
 import { ForecastEngine } from '../../core/forecast-engine.js';
-import { AccountBalancePredictor } from '../../core/account-balance-predictor.js';
+import { AccountBalancePredictor } from '../../core/Account/account-balance-predictor.js';
 import {
   createProjectedBalanceChart,
   createForecastComparisonChart,
@@ -215,9 +215,9 @@ function createForecastTable(incomeForecasts, expenseForecasts) {
     const row = [
       income.period
         ? income.period.toLocaleDateString('en-US', {
-            month: 'short',
-            year: 'numeric',
-          })
+          month: 'short',
+          year: 'numeric',
+        })
         : `Month ${i + 1}`,
       `€${income.predictedAmount.toFixed(2)}`,
       `€${expense.predictedAmount.toFixed(2)}`,

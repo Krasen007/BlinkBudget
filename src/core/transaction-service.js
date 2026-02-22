@@ -7,7 +7,7 @@
 import { STORAGE_KEYS } from '../utils/constants.js';
 import { SyncService } from './sync-service.js';
 import { AuthService } from './auth-service.js';
-import { AccountService } from './account-service.js';
+import { AccountService } from './Account/account-service.js';
 import { generateId } from '../utils/id-utils.js';
 import { safeJsonParse } from '../utils/security-utils.js';
 import { auditService, auditEvents } from './audit-service.js';

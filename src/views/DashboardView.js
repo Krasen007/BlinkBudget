@@ -2,7 +2,7 @@ import { Button } from '../components/Button.js';
 import { DashboardStatsCard } from '../components/DashboardStatsCard.js';
 import { TransactionList } from '../components/TransactionList.js';
 import { QuickAmountPresets } from '../components/QuickAmountPresets.js';
-import { AccountService } from '../core/account-service.js';
+import { AccountService } from '../core/Account/account-service.js';
 import { TransactionService } from '../core/transaction-service.js';
 import { FilteringService } from '../core/analytics/FilteringService.js';
 import { AuthService } from '../core/auth-service.js';

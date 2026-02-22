@@ -96,7 +96,7 @@ export const AccountDeletionSection = () => {
 
         // Load data summary
         const { accountDeletionService } =
-          await import('../core/account-deletion-service.js');
+          await import('../core/Account/account-deletion-service.js');
         const dataSummary = await accountDeletionService.getUserDataSummary();
 
         // Show data summary

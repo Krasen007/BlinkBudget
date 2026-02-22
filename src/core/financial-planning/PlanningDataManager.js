@@ -1,5 +1,5 @@
 import { TransactionService } from '../transaction-service.js';
-import { AccountService } from '../account-service.js';
+import { AccountService } from '../Account/account-service.js';
 import { StorageService } from '../storage.js';
 import { STORAGE_KEYS } from '../../utils/constants.js';
 

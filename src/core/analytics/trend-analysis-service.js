@@ -180,7 +180,6 @@ export class TrendAnalysisService {
 
     const categoryMap = {};
     transactions.forEach(t => {
-      if (t.type !== TRANSACTION_TYPES.EXPENSE) return;
       const cat = t.category || 'Uncategorized';
       if (!categoryMap[cat]) categoryMap[cat] = [];
       categoryMap[cat].push(Math.abs(t.amount || 0));
@@ -209,7 +208,7 @@ export class TrendAnalysisService {
     const overallConsistency =
       Object.values(categoryConsistency).length > 0
         ? Object.values(categoryConsistency).reduce((s, v) => s + v, 0) /
-          Object.values(categoryConsistency).length
+        Object.values(categoryConsistency).length
         : 1.0;
 
     return { categories: categoryConsistency, overall: overallConsistency };
