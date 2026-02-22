@@ -14,10 +14,9 @@ import { createCategorySelector } from '../utils/form-utils/category-chips.js';
 import { createAmountInput } from '../utils/form-utils/amount-input.js';
 import { setupFormKeyboardHandling } from '../utils/form-utils/keyboard.js';
 import { SmartAmountInput } from './SmartAmountInput.js';
-import { SmartCategorySelector } from './SmartCategorySelector.js';
 import { SmartNoteField } from './SmartNoteField.js';
+import { SmartCategorySelector } from './SmartCategorySelector.js';
 import { getCopyString } from '../utils/copy-strings.js';
-import { ExpandableSection } from '../components/ExpandableSection.js';
 import { initializeCategoryIconsCSS } from '../utils/category-icons.js';
 import {
   validateAmount,
@@ -302,10 +301,7 @@ export const TransactionForm = ({
     );
   });
 
-  // 7. Note Field (Smart or Classic based on setting) - Wrapped in ExpandableSection for progressive disclosure
-
-  // eslint-disable-next-line no-useless-assignment
-  let expandableNoteSection = null;
+  // 7. Note Field (Smart or Classic based on setting)
   let noteField = null;
 
   if (smartSuggestionsEnabled) {
@@ -325,15 +321,6 @@ export const TransactionForm = ({
     // Add touch target classes
     smartNoteField.classList.add('touch-target-secondary');
     noteField = smartNoteField;
-
-    // Wrap in ExpandableSection for progressive disclosure
-    expandableNoteSection = ExpandableSection({
-      title: getCopyString('transaction.advancedOptions') || 'Advanced Options',
-      defaultExpanded: false,
-      storageKey: 'transaction-note-expanded',
-      content: smartNoteField,
-      icon: '⚙️',
-    });
   } else {
     // Classic Note Field
     noteField = document.createElement('textarea');
@@ -344,15 +331,6 @@ export const TransactionForm = ({
     noteField.style.minHeight = '80px';
     noteField.style.resize = 'vertical';
     noteField.classList.add('touch-target-secondary');
-
-    // Wrap in ExpandableSection for progressive disclosure
-    expandableNoteSection = ExpandableSection({
-      title: getCopyString('transaction.advancedOptions') || 'Advanced Options',
-      defaultExpanded: false,
-      storageKey: 'transaction-note-expanded',
-      content: noteField,
-      icon: '⚙️',
-    });
   }
 
   // 7. Layout Assembly
@@ -371,9 +349,9 @@ export const TransactionForm = ({
   // Type Toggle (Label handled by fieldset/legend in utility later)
   form.appendChild(typeToggle.container);
 
-  // Add ExpandableSection with note field (if enabled)
-  if (expandableNoteSection) {
-    form.appendChild(expandableNoteSection.container);
+  // Add note field directly
+  if (noteField) {
+    form.appendChild(noteField);
   }
 
   // 7.5. Cancel Button (for Add mode)

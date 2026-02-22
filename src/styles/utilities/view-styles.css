@@ -28,7 +28,7 @@
 
 /* View Header - Consistent header styling */
 .view-header {
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-xs);
   flex-shrink: 0;
 }
 
@@ -120,7 +120,7 @@
 
   /* Mobile content spacing */
   .view-content {
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
   }
 
   /* Mobile stats container - controlled by consolidated rules later to avoid duplication */
@@ -264,8 +264,8 @@
 .view-stats-container {
   display: grid;
   grid-template-columns: 1fr 1fr; /* Default to 2 columns for mobile */
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-xl);
+  gap: var(--spacing-xs);
+  margin-bottom: 0;
 }
 
 /* Ensure 2 columns on small screens (mobile) */
@@ -273,7 +273,7 @@
   .view-stats-container {
     grid-template-columns: 1fr 1fr;
     gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: 0;
   }
 }
 
@@ -385,9 +385,9 @@
 .view-header-container {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: 0;
   width: 100%;
-  margin-bottom: var(--spacing-md); /* Consistent gap to content */
+  margin-bottom: 0; /* Remove gap to content */
 }
 
 /* View Title - Standard title styling */

@@ -30,7 +30,7 @@ export const DashboardView = () => {
   const leftSide = document.createElement('div');
   leftSide.style.display = 'flex';
   leftSide.style.alignItems = 'center';
-  leftSide.style.gap = SPACING.MD;
+  leftSide.style.gap = SPACING.XS;
 
   // Title
   const title = document.createElement('h2');
@@ -59,20 +59,12 @@ export const DashboardView = () => {
   // Account Selector
   const leftHeader = document.createElement('div');
 
-  // Add accessible label for the account filter
-  const accountFilterLabel = document.createElement('label');
-  accountFilterLabel.htmlFor = 'account-filter-select';
-  accountFilterLabel.textContent = 'Filter by account:';
-  accountFilterLabel.className = 'form-label';
-  accountFilterLabel.style.display = 'block';
-  accountFilterLabel.style.marginBottom = '4px';
-  accountFilterLabel.style.fontSize = 'var(--font-size-sm)';
-
   const accountSelect = document.createElement('select');
   accountSelect.id = 'account-filter-select';
   accountSelect.name = 'account-filter';
   accountSelect.className = 'view-select';
-  accountSelect.style.marginTop = SPACING.SM;
+  accountSelect.style.marginTop = '0';
+  accountSelect.style.marginBottom = SPACING.XS;
   accountSelect.style.width = '100%';
 
   // Account Options Logic
@@ -100,7 +92,6 @@ export const DashboardView = () => {
     accountSelect.appendChild(opt);
   });
 
-  leftHeader.appendChild(accountFilterLabel);
   leftHeader.appendChild(accountSelect);
   header.appendChild(leftHeader);
   container.appendChild(header);
@@ -301,8 +292,13 @@ export const DashboardView = () => {
         Router.navigate('add-expense', params);
       },
     });
-    quickAmountPresets.style.marginBottom = SPACING.MD;
-    content.appendChild(quickAmountPresets);
+
+    // Add a small container for quick amount presets with no spacing
+    const quickPresetsWrapper = document.createElement('div');
+    quickPresetsWrapper.style.margin = '0';
+    quickPresetsWrapper.style.padding = '0';
+    quickPresetsWrapper.appendChild(quickAmountPresets);
+    content.appendChild(quickPresetsWrapper);
 
     // Action Button
     const addBtn = Button({
@@ -318,7 +314,7 @@ export const DashboardView = () => {
     });
     addBtn.style.width = '100%';
     addBtn.style.margin = '0';
-    addBtn.style.marginBottom = SPACING.XL;
+    addBtn.style.marginBottom = SPACING.XS;
     addBtn.style.flexShrink = '0'; // Prevent button from shrinking
     content.appendChild(addBtn);
 

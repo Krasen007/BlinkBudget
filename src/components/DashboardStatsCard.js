@@ -19,8 +19,8 @@ export const DashboardStatsCard = ({ label, value, color }) => {
 
   Object.assign(card.style, {
     textAlign: 'left',
-    padding: isMobile ? `${SPACING.MD} ${SPACING.SM}` : SPACING.LG,
-    minHeight: TOUCH_TARGETS.MIN_HEIGHT,
+    padding: isMobile ? `${SPACING.XS} ${SPACING.XS}` : SPACING.MD,
+    minHeight: isMobile ? '80px' : TOUCH_TARGETS.MIN_HEIGHT,
 
     display: 'flex',
     flexDirection: isMobile ? 'row' : 'column',
@@ -48,9 +48,7 @@ export const DashboardStatsCard = ({ label, value, color }) => {
   Object.assign(val.style, {
     color,
     margin: 0,
-    fontSize: isMobile
-      ? FONT_SIZES.STAT_VALUE_MOBILE
-      : FONT_SIZES.STAT_VALUE_DESKTOP,
+    fontSize: FONT_SIZES.STAT_VALUE_DESKTOP,
     lineHeight: 'var(--line-height-tight)',
     fontWeight: '700',
   });

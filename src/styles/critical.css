@@ -90,7 +90,7 @@ body {
 
 .view-header {
   flex-shrink: 0;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-xs);
 }
 
 .view-title {

@@ -258,7 +258,7 @@
 
 @media (width <= calc(var(--breakpoint-md) - 1px)) {
   .dashboard-stat-card {
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm);
     min-height: 80px;
     flex-direction: row;
     justify-content: space-between;
