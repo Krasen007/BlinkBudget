@@ -337,9 +337,21 @@ export const TransactionForm = ({
     noteField.placeholder =
       getCopyString('transaction.notes') || 'Notes (optional)';
     noteField.value = initialValues.description || '';
-    noteField.style.minHeight = '80px';
+    noteField.style.minHeight = '0px';
     noteField.style.resize = 'vertical';
     noteField.classList.add('touch-target-secondary');
+
+    // Style to match other form elements
+    noteField.style.width = '100%';
+    noteField.style.padding = 'var(--spacing-sm)';
+    noteField.style.fontSize = 'var(--font-size-base)';
+    noteField.style.border = '1px solid var(--color-border)';
+    noteField.style.borderRadius = 'var(--radius-md)';
+    noteField.style.backgroundColor = 'var(--color-surface)';
+    noteField.style.color = 'var(--color-text-main)';
+    noteField.style.fontFamily = 'inherit';
+    noteField.style.lineHeight = 'var(--line-height-normal)';
+    noteField.style.transition = 'border-color var(--transition-fast), box-shadow var(--transition-fast)';
   }
 
   // 7. Layout Assembly
