@@ -8,3 +8,7 @@ package-lock.json
 .env.*
 *.log
 changelog.txt
+.claude/**
+.gemini/**
+.opencode/**
+.planning/**

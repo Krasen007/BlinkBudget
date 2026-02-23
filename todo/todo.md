@@ -13,6 +13,13 @@ DO NOT IMPLEMENT: use Ionic's Capacitor or Cordova to make android app
 
 ---
 
+[ ] Historical Pattern Recognition: Implement long-term trend identification with spending direction analysis and consistency scoring
+[ ] Predictive Budget Recommendations: Generate budget optimization suggestions based on historical spending patterns and future projections
+[ ] Location-Based Categories: GPS-aware category suggestions based on user location (e.g., "Coffee" when at café)
+[ ] Progressive Image Loading: Implement progressive loading for category icons and visual elements
+
+---
+
 [x] Implement offline first loading for charts to be available on PWA even when there is no internet
 [ ] there is a white bar when using the PWA in light mode i must check how it is on the browser
 [ ] Chrome browser detects the app core and switches to dark or white mode but when I use the PWA it detects that I'm using light theme and it makes my bar white

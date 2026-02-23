@@ -86,3 +86,6 @@ deployment_keys.tar
 
 .github/.release
 release-artifacts-*
+.planning/
+.opencode/
+.gemini/

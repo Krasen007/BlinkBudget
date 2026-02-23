@@ -73,30 +73,8 @@ BlinkBudget will focus on core functionality that delivers maximum value with mi
   - **Data Integrity:** Comprehensive validation, backup systems, and emergency export functionality
   - **Predictive Analytics:** ✅ **IMPLEMENTED** - Advanced forecasting engine with statistical methods and future projections
   - **Account Balance Projection:** ✅ **IMPLEMENTED** - Balance predictor with visualization and risk assessment
-
-#### 3.2. Minor Enhancements (Future Iterations)
-
-- **Advanced Insights Analytics:** Enhanced spending pattern analysis, top movers, and timeline comparisons
-- **Category Usage Statistics:** Track most frequently used categories for better suggestions
-
-#### 3.3. Enhanced Analytics Opportunities (Future Iterations)
-
-- **Advanced Actionable Insights:** Provide specific optimization suggestions like "Switching from coffee shops to home brewing could save you $45/month"
-- **Historical Pattern Recognition:** Implement long-term trend identification with spending direction analysis and consistency scoring
-- **Comparative Analytics:** Add personal benchmarking against user's own historical averages and spending patterns
-- **Predictive Budget Recommendations:** Generate budget optimization suggestions based on historical spending patterns and future projections
-
-#### 3.4. UI/UX Enhancement Opportunities (Future Iterations)
-
-- **Quick Amount Presets:** Add one-tap amount buttons below the main add transaction button, list the 4 most used amounts as a pre-filled amount button, this should be calculated and updated on the main screen ($5, $10, $20, $50) for faster transaction entry
-- **Location-Based Categories:** GPS-aware category suggestions based on user location (e.g., "Coffee" when at café)
-- **Progressive Image Loading:** Implement progressive loading for category icons and visual elements
-
-#### 3.5. Visual & Experience Enhancements (Future Iterations)
-
-- **Hero-Sized Add Expense Button:** Make the Add Expense button visually dominant and centered to emphasize the primary action
-- **Anti-Deterrent Design Elements:** Add reassuring micro-copy and visual cues that contrast with tedious multi-step apps
-- **Progressive Disclosure Interface:** Hide advanced options behind toggles to minimize initial cognitive load
+- **Category Usage Statistics:** ✅ **IMPLEMENTED** - Track most frequently used categories for better suggestions
+- **Quick Amount Presets:** ✅ **IMPLEMENTED** - Add one-tap amount buttons below the main add transaction button, list the 4 most used amounts as a pre-filled amount button, this should be calculated and updated on the main screen ($5, $10, $20, $50) for faster transaction entry 
 
 ---
 
