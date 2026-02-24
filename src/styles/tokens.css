@@ -52,8 +52,12 @@
   --color-text-muted: hsl(
     220,
     10%,
-    75%
-  ); /* Lightened from 65% for better contrast */
+    45%
+  ); /* Adjusted from 75% for WCAG AA compliance */
+
+  /* Surface text colors for better contrast hierarchy */
+  --color-text-surface: hsl(240, 10%, 25%);
+  --color-text-inverse: hsl(240, 10%, 95%);
 
   /* Border colors */
   --color-border: hsl(240, 5%, 30%);

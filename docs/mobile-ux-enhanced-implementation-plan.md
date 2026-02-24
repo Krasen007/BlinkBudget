@@ -315,9 +315,9 @@ h1, h2, h3, h4, h5, h6 {
 - [x] Add gradient token system
 
 ### Phase 2: Visual Polish
-- [ ] Verify and fix contrast ratios
-- [ ] Apply shadow tokens to components
-- [ ] Ensure typography line-height consistency
+- [x] Verify and fix contrast ratios
+- [x] Apply shadow tokens to components
+- [x] Ensure typography line-height consistency
 
 ### Phase 3: Micro-interactions
 - [ ] Refine button transitions (150ms)
