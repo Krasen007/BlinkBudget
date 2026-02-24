@@ -148,7 +148,7 @@ const initApp = () => {
   // Initialize centralized cache invalidator
   CacheInvalidator.init();
   // Initialize enhanced back button handling for mobile
-  if (window.mobileUtils) {
+  if (window.mobileUtils && window.mobileUtils.setupBackButtonHandling) {
     window.mobileUtils.setupBackButtonHandling();
   }
   // Lazy load privacy service after app is ready

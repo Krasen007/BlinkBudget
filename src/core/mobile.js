@@ -232,9 +232,13 @@ export class MobileUtils {
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
         window.mobileUtils = new MobileUtils();
+        // Setup back button handling after initialization
+        window.mobileUtils.setupBackButtonHandling();
       });
     } else {
       window.mobileUtils = new MobileUtils();
+      // Setup back button handling after initialization
+      window.mobileUtils.setupBackButtonHandling();
     }
   }
 
@@ -243,9 +247,12 @@ export class MobileUtils {
    */
   setupBackButtonHandling() {
     if (window.BackButton) {
-      window.BackButton.addHandler(route => {
+      window.BackButton.addHandler(() => {
+        // Get current route from router instead of undefined parameter
+        const currentRoute = window.router?.currentRoute?.name || 'dashboard';
+
         // Custom back button logic
-        if (route === 'dashboard') {
+        if (currentRoute === 'dashboard') {
           // Show exit confirmation
           return false;
         }

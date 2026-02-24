@@ -213,7 +213,7 @@ export class TouchGestures {
       if (isTouch) {
         isTouch = false;
         onClick(_e);
-        // Do NOT trigger medium haptic here (we already gave a light haptic on touchstart)
+        // Haptic feedback disabled - no haptic feedback triggered
         return;
       }
 

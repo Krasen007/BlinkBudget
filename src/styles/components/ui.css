@@ -214,6 +214,12 @@
   cursor: pointer;
 }
 
+.card-interactive:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-border-strong);
+  transform: translateY(-2px);
+}
+
 .card-interactive:active {
   transform: translateY(0);
   box-shadow: var(--shadow-sm);

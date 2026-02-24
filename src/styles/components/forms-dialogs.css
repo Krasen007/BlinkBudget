@@ -93,7 +93,7 @@ input[type='date'].mobile-form-input,
   pointer-events: auto;
   z-index: 1;
   background-color: var(--color-surface) !important;
-  border: 1px solid var(--color-border) !important;
+  border: 2px solid var(--color-border) !important;
   border-radius: var(--radius-md) !important;
   padding: var(--spacing-md) var(--spacing-lg) !important;
   font-family: var(--font-body) !important;
@@ -180,7 +180,7 @@ select.input-select:focus {
 .mobile-form-input:focus,
 .mobile-form-select:focus {
   border-color: var(--color-primary);
-  box-shadow: var(--focus-shadow), var(--shadow-primary);
+  box-shadow: var(--focus-shadow, var(--shadow-primary));
   outline: none;
 }
 
