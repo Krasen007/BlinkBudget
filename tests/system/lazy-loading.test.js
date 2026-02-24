@@ -4,16 +4,16 @@
  * Tests for Chart.js lazy loading functionality
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
   loadChartJS,
   isChartJSReady,
   getChartJSModules,
   resetChartLoader,
   preloadChartJS,
-} from "../../src/core/chart-loader.js";
+} from '../../src/core/chart-loader.js';
 
-describe("Chart.js Lazy Loading", () => {
+describe('Chart.js Lazy Loading', () => {
   beforeEach(() => {
     resetChartLoader();
   });
@@ -22,7 +22,7 @@ describe("Chart.js Lazy Loading", () => {
     resetChartLoader();
   });
 
-  it("should load Chart.js dynamically", async () => {
+  it('should load Chart.js dynamically', async () => {
     expect(isChartJSReady()).toBe(false);
     expect(getChartJSModules()).toBe(null);
 
@@ -32,14 +32,14 @@ describe("Chart.js Lazy Loading", () => {
     expect(getChartJSModules()).not.toBe(null);
   });
 
-  it("should preload Chart.js modules", async () => {
+  it('should preload Chart.js modules', async () => {
     await preloadChartJS();
 
     expect(isChartJSReady()).toBe(true);
     expect(getChartJSModules()).not.toBe(null);
   });
 
-  it("should handle multiple load calls", async () => {
+  it('should handle multiple load calls', async () => {
     await loadChartJS();
     expect(isChartJSReady()).toBe(true);
 
@@ -48,7 +48,7 @@ describe("Chart.js Lazy Loading", () => {
     expect(isChartJSReady()).toBe(true);
   });
 
-  it("should reset loader state", async () => {
+  it('should reset loader state', async () => {
     await loadChartJS();
     expect(isChartJSReady()).toBe(true);
 

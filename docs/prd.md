@@ -74,7 +74,7 @@ BlinkBudget will focus on core functionality that delivers maximum value with mi
   - **Predictive Analytics:** ✅ **IMPLEMENTED** - Advanced forecasting engine with statistical methods and future projections
   - **Account Balance Projection:** ✅ **IMPLEMENTED** - Balance predictor with visualization and risk assessment
 - **Category Usage Statistics:** ✅ **IMPLEMENTED** - Track most frequently used categories for better suggestions
-- **Quick Amount Presets:** ✅ **IMPLEMENTED** - Add one-tap amount buttons below the main add transaction button, list the 4 most used amounts as a pre-filled amount button, this should be calculated and updated on the main screen ($5, $10, $20, $50) for faster transaction entry 
+- **Quick Amount Presets:** ✅ **IMPLEMENTED** - Add one-tap amount buttons below the main add transaction button, list the 4 most used amounts as a pre-filled amount button, this should be calculated and updated on the main screen ($5, $10, $20, $50) for faster transaction entry
 
 ---
 

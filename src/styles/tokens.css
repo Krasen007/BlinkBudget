@@ -154,13 +154,41 @@
   --shadow-info: 0 4px 14px 0 hsl(190 85% 55% / 0.25);
 
   /* Gradient system - For modern visual elements */
-  --gradient-primary: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
-  --gradient-success: linear-gradient(135deg, var(--color-success), var(--color-success-dark));
-  --gradient-warning: linear-gradient(135deg, var(--color-warning), var(--color-warning-dark));
-  --gradient-error: linear-gradient(135deg, var(--color-error), var(--color-error-dark));
-  --gradient-info: linear-gradient(135deg, var(--color-info), var(--color-info-dark));
-  --gradient-subtle: linear-gradient(135deg, var(--color-surface), var(--color-surface-hover));
-  --gradient-hero: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-700));
+  --gradient-primary: linear-gradient(
+    135deg,
+    var(--color-primary-500),
+    var(--color-primary-600)
+  );
+  --gradient-success: linear-gradient(
+    135deg,
+    var(--color-success),
+    var(--color-success-dark)
+  );
+  --gradient-warning: linear-gradient(
+    135deg,
+    var(--color-warning),
+    var(--color-warning-dark)
+  );
+  --gradient-error: linear-gradient(
+    135deg,
+    var(--color-error),
+    var(--color-error-dark)
+  );
+  --gradient-info: linear-gradient(
+    135deg,
+    var(--color-info),
+    var(--color-info-dark)
+  );
+  --gradient-subtle: linear-gradient(
+    135deg,
+    var(--color-surface),
+    var(--color-surface-hover)
+  );
+  --gradient-hero: linear-gradient(
+    135deg,
+    var(--color-primary-400),
+    var(--color-primary-700)
+  );
 
   /* Transitions */
   --transition-fast: 150ms ease;

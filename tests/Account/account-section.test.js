@@ -149,7 +149,8 @@ describe('AccountSection Component Display', () => {
   });
 
   it('renders accounts and displays friendly account type labels (not raw types)', async () => {
-    const accountModule = await import('../../src/core/Account/account-service.js');
+    const accountModule =
+      await import('../../src/core/Account/account-service.js');
     accountModule.AccountService.getAccounts.mockReturnValue([
       { id: 'a1', name: 'Main Checking', type: 'checking', balance: 100 },
       { id: 'a2', name: 'My Savings', type: 'savings', balance: 200 },
@@ -173,7 +174,8 @@ describe('AccountSection Component Display', () => {
   });
 
   it('shows "Other" when account.type is missing', async () => {
-    const accountModule = await import('../../src/core/Account/account-service.js');
+    const accountModule =
+      await import('../../src/core/Account/account-service.js');
     accountModule.AccountService.getAccounts.mockReturnValue([
       { id: 'a3', name: 'Mystery Account', balance: 0 },
     ]);

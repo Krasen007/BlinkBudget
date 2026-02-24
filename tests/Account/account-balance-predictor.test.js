@@ -9,7 +9,7 @@ import { AccountBalancePredictor } from '../../src/core/Account/account-balance-
 // Mock ForecastEngine
 vi.mock('../../src/core/forecast-engine.js', () => {
   return {
-    ForecastEngine: vi.fn().mockImplementation(function () {
+    ForecastEngine: vi.fn().mockImplementation(() => {
       return {
         generateIncomeForecast: vi.fn(),
         generateExpenseForecast: vi.fn(),
@@ -103,7 +103,10 @@ describe('AccountBalancePredictor', () => {
         { predictedAmount: 900, period: new Date() },
       ];
 
-      const cashFlows = predictor.calculateCashFlow(incomeForecasts, expenseForecasts);
+      const cashFlows = predictor.calculateCashFlow(
+        incomeForecasts,
+        expenseForecasts
+      );
 
       expect(cashFlows).toHaveLength(2);
       expect(cashFlows[0].netCashFlow).toBe(200); // 1000 - 800
@@ -115,7 +118,10 @@ describe('AccountBalancePredictor', () => {
       const incomeForecasts = [{ predictedAmount: 500, period: new Date() }];
       const expenseForecasts = [{ predictedAmount: 800, period: new Date() }];
 
-      const cashFlows = predictor.calculateCashFlow(incomeForecasts, expenseForecasts);
+      const cashFlows = predictor.calculateCashFlow(
+        incomeForecasts,
+        expenseForecasts
+      );
 
       expect(cashFlows[0].netCashFlow).toBe(-300); // 500 - 800
       expect(cashFlows[0].isPositive).toBe(false);
@@ -126,7 +132,12 @@ describe('AccountBalancePredictor', () => {
     it('should identify critical balance risks', () => {
       const balanceProjections = [
         { projectedBalance: 50, period: new Date(), confidence: 0.8, month: 1 },
-        { projectedBalance: -10, period: new Date(), confidence: 0.7, month: 2 },
+        {
+          projectedBalance: -10,
+          period: new Date(),
+          confidence: 0.7,
+          month: 2,
+        },
       ];
 
       const risks = predictor.identifyLowBalanceRisks(balanceProjections);
@@ -138,11 +149,19 @@ describe('AccountBalancePredictor', () => {
 
     it('should use custom thresholds', () => {
       const balanceProjections = [
-        { projectedBalance: 200, period: new Date(), confidence: 0.8, month: 1 },
+        {
+          projectedBalance: 200,
+          period: new Date(),
+          confidence: 0.8,
+          month: 1,
+        },
       ];
       const thresholds = { critical: 150, warning: 250, caution: 300 };
 
-      const risks = predictor.identifyLowBalanceRisks(balanceProjections, thresholds);
+      const risks = predictor.identifyLowBalanceRisks(
+        balanceProjections,
+        thresholds
+      );
 
       expect(risks).toHaveLength(1);
       expect(risks[0].riskLevel).toBe('warning'); // 200 > 150 (critical) but 200 <= 250 (warning)
@@ -152,9 +171,24 @@ describe('AccountBalancePredictor', () => {
   describe('detectOverdraftRisks', () => {
     it('should detect overdraft risks', () => {
       const balanceProjections = [
-        { projectedBalance: 100, period: new Date(), confidence: 0.8, month: 1 },
-        { projectedBalance: -50, period: new Date(), confidence: 0.7, month: 2 },
-        { projectedBalance: -600, period: new Date(), confidence: 0.6, month: 3 },
+        {
+          projectedBalance: 100,
+          period: new Date(),
+          confidence: 0.8,
+          month: 1,
+        },
+        {
+          projectedBalance: -50,
+          period: new Date(),
+          confidence: 0.7,
+          month: 2,
+        },
+        {
+          projectedBalance: -600,
+          period: new Date(),
+          confidence: 0.6,
+          month: 3,
+        },
       ];
 
       const risks = predictor.detectOverdraftRisks(balanceProjections);
@@ -170,12 +204,25 @@ describe('AccountBalancePredictor', () => {
   describe('assessCreditLimitRisks', () => {
     it('should assess credit limit utilization', () => {
       const balanceProjections = [
-        { projectedBalance: -800, period: new Date(), confidence: 0.8, month: 1 }, // 80% utilization
-        { projectedBalance: -950, period: new Date(), confidence: 0.7, month: 2 }, // 95% utilization
+        {
+          projectedBalance: -800,
+          period: new Date(),
+          confidence: 0.8,
+          month: 1,
+        }, // 80% utilization
+        {
+          projectedBalance: -950,
+          period: new Date(),
+          confidence: 0.7,
+          month: 2,
+        }, // 95% utilization
       ];
       const creditLimit = 1000;
 
-      const risks = predictor.assessCreditLimitRisks(balanceProjections, creditLimit);
+      const risks = predictor.assessCreditLimitRisks(
+        balanceProjections,
+        creditLimit
+      );
 
       expect(risks).toHaveLength(2);
       expect(risks[0].riskLevel).toBe('warning'); // 80% utilization
@@ -186,7 +233,12 @@ describe('AccountBalancePredictor', () => {
 
     it('should return empty array for invalid credit limit', () => {
       const balanceProjections = [
-        { projectedBalance: -500, period: new Date(), confidence: 0.8, month: 1 },
+        {
+          projectedBalance: -500,
+          period: new Date(),
+          confidence: 0.8,
+          month: 1,
+        },
       ];
 
       const risks = predictor.assessCreditLimitRisks(balanceProjections, 0);
@@ -221,7 +273,10 @@ describe('AccountBalancePredictor', () => {
         oneTimeExpense: 200,
       };
 
-      const adjustedProjections = predictor.modelWhatIfScenarios(baseProjections, adjustments);
+      const adjustedProjections = predictor.modelWhatIfScenarios(
+        baseProjections,
+        adjustments
+      );
 
       // The method returns projections (may be unchanged if there's an error in implementation)
       expect(adjustedProjections).toHaveLength(2);
@@ -263,7 +318,8 @@ describe('AccountBalancePredictor', () => {
         },
       ];
 
-      const consolidated = predictor.generateConsolidatedView(accountProjections);
+      const consolidated =
+        predictor.generateConsolidatedView(accountProjections);
 
       expect(consolidated).toHaveLength(1);
       expect(consolidated[0].projectedBalance).toBe(3000); // 1000 + 2000

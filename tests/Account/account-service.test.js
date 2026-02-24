@@ -21,7 +21,7 @@ vi.mock('../../src/core/auth-service.js', () => ({
 }));
 
 vi.mock('../../src/utils/security-utils.js', () => ({
-  safeJsonParse: vi.fn((data) => JSON.parse(data)),
+  safeJsonParse: vi.fn(data => JSON.parse(data)),
 }));
 
 vi.mock('../../src/core/audit-service.js', () => ({
@@ -88,7 +88,8 @@ describe('AccountService', () => {
       localStorage.setItem(STORAGE_KEYS.ACCOUNTS, 'invalid-json');
 
       // Re-import to get a fresh mock that throws for this test
-      const { safeJsonParse } = await import('../../src/utils/security-utils.js');
+      const { safeJsonParse } =
+        await import('../../src/utils/security-utils.js');
       safeJsonParse.mockImplementationOnce(() => {
         throw new Error('Invalid JSON');
       });
@@ -114,7 +115,9 @@ describe('AccountService', () => {
       expect(savedAccount.updatedAt).toBeDefined();
       expect(savedAccount.userId).toBe('test-user-123');
 
-      const storedAccounts = JSON.parse(localStorage.getItem(STORAGE_KEYS.ACCOUNTS));
+      const storedAccounts = JSON.parse(
+        localStorage.getItem(STORAGE_KEYS.ACCOUNTS)
+      );
       expect(storedAccounts).toHaveLength(2); // Default + new account
     });
 
@@ -141,7 +144,9 @@ describe('AccountService', () => {
       expect(result.type).toBe('savings');
       expect(result.updatedAt).toBeDefined();
 
-      const storedAccounts = JSON.parse(localStorage.getItem(STORAGE_KEYS.ACCOUNTS));
+      const storedAccounts = JSON.parse(
+        localStorage.getItem(STORAGE_KEYS.ACCOUNTS)
+      );
       const storedAccount = storedAccounts.find(acc => acc.id === 'test-acc');
       expect(storedAccount.name).toBe('Updated Name');
     });
@@ -184,8 +189,18 @@ describe('AccountService', () => {
   describe('deleteAccount', () => {
     it('should delete account successfully', () => {
       // Create multiple accounts
-      const account1 = { id: 'acc1', name: 'Account 1', type: 'checking', isDefault: false };
-      const account2 = { id: 'acc2', name: 'Account 2', type: 'savings', isDefault: false };
+      const account1 = {
+        id: 'acc1',
+        name: 'Account 1',
+        type: 'checking',
+        isDefault: false,
+      };
+      const account2 = {
+        id: 'acc2',
+        name: 'Account 2',
+        type: 'savings',
+        isDefault: false,
+      };
 
       AccountService.saveAccount(account1);
       AccountService.saveAccount(account2);
@@ -211,8 +226,18 @@ describe('AccountService', () => {
 
     it('should ensure there is always a default account after deletion', () => {
       // Create accounts with one being default
-      const account1 = { id: 'acc1', name: 'Account 1', type: 'checking', isDefault: true };
-      const account2 = { id: 'acc2', name: 'Account 2', type: 'savings', isDefault: false };
+      const account1 = {
+        id: 'acc1',
+        name: 'Account 1',
+        type: 'checking',
+        isDefault: true,
+      };
+      const account2 = {
+        id: 'acc2',
+        name: 'Account 2',
+        type: 'savings',
+        isDefault: false,
+      };
 
       AccountService.saveAccount(account1);
       AccountService.saveAccount(account2);
@@ -231,8 +256,18 @@ describe('AccountService', () => {
 
   describe('getDefaultAccount', () => {
     it('should return the default account', () => {
-      const account1 = { id: 'acc1', name: 'Account 1', type: 'checking', isDefault: false };
-      const account2 = { id: 'acc2', name: 'Account 2', type: 'savings', isDefault: true };
+      const account1 = {
+        id: 'acc1',
+        name: 'Account 1',
+        type: 'checking',
+        isDefault: false,
+      };
+      const account2 = {
+        id: 'acc2',
+        name: 'Account 2',
+        type: 'savings',
+        isDefault: true,
+      };
 
       AccountService.saveAccount(account1);
       AccountService.saveAccount(account2);
@@ -252,38 +287,71 @@ describe('AccountService', () => {
 
   describe('isAccountDuplicate', () => {
     it('should detect duplicate account names and types', () => {
-      const account1 = { id: 'acc1', name: 'Test Account', type: 'checking', isDefault: false };
+      const account1 = {
+        id: 'acc1',
+        name: 'Test Account',
+        type: 'checking',
+        isDefault: false,
+      };
 
       AccountService.saveAccount(account1);
 
-      const isDuplicate = AccountService.isAccountDuplicate('Test Account', 'checking');
+      const isDuplicate = AccountService.isAccountDuplicate(
+        'Test Account',
+        'checking'
+      );
       expect(isDuplicate).toBe(true);
     });
 
     it('should allow same name with different type', () => {
-      const account1 = { id: 'acc1', name: 'Test Account', type: 'checking', isDefault: false };
+      const account1 = {
+        id: 'acc1',
+        name: 'Test Account',
+        type: 'checking',
+        isDefault: false,
+      };
 
       AccountService.saveAccount(account1);
 
-      const isDuplicate = AccountService.isAccountDuplicate('Test Account', 'savings');
+      const isDuplicate = AccountService.isAccountDuplicate(
+        'Test Account',
+        'savings'
+      );
       expect(isDuplicate).toBe(false);
     });
 
     it('should exclude specified account from duplicate check', () => {
-      const account1 = { id: 'acc1', name: 'Test Account', type: 'checking', isDefault: false };
+      const account1 = {
+        id: 'acc1',
+        name: 'Test Account',
+        type: 'checking',
+        isDefault: false,
+      };
 
       AccountService.saveAccount(account1);
 
-      const isDuplicate = AccountService.isAccountDuplicate('Test Account', 'checking', 'acc1');
+      const isDuplicate = AccountService.isAccountDuplicate(
+        'Test Account',
+        'checking',
+        'acc1'
+      );
       expect(isDuplicate).toBe(false);
     });
 
     it('should be case insensitive for name comparison', () => {
-      const account1 = { id: 'acc1', name: 'Test Account', type: 'checking', isDefault: false };
+      const account1 = {
+        id: 'acc1',
+        name: 'Test Account',
+        type: 'checking',
+        isDefault: false,
+      };
 
       AccountService.saveAccount(account1);
 
-      const isDuplicate = AccountService.isAccountDuplicate('test account', 'checking');
+      const isDuplicate = AccountService.isAccountDuplicate(
+        'test account',
+        'checking'
+      );
       expect(isDuplicate).toBe(true);
     });
   });
@@ -303,7 +371,9 @@ describe('AccountService', () => {
 
       // Should remove duplicates, keeping only unique accounts
       expect(cleanedAccounts).toHaveLength(2);
-      expect(cleanedAccounts.map(acc => acc.id)).toEqual(expect.arrayContaining(['acc1', 'acc2']));
+      expect(cleanedAccounts.map(acc => acc.id)).toEqual(
+        expect.arrayContaining(['acc1', 'acc2'])
+      );
     });
   });
 

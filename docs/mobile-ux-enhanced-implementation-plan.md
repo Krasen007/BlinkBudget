@@ -11,6 +11,7 @@
 This implementation plan addresses the critical gaps identified in the mobile design audit to achieve Apple-level mobile UX while maintaining BlinkBudget's 3-click workflow promise.
 
 **Priority Focus Areas:**
+
 1. **Design System Completion** - Missing semantic colors and expanded primary ramp
 2. **Visual Polish Enhancement** - Shadow tokens and gradients
 3. **Accessibility Compliance** - Contrast ratio verification
@@ -19,9 +20,11 @@ This implementation plan addresses the critical gaps identified in the mobile de
 ---
 
 ## 🎯 Phase 1: Critical Design System Fixes (Week 1)
-*Foundation improvements for design consistency*
+
+_Foundation improvements for design consistency_
 
 ### 1.1 Add Missing Semantic Colors
+
 **Files to modify:** `src/styles/tokens.css`
 **Impact:** Critical - Fixes undefined color references
 **Priority:** 🔴 CRITICAL
@@ -42,6 +45,7 @@ This implementation plan addresses the critical gaps identified in the mobile de
 ```
 
 ### 1.2 Expand Primary Color Ramp
+
 **Files to modify:** `src/styles/tokens.css`
 **Impact:** Critical - Enables proper color hierarchy
 **Priority:** 🔴 CRITICAL
@@ -66,6 +70,7 @@ This implementation plan addresses the critical gaps identified in the mobile de
 ```
 
 ### 1.3 Add Shadow Tokens
+
 **Files to modify:** `src/styles/tokens.css`
 **Impact:** High - Consistent elevation system
 **Priority:** 🟠 HIGH
@@ -85,24 +90,43 @@ This implementation plan addresses the critical gaps identified in the mobile de
 ```
 
 ### 1.4 Add Gradient Tokens
+
 **Files to modify:** `src/styles/tokens.css`
 **Impact:** High - Modern visual elements
 **Priority:** 🟠 HIGH
 
 ```css
 /* Add to tokens.css after colors section */
---gradient-primary: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
---gradient-success: linear-gradient(135deg, var(--color-success), var(--color-success-dark));
---gradient-subtle: linear-gradient(135deg, var(--color-surface), var(--color-surface-hover));
---gradient-hero: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-700));
+--gradient-primary: linear-gradient(
+  135deg,
+  var(--color-primary-500),
+  var(--color-primary-600)
+);
+--gradient-success: linear-gradient(
+  135deg,
+  var(--color-success),
+  var(--color-success-dark)
+);
+--gradient-subtle: linear-gradient(
+  135deg,
+  var(--color-surface),
+  var(--color-surface-hover)
+);
+--gradient-hero: linear-gradient(
+  135deg,
+  var(--color-primary-400),
+  var(--color-primary-700)
+);
 ```
 
 ---
 
 ## 🎨 Phase 2: Visual Polish & Accessibility (Week 2)
-*Refined visual hierarchy and compliance*
+
+_Refined visual hierarchy and compliance_
 
 ### 2.1 Verify and Fix Contrast Ratios
+
 **Files to modify:** `src/styles/tokens.css`
 **Impact:** Critical - WCAG AA compliance
 **Priority:** 🔴 CRITICAL
@@ -117,6 +141,7 @@ This implementation plan addresses the critical gaps identified in the mobile de
 ```
 
 ### 2.2 Apply Shadow Tokens to Components
+
 **Files to modify:** `src/styles/components/ui.css`
 **Impact:** High - Consistent elevation
 **Priority:** 🟠 HIGH
@@ -145,6 +170,7 @@ This implementation plan addresses the critical gaps identified in the mobile de
 ```
 
 ### 2.3 Typography Line-Height Consistency
+
 **Files to modify:** `src/styles/base.css`
 **Impact:** Medium - Better readability
 **Priority:** 🟡 MEDIUM
@@ -155,7 +181,12 @@ body {
   line-height: var(--line-height-normal); /* 1.5 */
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   line-height: var(--line-height-tight); /* 1.25 */
 }
 ```
@@ -163,9 +194,11 @@ h1, h2, h3, h4, h5, h6 {
 ---
 
 ## ✨ Phase 3: Enhanced Micro-interactions (Week 3)
-*Balanced animations for polished feel*
+
+_Balanced animations for polished feel_
 
 ### 3.1 Refined Button Transitions
+
 **Files to modify:** `src/styles/components/ui.css`
 **Impact:** Medium - Smoother interactions
 **Priority:** 🟡 MEDIUM
@@ -194,6 +227,7 @@ h1, h2, h3, h4, h5, h6 {
 ```
 
 ### 3.2 Animation Token System
+
 **Files to modify:** `src/styles/tokens.css`, `src/styles/components/ui.css`
 **Impact:** Low - Animation consistency
 **Priority:** 🟢 LOW
@@ -212,9 +246,11 @@ h1, h2, h3, h4, h5, h6 {
 ---
 
 ## 🔧 Phase 4: Component Updates (Week 4)
-*Apply new design system to components*
+
+_Apply new design system to components_
 
 ### 4.1 Update Toast Notifications
+
 **Files to modify:** `src/styles/components/ui.css`
 **Impact:** High - Better feedback system
 **Priority:** 🟠 HIGH
@@ -247,6 +283,7 @@ h1, h2, h3, h4, h5, h6 {
 ```
 
 ### 4.2 Enhanced Card Components
+
 **Files to modify:** `src/styles/components/ui.css`
 **Impact:** Medium - Better visual hierarchy
 **Priority:** 🟡 MEDIUM
@@ -277,6 +314,7 @@ h1, h2, h3, h4, h5, h6 {
 ```
 
 ### 4.3 Form Input Enhancements
+
 **Files to modify:** `src/styles/components/ui.css`
 **Impact:** Medium - Better form UX
 **Priority:** 🟡 MEDIUM
@@ -309,22 +347,26 @@ h1, h2, h3, h4, h5, h6 {
 ## 📊 Implementation Checklist
 
 ### Phase 1: Critical Fixes
+
 - [x] Add semantic color tokens (warning, error, info)
 - [x] Expand primary color ramp to 9 shades
 - [x] Add shadow token system
 - [x] Add gradient token system
 
 ### Phase 2: Visual Polish
+
 - [x] Verify and fix contrast ratios
 - [x] Apply shadow tokens to components
 - [x] Ensure typography line-height consistency
 
 ### Phase 3: Micro-interactions
+
 - [x] Refine button transitions (150ms)
 - [x] Add animation token system
 - [x] Update hover states
 
 ### Phase 4: Component Updates
+
 - [x] Update toast notifications
 - [x] Enhance card components
 - [x] Improve form input styles
@@ -334,6 +376,7 @@ h1, h2, h3, h4, h5, h6 {
 ## 🧪 Testing Strategy
 
 ### Automated Testing
+
 ```bash
 # Build verification
 npm run build
@@ -346,6 +389,7 @@ npm run test:accessibility
 ```
 
 ### Manual Testing Checklist
+
 - [ ] Verify all semantic colors display correctly
 - [ ] Test contrast ratios with WebAIM Contrast Checker
 - [ ] Validate shadow consistency across components
@@ -354,6 +398,7 @@ npm run test:accessibility
 - [ ] Verify hover states work on touch devices
 
 ### Performance Verification
+
 - [ ] Lighthouse performance score ≥90
 - [ ] Animation performance at 60fps
 - [ ] Bundle size impact assessment
@@ -364,16 +409,19 @@ npm run test:accessibility
 ## 📱 Platform-Specific Considerations
 
 ### iOS Optimizations
+
 - Ensure smooth scrolling with new shadows
 - Test gradient rendering on iOS Safari
 - Verify touch feedback with updated transitions
 
 ### Android Optimizations
+
 - Test shadow rendering on Chrome Mobile
 - Verify color consistency across Android versions
 - Ensure transitions don't impact performance
 
 ### Cross-Platform Consistency
+
 - Semantic colors work everywhere
 - Shadow tokens degrade gracefully
 - Gradients have fallbacks for older browsers
@@ -383,21 +431,25 @@ npm run test:accessibility
 ## 🚀 Rollout Strategy
 
 ### Week 1: Foundation
+
 - Deploy semantic colors and primary ramp
 - Monitor for any color-related issues
 - Update component references
 
 ### Week 2: Polish
+
 - Apply shadows and verify contrast
 - Test accessibility compliance
 - Gather feedback on visual changes
 
 ### Week 3: Interactions
+
 - Implement refined transitions
 - Test animation performance
 - Optimize for mobile devices
 
 ### Week 4: Integration
+
 - Update all components
 - Full regression testing
 - Performance validation
@@ -407,23 +459,27 @@ npm run test:accessibility
 ## 📈 Success Metrics
 
 ### Design System Completeness
+
 - [ ] 100% semantic color coverage
 - [ ] 9-shade primary ramp implemented
 - [ ] Shadow tokens used consistently
 - [ ] Gradient tokens available
 
 ### Accessibility Compliance
+
 - [ ] WCAG AA contrast ratios met
 - [ ] Focus indicators preserved
 - [ ] Screen reader compatibility maintained
 
 ### Performance Standards
+
 - [ ] Build size increase <5%
 - [ ] Lighthouse score maintained
 - [ ] 60fps animations on mobile
 - [ ] No layout shifts
 
 ### User Experience
+
 - [ ] Visual hierarchy improved
 - [ ] Micro-interactions feel polished
 - [ ] Touch feedback enhanced
@@ -434,15 +490,17 @@ npm run test:accessibility
 ## 🔄 Maintenance Plan
 
 ### Design System Governance
+
 - Document new tokens in design guide
 - Update component library documentation
 - Establish token usage guidelines
 
 ### Future Enhancements
+
 - Monitor usage patterns for new tokens
 - Consider dark mode variations
 - Plan for theme system expansion
 
 ---
 
-*This plan prioritizes critical design system fixes while maintaining BlinkBudget's core promise of extremely fast, 3-click expense tracking. All changes enhance the mobile experience without compromising performance or accessibility.*
+_This plan prioritizes critical design system fixes while maintaining BlinkBudget's core promise of extremely fast, 3-click expense tracking. All changes enhance the mobile experience without compromising performance or accessibility._

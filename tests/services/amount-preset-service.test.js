@@ -7,11 +7,11 @@ describe('AmountPresetService', () => {
   beforeEach(() => {
     const store = {};
     mockLocalStorage = {
-      getItem: vi.fn((key) => store[key] || null),
+      getItem: vi.fn(key => store[key] || null),
       setItem: vi.fn((key, value) => {
         store[key] = value;
       }),
-      removeItem: vi.fn((key) => {
+      removeItem: vi.fn(key => {
         delete store[key];
       }),
       clear: vi.fn(() => {

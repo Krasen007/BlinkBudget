@@ -2,9 +2,19 @@
 
 /* Success highlight animation */
 @keyframes successPulse {
-  0% { background-color: var(--color-success-light); }
-  50% { background-color: var(--color-success-light); opacity: 0.8; }
-  100% { background-color: transparent; opacity: 1; }
+  0% {
+    background-color: var(--color-success-light);
+  }
+
+  50% {
+    background-color: var(--color-success-light);
+    opacity: 0.8;
+  }
+
+  100% {
+    background-color: transparent;
+    opacity: 1;
+  }
 }
 
 .success-highlight-active {
@@ -13,12 +23,12 @@
 
 /* Transaction saved animation */
 @keyframes slideInSuccess {
-  0% { 
+  0% {
     transform: translateX(100%);
     opacity: 0;
   }
 
-  100% { 
+  100% {
     transform: translateX(0);
     opacity: 1;
   }
@@ -103,7 +113,6 @@
   transform: scale(0.98);
   filter: brightness(0.9);
 }
-
 
 .btn:hover {
   transform: translateY(-1px);

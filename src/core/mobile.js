@@ -243,7 +243,7 @@ export class MobileUtils {
    */
   setupBackButtonHandling() {
     if (window.BackButton) {
-      window.BackButton.addHandler((route) => {
+      window.BackButton.addHandler(route => {
         // Custom back button logic
         if (route === 'dashboard') {
           // Show exit confirmation
