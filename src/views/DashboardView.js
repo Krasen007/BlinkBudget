@@ -382,6 +382,8 @@ export const DashboardView = () => {
     currentAccountFilter = e.target.value;
     // Use localStorage directly to avoid syncing this preference
     sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, currentAccountFilter);
+    // Remove focus from select to eliminate persistent border
+    e.target.blur();
     renderDashboard();
   });
 

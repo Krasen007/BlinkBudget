@@ -268,6 +268,9 @@ export const TransactionListItem = ({
 
   // Apply success highlight if this transaction should be highlighted
   if (shouldHighlight) {
+    // Add new transaction animation class
+    item.classList.add('transaction-item-new');
+
     // Use a small delay to ensure the item is rendered before highlighting
     setTimeout(() => {
       highlightTransactionSuccess(item, 1500);

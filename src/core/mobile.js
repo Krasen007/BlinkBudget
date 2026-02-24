@@ -237,6 +237,22 @@ export class MobileUtils {
       window.mobileUtils = new MobileUtils();
     }
   }
+
+  /**
+   * Setup enhanced back button handling for mobile platforms
+   */
+  setupBackButtonHandling() {
+    if (window.BackButton) {
+      window.BackButton.addHandler((route) => {
+        // Custom back button logic
+        if (route === 'dashboard') {
+          // Show exit confirmation
+          return false;
+        }
+        return true;
+      });
+    }
+  }
 }
 
 // Auto-initialize when module is imported

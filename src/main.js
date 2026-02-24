@@ -132,6 +132,10 @@ const initApp = () => {
   NavigationState.init();
   // Initialize centralized cache invalidator
   CacheInvalidator.init();
+  // Initialize enhanced back button handling for mobile
+  if (window.mobileUtils) {
+    window.mobileUtils.setupBackButtonHandling();
+  }
   // Lazy load privacy service after app is ready
   initPrivacyService();
   console.log('[Main] App initialized, starting router.');
