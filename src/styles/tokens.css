@@ -166,6 +166,23 @@
   --transition-fast: 150ms ease;
   --transition-normal: 250ms ease;
   --transition-slow: 300ms ease;
+
+  /* Animation system - For consistent motion design */
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+
+  /* Animation durations */
+  --duration-instant: 50ms;
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 350ms;
+
+  /* Animation properties */
+  --animation-interactive: var(--duration-fast) var(--ease-in-out);
+  --animation-smooth: var(--duration-normal) var(--ease-out);
+  --animation-entrance: var(--duration-normal) var(--ease-out);
+  --animation-exit: var(--duration-fast) var(--ease-in);
 }
 
 /* typography.css (Tokens) */

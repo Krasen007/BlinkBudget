@@ -39,7 +39,7 @@
   border-radius: var(--radius-md);
   border: 1px solid transparent;
   cursor: pointer;
-  transition: none; /* Instant feedback */
+  transition: var(--transition-fast); /* Refined to 150ms for balanced feel */
   text-decoration: none;
   font-size: var(--font-size-base);
   position: relative;
@@ -109,6 +109,7 @@
   transform: translateY(-1px);
   filter: brightness(1.2);
   box-shadow: var(--shadow-md);
+  transition: var(--animation-interactive);
 }
 
 .btn-ghost {
@@ -117,12 +118,15 @@
   border: 1px solid var(--color-border);
   padding: var(--spacing-sm) var(--spacing-md);
   font-size: var(--font-size-sm);
+  transition: var(--animation-interactive);
 }
 
 .btn-ghost:hover {
-  border-color: var(--color-text-main);
-  color: var(--color-text-main);
   background-color: var(--color-surface-hover);
+  color: var(--color-text-main);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-ghost.btn-small {

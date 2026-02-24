@@ -17,6 +17,18 @@ import './core/mobile-form-optimizer.js';
 
 InstallService.init();
 
+// Preload critical views for faster navigation when authenticated
+const preloadCriticalViews = () => {
+  // Preload AddView and EditView for instant transaction management
+  Promise.all([import('./views/AddView.js'), import('./views/EditView.js')])
+    .then(() => {
+      console.log('[Main] Critical views preloaded successfully');
+    })
+    .catch(error => {
+      console.warn('[Main] Failed to preload critical views:', error);
+    });
+};
+
 // Lazy load privacy service after app initialization
 const initPrivacyService = () => {
   import('./core/privacy-service.js')
@@ -106,6 +118,9 @@ const initApp = () => {
       if (currentRoute === 'login' || currentRoute === 'landing') {
         Router.navigate('dashboard');
       }
+
+      // Preload critical views for faster navigation
+      preloadCriticalViews();
     } else {
       console.log('[Main] No user, stopping sync.');
 
