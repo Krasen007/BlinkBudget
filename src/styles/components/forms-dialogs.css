@@ -158,30 +158,29 @@ select.input-select:focus {
   font-size: max(var(--font-size-prevent-zoom), var(--font-size-base));
   padding: var(--spacing-md);
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
+  border: 2px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text-main);
-  transition: all var(--transition-fast);
+  transition: var(--animation-interactive);
   font-family: var(--font-body);
   outline: none;
   box-sizing: border-box;
   appearance: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  box-shadow: var(--shadow-sm);
 }
 
 .mobile-form-input:hover,
 .mobile-form-select:hover {
   border-color: var(--color-primary);
-  box-shadow: 0 0 8px
-    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.4);
+  box-shadow: var(--shadow-primary);
 }
 
 .mobile-form-input:focus,
 .mobile-form-select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px
-    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.15);
+  box-shadow: var(--focus-shadow), var(--shadow-primary);
   outline: none;
 }
 
