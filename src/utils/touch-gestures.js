@@ -174,7 +174,7 @@ export class TouchGestures {
       isTouch = true;
       button.style.transform = 'scale(0.95)';
       button.style.opacity = '0.8';
-      this.triggerHapticFeedback('light');
+      // Haptic feedback disabled
     };
 
     const touchEndHandler = () => {
@@ -219,7 +219,7 @@ export class TouchGestures {
 
       // Regular mouse/keyboard click
       onClick(_e);
-      this.triggerHapticFeedback('medium');
+      // Haptic feedback disabled
     });
 
     return button;

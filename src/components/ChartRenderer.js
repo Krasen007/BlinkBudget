@@ -458,8 +458,8 @@ export class ChartRenderer {
           clientX: touch.clientX,
           clientY: touch.clientY,
           target: canvas,
-          preventDefault: () => {},
-          stopPropagation: () => {},
+          preventDefault: () => { },
+          stopPropagation: () => { },
         };
 
         // Get elements at touch position
@@ -568,8 +568,7 @@ export class ChartRenderer {
     // Add enhanced click animations
     this.addClickAnimation(chart, activeElement, chartType);
 
-    // Add haptic feedback for mobile devices
-    this.addHapticFeedback();
+    // Haptic feedback disabled
 
     // Dispatch custom event for other components to listen to
     const customEvent = new CustomEvent('chartSegmentClick', {
@@ -667,8 +666,8 @@ export class ChartRenderer {
       originalBorderWidth
     )
       ? originalBorderWidth.map((width, i) =>
-          i === activeElement.index ? width + 2 : width
-        )
+        i === activeElement.index ? width + 2 : width
+      )
       : originalBorderWidth + 2;
 
     chart.update('none');

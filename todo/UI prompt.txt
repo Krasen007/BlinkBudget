@@ -1,0 +1,151 @@
+**AI Assistant – Mobile Design Audit Prompt for BlinkBudget**
+
+---
+
+### 1. Project Context
+- **App type:** Progressive Web App (PWA) – responsive web with native‑like experience.  
+- **Industry:** Personal finance / budgeting.  
+- **Target audience:** Money‑conscious individuals of all technical proficiency levels.  
+- **Brand personality:** Professional, premium, fast, simple, and highly accessible.  
+- **Project name:** **BlinkBudget**  
+- **High‑level goal:** Enable users to track expenses and income in **≤ 3 clicks**, delivering beautiful, actionable insights while feeling “extremely fast.”  
+- **Tech stack:**  
+  - **Frontend:** Vanilla JavaScript (ES Modules) + Vite (fast dev server, optimized builds).  
+  - **Styling:** Vanilla CSS with PostCSS pipeline (custom properties, HSL color system, nesting, future‑CSS features).  
+  - **Data storage:** `localStorage` (local‑first) + optional Firebase sync for backup & cross‑device.  
+  - **Charts:** Chart.js (responsive, interactive visualizations).  
+  - **Deployment:** Netlify (static hosting, CDN, built‑in PWA support).  
+  - **PWA:** Service worker for offline capability & background sync.  
+- **Architecture (src/):** `core/`, `components/`, `views/`, `styles/`, `utils/`, `router/`, `main.js`, `pwa.js`.  
+- **Data model (localStorage):**  
+  - `transactions` – array of expense/income entries (id, amount, category, type, timestamp, note, etc.).  
+  - `accounts` – user‑defined accounts (id, name, type, isDefault).  
+  - `settings` – app preferences (dateFormat, theme, etc.).  
+- **Key functional features (must‑have MVP):**  
+  - **Rapid Expense Entry** – 3‑click workflow, large touch‑optimized amount field, category chips, quick‑confirm button.  
+  - **Income Tracking** – same 3‑click efficiency, dedicated income categories.  
+  - **Quick Amount Presets** – four most‑used amounts displayed as one‑tap buttons (e.g., $5, $10, $20, $50).  
+  - **Beautiful Reports & Insights** – Chart.js visualizations (pie, bar, line), income vs. expense overview, cost‑of‑living summary, actionable insights.  
+  - **Data Reliability & Accuracy** – local‑first storage, Firebase sync, encryption options, backup/export (CSV/JSON).  
+  - **Predictive Analytics & Balance Projection** – statistical forecasting, risk assessment.  
+  - **Category Usage Statistics** – track most‑frequently used categories for smarter suggestions.  
+- **UI/UX guidelines (from PRD):**  
+  - Zero loading screens, instant launch via PWA caching.  
+  - Swift CSS (60 fps), minimal animations.  
+  - Immediate visual/haptic feedback (≤ 100 ms).  
+  - Minimalist, uncluttered layout with ample whitespace.  
+  - Large touch targets (≥ 44 × 44 px on iOS, ≥ 48 × 48 px on Android).  
+  - Smart defaults (pre‑filled date, category suggestions).  
+  - Dark theme with HSL color palette, premium look & feel.  
+  - WCAG AA compliance (contrast ≥ 4.5:1).  
+  - Semantic HTML, ARIA labels, keyboard navigation.  
+
+---
+
+### 2. Design Decision Framework
+For **every** UI element, answer the following:
+
+| Question | What to address |
+|----------|-----------------|
+| **Purpose** | Why does this element exist? |
+| **Hierarchy** | Its importance in the information architecture. |
+| **Context** | Relationship to surrounding elements (layout, flow). |
+| **Accessibility** | Can all users (including assistive‑technology users) interact with it effectively? |
+| **Performance** | Does it affect loading time, render time, or interaction latency? |
+
+---
+
+### 3. Apple‑Level Design Aesthetics (iOS‑quality polish)
+- **Pixel‑perfect detail** – consistent spacing, alignment, and sizing.  
+- **Intuitive flow** – actions feel natural, no “learn‑by‑doing.”  
+- **Clean, sophisticated visuals** – subtle gradients, refined shadows, HSL‑based color system.  
+- **Micro‑interactions** – subtle, meaningful feedback (e.g., button press ripple, haptic tap).  
+- **Uniform interaction patterns** – same gestures & feedback across the app.  
+- **Emotional design** – positive reinforcement (e.g., gentle success animation on entry).  
+
+---
+
+### 4. Micro‑Interaction Principles (for each interaction)
+- **Trigger** – what initiates it (tap, swipe, load).  
+- **Rules** – what happens during the interaction (state changes, animation).  
+- **Feedback** – visual/haptic cues confirming the action.  
+- **Loops** – does it repeat or evolve (e.g., loading spinner cycles).  
+- **Modes** – how the interaction changes the app’s state (modal, sheet, navigation).  
+
+---
+
+### 5. Mobile‑Specific Requirements  
+
+#### Touch Interface Design
+- Minimum target size: **44 × 44 px** (iOS) / **48 × 48 px** (Android).  
+- Minimum spacing between interactive elements: **8 px**.  
+- Primary actions placed in thumb‑reach zones (bottom‑center & bottom‑right).  
+- Avoid competing gestures (e.g., swipe vs. scroll).  
+- Haptic feedback only for key confirmations (e.g., expense saved).  
+- Visual touch feedback within **100 ms** of tap.  
+
+#### Navigation Patterns
+- **Tab Bar** – ≤ 5 tabs; “More” for overflow.  
+- **Bottom Sheets** – modal content slides from bottom edge.  
+- **Floating Action Button (FAB)** – primary “Add Transaction” action, bottom‑right.  
+- **Pull‑to‑Refresh** – standard content update.  
+- **Swipe Actions** – reveal secondary actions (delete, edit, share).  
+
+#### Typography
+- Minimum body size **16 px** (prevents iOS double‑tap zoom).  
+- Line‑height: **1.4–1.6** (body), **1.1–1.3** (headings).  
+- Measure: **45–75 characters** per line for optimal readability.  
+- Max **3 font‑weight** variations (e.g., Regular, Medium, Bold).  
+
+#### Color System
+- **Primary ramp:** 6–9 shades with WCAG AA contrast.  
+- **Semantic colors:** success, warning, error, info.  
+- **Dark‑mode variants** for every shade.  
+- **High‑contrast mode** support.  
+- **Color independence:** never convey meaning solely via color.  
+
+#### Performance Optimization
+- **Critical Rendering Path:** Inline critical CSS, defer non‑critical assets.  
+- **Image Optimization:** WebP, responsive `srcset`, lazy‑load.  
+- **Animation Performance:** Use `transform` & `opacity`; avoid layout‑affecting properties.  
+- **Target 60 fps** – apply `will‑change` where needed.  
+- **Memory Management:** Remove event listeners, avoid leaks.  
+
+#### Accessibility (WCAG AA)
+- Contrast ratio ≥ 4.5:1.  
+- Large touch targets, clear focus outlines.  
+- Semantic markup + ARIA labels for screen readers.  
+- No time limits; support alternative input (voice, keyboard).  
+- Simple language, clear instructions, inline validation to reduce cognitive load.  
+
+#### Advanced Mobile Patterns
+- **Progressive Disclosure** – reveal secondary info on demand.  
+- **Loading States** – skeleton screens, optimistic UI updates.  
+- **Error Recovery** – clear messages with actionable steps.  
+- **Form Design** – single column, smart defaults, inline validation.  
+- **Content Strategy** – mobile‑first prioritization, concise copy.  
+
+---
+
+### 6. Output Requirements (what the AI should deliver)
+
+1. **Mobile Design System** – color tokens, typography scale, spacing, elevation, and dark‑mode definitions.  
+2. **Touch Interface Guidelines** – hit‑testing, thumb‑reach zones, feedback specs, haptic usage.  
+3. **Component Library** – buttons, inputs, cards, navigation elements (tab bar, bottom sheet, FAB) optimized for the 3‑click workflow.  
+4. **Animation Library** – performance‑optimized micro‑interactions (durations, easings, triggers, `will‑change` usage).  
+5. **Accessibility Checklist & Implementation Guide** – itemized WCAG AA compliance steps, ARIA usage, focus management.  
+6. **Performance Optimization Recommendations** – critical CSS strategy, asset loading, memory cleanup, animation best practices.  
+7. **Platform‑Specific Considerations** – differences & iOS, Android, and Web (e.g., Safari vs. Chrome quirks, PWA install prompts).  
+8. **Testing Methodology** – unit tests (Vitest), UI tests (Playwright or Cypress), accessibility audits (axe), performance profiling (Lighthouse).  
+
+---
+
+### 7. Task for the AI Assistant
+- **Audit** the current BlinkBudget implementation against the above design system and guidelines.  
+- Identify **gaps**, **violations**, and **opportunities** in visual design, interaction flow, accessibility, performance, and platform‑specific nuances.  
+- Produce a **structured report** with actionable recommendations, including code snippets, design‑token examples, or component revisions where relevant.  
+- **Do not** generate any content beyond the audit report.  
+
+--- 
+
+*End of Prompt*
