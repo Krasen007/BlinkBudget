@@ -25,14 +25,22 @@
   --primary-sat: 84%;
   --primary-light: 60%;
 
-  /* Primary color variants */
-  --color-primary: hsl(
-    var(--primary-hue),
-    var(--primary-sat),
-    var(--primary-light)
-  );
-  --color-primary-dark: hsl(var(--primary-hue), var(--primary-sat), 50%);
-  --color-primary-light: hsl(var(--primary-hue), var(--primary-sat), 75%);
+  /* Primary color ramp - Expanded to 9 shades for design system compliance */
+  --color-primary-50: hsl(250, 84%, 95%);
+  --color-primary-100: hsl(250, 84%, 90%);
+  --color-primary-200: hsl(250, 84%, 80%);
+  --color-primary-300: hsl(250, 84%, 70%);
+  --color-primary-400: hsl(250, 84%, 65%);
+  --color-primary-500: hsl(250, 84%, 60%); /* Primary base color */
+  --color-primary-600: hsl(250, 84%, 55%);
+  --color-primary-700: hsl(250, 84%, 50%);
+  --color-primary-800: hsl(250, 84%, 40%);
+  --color-primary-900: hsl(250, 84%, 30%);
+
+  /* Legacy primary color compatibility */
+  --color-primary: var(--color-primary-500);
+  --color-primary-dark: var(--color-primary-700);
+  --color-primary-light: var(--color-primary-200);
 
   /* Surface colors */
   --color-background: hsl(240, 10%, 4%);
@@ -55,6 +63,17 @@
   /* Success colors */
   --color-success: hsl(150, 100%, 35%);
   --color-success-light: hsla(150, 100%, 35%, 0.1);
+
+  /* Semantic colors - Missing tokens from audit */
+  --color-warning: hsl(45, 100%, 50%);
+  --color-warning-light: hsl(45, 100%, 95%);
+  --color-warning-dark: hsl(45, 100%, 40%);
+  --color-error: hsl(0, 85%, 60%);
+  --color-error-light: hsl(0, 85%, 95%);
+  --color-error-dark: hsl(0, 85%, 40%);
+  --color-info: hsl(190, 85%, 55%);
+  --color-info-light: hsl(190, 85%, 95%);
+  --color-info-dark: hsl(190, 85%, 40%);
 
   /* Enhanced accessibility tokens */
   --focus-color: hsl(250, 84%, 60%); /* Same as primary for consistency */
@@ -116,6 +135,28 @@
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-full: 9999px;
+
+  /* Shadow system - For consistent elevation and visual hierarchy */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+
+  /* Colored shadows for semantic elements */
+  --shadow-primary: 0 4px 14px 0 hsl(250 84% 60% / 0.25);
+  --shadow-success: 0 4px 14px 0 hsl(150 100% 35% / 0.25);
+  --shadow-warning: 0 4px 14px 0 hsl(45 100% 50% / 0.25);
+  --shadow-error: 0 4px 14px 0 hsl(0 85% 60% / 0.25);
+  --shadow-info: 0 4px 14px 0 hsl(190 85% 55% / 0.25);
+
+  /* Gradient system - For modern visual elements */
+  --gradient-primary: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
+  --gradient-success: linear-gradient(135deg, var(--color-success), var(--color-success-dark));
+  --gradient-warning: linear-gradient(135deg, var(--color-warning), var(--color-warning-dark));
+  --gradient-error: linear-gradient(135deg, var(--color-error), var(--color-error-dark));
+  --gradient-info: linear-gradient(135deg, var(--color-info), var(--color-info-dark));
+  --gradient-subtle: linear-gradient(135deg, var(--color-surface), var(--color-surface-hover));
+  --gradient-hero: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-700));
 
   /* Transitions */
   --transition-fast: 150ms ease;
