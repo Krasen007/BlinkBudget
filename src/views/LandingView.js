@@ -4,10 +4,7 @@ import { Button } from '../components/Button.js';
 export const LandingView = () => {
   const container = document.createElement('div');
   container.className = 'view-landing';
-  Object.assign(container.style, {
-    height: '100vh',
-    overflow: 'auto',
-  });
+  // Remove height/overflow constraints to allow document-level scrolling
 
   const heroSection = document.createElement('section');
   heroSection.className = 'hero-placeholder';

@@ -185,8 +185,8 @@ export const DashboardView = () => {
           const tDate = new Date(t.timestamp);
           const filterDate = new Date(currentMonthFilter);
           if (
-            tDate.getMonth() !== filterDate.getMonth() ||
-            tDate.getFullYear() !== filterDate.getFullYear()
+            tDate.getUTCMonth() !== filterDate.getUTCMonth() ||
+            tDate.getUTCFullYear() !== filterDate.getUTCFullYear()
           ) {
             return false;
           }
@@ -204,7 +204,8 @@ export const DashboardView = () => {
     const hasActiveFilters = currentAccountFilter !== 'all' ||
       currentDateFilter !== null ||
       currentCategoryFilter !== null ||
-      currentMonthFilter !== null;
+      currentMonthFilter !== null ||
+      advancedFilters !== null;
 
     // Calculate ALL TIME net worth for Total Available
     let allTimeIncome = 0;
@@ -239,9 +240,11 @@ export const DashboardView = () => {
       let filteredExpense = 0;
 
       validTransactionsForStats.forEach(t => {
-        if (t.type === 'income') filteredIncome += t.amount;
-        if (t.type === 'expense') filteredExpense += t.amount;
-        if (t.type === 'refund') filteredExpense -= t.amount;
+        const isSource = (currentAccountFilter === 'all') || (t.accountId === currentAccountFilter);
+
+        if (t.type === 'income' && isSource) filteredIncome += t.amount;
+        if (t.type === 'expense' && isSource) filteredExpense += t.amount;
+        if (t.type === 'refund' && isSource) filteredExpense -= t.amount;
 
         if (t.type === 'transfer') {
           if (t.accountId === currentAccountFilter || currentAccountFilter === 'all') {

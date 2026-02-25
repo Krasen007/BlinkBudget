@@ -229,6 +229,11 @@ export class MobileUtils {
    * Initialize mobile utilities when DOM is ready
    */
   static initialize() {
+    // Cleanup existing instance if present
+    if (window.mobileUtils) {
+      window.mobileUtils.destroy();
+    }
+
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
         window.mobileUtils = new MobileUtils();
@@ -247,9 +252,18 @@ export class MobileUtils {
    */
   setupBackButtonHandling() {
     if (window.BackButton) {
-      window.BackButton.addHandler(() => {
-        // Get current route from router instead of undefined parameter
-        const currentRoute = window.router?.currentRoute?.name || 'dashboard';
+      this._backButtonHandle = window.BackButton.addHandler(() => {
+        // Get current route from router, handling both Vue Router 3 and 4
+        let currentRoute = null;
+        if (window.router?.currentRoute) {
+          // Handle Vue Router 4 (Ref) vs Router 3 (plain object)
+          currentRoute = window.router.currentRoute.value?.name || window.router.currentRoute.name;
+        }
+
+        // If router is not initialized, don't trigger exit confirmation
+        if (!currentRoute) {
+          return true;
+        }
 
         // Custom back button logic
         if (currentRoute === 'dashboard') {
@@ -258,6 +272,22 @@ export class MobileUtils {
         }
         return true;
       });
+    }
+  }
+
+  /**
+   * Cleanup method to remove back button handler
+   */
+  destroy() {
+    if (this._backButtonHandle && window.BackButton) {
+      // Remove back button handler if API supports it
+      if (typeof window.BackButton.removeHandler === 'function') {
+        window.BackButton.removeHandler(this._backButtonHandle);
+      } else if (typeof this._backButtonHandle === 'function') {
+        // Some APIs return handler function for removal
+        this._backButtonHandle();
+      }
+      this._backButtonHandle = null;
     }
   }
 }

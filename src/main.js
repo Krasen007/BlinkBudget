@@ -70,12 +70,14 @@ const initApp = () => {
 
   // Mobile Responsive updates - only init nav if user is authenticated
   if (window.mobileUtils) {
-    window.mobileUtils.onResponsiveChange(() => {
-      // Only initialize mobile navigation if user is authenticated
-      if (AuthService.user) {
-        initMobileNav();
-      }
-    });
+    if (typeof window.mobileUtils.onResponsiveChange === 'function') {
+      window.mobileUtils.onResponsiveChange(() => {
+        // Only initialize mobile navigation if user is authenticated
+        if (AuthService.user) {
+          initMobileNav();
+        }
+      });
+    }
   } else {
     // Only initialize mobile navigation if user is authenticated
     if (AuthService.user) {
@@ -136,6 +138,12 @@ const initApp = () => {
       if (window.tutorialManager) {
         window.tutorialManager.destroy();
         window.tutorialManager = null;
+      }
+
+      // Remove mobile navigation when user logs out
+      const existingNav = document.querySelector('.mobile-nav');
+      if (existingNav) {
+        existingNav.remove();
       }
 
       localStorage.removeItem('auth_hint');

@@ -89,6 +89,7 @@ export const DashboardStatsCard = ({
     resetBtn.style.borderRadius = '4px';
     resetBtn.style.zIndex = '10';
     resetBtn.title = 'Reset all filters to show total amount';
+    resetBtn.setAttribute('aria-label', 'Reset all filters');
 
     // Add hover effects
     resetBtn.addEventListener('mouseenter', () => {
@@ -138,6 +139,7 @@ export const DashboardStatsCard = ({
     prevBtn.style.justifyContent = 'center';
     prevBtn.style.borderRadius = 'var(--radius-md)';
     prevBtn.title = 'Previous month';
+    prevBtn.setAttribute('aria-label', 'Previous month');
 
     // Right arrow button - covers entire right side
     const nextBtn = document.createElement('button');
@@ -160,6 +162,7 @@ export const DashboardStatsCard = ({
     nextBtn.style.justifyContent = 'center';
     nextBtn.style.borderRadius = 'var(--radius-md)';
     nextBtn.title = 'Next month';
+    nextBtn.setAttribute('aria-label', 'Next month');
 
     // Add hover effects
     const addHoverEffects = (btn) => {
@@ -188,11 +191,15 @@ export const DashboardStatsCard = ({
         currentDate = new Date();
       }
 
-      // Navigate to previous/next month
-      currentDate.setMonth(currentDate.getMonth() + direction);
+      // Use UTC methods to avoid timezone shifts and pin to first day
+      const currentYear = currentDate.getUTCFullYear();
+      const currentMonth = currentDate.getUTCMonth();
+
+      // Navigate to previous/next month in UTC and pin to first day
+      const newDate = new Date(Date.UTC(currentYear, currentMonth + direction, 1));
 
       if (typeof onMonthChange === 'function') {
-        onMonthChange(currentDate.toISOString());
+        onMonthChange(newDate.toISOString());
       }
     };
 

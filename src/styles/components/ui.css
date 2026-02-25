@@ -98,7 +98,7 @@
   box-shadow: var(--shadow-primary);
 }
 
-.btn-primary:hover {
+.btn.btn-primary:hover {
   background-color: var(--color-primary-dark);
   transform: translateY(-1px);
   box-shadow: var(--shadow-lg);
@@ -305,7 +305,7 @@
 .toast-close {
   background: none;
   border: none;
-  color: white;
+  color: currentColor;
   font-size: 18px;
   cursor: pointer;
   padding: 0;
@@ -321,10 +321,6 @@
 /* Success Feedback Highlight */
 .success-highlight {
   transition: background-color var(--transition-normal);
-}
-
-.success-highlight-active {
-  background-color: var(--color-success-light) !important;
 }
 
 .card:hover {

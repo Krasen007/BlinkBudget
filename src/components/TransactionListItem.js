@@ -247,7 +247,7 @@ export const TransactionListItem = ({
   // Append sign - use arrow for refunds and transfers
   let sign = isPositive ? '+' : '-';
   if (transaction.type === 'refund') {
-    sign = '↪ '; // Up arrow for refund (money coming back)
+    sign = '↪ '; // Return arrow for refund (money coming back) 
   } else if (transaction.type === 'transfer') {
     sign = '⇆ '; // Horizontal arrow for transfer
   }
