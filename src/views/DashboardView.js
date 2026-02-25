@@ -74,6 +74,8 @@ export const DashboardView = () => {
     sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_DATE_FILTER) || null;
   let currentCategoryFilter =
     sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER) || null;
+  let currentMonthFilter =
+    sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER) || null;
   let advancedFilters = null;
 
   const accounts = AccountService.getAccounts();
@@ -176,6 +178,18 @@ export const DashboardView = () => {
         // Quick Category Filter (from clicking category in list)
         if (currentCategoryFilter) {
           if (t.category !== currentCategoryFilter) return false;
+        }
+
+        // Quick Month Filter (from clicking arrows in category bar)
+        if (currentMonthFilter) {
+          const tDate = new Date(t.timestamp);
+          const filterDate = new Date(currentMonthFilter);
+          if (
+            tDate.getMonth() !== filterDate.getMonth() ||
+            tDate.getFullYear() !== filterDate.getFullYear()
+          ) {
+            return false;
+          }
         }
 
         return true;
@@ -354,6 +368,26 @@ export const DashboardView = () => {
           );
         } else {
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER);
+        }
+
+        // Clear month filter when category changes
+        currentMonthFilter = null;
+        sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
+
+        renderDashboard();
+      },
+      // Pass month filter props
+      currentMonthFilter,
+      onMonthChange: monthDate => {
+        currentMonthFilter = monthDate;
+
+        if (monthDate) {
+          sessionStorage.setItem(
+            STORAGE_KEYS.DASHBOARD_MONTH_FILTER,
+            monthDate
+          );
+        } else {
+          sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
         }
 
         renderDashboard();
