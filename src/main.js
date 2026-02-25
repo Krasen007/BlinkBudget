@@ -68,11 +68,19 @@ const initApp = () => {
   // Register Route Guard
   Router.before(routeGuard);
 
-  // Mobile Responsive updates
+  // Mobile Responsive updates - only init nav if user is authenticated
   if (window.mobileUtils) {
-    window.mobileUtils.onResponsiveChange(() => initMobileNav());
+    window.mobileUtils.onResponsiveChange(() => {
+      // Only initialize mobile navigation if user is authenticated
+      if (AuthService.user) {
+        initMobileNav();
+      }
+    });
   } else {
-    initMobileNav();
+    // Only initialize mobile navigation if user is authenticated
+    if (AuthService.user) {
+      initMobileNav();
+    }
   }
 
   // Network status
@@ -138,7 +146,10 @@ const initApp = () => {
       }
     }
 
-    initMobileNav();
+    // Only initialize mobile navigation if user is authenticated
+    if (user) {
+      initMobileNav();
+    }
     window.dispatchEvent(
       new CustomEvent('auth-state-changed', { detail: { user } })
     );

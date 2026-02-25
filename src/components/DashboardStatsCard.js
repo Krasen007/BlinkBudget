@@ -34,10 +34,9 @@ export const DashboardStatsCard = ({
     minHeight: isMobile ? '80px' : TOUCH_TARGETS.MIN_HEIGHT,
 
     display: 'flex',
-    flexDirection: isMobile ? 'row' : 'column',
+    flexDirection: 'column', // Always use column layout for consistent label-value positioning
     justifyContent: 'space-between',
     alignItems: isMobile ? 'center' : 'flex-start',
-    gap: isMobile ? SPACING.MD : 0,
   });
 
   const lbl = document.createElement('p');
@@ -52,8 +51,8 @@ export const DashboardStatsCard = ({
     lineHeight: 'var(--line-height-normal)',
     fontWeight: '500',
     margin: 0,
-    paddingLeft: showMonthNavigation ? '40px' : '40px',
-    paddingRight: showMonthNavigation ? '40px' : '40px',
+    paddingLeft: showMonthNavigation ? '40px' : '0',
+    paddingRight: showMonthNavigation ? '40px' : '0',
   });
 
   const val = document.createElement('h2');
@@ -65,8 +64,8 @@ export const DashboardStatsCard = ({
     fontSize: FONT_SIZES.STAT_VALUE_DESKTOP,
     lineHeight: 'var(--line-height-tight)',
     fontWeight: '700',
-    paddingLeft: showMonthNavigation ? '40px' : '40px',
-    paddingRight: showMonthNavigation ? '40px' : '40px',
+    paddingLeft: showMonthNavigation ? '40px' : '0',
+    paddingRight: showMonthNavigation ? '40px' : '0',
   });
 
   card.appendChild(lbl);
@@ -115,8 +114,8 @@ export const DashboardStatsCard = ({
   // Add anchored month navigation controls if enabled
   if (showMonthNavigation) {
     // Add padding to value to prevent overlap with arrows
-    val.style.paddingLeft = '40px';
-    val.style.paddingRight = '40px';
+    val.style.paddingLeft = '30px';
+    val.style.paddingRight = '30px';
 
     // Left arrow button - covers entire left side
     const prevBtn = document.createElement('button');
@@ -125,7 +124,7 @@ export const DashboardStatsCard = ({
     prevBtn.style.position = 'absolute';
     prevBtn.style.left = '0';
     prevBtn.style.top = '0';
-    prevBtn.style.width = '40px';
+    prevBtn.style.width = '30px';
     prevBtn.style.height = '100%';
     prevBtn.style.background = 'none';
     prevBtn.style.border = 'none';
@@ -147,7 +146,7 @@ export const DashboardStatsCard = ({
     nextBtn.style.position = 'absolute';
     nextBtn.style.right = '0';
     nextBtn.style.top = '0';
-    nextBtn.style.width = '40px';
+    nextBtn.style.width = '30px';
     nextBtn.style.height = '100%';
     nextBtn.style.background = 'none';
     nextBtn.style.border = 'none';

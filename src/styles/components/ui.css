@@ -355,6 +355,7 @@
   line-height: var(--line-height-normal);
   margin-bottom: var(--spacing-xs);
   color: var(--color-text-muted);
+  white-space: nowrap;
 }
 
 @media (width <= calc(var(--breakpoint-md) - 1px)) {

@@ -6,7 +6,7 @@ export const LandingView = () => {
   container.className = 'view-landing';
   Object.assign(container.style, {
     height: '100vh',
-    overflow: 'hidden',
+    overflow: 'auto',
   });
 
   const heroSection = document.createElement('section');
