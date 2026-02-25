@@ -22,9 +22,9 @@ export const TransactionListItem = ({
   accounts,
   shouldHighlight = false,
   currentDateFilter = null,
-  onDateClick = () => { },
+  onDateClick = () => {},
   currentCategoryFilter = null,
-  onCategoryClick = () => { },
+  onCategoryClick = () => {},
 }) => {
   const item = document.createElement('li');
   item.className = 'transaction-item';
@@ -141,7 +141,7 @@ export const TransactionListItem = ({
           : COLORS.TEXT_MAIN,
     fontWeight:
       currentCategoryFilter === transaction.category ||
-        transaction.type === 'transfer'
+      transaction.type === 'transfer'
         ? '700'
         : '500',
   });
@@ -247,7 +247,7 @@ export const TransactionListItem = ({
   // Append sign - use arrow for refunds and transfers
   let sign = isPositive ? '+' : '-';
   if (transaction.type === 'refund') {
-    sign = '↪ '; // Return arrow for refund (money coming back) 
+    sign = '↪ '; // Return arrow for refund (money coming back)
   } else if (transaction.type === 'transfer') {
     sign = '⇆ '; // Horizontal arrow for transfer
   }

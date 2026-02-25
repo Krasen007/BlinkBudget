@@ -257,7 +257,9 @@ export class MobileUtils {
         let currentRoute = null;
         if (window.router?.currentRoute) {
           // Handle Vue Router 4 (Ref) vs Router 3 (plain object)
-          currentRoute = window.router.currentRoute.value?.name || window.router.currentRoute.name;
+          currentRoute =
+            window.router.currentRoute.value?.name ||
+            window.router.currentRoute.name;
         }
 
         // If router is not initialized, don't trigger exit confirmation

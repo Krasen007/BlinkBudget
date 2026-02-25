@@ -208,7 +208,7 @@ export class TrendAnalysisService {
     const overallConsistency =
       Object.values(categoryConsistency).length > 0
         ? Object.values(categoryConsistency).reduce((s, v) => s + v, 0) /
-        Object.values(categoryConsistency).length
+          Object.values(categoryConsistency).length
         : 1.0;
 
     return { categories: categoryConsistency, overall: overallConsistency };

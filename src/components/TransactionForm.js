@@ -351,7 +351,8 @@ export const TransactionForm = ({
     noteField.style.color = 'var(--color-text-main)';
     noteField.style.fontFamily = 'inherit';
     noteField.style.lineHeight = 'var(--line-height-normal)';
-    noteField.style.transition = 'border-color var(--transition-fast), box-shadow var(--transition-fast)';
+    noteField.style.transition =
+      'border-color var(--transition-fast), box-shadow var(--transition-fast)';
   }
 
   // 7. Layout Assembly

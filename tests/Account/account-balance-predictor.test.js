@@ -8,13 +8,13 @@ import { AccountBalancePredictor } from '../../src/core/Account/account-balance-
 
 // Mock ForecastEngine
 vi.mock('../../src/core/forecast-engine.js', () => {
+  const mockForecastEngine = vi.fn().mockImplementation(function () {
+    this.generateIncomeForecasts = vi.fn().mockReturnValue([]);
+    this.generateExpenseForecasts = vi.fn().mockReturnValue([]);
+  });
+
   return {
-    ForecastEngine: vi.fn().mockImplementation(() => {
-      return {
-        generateIncomeForecast: vi.fn(),
-        generateExpenseForecast: vi.fn(),
-      };
-    }),
+    ForecastEngine: mockForecastEngine,
   };
 });
 

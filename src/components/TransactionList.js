@@ -23,10 +23,10 @@ export const TransactionList = ({
   accounts,
   highlightTransactionIds = null,
   currentDateFilter = null,
-  onDateClick = () => { },
+  onDateClick = () => {},
   currentCategoryFilter = null,
-  onCategoryClick = () => { },
-  onFilterClear = () => { }, // New callback for clearing general filter
+  onCategoryClick = () => {},
+  onFilterClear = () => {}, // New callback for clearing general filter
 }) => {
   const listContainer = document.createElement('div');
   listContainer.className = 'dashboard-transactions-container';
@@ -103,7 +103,6 @@ export const TransactionList = ({
   titleContainer.appendChild(listTitle);
   titleContainer.appendChild(metricsDisplay);
   listContainer.appendChild(titleContainer);
-
 
   if (transactions.length === 0) {
     // Determine empty state scenario

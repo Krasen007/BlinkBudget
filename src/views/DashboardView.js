@@ -201,7 +201,8 @@ export const DashboardView = () => {
     const validTransactionsForStats = transactions.filter(t => !t.isGhost);
 
     // Check if any filters are active
-    const hasActiveFilters = currentAccountFilter !== 'all' ||
+    const hasActiveFilters =
+      currentAccountFilter !== 'all' ||
       currentDateFilter !== null ||
       currentCategoryFilter !== null ||
       currentMonthFilter !== null ||
@@ -240,17 +241,25 @@ export const DashboardView = () => {
       let filteredExpense = 0;
 
       validTransactionsForStats.forEach(t => {
-        const isSource = (currentAccountFilter === 'all') || (t.accountId === currentAccountFilter);
+        const isSource =
+          currentAccountFilter === 'all' ||
+          t.accountId === currentAccountFilter;
 
         if (t.type === 'income' && isSource) filteredIncome += t.amount;
         if (t.type === 'expense' && isSource) filteredExpense += t.amount;
         if (t.type === 'refund' && isSource) filteredExpense -= t.amount;
 
         if (t.type === 'transfer') {
-          if (t.accountId === currentAccountFilter || currentAccountFilter === 'all') {
+          if (
+            t.accountId === currentAccountFilter ||
+            currentAccountFilter === 'all'
+          ) {
             filteredExpense += t.amount;
           }
-          if (t.toAccountId === currentAccountFilter || currentAccountFilter === 'all') {
+          if (
+            t.toAccountId === currentAccountFilter ||
+            currentAccountFilter === 'all'
+          ) {
             filteredIncome += t.amount;
           }
         }
@@ -322,7 +331,9 @@ export const DashboardView = () => {
     statsContainer.appendChild(
       DashboardStatsCard({
         label: 'Total Available',
-        value: hasActiveFilters ? filteredAvailableBalance : totalAvailableBalance,
+        value: hasActiveFilters
+          ? filteredAvailableBalance
+          : totalAvailableBalance,
         color: COLORS.PRIMARY_LIGHT,
         showResetButton: true,
         isFiltered: hasActiveFilters,

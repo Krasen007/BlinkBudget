@@ -56,7 +56,7 @@ export const StorageService = {
     // keep chain but swallow final rejection so it doesn't break subsequent chains
     this._pushChains.set(
       key,
-      newChain.catch(() => { })
+      newChain.catch(() => {})
     );
     return newChain;
   },

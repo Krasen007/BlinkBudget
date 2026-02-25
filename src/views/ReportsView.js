@@ -956,9 +956,9 @@ export const ReportsView = () => {
     try {
       const benchmarkingData = analyticsEngine.getPersonalBenchmarking
         ? analyticsEngine.getPersonalBenchmarking(
-          currentData.transactions,
-          currentTimePeriod
-        )
+            currentData.transactions,
+            currentTimePeriod
+          )
         : null;
 
       if (benchmarkingData && benchmarkingData.length > 0) {
@@ -1005,9 +1005,9 @@ export const ReportsView = () => {
     try {
       const recommendationsData = analyticsEngine.getBudgetRecommendations
         ? analyticsEngine.getBudgetRecommendations(
-          currentData.transactions,
-          currentTimePeriod
-        )
+            currentData.transactions,
+            currentTimePeriod
+          )
         : null;
 
       if (recommendationsData && recommendationsData.length > 0) {

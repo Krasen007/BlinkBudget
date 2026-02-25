@@ -18,9 +18,9 @@ export const DashboardStatsCard = ({
   color,
   showMonthNavigation = false,
   currentMonthFilter = null,
-  onMonthChange = () => { },
+  onMonthChange = () => {},
   showResetButton = false,
-  onReset = () => { },
+  onReset = () => {},
   isFiltered = false,
 }) => {
   const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
@@ -35,7 +35,8 @@ export const DashboardStatsCard = ({
 
     display: 'flex',
     flexDirection: 'column', // Always use column layout for consistent label-value positioning
-    justifyContent: 'space-between',
+    justifyContent: isMobile ? 'center' : 'space-between',
+    gap: isMobile ? SPACING.XS : '0',
     alignItems: isMobile ? 'center' : 'flex-start',
   });
 
@@ -165,7 +166,7 @@ export const DashboardStatsCard = ({
     nextBtn.setAttribute('aria-label', 'Next month');
 
     // Add hover effects
-    const addHoverEffects = (btn) => {
+    const addHoverEffects = btn => {
       btn.addEventListener('mouseenter', () => {
         btn.style.color = COLORS.PRIMARY || 'var(--color-primary)';
         btn.style.backgroundColor = 'var(--color-surface-hover)';
@@ -196,7 +197,9 @@ export const DashboardStatsCard = ({
       const currentMonth = currentDate.getUTCMonth();
 
       // Navigate to previous/next month in UTC and pin to first day
-      const newDate = new Date(Date.UTC(currentYear, currentMonth + direction, 1));
+      const newDate = new Date(
+        Date.UTC(currentYear, currentMonth + direction, 1)
+      );
 
       if (typeof onMonthChange === 'function') {
         onMonthChange(newDate.toISOString());

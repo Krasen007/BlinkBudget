@@ -270,7 +270,11 @@ export class AccountBalancePredictor {
         startMonth = 1, // When changes take effect
       } = scenarioAdjustments;
 
-      const adjustedProjections = baseProjections.map((projection, index) => {
+      const adjustedProjections = [];
+      let runningAdjustedBalance;
+
+      for (let index = 0; index < baseProjections.length; index++) {
+        const projection = baseProjections[index];
         const month = index + 1;
         let adjustedIncome = projection.income;
         let adjustedExpenses = projection.expenses;
@@ -292,17 +296,18 @@ export class AccountBalancePredictor {
         // Recalculate running balance
         let adjustedBalance;
         if (index === 0) {
-          // First month: start with original balance and apply changes
+          // First month: start with original balance (before original net flow) and apply changes
           const originalNetFlow = projection.income - projection.expenses;
           adjustedBalance =
             projection.projectedBalance - originalNetFlow + adjustedNetFlow;
         } else {
           // Subsequent months: use previous adjusted balance
-          const previousAdjusted = adjustedProjections[index - 1];
-          adjustedBalance = previousAdjusted.projectedBalance + adjustedNetFlow;
+          adjustedBalance = runningAdjustedBalance + adjustedNetFlow;
         }
 
-        return {
+        runningAdjustedBalance = adjustedBalance;
+
+        adjustedProjections.push({
           ...projection,
           income: Math.round(adjustedIncome * 100) / 100,
           expenses: Math.round(adjustedExpenses * 100) / 100,
@@ -316,8 +321,8 @@ export class AccountBalancePredictor {
             oneTimeIncome: month === 1 ? oneTimeIncome : 0,
             oneTimeExpense: month === 1 ? oneTimeExpense : 0,
           },
-        };
-      });
+        });
+      }
 
       return adjustedProjections;
     } catch (error) {
