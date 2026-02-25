@@ -18,6 +18,28 @@
 
 <img src="docs/financialplanning.png" alt="Financial Planning Screenshot" width="512"/>
 
+## What's New in Version 1.36.0
+
+### 🎯 Core Experience Improvements
+- **Enhanced quick entry flow** - Added month navigation to category filter for faster expense logging
+- **Improved component reliability** - Various bug fixes and stability improvements
+- **Fixed critical test failures** - Resolved test suite issues that were blocking development
+
+### 🎨 Design & Polish
+- **Phase 1 Complete: Critical Design System Fixes** - Addressed fundamental UI inconsistencies
+- **Phase 2: Visual Polish** - Enhanced visual consistency across the application
+- **Phase 3 Complete: Enhanced Micro-interactions** - Added subtle animations and feedback
+- **Phase 4: Component Updates** - Modernized component architecture and styling
+
+### 🔧 Technical Improvements
+- **Code quality enhancements** - Linting improvements and code cleanup
+- **Performance optimizations** - Streamlined component rendering and interactions
+- **Accessibility improvements** - Better keyboard navigation and screen reader support
+
+### 📱 Mobile Experience
+- **Enhanced mobile navigation** - Improved touch interactions and responsiveness
+- **Disabled haptic feedback** - Removed unnecessary vibration feedback for cleaner UX
+
 ## Key Features
 
 ### Lightning Fast Entry

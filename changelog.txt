@@ -1,19 +1,25 @@
-## v1.23 (2026-02-23)
+## Version 1.36.0 - February 2026
 
-### New Features
-- Quick Amount Presets - Added one-tap amount buttons for faster transaction entry
-- Enhanced Analytics - Advanced insights, category usage tracking, optimization suggestions, pattern recognition, comparative benchmarking, and predictive budget recommendations
+### 🎯 Core Experience Improvements
+- **Fixed critical test failures** - Resolved test suite issues that were blocking development
+- **Enhanced quick entry flow** - Added month navigation to category filter for faster expense logging
+- **Improved component reliability** - Various bug fixes and stability improvements
 
-### Improvements
-- Lighthouse Performance Optimization - Complete performance optimization implementation
-- UI Fixes - Various UI improvements and icon updates
-- Notes/Description Fix - Fixed notes field to display properly in the app theme
-- Code Quality - Fixed multiple issues across security, performance, accessibility, and code quality
+### 🎨 Design & Polish
+- **Phase 1 Complete: Critical Design System Fixes** - Addressed fundamental UI inconsistencies
+- **Phase 2: Visual Polish** - Enhanced visual consistency across the application
+- **Phase 3 Complete: Enhanced Micro-interactions** - Added subtle animations and feedback
+- **Phase 4: Component Updates** - Modernized component architecture and styling
 
-### Technical
-- Removed CSP duplication and fixed caching conflicts
-- Improved keyboard accessibility and restored note field functionality
-- Added date validation, error handling, and type safety
-- Added rate limiting and privacy-preserving audit logging
-- Compressed images to save space
-- Updated agents and PRD documentation
+### 🔧 Technical Improvements
+- **Code quality enhancements** - Linting improvements and code cleanup
+- **Performance optimizations** - Streamlined component rendering and interactions
+- **Accessibility improvements** - Better keyboard navigation and screen reader support
+
+### 📱 Mobile Experience
+- **Disabled haptic feedback** - Removed unnecessary vibration feedback for cleaner UX
+- **Enhanced mobile navigation** - Improved touch interactions and responsiveness
+
+### 📋 Product Updates
+- **Updated PRD** - Refreshed product requirements documentation
+- **Test suite stabilization** - Fixed failing tests to ensure reliable development workflow
