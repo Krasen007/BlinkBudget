@@ -35,3 +35,4 @@ DO NOT IMPLEMENT: use Ionic's Capacitor or Cordova to make android app
 [ ] consider removing googleapis for fonts
 [ ] investigate: data integrity check in settings is adding unexpected labels to categories - determine root cause and fix
 [ ] Add basic client-side security monitoring for failed login attempts and unusual data access patterns
+[ ] when i filter a category on the dashboard, by clicking on the name of the category, all transactions are shown in the transaction list, however i want to be able to filter by month, currently I can see February spent (current month) i want to be able to select a category like Храна and then see all transactions for January December etc via, this could be implemented via small arrow on the current month spent amount, it should be possible to go backward and forward, the arrow should appear only if there is transaction data

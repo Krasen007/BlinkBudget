@@ -200,6 +200,12 @@ export const DashboardView = () => {
     // We want them in the list but not affecting the balance/stats
     const validTransactionsForStats = transactions.filter(t => !t.isGhost);
 
+    // Check if any filters are active
+    const hasActiveFilters = currentAccountFilter !== 'all' ||
+      currentDateFilter !== null ||
+      currentCategoryFilter !== null ||
+      currentMonthFilter !== null;
+
     // Calculate ALL TIME net worth for Total Available
     let allTimeIncome = 0;
     let allTimeExpense = 0;
@@ -224,25 +230,56 @@ export const DashboardView = () => {
       }
     });
 
-    const availableBalance = allTimeIncome - allTimeExpense;
+    const totalAvailableBalance = allTimeIncome - allTimeExpense;
 
-    // Filter for current month only for Monthly Spent calculation
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
+    // Calculate FILTERED net worth if filters are active
+    let filteredAvailableBalance = totalAvailableBalance;
+    if (hasActiveFilters) {
+      let filteredIncome = 0;
+      let filteredExpense = 0;
 
-    const currentMonthTransactions = validTransactionsForStats.filter(t => {
+      validTransactionsForStats.forEach(t => {
+        if (t.type === 'income') filteredIncome += t.amount;
+        if (t.type === 'expense') filteredExpense += t.amount;
+        if (t.type === 'refund') filteredExpense -= t.amount;
+
+        if (t.type === 'transfer') {
+          if (t.accountId === currentAccountFilter || currentAccountFilter === 'all') {
+            filteredExpense += t.amount;
+          }
+          if (t.toAccountId === currentAccountFilter || currentAccountFilter === 'all') {
+            filteredIncome += t.amount;
+          }
+        }
+      });
+
+      filteredAvailableBalance = filteredIncome - filteredExpense;
+    }
+
+    // Filter for selected month for Monthly Spent calculation
+    let filterMonth, filterYear;
+    if (currentMonthFilter) {
+      const filterDate = new Date(currentMonthFilter);
+      filterMonth = filterDate.getMonth();
+      filterYear = filterDate.getFullYear();
+    } else {
+      const now = new Date();
+      filterMonth = now.getMonth();
+      filterYear = now.getFullYear();
+    }
+
+    const selectedMonthTransactions = validTransactionsForStats.filter(t => {
       const transactionDate = new Date(t.timestamp);
       return (
-        transactionDate.getMonth() === currentMonth &&
-        transactionDate.getFullYear() === currentYear
+        transactionDate.getMonth() === filterMonth &&
+        transactionDate.getFullYear() === filterYear
       );
     });
 
     // Calculate monthly expense for the monthly spent card
     let totalExpense = 0;
 
-    currentMonthTransactions.forEach(t => {
+    selectedMonthTransactions.forEach(t => {
       if (currentAccountFilter === 'all') {
         if (t.type === 'expense') totalExpense += t.amount;
         if (t.type === 'refund') totalExpense -= t.amount;
@@ -262,7 +299,7 @@ export const DashboardView = () => {
     const statsContainer = document.createElement('div');
     statsContainer.className = 'view-stats-container';
 
-    // Get current month name for the label
+    // Get selected month name for the label
     const monthNames = [
       'January',
       'February',
@@ -277,20 +314,55 @@ export const DashboardView = () => {
       'November',
       'December',
     ];
-    const currentMonthName = monthNames[currentMonth];
+    const selectedMonthName = monthNames[filterMonth];
 
     statsContainer.appendChild(
       DashboardStatsCard({
         label: 'Total Available',
-        value: availableBalance,
+        value: hasActiveFilters ? filteredAvailableBalance : totalAvailableBalance,
         color: COLORS.PRIMARY_LIGHT,
+        showResetButton: true,
+        isFiltered: hasActiveFilters,
+        onReset: () => {
+          // Reset all filters
+          currentAccountFilter = 'all';
+          currentDateFilter = null;
+          currentCategoryFilter = null;
+          currentMonthFilter = null;
+
+          sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_FILTER);
+          sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_DATE_FILTER);
+          sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER);
+          sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
+
+          // Reset account select
+          accountSelect.value = 'all';
+
+          renderDashboard();
+        },
       })
     );
     statsContainer.appendChild(
       DashboardStatsCard({
-        label: `${currentMonthName} Spent`,
+        label: `${selectedMonthName} Spent`,
         value: totalExpense,
         color: COLORS.ERROR,
+        showMonthNavigation: true,
+        currentMonthFilter,
+        onMonthChange: monthDate => {
+          currentMonthFilter = monthDate;
+
+          if (monthDate) {
+            sessionStorage.setItem(
+              STORAGE_KEYS.DASHBOARD_MONTH_FILTER,
+              monthDate
+            );
+          } else {
+            sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
+          }
+
+          renderDashboard();
+        },
       })
     );
 
@@ -373,22 +445,6 @@ export const DashboardView = () => {
         // Clear month filter when category changes
         currentMonthFilter = null;
         sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
-
-        renderDashboard();
-      },
-      // Pass month filter props
-      currentMonthFilter,
-      onMonthChange: monthDate => {
-        currentMonthFilter = monthDate;
-
-        if (monthDate) {
-          sessionStorage.setItem(
-            STORAGE_KEYS.DASHBOARD_MONTH_FILTER,
-            monthDate
-          );
-        } else {
-          sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
-        }
 
         renderDashboard();
       },
