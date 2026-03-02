@@ -56,7 +56,11 @@
   ); /* Brightened from 45% to 75% for better readability */
 
   /* Surface text colors for better contrast hierarchy */
-  --color-text-surface: hsl(240, 10%, 65%); /* Brightened from 25% to 65% for better readability */
+  --color-text-surface: hsl(
+    240,
+    10%,
+    65%
+  ); /* Brightened from 25% to 65% for better readability */
   --color-text-inverse: hsl(240, 10%, 95%);
 
   /* Border colors */

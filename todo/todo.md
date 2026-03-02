@@ -10,6 +10,7 @@ DO NOT IMPLEMENT: add possibility to import transactions from a csv file
 DO NOT IMPLEMENT: add possible language selection with preloaded categories of the preferred language
 DO NOT IMPLEMENT: release as windows store app https://learn.microsoft.com/en-us/microsoft-edge/progressive-web-apps/how-to/microsoft-store
 DO NOT IMPLEMENT: use Ionic's Capacitor or Cordova to make android app
+DO NOT IMPLEMENT: Convert to TWA (Trusted Web Activity) - Use Bubblewrap to convert PWA to native Android app for system navigation bar control
 
 ---
 

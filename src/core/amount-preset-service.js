@@ -9,6 +9,7 @@
 
 const AMOUNT_PRESETS_KEY = 'amount_presets';
 const MAX_PRESETS = 4;
+const PRESETS_CHANGE_EVENT = 'amount-presets-changed';
 
 /**
  * AmountPresetService
@@ -36,9 +37,35 @@ export const AmountPresetService = {
   _savePresets(presetsData) {
     try {
       localStorage.setItem(AMOUNT_PRESETS_KEY, JSON.stringify(presetsData));
+      // Emit change event so UI components can update
+      this._emitChange();
     } catch (error) {
       console.error('Error saving amount presets:', error);
     }
+  },
+
+  /**
+   * Emit a change event to notify listeners of preset updates
+   * @private
+   */
+  _emitChange() {
+    if (typeof window !== 'undefined') {
+      const event = new CustomEvent(PRESETS_CHANGE_EVENT, {
+        detail: { presets: this.getPresets() },
+      });
+      window.dispatchEvent(event);
+    }
+  },
+
+  /**
+   * Subscribe to preset changes
+   * @param {Function} callback - Function to call when presets change
+   * @returns {Function} Unsubscribe function
+   */
+  onPresetsChange(callback) {
+    const listener = event => callback(event.detail.presets);
+    window.addEventListener(PRESETS_CHANGE_EVENT, listener);
+    return () => window.removeEventListener(PRESETS_CHANGE_EVENT, listener);
   },
 
   /**
