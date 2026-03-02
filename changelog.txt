@@ -1,25 +1,11 @@
-## Version 1.36.0 - February 2026
+## Version 1.25.0 - February 2026
 
-### 🎯 Core Experience Improvements
-- **Fixed critical test failures** - Resolved test suite issues that were blocking development
-- **Enhanced quick entry flow** - Added month navigation to category filter for faster expense logging
-- **Improved component reliability** - Various bug fixes and stability improvements
+### 🐛 Bug Fixes
+- **Fixed quick amount preset buttons** - Dashboard quick entry buttons now update dynamically based on transaction history
+- **Improved mobile notifications** - Notification messages now display correctly on mobile devices
+- **Enhanced text readability** - Brightened text colors throughout the application for better contrast and accessibility
+- **Resolved module dependencies** - Fixed critical node_modules issue with workaround implementation
 
-### 🎨 Design & Polish
-- **Phase 1 Complete: Critical Design System Fixes** - Addressed fundamental UI inconsistencies
-- **Phase 2: Visual Polish** - Enhanced visual consistency across the application
-- **Phase 3 Complete: Enhanced Micro-interactions** - Added subtle animations and feedback
-- **Phase 4: Component Updates** - Modernized component architecture and styling
-
-### 🔧 Technical Improvements
-- **Code quality enhancements** - Linting improvements and code cleanup
-- **Performance optimizations** - Streamlined component rendering and interactions
-- **Accessibility improvements** - Better keyboard navigation and screen reader support
-
-### 📱 Mobile Experience
-- **Disabled haptic feedback** - Removed unnecessary vibration feedback for cleaner UX
-- **Enhanced mobile navigation** - Improved touch interactions and responsiveness
-
-### 📋 Product Updates
-- **Updated PRD** - Refreshed product requirements documentation
-- **Test suite stabilization** - Fixed failing tests to ensure reliable development workflow
+### 🧹 Code Quality
+- **Code cleanup** - Improved code organization and removed technical debt
+- **Version management** - Updated version tracking for consistent releases

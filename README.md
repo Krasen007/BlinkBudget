@@ -28,6 +28,7 @@
 - **Offline-capable** with localStorage and Service Worker persistence
 - **Smart Suggestions Engine** - Intelligent transaction categorization and insights
 - **Ghost Transactions** - See historical transaction data when dates are modified
+- **Dynamic quick amount presets** - Buttons automatically update based on your most frequently used transaction amounts
 
 ### Transaction Management
 
@@ -81,7 +82,8 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 - **Helpful tips on each section**
 - **Enhanced security** with comprehensive privacy compliance
 - **Improved accessibility** with "Skip to Content" links, ARIA roles, and proper form label associations
-- **Enhanced color schemes** and better text handling for improved readability
+- **Enhanced color schemes** with improved text contrast for better readability
+- **Better text handling** for improved readability across all themes
 - **Smoother animations** with fixed CSS transitions throughout the app (v1.22)
 - **Faster rendering** with frame times under 16ms for buttery-smooth performance (v1.22)
 - **Consistent button styling** across all views for a cohesive experience (v1.22)
