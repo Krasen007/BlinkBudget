@@ -61,11 +61,13 @@
     10%,
     65%
   ); /* Brightened from 25% to 65% for better readability */
+
   --color-text-inverse: hsl(240, 10%, 95%);
 
   /* Border colors */
   --color-border: hsl(240, 5%, 30%);
   /* Enhanced from 20% for WCAG AA compliance */
+
   --color-border-strong: hsl(240, 5%, 40%); /* New token for stronger borders */
 
   /* Success colors */

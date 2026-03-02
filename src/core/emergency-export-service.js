@@ -475,9 +475,12 @@ export const EmergencyExportService = {
             URL.revokeObjectURL(url);
           } catch (error) {
             // URL may already be revoked, log for debugging
+            // Normalize error value in case it's not an Error object
+            const errorMessage =
+              error instanceof Error ? error.message : String(error);
             console.debug(
               '[EmergencyExport] URL revocation note:',
-              error.message
+              errorMessage
             );
           }
         },

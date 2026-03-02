@@ -117,8 +117,8 @@ export class OptimizationEngine {
         'blinkbudget_optimization_data',
         JSON.stringify(this.persistedData)
       );
-    } catch {
-      console.warn('[OptimizationEngine] Failed to persist data');
+    } catch (err) {
+      console.warn('[OptimizationEngine] Failed to persist data', err);
     }
   }
 

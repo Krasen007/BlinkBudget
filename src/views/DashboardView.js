@@ -1,7 +1,7 @@
 import { Button } from '../components/Button.js';
 import { DashboardStatsCard } from '../components/DashboardStatsCard.js';
 import { TransactionList } from '../components/TransactionList.js';
-import { QuickAmountPresets } from '../components/QuickAmountPresets.js';
+import { createQuickAmountPresets } from '../components/QuickAmountPresets.js';
 import { AccountService } from '../core/Account/account-service.js';
 import { TransactionService } from '../core/transaction-service.js';
 import { FilteringService } from '../core/analytics/FilteringService.js';
@@ -383,22 +383,29 @@ export const DashboardView = () => {
     content.appendChild(statsContainer);
 
     // Quick Amount Presets (Feature 3.4.1)
-    const quickAmountPresets = QuickAmountPresets({
-      onPresetSelect: amount => {
-        const params =
-          currentAccountFilter !== 'all'
-            ? { accountId: currentAccountFilter, amount: amount.toString() }
-            : { amount: amount.toString() };
-        Router.navigate('add-expense', params);
-      },
+    const {
+      container: quickAmountPresetsContainer,
+      destroy: destroyQuickPresets,
+    } = createQuickAmountPresets(amount => {
+      const params =
+        currentAccountFilter !== 'all'
+          ? { accountId: currentAccountFilter, amount: amount.toString() }
+          : { amount: amount.toString() };
+      Router.navigate('add-expense', params);
     });
 
     // Add a small container for quick amount presets with no spacing
     const quickPresetsWrapper = document.createElement('div');
     quickPresetsWrapper.style.margin = '0';
     quickPresetsWrapper.style.padding = '0';
-    quickPresetsWrapper.appendChild(quickAmountPresets);
+    quickPresetsWrapper.appendChild(quickAmountPresetsContainer);
     content.appendChild(quickPresetsWrapper);
+
+    // Store destroy function for cleanup when view is destroyed
+    if (!content._cleanupFunctions) {
+      content._cleanupFunctions = [];
+    }
+    content._cleanupFunctions.push(destroyQuickPresets);
 
     // Action Button
     const addBtn = Button({

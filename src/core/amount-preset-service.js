@@ -60,11 +60,22 @@ export const AmountPresetService = {
   /**
    * Subscribe to preset changes
    * @param {Function} callback - Function to call when presets change
-   * @returns {Function} Unsubscribe function
+   * @returns {Function} Unsubscribe function that removes the listener
+   *
+   * Safe for SSR/Node environments - returns a no-op unsubscribe if window is unavailable.
+   * In browser environments, subscribes to PRESETS_CHANGE_EVENT via window.addEventListener.
    */
   onPresetsChange(callback) {
+    // Guard for non-browser environments (SSR, Node.js, etc.)
+    if (typeof window === 'undefined') {
+      // Return a no-op unsubscribe function
+      return () => {};
+    }
+
     const listener = event => callback(event.detail.presets);
     window.addEventListener(PRESETS_CHANGE_EVENT, listener);
+
+    // Return cleanup function that removes the listener
     return () => window.removeEventListener(PRESETS_CHANGE_EVENT, listener);
   },
 

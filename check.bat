@@ -18,7 +18,7 @@ echo ESLint passed!
 echo 2. Running Stylelint...
 cd /d "%~dp0"
 echo Running Stylelint command...
-call .\node_modules\.bin\stylelint.cmd "src/styles/**/*.css"
+call .\node_modules\.bin\stylelint.cmd "src/styles/**/*.css" --fix
 set STYLELINT_RESULT=%errorlevel%
 echo Stylelint result code: %STYLELINT_RESULT%
 if %STYLELINT_RESULT% neq 0 (

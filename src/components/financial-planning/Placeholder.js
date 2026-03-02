@@ -10,9 +10,17 @@ import { createPlaceholder } from '../../utils/financial-planning-helpers.js';
  */
 export const Placeholder = ({ title, description, icon }) => {
   const placeholder = createPlaceholder(title, description, icon);
-  // Add accessibility attribute for component version
-  placeholder
-    .querySelector('div:first-child')
-    ?.setAttribute('aria-hidden', 'true');
+
+  // Hide decorative icon from screen readers
+  const iconElement = placeholder.querySelector('div:first-child');
+  if (iconElement) {
+    iconElement.setAttribute('aria-hidden', 'true');
+  } else {
+    console.warn(
+      '[Placeholder] Expected decorative icon element not found in DOM. ' +
+        'The placeholder structure may have changed.'
+    );
+  }
+
   return placeholder;
 };

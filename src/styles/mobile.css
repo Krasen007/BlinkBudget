@@ -1,5 +1,11 @@
 /* Mobile Styles - Merged from navigation, modals, touch, and keyboard */
 
+/* Z-index stacking scheme for overlays */
+:root {
+  --overlay-z-index: 1000;
+  --overlay-top-z-index: 1001;
+}
+
 /* Mobile Modal Styles */
 .mobile-modal-overlay {
   position: fixed;
@@ -11,7 +17,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: var(--overlay-top-z-index);
   backdrop-filter: blur(4px);
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -41,6 +47,7 @@
     transform: translateY(20px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -151,7 +158,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  z-index: 1000;
+  z-index: var(--overlay-z-index);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -176,6 +183,7 @@
   from {
     transform: translateY(100%);
   }
+
   to {
     transform: translateY(0);
   }

@@ -2,7 +2,10 @@
  * QuickAmountPresets Component
  * Part of Feature 3.4.1: Quick Amount Presets
  *
- * Dynamically updates when preset amounts change
+ * Dynamically updates when preset amounts change.
+ *
+ * IMPORTANT: Use createQuickAmountPresets() factory which returns { container, destroy }.
+ * Call destroy() when removing the component to clean up the AmountPresetService subscription.
  */
 
 import { AmountPresetService } from '../core/amount-preset-service.js';
@@ -129,14 +132,38 @@ export const QuickAmountPresets = ({ onPresetSelect }) => {
     renderButtons();
   });
 
-  // Store unsubscribe function for cleanup if needed
-  container._unsubscribe = unsubscribe;
-
-  return container;
+  return { container, unsubscribe };
 };
 
+/**
+ * Factory function to create QuickAmountPresets with cleanup support
+ *
+ * @param {Function} onPresetSelect - Callback when a preset is selected
+ * @returns {Object} Object with { container, destroy }
+ * @returns {HTMLElement} container - The DOM element to append
+ * @returns {Function} destroy - Must be called when removing the component to clean up
+ *                               the AmountPresetService subscription and prevent memory leaks
+ *
+ * Usage:
+ *   const { container, destroy } = createQuickAmountPresets(onSelect);
+ *   parent.appendChild(container);
+ *   // Later, when removing:
+ *   parent.removeChild(container);
+ *   destroy(); // Clean up subscription
+ */
 export const createQuickAmountPresets = onPresetSelect => {
-  return QuickAmountPresets({ onPresetSelect });
+  const { container, unsubscribe } = QuickAmountPresets({ onPresetSelect });
+
+  return {
+    container,
+    /**
+     * Cleanup function - MUST be called when removing the component
+     * Unsubscribes from AmountPresetService.onPresetsChange to prevent memory leaks
+     */
+    destroy() {
+      unsubscribe();
+    },
+  };
 };
 
 export default QuickAmountPresets;
