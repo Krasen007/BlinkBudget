@@ -96,7 +96,11 @@ export class OptimizationEngine {
             dismissedInsights: [],
             lastAnalysisDate: null,
           };
-    } catch {
+    } catch (error) {
+      console.warn(
+        '[OptimizationEngine] Failed to load persisted data:',
+        error
+      );
       this.persistedData = {
         savingsGoals: [],
         customRecommendations: [],

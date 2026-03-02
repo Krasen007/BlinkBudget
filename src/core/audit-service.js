@@ -73,10 +73,15 @@ export class AuditService {
   }
 
   /**
-   * Generate a unique log ID
+   * Generate a unique log ID using cryptographically secure random values
    */
   generateLogId() {
-    return `audit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const randomBytes = new Uint8Array(6);
+    crypto.getRandomValues(randomBytes);
+    const randomHex = Array.from(randomBytes)
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+    return `audit_${Date.now()}_${randomHex}`;
   }
 
   /**
@@ -107,12 +112,17 @@ export class AuditService {
   }
 
   /**
-   * Get or create session ID
+   * Get or create session ID using cryptographically secure random values
    */
   getSessionId() {
     let sessionId = sessionStorage.getItem('audit_session_id');
     if (!sessionId) {
-      sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const randomBytes = new Uint8Array(6);
+      crypto.getRandomValues(randomBytes);
+      const randomHex = Array.from(randomBytes)
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+      sessionId = `session_${Date.now()}_${randomHex}`;
       sessionStorage.setItem('audit_session_id', sessionId);
     }
     return sessionId;

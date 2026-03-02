@@ -45,6 +45,7 @@ export function createPlaceholder(title, description, icon) {
   placeholder.style.minHeight = '300px';
 
   const iconDiv = document.createElement('div');
+  iconDiv.setAttribute('aria-hidden', 'true');
   iconDiv.textContent = icon;
   iconDiv.style.fontSize = '3rem';
   iconDiv.style.marginBottom = SPACING.MD;

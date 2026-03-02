@@ -473,8 +473,12 @@ export const EmergencyExportService = {
         () => {
           try {
             URL.revokeObjectURL(url);
-          } catch {
-            // URL may already be revoked
+          } catch (error) {
+            // URL may already be revoked, log for debugging
+            console.debug(
+              '[EmergencyExport] URL revocation note:',
+              error.message
+            );
           }
         },
         5 * 60 * 1000
