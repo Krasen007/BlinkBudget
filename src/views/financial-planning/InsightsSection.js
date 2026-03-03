@@ -23,82 +23,203 @@ import { InsightsGenerator } from '../../core/insights-generator.js';
  * Create top movers analysis
  */
 function createTopMoversSection(planningData, chartRenderer, activeCharts) {
-  const topMovers = InsightsGenerator.topMovers(planningData.transactions, 6);
-
   const topContainer = document.createElement('div');
   topContainer.className = 'insights-top-movers';
   topContainer.style.display = 'flex';
   topContainer.style.flexDirection = 'column';
   topContainer.style.gap = SPACING.MD;
 
+  // State for month navigation
+  let monthOffset = 0; // 0 = current month, -1 = last month, etc.
+
+  function getMonthData(offset) {
+    const now = new Date();
+    const targetDate = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+    const currentMonth = targetDate.getMonth();
+    const currentYear = targetDate.getFullYear();
+    const startOfMonth = new Date(currentYear, currentMonth, 1);
+    const endOfMonth = new Date(currentYear, currentMonth + 1, 1);
+
+    const monthTransactions = planningData.transactions.filter(t => {
+      const ts = new Date(t.timestamp);
+      return ts >= startOfMonth && ts < endOfMonth;
+    });
+
+    return {
+      transactions: monthTransactions,
+      startOfMonth,
+      endOfMonth,
+      displayMonth: targetDate,
+    };
+  }
+
+  function renderTopMovers(offset) {
+    monthOffset = offset;
+    const monthData = getMonthData(offset);
+    const topMovers = InsightsGenerator.topMovers(monthData.transactions, 6);
+
+    // Clear previous content except header
+    const existingList = topContainer.querySelector('.top-movers-list');
+    const existingChart = topContainer.querySelector('.top-movers-chart');
+    if (existingList) existingList.remove();
+    if (existingChart) existingChart.remove();
+
+    // Update title with month
+    const monthName = monthData.displayMonth.toLocaleDateString('en-US', {
+      month: 'long',
+      year: 'numeric',
+    });
+    topTitle.textContent = `Top Movers - ${monthName}`;
+
+    // Update navigation button text
+    const prevBtn = topContainer.querySelector('.top-movers-prev-btn');
+    const nextBtn = topContainer.querySelector('.top-movers-next-btn');
+    if (prevBtn && nextBtn) {
+      const prevMonth = new Date(monthData.displayMonth.getFullYear(), monthData.displayMonth.getMonth() - 1, 1);
+      const nextMonth = new Date(monthData.displayMonth.getFullYear(), monthData.displayMonth.getMonth() + 1, 1);
+      const prevMonthName = prevMonth.toLocaleDateString('en-US', { month: 'short' });
+      const nextMonthName = nextMonth.toLocaleDateString('en-US', { month: 'short' });
+      prevBtn.textContent = `← ${prevMonthName}`;
+      nextBtn.textContent = `${nextMonthName} →`;
+    }
+
+    const list = document.createElement('ul');
+    list.className = 'top-movers-list';
+    list.style.listStyle = 'none';
+    list.style.padding = '0';
+    list.style.margin = '0';
+    list.style.display = 'grid';
+    list.style.gridTemplateColumns = '1fr auto';
+    list.style.gap = SPACING.SM;
+
+    const currency = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'EUR',
+    });
+
+    topMovers.forEach(item => {
+      const liLabel = document.createElement('li');
+      liLabel.textContent = item.category;
+      liLabel.style.fontWeight = '600';
+      liLabel.style.color = COLORS.TEXT_MAIN;
+
+      const liValue = document.createElement('li');
+      liValue.textContent = currency.format(Math.abs(item.total));
+      liValue.style.textAlign = 'right';
+      liValue.style.color = COLORS.TEXT_MUTED;
+
+      list.appendChild(liLabel);
+      list.appendChild(liValue);
+    });
+
+    topContainer.appendChild(list);
+
+    // Chart for Top Movers
+    const topChartDiv = document.createElement('div');
+    topChartDiv.className = 'top-movers-chart';
+    topChartDiv.style.marginTop = SPACING.MD;
+    topChartDiv.style.position = 'relative';
+    topChartDiv.style.height = '220px';
+    const topCanvas = document.createElement('canvas');
+    topCanvas.id = `insights-top-movers-${Date.now()}`;
+    topCanvas.style.width = '100%';
+    topCanvas.style.maxHeight = '100%';
+    topChartDiv.appendChild(topCanvas);
+    topContainer.appendChild(topChartDiv);
+
+    // Render bar chart for top movers
+    const topLabels = topMovers.map(t => t.category);
+    const topData = topMovers.map(t => Math.abs(t.total));
+
+    chartRenderer
+      .createBarChart(
+        topCanvas,
+        {
+          labels: topLabels,
+          datasets: [{ label: 'Amount', data: topData }],
+        },
+        { title: 'Top Movers' }
+      )
+      .then(chart => {
+        if (chart) activeCharts.set('insights-top-movers', chart);
+      })
+      .catch(err => console.error('Top movers chart error', err));
+  }
+
+  // Header with title and navigation
+  const topHeader = document.createElement('div');
+  topHeader.style.display = 'flex';
+  topHeader.style.justifyContent = 'space-between';
+  topHeader.style.alignItems = 'center';
+  topHeader.style.marginBottom = SPACING.MD;
+
   const topTitle = document.createElement('h3');
   topTitle.textContent = 'Top Movers';
   topTitle.style.margin = '0';
   topTitle.style.fontSize = '1rem';
   topTitle.style.fontWeight = '600';
-  topContainer.appendChild(topTitle);
+  topHeader.appendChild(topTitle);
 
-  const list = document.createElement('ul');
-  list.style.listStyle = 'none';
-  list.style.padding = '0';
-  list.style.margin = '0';
-  list.style.display = 'grid';
-  list.style.gridTemplateColumns = '1fr auto';
-  list.style.gap = SPACING.SM;
+  // Navigation button (single combined button)
+  const navButton = document.createElement('div');
+  navButton.style.display = 'flex';
+  navButton.style.gap = SPACING.SM;
+  navButton.style.alignItems = 'center';
 
-  const currency = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'EUR',
+  const prevBtn = document.createElement('button');
+  prevBtn.className = 'top-movers-prev-btn';
+  prevBtn.textContent = '← Previous';
+  prevBtn.style.padding = '6px 12px';
+  prevBtn.style.fontSize = '0.85rem';
+  prevBtn.style.border = `1px solid ${COLORS.BORDER}`;
+  prevBtn.style.background = COLORS.SURFACE;
+  prevBtn.style.color = COLORS.TEXT_MAIN;
+  prevBtn.style.borderRadius = 'var(--radius-sm)';
+  prevBtn.style.cursor = 'pointer';
+  prevBtn.style.transition = 'all 0.2s ease';
+
+  prevBtn.addEventListener('mouseover', () => {
+    prevBtn.style.background = COLORS.SURFACE_HOVER;
+  });
+  prevBtn.addEventListener('mouseout', () => {
+    prevBtn.style.background = COLORS.SURFACE;
+  });
+  prevBtn.addEventListener('click', () => renderTopMovers(monthOffset - 1));
+
+  const nextBtn = document.createElement('button');
+  nextBtn.className = 'top-movers-next-btn';
+  nextBtn.textContent = 'Next →';
+  nextBtn.style.padding = '6px 12px';
+  nextBtn.style.fontSize = '0.85rem';
+  nextBtn.style.border = `1px solid ${COLORS.BORDER}`;
+  nextBtn.style.background = COLORS.SURFACE;
+  nextBtn.style.color = COLORS.TEXT_MAIN;
+  nextBtn.style.borderRadius = 'var(--radius-sm)';
+  nextBtn.style.cursor = 'pointer';
+  nextBtn.style.transition = 'all 0.2s ease';
+
+  nextBtn.addEventListener('mouseover', () => {
+    nextBtn.style.background = COLORS.SURFACE_HOVER;
+  });
+  nextBtn.addEventListener('mouseout', () => {
+    nextBtn.style.background = COLORS.SURFACE;
+  });
+  nextBtn.addEventListener('click', () => {
+    const now = new Date();
+    if (monthOffset < 0) {
+      renderTopMovers(monthOffset + 1);
+    }
   });
 
-  topMovers.forEach(item => {
-    const liLabel = document.createElement('li');
-    liLabel.textContent = item.category;
-    liLabel.style.fontWeight = '600';
-    liLabel.style.color = COLORS.TEXT_MAIN;
+  navButton.appendChild(prevBtn);
+  navButton.appendChild(nextBtn);
+  topHeader.appendChild(navButton);
+  topContainer.appendChild(topHeader);
 
-    const liValue = document.createElement('li');
-    liValue.textContent = currency.format(Math.abs(item.total));
-    liValue.style.textAlign = 'right';
-    liValue.style.color = COLORS.TEXT_MUTED;
+  // Initial render
+  renderTopMovers(0);
 
-    list.appendChild(liLabel);
-    list.appendChild(liValue);
-  });
-
-  topContainer.appendChild(list);
-
-  // Chart for Top Movers
-  const topChartDiv = document.createElement('div');
-  topChartDiv.style.marginTop = SPACING.MD;
-  topChartDiv.style.position = 'relative';
-  topChartDiv.style.height = '220px';
-  const topCanvas = document.createElement('canvas');
-  topCanvas.id = `insights-top-movers-${Date.now()}`;
-  topCanvas.style.width = '100%';
-  topCanvas.style.maxHeight = '100%';
-  topChartDiv.appendChild(topCanvas);
-  topContainer.appendChild(topChartDiv);
-
-  // Render bar chart for top movers
-  const topLabels = topMovers.map(t => t.category);
-  const topData = topMovers.map(t => Math.abs(t.total));
-
-  chartRenderer
-    .createBarChart(
-      topCanvas,
-      {
-        labels: topLabels,
-        datasets: [{ label: 'Amount', data: topData }],
-      },
-      { title: 'Top Movers' }
-    )
-    .then(chart => {
-      if (chart) activeCharts.set('insights-top-movers', chart);
-    })
-    .catch(err => console.error('Top movers chart error', err));
-
-  return { topContainer, topChartDiv };
+  return { topContainer, topChartDiv: null };
 }
 
 /**
@@ -120,6 +241,16 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
   timelineTitle.style.fontSize = '1rem';
   timelineTitle.style.fontWeight = '600';
   timelineHeader.appendChild(timelineTitle);
+
+  // State for navigation
+  let monthOffset = 0;
+  let currentMode = 'monthly';
+
+  // Toggle and navigation container
+  const controlsContainer = document.createElement('div');
+  controlsContainer.style.display = 'flex';
+  controlsContainer.style.gap = SPACING.MD;
+  controlsContainer.style.alignItems = 'center';
 
   // Toggle control
   const toggleContainer = document.createElement('div');
@@ -154,7 +285,9 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
       btn.style.fontWeight = '600';
 
       // Render chart
-      renderTimelineChart(mode);
+      currentMode = mode;
+      monthOffset = 0; // Reset to current month when switching modes
+      renderTimelineChart(mode, monthOffset);
     });
 
     return btn;
@@ -165,7 +298,65 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
 
   toggleContainer.appendChild(monthlyBtn);
   toggleContainer.appendChild(dailyBtn);
-  timelineHeader.appendChild(toggleContainer);
+  controlsContainer.appendChild(toggleContainer);
+
+  // Navigation button (single combined button)
+  const navButton = document.createElement('div');
+  navButton.style.display = 'flex';
+  navButton.style.gap = SPACING.SM;
+
+  const prevBtn = document.createElement('button');
+  prevBtn.className = 'timeline-prev-btn';
+  prevBtn.textContent = '← Previous';
+  prevBtn.style.padding = '6px 12px';
+  prevBtn.style.fontSize = '0.85rem';
+  prevBtn.style.border = `1px solid ${COLORS.BORDER}`;
+  prevBtn.style.background = COLORS.SURFACE;
+  prevBtn.style.color = COLORS.TEXT_MAIN;
+  prevBtn.style.borderRadius = 'var(--radius-sm)';
+  prevBtn.style.cursor = 'pointer';
+  prevBtn.style.transition = 'all 0.2s ease';
+
+  prevBtn.addEventListener('mouseover', () => {
+    prevBtn.style.background = COLORS.SURFACE_HOVER;
+  });
+  prevBtn.addEventListener('mouseout', () => {
+    prevBtn.style.background = COLORS.SURFACE;
+  });
+  prevBtn.addEventListener('click', () => {
+    monthOffset--;
+    renderTimelineChart(currentMode, monthOffset);
+  });
+
+  const nextBtn = document.createElement('button');
+  nextBtn.className = 'timeline-next-btn';
+  nextBtn.textContent = 'Next →';
+  nextBtn.style.padding = '6px 12px';
+  nextBtn.style.fontSize = '0.85rem';
+  nextBtn.style.border = `1px solid ${COLORS.BORDER}`;
+  nextBtn.style.background = COLORS.SURFACE;
+  nextBtn.style.color = COLORS.TEXT_MAIN;
+  nextBtn.style.borderRadius = 'var(--radius-sm)';
+  nextBtn.style.cursor = 'pointer';
+  nextBtn.style.transition = 'all 0.2s ease';
+
+  nextBtn.addEventListener('mouseover', () => {
+    nextBtn.style.background = COLORS.SURFACE_HOVER;
+  });
+  nextBtn.addEventListener('mouseout', () => {
+    nextBtn.style.background = COLORS.SURFACE;
+  });
+  nextBtn.addEventListener('click', () => {
+    if (monthOffset < 0) {
+      monthOffset++;
+      renderTimelineChart(currentMode, monthOffset);
+    }
+  });
+
+  navButton.appendChild(prevBtn);
+  navButton.appendChild(nextBtn);
+  controlsContainer.appendChild(navButton);
+  timelineHeader.appendChild(controlsContainer);
   timelineDiv.appendChild(timelineHeader);
 
   const timelineChartWrapper = document.createElement('div');
@@ -180,7 +371,7 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
 
   let currentTimelineChart = null;
 
-  function renderTimelineChart(mode) {
+  function renderTimelineChart(mode, offset = 0) {
     if (currentTimelineChart) {
       currentTimelineChart.destroy();
       currentTimelineChart = null;
@@ -191,13 +382,14 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
     let labelFormat;
     let title;
     let sumFunction = null;
+    let targetDate = new Date(now.getFullYear(), now.getMonth() + offset, 1);
 
     if (mode === 'monthly') {
       title = 'Monthly Expenses: This Period vs Previous Period';
       labelFormat = { month: 'short', year: 'numeric' };
       const monthsBack = 6;
       for (let i = monthsBack - 1; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const d = new Date(targetDate.getFullYear(), targetDate.getMonth() - i, 1);
         keys.push(
           `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
         );
@@ -219,55 +411,130 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
         }, 0);
       };
     } else {
-      // Daily mode: show daily data comparing current month vs previous month
-      title = 'Daily Expenses: Current Month vs Previous Month';
+      // Daily mode: show cumulative daily data comparing current month vs previous month
+      title = 'Daily Expenses (Cumulative): Current Month vs Previous Month';
       labelFormat = { month: 'short', day: 'numeric' };
-      // Show all days in current month
-      const currentMonth = now.getMonth();
-      const currentYear = now.getFullYear();
-      const daysInCurrentMonth = new Date(
-        currentYear,
-        currentMonth + 1,
+      // Show all days in target month
+      const targetMonth = targetDate.getMonth();
+      const targetYear = targetDate.getFullYear();
+      const daysInTargetMonth = new Date(
+        targetYear,
+        targetMonth + 1,
         0
       ).getDate();
 
-      for (let day = 1; day <= daysInCurrentMonth; day++) {
+      // Get previous month's day count for comparison
+      const prevMonth = new Date(targetYear, targetMonth - 1, 1);
+      const daysInPrevMonth = new Date(
+        prevMonth.getFullYear(),
+        prevMonth.getMonth() + 1,
+        0
+      ).getDate();
+
+      // Use the minimum of both months to avoid edge cases
+      const maxDaysToShow = Math.min(daysInTargetMonth, daysInPrevMonth);
+
+      for (let day = 1; day <= maxDaysToShow; day++) {
         keys.push(
-          `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+          `${targetYear}-${String(targetMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
         );
       }
 
-      sumFunction = (key, txs) => {
+      sumFunction = (key, txs, isCumulative = false) => {
         // key format YYYY-MM-DD
-        return txs.reduce((sum, t) => {
-          const dateStr = t.timestamp.split('T')[0];
-          if (dateStr === key && t.type === 'expense') {
-            return (
-              sum +
-              (typeof t.amount === 'number' ? t.amount : Number(t.amount) || 0)
-            );
-          }
-          return sum;
-        }, 0);
+        if (!isCumulative) {
+          // Single day sum
+          return txs.reduce((sum, t) => {
+            const dateStr = t.timestamp.split('T')[0];
+            if (dateStr === key && t.type === 'expense') {
+              return (
+                sum +
+                (typeof t.amount === 'number' ? t.amount : Number(t.amount) || 0)
+              );
+            }
+            return sum;
+          }, 0);
+        } else {
+          // Cumulative sum from start of month to this day
+          const [y, m, d] = key.split('-').map(Number);
+          const targetDateCalc = new Date(y, m - 1, d);
+          const monthStart = new Date(y, m - 1, 1);
+          
+          return txs.reduce((sum, t) => {
+            const ts = new Date(t.timestamp);
+            const dateStr = t.timestamp.split('T')[0];
+            if (ts >= monthStart && ts <= targetDateCalc && t.type === 'expense') {
+              return (
+                sum +
+                (typeof t.amount === 'number' ? t.amount : Number(t.amount) || 0)
+              );
+            }
+            return sum;
+          }, 0);
+        }
       };
     }
 
-    timelineTitle.textContent = title;
+    // Update title with month
+    const monthName = targetDate.toLocaleDateString('en-US', {
+      month: 'long',
+      year: 'numeric',
+    });
+    timelineTitle.textContent = `${title.split(':')[0]}: ${monthName}`;
+
+    // Update navigation button text
+    const prevBtn = timelineDiv.querySelector('.timeline-prev-btn');
+    const nextBtn = timelineDiv.querySelector('.timeline-next-btn');
+    if (prevBtn && nextBtn) {
+      const prevMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() - 1, 1);
+      const nextMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 1);
+      const prevMonthName = prevMonth.toLocaleDateString('en-US', { month: 'short' });
+      const nextMonthName = nextMonth.toLocaleDateString('en-US', { month: 'short' });
+      prevBtn.textContent = `← ${prevMonthName}`;
+      nextBtn.textContent = `${nextMonthName} →`;
+    }
 
     // Generate data series
-    const currentSeries = keys.map(k => ({
-      period: k,
-      value: sumFunction(k, transactions),
-    }));
+    let currentSeries, previousSeries;
+    let currentMonthLabel, previousMonthLabel;
 
-    const previousSeries = keys.map(k => {
-      // Calculate previous period (not previous year)
-      const parts = k.split('-').map(Number); // [y, m, d?]
-      const y = parts[0];
-      const m = parts[1];
-      const d = parts[2]; // undefined if monthly
-      let prevKey;
-      if (mode === 'monthly') {
+    if (mode === 'daily') {
+      // For daily mode, use cumulative sums
+      currentSeries = keys.map(k => ({
+        period: k,
+        value: sumFunction(k, transactions, true), // true = cumulative
+      }));
+
+      previousSeries = keys.map(k => {
+        // Calculate previous period (same day in previous month)
+        const parts = k.split('-').map(Number); // [y, m, d]
+        const y = parts[0];
+        const m = parts[1];
+        const d = parts[2];
+        const currentDate = new Date(y, m - 1, d);
+        // Go to same day in previous month
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        const prevKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
+        return { period: prevKey, value: sumFunction(prevKey, transactions, true) }; // true = cumulative
+      });
+
+      // Get month names for labels
+      currentMonthLabel = targetDate.toLocaleDateString('en-US', { month: 'long' });
+      const prevMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() - 1, 1);
+      previousMonthLabel = prevMonth.toLocaleDateString('en-US', { month: 'long' });
+    } else {
+      // For monthly mode, use regular sums
+      currentSeries = keys.map(k => ({
+        period: k,
+        value: sumFunction(k, transactions),
+      }));
+
+      previousSeries = keys.map(k => {
+        // Calculate previous period (not previous year)
+        const parts = k.split('-').map(Number); // [y, m]
+        const y = parts[0];
+        const m = parts[1];
+        let prevKey;
         // Previous month: subtract 1 month
         if (m === 1) {
           // January -> December of previous year
@@ -275,15 +542,13 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
         } else {
           prevKey = `${y}-${String(m - 1).padStart(2, '0')}`;
         }
-      } else {
-        // Daily mode: compare same day in previous month
-        const currentDate = new Date(y, m - 1, d);
-        // Go to same day in previous month
-        currentDate.setMonth(currentDate.getMonth() - 1);
-        prevKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
-      }
-      return { period: prevKey, value: sumFunction(prevKey, transactions) };
-    });
+        return { period: prevKey, value: sumFunction(prevKey, transactions) };
+      });
+
+      // For monthly mode, use generic labels since we're showing 6 months
+      currentMonthLabel = 'This Period';
+      previousMonthLabel = 'Previous Period';
+    }
 
     const chartLabels = keys.map(k => {
       const parts = k.split('-').map(Number);
@@ -304,8 +569,8 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
         {
           labels: chartLabels,
           datasets: [
-            { label: 'This Period', data: currentData },
-            { label: 'Previous Period', data: previousData },
+            { label: currentMonthLabel, data: currentData },
+            { label: previousMonthLabel, data: previousData },
           ],
         },
         {
