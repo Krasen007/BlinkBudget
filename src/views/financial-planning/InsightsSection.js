@@ -278,6 +278,7 @@ function createTimelineSection(
 
   // Track current mode for re-rendering
   let currentMode = 'monthly';
+  let isRendering = false; // Prevent double rendering
 
   // Toggle control
   const toggleContainer = document.createElement('div');
@@ -314,8 +315,9 @@ function createTimelineSection(
       // Update current mode and render
       currentMode = mode;
       sharedMonthState.offset = 0; // Reset to current month when switching modes
+
+      // Use the shared callback to update all sections
       if (sharedMonthState.onNavigate) sharedMonthState.onNavigate();
-      renderTimelineChart(mode);
     });
 
     return btn;
@@ -399,6 +401,10 @@ function createTimelineSection(
   timelineDiv.appendChild(timelineChartWrapper);
 
   function renderTimelineChart(mode) {
+    // Prevent double rendering
+    if (isRendering) return;
+    isRendering = true;
+
     // Destroy existing chart using the activeCharts key
     const existingChart = activeCharts.get('insights-timeline');
     if (existingChart) {
@@ -694,7 +700,11 @@ function createTimelineSection(
           activeCharts.set('insights-timeline', chart);
         }
       })
-      .catch(err => console.error('Timeline chart error', err));
+      .catch(err => console.error('Timeline chart error', err))
+      .finally(() => {
+        // Reset rendering flag after chart is created
+        isRendering = false;
+      });
   }
 
   // Initial render
@@ -762,7 +772,12 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
 
   // Timeline comparison: monthly/daily expenses
   const { timelineDiv, renderTimelineChart, getCurrentMode } =
-    createTimelineSection(transactions, chartRenderer, activeCharts, sharedMonthState);
+    createTimelineSection(
+      transactions,
+      chartRenderer,
+      activeCharts,
+      sharedMonthState
+    );
   section.appendChild(timelineDiv);
 
   // Set up synchronized navigation - both sections update together

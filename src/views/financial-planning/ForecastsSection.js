@@ -24,9 +24,43 @@ import {
 } from '../../utils/financial-planning-helpers.js';
 
 /**
- * Create a detailed forecast table
+ * Generate historical monthly data from transactions
  */
-function createForecastTable(incomeForecasts, expenseForecasts) {
+function generateHistoricalData(transactions, months = 3) {
+  const monthlyData = [];
+  const now = new Date();
+  
+  for (let i = months - 1; i >= 0; i--) {
+    const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const nextMonthDate = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+    
+    const monthTransactions = transactions.filter(t => {
+      const transactionDate = new Date(t.date || t.timestamp);
+      return transactionDate >= monthDate && transactionDate < nextMonthDate;
+    });
+    
+    const income = monthTransactions
+      .filter(t => t.type === 'income')
+      .reduce((sum, t) => sum + t.amount, 0);
+    
+    const expenses = monthTransactions
+      .filter(t => t.type === 'expense')
+      .reduce((sum, t) => sum + t.amount, 0);
+    
+    monthlyData.push({
+      period: monthDate,
+      income,
+      expenses
+    });
+  }
+  
+  return { monthlyData };
+}
+
+/**
+ * Create a detailed forecast table with historical values for previous months
+ */
+function createForecastTable(incomeForecasts, expenseForecasts, historicalData) {
   const container = document.createElement('div');
   container.className = 'forecast-table-container';
   container.style.background = COLORS.SURFACE;
@@ -50,7 +84,7 @@ function createForecastTable(incomeForecasts, expenseForecasts) {
   table.style.fontSize = '0.875rem';
 
   // Header row
-  const headers = ['Month', 'Income', 'Expenses', 'Net', 'Confidence'];
+  const headers = ['Month', 'Income', 'Expenses', 'Net', 'Historical'];
   headers.forEach(header => {
     const headerCell = document.createElement('div');
     headerCell.textContent = header;
@@ -61,9 +95,62 @@ function createForecastTable(incomeForecasts, expenseForecasts) {
     table.appendChild(headerCell);
   });
 
-  // Data rows
-  const maxRows = Math.max(incomeForecasts.length, expenseForecasts.length);
-  for (let i = 0; i < maxRows; i++) {
+  // Add historical months first
+  if (historicalData && historicalData.monthlyData) {
+    historicalData.monthlyData.forEach((month, _index) => {
+      // Month
+      const monthCell = document.createElement('div');
+      monthCell.textContent = month.period.toLocaleDateString('en-US', {
+        month: 'short',
+        year: 'numeric',
+      });
+      monthCell.style.paddingTop = SPACING.SM;
+      monthCell.style.fontWeight = '600'; // Bold for historical months
+      table.appendChild(monthCell);
+
+      // Income
+      const incomeCell = document.createElement('div');
+      incomeCell.textContent = `€${month.income.toFixed(2)}`;
+      incomeCell.style.color = COLORS.SUCCESS;
+      incomeCell.style.fontWeight = '500';
+      incomeCell.style.paddingTop = SPACING.SM;
+      incomeCell.style.textAlign = 'right';
+      table.appendChild(incomeCell);
+
+      // Expenses
+      const expenseCell = document.createElement('div');
+      expenseCell.textContent = `€${month.expenses.toFixed(2)}`;
+      expenseCell.style.color = COLORS.ERROR;
+      expenseCell.style.fontWeight = '500';
+      expenseCell.style.paddingTop = SPACING.SM;
+      expenseCell.style.textAlign = 'right';
+      table.appendChild(expenseCell);
+
+      // Net
+      const net = month.income - month.expenses;
+      const netCell = document.createElement('div');
+      netCell.textContent = `€${net.toFixed(2)}`;
+      netCell.style.color = net >= 0 ? COLORS.SUCCESS : COLORS.ERROR;
+      netCell.style.fontWeight = '600';
+      netCell.style.paddingTop = SPACING.SM;
+      netCell.style.textAlign = 'right';
+      table.appendChild(netCell);
+
+      // Historical column (shows "Actual" for historical months)
+      const historicalCell = document.createElement('div');
+      historicalCell.textContent = 'Actual';
+      historicalCell.style.color = COLORS.PRIMARY;
+      historicalCell.style.fontWeight = '600';
+      historicalCell.style.paddingTop = SPACING.SM;
+      historicalCell.style.textAlign = 'right';
+      historicalCell.style.fontSize = '0.875rem';
+      table.appendChild(historicalCell);
+    });
+  }
+
+  // Add forecasted months
+  const maxForecastRows = Math.max(incomeForecasts.length, expenseForecasts.length);
+  for (let i = 0; i < maxForecastRows; i++) {
     const income = incomeForecasts[i] || {
       predictedAmount: 0,
       confidence: 0,
@@ -73,7 +160,7 @@ function createForecastTable(incomeForecasts, expenseForecasts) {
       confidence: 0,
     };
     const net = income.predictedAmount - expense.predictedAmount;
-    const confidence = Math.min(income.confidence, expense.confidence);
+    // const confidence = Math.min(income.confidence, expense.confidence); // Unused for now
 
     // Month
     const monthCell = document.createElement('div');
@@ -84,6 +171,7 @@ function createForecastTable(incomeForecasts, expenseForecasts) {
         })
       : `Month ${i + 1}`;
     monthCell.style.paddingTop = SPACING.SM;
+    monthCell.style.fontWeight = 'normal'; // Normal weight for forecasted months
     table.appendChild(monthCell);
 
     // Income
@@ -113,18 +201,15 @@ function createForecastTable(incomeForecasts, expenseForecasts) {
     netCell.style.textAlign = 'right';
     table.appendChild(netCell);
 
-    // Confidence
-    const confidenceCell = document.createElement('div');
-    confidenceCell.textContent = `${(confidence * 100).toFixed(0)}%`;
-    confidenceCell.style.color =
-      confidence > 0.7
-        ? COLORS.SUCCESS
-        : confidence > 0.4
-          ? COLORS.WARNING
-          : COLORS.ERROR;
-    confidenceCell.style.paddingTop = SPACING.SM;
-    confidenceCell.style.textAlign = 'right';
-    table.appendChild(confidenceCell);
+    // Historical column (shows "Forecast" for forecasted months)
+    const historicalCell = document.createElement('div');
+    historicalCell.textContent = 'Forecast';
+    historicalCell.style.color = COLORS.TEXT_MUTED;
+    historicalCell.style.fontWeight = '500';
+    historicalCell.style.paddingTop = SPACING.SM;
+    historicalCell.style.textAlign = 'right';
+    historicalCell.style.fontSize = '0.875rem';
+    table.appendChild(historicalCell);
   }
 
   container.appendChild(title);
@@ -295,10 +380,12 @@ export const ForecastsSection = (
         console.error('Error creating projected balance chart:', error);
       });
 
-    // Create detailed forecast table
+    // Create detailed forecast table with historical data
+    const historicalData = generateHistoricalData(planningData.transactions, 3);
     const forecastTable = createForecastTable(
       incomeForecasts,
-      expenseForecasts
+      expenseForecasts,
+      historicalData
     );
     section.appendChild(forecastTable);
   } catch (error) {

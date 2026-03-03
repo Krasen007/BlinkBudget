@@ -112,37 +112,73 @@ export async function createCategoryBreakdownChart(
   // Prepare chart data first
   const categoryData = currentData.categoryBreakdown;
 
-  // Total amount display
-  const totalAmount = document.createElement('div');
-  totalAmount.style.display = 'flex';
-  totalAmount.style.flexDirection = 'column';
-  totalAmount.style.alignItems = 'flex-end';
-  totalAmount.style.textAlign = 'right';
+  // Total amounts display
+  const totalsContainer = document.createElement('div');
+  totalsContainer.style.display = 'flex';
+  totalsContainer.style.flexDirection = 'row';
+  totalsContainer.style.alignItems = 'flex-end';
+  totalsContainer.style.justifyContent = 'space-between';
+  totalsContainer.style.gap = SPACING.MD;
+  totalsContainer.style.textAlign = 'right';
 
-  const totalLabel = document.createElement('span');
-  totalLabel.textContent = 'Total Spent';
-  totalLabel.style.fontSize = '0.875rem';
-  totalLabel.style.color = COLORS.TEXT_MUTED;
-  totalLabel.style.marginBottom = '2px';
+  // Total Income (Left side)
+  const totalIncomeContainer = document.createElement('div');
+  totalIncomeContainer.style.display = 'flex';
+  totalIncomeContainer.style.flexDirection = 'column';
+  totalIncomeContainer.style.alignItems = 'flex-start';
 
-  const totalValue = document.createElement('span');
+  const totalIncomeLabel = document.createElement('span');
+  totalIncomeLabel.textContent = 'Total Income';
+  totalIncomeLabel.style.fontSize = '0.875rem';
+  totalIncomeLabel.style.color = COLORS.TEXT_MUTED;
+  totalIncomeLabel.style.marginBottom = '2px';
+
+  const totalIncomeValue = document.createElement('span');
+  const totalIncome = currentData.incomeVsExpenses?.totalIncome || 0;
+  totalIncomeValue.textContent = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(totalIncome);
+  totalIncomeValue.style.fontSize = '1.25rem';
+  totalIncomeValue.style.fontWeight = 'bold';
+  totalIncomeValue.style.color = 'rgba(34, 197, 94, 1)'; // Green color for income
+
+  totalIncomeContainer.appendChild(totalIncomeLabel);
+  totalIncomeContainer.appendChild(totalIncomeValue);
+
+  // Total Spent (Right side)
+  const totalSpentContainer = document.createElement('div');
+  totalSpentContainer.style.display = 'flex';
+  totalSpentContainer.style.flexDirection = 'column';
+  totalSpentContainer.style.alignItems = 'flex-end';
+
+  const totalSpentLabel = document.createElement('span');
+  totalSpentLabel.textContent = 'Total Spent';
+  totalSpentLabel.style.fontSize = '0.875rem';
+  totalSpentLabel.style.color = COLORS.TEXT_MUTED;
+  totalSpentLabel.style.marginBottom = '2px';
+
+  const totalSpentValue = document.createElement('span');
   const totalSpent = categoryData.categories.reduce(
     (sum, cat) => sum + cat.amount,
     0
   );
-  totalValue.textContent = new Intl.NumberFormat('en-US', {
+  totalSpentValue.textContent = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
   }).format(totalSpent);
-  totalValue.style.fontSize = '1.25rem';
-  totalValue.style.fontWeight = 'bold';
-  totalValue.style.color = COLORS.PRIMARY;
+  totalSpentValue.style.fontSize = '1.25rem';
+  totalSpentValue.style.fontWeight = 'bold';
+  totalSpentValue.style.color = COLORS.PRIMARY;
 
-  totalAmount.appendChild(totalLabel);
-  totalAmount.appendChild(totalValue);
+  totalSpentContainer.appendChild(totalSpentLabel);
+  totalSpentContainer.appendChild(totalSpentValue);
+
+  totalsContainer.appendChild(totalIncomeContainer);
+  totalsContainer.appendChild(totalSpentContainer);
 
   header.appendChild(title);
-  header.appendChild(totalAmount);
+  header.appendChild(totalsContainer);
   section.appendChild(header);
 
   // Chart container - fixed height
@@ -203,12 +239,12 @@ export async function createCategoryBreakdownChart(
   // Create initial pie chart with responsive legend
   const legendPosition = window.innerWidth < 768 ? 'bottom' : 'right';
   const categoryCount = categoryData.categories.length;
-  
+
   // Adjust legend settings based on category count
   const legendFontSize = categoryCount > 15 ? 10 : categoryCount > 10 ? 11 : 12;
   const legendPadding = categoryCount > 15 ? 6 : categoryCount > 10 ? 8 : 10;
   const legendBoxWidth = categoryCount > 15 ? 12 : 15;
-  
+
   const currentChart = await chartRenderer.createPieChart(canvas, chartData, {
     responsive: true,
     maintainAspectRatio: false,
@@ -218,7 +254,7 @@ export async function createCategoryBreakdownChart(
         bottom: 10,
         left: legendPosition === 'right' ? 10 : 0,
         right: legendPosition === 'right' ? 10 : 0,
-      }
+      },
     },
     plugins: {
       legend: {
@@ -228,9 +264,9 @@ export async function createCategoryBreakdownChart(
           boxWidth: legendBoxWidth,
           padding: legendPadding,
           font: {
-            size: legendFontSize
+            size: legendFontSize,
           },
-          generateLabels: (chart) => {
+          generateLabels: chart => {
             const data = chart.data;
             if (data.labels.length && data.datasets.length) {
               return data.labels.map((label, i) => {
@@ -242,12 +278,12 @@ export async function createCategoryBreakdownChart(
                   strokeStyle: style.borderColor,
                   lineWidth: style.borderWidth,
                   hidden: !chart.getDataVisibility(i),
-                  index: i
+                  index: i,
                 };
               });
             }
             return [];
-          }
+          },
         },
         // Remove max height/width constraints to allow legend to expand naturally
         maxHeight: undefined,
