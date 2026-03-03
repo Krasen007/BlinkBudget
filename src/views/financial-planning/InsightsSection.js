@@ -378,7 +378,8 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
     }
 
     const now = new Date();
-    const keys = [];
+    let keys = [];
+    let prevKeys = [];
     let labelFormat;
     let title;
     let sumFunction = null;
@@ -431,14 +432,39 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
         0
       ).getDate();
 
-      // Use the minimum of both months to avoid edge cases
-      const maxDaysToShow = Math.min(daysInTargetMonth, daysInPrevMonth);
+      // Use the maximum of both months to show all days
+      const maxDaysToShow = Math.max(daysInTargetMonth, daysInPrevMonth);
 
+      // Generate keys for the target month only (don't extend into next month)
+      const targetKeys = [];
+      
       for (let day = 1; day <= maxDaysToShow; day++) {
-        keys.push(
-          `${targetYear}-${String(targetMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-        );
+        if (day <= daysInTargetMonth) {
+          // Real days in target month
+          targetKeys.push(
+            `${targetYear}-${String(targetMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+          );
+        } else {
+          // Virtual days (beyond target month) - use last day of target month
+          targetKeys.push(
+            `${targetYear}-${String(targetMonth + 1).padStart(2, '0')}-${String(daysInTargetMonth).padStart(2, '0')}`
+          );
+        }
+        
+        // For previous month, use actual days
+        if (day <= daysInPrevMonth) {
+          prevKeys.push(
+            `${prevMonth.getFullYear()}-${String(prevMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+          );
+        } else {
+          // If previous month has fewer days, repeat the last day
+          prevKeys.push(
+            `${prevMonth.getFullYear()}-${String(prevMonth.getMonth() + 1).padStart(2, '0')}-${String(daysInPrevMonth).padStart(2, '0')}`
+          );
+        }
       }
+      
+      keys = targetKeys;
 
       sumFunction = (key, txs, isCumulative = false) => {
         // key format YYYY-MM-DD
@@ -505,16 +531,9 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
         value: sumFunction(k, transactions, true), // true = cumulative
       }));
 
-      previousSeries = keys.map(k => {
-        // Calculate previous period (same day in previous month)
-        const parts = k.split('-').map(Number); // [y, m, d]
-        const y = parts[0];
-        const m = parts[1];
-        const d = parts[2];
-        const currentDate = new Date(y, m - 1, d);
-        // Go to same day in previous month
-        currentDate.setMonth(currentDate.getMonth() - 1);
-        const prevKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
+      previousSeries = keys.map((k, index) => {
+        // Use the pre-calculated previous month key
+        const prevKey = prevKeys[index];
         return { period: prevKey, value: sumFunction(prevKey, transactions, true) }; // true = cumulative
       });
 
@@ -550,13 +569,29 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
       previousMonthLabel = 'Previous Period';
     }
 
-    const chartLabels = keys.map(k => {
+    const chartLabels = keys.map((k, index) => {
       const parts = k.split('-').map(Number);
       // For monthly: parts=[y, m]. For daily: parts=[y, m, d]
       const d =
         parts.length === 3
           ? new Date(parts[0], parts[1] - 1, parts[2])
           : new Date(parts[0], parts[1] - 1, 1); // undefined if monthly
+      
+      // For daily mode, if we're showing virtual days (beyond the month), 
+      // show them with the actual day number (e.g., "Feb 29", "Feb 30", "Feb 31")
+      if (mode === 'daily' && parts.length === 3) {
+        const targetMonth = targetDate.getMonth();
+        const targetYear = targetDate.getFullYear();
+        const daysInTargetMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+        const dayNum = parts[2];
+        
+        if (dayNum > daysInTargetMonth) {
+          // Virtual day - show with the actual day number
+          const monthName = targetDate.toLocaleDateString('en-US', { month: 'short' });
+          return `${monthName} ${dayNum}`;
+        }
+      }
+      
       return d.toLocaleDateString('en-US', labelFormat);
     });
 
