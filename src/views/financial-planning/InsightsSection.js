@@ -22,15 +22,17 @@ import { InsightsGenerator } from '../../core/insights-generator.js';
 /**
  * Create top movers analysis
  */
-function createTopMoversSection(planningData, chartRenderer, activeCharts) {
+function createTopMoversSection(
+  planningData,
+  chartRenderer,
+  activeCharts,
+  sharedMonthState
+) {
   const topContainer = document.createElement('div');
   topContainer.className = 'insights-top-movers';
   topContainer.style.display = 'flex';
   topContainer.style.flexDirection = 'column';
   topContainer.style.gap = SPACING.MD;
-
-  // State for month navigation
-  let monthOffset = 0; // 0 = current month, -1 = last month, etc.
 
   function getMonthData(offset) {
     const now = new Date();
@@ -53,16 +55,20 @@ function createTopMoversSection(planningData, chartRenderer, activeCharts) {
     };
   }
 
-  function renderTopMovers(offset) {
-    monthOffset = offset;
-    const monthData = getMonthData(offset);
+  function renderTopMovers() {
+    const monthOffset = sharedMonthState.offset;
+    const monthData = getMonthData(monthOffset);
     const topMovers = InsightsGenerator.topMovers(monthData.transactions, 6);
 
     // Clear previous content except header
     const existingList = topContainer.querySelector('.top-movers-list');
     const existingChart = topContainer.querySelector('.top-movers-chart');
     if (existingList) existingList.remove();
-    if (existingChart) existingChart.remove();
+    if (existingChart) {
+      // Destroy existing chart using fixed ID
+      chartRenderer.destroyChart('insights-top-movers-chart');
+      existingChart.remove();
+    }
 
     // Update title with month
     const monthName = monthData.displayMonth.toLocaleDateString('en-US', {
@@ -75,10 +81,22 @@ function createTopMoversSection(planningData, chartRenderer, activeCharts) {
     const prevBtn = topContainer.querySelector('.top-movers-prev-btn');
     const nextBtn = topContainer.querySelector('.top-movers-next-btn');
     if (prevBtn && nextBtn) {
-      const prevMonth = new Date(monthData.displayMonth.getFullYear(), monthData.displayMonth.getMonth() - 1, 1);
-      const nextMonth = new Date(monthData.displayMonth.getFullYear(), monthData.displayMonth.getMonth() + 1, 1);
-      const prevMonthName = prevMonth.toLocaleDateString('en-US', { month: 'short' });
-      const nextMonthName = nextMonth.toLocaleDateString('en-US', { month: 'short' });
+      const prevMonth = new Date(
+        monthData.displayMonth.getFullYear(),
+        monthData.displayMonth.getMonth() - 1,
+        1
+      );
+      const nextMonth = new Date(
+        monthData.displayMonth.getFullYear(),
+        monthData.displayMonth.getMonth() + 1,
+        1
+      );
+      const prevMonthName = prevMonth.toLocaleDateString('en-US', {
+        month: 'short',
+      });
+      const nextMonthName = nextMonth.toLocaleDateString('en-US', {
+        month: 'short',
+      });
       prevBtn.textContent = `← ${prevMonthName}`;
       nextBtn.textContent = `${nextMonthName} →`;
     }
@@ -121,7 +139,7 @@ function createTopMoversSection(planningData, chartRenderer, activeCharts) {
     topChartDiv.style.position = 'relative';
     topChartDiv.style.height = '220px';
     const topCanvas = document.createElement('canvas');
-    topCanvas.id = `insights-top-movers-${Date.now()}`;
+    topCanvas.id = 'insights-top-movers-chart'; // Fixed ID for consistent tracking
     topCanvas.style.width = '100%';
     topCanvas.style.maxHeight = '100%';
     topChartDiv.appendChild(topCanvas);
@@ -184,7 +202,11 @@ function createTopMoversSection(planningData, chartRenderer, activeCharts) {
   prevBtn.addEventListener('mouseout', () => {
     prevBtn.style.background = COLORS.SURFACE;
   });
-  prevBtn.addEventListener('click', () => renderTopMovers(monthOffset - 1));
+  prevBtn.addEventListener('click', () => {
+    sharedMonthState.offset--;
+    if (sharedMonthState.onNavigate) sharedMonthState.onNavigate();
+    renderTopMovers();
+  });
 
   const nextBtn = document.createElement('button');
   nextBtn.className = 'top-movers-next-btn';
@@ -205,9 +227,10 @@ function createTopMoversSection(planningData, chartRenderer, activeCharts) {
     nextBtn.style.background = COLORS.SURFACE;
   });
   nextBtn.addEventListener('click', () => {
-    const now = new Date();
-    if (monthOffset < 0) {
-      renderTopMovers(monthOffset + 1);
+    if (sharedMonthState.offset < 0) {
+      sharedMonthState.offset++;
+      if (sharedMonthState.onNavigate) sharedMonthState.onNavigate();
+      renderTopMovers();
     }
   });
 
@@ -217,15 +240,20 @@ function createTopMoversSection(planningData, chartRenderer, activeCharts) {
   topContainer.appendChild(topHeader);
 
   // Initial render
-  renderTopMovers(0);
+  renderTopMovers();
 
-  return { topContainer, topChartDiv: null };
+  return { topContainer, topChartDiv: null, renderTopMovers };
 }
 
 /**
  * Create timeline comparison section
  */
-function createTimelineSection(transactions, chartRenderer, activeCharts) {
+function createTimelineSection(
+  transactions,
+  chartRenderer,
+  activeCharts,
+  sharedMonthState
+) {
   const timelineDiv = document.createElement('div');
   timelineDiv.style.marginTop = SPACING.LG;
 
@@ -242,15 +270,14 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
   timelineTitle.style.fontWeight = '600';
   timelineHeader.appendChild(timelineTitle);
 
-  // State for navigation
-  let monthOffset = 0;
-  let currentMode = 'monthly';
-
   // Toggle and navigation container
   const controlsContainer = document.createElement('div');
   controlsContainer.style.display = 'flex';
   controlsContainer.style.gap = SPACING.MD;
   controlsContainer.style.alignItems = 'center';
+
+  // Track current mode for re-rendering
+  let currentMode = 'monthly';
 
   // Toggle control
   const toggleContainer = document.createElement('div');
@@ -284,10 +311,11 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
       btn.style.color = COLORS.PRIMARY;
       btn.style.fontWeight = '600';
 
-      // Render chart
+      // Update current mode and render
       currentMode = mode;
-      monthOffset = 0; // Reset to current month when switching modes
-      renderTimelineChart(mode, monthOffset);
+      sharedMonthState.offset = 0; // Reset to current month when switching modes
+      if (sharedMonthState.onNavigate) sharedMonthState.onNavigate();
+      renderTimelineChart(mode);
     });
 
     return btn;
@@ -300,10 +328,11 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
   toggleContainer.appendChild(dailyBtn);
   controlsContainer.appendChild(toggleContainer);
 
-  // Navigation button (single combined button)
-  const navButton = document.createElement('div');
-  navButton.style.display = 'flex';
-  navButton.style.gap = SPACING.SM;
+  // Navigation buttons
+  const navContainer = document.createElement('div');
+  navContainer.style.display = 'flex';
+  navContainer.style.gap = SPACING.SM;
+  navContainer.style.alignItems = 'center';
 
   const prevBtn = document.createElement('button');
   prevBtn.className = 'timeline-prev-btn';
@@ -324,8 +353,8 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
     prevBtn.style.background = COLORS.SURFACE;
   });
   prevBtn.addEventListener('click', () => {
-    monthOffset--;
-    renderTimelineChart(currentMode, monthOffset);
+    sharedMonthState.offset--;
+    if (sharedMonthState.onNavigate) sharedMonthState.onNavigate();
   });
 
   const nextBtn = document.createElement('button');
@@ -347,15 +376,15 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
     nextBtn.style.background = COLORS.SURFACE;
   });
   nextBtn.addEventListener('click', () => {
-    if (monthOffset < 0) {
-      monthOffset++;
-      renderTimelineChart(currentMode, monthOffset);
+    if (sharedMonthState.offset < 0) {
+      sharedMonthState.offset++;
+      if (sharedMonthState.onNavigate) sharedMonthState.onNavigate();
     }
   });
 
-  navButton.appendChild(prevBtn);
-  navButton.appendChild(nextBtn);
-  controlsContainer.appendChild(navButton);
+  navContainer.appendChild(prevBtn);
+  navContainer.appendChild(nextBtn);
+  controlsContainer.appendChild(navContainer);
   timelineHeader.appendChild(controlsContainer);
   timelineDiv.appendChild(timelineHeader);
 
@@ -363,34 +392,44 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
   timelineChartWrapper.style.position = 'relative';
   timelineChartWrapper.style.height = '300px';
   const timelineCanvas = document.createElement('canvas');
-  timelineCanvas.id = `insights-timeline-${Date.now()}`;
+  timelineCanvas.id = 'insights-timeline-chart'; // Fixed ID for consistent tracking
   timelineCanvas.style.width = '100%';
   timelineCanvas.style.maxHeight = '100%';
   timelineChartWrapper.appendChild(timelineCanvas);
   timelineDiv.appendChild(timelineChartWrapper);
 
-  let currentTimelineChart = null;
-
-  function renderTimelineChart(mode, offset = 0) {
-    if (currentTimelineChart) {
-      currentTimelineChart.destroy();
-      currentTimelineChart = null;
+  function renderTimelineChart(mode) {
+    // Destroy existing chart using the activeCharts key
+    const existingChart = activeCharts.get('insights-timeline');
+    if (existingChart) {
+      chartRenderer.destroyChart(existingChart);
+      activeCharts.delete('insights-timeline');
     }
 
     const now = new Date();
+    const monthOffset = sharedMonthState.offset;
+    const targetDate = new Date(
+      now.getFullYear(),
+      now.getMonth() + monthOffset,
+      1
+    );
+
     let keys = [];
-    let prevKeys = [];
+    const prevKeys = [];
     let labelFormat;
     let title;
     let sumFunction = null;
-    let targetDate = new Date(now.getFullYear(), now.getMonth() + offset, 1);
 
     if (mode === 'monthly') {
       title = 'Monthly Expenses: This Period vs Previous Period';
       labelFormat = { month: 'short', year: 'numeric' };
       const monthsBack = 6;
       for (let i = monthsBack - 1; i >= 0; i--) {
-        const d = new Date(targetDate.getFullYear(), targetDate.getMonth() - i, 1);
+        const d = new Date(
+          targetDate.getFullYear(),
+          targetDate.getMonth() - i,
+          1
+        );
         keys.push(
           `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
         );
@@ -413,7 +452,7 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
       };
     } else {
       // Daily mode: show cumulative daily data comparing current month vs previous month
-      title = 'Daily Expenses (Cumulative): Current Month vs Previous Month';
+      title = 'Daily Expenses : Current Month vs Previous Month';
       labelFormat = { month: 'short', day: 'numeric' };
       // Show all days in target month
       const targetMonth = targetDate.getMonth();
@@ -437,7 +476,7 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
 
       // Generate keys for the target month only (don't extend into next month)
       const targetKeys = [];
-      
+
       for (let day = 1; day <= maxDaysToShow; day++) {
         if (day <= daysInTargetMonth) {
           // Real days in target month
@@ -450,7 +489,7 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
             `${targetYear}-${String(targetMonth + 1).padStart(2, '0')}-${String(daysInTargetMonth).padStart(2, '0')}`
           );
         }
-        
+
         // For previous month, use actual days
         if (day <= daysInPrevMonth) {
           prevKeys.push(
@@ -463,7 +502,7 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
           );
         }
       }
-      
+
       keys = targetKeys;
 
       sumFunction = (key, txs, isCumulative = false) => {
@@ -475,7 +514,9 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
             if (dateStr === key && t.type === 'expense') {
               return (
                 sum +
-                (typeof t.amount === 'number' ? t.amount : Number(t.amount) || 0)
+                (typeof t.amount === 'number'
+                  ? t.amount
+                  : Number(t.amount) || 0)
               );
             }
             return sum;
@@ -485,14 +526,19 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
           const [y, m, d] = key.split('-').map(Number);
           const targetDateCalc = new Date(y, m - 1, d);
           const monthStart = new Date(y, m - 1, 1);
-          
+
           return txs.reduce((sum, t) => {
             const ts = new Date(t.timestamp);
-            const dateStr = t.timestamp.split('T')[0];
-            if (ts >= monthStart && ts <= targetDateCalc && t.type === 'expense') {
+            if (
+              ts >= monthStart &&
+              ts <= targetDateCalc &&
+              t.type === 'expense'
+            ) {
               return (
                 sum +
-                (typeof t.amount === 'number' ? t.amount : Number(t.amount) || 0)
+                (typeof t.amount === 'number'
+                  ? t.amount
+                  : Number(t.amount) || 0)
               );
             }
             return sum;
@@ -512,10 +558,22 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
     const prevBtn = timelineDiv.querySelector('.timeline-prev-btn');
     const nextBtn = timelineDiv.querySelector('.timeline-next-btn');
     if (prevBtn && nextBtn) {
-      const prevMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() - 1, 1);
-      const nextMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 1);
-      const prevMonthName = prevMonth.toLocaleDateString('en-US', { month: 'short' });
-      const nextMonthName = nextMonth.toLocaleDateString('en-US', { month: 'short' });
+      const prevMonth = new Date(
+        targetDate.getFullYear(),
+        targetDate.getMonth() - 1,
+        1
+      );
+      const nextMonth = new Date(
+        targetDate.getFullYear(),
+        targetDate.getMonth() + 1,
+        1
+      );
+      const prevMonthName = prevMonth.toLocaleDateString('en-US', {
+        month: 'short',
+      });
+      const nextMonthName = nextMonth.toLocaleDateString('en-US', {
+        month: 'short',
+      });
       prevBtn.textContent = `← ${prevMonthName}`;
       nextBtn.textContent = `${nextMonthName} →`;
     }
@@ -531,16 +589,27 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
         value: sumFunction(k, transactions, true), // true = cumulative
       }));
 
-      previousSeries = keys.map((k, index) => {
+      previousSeries = keys.map((_k, index) => {
         // Use the pre-calculated previous month key
         const prevKey = prevKeys[index];
-        return { period: prevKey, value: sumFunction(prevKey, transactions, true) }; // true = cumulative
+        return {
+          period: prevKey,
+          value: sumFunction(prevKey, transactions, true),
+        }; // true = cumulative
       });
 
       // Get month names for labels
-      currentMonthLabel = targetDate.toLocaleDateString('en-US', { month: 'long' });
-      const prevMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() - 1, 1);
-      previousMonthLabel = prevMonth.toLocaleDateString('en-US', { month: 'long' });
+      currentMonthLabel = targetDate.toLocaleDateString('en-US', {
+        month: 'long',
+      });
+      const prevMonth = new Date(
+        targetDate.getFullYear(),
+        targetDate.getMonth() - 1,
+        1
+      );
+      previousMonthLabel = prevMonth.toLocaleDateString('en-US', {
+        month: 'long',
+      });
     } else {
       // For monthly mode, use regular sums
       currentSeries = keys.map(k => ({
@@ -569,29 +638,35 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
       previousMonthLabel = 'Previous Period';
     }
 
-    const chartLabels = keys.map((k, index) => {
+    const chartLabels = keys.map((k, _index) => {
       const parts = k.split('-').map(Number);
       // For monthly: parts=[y, m]. For daily: parts=[y, m, d]
       const d =
         parts.length === 3
           ? new Date(parts[0], parts[1] - 1, parts[2])
           : new Date(parts[0], parts[1] - 1, 1); // undefined if monthly
-      
-      // For daily mode, if we're showing virtual days (beyond the month), 
+
+      // For daily mode, if we're showing virtual days (beyond the month),
       // show them with the actual day number (e.g., "Feb 29", "Feb 30", "Feb 31")
       if (mode === 'daily' && parts.length === 3) {
         const targetMonth = targetDate.getMonth();
         const targetYear = targetDate.getFullYear();
-        const daysInTargetMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+        const daysInTargetMonth = new Date(
+          targetYear,
+          targetMonth + 1,
+          0
+        ).getDate();
         const dayNum = parts[2];
-        
+
         if (dayNum > daysInTargetMonth) {
           // Virtual day - show with the actual day number
-          const monthName = targetDate.toLocaleDateString('en-US', { month: 'short' });
+          const monthName = targetDate.toLocaleDateString('en-US', {
+            month: 'short',
+          });
           return `${monthName} ${dayNum}`;
         }
       }
-      
+
       return d.toLocaleDateString('en-US', labelFormat);
     });
 
@@ -616,7 +691,6 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
       )
       .then(chart => {
         if (chart) {
-          currentTimelineChart = chart;
           activeCharts.set('insights-timeline', chart);
         }
       })
@@ -626,7 +700,13 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
   // Initial render
   renderTimelineChart('monthly');
 
-  return { timelineDiv, timelineChartWrapper };
+  // Return getCurrentMode function to access current mode from outside
+  return {
+    timelineDiv,
+    timelineChartWrapper,
+    renderTimelineChart,
+    getCurrentMode: () => currentMode,
+  };
 }
 
 /**
@@ -637,6 +717,11 @@ function createTimelineSection(transactions, chartRenderer, activeCharts) {
  * @returns {HTMLElement} DOM element containing insights section content
  */
 export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
+  // Shared month state for synchronized navigation
+  const sharedMonthState = {
+    offset: 0, // 0 = current month, -1 = last month, etc.
+    onNavigate: null, // Callback to notify other sections of navigation
+  };
   const section = createSectionContainer(
     'insights',
     'Financial Insights',
@@ -667,20 +752,29 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
   const transactions = planningData.transactions;
 
   // Top Movers (by absolute spend/amount per category)
-  const { topContainer } = createTopMoversSection(
+  const { topContainer, renderTopMovers } = createTopMoversSection(
     planningData,
     chartRenderer,
-    activeCharts
+    activeCharts,
+    sharedMonthState
   );
   section.appendChild(topContainer);
 
   // Timeline comparison: monthly/daily expenses
-  const { timelineDiv } = createTimelineSection(
-    transactions,
-    chartRenderer,
-    activeCharts
-  );
+  const { timelineDiv, renderTimelineChart, getCurrentMode } =
+    createTimelineSection(transactions, chartRenderer, activeCharts, sharedMonthState);
   section.appendChild(timelineDiv);
+
+  // Set up synchronized navigation - both sections update together
+  sharedMonthState.onNavigate = () => {
+    renderTopMovers();
+    renderTimelineChart(getCurrentMode());
+  };
+
+  // Store references for cleanup
+  sharedMonthState.cleanup = () => {
+    sharedMonthState.onNavigate = null;
+  };
 
   return section;
 };

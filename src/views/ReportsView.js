@@ -57,7 +57,7 @@ import {
   getCategoryColors,
 } from '../utils/reports-charts.js';
 import { CategorySelector } from '../components/CategorySelector.js';
-import { InsightsSection } from '../components/InsightsSection.js';
+import { InsightsSection } from '../components/BudgetInsightsSection.js';
 import { PatternInsights } from '../components/PatternInsights.js';
 import { BudgetSummaryCard } from '../components/BudgetSummaryCard.js';
 import { BudgetPlanner } from '../core/budget-planner.js';

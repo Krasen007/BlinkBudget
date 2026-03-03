@@ -145,11 +145,12 @@ export async function createCategoryBreakdownChart(
   header.appendChild(totalAmount);
   section.appendChild(header);
 
-  // Chart container
+  // Chart container - fixed height
   const chartDiv = document.createElement('div');
   chartDiv.style.position = 'relative';
   chartDiv.style.height = '400px';
   chartDiv.style.marginBottom = SPACING.MD;
+  chartDiv.style.width = '100%';
 
   const canvas = document.createElement('canvas');
   canvas.id = 'category-breakdown-chart';
@@ -167,6 +168,9 @@ export async function createCategoryBreakdownChart(
   detailsContainer.style.marginTop = SPACING.SM;
   detailsContainer.style.display = 'block'; // Always visible
   detailsContainer.style.minHeight = '60px'; // Prevent jumping
+  detailsContainer.style.maxHeight = '60px'; // Prevent expansion
+  detailsContainer.style.overflow = 'hidden'; // Hide overflow
+  detailsContainer.style.transition = 'none'; // Remove any transitions that might cause expansion
 
   // Add default instruction text
   const initialAction = window.innerWidth < 768 ? 'Tap' : 'Hover';
@@ -196,13 +200,58 @@ export async function createCategoryBreakdownChart(
     ],
   };
 
-  // Create initial pie chart
+  // Create initial pie chart with responsive legend
+  const legendPosition = window.innerWidth < 768 ? 'bottom' : 'right';
+  const categoryCount = categoryData.categories.length;
+  
+  // Adjust legend settings based on category count
+  const legendFontSize = categoryCount > 15 ? 10 : categoryCount > 10 ? 11 : 12;
+  const legendPadding = categoryCount > 15 ? 6 : categoryCount > 10 ? 8 : 10;
+  const legendBoxWidth = categoryCount > 15 ? 12 : 15;
+  
   const currentChart = await chartRenderer.createPieChart(canvas, chartData, {
     responsive: true,
     maintainAspectRatio: false,
+    layout: {
+      padding: {
+        top: 10,
+        bottom: 10,
+        left: legendPosition === 'right' ? 10 : 0,
+        right: legendPosition === 'right' ? 10 : 0,
+      }
+    },
     plugins: {
       legend: {
-        position: window.innerWidth < 768 ? 'bottom' : 'right',
+        position: legendPosition,
+        align: 'start',
+        labels: {
+          boxWidth: legendBoxWidth,
+          padding: legendPadding,
+          font: {
+            size: legendFontSize
+          },
+          generateLabels: (chart) => {
+            const data = chart.data;
+            if (data.labels.length && data.datasets.length) {
+              return data.labels.map((label, i) => {
+                const meta = chart.getDatasetMeta(0);
+                const style = meta.controller.getStyle(i);
+                return {
+                  text: label,
+                  fillStyle: style.backgroundColor,
+                  strokeStyle: style.borderColor,
+                  lineWidth: style.borderWidth,
+                  hidden: !chart.getDataVisibility(i),
+                  index: i
+                };
+              });
+            }
+            return [];
+          }
+        },
+        // Remove max height/width constraints to allow legend to expand naturally
+        maxHeight: undefined,
+        maxWidth: undefined,
       },
       tooltip: createCategoryTooltipConfig(detailsContainer),
     },
