@@ -29,38 +29,47 @@ import {
 function generateHistoricalData(transactions, months = 3) {
   const monthlyData = [];
   const now = new Date();
-  
+
   for (let i = months - 1; i >= 0; i--) {
     const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const nextMonthDate = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
-    
+    const nextMonthDate = new Date(
+      now.getFullYear(),
+      now.getMonth() - i + 1,
+      1
+    );
+
     const monthTransactions = transactions.filter(t => {
+      if (t.isGhost) return false;
       const transactionDate = new Date(t.date || t.timestamp);
       return transactionDate >= monthDate && transactionDate < nextMonthDate;
     });
-    
+
     const income = monthTransactions
       .filter(t => t.type === 'income')
       .reduce((sum, t) => sum + t.amount, 0);
-    
+
     const expenses = monthTransactions
       .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
-    
+
     monthlyData.push({
       period: monthDate,
       income,
-      expenses
+      expenses,
     });
   }
-  
+
   return { monthlyData };
 }
 
 /**
  * Create a detailed forecast table with historical values for previous months
  */
-function createForecastTable(incomeForecasts, expenseForecasts, historicalData) {
+function createForecastTable(
+  incomeForecasts,
+  expenseForecasts,
+  historicalData
+) {
   const container = document.createElement('div');
   container.className = 'forecast-table-container';
   container.style.background = COLORS.SURFACE;
@@ -149,7 +158,10 @@ function createForecastTable(incomeForecasts, expenseForecasts, historicalData) 
   }
 
   // Add forecasted months
-  const maxForecastRows = Math.max(incomeForecasts.length, expenseForecasts.length);
+  const maxForecastRows = Math.max(
+    incomeForecasts.length,
+    expenseForecasts.length
+  );
   for (let i = 0; i < maxForecastRows; i++) {
     const income = incomeForecasts[i] || {
       predictedAmount: 0,
@@ -358,10 +370,10 @@ export const ForecastsSection = (
       });
 
     // Generate balance projections
-    const currentBalance = planningData.transactions.reduce(
-      (balance, t) => balance + (t.type === 'income' ? t.amount : -t.amount),
-      0
-    );
+    const currentBalance = planningData.transactions.reduce((balance, t) => {
+      if (t.isGhost) return balance;
+      return balance + (t.type === 'income' ? t.amount : -t.amount);
+    }, 0);
 
     const balanceProjections = balancePredictor.projectBalances(
       currentBalance,

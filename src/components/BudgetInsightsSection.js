@@ -13,6 +13,10 @@ import { PredictionsSection } from './PredictionsSection.js';
  * @returns {HTMLElement}
  */
 export const InsightsSection = currentData => {
+  if (!currentData) {
+    currentData = { insights: [], predictions: {} };
+  }
+
   const section = document.createElement('div');
   section.className = 'insights-section';
   section.style.background = COLORS.SURFACE;

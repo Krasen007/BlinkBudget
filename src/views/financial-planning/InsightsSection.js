@@ -43,6 +43,7 @@ function createTopMoversSection(
     const endOfMonth = new Date(currentYear, currentMonth + 1, 1);
 
     const monthTransactions = planningData.transactions.filter(t => {
+      if (t.isGhost) return false;
       const ts = new Date(t.timestamp);
       return ts >= startOfMonth && ts < endOfMonth;
     });
@@ -205,7 +206,6 @@ function createTopMoversSection(
   prevBtn.addEventListener('click', () => {
     sharedMonthState.offset--;
     if (sharedMonthState.onNavigate) sharedMonthState.onNavigate();
-    renderTopMovers();
   });
 
   const nextBtn = document.createElement('button');
@@ -230,7 +230,6 @@ function createTopMoversSection(
     if (sharedMonthState.offset < 0) {
       sharedMonthState.offset++;
       if (sharedMonthState.onNavigate) sharedMonthState.onNavigate();
-      renderTopMovers();
     }
   });
 
@@ -446,6 +445,7 @@ function createTimelineSection(
         const start = new Date(y, m - 1, 1);
         const end = new Date(y, m, 1); // First day of next month
         return txs.reduce((sum, t) => {
+          if (t.isGhost) return sum;
           const ts = new Date(t.timestamp);
           if (ts >= start && ts < end && t.type === 'expense') {
             return (
@@ -516,6 +516,7 @@ function createTimelineSection(
         if (!isCumulative) {
           // Single day sum
           return txs.reduce((sum, t) => {
+            if (t.isGhost) return sum;
             const dateStr = t.timestamp.split('T')[0];
             if (dateStr === key && t.type === 'expense') {
               return (
@@ -534,6 +535,7 @@ function createTimelineSection(
           const monthStart = new Date(y, m - 1, 1);
 
           return txs.reduce((sum, t) => {
+            if (t.isGhost) return sum;
             const ts = new Date(t.timestamp);
             if (
               ts >= monthStart &&

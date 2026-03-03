@@ -59,7 +59,7 @@
   display: block;
   min-height: 60px;
   max-height: 60px;
-  overflow: hidden;
+  overflow: auto;
   transition: none;
   box-sizing: border-box;
   position: relative;
@@ -544,11 +544,6 @@
       0 4px 12px rgb(0, 0, 0, 0.3),
       inset 0 1px 0 rgb(255, 255, 255, 0.05);
   }
-}
-
-/* Focus management for accessibility */
-.charts-section:focus-within {
-  /* Maintain native focus visibility inside charts container */
 }
 
 /* Chart Canvas Interactions - Simplified */

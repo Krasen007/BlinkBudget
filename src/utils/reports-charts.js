@@ -137,7 +137,7 @@ export async function createCategoryBreakdownChart(
   const totalIncome = currentData.incomeVsExpenses?.totalIncome || 0;
   totalIncomeValue.textContent = new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'EUR',
   }).format(totalIncome);
   totalIncomeValue.style.fontSize = '1.25rem';
   totalIncomeValue.style.fontWeight = 'bold';

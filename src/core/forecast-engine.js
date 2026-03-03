@@ -32,7 +32,8 @@ export class ForecastEngine {
           t &&
           t.type === 'income' &&
           typeof t.amount === 'number' &&
-          t.timestamp
+          t.timestamp &&
+          !t.isGhost
       );
 
       if (incomeTransactions.length < this.minDataPoints) {
@@ -115,7 +116,8 @@ export class ForecastEngine {
           t &&
           t.type === 'expense' &&
           typeof t.amount === 'number' &&
-          t.timestamp
+          t.timestamp &&
+          !t.isGhost
       );
 
       if (expenseTransactions.length < this.minDataPoints) {
@@ -198,7 +200,8 @@ export class ForecastEngine {
           transaction &&
           typeof transaction.amount === 'number' &&
           transaction.timestamp &&
-          transaction.type
+          transaction.type &&
+          !transaction.isGhost
       );
 
       if (validTransactions.length < 12) {
@@ -327,7 +330,8 @@ export class ForecastEngine {
           transaction &&
           typeof transaction.amount === 'number' &&
           transaction.timestamp &&
-          (transaction.description || transaction.category)
+          (transaction.description || transaction.category) &&
+          !transaction.isGhost
       );
 
       // Group transactions by description and amount (with tolerance)
@@ -411,7 +415,8 @@ export class ForecastEngine {
       transaction =>
         transaction &&
         typeof transaction.amount === 'number' &&
-        transaction.timestamp
+        transaction.timestamp &&
+        !transaction.isGhost
     );
 
     validTransactions.forEach(transaction => {

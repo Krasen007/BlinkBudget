@@ -7,7 +7,8 @@ const InsightsGenerator = {
     const byCategory = new Map();
     for (const tx of transactions) {
       // Skip income and transfer transactions to prevent skewing expense analysis
-      if (tx.type === 'income' || tx.type === 'transfer') continue;
+      if (tx.type === 'income' || tx.type === 'transfer' || tx.isGhost)
+        continue;
 
       const cat = tx.category || 'Uncategorized';
       const amt =
