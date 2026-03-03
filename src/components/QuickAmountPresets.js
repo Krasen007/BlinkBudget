@@ -122,6 +122,67 @@ export const QuickAmountPresets = ({ onPresetSelect }) => {
 
       container.appendChild(button);
     });
+
+    // Add a reset button
+    const resetBtn = document.createElement('button');
+    resetBtn.type = 'button';
+    resetBtn.className = 'quick-amount-preset-reset-btn';
+    resetBtn.innerHTML = '↺';
+    resetBtn.setAttribute('aria-label', 'Reset amount presets');
+    resetBtn.setAttribute('title', 'Reset amount presets');
+    resetBtn.setAttribute('tabindex', '0');
+
+    resetBtn.style.minWidth = '44px';
+    resetBtn.style.minHeight = '44px';
+    resetBtn.style.padding = 'var(--spacing-sm)';
+    resetBtn.style.fontSize = '1.2rem';
+    resetBtn.style.fontWeight = 'normal';
+    resetBtn.style.color = 'var(--color-text-muted)';
+    resetBtn.style.backgroundColor = 'transparent';
+    resetBtn.style.border = '1px dashed var(--color-border)';
+    resetBtn.style.borderRadius = 'var(--radius-md)';
+    resetBtn.style.cursor = 'pointer';
+    resetBtn.style.transition = 'all var(--transition-fast)';
+    resetBtn.style.outline = 'none';
+    resetBtn.style.display = 'inline-flex';
+    resetBtn.style.alignItems = 'center';
+    resetBtn.style.justifyContent = 'center';
+    resetBtn.style.marginLeft = 'var(--spacing-xs)';
+
+    resetBtn.addEventListener('focus', () => {
+      resetBtn.style.boxShadow = 'var(--focus-shadow-strong)';
+      resetBtn.style.borderColor = 'var(--focus-color)';
+    });
+
+    resetBtn.addEventListener('blur', () => {
+      resetBtn.style.boxShadow = 'none';
+      resetBtn.style.borderColor = 'var(--color-border)';
+    });
+
+    resetBtn.addEventListener('mouseenter', () => {
+      resetBtn.style.backgroundColor = 'var(--color-surface-hover)';
+      resetBtn.style.color = 'var(--color-error)';
+      resetBtn.style.borderColor = 'var(--color-error)';
+    });
+
+    resetBtn.addEventListener('mouseleave', () => {
+      resetBtn.style.backgroundColor = 'transparent';
+      resetBtn.style.color = 'var(--color-text-muted)';
+      resetBtn.style.borderColor = 'var(--color-border)';
+    });
+
+    resetBtn.addEventListener('click', () => {
+      AmountPresetService.resetPresets();
+    });
+
+    resetBtn.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        AmountPresetService.resetPresets();
+      }
+    });
+
+    container.appendChild(resetBtn);
   };
 
   // Initial render
