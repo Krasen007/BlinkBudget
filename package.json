@@ -1,6 +1,6 @@
 {
   "name": "blinkbudget",
-  "version": "1.25",
+  "version": "1.26",
   "type": "module",
   "description": "Making expense tracking effortless, all in 3 moves.",
   "main": "index.js",
@@ -18,23 +18,18 @@
     "lint:css:fix": "stylelint \"src/styles/**/*.css\" --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run lint && npm run lint:css && npm run format:check",
-    "fix": "npm run lint:fix && npm run lint:css:fix && npm run format",
+    "check": "yarn run lint && yarn run lint:css && yarn run format:check",
+    "fix": "yarn run lint:fix && yarn run lint:css:fix && yarn run format",
     "validate-env": "node config/validate-env.cjs"
   },
   "keywords": [],
   "author": "Krasen Ivanov",
   "license": "GPL-3.0-only",
-  "engines": {
-    "node": ">=22.0.0",
-    "npm": ">=11.0.0"
-  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@fullhuman/postcss-purgecss": "^8.0.0",
     "autoprefixer": "^10.4.27",
     "cssnano": "^7.1.2",
-    "esbuild": "0.27.3",
     "eslint": "^10.0.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",

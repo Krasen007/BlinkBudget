@@ -32,7 +32,7 @@ The project is a web (browser) application, leveraging a modern, lightweight sta
 
 ### **Core Stack**
 
-- **Frontend**: Vanilla JavaScript (ES Modules) + Vite
+- **Frontend**: Vanilla JavaScript (ES Modules) + Vite (using yarn)
   - Chosen for maximum performance, zero-bundle-overhead (initial), and "closer to the metal" understanding of web fundamentals.
   - Utilizes a custom Router and functional component pattern (returning DOM elements).
 - **Styling**: Vanilla CSS with advanced PostCSS pipeline
@@ -44,7 +44,7 @@ The project is a web (browser) application, leveraging a modern, lightweight sta
 - **Routing**: Custom Hash-based Router
 - **Deployment**: Netlify + Firebase for Auth and Database.
 - **Data Persistence**: `localStorage` (via `StorageService`) for instant, offline-capable data storage. Also Firebase for cloud sync.
-- **System**: Use Windows and Powershell commands when developing locally on Windows for the terminal, DO NOT use Linux or UNIX tools and commands. (e.g. instead of cd "c:\Users\krase\repos\BlinkBudget" && npm test -- --reporter=verbose 2>&1 | head -50
+- **System**: Use Windows and Powershell commands when developing locally on Windows for the terminal, DO NOT use Linux or UNIX tools and commands. (e.g. instead of cd "c:\Users\krase\repos\BlinkBudget" && yarn test -- --reporter=verbose 2>&1 | head -50
   head: The term 'head' is not recognized as a name of a cmdlet, function, script file, or executable program. Use PowerShell Select-Object -First 50)
 
 ### **Key Design Principles**
@@ -122,11 +122,11 @@ App preferences.
 
 ### **Core Development Commands**
 
-- **Install Dependencies**: `npm install`
-- **Development Server**: `npm run dev` (Vite dev server at `http://localhost:3000`)
-- **Production Build**: `npm run build` (Optimized build in `/dist`)
-- **Unit Tests**: `npm test` (Vitest framework)
-- **Preview Build**: `npm run preview` (Production preview)
+- **Install Dependencies**: `yarn install`
+- **Development Server**: `yarn run dev` (Vite dev server at `http://localhost:3000`)
+- **Production Build**: `yarn run build` (Optimized build in `/dist`)
+- **Unit Tests**: `yarn test` (Vitest framework)
+- **Preview Build**: `yarn run preview` (Production preview)
 
 ### **Code Quality & Formatting Tools**
 
@@ -166,14 +166,14 @@ App preferences.
 ### **Quality Assurance Scripts**
 
 ```bash
-npm run lint         # Lint JavaScript files
-npm run lint:fix     # Auto-fix JavaScript issues
-npm run lint:css     # Lint CSS files
-npm run lint:css:fix # Auto-fix CSS issues
-npm run format       # Format all files with Prettier
-npm run format:check # Check if files are formatted
-npm run check        # Run all linting and format checks
-npm run fix          # Auto-fix all issues (JS, CSS, formatting)
+yarn run lint         # Lint JavaScript files
+yarn run lint:fix     # Auto-fix JavaScript issues
+yarn run lint:css     # Lint CSS files
+yarn run lint:css:fix # Auto-fix CSS issues
+yarn run format       # Format all files with Prettier
+yarn run format:check # Check if files are formatted
+yarn run check        # Run all linting and format checks
+yarn run fix          # Auto-fix all issues (JS, CSS, formatting)
 ```
 
 ### **IDE Integration (VS Code Recommended)**
@@ -193,7 +193,7 @@ Install extensions: ESLint, Prettier, Stylelint
 
 ### **Pre-commit Workflow**
 
-Before committing: `npm run check` → `npm run fix`
+Before committing: `yarn run check` → `yarn run fix`
 
 ---
 
