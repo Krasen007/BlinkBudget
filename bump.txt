@@ -14,3 +14,8 @@ update the changelog.txt file itself.
 6. WAIT for commit bump with message "bump version %VERSION%"
 
 7. WAIT for confirmation before you push all changes to remote repository
+
+8. Update @gradle.properties with the new version
+org.gradle.jvmargs=-Xmx1024m -Xms512m
+
+#18171F

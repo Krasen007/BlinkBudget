@@ -66,8 +66,11 @@ function createTopMoversSection(
     const existingChart = topContainer.querySelector('.top-movers-chart');
     if (existingList) existingList.remove();
     if (existingChart) {
-      // Destroy existing chart using fixed ID
-      chartRenderer.destroyChart('insights-top-movers-chart');
+      // Destroy existing chart using the canvas element
+      const canvas = existingChart.querySelector('canvas');
+      if (canvas) {
+        chartRenderer.destroyChart(canvas);
+      }
       existingChart.remove();
     }
 
@@ -241,7 +244,7 @@ function createTopMoversSection(
   // Initial render
   renderTopMovers();
 
-  return { topContainer, topChartDiv: null, renderTopMovers };
+  return { topContainer, renderTopMovers };
 }
 
 /**
@@ -667,11 +670,8 @@ function createTimelineSection(
         const dayNum = parts[2];
 
         if (dayNum > daysInTargetMonth) {
-          // Virtual day - show with the actual day number
-          const monthName = targetDate.toLocaleDateString('en-US', {
-            month: 'short',
-          });
-          return `${monthName} ${dayNum}`;
+          // Virtual day - show placeholder instead of invalid date
+          return "—";
         }
       }
 

@@ -159,7 +159,7 @@ export async function createCategoryBreakdownChart(
   totalSpentLabel.style.marginBottom = '2px';
 
   const totalSpentValue = document.createElement('span');
-  const totalSpent = categoryData.categories.reduce(
+  const totalSpent = (categoryData?.categories || []).reduce(
     (sum, cat) => sum + cat.amount,
     0
   );

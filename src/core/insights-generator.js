@@ -1,7 +1,7 @@
 // InsightsGenerator: provides Top Movers and Timeline comparison utilities
 const InsightsGenerator = {
   // transactions: array of {id, date, amount, category, account, type}
-  // Returns top N movers by absolute amount (descending), excluding income and transfer transactions.
+  // Returns top N movers by absolute amount (descending), excluding income, transfer, and ghost transactions.
   topMovers(transactions, n = 5) {
     if (!Array.isArray(transactions)) return [];
     const byCategory = new Map();

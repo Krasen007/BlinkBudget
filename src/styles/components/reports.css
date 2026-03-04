@@ -50,20 +50,49 @@
   height: auto !important;
 }
 
-/* Chart Mobile Details Container - Fixed height to prevent expansion */
+/* Chart Mobile Details Container - Improved height for better touch scrolling */
 .chart-mobile-details {
   background: var(--color-background);
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
   margin-top: var(--spacing-sm);
   display: block;
-  min-height: 60px;
-  max-height: 60px;
+  min-height: 90px;
+  max-height: 120px;
   overflow: auto;
   transition: none;
   box-sizing: border-box;
   position: relative;
   z-index: 1;
+}
+
+/* Scroll affordance for better UX */
+.chart-mobile-details::-webkit-scrollbar {
+  width: 4px;
+}
+
+.chart-mobile-details::-webkit-scrollbar-track {
+  background: var(--color-border);
+  border-radius: 2px;
+}
+
+.chart-mobile-details::-webkit-scrollbar-thumb {
+  background: var(--color-text-secondary);
+  border-radius: 2px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .chart-mobile-details {
+    scroll-behavior: auto;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .chart-mobile-details {
+    border: 1px solid var(--color-text);
+  }
 }
 
 /* Chart.js Tooltip Styling - Prevent overlap with content below */

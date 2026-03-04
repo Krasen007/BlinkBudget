@@ -1,0 +1,60 @@
+{
+    "name": "BlinkBudget",
+    "short_name": "BlinkBudget",
+    "description": "Making expense tracking effortless, all in 3 clicks.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#000000",
+    "theme_color": "#000000",
+    "lang": "en",
+    "scope": "/",
+    "id": "/",
+    "orientation": "portrait",
+    "categories": [
+        "finance",
+        "productivity"
+    ],
+    "icons": [
+        {
+            "src": "favicon.png",
+            "sizes": "1024x1024",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "favicon.png",
+            "sizes": "1024x1024",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Add Transaction",
+            "short_name": "Add",
+            "description": "Quickly add a new expense or income",
+            "url": "/#add-expense",
+            "icons": [
+                {
+                    "src": "favicon.png",
+                    "sizes": "1024x1024"
+                }
+            ]
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "screenshot-desktop.png",
+            "sizes": "1264x705",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "Desktop Dashboard"
+        },
+        {
+            "src": "screenshot-mobile.png",
+            "sizes": "500x749",
+            "type": "image/png",
+            "label": "Mobile Dashboard"
+        }
+    ]
+}
