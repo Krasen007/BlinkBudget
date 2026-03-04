@@ -97,12 +97,6 @@ export const TransactionListItem = ({
     if (longPressed) e.preventDefault();
   });
 
-  // Instant click for navigation
-  item.addEventListener('click', _e => {
-    if (!longPressed) {
-      Router.navigate('edit-expense', { id: transaction.id });
-    }
-  });
 
   const info = document.createElement('div');
   info.className = 'transaction-item-info';
@@ -204,11 +198,12 @@ export const TransactionListItem = ({
   info.appendChild(cat);
   info.appendChild(date);
 
-  // Add description/notes if available
+  // Add description/notes if available (hidden by default)
   if (transaction.description && transaction.description.trim()) {
     const description = document.createElement('div');
     description.textContent = transaction.description;
     description.className = 'transaction-item-description';
+    description.style.display = 'none'; // Hidden by default
     Object.assign(description.style, {
       fontSize: isMobile ? FONT_SIZES.XS : '0.7rem',
       color: COLORS.TEXT_MUTED,
@@ -221,6 +216,14 @@ export const TransactionListItem = ({
     });
     info.appendChild(description);
   }
+
+  // Instant click for navigation with note toggle
+  item.addEventListener('click', _e => {
+    if (!longPressed) {      
+      // Navigate to edit immediately
+      Router.navigate('edit-expense', { id: transaction.id });
+    }
+  });
 
   const val = document.createElement('div');
 
