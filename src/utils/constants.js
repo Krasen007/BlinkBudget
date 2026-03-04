@@ -19,6 +19,7 @@ export const COLORS = {
   SUCCESS_LIGHT: 'rgba(16, 185, 129, 0.1)',
   WARNING: '#f97316',
   INFO: '#06b6d4',
+  INCOME_COLOR: 'rgba(34, 197, 94, 1)',
 
   // CSS variable references (for consistency)
   PRIMARY: 'var(--color-primary)',

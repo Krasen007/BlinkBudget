@@ -141,7 +141,7 @@ export async function createCategoryBreakdownChart(
   }).format(totalIncome);
   totalIncomeValue.style.fontSize = '1.25rem';
   totalIncomeValue.style.fontWeight = 'bold';
-  totalIncomeValue.style.color = 'rgba(34, 197, 94, 1)'; // Green color for income
+  totalIncomeValue.style.color = COLORS.INCOME_COLOR; // Green color for income
 
   totalIncomeContainer.appendChild(totalIncomeLabel);
   totalIncomeContainer.appendChild(totalIncomeValue);
@@ -370,10 +370,10 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
             : 'rgba(239, 68, 68, 0.6)',
         ],
         borderColor: [
-          'rgba(34, 197, 94, 1)',
+          COLORS.INCOME_COLOR,
           'rgba(239, 68, 68, 1)',
           incomeExpenseData.netBalance >= 0
-            ? 'rgba(34, 197, 94, 1)'
+            ? COLORS.INCOME_COLOR
             : 'rgba(239, 68, 68, 1)',
         ],
         borderWidth: 1,

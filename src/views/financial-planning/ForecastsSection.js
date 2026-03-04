@@ -46,11 +46,11 @@ function generateHistoricalData(transactions, months = 3) {
 
     const income = monthTransactions
       .filter(t => t.type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + (t.amount || 0), 0);
 
     const expenses = monthTransactions
       .filter(t => t.type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + (t.amount || 0), 0);
 
     monthlyData.push({
       period: monthDate,
@@ -93,7 +93,7 @@ function createForecastTable(
   table.style.fontSize = '0.875rem';
 
   // Header row
-  const headers = ['Month', 'Income', 'Expenses', 'Net', 'Historical'];
+  const headers = ['Month', 'Income', 'Expenses', 'Net', 'Type'];
   headers.forEach(header => {
     const headerCell = document.createElement('div');
     headerCell.textContent = header;

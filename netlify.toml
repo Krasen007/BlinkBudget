@@ -1,21 +1,22 @@
 [build]
   publish = "dist"
-  command = "npm run build"
+  command = "yarn build"
 
 [build.environment]
   NODE_VERSION = "18"
+  YARN_VERSION = "4.5.3"
 
 # Production environment
 [context.production]
-  command = "npm run build"
+  command = "yarn build"
 
 # Staging/develop environment  
 [context.deploy-preview]
-  command = "npm run build"
+  command = "yarn build"
 
 # Branch deploy environment
 [context.branch-deploy]
-  command = "npm run build"
+  command = "yarn build"
 
 # Security headers
 [[headers]]

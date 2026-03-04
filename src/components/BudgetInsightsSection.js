@@ -13,9 +13,7 @@ import { PredictionsSection } from './PredictionsSection.js';
  * @returns {HTMLElement}
  */
 export const InsightsSection = currentData => {
-  if (!currentData) {
-    currentData = { insights: [], predictions: {} };
-  }
+  const data = currentData || { insights: [], predictions: {} };
 
   const section = document.createElement('div');
   section.className = 'insights-section';
@@ -42,11 +40,11 @@ export const InsightsSection = currentData => {
   insightsGrid.style.gap = SPACING.MD;
 
   if (
-    currentData.insights &&
-    Array.isArray(currentData.insights) &&
-    currentData.insights.length > 0
+    data.insights &&
+    Array.isArray(data.insights) &&
+    data.insights.length > 0
   ) {
-    const topInsights = currentData.insights.slice(0, 5);
+    const topInsights = data.insights.slice(0, 5);
     topInsights.forEach((insight, index) => {
       const card = InsightCard(insight, index);
       insightsGrid.appendChild(card);
@@ -63,8 +61,8 @@ export const InsightsSection = currentData => {
 
   section.appendChild(insightsGrid);
 
-  if (currentData.predictions && currentData.predictions.hasEnoughData) {
-    const predictions = PredictionsSection(currentData);
+  if (data.predictions && data.predictions.hasEnoughData) {
+    const predictions = PredictionsSection(data);
     section.appendChild(predictions);
   }
 

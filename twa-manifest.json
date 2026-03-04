@@ -17,7 +17,7 @@
   "maskableIconUrl": "https://blinkbudget.netlify.app/favicon.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
-    "path": "C:\\Users\\krase\\repos\\BlinkBudget\\android.keystore",
+    "path": "./android.keystore",
     "alias": "android"
   },
   "appVersionName": "3",

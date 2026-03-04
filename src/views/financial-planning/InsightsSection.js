@@ -793,5 +793,5 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
     sharedMonthState.onNavigate = null;
   };
 
-  return section;
+  return { element: section, cleanup: sharedMonthState.cleanup };
 };

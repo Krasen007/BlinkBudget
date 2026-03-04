@@ -175,6 +175,32 @@ export const QuickAmountPresets = ({ onPresetSelect }) => {
       AmountPresetService.resetPresets();
     });
 
+    // Touch events for mobile feedback
+    resetBtn.addEventListener('touchstart', e => {
+      e.preventDefault();
+      resetBtn.style.transform = 'scale(0.95)';
+      resetBtn.style.backgroundColor = 'var(--color-surface-hover)';
+      resetBtn.style.color = 'var(--color-error)';
+      resetBtn.style.borderColor = 'var(--color-error)';
+    });
+
+    resetBtn.addEventListener('touchend', e => {
+      e.preventDefault();
+      resetBtn.style.transform = '';
+      resetBtn.style.backgroundColor = 'transparent';
+      resetBtn.style.color = 'var(--color-text-muted)';
+      resetBtn.style.borderColor = 'var(--color-border)';
+      AmountPresetService.resetPresets();
+    });
+
+    resetBtn.addEventListener('touchcancel', e => {
+      e.preventDefault();
+      resetBtn.style.transform = '';
+      resetBtn.style.backgroundColor = 'transparent';
+      resetBtn.style.color = 'var(--color-text-muted)';
+      resetBtn.style.borderColor = 'var(--color-border)';
+    });
+
     resetBtn.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
