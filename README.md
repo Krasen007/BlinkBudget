@@ -28,7 +28,7 @@
 - **Offline-capable** with localStorage and Service Worker persistence
 - **Smart Suggestions Engine** - Intelligent transaction categorization and insights
 - **Ghost Transactions** - See historical transaction data when dates are modified
-- **Dynamic quick amount presets** - Buttons automatically update based on your most frequently used transaction amounts
+- **Dynamic quick amount presets** - Buttons automatically update based on your most frequently used transaction amounts with reset functionality
 
 ### Transaction Management
 
@@ -78,6 +78,7 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 - **Mobile navigation** with bottom tab bar
 - **Keyboard-aware UI** that adapts to virtual keyboard
 - **PWA support** - Installable as a standalone app with offline support
+- **Android TWA support** - Trusted Web Activity for native Android app experience with Play Store deployment
 - **Keyboard shortcut (Escape key)** to exit Settings and return to dashboard
 - **Helpful tips on each section**
 - **Enhanced security** with comprehensive privacy compliance
@@ -111,13 +112,15 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 - **Testing**: Vitest with jsdom environment
 - **Build**: Vite with PostCSS optimization
 - **PWA**: vite-plugin-pwa for service worker and manifest management
+- **Package Manager**: Yarn for improved dependency management
+- **Android**: Trusted Web Activity (TWA) with Bubblewrap CLI for Play Store deployment
 
 ## Quick Start
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
-- npm or yarn
+- Node.js (v22 or higher)
+- yarn (v4 or higher)
 
 ### Installation
 
@@ -127,19 +130,19 @@ git clone <repository-url>
 cd blinkbudget
 
 # Install dependencies
-npm install
+yarn install
 
 # Start development server
-npm run dev
+yarn run dev
 ```
 
 ### Available Scripts
 
 ```bash
-npm run dev        # Start development server
-npm run build      # Build for production
-npm run preview    # Preview production build
-npm test           # Run unit tests
+yarn run dev        # Start development server
+yarn run build      # Build for production
+yarn run preview    # Preview production build
+yarn test           # Run unit tests
 ```
 
 ## Usage
@@ -213,8 +216,8 @@ Comprehensive test suite covering:
 - CSS architecture and optimization
 
 ```bash
-npm test           # Run all tests
-npm test -- --watch # Run tests in watch mode
+yarn test           # Run all tests
+yarn test -- --watch # Run tests in watch mode
 ```
 
 ## Production Build

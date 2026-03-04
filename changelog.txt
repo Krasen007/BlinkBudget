@@ -1,11 +1,23 @@
-## Version 1.25.0 - February 2026
+# Version 1.26 Changes
 
-### 🐛 Bug Fixes
-- **Fixed quick amount preset buttons** - Dashboard quick entry buttons now update dynamically based on transaction history
-- **Improved mobile notifications** - Notification messages now display correctly on mobile devices
-- **Enhanced text readability** - Brightened text colors throughout the application for better contrast and accessibility
-- **Resolved module dependencies** - Fixed critical node_modules issue with workaround implementation
+## 🚀 New Features & Improvements
+- **TWA Configuration**: Complete Android Trusted Web Activity setup for Play Store deployment
+- **Quick Amount Presets**: Added reset button for easy preset management
+- **Monthly Navigation**: Fixed month navigation arrows for better date browsing
+- **Transaction View**: Cleaner transaction list with notes hidden (visible in edit view)
 
-### 🧹 Code Quality
-- **Code cleanup** - Improved code organization and removed technical debt
-- **Version management** - Updated version tracking for consistent releases
+## 🐛 Bug Fixes
+- **Financial Forecasts**: Fixed incorrect calculations in financial forecasting
+- **Monthly Forecast Breakdown**: Updated and improved accuracy
+- **Charts**: Fixed chart rendering issues in budgets and financial sections
+- **JavaScript Errors**: Resolved const assignment errors
+
+## 🔧 Technical Updates
+- **Build System**: Migrated from npm to yarn for improved dependency management
+- **Insights Section**: Enhanced with month-to-month comparison buttons
+- **Code Quality**: Various fixes and improvements across the application
+
+## 📱 Android App
+- Successfully built and signed Android APK and App Bundle
+- Proper asset links configuration for app verification
+- Version 3.0 ready for Play Store submission
