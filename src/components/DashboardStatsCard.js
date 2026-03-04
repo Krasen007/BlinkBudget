@@ -27,6 +27,7 @@ export const DashboardStatsCard = ({
   const card = document.createElement('div');
   card.className = 'card dashboard-stat-card';
   card.style.position = 'relative';
+  card.style.overflow = 'hidden';
 
   Object.assign(card.style, {
     textAlign: 'left',
@@ -134,7 +135,7 @@ export const DashboardStatsCard = ({
     prevBtn.style.fontSize = '16px';
     prevBtn.style.color = COLORS.TEXT_MUTED || 'var(--color-text-muted)';
     prevBtn.style.transition = 'all 0.2s';
-    prevBtn.style.zIndex = '10';
+    prevBtn.style.zIndex = '1';
     prevBtn.style.display = 'flex';
     prevBtn.style.alignItems = 'center';
     prevBtn.style.justifyContent = 'center';
@@ -157,7 +158,7 @@ export const DashboardStatsCard = ({
     nextBtn.style.fontSize = '16px';
     nextBtn.style.color = COLORS.TEXT_MUTED || 'var(--color-text-muted)';
     nextBtn.style.transition = 'all 0.2s';
-    nextBtn.style.zIndex = '10';
+    nextBtn.style.zIndex = '1';
     nextBtn.style.display = 'flex';
     nextBtn.style.alignItems = 'center';
     nextBtn.style.justifyContent = 'center';
