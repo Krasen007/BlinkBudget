@@ -289,12 +289,12 @@ export const FinancialPlanningView = () => {
    * Render Insights section - Advanced analytics
    */
   function renderInsightsSection() {
-    const insightsElement = InsightsSection(
+    const insightsResult = InsightsSection(
       planningData,
       chartRenderer,
       activeCharts
     );
-    content.appendChild(insightsElement);
+    content.appendChild(insightsResult.element);
   }
 
   /**

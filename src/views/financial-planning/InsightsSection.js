@@ -66,11 +66,8 @@ function createTopMoversSection(
     const existingChart = topContainer.querySelector('.top-movers-chart');
     if (existingList) existingList.remove();
     if (existingChart) {
-      // Destroy existing chart using the canvas element
-      const canvas = existingChart.querySelector('canvas');
-      if (canvas) {
-        chartRenderer.destroyChart(canvas);
-      }
+      // Destroy existing chart using the chart ID
+      chartRenderer.destroyChart('insights-top-movers');
       existingChart.remove();
     }
 
