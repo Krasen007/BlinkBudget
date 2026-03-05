@@ -46,6 +46,7 @@
 ## 📋 Implementation Notes
 
 ### Form Label Audit Strategy
+
 ```javascript
 // Look for patterns like these in remaining components:
 <label for="input-id">Label Text</label>
@@ -53,7 +54,9 @@
 ```
 
 ### Visual Changes - Test Thoroughly
+
 If implementing visual consistency changes:
+
 - Test on mobile and desktop
 - Verify modal layouts still work
 - Check touch target sizes remain ≥44px

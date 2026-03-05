@@ -1,7 +1,9 @@
 # Analytics Enhancements - Future Analysis Todo
 
 ## Current Status
+
 **Backend Services: ✅ COMPLETE**
+
 - CategoryUsageService - Fully implemented
 - OptimizationEngine - Complete with substitution/reduction/elimination insights
 - TrendAnalysisService - Full trend analysis, consistency scoring, seasonal patterns
@@ -9,6 +11,7 @@
 - AnalyticsEngine Integration - All services integrated and exposed
 
 **UI Components: ⚠️ PARTIAL**
+
 - BenchmarkingSection ✅ - Complete and integrated
 - OptimizationInsights ❌ - Missing UI component
 - TrendAnalysisSection ❌ - Missing UI component
@@ -21,6 +24,7 @@
 ### High Priority - Complete UI Implementation
 
 #### 1. Create OptimizationInsights Component
+
 - **File**: `src/components/OptimizationInsights.js`
 - **Purpose**: Display optimization suggestions (substitution, reduction, elimination)
 - **Features**:
@@ -30,6 +34,7 @@
   - Actionable recommendations with specific suggestions
 
 #### 2. Create TrendAnalysisSection Component
+
 - **File**: `src/components/TrendAnalysisSection.js`
 - **Purpose**: Display spending trends and patterns
 - **Features**:
@@ -39,6 +44,7 @@
   - Month-over-month comparisons
 
 #### 3. Enhance InsightCard Component
+
 - **File**: `src/components/InsightCard.js` (extend existing)
 - **Purpose**: Support new insight types from analytics
 - **Features**:
@@ -48,6 +54,7 @@
   - Support dismissible insights
 
 #### 4. Integrate Components into ReportsView
+
 - **File**: `src/views/ReportsView.js` (extend existing)
 - **Tasks**:
   - Add renderOptimizationInsights() function
@@ -58,12 +65,14 @@
 ### Medium Priority - Enhancements
 
 #### 5. Performance Optimization
+
 - Implement Web Workers for heavy calculations
 - Add progressive loading for large datasets
 - Optimize cache TTLs for analytics data
 - Add debouncing for real-time updates
 
 #### 6. Testing & Validation
+
 - Unit tests for new UI components
 - Integration tests for analytics flow
 - Performance testing with large datasets
@@ -72,6 +81,7 @@
 ### Low Priority - Future Enhancements
 
 #### 7. Advanced Features
+
 - Export analytics reports
 - Custom date range analytics
 - Multi-currency support for insights
@@ -82,17 +92,20 @@
 ## Implementation Notes
 
 ### Dependencies
+
 - All backend services are complete and tested
 - AnalyticsEngine already exposes required methods
 - BenchmarkingSection provides integration pattern
 
 ### Design Considerations
+
 - Follow existing component patterns (vanilla JS, functional components)
 - Use consistent styling with CSS variables
 - Ensure responsive design for mobile
 - Maintain 3-click user experience principle
 
 ### File Structure After Completion
+
 ```
 src/components/
 ├── OptimizationInsights.js (NEW)
@@ -110,6 +123,7 @@ src/views/
 ## Acceptance Criteria
 
 ### OptimizationInsights Component
+
 - [ ] Display substitution, reduction, elimination insights
 - [ ] Show potential savings amounts (monthly/yearly)
 - [ ] Indicate difficulty levels (easy/medium/hard)
@@ -117,6 +131,7 @@ src/views/
 - [ ] Sort by priority and savings amount
 
 ### TrendAnalysisSection Component
+
 - [ ] Show spending direction with visual indicators
 - [ ] Display consistency scores (0-1 scale)
 - [ ] Highlight seasonal patterns
@@ -124,6 +139,7 @@ src/views/
 - [ ] Show confidence levels for predictions
 
 ### Integration
+
 - [ ] Components render in ReportsView without errors
 - [ ] Proper loading states and error handling
 - [ ] Responsive design works on mobile
@@ -132,6 +148,7 @@ src/views/
 ---
 
 ## Estimated Effort
+
 - **OptimizationInsights Component**: 4-6 hours
 - **TrendAnalysisSection Component**: 3-5 hours
 - **InsightCard Enhancements**: 2-3 hours

@@ -422,6 +422,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     watch: false,
+    setupFiles: ['./tests/setup.js'],
   },
   // Split test files for better performance
   include: ['tests/**/*.test.js'],

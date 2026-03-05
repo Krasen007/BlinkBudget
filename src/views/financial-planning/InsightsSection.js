@@ -668,7 +668,7 @@ function createTimelineSection(
 
         if (dayNum > daysInTargetMonth) {
           // Virtual day - show placeholder instead of invalid date
-          return "—";
+          return '—';
         }
       }
 

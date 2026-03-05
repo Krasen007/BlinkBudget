@@ -97,7 +97,6 @@ export const TransactionListItem = ({
     if (longPressed) e.preventDefault();
   });
 
-
   const info = document.createElement('div');
   info.className = 'transaction-item-info';
   const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
@@ -219,7 +218,7 @@ export const TransactionListItem = ({
 
   // Instant click for navigation with note toggle
   item.addEventListener('click', _e => {
-    if (!longPressed) {      
+    if (!longPressed) {
       // Navigate to edit immediately
       Router.navigate('edit-expense', { id: transaction.id });
     }
