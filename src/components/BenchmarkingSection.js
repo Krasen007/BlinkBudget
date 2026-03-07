@@ -33,7 +33,8 @@ export const BenchmarkingSection = (benchmarkingData, _timePeriod) => {
     headerDiv.style.gridTemplateColumns = '2fr 1fr 1fr 1fr';
     headerDiv.style.gap = 'var(--spacing-sm)';
     headerDiv.style.padding = 'var(--spacing-sm)';
-    headerDiv.style.background = COLORS.SURFACE_BORDER || 'rgba(156, 163, 175, 0.1)';
+    headerDiv.style.background =
+      COLORS.SURFACE_BORDER || 'rgba(156, 163, 175, 0.1)';
     headerDiv.style.borderRadius = 'var(--radius-sm)';
     headerDiv.style.marginBottom = 'var(--spacing-xs)';
     headerDiv.style.fontWeight = '600';

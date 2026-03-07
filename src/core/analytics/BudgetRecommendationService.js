@@ -91,11 +91,11 @@ export function getPersonalBenchmarking(transactions, timePeriod) {
   const currentStart = new Date(timePeriod.startDate);
   const currentMonth = currentStart.getMonth();
   const currentYear = currentStart.getFullYear();
-  
+
   // Previous month is current month - 1 (handle January -> December)
   const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
   const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-  
+
   // Get first day of previous month and last day of previous month
   const lastMonthStart = new Date(lastMonthYear, lastMonth, 1);
   const lastMonthEnd = new Date(lastMonthYear, lastMonth + 1, 0); // 0th day of next month = last day of current month
@@ -108,7 +108,10 @@ export function getPersonalBenchmarking(transactions, timePeriod) {
   });
 
   // Get current period category breakdown using MetricsService (same as pie chart)
-  const currentBreakdown = MetricsService.calculateCategoryBreakdown(transactions, timePeriod);
+  const currentBreakdown = MetricsService.calculateCategoryBreakdown(
+    transactions,
+    timePeriod
+  );
   const currentSpending = {};
   currentBreakdown.categories.forEach(cat => {
     currentSpending[cat.name] = cat.amount;
@@ -118,9 +121,12 @@ export function getPersonalBenchmarking(transactions, timePeriod) {
   const lastMonthPeriod = {
     startDate: lastMonthStartStr,
     endDate: lastMonthEndStr,
-    type: 'monthly'
+    type: 'monthly',
   };
-  const lastMonthBreakdown = MetricsService.calculateCategoryBreakdown(transactions, lastMonthPeriod);
+  const lastMonthBreakdown = MetricsService.calculateCategoryBreakdown(
+    transactions,
+    lastMonthPeriod
+  );
   const lastMonthSpending = {};
   lastMonthBreakdown.categories.forEach(cat => {
     lastMonthSpending[cat.name] = cat.amount;
@@ -128,7 +134,7 @@ export function getPersonalBenchmarking(transactions, timePeriod) {
 
   // Calculate benchmarking comparing current vs last month
   const benchmarking = [];
-  
+
   // Use top categories from current month (same as pie chart) for consistency
   const categories = currentBreakdown.categories.map(cat => cat.name);
 
@@ -137,7 +143,11 @@ export function getPersonalBenchmarking(transactions, timePeriod) {
     const lastMonth = lastMonthSpending[category] || 0;
 
     // Always show top categories from current month, even if no spending in either period
-    if (current > 0 || lastMonth > 0 || currentBreakdown.categories.some(cat => cat.name === category)) {
+    if (
+      current > 0 ||
+      lastMonth > 0 ||
+      currentBreakdown.categories.some(cat => cat.name === category)
+    ) {
       let change = 0;
       let trend = 'stable';
 
@@ -175,7 +185,10 @@ export function getPercentileRankings(transactions, timePeriod) {
   }
 
   // Get all category spending for the period using MetricsService
-  const categorySpending = MetricsService.getCategorySpending(transactions, timePeriod);
+  const categorySpending = MetricsService.getCategorySpending(
+    transactions,
+    timePeriod
+  );
 
   // Calculate percentiles
   const rankings = Object.entries(categorySpending).map(
@@ -223,7 +236,10 @@ export function getBudgetRecommendations(transactions, timePeriod) {
   const periods = getHistoricalPeriods(timePeriod, 3);
 
   // Get current period spending by category using MetricsService (same as pie chart)
-  const currentBreakdown = MetricsService.calculateCategoryBreakdown(transactions, timePeriod);
+  const currentBreakdown = MetricsService.calculateCategoryBreakdown(
+    transactions,
+    timePeriod
+  );
   const currentSpending = {};
   currentBreakdown.categories.forEach(cat => {
     currentSpending[cat.name] = cat.amount;

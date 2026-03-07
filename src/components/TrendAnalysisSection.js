@@ -33,7 +33,8 @@ export const TrendAnalysisSection = ({
   section.appendChild(title);
 
   const description = document.createElement('p');
-  description.textContent = 'Your spending patterns over time (vs last 3 months)';
+  description.textContent =
+    'Your spending patterns over time (vs last 3 months)';
   description.style.margin = `0 0 ${SPACING.LG} 0`;
   description.style.color = COLORS.TEXT_MUTED;
   section.appendChild(description);

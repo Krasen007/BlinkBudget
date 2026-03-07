@@ -176,30 +176,42 @@ export const QuickAmountPresets = ({ onPresetSelect }) => {
     });
 
     // Touch events for mobile feedback
-    resetBtn.addEventListener('touchstart', e => {
-      e.preventDefault();
-      resetBtn.style.transform = 'scale(0.95)';
-      resetBtn.style.backgroundColor = 'var(--color-surface-hover)';
-      resetBtn.style.color = 'var(--color-error)';
-      resetBtn.style.borderColor = 'var(--color-error)';
-    }, { passive: false });
+    resetBtn.addEventListener(
+      'touchstart',
+      e => {
+        e.preventDefault();
+        resetBtn.style.transform = 'scale(0.95)';
+        resetBtn.style.backgroundColor = 'var(--color-surface-hover)';
+        resetBtn.style.color = 'var(--color-error)';
+        resetBtn.style.borderColor = 'var(--color-error)';
+      },
+      { passive: false }
+    );
 
-    resetBtn.addEventListener('touchend', e => {
-      e.preventDefault();
-      resetBtn.style.transform = '';
-      resetBtn.style.backgroundColor = 'transparent';
-      resetBtn.style.color = 'var(--color-text-muted)';
-      resetBtn.style.borderColor = 'var(--color-border)';
-      AmountPresetService.resetPresets();
-    }, { passive: false });
+    resetBtn.addEventListener(
+      'touchend',
+      e => {
+        e.preventDefault();
+        resetBtn.style.transform = '';
+        resetBtn.style.backgroundColor = 'transparent';
+        resetBtn.style.color = 'var(--color-text-muted)';
+        resetBtn.style.borderColor = 'var(--color-border)';
+        AmountPresetService.resetPresets();
+      },
+      { passive: false }
+    );
 
-    resetBtn.addEventListener('touchcancel', e => {
-      e.preventDefault();
-      resetBtn.style.transform = '';
-      resetBtn.style.backgroundColor = 'transparent';
-      resetBtn.style.color = 'var(--color-text-muted)';
-      resetBtn.style.borderColor = 'var(--color-border)';
-    }, { passive: false });
+    resetBtn.addEventListener(
+      'touchcancel',
+      e => {
+        e.preventDefault();
+        resetBtn.style.transform = '';
+        resetBtn.style.backgroundColor = 'transparent';
+        resetBtn.style.color = 'var(--color-text-muted)';
+        resetBtn.style.borderColor = 'var(--color-border)';
+      },
+      { passive: false }
+    );
 
     resetBtn.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') {

@@ -417,8 +417,9 @@ export async function createCategoryTrendsChart(
 
   // Calculate months more accurately using calendar months
   const now = new Date();
-  const monthsOfData = (now.getFullYear() - oldestTransaction.getFullYear()) * 12 + 
-                       (now.getMonth() - oldestTransaction.getMonth());
+  const monthsOfData =
+    (now.getFullYear() - oldestTransaction.getFullYear()) * 12 +
+    (now.getMonth() - oldestTransaction.getMonth());
 
   if (monthsOfData < 3) {
     // Render informative message instead of null
@@ -484,7 +485,7 @@ export async function createCategoryTrendsChart(
   chartDiv.appendChild(canvas);
   section.appendChild(chartDiv);
 
-  // Generate monthly data for top 3 categories
+  // Generate monthly data for top 6 categories
   const topCategories = currentData.categoryBreakdown.categories.slice(0, 6);
   const monthlyData = generateMonthlyTrendData(allTransactions, topCategories);
 

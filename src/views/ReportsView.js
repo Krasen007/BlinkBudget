@@ -867,7 +867,7 @@ export const ReportsView = () => {
         currentData.transactions,
         currentTimePeriod
       );
-      
+
       // Create budget status map for easy lookup
       const budgetStatusMap = {};
       budgetStatus.forEach(budget => {

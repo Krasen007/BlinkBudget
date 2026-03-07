@@ -58,14 +58,21 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
   headerDiv.style.gridTemplateColumns = '2fr 1fr 1fr 1fr 1fr';
   headerDiv.style.gap = 'var(--spacing-sm)';
   headerDiv.style.padding = 'var(--spacing-sm)';
-  headerDiv.style.background = COLORS.SURFACE_BORDER || 'rgba(156, 163, 175, 0.1)';
+  headerDiv.style.background =
+    COLORS.SURFACE_BORDER || 'rgba(156, 163, 175, 0.1)';
   headerDiv.style.borderRadius = 'var(--radius-sm)';
   headerDiv.style.marginBottom = 'var(--spacing-xs)';
   headerDiv.style.fontWeight = '600';
   headerDiv.style.fontSize = 'var(--font-size-sm)';
   headerDiv.style.color = COLORS.TEXT_MUTED;
 
-  const headers = ['Category', 'Current', 'Recommended', 'vs Budget', 'Confidence'];
+  const headers = [
+    'Category',
+    'Current',
+    'Recommended',
+    'vs Budget',
+    'Confidence',
+  ];
   headers.forEach(headerText => {
     const header = document.createElement('div');
     header.textContent = headerText;
@@ -101,7 +108,8 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
     // Current spending column
     const current = rec.currentBudget || 0;
     const currentSpan = document.createElement('div');
-    const safeCurrent = typeof current === 'number' && isFinite(current) ? current : 0;
+    const safeCurrent =
+      typeof current === 'number' && isFinite(current) ? current : 0;
     currentSpan.textContent = `$${safeCurrent.toFixed(2)}`;
     currentSpan.style.color = COLORS.TEXT_MAIN;
     currentSpan.style.textAlign = 'right';
@@ -111,7 +119,10 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
     // Recommended budget column
     const recommended = rec.recommendedBudget || 0;
     const recommendedSpan = document.createElement('div');
-    const safeRecommended = typeof recommended === 'number' && isFinite(recommended) ? recommended : 0;
+    const safeRecommended =
+      typeof recommended === 'number' && isFinite(recommended)
+        ? recommended
+        : 0;
     recommendedSpan.textContent = `$${safeRecommended.toFixed(2)}`;
     recommendedSpan.style.color = COLORS.TEXT_MUTED;
     recommendedSpan.style.fontWeight = '600';
@@ -123,7 +134,7 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
     const vsBudgetSpan = document.createElement('div');
     let vsBudgetText = '→0%';
     let vsBudgetColor = COLORS.TEXT_MUTED;
-    
+
     if (recommended > 0) {
       const diff = ((current - recommended) / recommended) * 100;
       if (diff > 5) {
@@ -137,7 +148,7 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
         vsBudgetColor = COLORS.TEXT_MUTED;
       }
     }
-    
+
     vsBudgetSpan.textContent = vsBudgetText;
     vsBudgetSpan.style.color = vsBudgetColor;
     vsBudgetSpan.style.fontSize = 'var(--font-size-sm)';
