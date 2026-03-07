@@ -105,9 +105,7 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 - **Date format preferences** (US, ISO, EU formats)
 - **Data export/import** capabilities
 - **Transaction editing** with validation
-- **Enhanced data integrity checks** - Better validation for transfers, refunds, and optional descriptions
 - **Simplified feedback system** - Direct GitHub issues link for bug reports and suggestions
-- **Smart error reporting** - See transaction details instead of cryptic IDs in error messages
 
 ## Tech Stack
 
