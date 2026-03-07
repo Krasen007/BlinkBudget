@@ -12,6 +12,9 @@ import { formatCurrency } from '../utils/financial-planning-helpers.js';
  * @param {number} index - Index for color assignment
  * @param {Map} categoryColorMap - Consistent color mapping
  * @param {Function} onClick - Click handler for details
+ * @param {Object} frequencyData - Optional frequency analysis data
+ * @param {Array} insights - Optional insights array
+ * @param {Object} budgetStatus - Optional budget status information
  */
 export const CategoryCard = (
   category,
@@ -19,7 +22,8 @@ export const CategoryCard = (
   categoryColorMap,
   onClick,
   frequencyData = null,
-  insights = []
+  insights = [],
+  budgetStatus = null
 ) => {
   const card = document.createElement('button');
   card.className = 'category-card';
@@ -135,6 +139,29 @@ export const CategoryCard = (
       insightEl.textContent = `💡 ${relevantInsight.message.split('.')[0]}`;
       card.appendChild(insightEl);
     }
+  }
+
+  // Budget status indicator
+  if (budgetStatus && budgetStatus[category.name]) {
+    const budget = budgetStatus[category.name];
+    const budgetEl = document.createElement('div');
+    budgetEl.style.fontSize = '0.75rem';
+    budgetEl.style.marginTop = SPACING.XS;
+    budgetEl.style.textAlign = 'center';
+    budgetEl.style.fontWeight = '600';
+    
+    if (budget.isExceeded) {
+      budgetEl.textContent = `🔴 Over budget by ${formatCurrency(budget.actual - budget.amountLimit)}`;
+      budgetEl.style.color = COLORS.ERROR;
+    } else if (budget.isWarning) {
+      budgetEl.textContent = `⚠️ Near budget limit`;
+      budgetEl.style.color = COLORS.WARNING;
+    } else {
+      budgetEl.textContent = `✅ On track (${formatCurrency(budget.amountLimit - budget.actual)} left)`;
+      budgetEl.style.color = COLORS.SUCCESS;
+    }
+    
+    card.appendChild(budgetEl);
   }
 
   return card;

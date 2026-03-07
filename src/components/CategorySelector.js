@@ -13,6 +13,7 @@ import { CategoryCard } from './CategoryCard.js';
  * @param {Function} getCategoryColors - Logic for consistent colors
  * @param {Function} onCategoryClick - Selection callback
  * @param {Object} frequencyData - Optional frequency analysis data
+ * @param {Object} budgetStatus - Optional budget status information
  * @returns {HTMLElement}
  */
 export const CategorySelector = (
@@ -20,7 +21,8 @@ export const CategorySelector = (
   categoryColorMap,
   getCategoryColors,
   onCategoryClick,
-  frequencyData = null
+  frequencyData = null,
+  budgetStatus = null
 ) => {
   const section = document.createElement('div');
   section.className = 'category-selector-section';
@@ -58,9 +60,9 @@ export const CategorySelector = (
       index,
       categoryColorMap,
       onCategoryClick,
-      getCategoryColors,
       frequencyData,
-      currentData.insights
+      currentData.insights,
+      budgetStatus // Pass budget status to CategoryCard
     );
     categoryGrid.appendChild(card);
   });

@@ -862,12 +862,25 @@ export const ReportsView = () => {
         currentTimePeriod
       );
 
+      // Get budget status for each category
+      const budgetStatus = BudgetPlanner.getBudgetsStatus(
+        currentData.transactions,
+        currentTimePeriod
+      );
+      
+      // Create budget status map for easy lookup
+      const budgetStatusMap = {};
+      budgetStatus.forEach(budget => {
+        budgetStatusMap[budget.name] = budget;
+      });
+
       const categorySelectorSection = CategorySelector(
         currentData,
         categoryColorMap,
         categories => getCategoryColors(categories, categoryColorMap),
         handleCategoryCardClick,
-        frequencyData.categories
+        frequencyData.categories,
+        budgetStatusMap // Pass budget status to CategoryCard
       );
       categorySelectorSection.style.clear = 'both';
       categorySelectorSection.style.position = 'relative';
