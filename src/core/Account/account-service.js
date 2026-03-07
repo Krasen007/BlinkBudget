@@ -263,7 +263,9 @@ export const AccountService = {
       cleanedAccounts[0].isDefault = true;
     } else if (defaultAccounts.length > 1) {
       // Find the first account that is actually marked as default
-      const firstTrueDefaultIndex = cleanedAccounts.findIndex(a => a.isDefault === true);
+      const firstTrueDefaultIndex = cleanedAccounts.findIndex(
+        a => a.isDefault === true
+      );
       // Set all accounts to non-default except the first true default
       cleanedAccounts.forEach((account, index) => {
         account.isDefault = index === firstTrueDefaultIndex;

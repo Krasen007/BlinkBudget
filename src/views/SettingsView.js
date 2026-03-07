@@ -131,11 +131,10 @@ export const SettingsView = () => {
   // // Smart Suggestions Section
   // const smartSuggestionsSection = SmartSuggestionsSection();
   // content.appendChild(smartSuggestionsSection);
- /* Disabled until further notice */
+  /* Disabled until further notice */
   // // Advanced Filtering Section
   // const advancedFilteringSection = AdvancedFilteringSection();
   // content.appendChild(advancedFilteringSection);
-
 
   // Security & Privacy Section
   const securitySection = SecuritySection();
@@ -160,7 +159,6 @@ export const SettingsView = () => {
     }
   };
 
-  
   // Done Button
   const doneBtn = Button({
     text: 'Done',

@@ -120,6 +120,8 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 
 ## Quick Start
 
+https://github.com/Krasen007/BlinkBudget/releases/download/v1.26/blinkbudget-signed.apk - Trusted Web Application, download and install directly on your Android device, ignore that it says v1.26, the TWA updates automatically from the website.
+
 ### Prerequisites
 
 - Node.js (v22 or higher)

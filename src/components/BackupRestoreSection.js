@@ -69,14 +69,14 @@ export const BackupRestoreSection = () => {
       backupDateEl.style.marginBottom = SPACING.XS;
 
       const backupDate = new Date(lastBackupDate);
-      
+
       // Validate date before displaying
       if (isNaN(backupDate.getTime())) {
         backupDateEl.textContent = 'Last backup: unknown';
       } else {
         backupDateEl.textContent = `Last backup: ${backupDate.toLocaleDateString()} ${backupDate.toLocaleTimeString()}`;
       }
-      
+
       metadataContainer.appendChild(backupDateEl);
 
       if (lastBackupDataAsOf) {
@@ -86,7 +86,7 @@ export const BackupRestoreSection = () => {
         dataAsOfEl.style.marginBottom = SPACING.XS;
 
         const dataAsOfDate = new Date(lastBackupDataAsOf);
-        
+
         // Validate dataAsOf date before displaying
         if (isNaN(dataAsOfDate.getTime())) {
           dataAsOfEl.textContent = 'Data as of: unknown';
@@ -110,8 +110,8 @@ export const BackupRestoreSection = () => {
   const abortController = new AbortController();
 
   // Listen for backup events to update metadata
-  window.addEventListener('backup-operation', updateBackupMetadata, { 
-    signal: abortController.signal 
+  window.addEventListener('backup-operation', updateBackupMetadata, {
+    signal: abortController.signal,
   });
 
   section.appendChild(metadataContainer);

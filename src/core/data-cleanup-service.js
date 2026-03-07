@@ -67,7 +67,10 @@ export const DataCleanupService = {
         // }
 
         // Fix missing categories (skip transfers - they use toAccountId)
-        if (transaction.type !== 'transfer' && (!transaction.category || typeof transaction.category !== 'string')) {
+        if (
+          transaction.type !== 'transfer' &&
+          (!transaction.category || typeof transaction.category !== 'string')
+        ) {
           const oldCategory = transaction.category || 'missing';
           transaction.category = 'Uncategorized';
           hasChanges = true;
@@ -77,7 +80,10 @@ export const DataCleanupService = {
         }
 
         // Ensure amount is valid (allow negative for refunds)
-        if (typeof transaction.amount !== 'number' || !isFinite(transaction.amount)) {
+        if (
+          typeof transaction.amount !== 'number' ||
+          !isFinite(transaction.amount)
+        ) {
           const oldAmount = transaction.amount || 'invalid';
           transaction.amount = Math.abs(parseFloat(transaction.amount) || 0);
           hasChanges = true;
@@ -89,7 +95,9 @@ export const DataCleanupService = {
         // Fix missing or invalid transaction type
         if (
           !transaction.type ||
-          !['income', 'expense', 'transfer', 'refund'].includes(transaction.type)
+          !['income', 'expense', 'transfer', 'refund'].includes(
+            transaction.type
+          )
         ) {
           const oldType = transaction.type || 'missing';
           // Don't auto-fix transfers/refunds - they require specific fields

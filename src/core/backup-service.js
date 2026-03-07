@@ -10,7 +10,10 @@ import { AccountService } from './Account/account-service.js';
 import { SettingsService } from './settings-service.js';
 import { goalPlanner } from './goal-planner.js';
 import { investmentTracker } from './investment-tracker.js';
-import { showProgressIndicator, hideProgressIndicator } from '../utils/progress-indicators.js';
+import {
+  showProgressIndicator,
+  hideProgressIndicator,
+} from '../utils/progress-indicators.js';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 export const BackupService = {
@@ -53,17 +56,12 @@ export const BackupService = {
       }
 
       const progressId = 'backup-create';
-      const progress = showProgressIndicator(
-        progressId,
-        'Creating backup...',
-        document.body,
-        {
-          showCancel: true,
-          onCancel: () => {
-            console.log('[Backup] Backup cancelled by user');
-          },
-        }
-      );
+      showProgressIndicator(progressId, 'Creating backup...', document.body, {
+        showCancel: true,
+        onCancel: () => {
+          console.log('[Backup] Backup cancelled by user');
+        },
+      });
 
       try {
         await this.createBackup();
@@ -150,7 +148,7 @@ export const BackupService = {
     }
 
     const progressId = 'backup-restore';
-    const progress = showProgressIndicator(
+    showProgressIndicator(
       progressId,
       'Restoring from backup...',
       document.body,
@@ -227,9 +225,11 @@ export const BackupService = {
         })
       );
 
-      console.log(`[Backup] Restore completed: ${restoreSummary.transactions} transactions, ${restoreSummary.accounts} accounts, ${restoreSummary.goals} goals, ${restoreSummary.investments} investments restored`);
+      console.log(
+        `[Backup] Restore completed: ${restoreSummary.transactions} transactions, ${restoreSummary.accounts} accounts, ${restoreSummary.goals} goals, ${restoreSummary.investments} investments restored`
+      );
       hideProgressIndicator(progressId);
-      
+
       return restoreSummary;
     } catch (error) {
       console.error('[Backup] Restore failed:', error);

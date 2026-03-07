@@ -21,7 +21,8 @@ export const SecuritySection = () => {
 
   // Basic notice
   const notice = document.createElement('p');
-  notice.textContent = 'Your data is encrypted and stored locally. You control your information and can export or delete it at any time.';
+  notice.textContent =
+    'Your data is encrypted and stored locally. You control your information and can export or delete it at any time.';
   Object.assign(notice.style, {
     fontSize: FONT_SIZES.SM,
     color: 'var(--color-text-muted)',
@@ -46,7 +47,7 @@ export const SecuritySection = () => {
     'Optional cloud sync with your control',
     'No third-party analytics or tracking',
     'You can export all your data anytime',
-    'Secure authentication'
+    'Secure authentication',
   ];
 
   features.forEach(feature => {

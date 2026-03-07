@@ -6,7 +6,12 @@
 import { Button } from './Button.js';
 import { AccountService } from '../core/Account/account-service.js';
 import { generateId } from '../utils/id-utils.js';
-import { SPACING, TOUCH_TARGETS, FONT_SIZES, COLORS } from '../utils/constants.js';
+import {
+  SPACING,
+  TOUCH_TARGETS,
+  FONT_SIZES,
+  COLORS,
+} from '../utils/constants.js';
 import { showSuccessCheckmark } from '../utils/success-feedback.js';
 import { sanitizeInput } from '../utils/security-utils.js';
 import { getAccountTypeLabel } from '../utils/constants.js';
@@ -242,7 +247,7 @@ export const AccountSection = () => {
               AccountService.saveAccount(newAccount);
               renderAccounts();
               cleanupOverlay();
-              
+
               // Show success animation
               showSuccessCheckmark(section, 'Account saved successfully!');
             } catch (error) {
@@ -610,7 +615,10 @@ export const AccountSection = () => {
                   renderAccounts();
                   cleanupOverlay();
                   // Show success animation
-                  showSuccessCheckmark(section, 'Account updated successfully!');
+                  showSuccessCheckmark(
+                    section,
+                    'Account updated successfully!'
+                  );
                 } catch (error) {
                   console.error('Error updating account:', error);
                   // Show error dialog to user

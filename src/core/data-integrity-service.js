@@ -662,7 +662,10 @@ export class DataIntegrityService {
       issues.push('Missing transaction ID');
     }
 
-    if (typeof transaction.amount !== 'number' || !isFinite(transaction.amount)) {
+    if (
+      typeof transaction.amount !== 'number' ||
+      !isFinite(transaction.amount)
+    ) {
       issues.push('Invalid or missing amount');
     }
 
@@ -671,7 +674,10 @@ export class DataIntegrityService {
     }
 
     // Category is not required for transfers (they use toAccountId)
-    if (transaction.type !== 'transfer' && (!transaction.category || typeof transaction.category !== 'string')) {
+    if (
+      transaction.type !== 'transfer' &&
+      (!transaction.category || typeof transaction.category !== 'string')
+    ) {
       issues.push('Invalid or missing category');
     }
 

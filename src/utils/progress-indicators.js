@@ -14,9 +14,14 @@ const activeIndicators = new Map();
  * @param {HTMLElement} container - Container element to show indicator in
  * @param {Object} options - Configuration options
  */
-export const showProgressIndicator = (operationId, message = 'Processing...', container, options = {}) => {
+export const showProgressIndicator = (
+  operationId,
+  message = 'Processing...',
+  container,
+  options = {}
+) => {
   const { timeout = 30000 } = options; // Default 30 second timeout
-  
+
   // Remove existing indicator for this operation if it exists
   if (activeIndicators.has(operationId)) {
     const existingIndicator = activeIndicators.get(operationId);
@@ -116,7 +121,7 @@ export const showProgressIndicator = (operationId, message = 'Processing...', co
 
   return {
     hide: hideIndicator,
-    update: (newMessage) => {
+    update: newMessage => {
       const messageEl = indicatorContainer.querySelector('.progress-message');
       if (messageEl) {
         messageEl.textContent = newMessage;
@@ -129,7 +134,7 @@ export const showProgressIndicator = (operationId, message = 'Processing...', co
  * Hide a specific progress indicator
  * @param {string} operationId - Operation identifier to hide
  */
-export const hideProgressIndicator = (operationId) => {
+export const hideProgressIndicator = operationId => {
   if (activeIndicators.has(operationId)) {
     const indicator = activeIndicators.get(operationId);
     if (indicator && indicator.parentNode) {

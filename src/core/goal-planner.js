@@ -611,7 +611,10 @@ export class GoalPlanner {
           return false;
         }
         if (!goal.id || !goal.name || typeof goal.targetAmount !== 'number') {
-          console.warn('[GoalPlanner] Skipping goal with missing required fields:', goal);
+          console.warn(
+            '[GoalPlanner] Skipping goal with missing required fields:',
+            goal
+          );
           return false;
         }
         return true;

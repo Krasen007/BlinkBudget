@@ -11,7 +11,11 @@ import { SPACING, FONT_SIZES } from '../utils/constants.js';
  * @param {string} message - Success message to display
  * @param {number} duration - Duration in milliseconds (default: 2000)
  */
-export const showSuccessCheckmark = (container, message = 'Success!', duration = 2000) => {
+export const showSuccessCheckmark = (
+  container,
+  message = 'Success!',
+  duration = 2000
+) => {
   if (!container) return;
 
   // Create checkmark container

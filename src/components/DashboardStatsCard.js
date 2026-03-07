@@ -89,7 +89,7 @@ export const DashboardStatsCard = ({
     resetBtn.style.color = COLORS.TEXT_MUTED || 'var(--color-text-muted)';
     resetBtn.style.transition = 'all 0.2s';
     resetBtn.style.borderRadius = '4px';
-    resetBtn.style.zIndex = '10';
+    resetBtn.style.zIndex = '2';
     resetBtn.title = 'Reset all filters to show total amount';
     resetBtn.setAttribute('aria-label', 'Reset all filters');
 

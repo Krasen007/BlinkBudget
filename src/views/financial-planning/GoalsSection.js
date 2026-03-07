@@ -11,10 +11,9 @@
  * - Progress tracking display
  */
 
-import { Button } from '../../components/Button.js';
 import { Router } from '../../core/router.js';
 import { createEnhancedEmptyState } from '../../utils/enhanced-empty-states.js';
-import { SPACING, FONT_SIZES, COLORS } from '../../utils/constants.js';
+import { SPACING, COLORS } from '../../utils/constants.js';
 import { createGoalProgressChart } from '../../utils/financial-planning-charts.js';
 import {
   createSectionContainer,
@@ -260,7 +259,8 @@ function createGoalsList(chartRenderer, activeCharts, section) {
 
       if (!items.length) {
         const empty = createEnhancedEmptyState('no-data', {
-          onAction: () => Router.navigate('financial-planning/goals?action=add'),
+          onAction: () =>
+            Router.navigate('financial-planning/goals?action=add'),
           showTips: true,
         });
         goalsList.appendChild(empty);

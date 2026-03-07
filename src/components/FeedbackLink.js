@@ -21,7 +21,8 @@ export const FeedbackLink = () => {
 
   // Description
   const description = document.createElement('p');
-  description.textContent = 'Help us improve BlinkBudget by reporting bugs or sharing your ideas on GitHub.';
+  description.textContent =
+    'Help us improve BlinkBudget by reporting bugs or sharing your ideas on GitHub.';
   Object.assign(description.style, {
     fontSize: FONT_SIZES.SM,
     color: 'var(--color-text-muted)',
@@ -93,7 +94,7 @@ export const FeedbackLink = () => {
     'Click "New issue" to report a bug or request a feature',
     'Describe your issue clearly with steps to reproduce (if applicable)',
     'Add screenshots if helpful',
-    'Submit and we\'ll review your feedback'
+    "Submit and we'll review your feedback",
   ];
 
   steps.forEach(step => {
