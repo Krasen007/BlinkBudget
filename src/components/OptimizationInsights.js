@@ -12,7 +12,7 @@ import { InsightCard } from './InsightCard.js';
  * @returns {HTMLElement}
  */
 export const OptimizationInsights = insights => {
-  const data = insights || [];
+  const data = Array.isArray(insights) ? insights : [];
 
   const section = document.createElement('div');
   section.className = 'optimization-insights';
@@ -37,7 +37,7 @@ export const OptimizationInsights = insights => {
   insightsGrid.style.flexDirection = 'column';
   insightsGrid.style.gap = SPACING.MD;
 
-  if (data && Array.isArray(data) && data.length > 0) {
+  if (data.length > 0) {
     data.forEach((insight, index) => {
       const card = InsightCard(insight, index);
       insightsGrid.appendChild(card);

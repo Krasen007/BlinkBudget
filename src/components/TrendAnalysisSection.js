@@ -10,7 +10,7 @@ import { COLORS, SPACING } from '../utils/constants.js';
  * @param {Object} options - Trend analysis data
  * @param {Array} options.trends - Array of trend data per category
  * @param {Object} options.consistencyScores - Map of category to consistency data
- * @param {Array} options.transactions - Transaction data for additional context
+ * @param {Array} options._transactions - Transaction data for additional context (unused)
  * @returns {HTMLElement}
  */
 export const TrendAnalysisSection = ({
@@ -75,6 +75,16 @@ export const TrendAnalysisSection = ({
  * @returns {HTMLElement}
  */
 function createTrendCard(trend, consistency, _index) {
+  // Guard against null/undefined trend or missing required properties
+  if (!trend || !trend.direction || !trend.label) {
+    const placeholder = document.createElement('div');
+    placeholder.className = 'trend-card placeholder';
+    placeholder.style.padding = 'var(--spacing-md)';
+    placeholder.style.color = 'var(--color-text-muted)';
+    placeholder.textContent = 'Trend data unavailable';
+    return placeholder;
+  }
+
   const card = document.createElement('div');
   card.className = 'trend-card';
 
@@ -142,6 +152,7 @@ function createTrendCard(trend, consistency, _index) {
   direction.style.fontSize = '0.9rem';
   direction.style.whiteSpace = 'nowrap';
 
+  // Direction indicator - use trend.direction even when changePercent is null/undefined
   if (trend.changePercent !== undefined && trend.changePercent !== null) {
     const arrow = isIncreasing ? '↑' : isDecreasing ? '↓' : '➡️';
     direction.textContent = `${arrow} ${trend.changePercent > 0 ? '+' : ''}${trend.changePercent.toFixed(1)}%`;
@@ -151,8 +162,14 @@ function createTrendCard(trend, consistency, _index) {
         ? COLORS.SUCCESS
         : COLORS.TEXT_MUTED;
   } else {
-    direction.textContent = '➡️';
-    direction.style.color = COLORS.TEXT_MUTED;
+    // When changePercent is null/undefined, still derive arrow from trend.direction
+    const arrow = isIncreasing ? '↑' : isDecreasing ? '↓' : '➡️';
+    direction.textContent = arrow;
+    direction.style.color = isIncreasing
+      ? COLORS.ERROR
+      : isDecreasing
+        ? COLORS.SUCCESS
+        : COLORS.TEXT_MUTED;
   }
   metrics.appendChild(direction);
 
@@ -171,7 +188,7 @@ function createTrendCard(trend, consistency, _index) {
       consistencyBadge.style.color = COLORS.SUCCESS;
     } else if (consistency.score >= 60) {
       consistencyBadge.style.background = 'rgba(251, 191, 36, 0.15)';
-      consistencyBadge.style.color = '#b45309'; // Dark yellow
+      consistencyBadge.style.color = COLORS.WARNING || '#b45309'; // Dark yellow
     } else {
       consistencyBadge.style.background = 'rgba(239, 68, 68, 0.15)';
       consistencyBadge.style.color = COLORS.ERROR;

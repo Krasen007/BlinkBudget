@@ -142,9 +142,10 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
         vsBudgetColor = COLORS.ERROR;
       } else if (diff < -5) {
         vsBudgetText = `↓${Math.abs(diff).toFixed(1)}%`;
-        vsBudgetColor = '#22c55e';
+        vsBudgetColor = COLORS.SUCCESS || '#22c55e';
       } else {
-        vsBudgetText = '→0%';
+        // Show actual percentage for small differences within ±5%
+        vsBudgetText = `${diff > 0 ? '↑' : '↓'}${Math.abs(diff).toFixed(1)}%`;
         vsBudgetColor = COLORS.TEXT_MUTED;
       }
     }
@@ -174,10 +175,17 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
 };
 
 function getConfidenceColor(confidence) {
-  if (!confidence) return COLORS.TEXT_MUTED;
-  if (confidence >= 70) return '#22c55e'; // green
-  if (confidence >= 40) return '#fbbf24'; // yellow
-  return '#f97316'; // orange
+  // 0 is valid low confidence, only null/undefined means no data
+  if (
+    confidence === null ||
+    confidence === undefined ||
+    !Number.isFinite(confidence)
+  ) {
+    return COLORS.TEXT_MUTED;
+  }
+  if (confidence >= 70) return COLORS.SUCCESS || '#22c55e'; // green
+  if (confidence >= 40) return COLORS.WARNING || '#fbbf24'; // yellow
+  return COLORS.ERROR || '#f97316'; // orange
 }
 
 export default BudgetRecommendationsSection;

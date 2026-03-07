@@ -84,7 +84,7 @@ function getInsightIcon(type) {
     decrease: '📉',
     // Optimization insight types
     substitution: '🔄',
-    reduction: '📉',
+    reduction: '➖', // Distinct from decrease - represents intentional cost reduction
     elimination: '🗑️',
     budget: '💰',
   };

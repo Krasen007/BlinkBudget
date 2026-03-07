@@ -57,7 +57,7 @@ global.IntersectionObserver = vi.fn().mockImplementation(() => ({
 Object.defineProperty(global, 'crypto', {
   value: {
     randomUUID: vi.fn(
-      () => `test-uuid-${Math.random().toString(36).substr(2, 9)}`
+      () => `test-uuid-${Math.random().toString(36).substring(2, 11)}`
     ),
     getRandomValues: vi.fn(arr => {
       for (let i = 0; i < arr.length; i++) {

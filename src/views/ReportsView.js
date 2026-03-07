@@ -735,7 +735,7 @@ export const ReportsView = () => {
       await renderPatternInsights(chartsSection, chartRenderResults);
 
       // Trend Analysis - spending direction, consistency scores, MoM
-      await renderTrendAnalysisSection(chartsSection, chartRenderResults);
+      renderTrendAnalysisSection(chartsSection, chartRenderResults);
 
       // Category Trends
       await renderCategoryTrends(chartsSection, chartRenderResults);
@@ -870,9 +870,11 @@ export const ReportsView = () => {
 
       // Create budget status map for easy lookup
       const budgetStatusMap = {};
-      budgetStatus.forEach(budget => {
-        budgetStatusMap[budget.name] = budget;
-      });
+      if (budgetStatus && Array.isArray(budgetStatus)) {
+        budgetStatus.forEach(budget => {
+          budgetStatusMap[budget.name] = budget;
+        });
+      }
 
       const categorySelectorSection = CategorySelector(
         currentData,
@@ -982,7 +984,11 @@ export const ReportsView = () => {
       }
     } catch (error) {
       console.warn('[ReportsView] Failed to render trend analysis:', error);
-      chartRenderResults.push({ name: 'Trend Analysis', success: false });
+      chartRenderResults.push({
+        name: 'Trend Analysis',
+        success: false,
+        error,
+      });
     }
   }
 
@@ -1045,6 +1051,7 @@ export const ReportsView = () => {
       chartRenderResults.push({
         name: 'Optimization Insights',
         success: false,
+        error,
       });
     }
   }

@@ -140,19 +140,15 @@ export function getPersonalBenchmarking(transactions, timePeriod) {
 
   categories.forEach(category => {
     const current = currentSpending[category] || 0;
-    const lastMonth = lastMonthSpending[category] || 0;
+    const lastMonthAmount = lastMonthSpending[category] || 0;
 
-    // Always show top categories from current month, even if no spending in either period
-    if (
-      current > 0 ||
-      lastMonth > 0 ||
-      currentBreakdown.categories.some(cat => cat.name === category)
-    ) {
+    // Always show top categories from current month
+    if (current > 0 || lastMonthAmount > 0) {
       let change = 0;
       let trend = 'stable';
 
-      if (lastMonth > 0) {
-        change = ((current - lastMonth) / lastMonth) * 100;
+      if (lastMonthAmount > 0) {
+        change = ((current - lastMonthAmount) / lastMonthAmount) * 100;
         trend =
           change > 5 ? 'increasing' : change < -5 ? 'decreasing' : 'stable';
       } else if (current > 0) {

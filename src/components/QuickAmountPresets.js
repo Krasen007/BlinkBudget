@@ -175,42 +175,38 @@ export const QuickAmountPresets = ({ onPresetSelect }) => {
       AmountPresetService.resetPresets();
     });
 
-    // Touch events for mobile feedback
+    // Touch events for mobile feedback only
     resetBtn.addEventListener(
       'touchstart',
-      e => {
-        e.preventDefault();
+      _e => {
         resetBtn.style.transform = 'scale(0.95)';
         resetBtn.style.backgroundColor = 'var(--color-surface-hover)';
         resetBtn.style.color = 'var(--color-error)';
         resetBtn.style.borderColor = 'var(--color-error)';
       },
-      { passive: false }
+      { passive: true }
     );
 
     resetBtn.addEventListener(
       'touchend',
-      e => {
-        e.preventDefault();
+      _e => {
         resetBtn.style.transform = '';
         resetBtn.style.backgroundColor = 'transparent';
         resetBtn.style.color = 'var(--color-text-muted)';
         resetBtn.style.borderColor = 'var(--color-border)';
-        AmountPresetService.resetPresets();
       },
-      { passive: false }
+      { passive: true }
     );
 
     resetBtn.addEventListener(
       'touchcancel',
-      e => {
-        e.preventDefault();
+      _e => {
         resetBtn.style.transform = '';
         resetBtn.style.backgroundColor = 'transparent';
         resetBtn.style.color = 'var(--color-text-muted)';
         resetBtn.style.borderColor = 'var(--color-border)';
       },
-      { passive: false }
+      { passive: true }
     );
 
     resetBtn.addEventListener('keydown', e => {

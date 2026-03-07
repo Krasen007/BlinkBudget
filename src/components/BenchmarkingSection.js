@@ -106,7 +106,7 @@ export const BenchmarkingSection = (benchmarkingData, _timePeriod) => {
         changeSpan.style.color = COLORS.ERROR || '#ef4444';
       } else if (change < 0) {
         changeSpan.textContent = `↓${Math.abs(change).toFixed(1)}%`;
-        changeSpan.style.color = '#22c55e';
+        changeSpan.style.color = COLORS.SUCCESS || '#22c55e';
       } else {
         changeSpan.textContent = '→0%';
         changeSpan.style.color = COLORS.TEXT_MUTED;

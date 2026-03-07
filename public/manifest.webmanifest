@@ -34,7 +34,8 @@
       "icons": [
         {
           "src": "favicon.png",
-          "sizes": "1024x1024"
+          "sizes": "1024x1024",
+          "type": "image/png"
         }
       ]
     }
@@ -51,6 +52,7 @@
       "src": "screenshot-mobile.png",
       "sizes": "500x749",
       "type": "image/png",
+      "form_factor": "narrow",
       "label": "Mobile Dashboard"
     }
   ]
