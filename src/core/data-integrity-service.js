@@ -145,6 +145,7 @@ export class DataIntegrityService {
         if (transactionIssues.length > 0) {
           issues.push({
             id: transaction.id,
+            description: `${transaction.category} - $${transaction.amount || 'N/A'} - ${transaction.date || 'N/A'}`,
             issues: transactionIssues,
             severity: this.determineSeverity(transactionIssues),
           });
@@ -163,7 +164,7 @@ export class DataIntegrityService {
           ...issues.map(i => ({
             type: 'transaction',
             id: i.id,
-            description: i.issues.join(', '),
+            description: `${i.description}: ${i.issues.join(', ')}`,
             severity: i.severity,
           }))
         );
@@ -210,6 +211,7 @@ export class DataIntegrityService {
         if (accountIssues.length > 0) {
           issues.push({
             id: account.id,
+            description: `${account.name || 'Unnamed'} (${account.type || 'Unknown'}) - Balance: $${account.balance || 'N/A'}`,
             issues: accountIssues,
             severity: this.determineSeverity(accountIssues),
           });
@@ -228,7 +230,7 @@ export class DataIntegrityService {
           ...issues.map(i => ({
             type: 'account',
             id: i.id,
-            description: i.issues.join(', '),
+            description: `${i.description}: ${i.issues.join(', ')}`,
             severity: i.severity,
           }))
         );
@@ -660,7 +662,7 @@ export class DataIntegrityService {
       issues.push('Missing transaction ID');
     }
 
-    if (typeof transaction.amount !== 'number' || transaction.amount <= 0) {
+    if (typeof transaction.amount !== 'number' || !isFinite(transaction.amount)) {
       issues.push('Invalid or missing amount');
     }
 
@@ -668,20 +670,19 @@ export class DataIntegrityService {
       issues.push('Invalid or missing date');
     }
 
-    if (!transaction.category || typeof transaction.category !== 'string') {
+    // Category is not required for transfers (they use toAccountId)
+    if (transaction.type !== 'transfer' && (!transaction.category || typeof transaction.category !== 'string')) {
       issues.push('Invalid or missing category');
     }
 
-    if (
-      !transaction.description ||
-      typeof transaction.description !== 'string'
-    ) {
-      issues.push('Invalid or missing description');
+    // toAccountId is required for transfers
+    if (transaction.type === 'transfer' && !transaction.toAccountId) {
+      issues.push('Transfer transactions require destination account');
     }
 
     if (
       !transaction.type ||
-      !['income', 'expense'].includes(transaction.type)
+      !['income', 'expense', 'transfer', 'refund'].includes(transaction.type)
     ) {
       issues.push('Invalid or missing transaction type');
     }
@@ -705,7 +706,8 @@ export class DataIntegrityService {
 
     if (
       !account.type ||
-      !['checking', 'savings', 'credit', 'investment'].includes(account.type)
+      typeof account.type !== 'string' ||
+      account.type.trim() === ''
     ) {
       issues.push('Invalid or missing account type');
     }

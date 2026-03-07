@@ -602,8 +602,30 @@ export class GoalPlanner {
       throw new Error('[GoalPlanner] batchSetGoals requires an array of goals');
     }
 
-    console.log(`[GoalPlanner] Setting ${goals.length} goals`);
-    this.goals = [...goals];
+    // Validate and clean goals array
+    const cleanedGoals = goals
+      .filter(goal => {
+        // Basic validation: ensure required fields exist
+        if (!goal || typeof goal !== 'object') {
+          console.warn('[GoalPlanner] Skipping invalid goal entry:', goal);
+          return false;
+        }
+        if (!goal.id || !goal.name || typeof goal.targetAmount !== 'number') {
+          console.warn('[GoalPlanner] Skipping goal with missing required fields:', goal);
+          return false;
+        }
+        return true;
+      })
+      .map(goal => ({
+        ...goal,
+        // Convert date strings to Date objects
+        targetDate: goal.targetDate ? new Date(goal.targetDate) : new Date(),
+        createdDate: goal.createdDate ? new Date(goal.createdDate) : new Date(),
+        updatedDate: goal.updatedDate ? new Date(goal.updatedDate) : new Date(),
+      }));
+
+    console.log(`[GoalPlanner] Setting ${cleanedGoals.length} validated goals`);
+    this.goals = cleanedGoals;
     this._saveGoals();
     return this.goals;
   }

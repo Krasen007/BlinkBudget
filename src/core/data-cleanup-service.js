@@ -44,50 +44,66 @@ export const DataCleanupService = {
 
         // Fix missing or invalid dates
         if (!transaction.date || isNaN(new Date(transaction.date).getTime())) {
+          const oldDate = transaction.date || 'missing';
           transaction.date = new Date().toISOString().split('T')[0];
           hasChanges = true;
-          results.details.push(`Fixed date for transaction ${transaction.id}`);
-        }
-
-        // Fix missing or empty descriptions
-        if (
-          !transaction.description ||
-          typeof transaction.description !== 'string' ||
-          transaction.description.trim() === ''
-        ) {
-          transaction.description = transaction.category || 'Transaction';
-          hasChanges = true;
           results.details.push(
-            `Fixed description for transaction ${transaction.id}`
+            `Fixed date for ${transaction.category || 'Unknown'} transaction ($${transaction.amount || 'N/A'}) - was: ${oldDate}, now: ${transaction.date}`
           );
         }
 
-        // Fix missing categories
-        if (!transaction.category || typeof transaction.category !== 'string') {
+        // Fix missing or empty descriptions - REMOVED (descriptions are optional)
+        // if (
+        //   !transaction.description ||
+        //   typeof transaction.description !== 'string' ||
+        //   transaction.description.trim() === ''
+        // ) {
+        //   const oldDesc = transaction.description || 'empty';
+        //   transaction.description = transaction.category || 'Transaction';
+        //   hasChanges = true;
+        //   results.details.push(
+        //     `Fixed description for ${transaction.category || 'Unknown'} transaction ($${transaction.amount || 'N/A'}) - was: ${oldDesc}, now: ${transaction.description}`
+        //   );
+        // }
+
+        // Fix missing categories (skip transfers - they use toAccountId)
+        if (transaction.type !== 'transfer' && (!transaction.category || typeof transaction.category !== 'string')) {
+          const oldCategory = transaction.category || 'missing';
           transaction.category = 'Uncategorized';
           hasChanges = true;
           results.details.push(
-            `Fixed category for transaction ${transaction.id}`
+            `Fixed category for $${transaction.amount || 'N/A'} transaction - was: ${oldCategory}, now: ${transaction.category}`
           );
         }
 
-        // Ensure amount is valid
-        if (typeof transaction.amount !== 'number' || transaction.amount <= 0) {
+        // Ensure amount is valid (allow negative for refunds)
+        if (typeof transaction.amount !== 'number' || !isFinite(transaction.amount)) {
+          const oldAmount = transaction.amount || 'invalid';
           transaction.amount = Math.abs(parseFloat(transaction.amount) || 0);
           hasChanges = true;
           results.details.push(
-            `Fixed amount for transaction ${transaction.id}`
+            `Fixed amount for ${transaction.category || 'Unknown'} transaction - was: ${oldAmount}, now: $${transaction.amount}`
           );
         }
 
         // Fix missing or invalid transaction type
         if (
           !transaction.type ||
-          !['income', 'expense'].includes(transaction.type)
+          !['income', 'expense', 'transfer', 'refund'].includes(transaction.type)
         ) {
-          transaction.type = 'expense'; // Default to expense
+          const oldType = transaction.type || 'missing';
+          // Don't auto-fix transfers/refunds - they require specific fields
+          if (transaction.toAccountId) {
+            transaction.type = 'transfer';
+          } else if (transaction.amount && transaction.amount < 0) {
+            transaction.type = 'refund';
+          } else {
+            transaction.type = 'expense'; // Default to expense
+          }
           hasChanges = true;
-          results.details.push(`Fixed type for transaction ${transaction.id}`);
+          results.details.push(
+            `Fixed type for $${transaction.amount || 'N/A'} transaction - was: ${oldType}, now: ${transaction.type}`
+          );
         }
 
         // Update the transaction if changes were made
@@ -98,7 +114,6 @@ export const DataCleanupService = {
           try {
             TransactionService.update(transaction.id, {
               date: transaction.date,
-              description: transaction.description,
               category: transaction.category,
               amount: transaction.amount,
               type: transaction.type,
@@ -106,12 +121,12 @@ export const DataCleanupService = {
             });
             results.fixed++;
             results.details.push(
-              `Updated transaction ${transaction.id} in storage`
+              `Updated ${transaction.category || 'Unknown'} transaction ($${transaction.amount || 'N/A'}) in storage`
             );
           } catch (updateError) {
             results.errors++;
             results.details.push(
-              `Failed to update transaction ${transaction.id}: ${updateError.message}`
+              `Failed to update ${transaction.category || 'Unknown'} transaction ($${transaction.amount || 'N/A'}): ${updateError.message}`
             );
           }
         }

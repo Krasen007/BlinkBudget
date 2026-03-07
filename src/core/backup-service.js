@@ -9,11 +9,9 @@ import { TransactionService } from './transaction-service.js';
 import { AccountService } from './Account/account-service.js';
 import { SettingsService } from './settings-service.js';
 import { goalPlanner } from './goal-planner.js';
-import { InvestmentTracker } from './investment-tracker.js';
+import { investmentTracker } from './investment-tracker.js';
+import { showProgressIndicator, hideProgressIndicator } from '../utils/progress-indicators.js';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-
-// Create instances for services that are classes
-const investmentTracker = new InvestmentTracker();
 
 export const BackupService = {
   init() {
@@ -54,13 +52,20 @@ export const BackupService = {
         return;
       }
 
-      try {
-        window.dispatchEvent(
-          new CustomEvent('backup-operation', {
-            detail: { operation: 'backup', status: 'starting' },
-          })
-        );
+      const progressId = 'backup-create';
+      const progress = showProgressIndicator(
+        progressId,
+        'Creating backup...',
+        document.body,
+        {
+          showCancel: true,
+          onCancel: () => {
+            console.log('[Backup] Backup cancelled by user');
+          },
+        }
+      );
 
+      try {
         await this.createBackup();
         SettingsService.saveSetting('lastBackupDate', today);
         SettingsService.saveSetting(
@@ -75,6 +80,7 @@ export const BackupService = {
         );
 
         console.log('[Backup] Daily backup created successfully');
+        hideProgressIndicator(progressId);
       } catch (error) {
         console.error('[Backup] Failed to create backup:', error);
         window.dispatchEvent(
@@ -86,6 +92,7 @@ export const BackupService = {
             },
           })
         );
+        hideProgressIndicator(progressId);
       }
     }
   },
@@ -142,6 +149,19 @@ export const BackupService = {
       throw new Error('Restore requires internet connection');
     }
 
+    const progressId = 'backup-restore';
+    const progress = showProgressIndicator(
+      progressId,
+      'Restoring from backup...',
+      document.body,
+      {
+        showCancel: true,
+        onCancel: () => {
+          console.log('[Backup] Restore cancelled by user');
+        },
+      }
+    );
+
     window.dispatchEvent(
       new CustomEvent('backup-operation', {
         detail: { operation: 'restore', status: 'starting' },
@@ -189,18 +209,30 @@ export const BackupService = {
         );
       }
 
+      // Create restore summary
+      const restoreSummary = {
+        accounts: backup.accounts?.length || 0,
+        goals: backup.goals?.length || 0,
+        investments: backup.investments?.length || 0,
+        transactions: backup.transactions?.length || 0,
+      };
+
       window.dispatchEvent(
         new CustomEvent('backup-operation', {
           detail: {
             operation: 'restore',
             status: 'completed',
-            count: backup.transactions.length,
+            ...restoreSummary,
           },
         })
       );
 
-      return backup.transactions.length;
+      console.log(`[Backup] Restore completed: ${restoreSummary.transactions} transactions, ${restoreSummary.accounts} accounts, ${restoreSummary.goals} goals, ${restoreSummary.investments} investments restored`);
+      hideProgressIndicator(progressId);
+      
+      return restoreSummary;
     } catch (error) {
+      console.error('[Backup] Restore failed:', error);
       window.dispatchEvent(
         new CustomEvent('backup-operation', {
           detail: {
@@ -210,6 +242,7 @@ export const BackupService = {
           },
         })
       );
+      hideProgressIndicator(progressId);
       throw error;
     }
   },

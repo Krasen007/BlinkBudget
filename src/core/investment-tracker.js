@@ -586,11 +586,22 @@ export class InvestmentTracker {
       );
     }
 
+    // Normalize date fields for each investment
+    const normalizedInvestments = investments.map(investment => ({
+      ...investment,
+      purchaseDate: investment.purchaseDate ? new Date(investment.purchaseDate) : null,
+      createdAt: investment.createdAt ? new Date(investment.createdAt) : new Date(),
+      updatedAt: investment.updatedAt ? new Date(investment.updatedAt) : new Date(),
+    }));
+
     console.log(
-      `[InvestmentTracker] Setting ${investments.length} investments`
+      `[InvestmentTracker] Setting ${normalizedInvestments.length} investments`
     );
-    this.investments = [...investments];
+    this.investments = [...normalizedInvestments];
     this._saveInvestments();
-    return this.investments;
+    return [...this.investments]; // Return a copy to prevent mutation
   }
 }
+
+// Singleton instance
+export const investmentTracker = new InvestmentTracker();

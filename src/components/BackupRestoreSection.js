@@ -69,7 +69,14 @@ export const BackupRestoreSection = () => {
       backupDateEl.style.marginBottom = SPACING.XS;
 
       const backupDate = new Date(lastBackupDate);
-      backupDateEl.textContent = `Last backup: ${backupDate.toLocaleDateString()} ${backupDate.toLocaleTimeString()}`;
+      
+      // Validate date before displaying
+      if (isNaN(backupDate.getTime())) {
+        backupDateEl.textContent = 'Last backup: unknown';
+      } else {
+        backupDateEl.textContent = `Last backup: ${backupDate.toLocaleDateString()} ${backupDate.toLocaleTimeString()}`;
+      }
+      
       metadataContainer.appendChild(backupDateEl);
 
       if (lastBackupDataAsOf) {
@@ -79,7 +86,13 @@ export const BackupRestoreSection = () => {
         dataAsOfEl.style.marginBottom = SPACING.XS;
 
         const dataAsOfDate = new Date(lastBackupDataAsOf);
-        dataAsOfEl.textContent = `Data as of: ${dataAsOfDate.toLocaleDateString()}`;
+        
+        // Validate dataAsOf date before displaying
+        if (isNaN(dataAsOfDate.getTime())) {
+          dataAsOfEl.textContent = 'Data as of: unknown';
+        } else {
+          dataAsOfEl.textContent = `Data as of: ${dataAsOfDate.toLocaleDateString()}`;
+        }
         metadataContainer.appendChild(dataAsOfEl);
       }
     } else {
@@ -93,8 +106,13 @@ export const BackupRestoreSection = () => {
 
   updateBackupMetadata();
 
+  // Create AbortController for cleanup
+  const abortController = new AbortController();
+
   // Listen for backup events to update metadata
-  window.addEventListener('backup-operation', updateBackupMetadata);
+  window.addEventListener('backup-operation', updateBackupMetadata, { 
+    signal: abortController.signal 
+  });
 
   section.appendChild(metadataContainer);
 
@@ -142,6 +160,11 @@ export const BackupRestoreSection = () => {
 
   buttonsContainer.appendChild(restoreBtn);
   section.appendChild(buttonsContainer);
+
+  // Add cleanup method
+  section.cleanup = () => {
+    abortController.abort();
+  };
 
   return section;
 };

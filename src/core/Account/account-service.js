@@ -169,9 +169,9 @@ export const AccountService = {
   },
 
   /**
-   * Private helper to deduplicate and clean account data
+   * Private helper to remove duplicate accounts (without persistence)
    */
-  _cleanAccounts(accounts) {
+  _removeDuplicateAccounts(accounts) {
     const seenId = new Set();
     const seenNameType = new Set();
     const cleaned = accounts.filter(acc => {
@@ -183,7 +183,16 @@ export const AccountService = {
       return true;
     });
 
-    if (cleaned.length !== accounts.length) {
+    return cleaned;
+  },
+
+  /**
+   * Private helper to deduplicate and clean account data
+   */
+  _cleanAccounts(accounts, skipPersist = false) {
+    const cleaned = this._removeDuplicateAccounts(accounts);
+
+    if (!skipPersist && cleaned.length !== accounts.length) {
       this._persist(cleaned, false); // Persist but don't push to cloud if just cleaning
     }
 
@@ -232,8 +241,8 @@ export const AccountService = {
 
     console.log(`[AccountService] Setting ${accounts.length} accounts`);
 
-    // Clean and validate accounts
-    const cleanedAccounts = this._cleanAccounts(accounts);
+    // Clean and validate accounts (skip persistence for now)
+    const cleanedAccounts = this._cleanAccounts(accounts, true);
 
     // Ensure at least one account exists
     if (cleanedAccounts.length === 0) {
@@ -253,8 +262,11 @@ export const AccountService = {
     if (defaultAccounts.length === 0) {
       cleanedAccounts[0].isDefault = true;
     } else if (defaultAccounts.length > 1) {
+      // Find the first account that is actually marked as default
+      const firstTrueDefaultIndex = cleanedAccounts.findIndex(a => a.isDefault === true);
+      // Set all accounts to non-default except the first true default
       cleanedAccounts.forEach((account, index) => {
-        if (index > 0) account.isDefault = false;
+        account.isDefault = index === firstTrueDefaultIndex;
       });
     }
 

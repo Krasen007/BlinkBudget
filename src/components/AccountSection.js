@@ -6,12 +6,8 @@
 import { Button } from './Button.js';
 import { AccountService } from '../core/Account/account-service.js';
 import { generateId } from '../utils/id-utils.js';
-import {
-  COLORS,
-  SPACING,
-  TOUCH_TARGETS,
-  FONT_SIZES,
-} from '../utils/constants.js';
+import { SPACING, TOUCH_TARGETS, FONT_SIZES, COLORS } from '../utils/constants.js';
+import { showSuccessCheckmark } from '../utils/success-feedback.js';
 import { sanitizeInput } from '../utils/security-utils.js';
 import { getAccountTypeLabel } from '../utils/constants.js';
 
@@ -246,6 +242,9 @@ export const AccountSection = () => {
               AccountService.saveAccount(newAccount);
               renderAccounts();
               cleanupOverlay();
+              
+              // Show success animation
+              showSuccessCheckmark(section, 'Account saved successfully!');
             } catch (error) {
               console.error('Error adding account:', error);
               // Show error dialog to user
@@ -604,16 +603,26 @@ export const AccountSection = () => {
                     ...account,
                     name: sanitizeInput(accountName),
                     type: accountType,
+                    balance: 0,
+                    createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString(),
                   });
                   renderAccounts();
                   cleanupOverlay();
+                  // Show success animation
+                  showSuccessCheckmark(section, 'Account updated successfully!');
                 } catch (error) {
                   console.error('Error updating account:', error);
-                  // Show error inline in the dialog
-                  errorText.textContent =
-                    'Failed to update account. Please try again.';
-                  errorText.style.opacity = '1';
+                  // Show error dialog to user
+                  import('./ConfirmDialog.js')
+                    .then(({ AlertDialog }) => {
+                      AlertDialog({
+                        message: 'Failed to update account. Please try again.',
+                      });
+                    })
+                    .catch(() => {
+                      console.error('Failed to load ConfirmDialog');
+                    });
                 }
               },
             });

@@ -6,8 +6,12 @@ import { DataManagementSection } from '../components/DataManagementSection.js';
 import { GeneralSection } from '../components/GeneralSection.js';
 import { BackupRestoreSection } from '../components/BackupRestoreSection.js';
 import { AccountDeletionSection } from '../components/AccountDeletionSection.js';
-import { SmartSuggestionsSection } from '../components/SmartSuggestionsSection.js';
-import { AdvancedFilteringSection } from '../components/AdvancedFilteringSection.js';
+/* Disabled until further notice */
+//import { SmartSuggestionsSection } from '../components/SmartSuggestionsSection.js';
+/* Disabled until further notice */
+//import { AdvancedFilteringSection } from '../components/AdvancedFilteringSection.js';
+import { SecuritySection } from '../components/SecuritySection.js';
+import { FeedbackLink } from '../components/FeedbackLink.js';
 import { SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
 
 import { createButton } from '../utils/dom-factory.js';
@@ -80,6 +84,24 @@ export const SettingsView = () => {
   const accountSection = AccountSection();
   content.appendChild(accountSection);
 
+  // Category Management Section
+  const categoryManagementSection = document.createElement('div');
+  categoryManagementSection.className = 'settings-section';
+  categoryManagementSection.innerHTML = `
+    <div class="settings-section-header">
+      <h3>🏷️ Category Management</h3>
+      <p>Organize and customize your transaction categories</p>
+    </div>
+  `;
+  const manageCategoriesBtn = Button({
+    text: 'Manage Categories',
+    variant: 'primary',
+    onClick: () => Router.navigate('category-manager'),
+  });
+  manageCategoriesBtn.style.width = '100%';
+  categoryManagementSection.appendChild(manageCategoriesBtn);
+  content.appendChild(categoryManagementSection);
+
   // Date Format Section
   const dateFormatSection = DateFormatSection({
     onFormatChange: () => {
@@ -105,32 +127,40 @@ export const SettingsView = () => {
   const generalSection = GeneralSection();
   content.appendChild(generalSection);
 
-  // Category Management Section
-  const categoryManagementSection = document.createElement('div');
-  categoryManagementSection.className = 'settings-section';
-  categoryManagementSection.innerHTML = `
-    <div class="settings-section-header">
-      <h3>🏷️ Category Management</h3>
-      <p>Organize and customize your transaction categories</p>
-    </div>
-  `;
-  const manageCategoriesBtn = Button({
-    text: 'Manage Categories',
-    variant: 'primary',
-    onClick: () => Router.navigate('category-manager'),
-  });
-  manageCategoriesBtn.style.width = '100%';
-  categoryManagementSection.appendChild(manageCategoriesBtn);
-  content.appendChild(categoryManagementSection);
+  /* Disabled until further notice */
+  // // Smart Suggestions Section
+  // const smartSuggestionsSection = SmartSuggestionsSection();
+  // content.appendChild(smartSuggestionsSection);
+ /* Disabled until further notice */
+  // // Advanced Filtering Section
+  // const advancedFilteringSection = AdvancedFilteringSection();
+  // content.appendChild(advancedFilteringSection);
 
-  // Smart Suggestions Section
-  const smartSuggestionsSection = SmartSuggestionsSection();
-  content.appendChild(smartSuggestionsSection);
 
-  // Advanced Filtering Section
-  const advancedFilteringSection = AdvancedFilteringSection();
-  content.appendChild(advancedFilteringSection);
+  // Security & Privacy Section
+  const securitySection = SecuritySection();
+  content.appendChild(securitySection);
 
+  // Feedback Link Section
+  const feedbackSection = FeedbackLink();
+  content.appendChild(feedbackSection);
+
+  // Account Deletion Section
+  const accountDeletionSection = AccountDeletionSection();
+  content.appendChild(accountDeletionSection);
+
+  const handleStorageUpdate = e => {
+    console.log(
+      `[Settings] Storage updated (${e.detail.key}), re-rendering...`
+    );
+    const parent = container.parentNode;
+    if (parent) {
+      parent.innerHTML = '';
+      parent.appendChild(SettingsView());
+    }
+  };
+
+  
   // Done Button
   const doneBtn = Button({
     text: 'Done',
@@ -149,21 +179,6 @@ export const SettingsView = () => {
     fontWeight: '600',
   });
   content.appendChild(doneBtn);
-
-  // Account Deletion Section
-  const accountDeletionSection = AccountDeletionSection();
-  content.appendChild(accountDeletionSection);
-
-  const handleStorageUpdate = e => {
-    console.log(
-      `[Settings] Storage updated (${e.detail.key}), re-rendering...`
-    );
-    const parent = container.parentNode;
-    if (parent) {
-      parent.innerHTML = '';
-      parent.appendChild(SettingsView());
-    }
-  };
 
   const handleBackupOperation = e => {
     const { operation, status, count, error } = e.detail;

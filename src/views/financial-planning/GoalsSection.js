@@ -11,7 +11,10 @@
  * - Progress tracking display
  */
 
-import { COLORS, SPACING } from '../../utils/constants.js';
+import { Button } from '../../components/Button.js';
+import { Router } from '../../core/router.js';
+import { createEnhancedEmptyState } from '../../utils/enhanced-empty-states.js';
+import { SPACING, FONT_SIZES, COLORS } from '../../utils/constants.js';
 import { createGoalProgressChart } from '../../utils/financial-planning-charts.js';
 import {
   createSectionContainer,
@@ -256,9 +259,10 @@ function createGoalsList(chartRenderer, activeCharts, section) {
       items = StorageService.getGoals() || [];
 
       if (!items.length) {
-        const empty = document.createElement('div');
-        empty.textContent = 'No goals yet.';
-        empty.style.color = COLORS.TEXT_MUTED;
+        const empty = createEnhancedEmptyState('no-data', {
+          onAction: () => Router.navigate('financial-planning/goals?action=add'),
+          showTips: true,
+        });
         goalsList.appendChild(empty);
         return;
       }
@@ -620,10 +624,10 @@ function createGoalsList(chartRenderer, activeCharts, section) {
       goalsList.appendChild(ul);
     } catch (err) {
       console.warn('Error loading goals for list:', err);
-      const empty = document.createElement('div');
-      empty.textContent = 'Error loading goals.';
-      empty.style.color = COLORS.ERROR;
-      goalsList.appendChild(empty);
+      const error = createEnhancedEmptyState('error', {
+        onAction: () => location.reload(),
+      });
+      goalsList.appendChild(error);
     }
   }
 
