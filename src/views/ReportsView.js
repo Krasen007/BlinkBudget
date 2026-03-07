@@ -999,8 +999,8 @@ export const ReportsView = () => {
    */
   function renderOptimizationInsights(chartsSection, chartRenderResults) {
     try {
-      const optInsights = analyticsEngine.optimizationEngine
-        ? analyticsEngine.optimizationEngine.getOptimizationInsights(
+      const optInsights = analyticsEngine.getOptimizationInsights
+        ? analyticsEngine.getOptimizationInsights(
             currentData.transactions,
             currentTimePeriod
           )
