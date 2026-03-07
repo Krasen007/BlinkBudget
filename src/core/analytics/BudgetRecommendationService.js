@@ -6,6 +6,8 @@
  * @module analytics/BudgetRecommendationService
  */
 
+import { MetricsService } from './MetricsService.js';
+
 /**
  * Get historical periods for comparison - works with 1+ months
  */
@@ -87,11 +89,16 @@ export function getPersonalBenchmarking(transactions, timePeriod) {
 
   // Get the previous month date range
   const currentStart = new Date(timePeriod.startDate);
-  const lastMonthStart = new Date(currentStart);
-  lastMonthStart.setMonth(lastMonthStart.getMonth() - 1);
-  const lastMonthEnd = new Date(lastMonthStart);
-  lastMonthEnd.setMonth(lastMonthEnd.getMonth() + 1);
-  lastMonthEnd.setDate(0); // Last day of month
+  const currentMonth = currentStart.getMonth();
+  const currentYear = currentStart.getFullYear();
+  
+  // Previous month is current month - 1 (handle January -> December)
+  const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+  const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+  
+  // Get first day of previous month and last day of previous month
+  const lastMonthStart = new Date(lastMonthYear, lastMonth, 1);
+  const lastMonthEnd = new Date(lastMonthYear, lastMonth + 1, 0); // 0th day of next month = last day of current month
 
   const lastMonthStartStr = lastMonthStart.toISOString().split('T')[0];
   const lastMonthEndStr = lastMonthEnd.toISOString().split('T')[0];
@@ -100,45 +107,37 @@ export function getPersonalBenchmarking(transactions, timePeriod) {
     year: 'numeric',
   });
 
-  // Get current period spending by category
+  // Get current period category breakdown using MetricsService (same as pie chart)
+  const currentBreakdown = MetricsService.calculateCategoryBreakdown(transactions, timePeriod);
   const currentSpending = {};
-  transactions.forEach(t => {
-    if (t.type !== 'expense') return;
-    const tDate = t.date || t.timestamp;
-    if (!tDate || tDate < timePeriod.startDate || tDate > timePeriod.endDate)
-      return;
-
-    if (!currentSpending[t.category]) {
-      currentSpending[t.category] = 0;
-    }
-    currentSpending[t.category] += t.amount || 0;
+  currentBreakdown.categories.forEach(cat => {
+    currentSpending[cat.name] = cat.amount;
   });
 
-  // Get last month spending by category
+  // Get last month category breakdown using MetricsService
+  const lastMonthPeriod = {
+    startDate: lastMonthStartStr,
+    endDate: lastMonthEndStr,
+    type: 'monthly'
+  };
+  const lastMonthBreakdown = MetricsService.calculateCategoryBreakdown(transactions, lastMonthPeriod);
   const lastMonthSpending = {};
-  transactions.forEach(t => {
-    if (t.type !== 'expense') return;
-    const tDate = t.date || t.timestamp;
-    if (!tDate || tDate < lastMonthStartStr || tDate > lastMonthEndStr) return;
-
-    if (!lastMonthSpending[t.category]) {
-      lastMonthSpending[t.category] = 0;
-    }
-    lastMonthSpending[t.category] += t.amount || 0;
+  lastMonthBreakdown.categories.forEach(cat => {
+    lastMonthSpending[cat.name] = cat.amount;
   });
 
   // Calculate benchmarking comparing current vs last month
   const benchmarking = [];
-  const categories = new Set([
-    ...Object.keys(currentSpending),
-    ...Object.keys(lastMonthSpending),
-  ]);
+  
+  // Use top categories from current month (same as pie chart) for consistency
+  const categories = currentBreakdown.categories.map(cat => cat.name);
 
   categories.forEach(category => {
     const current = currentSpending[category] || 0;
     const lastMonth = lastMonthSpending[category] || 0;
 
-    if (current > 0 || lastMonth > 0) {
+    // Always show top categories from current month, even if no spending in either period
+    if (current > 0 || lastMonth > 0 || currentBreakdown.categories.some(cat => cat.name === category)) {
       let change = 0;
       let trend = 'stable';
 
@@ -175,19 +174,8 @@ export function getPercentileRankings(transactions, timePeriod) {
     return [];
   }
 
-  // Get all category spending for the period
-  const categorySpending = {};
-  transactions.forEach(t => {
-    if (t.type !== 'expense') return;
-    const tDate = t.date || t.timestamp;
-    if (!tDate || tDate < timePeriod.startDate || tDate > timePeriod.endDate)
-      return;
-
-    if (!categorySpending[t.category]) {
-      categorySpending[t.category] = [];
-    }
-    categorySpending[t.category].push(t.amount || 0);
-  });
+  // Get all category spending for the period using MetricsService
+  const categorySpending = MetricsService.getCategorySpending(transactions, timePeriod);
 
   // Calculate percentiles
   const rankings = Object.entries(categorySpending).map(

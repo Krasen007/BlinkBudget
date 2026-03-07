@@ -415,9 +415,10 @@ export async function createCategoryTrendsChart(
     return transactionDate < oldest ? transactionDate : oldest;
   }, new Date());
 
-  const monthsOfData = Math.floor(
-    (new Date() - oldestTransaction) / (1000 * 60 * 60 * 24 * 30)
-  );
+  // Calculate months more accurately using calendar months
+  const now = new Date();
+  const monthsOfData = (now.getFullYear() - oldestTransaction.getFullYear()) * 12 + 
+                       (now.getMonth() - oldestTransaction.getMonth());
 
   if (monthsOfData < 3) {
     // Render informative message instead of null
@@ -484,7 +485,7 @@ export async function createCategoryTrendsChart(
   section.appendChild(chartDiv);
 
   // Generate monthly data for top 3 categories
-  const topCategories = currentData.categoryBreakdown.categories.slice(0, 3);
+  const topCategories = currentData.categoryBreakdown.categories.slice(0, 6);
   const monthlyData = generateMonthlyTrendData(allTransactions, topCategories);
 
   const chartData = {
