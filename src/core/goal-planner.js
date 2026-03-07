@@ -592,6 +592,21 @@ export class GoalPlanner {
     this.goals = [];
     this._saveGoals();
   }
+
+  /**
+   * Set multiple goals at once (for restore operations)
+   * @param {Array} goals - Array of goal objects
+   */
+  batchSetGoals(goals) {
+    if (!Array.isArray(goals)) {
+      throw new Error('[GoalPlanner] batchSetGoals requires an array of goals');
+    }
+
+    console.log(`[GoalPlanner] Setting ${goals.length} goals`);
+    this.goals = [...goals];
+    this._saveGoals();
+    return this.goals;
+  }
 }
 
 // Singleton instance

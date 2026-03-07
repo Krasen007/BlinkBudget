@@ -8,9 +8,12 @@ import { AuthService } from './auth-service.js';
 import { TransactionService } from './transaction-service.js';
 import { AccountService } from './Account/account-service.js';
 import { SettingsService } from './settings-service.js';
-import { GoalPlanner } from './goal-planner.js';
+import { goalPlanner } from './goal-planner.js';
 import { InvestmentTracker } from './investment-tracker.js';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+
+// Create instances for services that are classes
+const investmentTracker = new InvestmentTracker();
 
 export const BackupService = {
   init() {
@@ -18,6 +21,25 @@ export const BackupService = {
     setTimeout(() => {
       this.checkAndCreateBackup();
     }, 30000);
+
+    // Add visibilitychange listener for automatic backup when user returns to app
+    document.addEventListener('visibilitychange', () => {
+      this.handleVisibilityChange();
+    });
+  },
+
+  /**
+   * Handle visibility change events for automatic backup
+   */
+  handleVisibilityChange() {
+    // Only create backup when page becomes visible (user returns to app)
+    if (!document.hidden) {
+      console.log('[Backup] App became visible, checking for backup');
+      // Small delay to ensure app is fully active
+      setTimeout(() => {
+        this.checkAndCreateBackup();
+      }, 1000);
+    }
   },
 
   async checkAndCreateBackup() {
@@ -81,9 +103,9 @@ export const BackupService = {
       accounts: AccountService.getAccounts(),
       settings: SettingsService.getAllSettings(),
       // Check if these services exist/are imported correctly before accessing
-      goals: GoalPlanner?.getAllGoals ? GoalPlanner.getAllGoals() : [],
-      investments: InvestmentTracker?.getAllInvestments
-        ? InvestmentTracker.getAllInvestments()
+      goals: goalPlanner?.getAllGoals ? goalPlanner.getAllGoals() : [],
+      investments: investmentTracker?.getAllInvestments
+        ? investmentTracker.getAllInvestments()
         : [],
     };
 
@@ -145,12 +167,27 @@ export const BackupService = {
       }
 
       // 3. Restore Accounts
-      // We need to implement clear/set logic in AccountService if we want full replace.
-      // For now, let's assume we focus on transactions as the critical piece,
-      // but strictly speaking "Replace" should replace everything.
-      // However, AccountService might not have a clear() method exposed yet.
-      // Let's check AccountService capabilities in next steps if needed.
-      // For MVP of this task, transaction restore is the primary goal.
+      if (backup.accounts && Array.isArray(backup.accounts)) {
+        AccountService.clear();
+        AccountService.batchSet(backup.accounts);
+        console.log(`[Backup] Restored ${backup.accounts.length} accounts`);
+      }
+
+      // 4. Restore Goals
+      if (backup.goals && Array.isArray(backup.goals)) {
+        goalPlanner.clearAllGoals();
+        goalPlanner.batchSetGoals(backup.goals);
+        console.log(`[Backup] Restored ${backup.goals.length} goals`);
+      }
+
+      // 5. Restore Investments
+      if (backup.investments && Array.isArray(backup.investments)) {
+        investmentTracker.clearAllInvestments();
+        investmentTracker.batchSetInvestments(backup.investments);
+        console.log(
+          `[Backup] Restored ${backup.investments.length} investments`
+        );
+      }
 
       window.dispatchEvent(
         new CustomEvent('backup-operation', {

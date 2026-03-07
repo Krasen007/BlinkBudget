@@ -574,4 +574,23 @@ export class InvestmentTracker {
     this.investments = [];
     this._saveInvestments();
   }
+
+  /**
+   * Set multiple investments at once (for restore operations)
+   * @param {Array} investments - Array of investment objects
+   */
+  batchSetInvestments(investments) {
+    if (!Array.isArray(investments)) {
+      throw new Error(
+        '[InvestmentTracker] batchSetInvestments requires an array of investments'
+      );
+    }
+
+    console.log(
+      `[InvestmentTracker] Setting ${investments.length} investments`
+    );
+    this.investments = [...investments];
+    this._saveInvestments();
+    return this.investments;
+  }
 }

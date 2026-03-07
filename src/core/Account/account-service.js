@@ -199,4 +199,79 @@ export const AccountService = {
       SyncService.pushToCloud(ACCOUNTS_KEY, accounts);
     }
   },
+
+  /**
+   * Clear all accounts (for restore operations)
+   */
+  clear() {
+    console.log('[AccountService] Clearing all accounts');
+    localStorage.removeItem(ACCOUNTS_KEY);
+
+    // Audit log accounts clear
+    auditService.log(
+      auditEvents.DATA_DELETE,
+      {
+        entityType: 'accounts',
+        operation: 'clear_all',
+      },
+      AuthService.getUserId(),
+      'high'
+    );
+  },
+
+  /**
+   * Set multiple accounts at once (for restore operations)
+   * @param {Array} accounts - Array of account objects
+   */
+  batchSet(accounts) {
+    if (!Array.isArray(accounts)) {
+      throw new Error(
+        '[AccountService] batchSet requires an array of accounts'
+      );
+    }
+
+    console.log(`[AccountService] Setting ${accounts.length} accounts`);
+
+    // Clean and validate accounts
+    const cleanedAccounts = this._cleanAccounts(accounts);
+
+    // Ensure at least one account exists
+    if (cleanedAccounts.length === 0) {
+      const defaultAccount = {
+        id: DEFAULTS.ACCOUNT_ID,
+        name: DEFAULTS.ACCOUNT_NAME,
+        type: DEFAULTS.ACCOUNT_TYPE,
+        isDefault: true,
+        timestamp: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      cleanedAccounts.push(defaultAccount);
+    }
+
+    // Ensure only one default account
+    const defaultAccounts = cleanedAccounts.filter(a => a.isDefault);
+    if (defaultAccounts.length === 0) {
+      cleanedAccounts[0].isDefault = true;
+    } else if (defaultAccounts.length > 1) {
+      cleanedAccounts.forEach((account, index) => {
+        if (index > 0) account.isDefault = false;
+      });
+    }
+
+    this._persist(cleanedAccounts);
+
+    // Audit log batch set
+    auditService.log(
+      auditEvents.DATA_CREATE,
+      {
+        entityType: 'accounts',
+        operation: 'batch_set',
+        count: cleanedAccounts.length,
+      },
+      AuthService.getUserId(),
+      'medium'
+    );
+
+    return cleanedAccounts;
+  },
 };
