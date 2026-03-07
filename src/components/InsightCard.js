@@ -82,6 +82,11 @@ function getInsightIcon(type) {
     anomaly: '🔍',
     increase: '📈',
     decrease: '📉',
+    // Optimization insight types
+    substitution: '🔄',
+    reduction: '📉',
+    elimination: '🗑️',
+    budget: '💰',
   };
   return icons[type] || '💡';
 }
@@ -94,6 +99,11 @@ function getInsightBackgroundColor(type) {
     anomaly: 'rgba(239, 68, 68, 0.05)',
     increase: 'rgba(251, 191, 36, 0.05)',
     decrease: 'rgba(34, 197, 94, 0.05)',
+    // Optimization insight types
+    substitution: 'rgba(59, 130, 246, 0.05)',
+    reduction: 'rgba(251, 191, 36, 0.05)',
+    elimination: 'rgba(239, 68, 68, 0.05)',
+    budget: 'rgba(16, 185, 129, 0.05)',
   };
   return colors[type] || 'rgba(156, 163, 175, 0.05)';
 }

@@ -64,6 +64,7 @@ import { BudgetPlanner } from '../core/budget-planner.js';
 import { BenchmarkingSection } from '../components/BenchmarkingSection.js';
 import { BudgetRecommendationsSection } from '../components/BudgetRecommendationsSection.js';
 import { TrendAnalysisSection } from '../components/TrendAnalysisSection.js';
+import { OptimizationInsights } from '../components/OptimizationInsights.js';
 
 export const ReportsView = () => {
   const container = document.createElement('div');
@@ -724,6 +725,9 @@ export const ReportsView = () => {
       // Financial Insights
       await renderFinancialInsights(chartsSection, chartRenderResults);
 
+      // Optimization Insights - cost-saving recommendations
+      renderOptimizationInsights(chartsSection, chartRenderResults);
+
       // Income vs Expenses
       await renderIncomeExpense(chartsSection, chartRenderResults);
 
@@ -987,6 +991,48 @@ export const ReportsView = () => {
           error: insightsError,
         });
       }
+    }
+  }
+
+  /**
+   * Render optimization insights with error handling
+   */
+  function renderOptimizationInsights(chartsSection, chartRenderResults) {
+    try {
+      const optInsights = analyticsEngine.optimizationEngine
+        ? analyticsEngine.optimizationEngine.getOptimizationInsights(
+            currentData.transactions,
+            currentTimePeriod
+          )
+        : [];
+
+      if (optInsights && optInsights.length > 0) {
+        const section = OptimizationInsights(optInsights);
+        section.style.setProperty(
+          'margin-top',
+          'var(--spacing-md)',
+          'important'
+        );
+        chartsSection.appendChild(section);
+        chartRenderResults.push({
+          name: 'Optimization Insights',
+          success: true,
+        });
+      } else {
+        chartRenderResults.push({
+          name: 'Optimization Insights',
+          success: true,
+        });
+      }
+    } catch (error) {
+      console.warn(
+        '[ReportsView] Failed to render optimization insights:',
+        error
+      );
+      chartRenderResults.push({
+        name: 'Optimization Insights',
+        success: false,
+      });
     }
   }
 
