@@ -44,7 +44,7 @@ export const TrendAnalysisSection = ({
     const emptyState = createEmptyState();
     section.appendChild(emptyState);
     return section;
-  }
+  };
 
   // Container for trend cards
   const trendsGrid = document.createElement('div');
@@ -75,16 +75,6 @@ export const TrendAnalysisSection = ({
  * @returns {HTMLElement}
  */
 function createTrendCard(trend, consistency, _index) {
-  // Guard against null/undefined trend or missing required properties
-  if (!trend || !trend.direction || !trend.label) {
-    const placeholder = document.createElement('div');
-    placeholder.className = 'trend-card placeholder';
-    placeholder.style.padding = 'var(--spacing-md)';
-    placeholder.style.color = 'var(--color-text-muted)';
-    placeholder.textContent = 'Trend data unavailable';
-    return placeholder;
-  }
-
   const card = document.createElement('div');
   card.className = 'trend-card';
 

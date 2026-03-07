@@ -40,7 +40,6 @@ export const getDateSource = (externalDateInput = null) => {
  * @param {string} category - Category (or null for transfers)
  * @param {string} accountId - Source account ID
  * @param {string|null} toAccountId - Destination account ID (for transfers)
- * @param {HTMLInputElement|null} externalDateInput - External date input
  * @param {string} description - Transaction description/notes (optional)
  * @returns {Object} Prepared transaction data
  */
@@ -51,18 +50,17 @@ export const prepareTransactionData = formState => {
     category,
     accountId,
     toAccountId = null,
-    externalDateInput = null,
     description = '',
   } = formState;
 
-  const dateSource = getDateSource(externalDateInput);
-  const dateValue = dateSource.value || getTodayISO();
+  // Note: We now use current time for timestamp instead of form date
+  // This ensures transactions have real time-of-day data
 
   const transactionData = {
     amount: Math.abs(amount),
     type,
     accountId,
-    timestamp: new Date(dateValue).toISOString(),
+    timestamp: new Date().toISOString(), // Use current time, not just date
   };
 
   if (type === 'transfer') {

@@ -43,6 +43,8 @@ export function PatternInsights(
     flex-direction: column;
     gap: ${SPACING.MD};
     padding: ${SPACING.MD};
+    background: ${COLORS.SURFACE};
+    border-radius: var(--radius-lg);
   `;
 
   // Header
@@ -83,7 +85,7 @@ export function PatternInsights(
   container.appendChild(createWeekdayWeekendSection(weekdayWeekendAnalysis));
 
   // Time of Day Section
-  container.appendChild(createTimeOfDaySection(timeOfDayAnalysis));
+  container.appendChild(createTimeOfDaySection(timeOfDayAnalysis, transactions));
 
   return container;
 }
@@ -314,7 +316,7 @@ function createSpendingColumn(label, amount, maxAmount, color, uniqueDays) {
     color: ${COLORS.TEXT_MAIN};
   `;
 
-  // Visual bar
+  // Visual bar with percentage label
   const barContainer = document.createElement('div');
   barContainer.style.cssText = `
     width: 100%;
@@ -323,11 +325,16 @@ function createSpendingColumn(label, amount, maxAmount, color, uniqueDays) {
     border-radius: ${SPACING.XS};
     position: relative;
     overflow: hidden;
-    border: none;
+    border: 1px solid ${COLORS.BORDER};
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
   `;
 
   const bar = document.createElement('div');
   const heightPercent = maxAmount > 0 ? (amount / maxAmount) * 100 : 0;
+  const percentageText = maxAmount > 0 ? Math.round(heightPercent) : 0;
+  
   bar.style.cssText = `
     position: absolute;
     bottom: 0;
@@ -338,7 +345,25 @@ function createSpendingColumn(label, amount, maxAmount, color, uniqueDays) {
     transition: height 0.3s ease;
   `;
 
+  // Add percentage label on the bar
+  const percentageLabel = document.createElement('div');
+  percentageLabel.textContent = `${percentageText}%`;
+  percentageLabel.style.cssText = `
+    position: absolute;
+    bottom: ${Math.max(heightPercent + 5, 5)}%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: ${FONT_SIZES.XS};
+    font-weight: 600;
+    color: ${COLORS.TEXT_MUTED};
+    background: ${COLORS.SURFACE};
+    padding: 2px 6px;
+    border-radius: ${SPACING.XS};
+    white-space: nowrap;
+  `;
+
   barContainer.appendChild(bar);
+  barContainer.appendChild(percentageLabel);
 
   const amountEl = document.createElement('div');
   amountEl.textContent = formatCurrency(amount);
@@ -366,7 +391,7 @@ function createSpendingColumn(label, amount, maxAmount, color, uniqueDays) {
 /**
  * Create time of day section
  */
-function createTimeOfDaySection(analysis) {
+function createTimeOfDaySection(analysis, transactions) {
   const section = document.createElement('div');
   section.style.cssText = `
     background: ${COLORS.SURFACE};
@@ -378,19 +403,30 @@ function createTimeOfDaySection(analysis) {
   const title = document.createElement('h3');
   title.textContent = 'Time of Day Patterns';
   title.style.cssText = `
-    margin: 0 0 ${SPACING.MD} 0;
+    margin: 0 0 ${SPACING.SM} 0;
     color: ${COLORS.TEXT_MAIN};
     font-size: ${FONT_SIZES.LG};
     font-weight: 600;
   `;
   section.appendChild(title);
 
-  // Time period bars
-  const periodsContainer = document.createElement('div');
-  periodsContainer.style.cssText = `
+  const subtitle = document.createElement('div');
+  subtitle.textContent = 'Daily breakdown of spending by time period';
+  subtitle.style.cssText = `
+    font-size: ${FONT_SIZES.SM};
+    color: ${COLORS.TEXT_MUTED};
+    margin-bottom: ${SPACING.MD};
+  `;
+  section.appendChild(subtitle);
+
+  // Create daily breakdown
+  const dailyContainer = document.createElement('div');
+  dailyContainer.style.cssText = `
     display: flex;
     flex-direction: column;
     gap: ${SPACING.SM};
+    max-height: 400px;
+    overflow-y: auto;
   `;
 
   const periodColors = {
@@ -401,26 +437,39 @@ function createTimeOfDaySection(analysis) {
     night: COLORS.MUTED,
   };
 
-  // Calculate max total across all periods for relative scaling
-  const maxPeriodTotal = Math.max(
-    ...Object.values(analysis.periods).map(p => p.total)
-  );
-
-  Object.entries(analysis.periods).forEach(([period, data]) => {
-    // Show all periods with data, or at least show the structure if empty?
-    // The original code only showed if total > 0. Keeping that for now.
-    if (data.total > 0) {
-      const periodBar = createTimePeriodBar(
-        period,
-        data,
-        periodColors[period],
-        maxPeriodTotal
-      );
-      periodsContainer.appendChild(periodBar);
-    }
+  // Get all transactions and group by day
+  const dailyData = groupTransactionsByDay(transactions || []);
+  
+  // Filter to show only current month days
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  const currentMonthDays = Object.keys(dailyData).filter(dayKey => {
+    const dayDate = new Date(dayKey);
+    return dayDate.getMonth() === currentMonth && dayDate.getFullYear() === currentYear;
   });
+  
+  if (currentMonthDays.length === 0) {
+    const noActivityMsg = document.createElement('div');
+    noActivityMsg.textContent = 'No spending activity detected this month';
+    noActivityMsg.style.cssText = `
+      text-align: center;
+      color: ${COLORS.TEXT_MUTED};
+      font-size: ${FONT_SIZES.SM};
+      padding: ${SPACING.MD};
+      font-style: italic;
+    `;
+    dailyContainer.appendChild(noActivityMsg);
+  } else {
+    // Sort days chronologically
+    const sortedDays = currentMonthDays.sort();
+    
+    sortedDays.forEach(day => {
+      const dayChart = createDailyTimeChart(day, dailyData[day], periodColors);
+      dailyContainer.appendChild(dayChart);
+    });
+  }
 
-  section.appendChild(periodsContainer);
+  section.appendChild(dailyContainer);
 
   // Insights
   if (analysis.insights.length > 0) {
@@ -457,71 +506,154 @@ function createTimeOfDaySection(analysis) {
 }
 
 /**
- * Create time period bar
+ * Group transactions by day and time period
  */
-function createTimePeriodBar(period, data, color) {
-  const barContainer = document.createElement('div');
-  barContainer.style.cssText = `
-    display: flex;
-    align-items: center;
-    gap: ${SPACING.SM};
-  `;
+function groupTransactionsByDay(transactions) {
+  const dailyData = {};
+  
+  transactions.forEach(transaction => {
+    if (transaction.type === 'transfer') return; // Skip transfers
+    
+    const date = new Date(transaction.timestamp);
+    const dayKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
+    const hour = date.getUTCHours(); // Use UTC hours to avoid timezone issues
+    
+    // Determine time period
+    let period;
+    if (hour >= 5 && hour < 9) period = 'earlyMorning';
+    else if (hour >= 9 && hour < 12) period = 'morning';
+    else if (hour >= 12 && hour < 17) period = 'afternoon';
+    else if (hour >= 17 && hour < 21) period = 'evening';
+    else period = 'night';
+    
+    if (!dailyData[dayKey]) {
+      dailyData[dayKey] = {
+        date: date,
+        periods: {
+          earlyMorning: { total: 0, count: 0 },
+          morning: { total: 0, count: 0 },
+          afternoon: { total: 0, count: 0 },
+          evening: { total: 0, count: 0 },
+          night: { total: 0, count: 0 }
+        }
+      };
+    }
+    
+    dailyData[dayKey].periods[period].total += Math.abs(transaction.amount);
+    dailyData[dayKey].periods[period].count += 1;
+  });
+  
+  return dailyData;
+}
 
-  const label = document.createElement('div');
-  label.textContent = data.label || period;
-  label.style.cssText = `
-    width: 120px;
-    font-size: ${FONT_SIZES.SM};
-    color: ${COLORS.TEXT_MAIN};
-    flex-shrink: 0;
-  `;
-
-  const barWrapper = document.createElement('div');
-  barWrapper.style.cssText = `
-    flex: 1;
-    height: 24px;
+/**
+ * Create daily time chart with colored bars
+ */
+function createDailyTimeChart(dayKey, dayData, periodColors) {
+  const dayContainer = document.createElement('div');
+  dayContainer.style.cssText = `
+    border: 1px solid ${COLORS.BORDER};
+    border-radius: ${SPACING.SM};
+    padding: ${SPACING.SM};
     background: ${COLORS.BACKGROUND};
-    border-radius: ${SPACING.XS};
-    position: relative;
-    overflow: hidden;
-    border: none;
   `;
-
-  // Use the global maxPeriodTotal passed in, or fallback to internal calculation if missing (though it shouldn't be)
-  const maxAmount =
-    arguments[3] ||
-    Math.max(...Object.values(data.hourlyBreakdown).map(h => h.amount));
-
-  // Calculate width relative to the biggest period total
-  const barWidth = maxAmount > 0 ? (data.total / maxAmount) * 100 : 0;
-
-  const bar = document.createElement('div');
-  bar.style.cssText = `
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: ${Math.max(barWidth, 2)}%;
-    background: ${color};
-    transition: width 0.3s ease;
-  `;
-
-  barWrapper.appendChild(bar);
-
-  const amount = document.createElement('div');
-  amount.textContent = formatCurrency(data.total);
-  amount.style.cssText = `
-    width: 80px;
-    text-align: right;
-    font-size: ${FONT_SIZES.SM};
+  
+  // Day header
+  const date = new Date(dayKey);
+  const dayHeader = document.createElement('div');
+  dayHeader.textContent = formatDateForDisplay(date);
+  dayHeader.style.cssText = `
     font-weight: 600;
     color: ${COLORS.TEXT_MAIN};
-    flex-shrink: 0;
+    margin-bottom: ${SPACING.SM};
+    font-size: ${FONT_SIZES.SM};
   `;
-
-  barContainer.appendChild(label);
-  barContainer.appendChild(barWrapper);
-  barContainer.appendChild(amount);
-
-  return barContainer;
+  dayContainer.appendChild(dayHeader);
+  
+  // Time periods container
+  const periodsContainer = document.createElement('div');
+  periodsContainer.style.cssText = `
+    display: flex;
+    gap: ${SPACING.XS};
+    height: 40px;
+    align-items: flex-end;
+  `;
+  
+  // Calculate max amount for scaling
+  const maxAmount = Math.max(...Object.values(dayData.periods).map(p => p.total));
+  
+  // Create bars for each period
+  Object.entries(dayData.periods).forEach(([period, data]) => {
+    if (data.total > 0) {
+      const bar = document.createElement('div');
+      const heightPercent = maxAmount > 0 ? (data.total / maxAmount) * 100 : 0;
+      
+      bar.style.cssText = `
+        height: ${Math.max(heightPercent, 5)}%;
+        width: 20px;
+        background: ${periodColors[period]};
+        border-radius: 2px;
+        position: relative;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+      `;
+      
+      // Tooltip on hover
+      bar.title = `${period}: ${formatCurrency(data.total)} (${data.count} transactions)`;
+      
+      bar.addEventListener('mouseenter', () => {
+        bar.style.transform = 'scaleY(1.1)';
+      });
+      
+      bar.addEventListener('mouseleave', () => {
+        bar.style.transform = 'scaleY(1)';
+      });
+      
+      periodsContainer.appendChild(bar);
+    }
+  });
+  
+  dayContainer.appendChild(periodsContainer);
+  
+  // Legend
+  const legend = document.createElement('div');
+  legend.style.cssText = `
+    display: flex;
+    gap: ${SPACING.XS};
+    margin-top: ${SPACING.XS};
+    flex-wrap: wrap;
+  `;
+  
+  Object.entries(dayData.periods).forEach(([period, data]) => {
+    if (data.total > 0) {
+      const legendItem = document.createElement('div');
+      legendItem.style.cssText = `
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        font-size: ${FONT_SIZES.XS};
+        color: ${COLORS.TEXT_MUTED};
+      `;
+      
+      const colorDot = document.createElement('div');
+      colorDot.style.cssText = `
+        width: 8px;
+        height: 8px;
+        background: ${periodColors[period]};
+        border-radius: 50%;
+      `;
+      
+      const label = document.createElement('span');
+      label.textContent = period.slice(0, 3); // First 3 letters
+      
+      legendItem.appendChild(colorDot);
+      legendItem.appendChild(label);
+      legend.appendChild(legendItem);
+    }
+  });
+  
+  dayContainer.appendChild(legend);
+  
+  return dayContainer;
 }
+
