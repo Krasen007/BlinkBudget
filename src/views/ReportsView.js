@@ -943,7 +943,7 @@ export const ReportsView = () => {
     try {
       // Get trend data from analytics engine
       const trends = analyticsEngine.getTrendAnalysis
-        ? analyticsEngine.getTrendAnalysis(currentData.transactions)
+        ? analyticsEngine.getTrendAnalysis(null, currentData.transactions)
         : { trends: [] };
 
       const consistency = analyticsEngine.getConsistencyScores
