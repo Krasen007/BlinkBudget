@@ -63,6 +63,7 @@ import { BudgetSummaryCard } from '../components/BudgetSummaryCard.js';
 import { BudgetPlanner } from '../core/budget-planner.js';
 import { BenchmarkingSection } from '../components/BenchmarkingSection.js';
 import { BudgetRecommendationsSection } from '../components/BudgetRecommendationsSection.js';
+import { TrendAnalysisSection } from '../components/TrendAnalysisSection.js';
 
 export const ReportsView = () => {
   const container = document.createElement('div');
@@ -729,6 +730,9 @@ export const ReportsView = () => {
       // Spending patterns
       await renderPatternInsights(chartsSection, chartRenderResults);
 
+      // Trend Analysis - spending direction, consistency scores, MoM
+      await renderTrendAnalysisSection(chartsSection, chartRenderResults);
+
       // Category Trends
       await renderCategoryTrends(chartsSection, chartRenderResults);
 
@@ -925,6 +929,43 @@ export const ReportsView = () => {
         success: false,
         error: patternError,
       });
+    }
+  }
+
+  /**
+   * Render trend analysis section with direction indicators, consistency scores, and MoM
+   */
+  function renderTrendAnalysisSection(chartsSection, chartRenderResults) {
+    try {
+      // Get trend data from analytics engine
+      const trends = analyticsEngine.getTrendAnalysis
+        ? analyticsEngine.getTrendAnalysis(currentData.transactions)
+        : { trends: [] };
+
+      const consistency = analyticsEngine.getConsistencyScores
+        ? analyticsEngine.getConsistencyScores(currentData.transactions)
+        : {};
+
+      if (trends.trends && trends.trends.length > 0) {
+        const section = TrendAnalysisSection({
+          trends: trends.trends,
+          consistencyScores: consistency,
+          transactions: currentData.transactions,
+        });
+        section.style.setProperty(
+          'margin-top',
+          'var(--spacing-md)',
+          'important'
+        );
+        chartsSection.appendChild(section);
+        chartRenderResults.push({ name: 'Trend Analysis', success: true });
+      } else {
+        // Even with no trends, mark as success to avoid error display
+        chartRenderResults.push({ name: 'Trend Analysis', success: true });
+      }
+    } catch (error) {
+      console.warn('[ReportsView] Failed to render trend analysis:', error);
+      chartRenderResults.push({ name: 'Trend Analysis', success: false });
     }
   }
 
