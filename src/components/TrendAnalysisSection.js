@@ -33,7 +33,7 @@ export const TrendAnalysisSection = ({
   section.appendChild(title);
 
   const description = document.createElement('p');
-  description.textContent = 'Your spending patterns over time';
+  description.textContent = 'Your spending patterns over time (vs last 3 months)';
   description.style.margin = `0 0 ${SPACING.LG} 0`;
   description.style.color = COLORS.TEXT_MUTED;
   section.appendChild(description);
@@ -181,15 +181,6 @@ function createTrendCard(trend, consistency, _index) {
 
   container.appendChild(metrics);
   card.appendChild(container);
-
-  // Month-over-month comparison text
-  const momText = document.createElement('div');
-  momText.textContent = 'vs last 3 months';
-  momText.style.fontSize = '0.75rem';
-  momText.style.color = COLORS.TEXT_MUTED;
-  momText.style.marginTop = SPACING.XS;
-  momText.style.marginLeft = '2rem'; // Align with content
-  card.appendChild(momText);
 
   return card;
 }

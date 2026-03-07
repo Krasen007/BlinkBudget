@@ -182,7 +182,7 @@ export const QuickAmountPresets = ({ onPresetSelect }) => {
       resetBtn.style.backgroundColor = 'var(--color-surface-hover)';
       resetBtn.style.color = 'var(--color-error)';
       resetBtn.style.borderColor = 'var(--color-error)';
-    });
+    }, { passive: false });
 
     resetBtn.addEventListener('touchend', e => {
       e.preventDefault();
@@ -191,7 +191,7 @@ export const QuickAmountPresets = ({ onPresetSelect }) => {
       resetBtn.style.color = 'var(--color-text-muted)';
       resetBtn.style.borderColor = 'var(--color-border)';
       AmountPresetService.resetPresets();
-    });
+    }, { passive: false });
 
     resetBtn.addEventListener('touchcancel', e => {
       e.preventDefault();
@@ -199,7 +199,7 @@ export const QuickAmountPresets = ({ onPresetSelect }) => {
       resetBtn.style.backgroundColor = 'transparent';
       resetBtn.style.color = 'var(--color-text-muted)';
       resetBtn.style.borderColor = 'var(--color-border)';
-    });
+    }, { passive: false });
 
     resetBtn.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') {

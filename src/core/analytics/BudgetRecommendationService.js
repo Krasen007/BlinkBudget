@@ -222,18 +222,11 @@ export function getBudgetRecommendations(transactions, timePeriod) {
 
   const periods = getHistoricalPeriods(timePeriod, 3);
 
-  // Get current period spending by category
+  // Get current period spending by category using MetricsService (same as pie chart)
+  const currentBreakdown = MetricsService.calculateCategoryBreakdown(transactions, timePeriod);
   const currentSpending = {};
-  transactions.forEach(t => {
-    if (t.type !== 'expense') return;
-    const tDate = t.date || t.timestamp;
-    if (!tDate || tDate < timePeriod.startDate || tDate > timePeriod.endDate)
-      return;
-
-    if (!currentSpending[t.category]) {
-      currentSpending[t.category] = 0;
-    }
-    currentSpending[t.category] += t.amount || 0;
+  currentBreakdown.categories.forEach(cat => {
+    currentSpending[cat.name] = cat.amount;
   });
 
   // Generate recommendations
