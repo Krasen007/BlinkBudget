@@ -41,6 +41,7 @@ export const getDateSource = (externalDateInput = null) => {
  *   @property {string} formState.accountId - Source account ID
  *   @property {string|null} formState.toAccountId - Destination account ID (for transfers)
  *   @property {string} [formState.description] - Transaction description/notes (optional)
+ *   @property {HTMLInputElement|null} [formState.externalDateInput] - External date input element (optional)
  * @returns {Object} Prepared transaction data
  */
 export const prepareTransactionData = formState => {
@@ -51,16 +52,37 @@ export const prepareTransactionData = formState => {
     accountId,
     toAccountId = null,
     description = '',
+    externalDateInput = null,
   } = formState;
 
-  // Note: We now use current time for timestamp instead of form date
-  // This ensures transactions have real time-of-day data
+  // Get date source - use external date input if provided, otherwise current time
+  const dateSource = getDateSource(externalDateInput);
+  let timestamp;
+
+  if (dateSource && dateSource.value) {
+    // Use the date from external input and combine with current time for precise timestamp
+    const selectedDate = dateSource.value;
+    
+    // Check if it's a full ISO timestamp or just a date
+    if (selectedDate.includes('T')) {
+      // Full timestamp provided, use it as-is
+      timestamp = selectedDate;
+    } else {
+      // Date only provided, combine with current time using UTC to avoid timezone issues
+      const now = new Date();
+      const [year, month, day] = selectedDate.split('-').map(Number);
+      timestamp = new Date(Date.UTC(year, month - 1, day, now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds())).toISOString();
+    }
+  } else {
+    // Fallback to current time
+    timestamp = new Date().toISOString();
+  }
 
   const transactionData = {
     amount: Math.abs(amount),
     type,
     accountId,
-    timestamp: new Date().toISOString(), // Use current time, not just date
+    timestamp,
   };
 
   if (type === 'transfer') {

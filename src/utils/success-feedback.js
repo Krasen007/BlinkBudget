@@ -96,27 +96,9 @@ export const highlightTransactionSuccess = (element, duration = 1500) => {
   // Add the highlight class
   element.classList.add('success-highlight', 'success-highlight-active');
 
-  // Show subtle checkmark
-  const checkmark = document.createElement('div');
-  checkmark.className = 'inline-success-checkmark';
-  checkmark.innerHTML = '✓';
-  checkmark.style.cssText = `
-    display: inline-block;
-    margin-left: ${SPACING.XS};
-    color: var(--color-success);
-    font-weight: bold;
-    animation: checkmarkFade 1s ease-out;
-  `;
-
-  // Insert checkmark after the element
-  element.parentNode.insertBefore(checkmark, element.nextSibling);
-
   // Fade back to original
   setTimeout(() => {
     element.classList.remove('success-highlight-active');
-    if (checkmark.parentNode) {
-      checkmark.parentNode.removeChild(checkmark);
-    }
   }, duration);
 };
 
@@ -164,21 +146,6 @@ export const addSuccessStyles = () => {
       100% {
         transform: scale(1) rotate(0deg);
         opacity: 1;
-      }
-    }
-    
-    @keyframes checkmarkFade {
-      0% {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      50% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-      100% {
-        opacity: 0;
-        transform: translateY(-5px);
       }
     }
     
