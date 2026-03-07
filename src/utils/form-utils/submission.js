@@ -34,13 +34,13 @@ export const getDateSource = (externalDateInput = null) => {
 
 /**
  * Prepare transaction data for submission
- * @param {Object} formState - Current form state
- * @param {number} amount - Transaction amount
- * @param {string} type - Transaction type
- * @param {string} category - Category (or null for transfers)
- * @param {string} accountId - Source account ID
- * @param {string|null} toAccountId - Destination account ID (for transfers)
- * @param {string} description - Transaction description/notes (optional)
+ * @param {Object} formState - Form state object containing:
+ *   @property {number} formState.amount - Transaction amount
+ *   @property {string} formState.type - Transaction type
+ *   @property {string} formState.category - Category (or null for transfers)
+ *   @property {string} formState.accountId - Source account ID
+ *   @property {string|null} formState.toAccountId - Destination account ID (for transfers)
+ *   @property {string} [formState.description] - Transaction description/notes (optional)
  * @returns {Object} Prepared transaction data
  */
 export const prepareTransactionData = formState => {

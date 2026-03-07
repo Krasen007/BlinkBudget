@@ -44,7 +44,7 @@ export const TrendAnalysisSection = ({
     const emptyState = createEmptyState();
     section.appendChild(emptyState);
     return section;
-  };
+  }
 
   // Container for trend cards
   const trendsGrid = document.createElement('div');

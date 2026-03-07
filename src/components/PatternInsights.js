@@ -47,6 +47,15 @@ export function PatternInsights(
     border-radius: var(--radius-lg);
   `;
 
+  // Add CSS for hover effects
+  const style = document.createElement('style');
+  style.textContent = `
+    .pattern-insights .time-period-bar:hover {
+      transform: scaleY(1.1);
+    }
+  `;
+  document.head.appendChild(style);
+
   // Header
   const header = document.createElement('div');
   header.style.cssText = `
@@ -85,7 +94,7 @@ export function PatternInsights(
   container.appendChild(createWeekdayWeekendSection(weekdayWeekendAnalysis));
 
   // Time of Day Section
-  container.appendChild(createTimeOfDaySection(timeOfDayAnalysis, transactions));
+  container.appendChild(createTimeOfDaySection(timeOfDayAnalysis, transactions, timePeriod));
 
   return container;
 }
@@ -350,7 +359,7 @@ function createSpendingColumn(label, amount, maxAmount, color, uniqueDays) {
   percentageLabel.textContent = `${percentageText}%`;
   percentageLabel.style.cssText = `
     position: absolute;
-    bottom: ${Math.max(heightPercent + 5, 5)}%;
+    bottom: ${Math.min(Math.max(heightPercent + 5, 5), 90)}%;
     left: 50%;
     transform: translateX(-50%);
     font-size: ${FONT_SIZES.XS};
@@ -391,7 +400,7 @@ function createSpendingColumn(label, amount, maxAmount, color, uniqueDays) {
 /**
  * Create time of day section
  */
-function createTimeOfDaySection(analysis, transactions) {
+function createTimeOfDaySection(analysis, transactions, timePeriod) {
   const section = document.createElement('div');
   section.style.cssText = `
     background: ${COLORS.SURFACE};
@@ -440,15 +449,15 @@ function createTimeOfDaySection(analysis, transactions) {
   // Get all transactions and group by day
   const dailyData = groupTransactionsByDay(transactions || []);
   
-  // Filter to show only current month days
-  const currentMonth = new Date().getMonth();
-  const currentYear = new Date().getFullYear();
-  const currentMonthDays = Object.keys(dailyData).filter(dayKey => {
+  // Filter to show only days within the selected time period
+  const startDate = new Date(timePeriod.startDate);
+  const endDate = new Date(timePeriod.endDate);
+  const periodDays = Object.keys(dailyData).filter(dayKey => {
     const dayDate = new Date(dayKey);
-    return dayDate.getMonth() === currentMonth && dayDate.getFullYear() === currentYear;
+    return dayDate >= startDate && dayDate <= endDate;
   });
   
-  if (currentMonthDays.length === 0) {
+  if (periodDays.length === 0) {
     const noActivityMsg = document.createElement('div');
     noActivityMsg.textContent = 'No spending activity detected this month';
     noActivityMsg.style.cssText = `
@@ -461,7 +470,7 @@ function createTimeOfDaySection(analysis, transactions) {
     dailyContainer.appendChild(noActivityMsg);
   } else {
     // Sort days chronologically
-    const sortedDays = currentMonthDays.sort();
+    const sortedDays = periodDays.sort();
     
     sortedDays.forEach(day => {
       const dayChart = createDailyTimeChart(day, dailyData[day], periodColors);
@@ -547,6 +556,20 @@ function groupTransactionsByDay(transactions) {
 }
 
 /**
+ * Format period labels for better readability
+ */
+function formatPeriodLabel(period) {
+  const labels = {
+    earlyMorning: 'Early',
+    morning: 'Morning',
+    afternoon: 'Afternoon', 
+    evening: 'Evening',
+    night: 'Night'
+  };
+  return labels[period] || period;
+}
+
+/**
  * Create daily time chart with colored bars
  */
 function createDailyTimeChart(dayKey, dayData, periodColors) {
@@ -558,10 +581,12 @@ function createDailyTimeChart(dayKey, dayData, periodColors) {
     background: ${COLORS.BACKGROUND};
   `;
   
-  // Day header
-  const date = new Date(dayKey);
+  // Day header - parse dayKey as local date to avoid timezone shifts
+  const [year, month, day] = dayKey.split('-').map(Number);
+  const localDate = new Date(year, month - 1, day); // month-1 because JS months are 0-indexed
+  
   const dayHeader = document.createElement('div');
-  dayHeader.textContent = formatDateForDisplay(date);
+  dayHeader.textContent = formatDateForDisplay(localDate);
   dayHeader.style.cssText = `
     font-weight: 600;
     color: ${COLORS.TEXT_MAIN};
@@ -586,6 +611,7 @@ function createDailyTimeChart(dayKey, dayData, periodColors) {
   Object.entries(dayData.periods).forEach(([period, data]) => {
     if (data.total > 0) {
       const bar = document.createElement('div');
+      bar.className = 'time-period-bar';
       const heightPercent = maxAmount > 0 ? (data.total / maxAmount) * 100 : 0;
       
       bar.style.cssText = `
@@ -600,14 +626,6 @@ function createDailyTimeChart(dayKey, dayData, periodColors) {
       
       // Tooltip on hover
       bar.title = `${period}: ${formatCurrency(data.total)} (${data.count} transactions)`;
-      
-      bar.addEventListener('mouseenter', () => {
-        bar.style.transform = 'scaleY(1.1)';
-      });
-      
-      bar.addEventListener('mouseleave', () => {
-        bar.style.transform = 'scaleY(1)';
-      });
       
       periodsContainer.appendChild(bar);
     }
@@ -644,7 +662,7 @@ function createDailyTimeChart(dayKey, dayData, periodColors) {
       `;
       
       const label = document.createElement('span');
-      label.textContent = period.slice(0, 3); // First 3 letters
+      label.textContent = formatPeriodLabel(period);
       
       legendItem.appendChild(colorDot);
       legendItem.appendChild(label);
