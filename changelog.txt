@@ -1,23 +1,42 @@
-# Version 1.26 Changes
+## Version 1.27 - Data Management Improvements
 
-## 🚀 New Features & Improvements
-- **TWA Configuration**: Complete Android Trusted Web Activity setup for Play Store deployment
-- **Quick Amount Presets**: Added reset button for easy preset management
-- **Monthly Navigation**: Fixed month navigation arrows for better date browsing
-- **Transaction View**: Cleaner transaction list with notes hidden (visible in edit view)
+### 🎯 Better Data Integrity & Cleanup
+- **Fixed transfers & refunds** - No more false data corruption warnings
+- **Optional descriptions** - Won't auto-fill empty transaction descriptions
+- **Smart validation** - Better handling of all transaction types (income, expense, transfer, refund)
+- **Clear error messages** - Shows transaction details instead of cryptic IDs
 
-## 🐛 Bug Fixes
-- **Financial Forecasts**: Fixed incorrect calculations in financial forecasting
-- **Monthly Forecast Breakdown**: Updated and improved accuracy
-- **Charts**: Fixed chart rendering issues in budgets and financial sections
-- **JavaScript Errors**: Resolved const assignment errors
+### 🔧 System Improvements  
+- **Simplified feedback** - Direct GitHub issues link instead of complex forms
+- **Cleaner security section** - Streamlined privacy information
+- **Enhanced logging** - Better details for data fixes and issues
 
-## 🔧 Technical Updates
-- **Build System**: Migrated from npm to yarn for improved dependency management
-- **Insights Section**: Enhanced with month-to-month comparison buttons
-- **Code Quality**: Various fixes and improvements across the application
+### 📊 What's Fixed
+- Data integrity check now properly recognizes transfers and refunds
+- Fix Data Issues button no longer breaks valid transactions
+- Empty descriptions stay empty (truly optional)
+- Better error reporting with actionable information
 
-## 📱 Android App
-- Successfully built and signed Android APK and App Bundle
-- Proper asset links configuration for app verification
-- Version 3.0 ready for Play Store submission
+---
+
+8c39b87 More robust, user-friendly data management system with better transfer/refund support
+a382206 Phase 2: Backup/Restore
+8a0a410 rabbit fixes
+b8a2de6 update app to use current date and time not just date, also ui fixes in reports
+e844031 rabbit fixes
+dad7393 small fixes and test fix
+2f39637 remove the new logic as is redundant
+1270b59 restore overbudget information in the cards
+26d7992 optimize and fix budget recommendations
+0ac86ed fixes for Personal Benchmarking This Month vs Last Month comparison
+cac5abf fix small error in renderTrendAnalysisSection
+0bf7dbd fix(01-01): fix analyticsEngine API call
+3533c68 feat(01-01): add OptimizationInsights component
+dcbe567 feat(01-analytics-ui-02): add TrendAnalysisSection component with direction indicators and consistency scores
+657f6d9 remove failing tests
+5259a9a clean up old todos
+d8ec93d Root cause: The build failed with this message: [vite:terser] terser not found. Since Vite v3, terser has become an optional dependency. You need to install it.
+d173b28 Because you are using Yarn v4 with the default Plug'n'Play (PnP) module resolution, package resolution is extremely strict. vite-plugin-pwa implicitly relies on the workbox-window module behind the scenes for service worker registration. Yarn PnP blocks this "ghost dependency" because workbox-window was not explicitly listed in your
+9c569f8 node 22 build failure
+2f99ab4 fixed broken chart in financial planing
+781d763 YARN_VERSION = "4.5.3 + fixes

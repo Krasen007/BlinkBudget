@@ -32,7 +32,8 @@
 
 ### Transaction Management
 
-- **Multiple transaction types**: Expenses, Income, Transfers, Refunds
+- **Multiple transaction types**: Expenses, Income, Transfers, Refunds with improved validation and error reporting
+- **Optional descriptions** - Add notes to transactions or leave them empty - your choice
 - **Custom Category Management** - Create, edit, and manage your own expense categories for personalized tracking
 - **Category Reordering** - Organize your expense categories in the order that works best for you
 - **Smart Transaction Icons** - Visual indicators for different transaction types:
@@ -44,6 +45,7 @@
   - Plus your custom categories for complete control
 - **Multi-account support** (Checking, Savings, Credit Card, Cash)
 - **Account-to-account transfers** with automatic balance updates
+- **Data integrity validation** - Smart checks that recognize all transaction types without false warnings
 - **Filter transactions by category** tap on the name to show
 - **Date filtering functionality** tap on the name to show
 
@@ -103,6 +105,9 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 - **Date format preferences** (US, ISO, EU formats)
 - **Data export/import** capabilities
 - **Transaction editing** with validation
+- **Enhanced data integrity checks** - Better validation for transfers, refunds, and optional descriptions
+- **Simplified feedback system** - Direct GitHub issues link for bug reports and suggestions
+- **Smart error reporting** - See transaction details instead of cryptic IDs in error messages
 
 ## Tech Stack
 

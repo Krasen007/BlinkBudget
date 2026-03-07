@@ -9,7 +9,7 @@ summarize it in few notes but reword it so it's more easily understood,
 don't try to create changelog.txt because it already exists, 
 update the changelog.txt file itself.
 
-5. Update @readme.md with the new features from the changelog.txt
+5. Update @readme.md with the new features from the changelog.txt, in the readme do not add a what's new section, just update the readme itself to contain the features
 
 6. WAIT for commit bump with message "bump version %VERSION%"
 
