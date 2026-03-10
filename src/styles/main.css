@@ -11,6 +11,7 @@
 @import './components/forms-dialogs.css';
 @import './components/tutorial.css';
 @import './components/reports.css';
+@import './components/inflation-trends.css';
 
 /* 4. Mobile-specific styles (depends on tokens, base, components) */
 @import './mobile.css';

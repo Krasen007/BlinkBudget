@@ -18,6 +18,7 @@ import {
   createUsageNote,
 } from '../../utils/financial-planning-helpers.js';
 import { InsightsGenerator } from '../../core/insights-generator.js';
+import { InflationTrends } from '../../components/InflationTrends.js';
 
 /**
  * Create top movers analysis
@@ -779,15 +780,25 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
     );
   section.appendChild(timelineDiv);
 
-  // Set up synchronized navigation - both sections update together
+  // Personal Inflation Trends - now linked to shared navigation
+  const inflationTrendsComponent = InflationTrends(planningData, chartRenderer, activeCharts, sharedMonthState);
+  section.appendChild(inflationTrendsComponent.element);
+
+  // Set up synchronized navigation - all sections update together
   sharedMonthState.onNavigate = () => {
     renderTopMovers();
     renderTimelineChart(getCurrentMode());
+    if (inflationTrendsComponent.render) {
+      inflationTrendsComponent.render();
+    }
   };
 
   // Store references for cleanup
   sharedMonthState.cleanup = () => {
     sharedMonthState.onNavigate = null;
+    if (inflationTrendsComponent.cleanup) {
+      inflationTrendsComponent.cleanup();
+    }
   };
 
   return { element: section, cleanup: sharedMonthState.cleanup };
