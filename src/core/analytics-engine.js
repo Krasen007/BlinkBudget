@@ -378,7 +378,7 @@ export class AnalyticsEngine {
    * @returns {Array} Updated presets array
    */
   calculateAmountPresets() {
-    return AmountPresetService.calculatePresets();
+    return AmountPresetService.getPresets();
   }
 
   /**

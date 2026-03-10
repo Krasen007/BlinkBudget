@@ -218,7 +218,7 @@ describe('Form Submission', () => {
       // Should use the date from input with current time components
       expect(result.timestamp).toMatch(/^2024-02-14T\d{2}:\d{2}:\d{2}/);
       const timestampDate = new Date(result.timestamp);
-      
+
       // Use UTC methods to avoid timezone issues in validation
       expect(timestampDate.getUTCFullYear()).toBe(2024);
       expect(timestampDate.getUTCMonth()).toBe(1); // February is 1 (0-indexed)
@@ -227,7 +227,7 @@ describe('Form Submission', () => {
 
     test('handles DateInput component interface', () => {
       const mockDateInput = {
-        getDate: vi.fn(() => '2024-12-25')
+        getDate: vi.fn(() => '2024-12-25'),
       };
       const formState = {
         amount: 100,
@@ -241,7 +241,7 @@ describe('Form Submission', () => {
 
       expect(mockDateInput.getDate).toHaveBeenCalled();
       expect(result.timestamp).toMatch(/^2024-12-25T\d{2}:\d{2}:\d{2}/);
-      
+
       // Use UTC methods for validation
       const timestampDate = new Date(result.timestamp);
       expect(timestampDate.getUTCFullYear()).toBe(2024);
@@ -473,7 +473,9 @@ describe('Form Submission', () => {
       const transactionData = prepareTransactionData(formState);
 
       // Should preserve the new date with current time
-      expect(transactionData.timestamp).toMatch(/^2024-03-20T\d{2}:\d{2}:\d{2}/);
+      expect(transactionData.timestamp).toMatch(
+        /^2024-03-20T\d{2}:\d{2}:\d{2}/
+      );
       expect(transactionData.amount).toBe(150);
       expect(transactionData.category).toBe('Groceries');
     });
@@ -500,7 +502,7 @@ describe('Form Submission', () => {
     test('date editing with DateInput component', () => {
       // Simulate the DateInput component interface used in EditView
       const mockDateInput = {
-        getDate: vi.fn(() => '2024-06-15')
+        getDate: vi.fn(() => '2024-06-15'),
       };
       const formState = {
         amount: 200,
@@ -513,7 +515,9 @@ describe('Form Submission', () => {
       const transactionData = prepareTransactionData(formState);
 
       expect(mockDateInput.getDate).toHaveBeenCalled();
-      expect(transactionData.timestamp).toMatch(/^2024-06-15T\d{2}:\d{2}:\d{2}/);
+      expect(transactionData.timestamp).toMatch(
+        /^2024-06-15T\d{2}:\d{2}:\d{2}/
+      );
       expect(transactionData.amount).toBe(200);
       expect(transactionData.category).toBe('Utilities');
     });
@@ -552,7 +556,7 @@ describe('Form Submission', () => {
       // Should use the date from input with current time components
       expect(result.timestamp).toMatch(/^2024-02-14T\d{2}:\d{2}:\d{2}/);
       const timestampDate = new Date(result.timestamp);
-      
+
       // Use UTC methods to avoid timezone issues in validation
       expect(timestampDate.getUTCFullYear()).toBe(2024);
       expect(timestampDate.getUTCMonth()).toBe(1); // February is 1 (0-indexed)
@@ -561,7 +565,7 @@ describe('Form Submission', () => {
 
     test('should handle DateInput component interface with getDate method', () => {
       const mockDateInput = {
-        getDate: vi.fn(() => '2024-12-25')
+        getDate: vi.fn(() => '2024-12-25'),
       };
       const formState = {
         amount: 100,
@@ -575,7 +579,7 @@ describe('Form Submission', () => {
 
       expect(mockDateInput.getDate).toHaveBeenCalled();
       expect(result.timestamp).toMatch(/^2024-12-25T\d{2}:\d{2}:\d{2}/);
-      
+
       // Use UTC methods for validation
       const timestampDate = new Date(result.timestamp);
       expect(timestampDate.getUTCFullYear()).toBe(2024);
@@ -663,7 +667,9 @@ describe('Form Submission', () => {
       const transactionData = prepareTransactionData(formState);
 
       // Should preserve the new date with current time
-      expect(transactionData.timestamp).toMatch(/^2024-03-20T\d{2}:\d{2}:\d{2}/);
+      expect(transactionData.timestamp).toMatch(
+        /^2024-03-20T\d{2}:\d{2}:\d{2}/
+      );
       expect(transactionData.amount).toBe(150);
       expect(transactionData.category).toBe('Groceries');
     });
@@ -671,7 +677,7 @@ describe('Form Submission', () => {
     test('should handle DateInput component used in EditView', () => {
       // Simulate the DateInput component interface used in EditView
       const mockDateInput = {
-        getDate: vi.fn(() => '2024-06-15')
+        getDate: vi.fn(() => '2024-06-15'),
       };
       const formState = {
         amount: 200,
@@ -684,7 +690,9 @@ describe('Form Submission', () => {
       const transactionData = prepareTransactionData(formState);
 
       expect(mockDateInput.getDate).toHaveBeenCalled();
-      expect(transactionData.timestamp).toMatch(/^2024-06-15T\d{2}:\d{2}:\d{2}/);
+      expect(transactionData.timestamp).toMatch(
+        /^2024-06-15T\d{2}:\d{2}:\d{2}/
+      );
       expect(transactionData.amount).toBe(200);
       expect(transactionData.category).toBe('Utilities');
     });

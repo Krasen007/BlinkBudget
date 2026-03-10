@@ -62,7 +62,7 @@ export const prepareTransactionData = formState => {
   if (dateSource && dateSource.value) {
     // Use the date from external input and combine with current time for precise timestamp
     const selectedDate = dateSource.value;
-    
+
     // Check if it's a full ISO timestamp or just a date
     if (selectedDate.includes('T')) {
       // Full timestamp provided, use it as-is
@@ -71,7 +71,17 @@ export const prepareTransactionData = formState => {
       // Date only provided, combine with current time using UTC to avoid timezone issues
       const now = new Date();
       const [year, month, day] = selectedDate.split('-').map(Number);
-      timestamp = new Date(Date.UTC(year, month - 1, day, now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds())).toISOString();
+      timestamp = new Date(
+        Date.UTC(
+          year,
+          month - 1,
+          day,
+          now.getUTCHours(),
+          now.getUTCMinutes(),
+          now.getUTCSeconds(),
+          now.getUTCMilliseconds()
+        )
+      ).toISOString();
     }
   } else {
     // Fallback to current time
