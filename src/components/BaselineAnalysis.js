@@ -41,12 +41,17 @@ export const BaselineAnalysis = ({
     // Header
     const header = document.createElement('div');
     header.className = 'baseline-header';
-    header.innerHTML = `
-      <h3 class="baseline-title">
-        ${category ? `${category} Spending` : 'Overall Spending'} Baseline
-      </h3>
-      <div class="baseline-period">Per ${period}</div>
-    `;
+    
+    const h3 = document.createElement('h3');
+    h3.className = 'baseline-title';
+    h3.textContent = `${category ? `${category} Spending` : 'Overall Spending'} Baseline`;
+    
+    const periodDiv = document.createElement('div');
+    periodDiv.className = 'baseline-period';
+    periodDiv.textContent = `Per ${period}`;
+    
+    header.appendChild(h3);
+    header.appendChild(periodDiv);
     container.appendChild(header);
 
     // Metrics Grid
@@ -244,15 +249,26 @@ export const BaselineAnalysis = ({
   };
 
   const renderNoData = () => {
-    container.innerHTML = `
-      <div class="baseline-no-data">
-        <div class="no-data-icon">📊</div>
-        <div class="no-data-title">No Data Available</div>
-        <div class="no-data-description">
-          ${category ? `No expense data found for ${category}` : 'No expense data available'}
-        </div>
-      </div>
-    `;
+    container.innerHTML = '';
+    const wrapper = document.createElement('div');
+    wrapper.className = 'baseline-no-data';
+    
+    const icon = document.createElement('div');
+    icon.className = 'no-data-icon';
+    icon.textContent = '📊';
+    
+    const title = document.createElement('div');
+    title.className = 'no-data-title';
+    title.textContent = 'No Data Available';
+    
+    const desc = document.createElement('div');
+    desc.className = 'no-data-description';
+    desc.textContent = category ? `No expense data found for ${category}` : 'No expense data available';
+    
+    wrapper.appendChild(icon);
+    wrapper.appendChild(title);
+    wrapper.appendChild(desc);
+    container.appendChild(wrapper);
   };
 
   const renderError = () => {

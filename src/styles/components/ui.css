@@ -648,7 +648,8 @@
   outline-offset: 2px;
 }
 
-.segmented-control > .active {
+.segmented-control > .active,
+.segmented-control > *:has(input[type='radio']:checked) {
   background: var(--color-primary);
   color: white;
   box-shadow: var(--shadow-sm);
@@ -656,7 +657,14 @@
 }
 
 .segmented-control input[type='radio'] {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  border: 0;
 }
 
 /* Badge / Indicator Pattern */

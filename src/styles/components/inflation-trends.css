@@ -92,7 +92,7 @@
   border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin-right: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
 }
 
 /* Responsive adjustments */
@@ -106,9 +106,14 @@
     width: 100%;
   }
 
-  .segmented-control {
+  .inflation-controls .segmented-control {
     width: 100%;
     overflow-x: auto;
     scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .inflation-controls .segmented-control::-webkit-scrollbar {
+    display: none;
   }
 }

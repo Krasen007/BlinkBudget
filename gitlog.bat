@@ -1,1 +1,1 @@
-git log v1.27..HEAD --oneline > changelog.txt
+git log v1.28..HEAD --oneline > changelog.txt

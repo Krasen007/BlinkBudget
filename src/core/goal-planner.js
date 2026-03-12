@@ -611,13 +611,10 @@ export class GoalPlanner {
           return false;
         }
         if (!goal.id || !goal.name || typeof goal.targetAmount !== 'number') {
-          if (!goal.id || !goal.name || typeof goal.targetAmount !== 'number') {
-            console.warn(
-              '[GoalPlanner] Skipping goal with missing required fields. Goal ID:',
-              goal.id || 'unknown'
-            );
-            return false;
-          }
+          console.warn(
+            '[GoalPlanner] Skipping goal with missing required fields. Goal ID:',
+            goal.id || 'unknown'
+          );
           return false;
         }
         return true;

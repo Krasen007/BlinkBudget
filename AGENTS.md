@@ -39,7 +39,7 @@ The project is a web (browser) application, leveraging a modern, lightweight sta
 - **Deployment**: Netlify + Firebase for Auth and Database.
 - **Data Persistence**: `localStorage` (via `StorageService`) for instant, offline-capable data storage. Also Firebase for cloud sync.
 - **System**: Use Windows CMD and PowerShell commands when developing locally on Windows for the terminal, DO NOT use Linux or UNIX tools and commands.
-  Example: instead of `sed` and `cat` commands use PowerShell equivalents like Get-Content.
+  Example: instead of `cat` use Get-Content; for `sed`-like text processing use PowerShell operators like `-replace` or `ForEach-Object`.
 
 ### **Key Design Principles**
 

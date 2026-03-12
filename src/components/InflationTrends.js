@@ -27,17 +27,20 @@ export const InflationTrends = (
   const container = document.createElement('div');
   container.className = 'inflation-trends card';
 
+  const instanceId = crypto.randomUUID();
+
   // State management
   let currentChartType = 'line';
   let currentCalcMethod = 'average';
   let currentPeriod = 6;
   let currentChart = null;
+  let renderVersion = 0;
 
   // Chart type toggle
-  const chartTypeSelector = createChartTypeSelector();
+  const chartTypeSelector = createChartTypeSelector(instanceId);
 
   // Calculation method toggle
-  const calcMethodSelector = createCalcMethodSelector();
+  const calcMethodSelector = createCalcMethodSelector(instanceId);
 
   // Time period selector
   const periodSelector = createPeriodSelector();
@@ -83,12 +86,10 @@ export const InflationTrends = (
    * Render the chart with current settings
    */
   const renderChart = async () => {
+    renderVersion++;
+    const myVersion = renderVersion;
+
     try {
-      // Destroy existing chart
-      if (currentChart) {
-        chartRenderer.destroyChart(currentChart);
-        currentChart = null;
-      }
 
       // Calculate reference date based on sharedMonthState (end of selected month)
       const now = new Date();
@@ -139,10 +140,19 @@ export const InflationTrends = (
         fill: currentChartType === 'line' ? false : true,
       }));
 
-      // Create chart
-      currentChart = await chartRenderer[
+      const newChart = await chartRenderer[
         `create${currentChartType === 'line' ? 'Line' : 'Bar'}Chart`
       ](canvas, { labels, datasets }, getChartOptions(currentChartType));
+
+      if (myVersion !== renderVersion) {
+        if (newChart) chartRenderer.destroyChart(newChart);
+        return;
+      }
+
+      if (currentChart && currentChart !== newChart) {
+        chartRenderer.destroyChart(currentChart);
+      }
+      currentChart = newChart;
 
       if (currentChart) {
         activeCharts.set('inflation-trends', currentChart);
@@ -184,7 +194,9 @@ export const InflationTrends = (
    * Show no data message
    */
   const showNoDataMessage = container => {
-    container.innerHTML = ''; // Clear container
+    Array.from(container.childNodes).forEach(c => {
+      if (c.nodeName !== 'CANVAS') c.remove();
+    });
 
     const wrapper = document.createElement('div');
     wrapper.style.cssText =
@@ -209,7 +221,9 @@ export const InflationTrends = (
    * Show error message
    */
   const showErrorMessage = (container, message) => {
-    container.innerHTML = '';
+    Array.from(container.childNodes).forEach(c => {
+      if (c.nodeName !== 'CANVAS') c.remove();
+    });
 
     const wrapper = document.createElement('div');
     wrapper.style.cssText =
@@ -253,21 +267,9 @@ export const InflationTrends = (
   controls.appendChild(timeGroup);
 
   // Handle changes
-  const updateActiveStates = () => {
-    chartTypeSelector.querySelectorAll('.radio-wrapper').forEach(w => {
-      const input = w.querySelector('input');
-      w.classList.toggle('active', input.checked);
-    });
-    calcMethodSelector.querySelectorAll('.radio-wrapper').forEach(w => {
-      const input = w.querySelector('input');
-      w.classList.toggle('active', input.checked);
-    });
-  };
-
   chartTypeSelector.addEventListener('change', e => {
     if (e.target.tagName === 'INPUT') {
       currentChartType = e.target.value;
-      updateActiveStates();
       renderChart();
     }
   });
@@ -275,7 +277,6 @@ export const InflationTrends = (
   calcMethodSelector.addEventListener('change', e => {
     if (e.target.tagName === 'INPUT') {
       currentCalcMethod = e.target.value;
-      updateActiveStates();
       renderChart();
     }
   });
@@ -297,8 +298,7 @@ export const InflationTrends = (
   container.appendChild(controls);
   container.appendChild(chartContainer);
 
-  // Initial active states
-  updateActiveStates();
+
 
   // Initial render
   renderChart();
@@ -319,7 +319,7 @@ export const InflationTrends = (
 /**
  * Create chart type selector
  */
-const createChartTypeSelector = () => {
+const createChartTypeSelector = (instanceId) => {
   const container = document.createElement('div');
   container.className = 'chart-type-selector segmented-control';
 
@@ -334,7 +334,7 @@ const createChartTypeSelector = () => {
 
     const input = document.createElement('input');
     input.type = 'radio';
-    input.name = 'inflation-chart-type';
+    input.name = `inflation-chart-type-${instanceId}`;
     input.value = type.value;
     input.checked = type.value === 'line';
 
@@ -351,7 +351,7 @@ const createChartTypeSelector = () => {
 /**
  * Create calculation method selector
  */
-const createCalcMethodSelector = () => {
+const createCalcMethodSelector = (instanceId) => {
   const container = document.createElement('div');
   container.className = 'calc-method-selector segmented-control';
 
@@ -366,7 +366,7 @@ const createCalcMethodSelector = () => {
 
     const input = document.createElement('input');
     input.type = 'radio';
-    input.name = 'inflation-calc-method';
+    input.name = `inflation-calc-method-${instanceId}`;
     input.value = method.value;
     input.checked = method.value === 'average';
 

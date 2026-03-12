@@ -748,7 +748,7 @@ export const ReportsView = () => {
       renderBudgetRecommendationsSection(chartsSection, chartRenderResults);
 
       // Baseline Analysis - Floor vs Average Spending Patterns
-      renderBaselineAnalysisSection(chartsSection);
+      renderBaselineAnalysisSection(chartsSection, chartRenderResults);
 
       chartContainer.appendChild(chartsSection);
 
@@ -1156,13 +1156,19 @@ export const ReportsView = () => {
   /**
    * Render baseline analysis section - Floor vs Average Spending Patterns
    */
-  function renderBaselineAnalysisSection(chartsSection) {
+  function renderBaselineAnalysisSection(chartsSection, chartRenderResults) {
     try {
       // Determine period based on current time period
       let baselinePeriod = 'monthly';
-      if (currentTimePeriod.days <= 7) {
+      const days = typeof currentTimePeriod?.days === 'number' 
+          ? currentTimePeriod.days 
+          : (currentTimePeriod?.end && currentTimePeriod?.start) 
+            ? (currentTimePeriod.end - currentTimePeriod.start) / (1000 * 60 * 60 * 24) 
+            : 30; // fallback to monthly
+
+      if (days <= 7) {
         baselinePeriod = 'weekly';
-      } else if (currentTimePeriod.days >= 365) {
+      } else if (days >= 365) {
         baselinePeriod = 'yearly';
       }
 
@@ -1181,8 +1187,9 @@ export const ReportsView = () => {
       );
       chartsSection.appendChild(baselineAnalysis);
 
-      console.log('[ReportsView] Baseline analysis rendered successfully');
+      chartRenderResults.push({ name: 'Baseline Analysis', success: true });
     } catch (baselineError) {
+      chartRenderResults.push({ name: 'Baseline Analysis', success: false, error: baselineError });
       console.warn(
         '[ReportsView] Failed to render baseline analysis section:',
         baselineError

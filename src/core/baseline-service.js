@@ -65,11 +65,10 @@ export const BaselineService = {
 
     // Find the boundary dates to anchor our lookback without skewing averages
     // for periods before the user started
-    const timestamps = filteredTransactions.map(t =>
-      new Date(t.timestamp).getTime()
-    );
-    const maxDate = new Date(Math.max(...timestamps));
-    const minDate = new Date(Math.min(...timestamps));
+    const maxDateStr = filteredTransactions.reduce((acc, t) => Math.max(acc, new Date(t.timestamp).getTime()), Number.NEGATIVE_INFINITY);
+    const minDateStr = filteredTransactions.reduce((acc, t) => Math.min(acc, new Date(t.timestamp).getTime()), Number.POSITIVE_INFINITY);
+    const maxDate = new Date(maxDateStr);
+    const minDate = new Date(minDateStr);
 
     // Count theoretical periods from minDate to maxDate
     let actualPeriods = 1;
@@ -156,6 +155,7 @@ export const BaselineService = {
       consistency,
       periodTotals: recentPeriods,
       category,
+      period,
     });
 
     return {
@@ -299,7 +299,10 @@ export const BaselineService = {
       const olderAvg =
         olderHalf.reduce((sum, p) => sum + p.total, 0) / olderHalf.length;
 
-      const trend = ((recentAvg - olderAvg) / olderAvg) * 100;
+      let trend = 0;
+      if (olderAvg !== 0) {
+        trend = ((recentAvg - olderAvg) / olderAvg) * 100;
+      }
 
       if (trend > 10) {
         insights.push({

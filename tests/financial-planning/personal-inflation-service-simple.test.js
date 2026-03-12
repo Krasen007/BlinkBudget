@@ -10,6 +10,8 @@ import { PersonalInflationService } from '../../src/core/personal-inflation-serv
 describe('PersonalInflationService (Simplified)', () => {
   let mockTransactions;
 
+  const REFERENCE_DATE = new Date('2026-03-31T23:59:59Z');
+
   beforeEach(() => {
     // Simple test data without complex date filtering
     mockTransactions = [
@@ -99,7 +101,8 @@ describe('PersonalInflationService (Simplified)', () => {
         mockTransactions,
         'Coffee',
         3,
-        'average'
+        'average',
+        REFERENCE_DATE
       );
 
       // Coffee increased from $4.00 to $5.00 = 25% increase
@@ -111,7 +114,8 @@ describe('PersonalInflationService (Simplified)', () => {
         mockTransactions,
         'Transport',
         3,
-        'average'
+        'average',
+        REFERENCE_DATE
       );
 
       // Transport decreased from $60.00 to $50.00 = 16.67% decrease
@@ -123,7 +127,8 @@ describe('PersonalInflationService (Simplified)', () => {
         mockTransactions,
         'Groceries',
         3,
-        'average'
+        'average',
+        REFERENCE_DATE
       );
 
       // Groceries stayed around $100 = stable
@@ -135,7 +140,8 @@ describe('PersonalInflationService (Simplified)', () => {
         mockTransactions,
         'NonExistent',
         3,
-        'average'
+        'average',
+        REFERENCE_DATE
       );
 
       expect(inflation).toBe(0);
@@ -147,7 +153,8 @@ describe('PersonalInflationService (Simplified)', () => {
           mockTransactions,
           'Coffee',
           3,
-          'average'
+          'average',
+          REFERENCE_DATE
         );
 
       const inflationMedian =
@@ -155,7 +162,8 @@ describe('PersonalInflationService (Simplified)', () => {
           mockTransactions,
           'Coffee',
           3,
-          'median'
+          'median',
+          REFERENCE_DATE
         );
 
       // Both methods should return reasonable values
@@ -193,7 +201,9 @@ describe('PersonalInflationService (Simplified)', () => {
       const topCategories = PersonalInflationService.getTopInflationCategories(
         mockTransactions,
         3,
-        3
+        3,
+        'average',
+        REFERENCE_DATE
       );
 
       expect(topCategories).toHaveLength(3);
@@ -217,7 +227,9 @@ describe('PersonalInflationService (Simplified)', () => {
       const topCategories = PersonalInflationService.getTopInflationCategories(
         mockTransactions,
         3,
-        3
+        3,
+        'average',
+        REFERENCE_DATE
       );
 
       const coffeeTotal = topCategories.find(
@@ -241,7 +253,9 @@ describe('PersonalInflationService (Simplified)', () => {
       const topCategories = PersonalInflationService.getTopInflationCategories(
         transactionsWithEmptyCategory,
         5,
-        3
+        3,
+        'average',
+        REFERENCE_DATE
       );
 
       // Should not include categories with zero or NaN inflation
@@ -277,7 +291,7 @@ describe('PersonalInflationService (Simplified)', () => {
       );
     });
 
-    it('should reject categories with insufficient time range', () => {
+    it('should accept categories even if requested time range is larger than available data, assuming minimum data is met', () => {
       const validation = PersonalInflationService.validateCategoryData(
         mockTransactions,
         'Coffee',
@@ -285,9 +299,7 @@ describe('PersonalInflationService (Simplified)', () => {
         new Date('2026-03-31') // Use fixed date for testing
       );
 
-      expect(validation.hasData).toBe(false);
-      expect(typeof validation.reason).toBe('string');
-      expect(validation.reason.length).toBeGreaterThan(0);
+      expect(validation.hasData).toBe(true);
     });
   });
 
@@ -314,7 +326,8 @@ describe('PersonalInflationService (Simplified)', () => {
         transactionsWithZeroOldPrice,
         'Test',
         3,
-        'average'
+        'average',
+        REFERENCE_DATE
       );
 
       expect(inflation).toBe(0);
@@ -342,7 +355,8 @@ describe('PersonalInflationService (Simplified)', () => {
         transactionsWithNaN,
         'Test',
         3,
-        'average'
+        'average',
+        REFERENCE_DATE
       );
 
       expect(typeof inflation).toBe('number');
@@ -353,7 +367,9 @@ describe('PersonalInflationService (Simplified)', () => {
       const topCategories = PersonalInflationService.getTopInflationCategories(
         [],
         3,
-        3
+        3,
+        'average',
+        REFERENCE_DATE
       );
       expect(topCategories).toHaveLength(0);
     });

@@ -69,7 +69,7 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 - **Long-term Goal Planning** - Define specific financial objectives and track your progress over years or decades.
 - **Projected Account Balances** - Visualize how your current spending habits will impact your future bank balances.
 - **Risk Assessment & Warnings** - Automatically identifies potential financial risks and provides actionable alerts based on your patterns.
-- **Comprehensive Analytics** - Deep dive into your finances with "Top Movers" analysis and historical timeline comparisons.
+- **Comprehensive Analytics** - Deep dive into your finances with "Top Movers" analysis, historical timeline comparisons, and inflation trend analysis to understand how your purchasing power changes over time.
 - **Dynamic Charting** - Toggle between daily and monthly views for precise trend analysis.
 
 ### User Experience & UI
@@ -86,9 +86,6 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 - **Enhanced security** with comprehensive privacy compliance
 - **Improved accessibility** with "Skip to Content" links, ARIA roles, and proper form label associations
 - **Enhanced color schemes** with improved text contrast for better readability
-- **Smoother animations** with fixed CSS transitions throughout the app (v1.22)
-- **Faster rendering** with frame times under 16ms for buttery-smooth performance (v1.22)
-- **Consistent button styling** across all views for a cohesive experience (v1.22)
 
 ### Backup & Restore
 
@@ -120,7 +117,15 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 
 ## Quick Start
 
-https://github.com/Krasen007/BlinkBudget/releases/download/v1.26/blinkbudget-signed.apk - Trusted Web Application, download and install directly on your Android device, ignore that it says v1.26, the TWA updates automatically from the website.
+## Quick Start
+
+### Android App (Trusted Web Activity)
+
+Download and install the [BlinkBudget APK](https://github.com/Krasen007/BlinkBudget/releases/download/v1.26/blinkbudget-signed.apk) directly on your Android device. The TWA automatically updates from the website, so you'll always have the latest version.
+
+**Note**: You may need to enable "Install from Unknown Sources" in your Android settings. The app is signed and safe to install.
+
+### Prerequisites
 
 ### Prerequisites
 

@@ -117,7 +117,9 @@ export const PersonalInflationService = {
       .forEach(t => {
         const d = new Date(t.timestamp);
         const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; // YYYY-MM
-        monthly[month] = (monthly[month] || []).concat(t.amount);
+        if (Number.isFinite(t.amount)) {
+          monthly[month] = (monthly[month] || []).concat(Number(t.amount));
+        }
       });
 
     // Calculate averages for each month and sort by date (most recent first)
@@ -162,7 +164,8 @@ export const PersonalInflationService = {
       const validation = PersonalInflationService.validateCategoryData(
         transactions,
         category,
-        6 // Use 6 months to match mock data
+        monthsBack,
+        referenceDate
       );
       const inflationRate = validation.hasData
         ? this.calculateCategoryInflation(
