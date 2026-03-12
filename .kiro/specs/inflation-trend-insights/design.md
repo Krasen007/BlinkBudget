@@ -13,17 +13,17 @@ graph TD
     A[InsightsSection] --> B[InflationTrendsSection]
     A --> C[TopMoversSection]
     A --> D[TimelineSection]
-    
+
     B --> E[InflationService]
     B --> F[ChartRenderer]
     B --> G[InflationDataStore]
-    
+
     E --> H[InflationData]
     E --> I[TransactionService]
-    
+
     C --> J[InsightsGenerator]
     D --> J
-    
+
     style B fill:#e1f5ff
     style E fill:#fff4e1
     style G fill:#f0f0f0
@@ -40,23 +40,23 @@ sequenceDiagram
     participant AnalyticsEngine
     participant TransactionService
     participant InflationDataStore
-    
+
     User->>InsightsSection: Select time period (3/6/12/custom)
     InsightsSection->>InflationTrendsSection: Update time period
     InflationTrendsSection->>InflationService: GetInflationTrends(timePeriod, topCategories)
-    
+
     InflationService->>TransactionService: GetTransactions(timePeriod)
     TransactionService-->>InflationService: transactions[]
-    
+
     InflationService->>InflationDataStore: GetInflationRates(timePeriod)
     InflationDataStore-->>InflationService: inflationRates[]
-    
+
     InflationService->>InflationService: CalculateInflationAdjusted(transactions, rates)
     InflationService-->>InflationTrendsSection: trendData[]
-    
+
     InflationTrendsSection->>ChartRenderer: CreateLineChart(trendData)
     ChartRenderer-->>InflationTrendsSection: chartInstance
-    
+
     InflationTrendsSection->>User: Display chart with tooltips
 ```
 
@@ -67,24 +67,25 @@ sequenceDiagram
 **Purpose**: Main UI component for displaying inflation trend analysis
 
 **Interface**:
+
 ```pascal
 INTERFACE InflationTrendsSection
   METHOD render(planningData, chartRenderer, activeCharts, sharedMonthState)
-    INPUT: 
+    INPUT:
       planningData: Object { transactions: Array }
       chartRenderer: Object { createLineChart, destroyChart }
       activeCharts: Map { String -> Chart }
       sharedMonthState: Object { offset: Number, onNavigate: Function }
     OUTPUT: Object { element: HTMLElement, cleanup: Function }
-  
+
   METHOD updateTimePeriod(newPeriod)
     INPUT: newPeriod: Number (months count)
     OUTPUT: Void
-  
+
   METHOD updateCategories(topCategories)
     INPUT: topCategories: Array { category: String, total: Number }
     OUTPUT: Void
-  
+
   METHOD renderChart()
     INPUT: Void
     OUTPUT: Void
@@ -92,6 +93,7 @@ END INTERFACE
 ```
 
 **Responsibilities**:
+
 - Render the inflation trend UI with time period selector
 - Manage chart lifecycle (creation, updates, destruction)
 - Handle user interactions (time period selection, tooltips)
@@ -103,6 +105,7 @@ END INTERFACE
 **Purpose**: Core business logic for inflation trend calculations
 
 **Interface**:
+
 ```pascal
 INTERFACE InflationService
   METHOD getInflationTrends(transactions, inflationRates, timePeriod, topCategories)
@@ -111,27 +114,27 @@ INTERFACE InflationService
       inflationRates: Array { month: String, rate: Number }
       timePeriod: Number (months count)
       topCategories: Array { category: String, total: Number }
-    OUTPUT: Array { 
+    OUTPUT: Array {
       category: String,
       months: Array { month: String, nominal: Number, adjusted: Number, diffPercent: Number }
     }
-  
+
   METHOD calculateInflationAdjusted(nominalAmount, inflationRate)
     INPUT:
       nominalAmount: Number
       inflationRate: Number (monthly rate as decimal)
     OUTPUT: Number (inflation-adjusted amount)
-  
+
   METHOD getInflationRates(timePeriod)
     INPUT: timePeriod: Number (months count)
     OUTPUT: Array { month: String, rate: Number }
-  
+
   METHOD getTopCategories(transactions, count)
     INPUT:
       transactions: Array
       count: Number
     OUTPUT: Array { category: String, total: Number }
-  
+
   METHOD calculateCumulativeInflationFactor(inflationRates)
     INPUT: inflationRates: Array { rate: Number }
     OUTPUT: Array { factor: Number }
@@ -139,6 +142,7 @@ END INTERFACE
 ```
 
 **Responsibilities**:
+
 - Calculate inflation-adjusted spending values
 - Identify top spending categories
 - Manage inflation rate data
@@ -149,25 +153,27 @@ END INTERFACE
 **Purpose**: Data persistence and retrieval for inflation rates
 
 **Interface**:
+
 ```pascal
 INTERFACE InflationDataStore
   METHOD getInflationRates(monthsBack)
     INPUT: monthsBack: Number
     OUTPUT: Array { month: String, rate: Number }
-  
+
   METHOD setInflationRates(rates)
     INPUT: rates: Array { month: String, rate: Number }
     OUTPUT: Void
-  
+
   METHOD getLatestInflationRate()
     OUTPUT: Number (most recent rate)
-  
+
   METHOD hasInflationData()
     OUTPUT: Boolean
 END INTERFACE
 ```
 
 **Responsibilities**:
+
 - Store and retrieve inflation rate data
 - Provide fallback rates when data is unavailable
 - Manage inflation data lifecycle
@@ -222,7 +228,7 @@ END STRUCTURE
 
 ```pascal
 ALGORITHM calculateInflationTrends
-INPUT: 
+INPUT:
   transactions: Array of transaction objects
   inflationRates: Array of inflation rate objects
   timePeriod: Number of months to analyze
@@ -234,16 +240,16 @@ BEGIN
   // Step 1: Filter transactions by time period
   cutoffDate ← calculateCutoffDate(timePeriod)
   filteredTransactions ← filterTransactions(transactions, cutoffDate)
-  
+
   // Step 2: Get inflation rates for the time period
   periodInflationRates ← filterInflationRates(inflationRates, cutoffDate)
-  
+
   // Step 3: Calculate cumulative inflation factors
   cumulativeFactors ← calculateCumulativeInflationFactor(periodInflationRates)
-  
+
   // Step 4: Group transactions by category and month
   categoryMonthData ← groupByCategoryAndMonth(filteredTransactions)
-  
+
   // Step 5: Calculate trends for each top category
   trends ← EMPTY_ARRAY
   FOR EACH category IN topCategories DO
@@ -255,7 +261,7 @@ BEGIN
     )
     trends.ADD(categoryTrend)
   END FOR
-  
+
   RETURN trends
 END
 ```
@@ -273,22 +279,22 @@ OUTPUT: Number (inflation-adjusted amount)
 BEGIN
   // Formula: adjusted = nominal / (1 + inflation_rate)
   // This represents the purchasing power equivalent
-  
+
   IF nominalAmount IS NULL OR nominalAmount = 0 THEN
     RETURN 0
   END IF
-  
+
   IF monthlyInflationRate IS NULL THEN
     // No inflation data available, return nominal
     RETURN nominalAmount
   END IF
-  
+
   // Calculate inflation factor
   inflationFactor ← 1 + monthlyInflationRate
-  
+
   // Adjust for inflation
   adjustedAmount ← nominalAmount / inflationFactor
-  
+
   RETURN adjustedAmount
 END
 ```
@@ -304,13 +310,13 @@ OUTPUT: Array of cumulative inflation factors
 BEGIN
   factors ← EMPTY_ARRAY
   cumulative ← 1.0
-  
+
   FOR EACH rate IN inflationRates DO
     // Multiply cumulative factor by (1 + rate)
     cumulative ← cumulative * (1 + rate.rate)
     factors.ADD(cumulative)
   END FOR
-  
+
   RETURN factors
 END
 ```
@@ -328,27 +334,27 @@ OUTPUT: Array of top spending categories
 BEGIN
   // Group transactions by category
   categoryTotals ← EMPTY_MAP
-  
+
   FOR EACH transaction IN transactions DO
     // Skip income and transfer transactions
     IF transaction.type = 'income' OR transaction.type = 'transfer' THEN
       CONTINUE
     END IF
-    
+
     category ← transaction.category OR 'Uncategorized'
     amount ← transaction.amount OR 0
-    
+
     // Add to category total
     IF categoryTotals[category] IS NULL THEN
       categoryTotals[category] ← 0
     END IF
     categoryTotals[category] ← categoryTotals[category] + amount
   END FOR
-  
+
   // Convert to array and sort by total (descending)
   categoryArray ← MAP_TO_ARRAY(categoryTotals)
   categoryArray.SORT(compareByTotalDESC)
-  
+
   // Return top N categories
   RETURN categoryArray.SLICE(0, count)
 END
@@ -360,17 +366,19 @@ END
 
 ```pascal
 FUNCTION calculateInflationAdjusted(nominalAmount, monthlyInflationRate)
-  INPUT: 
+  INPUT:
     nominalAmount: Number
     monthlyInflationRate: Number (optional)
   OUTPUT: Number
 ```
 
 **Preconditions:**
+
 - `nominalAmount` is a non-negative number
 - `monthlyInflationRate` is a number between -1 and 1 (optional)
 
 **Postconditions:**
+
 - Returns a non-negative number representing inflation-adjusted spending
 - If `monthlyInflationRate` is null: `result = nominalAmount`
 - If `monthlyInflationRate` is provided: `result = nominalAmount / (1 + monthlyInflationRate)`
@@ -387,17 +395,20 @@ FUNCTION calculateCumulativeInflationFactor(inflationRates)
 ```
 
 **Preconditions:**
+
 - `inflationRates` is a non-empty array
 - Each rate is a number between -1 and 1
 - Array is sorted chronologically (oldest to newest)
 
 **Postconditions:**
+
 - Returns array of same length as input
 - First factor is always 1.0
-- Each subsequent factor = previous_factor * (1 + current_rate)
+- Each subsequent factor = previous_factor \* (1 + current_rate)
 - Factors are monotonically increasing if rates are positive
 
 **Loop Invariants:**
+
 - At iteration i: `cumulative = ∏(1 + rate[j])` for j from 0 to i-1
 - All factors are positive numbers
 
@@ -414,18 +425,21 @@ FUNCTION getInflationTrends(transactions, inflationRates, timePeriod, topCategor
 ```
 
 **Preconditions:**
+
 - `transactions` is a valid array of transaction objects
 - `inflationRates` contains at least `timePeriod` months of data
 - `topCategories` contains at least one category
 - `timePeriod` is a positive integer
 
 **Postconditions:**
+
 - Returns array with one entry per top category
 - Each category contains months array with trend data points
 - Each data point includes nominal, adjusted, and diffPercent values
 - Missing months are filled with zero values
 
 **Loop Invariants:**
+
 - All transactions are processed exactly once
 - Inflation factors are calculated consistently across all categories
 
@@ -477,6 +491,7 @@ END IF
 
 **Universal Quantification:**
 ∀ transactions ∈ Transactions, ∀ rates ∈ InflationRates:
+
 - adjusted = nominal / (1 + rate)
 - If rate = 0, then adjusted = nominal
 - If rate > 0, then adjusted < nominal
@@ -486,6 +501,7 @@ END IF
 
 **Universal Quantification:**
 ∀ rates ∈ InflationRates where rate ≥ 0:
+
 - cumulative[i] ≤ cumulative[j] for all i < j
 - cumulative[0] = 1.0
 
@@ -493,6 +509,7 @@ END IF
 
 **Universal Quantification:**
 ∀ category ∈ topCategories, ∀ month ∈ timePeriod:
+
 - trend[category].months[month] exists
 - trend[category].months[month].nominal ≥ 0
 - trend[category].months[month].adjusted ≥ 0
@@ -501,6 +518,7 @@ END IF
 
 **Universal Quantification:**
 ∀ timePeriod change, ∀ chart ∈ activeCharts:
+
 - chart is destroyed before new chart creation
 - new chart uses updated data
 - chart ID remains consistent for tracking
@@ -536,18 +554,21 @@ END IF
 ### Unit Testing Approach
 
 **Test Categories**:
+
 1. Inflation calculation accuracy
 2. Top categories selection
 3. Cumulative factor computation
 4. Chart data transformation
 
 **Key Test Cases**:
+
 - Verify inflation adjustment formula produces correct results
 - Test edge cases (zero amount, null rate, negative rate)
 - Validate top categories sorting and filtering
 - Test chart data structure generation
 
 **Test Coverage Goals**:
+
 - 90%+ code coverage for InflationService
 - 80%+ for InflationTrendsSection
 - All public methods tested
@@ -557,12 +578,14 @@ END IF
 **Property Test Library**: fast-check
 
 **Properties to Test**:
+
 1. **Inflation Adjustment**: For any nominal amount and rate, adjusted value follows formula
 2. **Cumulative Monotonicity**: Cumulative factors are non-decreasing for positive rates
 3. **Category Count**: Output contains exactly topCategories.length entries
 4. **Data Completeness**: Each category has exactly timePeriod months of data
 
 **Example Property Test**:
+
 ```pascal
 PROPERTY inflationAdjustmentFormula
 FORALL nominalAmount ∈ [0, 10000], rate ∈ [-0.1, 0.1]
@@ -572,6 +595,7 @@ ENSURE adjusted = nominalAmount / (1 + rate)
 ### Integration Testing Approach
 
 **Test Scenarios**:
+
 1. Full Insights section rendering with inflation trends
 2. Shared month navigation between sections
 3. Time period changes trigger chart updates

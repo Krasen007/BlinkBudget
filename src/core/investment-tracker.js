@@ -586,19 +586,31 @@ export class InvestmentTracker {
       );
     }
 
-    // Normalize date fields for each investment
-    const normalizedInvestments = investments.map(investment => ({
-      ...investment,
-      purchaseDate: investment.purchaseDate
-        ? new Date(investment.purchaseDate)
-        : null,
-      createdAt: investment.createdAt
-        ? new Date(investment.createdAt)
-        : new Date(),
-      updatedAt: investment.updatedAt
-        ? new Date(investment.updatedAt)
-        : new Date(),
-    }));
+    // Normalize date fields for each investment with validation
+    const normalizedInvestments = investments
+      .map(investment => {
+        const pd = investment.purchaseDate
+          ? new Date(investment.purchaseDate)
+          : null;
+        const ca = investment.createdAt ? new Date(investment.createdAt) : null;
+        const ua = investment.updatedAt ? new Date(investment.updatedAt) : null;
+
+        return {
+          ...investment,
+          purchaseDate: pd && !isNaN(pd.getTime()) ? pd : null,
+          createdAt: ca && !isNaN(ca.getTime()) ? ca : new Date(),
+          updatedAt: ua && !isNaN(ua.getTime()) ? ua : new Date(),
+        };
+      })
+      .filter(investment => {
+        if (!investment.purchaseDate) {
+          console.warn(
+            `[InvestmentTracker] Skipping investment ${investment.symbol || 'unknown'} due to invalid purchaseDate`
+          );
+          return false;
+        }
+        return true;
+      });
 
     console.log(
       `[InvestmentTracker] Setting ${normalizedInvestments.length} investments`

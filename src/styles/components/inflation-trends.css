@@ -1,26 +1,23 @@
 /**
- * Inflation Trends Component Styles
+ * Inflation Trends Component Styles (Optimized)
  *
- * Styling for personal inflation trends visualization
- * with chart type toggles, calculation methods, and period selectors
+ * Reuses global patterns from ui.css:
+ * - .card: For the main container
+ * - .segmented-control: For chart toggles and periods
+ * - .badge: For trend indicators
  */
 
 .inflation-trends {
-  margin: 1rem 0;
-  padding: 1.5rem;
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-md);
+  margin: var(--spacing-lg) 0;
 }
 
 .inflation-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-lg);
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--spacing-md);
 }
 
 .inflation-title {
@@ -34,298 +31,83 @@
 .inflation-controls {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
 }
 
 .selector-group {
   display: flex;
-  gap: 0.75rem;
+  gap: var(--spacing-md);
   flex-wrap: wrap;
   align-items: center;
 }
 
-.chart-type-selector,
-.calc-method-selector {
-  display: flex;
-  background: var(--color-background);
-  padding: 0.25rem;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
+/* Specific overrides for segmented-control within the component */
+.inflation-controls .segmented-control {
+  min-width: 0;
 }
 
-/* Radio Button Styles as Segmented Controls */
-.radio-wrapper {
+/* Chart Area */
+.inflation-chart {
+  height: 300px;
+  margin: var(--spacing-md) 0;
+  position: relative;
+  background: var(--color-background);
+  border-radius: var(--radius-md);
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  font-size: 0.875rem;
-  font-weight: 500;
+}
+
+/* State messaging (reusing some global flex logic if it existed, but keeping it clean here) */
+.inflation-chart.loading,
+.inflation-chart.error,
+.inflation-chart.no-data {
   color: var(--color-text-muted);
-  border: none;
-  background: transparent;
-  min-width: auto;
-}
-
-.radio-wrapper:hover {
-  color: var(--color-text-main);
-  background: var(--color-surface-hover);
-}
-
-.radio-wrapper input[type="radio"] {
-  display: none; /* Hide raw radio */
-}
-
-.radio-wrapper.active {
-  background: var(--color-primary);
-  color: white;
-  box-shadow: var(--shadow-sm);
-}
-
-.radio-wrapper.active span {
-  color: white;
-  font-weight: 600;
-}
-
-/* Period Selector */
-.period-selector {
+  font-size: var(--font-size-sm);
+  text-align: center;
+  padding: var(--spacing-xl);
   display: flex;
-  gap: 0.5rem;
-  background: var(--color-background);
-  padding: 0.25rem;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
+  flex-direction: column;
+  gap: var(--spacing-sm);
 }
 
-.period-selector button {
-  padding: 0.5rem 1rem;
-  border: none;
-  background: transparent;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.period-selector button:hover {
-  color: var(--color-text-main);
-  background: var(--color-surface-hover);
-}
-
-.period-selector button.active {
-  background: var(--color-primary);
-  color: white;
-  font-weight: 600;
-  box-shadow: var(--shadow-sm);
-}
-
-/* Trend Indicators */
-.trend-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--radius-sm);
-  margin-left: 0.5rem;
-  white-space: nowrap;
-}
-
-.trend-indicator.trend-up {
-  background: var(--trend-up, #ff4757);
-  color: white;
-}
-
-.trend-indicator.trend-down {
-  background: var(--trend-down, #10b981);
-  color: white;
-}
-
-.trend-indicator.trend-stable {
-  background: var(--trend-stable, #6b7280);
-  color: white;
-}
-
-/* Chart Container Loading State */
-.inflation-chart.loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary);
-  font-size: 0.875rem;
+/* Animations */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .inflation-chart.loading::before {
   content: '';
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--border);
-  border-top: 2px solid var(--primary);
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin-right: 0.5rem;
+  margin-right: var(--spacing-sm);
 }
 
-/* Chart Container Error State */
-.inflation-chart.error {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--error, #dc3545);
-  font-size: 0.875rem;
-  text-align: center;
-  padding: 2rem;
-}
-
-.inflation-chart.error::before {
-  content: '⚠️';
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-
-/* Chart Container No Data State */
-.inflation-chart.no-data {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-  text-align: center;
-  padding: 2rem;
-}
-
-.inflation-chart.no-data::before {
-  content: '📊';
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-
-/* CSS Custom Properties for trend colors using app theme */
-:root {
-  --trend-up: var(--color-primary); /* Purple for inflation */
-  --trend-down: var(--color-success); /* Green for deflation */
-  --trend-stable: var(--color-text-surface); /* Muted for stable */
-}
-
-/* Responsive Design */
+/* Responsive adjustments */
 @media (width <= 768px) {
-  .inflation-trends {
-    margin: 0.5rem 0;
-    padding: 0.75rem;
-  }
-  
-  .inflation-chart {
-    height: 250px;
-    margin: 0.75rem 0;
-  }
-  
-  .chart-type-selector,
-  .calc-method-selector,
-  .period-selector {
-    flex-wrap: wrap;
-    gap: 0.375rem;
-  }
-  
-  .radio-wrapper {
-    min-width: 100px;
-    padding: 0.375rem 0.5rem;
-    font-size: 0.8rem;
-  }
-  
-  .period-selector button {
-    padding: 0.375rem 0.75rem;
-    font-size: 0.8rem;
-  }
-  
-  .trend-indicator {
-    font-size: 0.625rem;
-    padding: 0.125rem 0.375rem;
-  }
-}
-
-@media (width <= 480px) {
-  .inflation-trends {
-    padding: 0.5rem;
-  }
-  
-  .inflation-chart {
-    height: 200px;
-  }
-  
-  .chart-type-selector,
-  .calc-method-selector {
+  .inflation-header {
     flex-direction: column;
-    gap: 0.25rem;
+    align-items: flex-start;
   }
-  
-  .radio-wrapper {
+
+  .selector-group {
     width: 100%;
-    justify-content: center;
   }
-  
-  .period-selector {
-    justify-content: space-between;
-  }
-  
-  .period-selector button {
-    flex: 1;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-  }
-}
 
-/* Animation for chart transitions */
-.inflation-chart canvas {
-  transition: opacity 0.3s ease;
-}
-
-.inflation-chart.updating canvas {
-  opacity: 0.6;
-}
-
-/* Loading spinner animation */
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Focus styles for accessibility */
-.radio-wrapper:focus-within {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-
-.period-selector button:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --trend-up: var(--color-primary-400); /* Slightly lighter purple for dark mode */
-    --trend-down: var(--color-success);
-    --trend-stable: var(--color-text-surface);
-  }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  .inflation-chart canvas,
-  .radio-wrapper,
-  .period-selector button,
-  .trend-indicator {
-    transition: none;
-  }
-  
-  .inflation-chart.loading::before {
-    animation: none;
+  .segmented-control {
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
 }

@@ -64,24 +64,37 @@ export const prepareTransactionData = formState => {
     const selectedDate = dateSource.value;
 
     // Check if it's a full ISO timestamp or just a date
-    if (selectedDate.includes('T')) {
-      // Full timestamp provided, use it as-is
-      timestamp = selectedDate;
+    const parsedDate = new Date(selectedDate);
+
+    if (!isNaN(parsedDate.getTime())) {
+      if (selectedDate.includes('T')) {
+        // Full timestamp provided, use it
+        timestamp = parsedDate.toISOString();
+      } else {
+        // Date only provided (YYYY-MM-DD), combine with current time
+        const now = new Date();
+        const [year, month, day] = selectedDate.split('-').map(Number);
+
+        // Final sanity check for split parts
+        if (year && month && day) {
+          timestamp = new Date(
+            Date.UTC(
+              year,
+              month - 1,
+              day,
+              now.getUTCHours(),
+              now.getUTCMinutes(),
+              now.getUTCSeconds(),
+              now.getUTCMilliseconds()
+            )
+          ).toISOString();
+        } else {
+          timestamp = new Date().toISOString();
+        }
+      }
     } else {
-      // Date only provided, combine with current time using UTC to avoid timezone issues
-      const now = new Date();
-      const [year, month, day] = selectedDate.split('-').map(Number);
-      timestamp = new Date(
-        Date.UTC(
-          year,
-          month - 1,
-          day,
-          now.getUTCHours(),
-          now.getUTCMinutes(),
-          now.getUTCSeconds(),
-          now.getUTCMilliseconds()
-        )
-      ).toISOString();
+      // Invalid date format, fallback to current time
+      timestamp = new Date().toISOString();
     }
   } else {
     // Fallback to current time

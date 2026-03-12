@@ -57,10 +57,7 @@ export const BackupService = {
 
       const progressId = 'backup-create';
       showProgressIndicator(progressId, 'Creating backup...', document.body, {
-        showCancel: true,
-        onCancel: () => {
-          console.log('[Backup] Backup cancelled by user');
-        },
+        showCancel: false,
       });
 
       try {
@@ -153,10 +150,7 @@ export const BackupService = {
       'Restoring from backup...',
       document.body,
       {
-        showCancel: true,
-        onCancel: () => {
-          console.log('[Backup] Restore cancelled by user');
-        },
+        showCancel: false,
       }
     );
 

@@ -781,7 +781,12 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
   section.appendChild(timelineDiv);
 
   // Personal Inflation Trends - now linked to shared navigation
-  const inflationTrendsComponent = InflationTrends(planningData, chartRenderer, activeCharts, sharedMonthState);
+  const inflationTrendsComponent = InflationTrends(
+    planningData,
+    chartRenderer,
+    activeCharts,
+    sharedMonthState
+  );
   section.appendChild(inflationTrendsComponent.element);
 
   // Set up synchronized navigation - all sections update together

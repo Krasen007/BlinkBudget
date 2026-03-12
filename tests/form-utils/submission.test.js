@@ -185,6 +185,7 @@ describe('Form Submission', () => {
 
       // Should use current time, not external date (implementation changed)
       expect(result.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
+      expect(result.timestamp.endsWith('Z')).toBe(true);
     });
 
     test('uses full ISO timestamp from external date input', () => {
@@ -431,7 +432,7 @@ describe('Form Submission', () => {
         amount: 25.5,
         type: 'expense',
         accountId: 'checking',
-        timestamp: '2024-01-15T10:30:00',
+        timestamp: new Date('2024-01-15T10:30:00').toISOString(),
         category: 'Coffee',
       });
     });

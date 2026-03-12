@@ -1,9 +1,3 @@
-# AGENTS.md: BlinkBudget - Universal Brain for AI Coding Agents
-
-This document serves as the single source of truth for all AI coding agents working on the BlinkBudget project. It provides essential context, technical specifications, and behavioral guidelines to ensure consistent, high-quality, and aligned development.
-
----
-
 ## 1. Project Overview
 
 - **Project Name**: BlinkBudget
@@ -44,8 +38,8 @@ The project is a web (browser) application, leveraging a modern, lightweight sta
 - **Routing**: Custom Hash-based Router
 - **Deployment**: Netlify + Firebase for Auth and Database.
 - **Data Persistence**: `localStorage` (via `StorageService`) for instant, offline-capable data storage. Also Firebase for cloud sync.
-- **System**: Use Windows and Powershell commands when developing locally on Windows for the terminal, DO NOT use Linux or UNIX tools and commands. (e.g. instead of cd "c:\Users\krase\repos\BlinkBudget" && yarn test -- --reporter=verbose 2>&1 | head -50
-  head: The term 'head' is not recognized as a name of a cmdlet, function, script file, or executable program. Use PowerShell Select-Object -First 50)
+- **System**: Use Windows CMD and PowerShell commands when developing locally on Windows for the terminal, DO NOT use Linux or UNIX tools and commands.
+  Example: instead of `sed` and `cat` commands use PowerShell equivalents like Get-Content.
 
 ### **Key Design Principles**
 
