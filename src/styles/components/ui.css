@@ -675,10 +675,12 @@
   background: var(--color-success);
   color: white;
 }
+
 .badge-error {
   background: var(--color-error);
   color: white;
 }
+
 .badge-muted {
   background: var(--color-text-surface);
   color: white;

@@ -228,7 +228,7 @@ export default defineConfig({
       output: {
         // Manual chunking for better optimization
         manualChunks: id => {
-          // Firebase gets its own chunk (largest dependency)
+          // Firebase gets its own chunk (largest dependency) - lazy loaded
           if (
             id.includes('node_modules/firebase') ||
             id.includes('node_modules/@firebase')
@@ -238,23 +238,6 @@ export default defineConfig({
           // Chart.js gets its own chunk for reports feature
           if (id.includes('node_modules/chart.js')) {
             return 'charts';
-          }
-          // Lazy load heavy views
-          if (id.includes('ReportsView')) {
-            return 'reports-view';
-          }
-          if (id.includes('FinancialPlanningView')) {
-            return 'planning-view';
-          }
-          // Split out analytics and heavy services
-          if (
-            id.includes('analytics-engine') ||
-            id.includes('AnalyticsInstance')
-          ) {
-            return 'analytics';
-          }
-          if (id.includes('tutorial') || id.includes('TutorialManager')) {
-            return 'tutorial';
           }
           // Other vendor dependencies
           if (id.includes('node_modules')) {

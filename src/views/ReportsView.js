@@ -16,6 +16,7 @@ import { AccountService } from '../core/Account/account-service.js';
 import { Router } from '../core/router.js';
 import { NavigationState } from '../core/navigation-state.js';
 import { SettingsService } from '../core/settings-service.js';
+import { BaselineAnalysis } from '../components/BaselineAnalysis.js';
 import {
   COLORS,
   SPACING,
@@ -746,6 +747,9 @@ export const ReportsView = () => {
       // Budget Recommendations - Feature 3.3.4 Predictive Budget
       renderBudgetRecommendationsSection(chartsSection, chartRenderResults);
 
+      // Baseline Analysis - Floor vs Average Spending Patterns
+      renderBaselineAnalysisSection(chartsSection);
+
       chartContainer.appendChild(chartsSection);
 
       const failedCharts = chartRenderResults.filter(result => !result.success);
@@ -1146,6 +1150,67 @@ export const ReportsView = () => {
         success: false,
         error: recommendationsError,
       });
+    }
+  }
+
+  /**
+   * Render baseline analysis section - Floor vs Average Spending Patterns
+   */
+  function renderBaselineAnalysisSection(chartsSection) {
+    try {
+      // Determine period based on current time period
+      let baselinePeriod = 'monthly';
+      if (currentTimePeriod.days <= 7) {
+        baselinePeriod = 'weekly';
+      } else if (currentTimePeriod.days >= 365) {
+        baselinePeriod = 'yearly';
+      }
+
+      // Create baseline analysis component
+      const baselineAnalysis = BaselineAnalysis({
+        period: baselinePeriod,
+        accountId: null, // Show overall baseline for all accounts
+        showInsights: true,
+        compact: false,
+      });
+
+      baselineAnalysis.style.setProperty(
+        'margin-top',
+        'var(--spacing-md)',
+        'important'
+      );
+      chartsSection.appendChild(baselineAnalysis);
+
+      console.log('[ReportsView] Baseline analysis rendered successfully');
+    } catch (baselineError) {
+      console.warn(
+        '[ReportsView] Failed to render baseline analysis section:',
+        baselineError
+      );
+
+      // Show fallback message
+      const fallbackSection = document.createElement('div');
+      fallbackSection.className = 'chart-section';
+      fallbackSection.style.setProperty(
+        'margin-top',
+        'var(--spacing-md)',
+        'important'
+      );
+      fallbackSection.innerHTML = `
+        <div class="chart-container">
+          <h3 class="chart-title">Baseline Analysis</h3>
+          <div class="chart-placeholder">
+            <div class="placeholder-icon">📊</div>
+            <div class="placeholder-text">
+              Baseline analysis temporarily unavailable
+            </div>
+            <div class="placeholder-subtext">
+              Please try refreshing the page
+            </div>
+          </div>
+        </div>
+      `;
+      chartsSection.appendChild(fallbackSection);
     }
   }
 

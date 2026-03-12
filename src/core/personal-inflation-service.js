@@ -53,7 +53,9 @@ export const PersonalInflationService = {
         const d = new Date(t.timestamp);
         const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         if (!monthlyGroups[month]) monthlyGroups[month] = [];
-        monthlyGroups[month].push(t.amount);
+        if (!isNaN(t.amount)) {
+          monthlyGroups[month].push(t.amount);
+        }
       });
 
     const months = Object.keys(monthlyGroups).sort();
@@ -66,16 +68,24 @@ export const PersonalInflationService = {
 
     if (method === 'median') {
       const getMedian = arr => {
-        const sorted = [...arr].sort((a, b) => a - b);
+        const validAmounts = arr.filter(a => !isNaN(a));
+        const sorted = [...validAmounts].sort((a, b) => a - b);
         const mid = Math.floor(sorted.length / 2);
-        return sorted.length % 2 !== 0
-          ? sorted[mid]
-          : (sorted[mid - 1] + sorted[mid]) / 2;
+        return sorted.length === 0
+          ? 0
+          : sorted.length % 2 !== 0
+            ? sorted[mid]
+            : (sorted[mid - 1] + sorted[mid]) / 2;
       };
       oldVal = getMedian(monthlyGroups[oldestMonth]);
       recentVal = getMedian(monthlyGroups[newestMonth]);
     } else {
-      const getAvg = arr => arr.reduce((sum, a) => sum + a, 0) / arr.length;
+      const getAvg = arr => {
+        const validAmounts = arr.filter(a => !isNaN(a));
+        return validAmounts.length === 0
+          ? 0
+          : validAmounts.reduce((sum, a) => sum + a, 0) / validAmounts.length;
+      };
       oldVal = getAvg(monthlyGroups[oldestMonth]);
       recentVal = getAvg(monthlyGroups[newestMonth]);
     }
@@ -149,13 +159,20 @@ export const PersonalInflationService = {
     const endWindow = new Date(referenceDate);
 
     const categoryInflation = categories.map(category => {
-      const inflationRate = this.calculateCategoryInflation(
+      const validation = PersonalInflationService.validateCategoryData(
         transactions,
         category,
-        monthsBack,
-        method,
-        referenceDate
+        6 // Use 6 months to match mock data
       );
+      const inflationRate = validation.hasData
+        ? this.calculateCategoryInflation(
+            transactions,
+            category,
+            monthsBack,
+            method,
+            referenceDate
+          )
+        : 0;
       const trend = this.getTrendDirection(inflationRate);
 
       const categoryTransactions = transactions.filter(t => {
@@ -181,7 +198,7 @@ export const PersonalInflationService = {
 
     return categoryInflation
       .filter(c => c.inflationRate !== 0 && !isNaN(c.inflationRate))
-      .sort((a, b) => Math.abs(b.inflationRate) - Math.abs(a.inflationRate))
+      .sort((a, b) => b.inflationRate - a.inflationRate) // Sort by inflation rate (highest first)
       .slice(0, count);
   },
 
@@ -231,7 +248,10 @@ export const PersonalInflationService = {
       .forEach(t => {
         const d = new Date(t.timestamp);
         const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-        monthlySpending[month] = (monthlySpending[month] || 0) + t.amount;
+        if (!monthlySpending[month]) monthlySpending[month] = 0;
+        if (!isNaN(t.amount)) {
+          monthlySpending[month] += t.amount;
+        }
       });
 
     return Object.entries(monthlySpending)

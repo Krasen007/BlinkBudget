@@ -7,6 +7,12 @@ import { ViewManager } from '../core/view-manager.js';
 import { NavigationState } from '../core/navigation-state.js';
 import { updateMobileNavigation } from '../components/MobileNavigation.js';
 
+// Statically import core views for instant loading
+import { DashboardView } from '../views/DashboardView.js';
+import { AddView } from '../views/AddView.js';
+import { EditView } from '../views/EditView.js';
+import { ReportsView } from '../views/ReportsView.js';
+
 export const routes = {
   landing: async () => {
     const { LandingView } = await import('../views/LandingView.js');
@@ -14,20 +20,17 @@ export const routes = {
     ViewManager.setView(LandingView());
     updateMobileNavigation('landing');
   },
-  dashboard: async () => {
-    const { DashboardView } = await import('../views/DashboardView.js');
+  dashboard: () => {
     NavigationState.setLastActiveView('dashboard');
     ViewManager.setView(DashboardView());
     updateMobileNavigation('dashboard');
   },
-  'add-expense': async params => {
-    const { AddView } = await import('../views/AddView.js');
+  'add-expense': params => {
     NavigationState.setLastActiveView('add-expense');
     ViewManager.setView(AddView(params));
     updateMobileNavigation('add-expense');
   },
-  'edit-expense': async params => {
-    const { EditView } = await import('../views/EditView.js');
+  'edit-expense': params => {
     NavigationState.setLastActiveView('edit-expense');
     ViewManager.setView(EditView(params));
     updateMobileNavigation('dashboard');
@@ -52,8 +55,7 @@ export const routes = {
     ViewManager.setView(SettingsView());
     updateMobileNavigation('settings');
   },
-  reports: async () => {
-    const { ReportsView } = await import('../views/ReportsView.js');
+  reports: () => {
     NavigationState.setLastActiveView('reports');
     ViewManager.setView(ReportsView());
     updateMobileNavigation('reports');
