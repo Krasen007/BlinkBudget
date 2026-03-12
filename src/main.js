@@ -14,19 +14,10 @@ import { InstallService } from './core/install.js';
 import { CacheInvalidator } from './core/cache-invalidator.js';
 import './core/mobile-viewport-manager.js';
 import './core/mobile-form-optimizer.js';
+import { PrivacyService } from './core/privacy-service.js';
 
 InstallService.init();
 
-// Lazy load privacy service after app initialization
-const initPrivacyService = () => {
-  import('./core/privacy-service.js')
-    .then(({ PrivacyService }) => {
-      PrivacyService.init();
-    })
-    .catch(error => {
-      console.warn('[Main] Failed to load privacy service:', error);
-    });
-};
 
 const initApp = () => {
   const app = document.querySelector('#app');
@@ -156,8 +147,8 @@ const initApp = () => {
   if (window.mobileUtils && window.mobileUtils.setupBackButtonHandling) {
     window.mobileUtils.setupBackButtonHandling();
   }
-  // Lazy load privacy service after app is ready
-  initPrivacyService();
+  // Initialize privacy service after app is ready
+  PrivacyService.init();
   console.log('[Main] App initialized, starting router.');
   Router.init();
 };

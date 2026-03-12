@@ -6,6 +6,8 @@
 
 import { suggestionService } from '../core/suggestion-service.js';
 import { getCategoryIconHTML } from '../utils/category-icons.js';
+import { CustomCategoryService } from '../core/custom-category-service.js';
+import { TransactionService } from '../core/transaction-service.js';
 
 export const SmartCategorySelector = {
   /**
@@ -93,8 +95,6 @@ export const SmartCategorySelector = {
   async initializeCategories(grid, onSelect, initialCategory = '') {
     try {
       // 1. Get all available categories (system + custom)
-      const { CustomCategoryService } =
-        await import('../core/custom-category-service.js');
       const allCategoryData =
         CustomCategoryService.getSystemCategories('expense');
       const customCategories = CustomCategoryService.getByType('expense');
@@ -379,8 +379,6 @@ export const SmartCategorySelector = {
    */
   async getTransactionHistory() {
     try {
-      const { TransactionService } =
-        await import('../core/transaction-service.js');
       return TransactionService.getAll();
     } catch (error) {
       console.warn('Failed to load transaction history:', error);

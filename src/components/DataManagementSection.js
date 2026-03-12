@@ -465,9 +465,6 @@ export const DataManagementSection = () => {
 
         if (backupData && backupData.transactions) {
           // Restore transactions
-          const { TransactionService } =
-            await import('../core/transaction-service.js');
-          TransactionService.clear();
           backupData.transactions.forEach(transaction => {
             TransactionService.add(transaction);
           });
