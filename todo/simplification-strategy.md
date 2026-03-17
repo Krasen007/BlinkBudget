@@ -72,8 +72,58 @@ _Everything else (Settings, Exports, Goals, Investments) should be tucked away i
 
 ---
 
+## **Codebase Analysis Results (March 2026)**
+
+**Current State: SIGNIFICANTLY OVER-ENGINEERED**
+
+### Complexity Evidence Found:
+- **Investment Tracking**: Full 41KB InvestmentsSection.js with portfolio management
+- **Financial Planning**: 7 comprehensive sections (Goals, Forecasts, Insights, Scenarios, etc.)
+- **Advanced Filtering**: 540-line complex panel with multiple criteria
+- **Transaction Form**: 531 lines with dual smart/classic modes
+- **Smart Suggestions**: AI-powered amount, category, and note predictions
+
+### Core "Blink" Features Still Intact:
+- Quick amount presets 
+- 3-click entry (classic mode) 
+- Clean dashboard 
+- Mobile optimization 
+
+## **Updated Recommendation: URGENT SIMPLIFICATION NEEDED**
+
+The analysis confirms we've drifted far from the "fastest budgeting app" promise. The app now resembles a "clunky" finance app rather than a lightning-fast expense tracker.
+
 ## **Next Steps**
 
-1. **User Decision**: Do we want to keep Investment Tracking?
-2. **Action**: Implement "Quick Mode" for the Transaction Form.
-3. **Action**: Move "Advanced Filtering" into a modal/hidden panel.
+1. **User Data Analysis Needed**: Which features are actually being used?
+2. **Click Path Measurement**: Current average clicks per transaction?
+3. **Prototype Testing**: Test simplified flows with real users
+4. **Gradual Rollout**: Hide complexity first, remove if unused
+
+## **Implementation Priority (Updated)**
+
+### Phase 1: Hide Complexity (Week 1-2)
+- Move Financial Planning to "Power User" menu
+- Simplify Advanced Filtering to basic search + date range  
+- Make Smart Suggestions opt-in (default to classic)
+
+### Phase 2: Streamline Core Flow (Week 3-4)
+- Implement "Blink Mode" one-tap entry
+- Progressive disclosure for transaction form details
+- Consolidate analytics into simple "Daily Briefing"
+
+### Phase 3: Remove Unused Features (Week 5-6)
+- Evaluate Investment Tracking removal/move
+- Simplify settings structure
+- Remove redundant UI elements
+
+## **Risk Assessment**
+- **Low Risk**: Hiding features (reversible)
+- **Medium Risk**: Investment tracking changes
+- **High Risk**: Core form simplification
+
+## **Success Metrics**
+- <3 second average transaction entry
+- Reduced dashboard cognitive load
+- Maintained user retention
+- Improved "simplicity" app store ratings
