@@ -138,14 +138,7 @@ body {
   outline-offset: 2px;
 }
 
-/* Critical loading state */
-.loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-lg);
-  color: var(--color-text-muted);
-}
+/* Loading styles moved to webapp-components.css to avoid duplication */
 
 /* Critical form styles */
 .form-label {

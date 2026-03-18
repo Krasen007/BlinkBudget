@@ -112,12 +112,7 @@
   filter: brightness(0.9);
 }
 
-.btn:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.2);
-  box-shadow: var(--shadow-md);
-  transition: var(--animation-interactive);
-}
+/* Button hover styles moved to enhanced-button.css to avoid duplication */
 
 .btn-ghost {
   background-color: transparent;
@@ -128,13 +123,7 @@
   transition: var(--animation-interactive);
 }
 
-.btn-ghost:hover {
-  background-color: var(--color-surface-hover);
-  color: var(--color-text-main);
-  border-color: var(--color-primary);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
-}
+/* Button ghost hover styles moved to enhanced-button.css to avoid duplication */
 
 .btn-ghost.btn-small {
   padding: var(--spacing-xs) var(--spacing-sm);
@@ -148,10 +137,7 @@
   border-color: #ef4444;
 }
 
-.btn-danger:hover {
-  background-color: #dc2626;
-  border-color: #dc2626;
-}
+/* Button danger hover styles moved to enhanced-button.css to avoid duplication */
 
 .mobile-action-btn {
   flex: 1;
@@ -321,9 +307,7 @@
   transition: background-color var(--transition-normal);
 }
 
-.card:hover {
-  border-color: var(--color-primary-light);
-}
+/* Duplicate .card:hover removed - see line 206-209 for primary definition */
 
 .dashboard-stat-card {
   min-height: var(--touch-target-min);

@@ -214,116 +214,11 @@
   flex-shrink: 0;
 }
 
-/* Loading State Enhancements */
-.loading-state {
-  background: linear-gradient(
-    145deg,
-    var(--color-surface) 0%,
-    hsl(240, 10%, 12%) 100%
-  );
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-3xl);
-  text-align: center;
-}
+/* Loading state styles moved to webapp-components.css to avoid duplication */
 
-.loading-spinner {
-  position: relative;
-}
+/* Progress bar styles moved to webapp-components.css to avoid duplication */
 
-.loading-spinner::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 20px;
-  height: 20px;
-  background: hsl(var(--primary-hue), var(--primary-sat), var(--primary-light));
-  border-radius: 50%;
-  opacity: 0.3;
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 0.3;
-    transform: translate(-50%, -50%) scale(1);
-  }
-
-  50% {
-    opacity: 0.8;
-    transform: translate(-50%, -50%) scale(1.2);
-  }
-}
-
-/* Progress Bar Styling */
-.progress-container {
-  background: var(--color-border);
-  border-radius: var(--radius-full);
-  overflow: hidden;
-  position: relative;
-}
-
-.progress-bar {
-  background: linear-gradient(
-    90deg,
-    hsl(var(--primary-hue), var(--primary-sat), var(--primary-light)) 0%,
-    hsl(
-        var(--primary-hue),
-        var(--primary-sat),
-        calc(var(--primary-light) + 15%)
-      )
-      100%
-  );
-  position: relative;
-  overflow: hidden;
-}
-
-.progress-bar::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgb(255, 255, 255, 0.4) 50%,
-    transparent 100%
-  );
-  animation: shimmer 2s infinite;
-}
-
-@keyframes shimmer {
-  0% {
-    left: -100%;
-  }
-
-  100% {
-    left: 100%;
-  }
-}
-
-/* Empty State Styling */
-.empty-state {
-  background: linear-gradient(
-    145deg,
-    var(--color-surface) 0%,
-    hsl(240, 10%, 12%) 100%
-  );
-  border: 2px dashed var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-3xl);
-  text-align: center;
-}
-
-.empty-state-icon {
-  font-size: 3rem;
-  margin-bottom: var(--spacing-lg);
-  opacity: 0.6;
-}
+/* Empty state styles moved to webapp-components.css to avoid duplication */
 
 /* Error State Styling */
 .error-state {

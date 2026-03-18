@@ -64,10 +64,7 @@
   transition: var(--transition-normal);
 }
 
-.card:hover {
-  background-color: var(--color-surface-hover);
-  transform: var(--hover-scale);
-}
+/* Card hover styles moved to ui.css to avoid duplication */
 
 @media (--md) {
   .card {
@@ -75,63 +72,9 @@
   }
 }
 
-/* Consistent Button Pattern with 44px Touch Target */
-.btn {
-  min-height: var(--touch-target-min);
-  padding: 0 var(--spacing-lg);
-  border-radius: var(--radius-md);
-  border: none;
-  background-color: var(--color-primary);
-  color: var(--color-text-on-primary);
-  font-size: var(--font-size-base);
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--transition-hover);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-sm);
-  text-decoration: none;
-  position: relative;
-  overflow: hidden;
-}
+/* Button styles moved to enhanced-button.css to avoid duplication */
 
-.btn:hover {
-  transform: var(--hover-scale);
-  box-shadow: var(--shadow-button);
-}
-
-.btn:active {
-  transform: var(--active-scale);
-}
-
-.btn:focus-visible {
-  outline: var(--focus-width) solid var(--focus-color);
-  outline-offset: var(--focus-offset);
-  box-shadow: var(--focus-shadow);
-}
-
-/* Button Variants */
-.btn-secondary {
-  background-color: var(--color-surface-elevated);
-  color: var(--color-text-main);
-  border: 1px solid var(--color-border);
-}
-
-.btn-success {
-  background-color: var(--color-success);
-  color: white;
-}
-
-.btn-warning {
-  background-color: var(--color-warning);
-  color: white;
-}
-
-.btn-error {
-  background-color: var(--color-error);
-  color: white;
-}
+/* Button variant styles moved to enhanced-button.css to avoid duplication */
 
 /* Fluid Typography Classes */
 .text-fluid-xs {
@@ -456,9 +399,4 @@
   transition: var(--transition-normal);
 }
 
-.touch-input:focus {
-  outline: var(--focus-width) solid var(--focus-color);
-  outline-offset: var(--focus-offset);
-  border-color: var(--focus-color);
-  box-shadow: var(--focus-shadow);
-}
+/* Touch input focus styles moved to forms-dialogs.css to avoid duplication */

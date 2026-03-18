@@ -53,6 +53,7 @@ export const createNavigationButtons = currentView => {
       settingsButton.className = 'btn btn-ghost';
       settingsButton.style.fontSize = '1.5rem';
       settingsButton.style.padding = SPACING.XS;
+      settingsButton.style.background = 'transparent'; // No purple background
       settingsButton.style.border = 'none';
       settingsButton.title = settingsView.title;
       settingsButton.style.transition = 'all 0.2s ease';
@@ -79,6 +80,7 @@ export const createNavigationButtons = currentView => {
     button.className = 'btn btn-ghost';
     button.style.fontSize = '1.5rem';
     button.style.padding = SPACING.XS;
+    button.style.background = 'transparent'; // No purple background
     button.style.border = 'none';
     button.title = view.title;
     button.style.transition = 'all 0.2s ease';

@@ -989,16 +989,7 @@
   transition: border-color 0.2s ease;
 }
 
-.view-form-input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-
-  .view-form-input:focus {
-    outline: none;
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgb(59, 130, 246, 0.1);
-  }
-}
+/* Input focus styles moved to forms-dialogs.css to avoid duplication */
 
 .view-form-error {
   border-color: var(--color-error);
