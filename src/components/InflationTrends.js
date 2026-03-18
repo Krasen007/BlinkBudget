@@ -90,7 +90,6 @@ export const InflationTrends = (
     const myVersion = renderVersion;
 
     try {
-
       // Calculate reference date based on sharedMonthState (end of selected month)
       const now = new Date();
       const referenceDate = sharedMonthState
@@ -298,8 +297,6 @@ export const InflationTrends = (
   container.appendChild(controls);
   container.appendChild(chartContainer);
 
-
-
   // Initial render
   renderChart();
 
@@ -319,7 +316,7 @@ export const InflationTrends = (
 /**
  * Create chart type selector
  */
-const createChartTypeSelector = (instanceId) => {
+const createChartTypeSelector = instanceId => {
   const container = document.createElement('div');
   container.className = 'chart-type-selector segmented-control';
 
@@ -351,7 +348,7 @@ const createChartTypeSelector = (instanceId) => {
 /**
  * Create calculation method selector
  */
-const createCalcMethodSelector = (instanceId) => {
+const createCalcMethodSelector = instanceId => {
   const container = document.createElement('div');
   container.className = 'calc-method-selector segmented-control';
 

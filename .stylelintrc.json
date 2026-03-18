@@ -89,6 +89,20 @@
       {
         "ignoreAtRules": ["tailwind", "use", "forward"]
       }
+    ],
+    "property-no-vendor-prefix": [
+      true,
+      {
+        "ignoreProperties": [
+          "appearance",
+          "user-select",
+          "backdrop-filter",
+          "background-clip",
+          "height",
+          "min-height",
+          "image-rendering"
+        ]
+      }
     ]
   }
 }

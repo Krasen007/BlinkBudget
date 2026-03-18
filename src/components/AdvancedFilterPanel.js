@@ -5,7 +5,7 @@
  */
 
 import { FilteringService } from '../core/analytics/FilteringService.js';
-import { Button } from './Button.js';
+import { ButtonComponent } from './Button.js';
 import { CustomCategoryService } from '../core/custom-category-service.js';
 
 export const AdvancedFilterPanel = ({
@@ -61,7 +61,7 @@ export const AdvancedFilterPanel = ({
     font-weight: 600;
   `;
 
-  const clearButton = Button({
+  const clearButton = ButtonComponent({
     text: 'Clear All',
     variant: 'ghost',
     onClick: () => {
@@ -347,7 +347,7 @@ export const AdvancedFilterPanel = ({
   searchSection.appendChild(searchOptions);
 
   // Apply Filters Button
-  const applyButton = Button({
+  const applyButton = ButtonComponent({
     text: 'Apply Filters',
     variant: 'primary',
     onClick: () => {

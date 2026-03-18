@@ -1,10 +1,10 @@
 // tests/components/button.test.js
 import { describe, it, expect, vi } from 'vitest';
-import { Button } from '../../src/components/Button.js';
+import { ButtonComponent } from '../../src/components/Button.js';
 
 describe('Button Component - Touch Optimizations', () => {
   it('should create button with proper structure and classes', () => {
-    const button = Button({ text: 'Test Button' });
+    const button = ButtonComponent({ text: 'Test Button' });
 
     expect(button.tagName).toBe('BUTTON');
     expect(button.textContent).toBe('Test Button');
@@ -16,7 +16,7 @@ describe('Button Component - Touch Optimizations', () => {
   });
 
   it('should add touch-active class on touchstart', () => {
-    const button = Button({ text: 'Test Button' });
+    const button = ButtonComponent({ text: 'Test Button' });
     document.body.appendChild(button);
 
     // Simulate touchstart event
@@ -31,7 +31,7 @@ describe('Button Component - Touch Optimizations', () => {
   });
 
   it('should remove touch-active class on touchend', () => {
-    const button = Button({ text: 'Test Button' });
+    const button = ButtonComponent({ text: 'Test Button' });
     document.body.appendChild(button);
 
     // Add the class first
@@ -47,7 +47,7 @@ describe('Button Component - Touch Optimizations', () => {
   });
 
   it('should handle disabled state correctly', () => {
-    const button = Button({ text: 'Disabled Button', disabled: true });
+    const button = ButtonComponent({ text: 'Disabled Button', disabled: true });
 
     expect(button.disabled).toBe(true);
 
@@ -62,14 +62,17 @@ describe('Button Component - Touch Optimizations', () => {
 
   it('should call onClick handler when clicked', () => {
     const mockClick = vi.fn();
-    const button = Button({ text: 'Clickable Button', onClick: mockClick });
+    const button = ButtonComponent({
+      text: 'Clickable Button',
+      onClick: mockClick,
+    });
 
     button.click();
     expect(mockClick).toHaveBeenCalledTimes(1);
   });
 
   it('should have touch optimization properties', () => {
-    const button = Button({ text: 'Optimized Button' });
+    const button = ButtonComponent({ text: 'Optimized Button' });
 
     // Check that the button has the proper class for CSS styling
     expect(button.className).toContain('btn');

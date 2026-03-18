@@ -1160,10 +1160,12 @@ export const ReportsView = () => {
     try {
       // Determine period based on current time period
       let baselinePeriod = 'monthly';
-      const days = typeof currentTimePeriod?.days === 'number' 
-          ? currentTimePeriod.days 
-          : (currentTimePeriod?.end && currentTimePeriod?.start) 
-            ? (currentTimePeriod.end - currentTimePeriod.start) / (1000 * 60 * 60 * 24) 
+      const days =
+        typeof currentTimePeriod?.days === 'number'
+          ? currentTimePeriod.days
+          : currentTimePeriod?.startDate && currentTimePeriod?.endDate
+            ? (currentTimePeriod.endDate - currentTimePeriod.startDate) /
+              (1000 * 60 * 60 * 24)
             : 30; // fallback to monthly
 
       if (days <= 7) {
@@ -1189,7 +1191,11 @@ export const ReportsView = () => {
 
       chartRenderResults.push({ name: 'Baseline Analysis', success: true });
     } catch (baselineError) {
-      chartRenderResults.push({ name: 'Baseline Analysis', success: false, error: baselineError });
+      chartRenderResults.push({
+        name: 'Baseline Analysis',
+        success: false,
+        error: baselineError,
+      });
       console.warn(
         '[ReportsView] Failed to render baseline analysis section:',
         baselineError

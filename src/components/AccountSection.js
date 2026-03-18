@@ -3,7 +3,7 @@
  * Handles account listing, renaming, deletion, and creation
  */
 
-import { Button } from './Button.js';
+import { ButtonComponent } from './Button.js';
 import { AccountService } from '../core/Account/account-service.js';
 import { generateId } from '../utils/id-utils.js';
 import {
@@ -35,7 +35,7 @@ export const AccountSection = () => {
   accountListContainer.style.gap = SPACING.SM;
 
   // Add Account Button
-  const addAccountBtn = Button({
+  const addAccountBtn = ButtonComponent({
     text: 'Add Account',
     variant: 'primary',
     onClick: () => {
@@ -209,7 +209,7 @@ export const AccountSection = () => {
         btnGroup.style.display = 'flex';
         btnGroup.style.gap = 'var(--spacing-md)';
 
-        const cancelBtn = Button({
+        const cancelBtn = ButtonComponent({
           text: 'Cancel',
           variant: 'secondary',
           onClick: () => {
@@ -217,7 +217,7 @@ export const AccountSection = () => {
           },
         });
 
-        const saveBtn = Button({
+        const saveBtn = ButtonComponent({
           text: 'Add Account',
           variant: 'primary',
           onClick: async () => {
@@ -579,7 +579,7 @@ export const AccountSection = () => {
             btnGroup.style.display = 'flex';
             btnGroup.style.gap = 'var(--spacing-md)';
 
-            const cancelBtn = Button({
+            const cancelBtn = ButtonComponent({
               text: 'Cancel',
               variant: 'secondary',
               onClick: () => {
@@ -587,7 +587,7 @@ export const AccountSection = () => {
               },
             });
 
-            const saveBtn = Button({
+            const saveBtn = ButtonComponent({
               text: 'Save Changes',
               variant: 'primary',
               onClick: async () => {

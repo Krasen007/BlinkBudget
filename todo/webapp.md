@@ -1,22 +1,27 @@
 {{APP_NAME}} — Web App Genesis Prompt
+
 1. Project Overview
-Build a web app called "{{APP_NAME}}" — {{APP_ONE_LINE_DESCRIPTION}}.
-{{APP_DETAILED_DESCRIPTION}}
+   Build a web app called "{{APP_NAME}}" — {{APP_ONE_LINE_DESCRIPTION}}.
+   {{APP_DETAILED_DESCRIPTION}}
 
 2. Technical Requirements
 
 Rendering: {{RENDERING_STRATEGY}}
+
 <!-- e.g., "SPA (Vite + React)", "SSR (Next.js App Router)", "SSG (Astro)", "Full-stack (Next.js + API Routes)" -->
 
 Framework: {{FRAMEWORK}}
+
 <!-- Recommended: Next.js 15 (App Router) for most apps; Vite + React for pure SPAs -->
 
 Language: TypeScript (strict mode — no any)
 Styling: Tailwind CSS v4 + CSS custom properties for theming
 Component Library: {{COMPONENT_LIBRARY}}
+
 <!-- e.g., shadcn/ui (recommended), Radix UI primitives, Headless UI, or "None — custom only" -->
 
 State Management: {{STATE_STRATEGY}}
+
 <!-- e.g., "Zustand for global state, TanStack Query for server state" / "React Context + useReducer (simple apps)" -->
 
 Data Fetching: TanStack Query v5 (recommended) or Next.js fetch with caching
@@ -26,12 +31,12 @@ Node version: 22 LTS (pin via .nvmrc or package.json#engines)
 Mobile-first: All layouts designed for 375px wide, scaling up
 
 Rendering Strategy Decision Guide
-Need SEO + dynamic data?      → Next.js App Router (SSR/ISR)
-Content-heavy / blog / docs?  → Astro (SSG) or Next.js (SSG)
-Auth-heavy dashboard / SaaS?  → Next.js App Router + Server Components
+Need SEO + dynamic data? → Next.js App Router (SSR/ISR)
+Content-heavy / blog / docs? → Astro (SSG) or Next.js (SSG)
+Auth-heavy dashboard / SaaS? → Next.js App Router + Server Components
 Pure client app, no SEO need? → Vite + React (SPA)
-Full-stack with DB?           → Next.js + API Routes or tRPC
-Real-time features?           → Next.js + WebSockets / Supabase Realtime
+Full-stack with DB? → Next.js + API Routes or tRPC
+Real-time features? → Next.js + WebSockets / Supabase Realtime
 Backend / API (if applicable)
 {{BACKEND_STRATEGY}}
 Options:
@@ -61,148 +66,149 @@ Mapbox GL / Leaflet for maps
 date-fns / Day.js for date handling
 nuqs for URL state management
 
-
 3. Project Structure
-Next.js App Router (recommended)
-{{APP_NAME}}/
-├── app/
-│   ├── layout.tsx                  ← Root layout (fonts, providers, metadata)
-│   ├── page.tsx                    ← Home route
-│   ├── globals.css                 ← Tailwind base + CSS custom properties
-│   ├── (marketing)/                ← Route group — no shared layout with app
-│   │   ├── page.tsx                ← Landing page
-│   │   └── pricing/page.tsx
-│   ├── (app)/                      ← Route group — authenticated app shell
-│   │   ├── layout.tsx              ← App shell (sidebar, nav)
-│   │   ├── dashboard/page.tsx
-│   │   └── settings/page.tsx
-│   ├── api/                        ← Route Handlers
-│   │   └── {{ROUTE_HANDLERS}}
-│   └── {{ADDITIONAL_ROUTES}}
-├── components/
-│   ├── ui/                         ← shadcn/ui primitives (auto-generated)
-│   ├── layout/                     ← Header, Footer, Sidebar, MobileNav
-│   ├── {{FEATURE}}/                ← Feature-scoped components
-│   └── shared/                     ← App-wide shared components
-├── lib/
-│   ├── utils.ts                    ← cn() helper + general utilities
-│   ├── validations.ts              ← Zod schemas
-│   └── {{ADDITIONAL_LIB_FILES}}
-├── hooks/
-│   └── {{CUSTOM_HOOKS}}            ← useMediaQuery, useDebounce, etc.
-├── stores/
-│   └── {{ZUSTAND_STORES}}          ← Global client state
-├── types/
-│   └── index.ts                    ← Shared TypeScript types & interfaces
-├── server/                         ← Server-only code (never imported client-side)
-│   ├── db/                         ← Drizzle / Prisma schema + client
-│   └── {{SERVER_MODULES}}
-├── public/
-│   ├── icons/                      ← SVG icons, favicon variants
-│   └── images/
-├── .env.local                      ← Local secrets (gitignored)
-├── .env.example                    ← Committed template with dummy values
-├── next.config.ts
-├── tailwind.config.ts
-├── tsconfig.json
-├── components.json                 ← shadcn/ui config
-└── package.json
-Vite + React SPA (alternative)
-{{APP_NAME}}/
-├── src/
-│   ├── main.tsx
-│   ├── App.tsx
-│   ├── routes/                     ← TanStack Router or React Router v7
-│   ├── components/
-│   ├── hooks/
-│   ├── stores/
-│   ├── lib/
-│   └── types/
-├── public/
-├── index.html
-├── vite.config.ts
-└── package.json
+   Next.js App Router (recommended)
+   {{APP_NAME}}/
+   ├── app/
+   │ ├── layout.tsx ← Root layout (fonts, providers, metadata)
+   │ ├── page.tsx ← Home route
+   │ ├── globals.css ← Tailwind base + CSS custom properties
+   │ ├── (marketing)/ ← Route group — no shared layout with app
+   │ │ ├── page.tsx ← Landing page
+   │ │ └── pricing/page.tsx
+   │ ├── (app)/ ← Route group — authenticated app shell
+   │ │ ├── layout.tsx ← App shell (sidebar, nav)
+   │ │ ├── dashboard/page.tsx
+   │ │ └── settings/page.tsx
+   │ ├── api/ ← Route Handlers
+   │ │ └── {{ROUTE_HANDLERS}}
+   │ └── {{ADDITIONAL_ROUTES}}
+   ├── components/
+   │ ├── ui/ ← shadcn/ui primitives (auto-generated)
+   │ ├── layout/ ← Header, Footer, Sidebar, MobileNav
+   │ ├── {{FEATURE}}/ ← Feature-scoped components
+   │ └── shared/ ← App-wide shared components
+   ├── lib/
+   │ ├── utils.ts ← cn() helper + general utilities
+   │ ├── validations.ts ← Zod schemas
+   │ └── {{ADDITIONAL_LIB_FILES}}
+   ├── hooks/
+   │ └── {{CUSTOM_HOOKS}} ← useMediaQuery, useDebounce, etc.
+   ├── stores/
+   │ └── {{ZUSTAND_STORES}} ← Global client state
+   ├── types/
+   │ └── index.ts ← Shared TypeScript types & interfaces
+   ├── server/ ← Server-only code (never imported client-side)
+   │ ├── db/ ← Drizzle / Prisma schema + client
+   │ └── {{SERVER_MODULES}}
+   ├── public/
+   │ ├── icons/ ← SVG icons, favicon variants
+   │ └── images/
+   ├── .env.local ← Local secrets (gitignored)
+   ├── .env.example ← Committed template with dummy values
+   ├── next.config.ts
+   ├── tailwind.config.ts
+   ├── tsconfig.json
+   ├── components.json ← shadcn/ui config
+   └── package.json
+   Vite + React SPA (alternative)
+   {{APP_NAME}}/
+   ├── src/
+   │ ├── main.tsx
+   │ ├── App.tsx
+   │ ├── routes/ ← TanStack Router or React Router v7
+   │ ├── components/
+   │ ├── hooks/
+   │ ├── stores/
+   │ ├── lib/
+   │ └── types/
+   ├── public/
+   ├── index.html
+   ├── vite.config.ts
+   └── package.json
 
 4. Design System
-Design Tokens (CSS Custom Properties)
-Define all tokens in globals.css. Tailwind v4 reads these natively:
-css/* app/globals.css */
-@import "tailwindcss";
+   Design Tokens (CSS Custom Properties)
+   Define all tokens in globals.css. Tailwind v4 reads these natively:
+   css/_ app/globals.css _/
+   @import "tailwindcss";
 
 @theme {
-  /* Colors */
-  --color-background:   {{BACKGROUND_COLOR}};
-  --color-surface:      {{SURFACE_COLOR}};
-  --color-primary:      {{PRIMARY_COLOR}};
-  --color-primary-hover:{{PRIMARY_HOVER_COLOR}};
-  --color-secondary:    {{SECONDARY_COLOR}};
-  --color-accent:       {{ACCENT_COLOR}};
-  --color-text:         {{TEXT_PRIMARY}};
-  --color-text-muted:   {{TEXT_MUTED}};
-  --color-border:       {{BORDER_COLOR}};
-  --color-destructive:  {{DESTRUCTIVE_COLOR}};
+/_ Colors _/
+--color-background: {{BACKGROUND_COLOR}};
+--color-surface: {{SURFACE_COLOR}};
+--color-primary: {{PRIMARY_COLOR}};
+--color-primary-hover:{{PRIMARY_HOVER_COLOR}};
+--color-secondary: {{SECONDARY_COLOR}};
+--color-accent: {{ACCENT_COLOR}};
+--color-text: {{TEXT_PRIMARY}};
+--color-text-muted: {{TEXT_MUTED}};
+--color-border: {{BORDER_COLOR}};
+--color-destructive: {{DESTRUCTIVE_COLOR}};
 
-  /* Typography */
-  --font-sans:    {{SANS_FONT}}, ui-sans-serif, system-ui, sans-serif;
-  --font-serif:   {{SERIF_FONT}}, ui-serif, Georgia, serif;
-  --font-mono:    {{MONO_FONT}}, ui-monospace, monospace;
+/_ Typography _/
+--font-sans: {{SANS_FONT}}, ui-sans-serif, system-ui, sans-serif;
+--font-serif: {{SERIF_FONT}}, ui-serif, Georgia, serif;
+--font-mono: {{MONO_FONT}}, ui-monospace, monospace;
 
-  /* Spacing scale overrides (if needed) */
-  --spacing-page-x:   {{HORIZONTAL_PADDING}}px;
+/_ Spacing scale overrides (if needed) _/
+--spacing-page-x: {{HORIZONTAL_PADDING}}px;
 
-  /* Radius */
-  --radius-sm:  {{RADIUS_SM}};
-  --radius-md:  {{RADIUS_MD}};
-  --radius-lg:  {{RADIUS_LG}};
-  --radius-full: 9999px;
+/_ Radius _/
+--radius-sm: {{RADIUS_SM}};
+--radius-md: {{RADIUS_MD}};
+--radius-lg: {{RADIUS_LG}};
+--radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-card: {{CARD_SHADOW}};
+/_ Shadows _/
+--shadow-card: {{CARD_SHADOW}};
 
-  /* Transitions */
-  --duration-fast:   150ms;
-  --duration-normal: 250ms;
-  --duration-slow:   400ms;
+/_ Transitions _/
+--duration-fast: 150ms;
+--duration-normal: 250ms;
+--duration-slow: 400ms;
 }
 
-/* Dark mode */
+/_ Dark mode _/
 @media (prefers-color-scheme: dark) {
-  @theme {
-    --color-background:  {{DARK_BACKGROUND}};
-    --color-surface:     {{DARK_SURFACE}};
-    --color-text:        {{DARK_TEXT}};
-    /* ... override all tokens for dark */
-  }
+@theme {
+--color-background: {{DARK_BACKGROUND}};
+--color-surface: {{DARK_SURFACE}};
+--color-text: {{DARK_TEXT}};
+/_ ... override all tokens for dark _/
+}
 }
 
-/* Manual dark mode toggle (add .dark class to <html>) */
+/_ Manual dark mode toggle (add .dark class to <html>) _/
 .dark {
-  --color-background:  {{DARK_BACKGROUND}};
-  /* ... */
+--color-background: {{DARK_BACKGROUND}};
+/_ ... _/
 }
 Typography Scale
-css/* Base size: 16px. Scale: 1.25 (Major Third) */
-/* Use rem throughout — respects user browser font preferences */
+css/_ Base size: 16px. Scale: 1.25 (Major Third) _/
+/_ Use rem throughout — respects user browser font preferences _/
 
---text-xs:   0.75rem;   /* 12px — labels, captions */
---text-sm:   0.875rem;  /* 14px — secondary body, UI labels */
---text-base: 1rem;      /* 16px — primary body */
---text-lg:   1.125rem;  /* 18px — large body, card text */
---text-xl:   1.25rem;   /* 20px — subheadings */
---text-2xl:  1.5rem;    /* 24px — section titles */
---text-3xl:  1.875rem;  /* 30px — page titles (mobile) */
---text-4xl:  2.25rem;   /* 36px — hero headings (tablet+) */
---text-5xl:  3rem;      /* 48px — hero headings (desktop) */
+--text-xs: 0.75rem; /_ 12px — labels, captions _/
+--text-sm: 0.875rem; /_ 14px — secondary body, UI labels _/
+--text-base: 1rem; /_ 16px — primary body _/
+--text-lg: 1.125rem; /_ 18px — large body, card text _/
+--text-xl: 1.25rem; /_ 20px — subheadings _/
+--text-2xl: 1.5rem; /_ 24px — section titles _/
+--text-3xl: 1.875rem; /_ 30px — page titles (mobile) _/
+--text-4xl: 2.25rem; /_ 36px — hero headings (tablet+) _/
+--text-5xl: 3rem; /_ 48px — hero headings (desktop) _/
+
 ```
 
 ### Breakpoints (Mobile-First)
 ```
-xs:  375px   ← Minimum supported (small phones)
-sm:  640px   ← Large phones / small tablets
-md:  768px   ← Tablets portrait
-lg:  1024px  ← Tablets landscape / small laptops
-xl:  1280px  ← Desktops
-2xl: 1536px  ← Large desktops
+
+xs: 375px ← Minimum supported (small phones)
+sm: 640px ← Large phones / small tablets
+md: 768px ← Tablets portrait
+lg: 1024px ← Tablets landscape / small laptops
+xl: 1280px ← Desktops
+2xl: 1536px ← Large desktops
 Every component starts with the mobile layout. Breakpoint prefixes
 (sm:, md:, lg:) layer on larger styles. Never write desktop-first CSS.
 Spacing & Touch Targets
@@ -215,12 +221,14 @@ Section vertical spacing: py-12 → md:py-20 → lg:py-28
 
 Component Patterns
 tsx// Consistent card pattern
+
 <div className="rounded-lg border border-border bg-surface p-4 sm:p-6 shadow-card">
 
 // Consistent button sizing (always meets 44px touch target)
 <button className="min-h-11 px-4 py-2 ...">
 
 // Consistent page wrapper
+
 <main className="mx-auto w-full max-w-{{MAX_WIDTH}} px-4 sm:px-6 lg:px-8">
 // Common max-widths: max-w-sm (384), max-w-2xl (672), max-w-4xl (896),
 //                   max-w-6xl (1152), max-w-7xl (1280)
@@ -238,49 +246,52 @@ Modals/drawers: slide-up on mobile, fade+scale on desktop
 e.g., "Respect prefers-reduced-motion on all animations" /
 "Framer Motion for all transitions — spring physics"
 
-css/* Always respect reduced motion */
+css/_ Always respect reduced motion _/
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
+_, _::before, \*::after {
+animation-duration: 0.01ms !important;
+transition-duration: 0.01ms !important;
 }
+}
+
 ```
 
 ### Favicon & PWA Icons
 ```
+
 public/
-├── favicon.ico              ← 32×32 legacy fallback
-├── favicon.svg              ← Modern scalable (preferred by browsers)
-├── apple-touch-icon.png     ← 180×180 for iOS home screen
-├── icon-192.png             ← PWA manifest
-└── icon-512.png             ← PWA manifest splash
+├── favicon.ico ← 32×32 legacy fallback
+├── favicon.svg ← Modern scalable (preferred by browsers)
+├── apple-touch-icon.png ← 180×180 for iOS home screen
+├── icon-192.png ← PWA manifest
+└── icon-512.png ← PWA manifest splash
 {{APP_ICON_DESCRIPTION}}
 
 5. Data Models
-{{DATA_MODELS}}
-Define all TypeScript interfaces, types, and Zod schemas:
-typescript// types/index.ts — shared domain types
-export interface {{ModelName}} {
-  id: string
-  createdAt: Date
-  updatedAt: Date
-  // ...
-}
+   {{DATA_MODELS}}
+   Define all TypeScript interfaces, types, and Zod schemas:
+   typescript// types/index.ts — shared domain types
+   export interface {{ModelName}} {
+   id: string
+   createdAt: Date
+   updatedAt: Date
+   // ...
+   }
 
 // lib/validations.ts — Zod schemas (source of truth for forms + API)
 export const {{modelName}}Schema = z.object({
-  title: z.string().min(1, "Title is required").max(100),
-  // ...
+title: z.string().min(1, "Title is required").max(100),
+// ...
 })
 export type {{ModelName}}Input = z.infer<typeof {{modelName}}Schema>
 
 // server/db/schema.ts — Drizzle ORM schema (if using a DB)
 export const {{tableName}} = pgTable("{{table_name}}", {
-  id:        text("id").primaryKey().$defaultFn(() => createId()),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  // ...
+id: text("id").primaryKey().$defaultFn(() => createId()),
+createdAt: timestamp("created_at").defaultNow().notNull(),
+// ...
 })
+
 ```
 
 ---
@@ -291,31 +302,34 @@ export const {{tableName}} = pgTable("{{table_name}}", {
 
 *For each page/screen, specify:*
 ```
+
 Route: /{{path}}
 Component: app/{{path}}/page.tsx (Next.js) | src/routes/{{path}}.tsx (Vite)
 
 Mobile layout (375px):
 ┌─────────────────┐
-│ Header / Nav    │
+│ Header / Nav │
 ├─────────────────┤
-│                 │
-│  Content        │
-│                 │
+│ │
+│ Content │
+│ │
 └─────────────────┘
 
 Desktop layout (1280px):
 ┌──────┬──────────────────────┐
-│      │                      │
-│ Side │   Main Content       │
-│ bar  │                      │
-│      │                      │
+│ │ │
+│ Side │ Main Content │
+│ bar │ │
+│ │ │
 └──────┴──────────────────────┘
 
 Components:
+
 - <ComponentA /> — description
 - <ComponentB /> — description
 
 State variations:
+
 - Loading: skeleton placeholders
 - Empty: empty state with CTA
 - Error: error boundary with retry
@@ -323,9 +337,9 @@ State variations:
 - Authenticated vs. guest
 
 7. Monetization Configuration
-Strategy
-{{MONETIZATION_STRATEGY}}
-Choose one or more:
+   Strategy
+   {{MONETIZATION_STRATEGY}}
+   Choose one or more:
 
 Stripe one-time purchase (lifetime access)
 Stripe subscriptions (monthly / annual)
@@ -340,9 +354,9 @@ Why Stripe: More control, better docs, industry standard. Use stripe-js + Stripe
 Product IDs
 typescript// lib/products.ts
 export const PRODUCTS = {
-  {{PRODUCT_IDS}}
-  // Examples:
-  // LIFETIME:          { id: "{{VARIANT_ID}}", price: "$49", label: "Lifetime" },
+{{PRODUCT_IDS}}
+// Examples:
+// LIFETIME: { id: "{{VARIANT_ID}}", price: "$49", label: "Lifetime" },
   // PRO_MONTHLY:       { id: "{{VARIANT_ID}}", price: "$9/mo", label: "Pro Monthly" },
   // PRO_ANNUAL:        { id: "{{VARIANT_ID}}", price: "$79/yr", label: "Pro Annual" },
 } as const
@@ -355,17 +369,17 @@ export async function POST(req: Request) {
     line_items: [{ price: PRICE_ID, quantity: 1 }],
     success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url:  `${origin}/pricing`,
-    metadata: { userId },
-  })
-  return Response.json({ url: session.url })
+metadata: { userId },
+})
+return Response.json({ url: session.url })
 }
 
 // Webhook handler — ALWAYS verify Stripe signature
 // app/api/webhooks/stripe/route.ts
 export async function POST(req: Request) {
-  const sig = req.headers.get("stripe-signature")!
-  const event = stripe.webhooks.constructEvent(body, sig, WEBHOOK_SECRET)
-  // Handle: checkout.session.completed, customer.subscription.deleted, etc.
+const sig = req.headers.get("stripe-signature")!
+const event = stripe.webhooks.constructEvent(body, sig, WEBHOOK_SECRET)
+// Handle: checkout.session.completed, customer.subscription.deleted, etc.
 }
 Premium State Management
 typescript// Persist entitlement in DB, expose via server component or API
@@ -373,11 +387,12 @@ typescript// Persist entitlement in DB, expose via server component or API
 
 // middleware.ts — protect premium routes at the edge
 export function middleware(request: NextRequest) {
-  const isPremium = // check session / JWT
-  if (!isPremium && request.nextUrl.pathname.startsWith("/app/premium")) {
-    return NextResponse.redirect(new URL("/pricing", request.url))
-  }
+const isPremium = // check session / JWT
+if (!isPremium && request.nextUrl.pathname.startsWith("/app/premium")) {
+return NextResponse.redirect(new URL("/pricing", request.url))
 }
+}
+
 ```
 
 ### Paywall / Pricing Page Design
@@ -401,17 +416,18 @@ export function middleware(request: NextRequest) {
 
 *Choose one:*
 ```
-Clerk        — Fastest for solo devs. Pre-built UI, social logins,
-               organizations, webhooks. Generous free tier.
-               clerk.com
 
-NextAuth v5  — Open-source, self-hosted. More control, more setup.
-(Auth.js)      Supports 50+ OAuth providers + credentials.
-               authjs.dev
+Clerk — Fastest for solo devs. Pre-built UI, social logins,
+organizations, webhooks. Generous free tier.
+clerk.com
+
+NextAuth v5 — Open-source, self-hosted. More control, more setup.
+(Auth.js) Supports 50+ OAuth providers + credentials.
+authjs.dev
 
 Supabase Auth — If already using Supabase. Integrated with RLS policies.
 
-Lucia v3     — Lightweight, framework-agnostic. Full control, most setup.
+Lucia v3 — Lightweight, framework-agnostic. Full control, most setup.
 Protected Route Pattern
 typescript// middleware.ts (Next.js + Clerk example)
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
@@ -419,8 +435,9 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
 const isProtectedRoute = createRouteMatcher(["/app(.*)", "/api/protected(.*)"])
 
 export default clerkMiddleware((auth, req) => {
-  if (isProtectedRoute(req)) auth().protect()
+if (isProtectedRoute(req)) auth().protect()
 })
+
 ```
 
 ---
@@ -460,33 +477,40 @@ export default clerkMiddleware((auth, req) => {
 
 ### Mobile Navigation
 ```
+
 Mobile (< 768px):
+
 - Fixed bottom tab bar (max 5 items) — thumb-friendly, Material-style
   OR
 - Hamburger → full-screen slide-over drawer
 - Back navigation via browser history (no custom back buttons)
 
 Thumb Zone Rule:
+
 - Primary actions: bottom 40% of screen
 - Secondary actions: middle
 - Destructive / rarely-used: top
+
 ```
 
 ### Desktop Navigation
 ```
+
 Desktop (≥ 1024px):
+
 - Top navbar (marketing pages)
   OR
 - Left sidebar (app/dashboard pages, collapsible)
 - Breadcrumbs for deep navigation
-Navigation Component
-tsx// components/layout/MobileNav.tsx
-// Renders bottom tab bar on mobile, hidden on md+
+  Navigation Component
+  tsx// components/layout/MobileNav.tsx
+  // Renders bottom tab bar on mobile, hidden on md+
 
 // components/layout/Sidebar.tsx
 // Hidden on mobile (drawer on toggle), visible on lg+
 
 // Consistent nav link pattern with active state:
+
 <Link
   href="/dashboard"
   className={cn(
@@ -503,6 +527,7 @@ tsx// components/layout/MobileNav.tsx
 ## 12. Settings Page
 
 ### Structure
+
 ```
 /settings (or /app/settings)
 
@@ -527,6 +552,7 @@ redirect(portal.url)
 ```
 
 ### Cross-Promotion Banner (Settings footer)
+
 ```
 ┌─────────────────────────────────────────────────┐
 │ [Icon]  {{PROMO_TEXT}}                          │
@@ -810,10 +836,11 @@ pnpm dlx vercel
 # Or connect GitHub repo for automatic preview + production deploys
 ```
 
-*Vercel gives you: automatic HTTPS, CDN, preview URLs per PR, Edge Runtime,
-image optimization, Analytics. Free hobby tier is generous for solo devs.*
+_Vercel gives you: automatic HTTPS, CDN, preview URLs per PR, Edge Runtime,
+image optimization, Analytics. Free hobby tier is generous for solo devs._
 
 ### Alternative Platforms
+
 ```
 Netlify       — Similar to Vercel, great for static/SSG sites
 Railway       — Full-stack with DB hosting, good DX
@@ -823,6 +850,7 @@ Fly.io        — Containerized, good for latency-sensitive apps
 ```
 
 ### Database Hosting
+
 ```
 Neon          — Serverless Postgres, generous free tier, instant branch DBs
 Supabase      — Postgres + Auth + Storage + Realtime as a service
@@ -851,6 +879,7 @@ jobs:
 ---
 
 ## 22. Security Checklist
+
 ```
 Authentication & Authorization
   [ ] All API routes validate session/token — never trust client
@@ -887,15 +916,16 @@ Dependencies
 
 ### App Identity
 
-| Field | Value |
-|-------|-------|
-| **App Name** | {{APP_NAME}} |
-| **Domain** | {{APP_DOMAIN}} |
-| **Tagline** | {{APP_TAGLINE}} (max ~10 words) |
-| **Primary Category** | {{PRIMARY_CATEGORY}} |
-| **Target Audience** | {{TARGET_AUDIENCE}} |
+| Field                | Value                           |
+| -------------------- | ------------------------------- |
+| **App Name**         | {{APP_NAME}}                    |
+| **Domain**           | {{APP_DOMAIN}}                  |
+| **Tagline**          | {{APP_TAGLINE}} (max ~10 words) |
+| **Primary Category** | {{PRIMARY_CATEGORY}}            |
+| **Target Audience**  | {{TARGET_AUDIENCE}}             |
 
 ### Landing Page Structure
+
 ```
 /  (marketing homepage)
 ├── Hero          — headline, subheadline, primary CTA, hero image/demo
@@ -1074,3 +1104,4 @@ Safari does not support all CSS features at parity with Chrome — test on real 
 Stripe test card: 4242 4242 4242 4242, any future date, any CVC
 Run pnpm dlx shadcn@latest init to scaffold the component library
 Add "type": "module" to package.json for ESM-native config files
+```

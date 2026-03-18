@@ -3,7 +3,7 @@
  * Handles Refresh, Install PWA, and Logout actions
  */
 
-import { Button } from './Button.js';
+import { ButtonComponent } from './Button.js';
 import { Router } from '../core/router.js';
 import { AuthService } from '../core/auth-service.js';
 import { InstallService } from '../core/install.js';
@@ -24,7 +24,7 @@ export const GeneralSection = () => {
   section.appendChild(title);
 
   // Refresh App Button
-  const refreshBtn = Button({
+  const refreshBtn = ButtonComponent({
     text: 'Refresh App',
     variant: 'ghost',
     onClick: () => {
@@ -45,7 +45,7 @@ export const GeneralSection = () => {
   section.appendChild(refreshBtn);
 
   // Install App Button (Conditional)
-  const installBtn = Button({
+  const installBtn = ButtonComponent({
     text: 'Install App',
     variant: 'primary',
     onClick: async () => {
@@ -97,7 +97,7 @@ export const GeneralSection = () => {
   section.appendChild(installBtn);
 
   // Logout Button
-  const logoutBtn = Button({
+  const logoutBtn = ButtonComponent({
     text: 'Logout',
     variant: 'ghost',
     onClick: () => {

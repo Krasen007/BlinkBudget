@@ -75,6 +75,9 @@ export default [
         MessageChannel: 'readonly',
         Image: 'readonly',
         scheduler: 'readonly',
+        PerformanceObserver: 'readonly',
+        IntersectionObserver: 'readonly',
+        Node: 'readonly',
       },
     },
     rules: {

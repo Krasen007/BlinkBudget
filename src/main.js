@@ -18,7 +18,6 @@ import { PrivacyService } from './core/privacy-service.js';
 
 InstallService.init();
 
-
 const initApp = () => {
   const app = document.querySelector('#app');
   ViewManager.init(app);

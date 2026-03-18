@@ -3,7 +3,7 @@
  * UI for backup/restore operations in settings
  */
 
-import { Button } from './Button.js';
+import { ButtonComponent } from './Button.js';
 import { SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
 import { BackupService } from '../core/backup-service.js';
 import { SettingsService } from '../core/settings-service.js';
@@ -122,7 +122,7 @@ export const BackupRestoreSection = () => {
   buttonsContainer.style.flexDirection = 'column';
   buttonsContainer.style.gap = SPACING.SM;
 
-  const restoreBtn = Button({
+  const restoreBtn = ButtonComponent({
     text: 'Restore From Last Backup',
     variant: 'secondary',
     onClick: () => {
@@ -150,7 +150,7 @@ export const BackupRestoreSection = () => {
         });
     },
   });
-  restoreBtn.className += ' touch-target mobile-form-button';
+  restoreBtn.classList.add('touch-target', 'mobile-form-button');
   Object.assign(restoreBtn.style, {
     width: '100%',
     minHeight: TOUCH_TARGETS.MIN_HEIGHT,

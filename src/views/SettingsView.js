@@ -1,4 +1,4 @@
-import { Button } from '../components/Button.js';
+import { ButtonComponent } from '../components/Button.js';
 import { Router } from '../core/router.js';
 import { AccountSection } from '../components/AccountSection.js';
 import { DateFormatSection } from '../components/DateFormatSection.js';
@@ -93,7 +93,7 @@ export const SettingsView = () => {
       <p>Organize and customize your transaction categories</p>
     </div>
   `;
-  const manageCategoriesBtn = Button({
+  const manageCategoriesBtn = ButtonComponent({
     text: 'Manage Categories',
     variant: 'primary',
     onClick: () => Router.navigate('category-manager'),
@@ -160,7 +160,7 @@ export const SettingsView = () => {
   };
 
   // Done Button
-  const doneBtn = Button({
+  const doneBtn = ButtonComponent({
     text: 'Done',
     variant: 'primary',
     onClick: () => Router.navigate('dashboard'),

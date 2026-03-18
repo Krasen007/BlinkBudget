@@ -118,6 +118,10 @@
   --spacing-2xl: 2rem; /* 32px */
   --spacing-3xl: 3rem; /* 48px */
   --spacing-4xl: 4rem; /* 64px */
+  --spacing-5xl: 5rem; /* 80px */
+  --spacing-6xl: 6rem; /* 96px */
+  --spacing-7xl: 7rem; /* 112px */
+  --spacing-8xl: 8rem; /* 128px */
 
   /* Touch-friendly spacing */
   --touch-target-min: 44px;
@@ -218,6 +222,88 @@
   --animation-smooth: var(--duration-normal) var(--ease-out);
   --animation-entrance: var(--duration-normal) var(--ease-out);
   --animation-exit: var(--duration-fast) var(--ease-in);
+
+  /* WebApp.md Additional Design Tokens */
+
+  /* Container max-widths for different layouts */
+  --container-max-width-sm: 384px; /* max-w-sm */
+  --container-max-width-2xl: 672px; /* max-w-2xl */
+  --container-max-width-4xl: 896px; /* max-w-4xl */
+  --container-max-width-6xl: 1152px; /* max-w-6xl */
+  --container-max-width-7xl: 1280px; /* max-w-7xl */
+
+  /* Page horizontal padding responsive scale */
+  --page-padding-x-mobile: var(--spacing-lg); /* 16px */
+  --page-padding-x-tablet: var(--spacing-xl); /* 24px */
+  --page-padding-x-desktop: var(--spacing-2xl); /* 32px */
+
+  /* Card padding responsive scale */
+  --card-padding-mobile: var(--spacing-lg); /* 16px */
+  --card-padding-tablet: var(--spacing-xl); /* 24px */
+
+  /* Section vertical spacing responsive scale */
+  --section-spacing-mobile: var(--spacing-3xl); /* 48px */
+  --section-spacing-tablet: var(--spacing-5xl); /* 80px */
+  --section-spacing-desktop: var(--spacing-7xl); /* 112px */
+
+  /* Responsive typography with clamp() for fluid scaling */
+  --font-size-fluid-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --font-size-fluid-sm: clamp(0.875rem, 0.8rem + 0.375vw, 1rem);
+  --font-size-fluid-base: clamp(1rem, 0.925rem + 0.375vw, 1.125rem);
+  --font-size-fluid-lg: clamp(1.125rem, 1rem + 0.625vw, 1.25rem);
+  --font-size-fluid-xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem);
+  --font-size-fluid-2xl: clamp(1.5rem, 1.3rem + 1vw, 1.875rem);
+  --font-size-fluid-3xl: clamp(1.875rem, 1.6rem + 1.375vw, 2.25rem);
+  --font-size-fluid-4xl: clamp(2.25rem, 1.9rem + 1.75vw, 3rem);
+
+  /* Interactive element animations */
+  --hover-scale: scale(0.98);
+  --active-scale: scale(0.96);
+  --transition-hover: var(--duration-fast) var(--ease-out);
+  --transition-active: var(--duration-fast) var(--ease-in);
+
+  /* Page transition animations */
+  --page-transition-translate-y: 8px;
+  --page-transition-fade: opacity;
+  --page-transition:
+    transform var(--duration-normal) var(--ease-out),
+    opacity var(--duration-normal) var(--ease-out);
+
+  /* Loading shimmer animation */
+  --shimmer-gradient: linear-gradient(
+    90deg,
+    var(--color-surface) 0%,
+    var(--color-surface-hover) 50%,
+    var(--color-surface) 100%
+  );
+  --shimmer-animation: shimmer 2s infinite;
+
+  /* Modal/Drawer animations */
+  --modal-mobile-animation: slide-up var(--duration-normal) var(--ease-out);
+  --modal-desktop-animation: fade-scale var(--duration-normal) var(--ease-out);
+
+  /* Enhanced motion with reduced motion support */
+  --motion-safe: var(--duration-normal) var(--ease-out);
+  --motion-reduced: 0.01ms; /* Respect prefers-reduced-motion */
+
+  /* Component-specific shadows */
+  --shadow-card: var(--shadow-md);
+  --shadow-button: var(--shadow-sm);
+  --shadow-modal: var(--shadow-lg);
+  --shadow-tooltip: var(--shadow-lg);
+
+  /* Enhanced color system for better contrast */
+  --color-surface-elevated: hsl(240, 10%, 12%);
+  --color-surface-elevated-hover: hsl(240, 10%, 18%);
+  --color-text-on-surface: hsl(240, 10%, 85%);
+  --color-text-on-primary: hsl(250, 84%, 95%);
+
+  /* Additional semantic colors */
+  --color-muted: hsl(240, 5%, 25%);
+  --color-muted-dark: hsl(240, 5%, 15%);
+  --color-accent: hsl(280, 100%, 60%);
+  --color-accent-light: hsla(280, 100%, 60%, 0.1);
+  --color-accent-dark: hsl(280, 100%, 50%);
 }
 
 /* typography.css (Tokens) */

@@ -4,7 +4,7 @@
 
 **Goal**: Acquire existing finance-related subreddits to leverage their authority and member base  
 **Method**: $0 acquisition through community value proposition  
-**Timeline**: 30-90 days for initial acquisitions  
+**Timeline**: 30-90 days for initial acquisitions
 
 ---
 
@@ -13,12 +13,14 @@
 ### Primary Acquisition Targets
 
 #### 1. r/Budget (150K+ members)
+
 **Current Status**: Moderately active, 1-2 posts/day
 **Moderator Activity**: 1 active mod, 2 inactive (last active 2+ years)
 **Acquisition Potential**: HIGH
 **Strategy**: Contact inactive mods, offer to maintain and grow community
 
 **Value Proposition**:
+
 ```
 Hi [Mod Name],
 
@@ -43,18 +45,21 @@ Founder, BlinkBudget
 ```
 
 #### 2. r/PersonalFinanceApps (5K+ members)
+
 **Current Status**: Low activity, 1-2 posts/week
 **Moderator Activity**: 1 inactive mod (last active 1+ years)
 **Acquisition Potential**: VERY HIGH
 **Strategy**: Reddit admin request for moderator transfer
 
 #### 3. r/MoneyTracking (2K+ members)
+
 **Current Status**: Nearly dormant, 1-2 posts/month
 **Moderator Activity**: All mods inactive (6+ months)
 **Acquisition Potential**: VERY HIGH
 **Strategy**: Direct Reddit admin petition
 
 #### 4. r/ExpenseTracking (1K+ members)
+
 **Current Status**: Completely dormant
 **Moderator Activity**: All mods inactive (1+ years)
 **Acquisition Potential**: VERY HIGH
@@ -63,11 +68,13 @@ Founder, BlinkBudget
 ### Secondary Acquisition Targets
 
 #### r/QuickBudget (800 members)
+
 - **Status**: Inactive moderation
 - **Potential**: Medium - needs content revival
 - **Strategy**: Community value proposition
 
 #### r/SimpleBudgeting (500 members)
+
 - **Status**: Abandoned
 - **Potential**: High - easy admin transfer
 - **Strategy**: Direct Reddit petition
@@ -77,10 +84,12 @@ Founder, BlinkBudget
 ## 🛠️ Acquisition Process
 
 ### Step 1: Research & Identification
+
 **Timeline**: Week 1
 **Tools**: RedditMetrics.com, SubredditStats.com, manual review
 
 **Research Checklist**:
+
 - [ ] Member count and growth trends
 - [ ] Post frequency and engagement rates
 - [ ] Moderator activity levels
@@ -89,6 +98,7 @@ Founder, BlinkBudget
 - [ ] Spam/moderation issues
 
 **Tracking Spreadsheet**:
+
 ```csv
 Subreddit,Members,Activity,Moderators,Last_Mod_Activity,Acquisition_Potential,Strategy
 r/Budget,150000,Medium,3,2_years,High,Direct_Contact
@@ -97,10 +107,12 @@ r/MoneyTracking,2000,Dormant,3,6_months,Very_High,Admin_Petition
 ```
 
 ### Step 2: Moderator Outreach
+
 **Timeline**: Week 2-3
 **Method**: Personalized Reddit DMs and email (if available)
 
 **Outreach Template**:
+
 ```
 Subject: Growing r/[SubredditName] together
 
@@ -130,10 +142,12 @@ Best regards,
 ```
 
 ### Step 3: Reddit Admin Request
+
 **Timeline**: Week 4-6
 **Trigger**: No response from moderators after 2 weeks
 
 **Admin Request Template**:
+
 ```
 Subject: Moderator Request for r/[SubredditName]
 
@@ -169,10 +183,12 @@ u/[YourUsername]
 ```
 
 ### Step 4: Community Takeover & Growth
+
 **Timeline**: Week 7-12
 **Focus**: Immediate value delivery and community building
 
 **First 7 Days Plan**:
+
 - **Day 1**: Introduction post, community guidelines review
 - **Day 2**: Clean up spam, approve pending posts
 - **Day 3**: "State of the Subreddit" discussion
@@ -188,15 +204,20 @@ u/[YourUsername]
 ### Widget Link Implementation
 
 **Widget Configuration**:
+
 ```html
 <div class="reddit-widget">
   <h3>BlinkBudget - 3-Click Budgeting</h3>
-  <p>Track expenses faster than any other app. Free, privacy-first, works offline.</p>
+  <p>
+    Track expenses faster than any other app. Free, privacy-first, works
+    offline.
+  </p>
   <a href="https://blinkbudget.app" target="_blank">Try BlinkBudget Free</a>
 </div>
 ```
 
 **SEO Value**:
+
 - **DR Transfer**: Reddit DR 95 → BlinkBudget
 - **Traffic**: 500-1000 monthly visitors per subreddit
 - **Authority**: Relevant, contextual backlink
@@ -205,12 +226,14 @@ u/[YourUsername]
 ### Community Value Delivery
 
 **Content Strategy**:
+
 - **Daily Posts**: Engaging questions, tips, challenges
 - **Weekly Features**: Expert AMAs, success stories, tool reviews
 - **Monthly Events**: Budgeting challenges, giveaways, community highlights
 - **Expert Resources**: Financial advisors, CPAs, investment experts
 
 **Growth Tactics**:
+
 - **Cross-Promotion**: Partner with complementary subreddits
 - **Influencer Outreach**: Invite finance experts to participate
 - **User-Generated Content**: Encourage community members to share
@@ -221,24 +244,28 @@ u/[YourUsername]
 ## 📈 Success Metrics & Tracking
 
 ### Acquisition KPIs
+
 - **Subreddits Acquired**: Target 3-5 in first 90 days
 - **Total Members Reached**: 200K+ across acquired communities
 - **Moderator Response Rate**: 30%+ positive responses
 - **Admin Request Success**: 80%+ approval rate
 
 ### Community Growth KPIs
+
 - **Member Growth**: 20%+ monthly increase
 - **Engagement Rate**: 10%+ upvote rate, 5%+ comment rate
 - **Post Frequency**: 1+ quality posts daily
 - **Active Users**: 15%+ of members engage monthly
 
 ### Business Impact KPIs
+
 - **Referral Traffic**: 1000+ monthly visitors from Reddit
 - **User Acquisition**: 100+ new users monthly
 - **Backlink Value**: $5000+ monthly equivalent value
 - **Domain Authority**: 20+ DR increase within 6 months
 
 ### Tracking Dashboard
+
 ```javascript
 // Acquisition tracking
 const acquisitionMetrics = {
@@ -249,7 +276,7 @@ const acquisitionMetrics = {
   total_members_acquired: 0,
   monthly_referral_traffic: 0,
   conversion_rate: 0,
-  estimated_seo_value: 0
+  estimated_seo_value: 0,
 };
 ```
 
@@ -258,7 +285,9 @@ const acquisitionMetrics = {
 ## 🛡️ Risk Mitigation
 
 ### Reddit Policy Compliance
+
 **Rules to Follow**:
+
 - **No Spam**: Provide genuine value before any promotion
 - **Transparency**: Disclose affiliation with BlinkBudget
 - **Community First**: Focus on helping members, not self-promotion
@@ -266,6 +295,7 @@ const acquisitionMetrics = {
 - **Quality Content**: Maintain high standards for all posts
 
 **Content Guidelines**:
+
 - 80% value content, 20% promotion
 - No repetitive self-promotion
 - Engage authentically with community
@@ -275,12 +305,14 @@ const acquisitionMetrics = {
 ### Contingency Planning
 
 **If Acquisition Fails**:
+
 - **Focus on r/BlinkBudget**: Build owned community
 - **Guest Posting**: Provide value in other communities
 - **Partnerships**: Collaborate with existing moderators
 - **Organic Growth**: Let community grow naturally
 
 **If Community Rejects**:
+
 - **Listen to Feedback**: Adjust approach based on community response
 - **Step Back Gracefully**: If not welcome, don't force it
 - **Learn and Adapt**: Use rejection as learning opportunity
@@ -291,24 +323,28 @@ const acquisitionMetrics = {
 ## 📅 Implementation Timeline
 
 ### Month 1: Research & Outreach
+
 - **Week 1**: Identify target subreddits, research moderator activity
 - **Week 2**: Begin moderator outreach with personalized messages
 - **Week 3**: Follow up with non-responding moderators
 - **Week 4**: Submit Reddit admin requests for inactive communities
 
 ### Month 2: Acquisition & Setup
+
 - **Week 5**: Receive moderator access, set up widgets
 - **Week 6**: Introduction posts, community guidelines
 - **Week 7**: Daily content schedule implementation
 - **Week 8**: First expert AMAs, community challenges
 
 ### Month 3: Growth & Optimization
+
 - **Week 9**: Cross-promotion campaigns
 - **Week 10**: Community feedback and optimization
 - **Week 11**: Advanced growth strategies
 - **Week 12**: Performance review and planning
 
 ### Months 4-6: Scaling
+
 - **Community Building**: Focus on member engagement and retention
 - **Content Authority**: Become go-to resource in niche
 - **Monetization**: Optimize widget placement and conversion
@@ -319,18 +355,21 @@ const acquisitionMetrics = {
 ## 🎯 Expected Outcomes
 
 ### Short-term (3 months)
+
 - **3-5 subreddits acquired** with 50K+ total members
 - **500+ monthly referral visitors** to BlinkBudget
 - **50+ new users** acquired from Reddit
 - **DR 15+ increase** from Reddit backlinks
 
 ### Medium-term (6 months)
+
 - **10+ subreddits acquired** with 200K+ total members
 - **2000+ monthly referral visitors**
 - **200+ new users** acquired monthly
 - **DR 25+ increase** and top 50 rankings for key terms
 
 ### Long-term (12 months)
+
 - **20+ subreddits acquired** with 500K+ total members
 - **5000+ monthly referral visitors**
 - **1000+ new users** acquired monthly
@@ -350,7 +389,7 @@ const acquisitionMetrics = {
 
 ---
 
-*Acquisition Plan Version 1.0*
-*Last Updated: March 2026*
-*Review Frequency: Bi-weekly*
-*Strategy Owner: Growth Team*
+_Acquisition Plan Version 1.0_
+_Last Updated: March 2026_
+_Review Frequency: Bi-weekly_
+_Strategy Owner: Growth Team_

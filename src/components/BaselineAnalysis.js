@@ -41,15 +41,15 @@ export const BaselineAnalysis = ({
     // Header
     const header = document.createElement('div');
     header.className = 'baseline-header';
-    
+
     const h3 = document.createElement('h3');
     h3.className = 'baseline-title';
     h3.textContent = `${category ? `${category} Spending` : 'Overall Spending'} Baseline`;
-    
+
     const periodDiv = document.createElement('div');
     periodDiv.className = 'baseline-period';
     periodDiv.textContent = `Per ${period}`;
-    
+
     header.appendChild(h3);
     header.appendChild(periodDiv);
     container.appendChild(header);
@@ -252,19 +252,21 @@ export const BaselineAnalysis = ({
     container.innerHTML = '';
     const wrapper = document.createElement('div');
     wrapper.className = 'baseline-no-data';
-    
+
     const icon = document.createElement('div');
     icon.className = 'no-data-icon';
     icon.textContent = '📊';
-    
+
     const title = document.createElement('div');
     title.className = 'no-data-title';
     title.textContent = 'No Data Available';
-    
+
     const desc = document.createElement('div');
     desc.className = 'no-data-description';
-    desc.textContent = category ? `No expense data found for ${category}` : 'No expense data available';
-    
+    desc.textContent = category
+      ? `No expense data found for ${category}`
+      : 'No expense data available';
+
     wrapper.appendChild(icon);
     wrapper.appendChild(title);
     wrapper.appendChild(desc);

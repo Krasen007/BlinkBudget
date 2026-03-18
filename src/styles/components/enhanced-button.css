@@ -1,0 +1,345 @@
+/* Enhanced Button Component Styles - WebApp.md Button Pattern */
+
+.btn {
+  /* Base styles using webapp.md tokens */
+  min-height: var(--touch-target-min);
+  padding: 0 var(--spacing-lg);
+  border-radius: var(--radius-md);
+  border: none;
+  background-color: var(--color-primary);
+  color: var(--color-text-on-primary);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  font-family: var(--font-body);
+  line-height: var(--line-height-normal);
+  cursor: pointer;
+  transition: var(--transition-hover);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:focus-visible {
+  outline: var(--focus-width) solid var(--focus-color);
+  outline-offset: var(--focus-offset);
+  box-shadow: var(--focus-shadow);
+}
+
+.btn:hover {
+  transform: var(--hover-scale);
+  box-shadow: var(--shadow-button);
+}
+
+.btn:active {
+  transform: var(--active-scale);
+}
+
+/* Button Variants */
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-text-on-primary);
+}
+
+.btn-secondary {
+  background-color: var(--color-surface-elevated);
+  color: var(--color-text-main);
+  border: 1px solid var(--color-border);
+}
+
+.btn-success {
+  background-color: var(--color-success);
+  color: white;
+}
+
+.btn-warning {
+  background-color: var(--color-warning);
+  color: white;
+}
+
+.btn-error {
+  background-color: var(--color-error);
+  color: white;
+}
+
+/* Button Sizes */
+.btn-small {
+  min-height: 36px;
+  padding: 0 var(--spacing-md);
+  font-size: var(--font-size-sm);
+}
+
+.btn-medium {
+  min-height: var(--touch-target-min);
+  padding: 0 var(--spacing-lg);
+  font-size: var(--font-size-base);
+}
+
+.btn-large {
+  min-height: var(--touch-target-standard);
+  padding: 0 var(--spacing-xl);
+  font-size: var(--font-size-lg);
+}
+
+/* Button States */
+.btn-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn-disabled:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-loading {
+  cursor: wait;
+  opacity: 0.8;
+}
+
+.btn-loading:hover {
+  transform: none !important;
+}
+
+/* Full Width Button */
+.btn-full-width {
+  width: 100%;
+  display: flex;
+}
+
+/* Button Content */
+.btn-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  position: relative;
+  z-index: 1;
+}
+
+/* Button Icons */
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-icon-left {
+  order: -1;
+  margin-right: var(--spacing-sm);
+  margin-left: 0;
+}
+
+.btn-icon-right {
+  order: 1;
+  margin-left: var(--spacing-sm);
+  margin-right: 0;
+}
+
+/* Button Loading Spinner */
+.btn-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.btn-spinner .spinner-inner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Touch Active State */
+.btn-touch-active {
+  transform: var(--active-scale) !important;
+  transition: transform var(--transition-active);
+}
+
+/* Focus Management for Accessibility */
+.btn:focus {
+  outline: none;
+}
+
+.btn:not(:focus-visible) {
+  outline: none;
+}
+
+/* Link-style Buttons */
+.btn[href] {
+  text-decoration: none;
+}
+
+.btn[href]:hover {
+  text-decoration: none;
+}
+
+/* Button Groups */
+.btn-group {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.btn-group .btn {
+  flex: 1;
+}
+
+.btn-group .btn:not(:first-child) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.btn-group .btn:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: none;
+}
+
+/* Responsive Button Adjustments */
+@media (--md) {
+  .btn-small {
+    min-height: var(--touch-target-min);
+    padding: 0 var(--spacing-lg);
+  }
+
+  .btn-medium {
+    min-height: var(--touch-target-standard);
+    padding: 0 var(--spacing-xl);
+  }
+
+  .btn-large {
+    min-height: 48px;
+    padding: 0 var(--spacing-2xl);
+  }
+}
+
+/* Performance Optimizations */
+.btn {
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+.btn:hover {
+  will-change: transform, box-shadow;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+
+  .btn:hover {
+    transform: none;
+  }
+
+  .btn:active {
+    transform: none;
+  }
+
+  .btn-spinner .spinner-inner {
+    animation: none;
+    border-top-color: currentColor;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .btn {
+    border: 2px solid var(--color-text-main);
+  }
+
+  .btn-primary {
+    background-color: var(--color-text-main);
+    color: var(--color-background);
+  }
+
+  .btn-secondary {
+    background-color: var(--color-background);
+    color: var(--color-text-main);
+  }
+}
+
+/* Dark Mode Support (if implemented) */
+@media (prefers-color-scheme: light) {
+  .btn-secondary {
+    background-color: var(--color-surface);
+    border-color: var(--color-border-strong);
+  }
+
+  .btn:hover {
+    box-shadow: var(--shadow-md);
+  }
+}
+
+/* Button Animation Keyframes */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Loading State Animation */
+@keyframes btn-pulse {
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.btn-loading {
+  animation: btn-pulse 1.5s ease-in-out infinite;
+}
+
+/* Success/Error State Animations */
+.btn-success {
+  background: var(--gradient-success);
+}
+
+.btn-error {
+  background: var(--gradient-error);
+}
+
+.btn-warning {
+  background: var(--gradient-warning);
+}
+
+/* Icon Button Variants */
+.btn-icon-only {
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  padding: 0;
+  border-radius: 50%;
+}
+
+.btn-icon-only.btn-small {
+  min-height: 36px;
+  min-width: 36px;
+}
+
+.btn-icon-only.btn-large {
+  min-height: var(--touch-target-standard);
+  min-width: var(--touch-target-standard);
+}

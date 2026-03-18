@@ -3,7 +3,7 @@
  * GDPR-compliant account deletion interface
  */
 
-import { Button } from './Button.js';
+import { ButtonComponent } from './Button.js';
 import { SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
 
 export const AccountDeletionSection = () => {
@@ -85,7 +85,7 @@ export const AccountDeletionSection = () => {
   section.appendChild(dataSummaryBox);
 
   // Delete Account Button
-  const deleteBtn = Button({
+  const deleteBtn = ButtonComponent({
     text: '🗑️ Delete My Account',
     variant: 'danger',
     onClick: async () => {

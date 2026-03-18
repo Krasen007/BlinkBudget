@@ -1,6 +1,6 @@
 import { AuthService } from '../core/auth-service.js';
 import { Router } from '../core/router.js';
-import { Button } from '../components/Button.js';
+import { ButtonComponent } from '../components/Button.js';
 import { COLORS, SPACING, FONT_SIZES } from '../utils/constants.js';
 import {
   validatePasswordStrength,
@@ -80,7 +80,7 @@ const createPasswordResetModal = () => {
     display: 'none',
   });
 
-  const submitBtn = Button({
+  const submitBtn = ButtonComponent({
     text: 'Send Reset Link',
     variant: 'primary',
     onClick: async e => {
@@ -120,7 +120,7 @@ const createPasswordResetModal = () => {
     },
   });
 
-  const cancelBtn = Button({
+  const cancelBtn = ButtonComponent({
     text: 'Cancel',
     variant: 'ghost',
     onClick: () => {
@@ -219,7 +219,7 @@ export const LoginView = () => {
 
   let isSignup = false;
 
-  const submitBtn = Button({
+  const submitBtn = ButtonComponent({
     text: 'Login',
     variant: 'primary',
     onClick: async e => {
@@ -294,7 +294,7 @@ export const LoginView = () => {
   separator.appendChild(orText);
   separator.appendChild(line2);
 
-  const googleBtn = Button({
+  const googleBtn = ButtonComponent({
     text: 'Sign in with Google',
     variant: 'ghost',
     className: 'btn-google',

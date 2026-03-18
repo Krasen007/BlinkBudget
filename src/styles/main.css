@@ -12,9 +12,14 @@
 @import './components/tutorial.css';
 @import './components/reports.css';
 @import './components/inflation-trends.css';
+@import './components/webapp-components.css';
+@import './components/enhanced-button.css';
+@import './components/enhanced-input.css';
+@import './components/performance-accessibility.css';
 
 /* 4. Mobile-specific styles (depends on tokens, base, components) */
 @import './mobile.css';
 
 /* 5. Utility classes (depends on tokens) */
 @import './utilities/view-styles.css';
+@import './utilities/webapp-patterns.css';

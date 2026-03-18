@@ -1,4 +1,4 @@
-import { Button } from '../components/Button.js';
+import { ButtonComponent } from '../components/Button.js';
 import { DashboardStatsCard } from '../components/DashboardStatsCard.js';
 import { TransactionList } from '../components/TransactionList.js';
 import { createQuickAmountPresets } from '../components/QuickAmountPresets.js';
@@ -408,7 +408,7 @@ export const DashboardView = () => {
     content._cleanupFunctions.push(destroyQuickPresets);
 
     // Action Button
-    const addBtn = Button({
+    const addBtn = ButtonComponent({
       text: '+ Add Transaction',
       onClick: () => {
         const params =
@@ -418,12 +418,27 @@ export const DashboardView = () => {
         Router.navigate('add-expense', params);
       },
       variant: 'primary',
+      disabled: false, // Explicitly set to false
     });
-    addBtn.style.width = '100%';
-    addBtn.style.margin = '0';
-    addBtn.style.marginBottom = SPACING.XS;
-    addBtn.style.flexShrink = '0'; // Prevent button from shrinking
-    content.appendChild(addBtn);
+
+    if (addBtn) {
+      addBtn.style.width = '100%';
+      addBtn.style.margin = '0';
+      addBtn.style.marginBottom = SPACING.XS;
+      addBtn.style.flexShrink = '0'; // Prevent button from shrinking
+      content.appendChild(addBtn);
+    } else {
+      console.warn('Add Transaction button failed to render', { addBtn });
+      // Create a fallback disabled button
+      const fallbackBtn = document.createElement('button');
+      fallbackBtn.textContent = '+ Add Transaction';
+      fallbackBtn.disabled = true;
+      fallbackBtn.style.width = '100%';
+      fallbackBtn.style.margin = '0';
+      fallbackBtn.style.marginBottom = SPACING.XS;
+      fallbackBtn.style.flexShrink = '0';
+      content.appendChild(fallbackBtn);
+    }
 
     // Recent Transactions
     const highlightTransactionIds = getTransactionToHighlight();

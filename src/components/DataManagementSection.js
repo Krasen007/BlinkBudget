@@ -3,7 +3,7 @@
  * Handles CSV export functionality
  */
 
-import { Button } from './Button.js';
+import { ButtonComponent } from './Button.js';
 import { DateInput } from './DateInput.js';
 import { TransactionService } from '../core/transaction-service.js';
 import {
@@ -85,7 +85,7 @@ export const DataManagementSection = () => {
   dateRangeContainer.appendChild(startInput.wrapper);
   dateRangeContainer.appendChild(endInput.wrapper);
 
-  const exportBtn = Button({
+  const exportBtn = ButtonComponent({
     text: 'Export Transactions (CSV)',
     variant: 'primary',
     onClick: () => {
@@ -153,7 +153,7 @@ export const DataManagementSection = () => {
   emergencyTitle.style.color = 'var(--color-primary-light)';
   section.appendChild(emergencyTitle);
 
-  const emergencyBtn = Button({
+  const emergencyBtn = ButtonComponent({
     text: '⚠️ Emergency JSON Export',
     variant: 'secondary',
     onClick: async () => {
@@ -217,7 +217,7 @@ export const DataManagementSection = () => {
   section.appendChild(spacing);
 
   // Data Integrity Check Button
-  const integrityBtn = Button({
+  const integrityBtn = ButtonComponent({
     text: '🔍 Data Integrity Check',
     variant: 'secondary',
     onClick: async () => {
@@ -287,7 +287,7 @@ export const DataManagementSection = () => {
   section.appendChild(spacing2);
 
   // Data Cleanup Button
-  const cleanupBtn = Button({
+  const cleanupBtn = ButtonComponent({
     text: '🔧 Fix Data Issues',
     variant: 'secondary',
     onClick: async () => {
@@ -357,7 +357,7 @@ export const DataManagementSection = () => {
   section.appendChild(spacing3);
 
   // Emergency Recovery Button
-  const recoveryBtn = Button({
+  const recoveryBtn = ButtonComponent({
     text: '🚨 Emergency Recovery',
     variant: 'secondary',
     onClick: async () => {
@@ -433,7 +433,7 @@ export const DataManagementSection = () => {
   section.appendChild(spacing4);
 
   // Restore from Backup Button
-  const restoreBtn = Button({
+  const restoreBtn = ButtonComponent({
     text: '📂 Restore from Backup',
     variant: 'secondary',
     onClick: async () => {

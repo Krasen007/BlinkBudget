@@ -5,7 +5,7 @@
  */
 
 import { CustomCategoryService } from '../core/custom-category-service.js';
-import { Button } from './Button.js';
+import { ButtonComponent } from './Button.js';
 import { Router } from '../core/router.js';
 
 export const CustomCategoryManager = ({
@@ -51,7 +51,7 @@ export const CustomCategoryManager = ({
   leftSide.style.alignItems = 'center';
   leftSide.style.gap = 'var(--spacing-md)';
 
-  const backButton = Button({
+  const backButton = ButtonComponent({
     text: '← Back',
     variant: 'ghost',
     onClick: () => Router.navigate('settings'),
@@ -69,7 +69,7 @@ export const CustomCategoryManager = ({
   `;
   leftSide.appendChild(title);
 
-  const addButton = Button({
+  const addButton = ButtonComponent({
     text: 'Add',
     variant: 'primary',
     onClick: () => showCategoryForm(),
@@ -597,15 +597,16 @@ export const CustomCategoryManager = ({
       margin-top: var(--spacing-md);
     `;
 
-    const cancelButton = Button({
+    const cancelButton = ButtonComponent({
       text: 'Cancel',
       variant: 'ghost',
       onClick: () => closeModal(),
     });
 
-    const saveButton = Button({
+    const saveButton = ButtonComponent({
       text: isEdit ? 'Update' : 'Create',
       variant: 'primary',
+      type: 'button',
       onClick: e => {
         e.preventDefault();
         saveCategory();

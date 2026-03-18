@@ -65,10 +65,16 @@ export const BaselineService = {
 
     // Find the boundary dates to anchor our lookback without skewing averages
     // for periods before the user started
-    const maxDateStr = filteredTransactions.reduce((acc, t) => Math.max(acc, new Date(t.timestamp).getTime()), Number.NEGATIVE_INFINITY);
-    const minDateStr = filteredTransactions.reduce((acc, t) => Math.min(acc, new Date(t.timestamp).getTime()), Number.POSITIVE_INFINITY);
-    const maxDate = new Date(maxDateStr);
-    const minDate = new Date(minDateStr);
+    const maxTimestamp = filteredTransactions.reduce(
+      (acc, t) => Math.max(acc, new Date(t.timestamp).getTime()),
+      Number.NEGATIVE_INFINITY
+    );
+    const minTimestamp = filteredTransactions.reduce(
+      (acc, t) => Math.min(acc, new Date(t.timestamp).getTime()),
+      Number.POSITIVE_INFINITY
+    );
+    const maxDate = new Date(maxTimestamp);
+    const minDate = new Date(minTimestamp);
 
     // Count theoretical periods from minDate to maxDate
     let actualPeriods = 1;

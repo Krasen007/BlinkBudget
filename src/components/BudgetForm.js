@@ -5,7 +5,7 @@
  */
 
 import { COLORS, SPACING, FONT_SIZES } from '../utils/constants.js';
-import { Button } from './Button.js';
+import { ButtonComponent } from './Button.js';
 import { getColorForCategory } from '../utils/reports-charts.js';
 
 /**
@@ -92,7 +92,7 @@ export const BudgetForm = ({
   actions.style.gap = SPACING.SM;
   actions.style.marginTop = SPACING.XS;
 
-  const saveBtn = Button({
+  const saveBtn = ButtonComponent({
     text: 'Save Budget',
     onClick: () => {
       const raw = (input.value || '').trim();
@@ -107,7 +107,7 @@ export const BudgetForm = ({
   saveBtn.style.backgroundColor = categoryColor;
   saveBtn.style.borderColor = categoryColor;
 
-  const cancelBtn = Button({
+  const cancelBtn = ButtonComponent({
     text: 'Cancel',
     onClick: onCancel,
     variant: 'ghost',

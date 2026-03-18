@@ -112,7 +112,7 @@
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
-  
+
   .inflation-controls .segmented-control::-webkit-scrollbar {
     display: none;
   }

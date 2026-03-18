@@ -1,4 +1,4 @@
-import { Button } from './Button.js';
+import { ButtonComponent } from './Button.js';
 import {
   MobileConfirmDialog,
   MobileAlert,
@@ -52,16 +52,16 @@ export const ConfirmDialog = ({
   btnGroup.style.gap = 'var(--spacing-md)';
   btnGroup.style.justifyContent = 'center';
 
-  const cancelBtn = Button({
+  const cancelBtn = ButtonComponent({
     text: 'Cancel',
-    className: 'btn-ghost',
+    variant: 'secondary',
     onClick: () => {
       document.body.removeChild(overlay);
       if (onCancel) onCancel();
     },
   });
 
-  const confirmBtn = Button({
+  const confirmBtn = ButtonComponent({
     text: confirmText,
     variant: variant,
     onClick: () => {
@@ -117,7 +117,7 @@ export const AlertDialog = ({
   text.style.marginBottom = 'var(--spacing-lg)';
   text.style.textAlign = 'center';
 
-  const okBtn = Button({
+  const okBtn = ButtonComponent({
     text: buttonText,
     variant: 'primary',
     onClick: () => {
@@ -188,7 +188,7 @@ export const PromptDialog = ({
   btnGroup.style.display = 'flex';
   btnGroup.style.gap = 'var(--spacing-md)';
 
-  const cancelBtn = Button({
+  const cancelBtn = ButtonComponent({
     text: 'Cancel',
     variant: 'secondary',
     onClick: () => {
@@ -198,7 +198,7 @@ export const PromptDialog = ({
   });
   cancelBtn.style.flex = '1';
 
-  const saveBtn = Button({
+  const saveBtn = ButtonComponent({
     text: 'Save',
     variant: 'primary',
     onClick: () => {

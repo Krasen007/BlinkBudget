@@ -1,5 +1,5 @@
 import { Router } from '../core/router.js';
-import { Button } from '../components/Button.js';
+import { ButtonComponent } from '../components/Button.js';
 
 export const LandingView = () => {
   const container = document.createElement('div');
@@ -114,7 +114,7 @@ export const LandingView = () => {
   const buttonContainer = document.createElement('div');
   buttonContainer.style.marginTop = '2rem';
 
-  const getStartedBtn = Button({
+  const getStartedBtn = ButtonComponent({
     text: 'Get Started',
     variant: 'primary',
     onClick: () => {

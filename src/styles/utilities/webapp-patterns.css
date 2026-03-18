@@ -1,0 +1,464 @@
+/* WebApp.md Pattern Utilities - Enhanced component patterns and responsive utilities */
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: var(--motion-reduced) !important;
+    transition-duration: var(--motion-reduced) !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Responsive Page Wrapper Pattern */
+.page-wrapper {
+  width: 100%;
+  margin: 0 auto;
+  padding-left: var(--page-padding-x-mobile);
+  padding-right: var(--page-padding-x-mobile);
+}
+
+@media (--md) {
+  .page-wrapper {
+    padding-left: var(--page-padding-x-tablet);
+    padding-right: var(--page-padding-x-tablet);
+  }
+}
+
+@media (--lg) {
+  .page-wrapper {
+    padding-left: var(--page-padding-x-desktop);
+    padding-right: var(--page-padding-x-desktop);
+  }
+}
+
+/* Container Max Width Patterns */
+.container-sm {
+  max-width: var(--container-max-width-sm);
+}
+
+.container-2xl {
+  max-width: var(--container-max-width-2xl);
+}
+
+.container-4xl {
+  max-width: var(--container-max-width-4xl);
+}
+
+.container-6xl {
+  max-width: var(--container-max-width-6xl);
+}
+
+.container-7xl {
+  max-width: var(--container-max-width-7xl);
+}
+
+/* Consistent Card Pattern */
+.card {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  padding: var(--card-padding-mobile);
+  box-shadow: var(--shadow-card);
+  transition: var(--transition-normal);
+}
+
+.card:hover {
+  background-color: var(--color-surface-hover);
+  transform: var(--hover-scale);
+}
+
+@media (--md) {
+  .card {
+    padding: var(--card-padding-tablet);
+  }
+}
+
+/* Consistent Button Pattern with 44px Touch Target */
+.btn {
+  min-height: var(--touch-target-min);
+  padding: 0 var(--spacing-lg);
+  border-radius: var(--radius-md);
+  border: none;
+  background-color: var(--color-primary);
+  color: var(--color-text-on-primary);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-hover);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:hover {
+  transform: var(--hover-scale);
+  box-shadow: var(--shadow-button);
+}
+
+.btn:active {
+  transform: var(--active-scale);
+}
+
+.btn:focus-visible {
+  outline: var(--focus-width) solid var(--focus-color);
+  outline-offset: var(--focus-offset);
+  box-shadow: var(--focus-shadow);
+}
+
+/* Button Variants */
+.btn-secondary {
+  background-color: var(--color-surface-elevated);
+  color: var(--color-text-main);
+  border: 1px solid var(--color-border);
+}
+
+.btn-success {
+  background-color: var(--color-success);
+  color: white;
+}
+
+.btn-warning {
+  background-color: var(--color-warning);
+  color: white;
+}
+
+.btn-error {
+  background-color: var(--color-error);
+  color: white;
+}
+
+/* Fluid Typography Classes */
+.text-fluid-xs {
+  font-size: var(--font-size-fluid-xs);
+}
+
+.text-fluid-sm {
+  font-size: var(--font-size-fluid-sm);
+}
+
+.text-fluid-base {
+  font-size: var(--font-size-fluid-base);
+}
+
+.text-fluid-lg {
+  font-size: var(--font-size-fluid-lg);
+}
+
+.text-fluid-xl {
+  font-size: var(--font-size-fluid-xl);
+}
+
+.text-fluid-2xl {
+  font-size: var(--font-size-fluid-2xl);
+}
+
+.text-fluid-3xl {
+  font-size: var(--font-size-fluid-3xl);
+}
+
+.text-fluid-4xl {
+  font-size: var(--font-size-fluid-4xl);
+}
+
+/* Interactive Element States */
+.interactive {
+  transition: var(--transition-hover);
+  cursor: pointer;
+}
+
+.interactive:hover {
+  transform: var(--hover-scale);
+}
+
+.interactive:active {
+  transform: var(--active-scale);
+}
+
+/* Loading Shimmer Pattern */
+.shimmer {
+  background: var(--shimmer-gradient);
+  background-size: 200% 100%;
+  animation: var(--shimmer-animation);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Page Transition Animation */
+
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(var(--page-transition-translate-y));
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: var(--page-transition);
+}
+
+.page-transition-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transform: translateY(calc(-1 * var(--page-transition-translate-y)));
+  transition: var(--page-transition);
+}
+
+/* Modal Animations */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  transition: var(--animation-smooth);
+}
+
+.modal-overlay.active {
+  opacity: 1;
+}
+
+.modal-content {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal);
+  max-width: var(--modal-max-width);
+  width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+  transform: var(--hover-scale);
+  transition: var(--modal-desktop-animation);
+}
+
+@media (--md) {
+  .modal-content {
+    transform: translateY(100%);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    max-height: 80vh;
+    width: 100vw;
+    max-width: none;
+  }
+
+  .modal-overlay.active .modal-content {
+    transform: translateY(0);
+    transition: var(--modal-mobile-animation);
+  }
+}
+
+/* Skip Link for Accessibility */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--color-primary);
+  color: var(--color-text-on-primary);
+  padding: var(--spacing-sm) var(--spacing-md);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  z-index: 9999;
+  transition: var(--transition-fast);
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* Focus Management Utilities */
+.focus-trap {
+  outline: none;
+}
+
+.focus-visible {
+  outline: var(--focus-width) solid var(--focus-color);
+  outline-offset: var(--focus-offset);
+}
+
+.focus-visible-strong {
+  outline: var(--focus-width-thick) solid var(--focus-color);
+  outline-offset: var(--focus-offset-large);
+  box-shadow: var(--focus-shadow-strong);
+}
+
+/* Screen Reader Announcements */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.sr-only-focusable:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* Status Announcements for Screen Readers */
+.status-announcement {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Responsive Section Spacing */
+.section-spacing {
+  padding-top: var(--section-spacing-mobile);
+  padding-bottom: var(--section-spacing-mobile);
+}
+
+@media (--md) {
+  .section-spacing {
+    padding-top: var(--section-spacing-tablet);
+    padding-bottom: var(--section-spacing-tablet);
+  }
+}
+
+@media (--lg) {
+  .section-spacing {
+    padding-top: var(--section-spacing-desktop);
+    padding-bottom: var(--section-spacing-desktop);
+  }
+}
+
+/* Enhanced Color Contrast Utilities */
+.text-on-surface {
+  color: var(--color-text-on-surface);
+}
+
+.text-on-primary {
+  color: var(--color-text-on-primary);
+}
+
+.bg-elevated {
+  background-color: var(--color-surface-elevated);
+}
+
+.bg-elevated-hover {
+  background-color: var(--color-surface-elevated-hover);
+}
+
+.bg-elevated:hover {
+  background-color: var(--color-surface-elevated-hover);
+}
+
+/* Semantic Color Utilities */
+.text-muted {
+  color: var(--color-muted);
+}
+
+.bg-muted {
+  background-color: var(--color-muted-dark);
+}
+
+.text-accent {
+  color: var(--color-accent);
+}
+
+.bg-accent {
+  background-color: var(--color-accent);
+}
+
+.bg-accent-light {
+  background-color: var(--color-accent-light);
+}
+
+/* Performance Optimizations */
+.will-change-transform {
+  will-change: transform;
+}
+
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Layout Utilities for Component Patterns */
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+/* Mobile-First Responsive Utilities */
+.mobile-hidden {
+  display: none;
+}
+
+@media (--md) {
+  .mobile-hidden {
+    display: block;
+  }
+
+  .desktop-hidden {
+    display: none;
+  }
+}
+
+/* Touch-Friendly Input Utilities */
+.touch-input {
+  min-height: var(--touch-target-min);
+  font-size: var(--font-size-prevent-zoom); /* Prevent iOS zoom */
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text-main);
+  transition: var(--transition-normal);
+}
+
+.touch-input:focus {
+  outline: var(--focus-width) solid var(--focus-color);
+  outline-offset: var(--focus-offset);
+  border-color: var(--focus-color);
+  box-shadow: var(--focus-shadow);
+}
