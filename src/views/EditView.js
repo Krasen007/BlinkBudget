@@ -61,6 +61,8 @@ export const EditView = ({ id }) => {
     showLabel: false,
   });
 
+  dateInput.dataset.timestamp = transaction.timestamp;
+
   // Back button
   const rightControls = document.createElement('div');
   rightControls.style.display = 'flex';

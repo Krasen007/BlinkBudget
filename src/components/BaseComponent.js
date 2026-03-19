@@ -366,7 +366,7 @@ export class BaseComponent {
     }
     this.eventListeners.get(`custom:${eventName}`).push({
       handler: wrappedHandler,
-      options: undefined
+      options: undefined,
     });
   }
 

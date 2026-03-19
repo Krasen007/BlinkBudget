@@ -45,7 +45,13 @@ export const DateInput = (options = {}) => {
   realDate.readOnly = false;
 
   // Initialize with today's date or provided value
-  const initialDate = value ? dateToISO(new Date(value)) : getTodayISO();
+  const initialDate = value
+    ? typeof value === 'string'
+      ? value.includes('T')
+        ? value.split('T')[0]
+        : value
+      : dateToISO(new Date(value))
+    : getTodayISO();
   realDate.value = initialDate;
 
   // Connect label to input

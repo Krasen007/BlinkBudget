@@ -72,7 +72,7 @@ export class ChartRenderer {
   async createPieChart(canvasElement, data, options = {}) {
     // Destroy any existing chart on this canvas first
     this.destroyChart(canvasElement.id);
-    
+
     const { ChartJS } = await this.ensureChartJSLoaded();
     const chartOptions = createThemedChartOptions('pie', {
       ...options,
@@ -143,7 +143,7 @@ export class ChartRenderer {
   async createBarChart(canvasElement, data, options = {}) {
     // Destroy any existing chart on this canvas first
     this.destroyChart(canvasElement.id);
-    
+
     const { ChartJS } = await this.ensureChartJSLoaded();
     const chartOptions = createThemedChartOptions('bar', {
       ...options,
@@ -224,7 +224,7 @@ export class ChartRenderer {
   async createLineChart(canvasElement, data, options = {}) {
     // Destroy any existing chart on this canvas first
     this.destroyChart(canvasElement.id);
-    
+
     const { ChartJS } = await this.ensureChartJSLoaded();
     const chartOptions = createChartOptions({
       ...options,

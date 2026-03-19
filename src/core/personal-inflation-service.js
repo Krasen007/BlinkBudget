@@ -101,13 +101,25 @@ export const PersonalInflationService = {
    * @param {Date} referenceDate - Reference date (default: now)
    * @returns {Array} Array of monthly averages (most recent first)
    */
-  getMonthlyAverages(transactions, monthsBack, referenceDate = new Date()) {
+  getMonthlyAverages(transactions, monthsBack, referenceDate = null) {
+    const effectiveReferenceDate = referenceDate
+      ? new Date(referenceDate)
+      : transactions && transactions.length
+        ? new Date(
+            Math.max(
+              ...transactions
+                .map(t => new Date(t.timestamp).getTime())
+                .filter(ts => Number.isFinite(ts))
+            )
+          )
+        : new Date();
+
     const monthly = {};
-    const cutoff = new Date(referenceDate);
+    const cutoff = new Date(effectiveReferenceDate);
     cutoff.setMonth(cutoff.getMonth() - monthsBack);
     cutoff.setDate(1);
 
-    const endWindow = new Date(referenceDate);
+    const endWindow = new Date(effectiveReferenceDate);
 
     transactions
       .filter(t => {
@@ -201,7 +213,7 @@ export const PersonalInflationService = {
 
     return categoryInflation
       .filter(c => c.inflationRate !== 0 && !isNaN(c.inflationRate))
-      .sort((a, b) => b.inflationRate - a.inflationRate) // Sort by inflation rate (highest first)
+      .sort((a, b) => Math.abs(b.inflationRate) - Math.abs(a.inflationRate)) // Sort by impact (highest absolute change first)
       .slice(0, count);
   },
 

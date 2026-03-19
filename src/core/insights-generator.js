@@ -13,11 +13,11 @@ const InsightsGenerator = {
       const cat = tx.category || 'Uncategorized';
       const amt =
         typeof tx.amount === 'number' ? tx.amount : Number(tx.amount) || 0;
-      
+
       // Handle refunds: subtract from total (same logic as MetricsService.calculateCategoryBreakdown)
       const isRefund = tx.type === 'refund';
       const adjustedAmount = isRefund ? -Math.abs(amt) : Math.abs(amt);
-      
+
       const entry = byCategory.get(cat) || {
         category: cat,
         total: 0,

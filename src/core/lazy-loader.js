@@ -273,25 +273,28 @@ export class LazyLoader {
     return new Promise((resolve, reject) => {
       // Check for existing script with same src
       const existingScript = document.querySelector(`script[src="${src}"]`);
-      
+
       if (existingScript) {
         // If script is already loaded, resolve immediately
-        if (existingScript.readyState === 'complete' || existingScript.readyState === 'loaded') {
+        if (
+          existingScript.readyState === 'complete' ||
+          existingScript.readyState === 'loaded'
+        ) {
           this.markAsLoaded(element);
           resolve();
           return;
         }
-        
+
         // If script exists but not loaded, attach handlers to existing script
         const handleLoad = () => {
           this.markAsLoaded(element);
           resolve();
         };
-        
+
         const handleError = () => {
           reject(new Error(`Failed to load script: ${src}`));
         };
-        
+
         existingScript.addEventListener('load', handleLoad);
         existingScript.addEventListener('error', handleError);
         return;
@@ -318,7 +321,9 @@ export class LazyLoader {
   async loadStyle(element, src) {
     return new Promise((resolve, reject) => {
       // Check for existing stylesheet with same href
-      const existingLink = document.querySelector(`link[rel="stylesheet"][href="${src}"]`);
+      const existingLink = document.querySelector(
+        `link[rel="stylesheet"][href="${src}"]`
+      );
       if (existingLink) {
         // If stylesheet is already loaded, resolve immediately
         if (existingLink.sheet) {
@@ -326,17 +331,17 @@ export class LazyLoader {
           resolve();
           return;
         }
-        
+
         // If stylesheet exists but not loaded, attach handlers to existing link
         const handleLoad = () => {
           this.markAsLoaded(element);
           resolve();
         };
-        
+
         const handleError = () => {
           reject(new Error(`Failed to load stylesheet: ${src}`));
         };
-        
+
         existingLink.addEventListener('load', handleLoad);
         existingLink.addEventListener('error', handleError);
         return;
@@ -373,7 +378,7 @@ export class LazyLoader {
       this.loadedItems.add(element);
       this.loadedCount++;
     }
-    
+
     if (this.loadingItems.has(element)) {
       this.loadingItems.delete(element);
       this.loadingCount--;
@@ -409,7 +414,7 @@ export class LazyLoader {
           this.loadingCount--;
           return;
         }
-        
+
         this.loadingItems.delete(element);
         this.loadingCount--;
         this.loadElement(element);
@@ -442,11 +447,13 @@ export class LazyLoader {
   // Utility methods
   preloadImage(src) {
     // Check for existing preload link
-    const existingLink = document.querySelector(`link[rel="preload"][as="image"][href="${src}"]`);
+    const existingLink = document.querySelector(
+      `link[rel="preload"][as="image"][href="${src}"]`
+    );
     if (existingLink) {
       return; // Already preloaded
     }
-    
+
     const link = document.createElement('link');
     link.rel = 'preload';
     link.as = 'image';
@@ -456,11 +463,13 @@ export class LazyLoader {
 
   preloadComponent(src) {
     // Check for existing modulepreload link
-    const existingLink = document.querySelector(`link[rel="modulepreload"][href="${src}"]`);
+    const existingLink = document.querySelector(
+      `link[rel="modulepreload"][href="${src}"]`
+    );
     if (existingLink) {
       return; // Already preloaded
     }
-    
+
     const link = document.createElement('link');
     link.rel = 'modulepreload';
     link.href = src;
