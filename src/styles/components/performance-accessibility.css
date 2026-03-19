@@ -134,12 +134,14 @@
 }
 
 .font-small body,
+body.font-small,
 .font-small .input-field,
 .font-small .btn {
   font-size: var(--font-size-sm);
 }
 
 .font-large body,
+body.font-large,
 .font-large .input-field,
 .font-large .btn {
   font-size: var(--font-size-lg);
@@ -422,7 +424,7 @@
 /* Critical CSS Inlining Hint */
 .critical-above-fold {
   /* Inline these styles for better performance */
-  display: contents;
+  contain: none;
 }
 
 .critical-css {

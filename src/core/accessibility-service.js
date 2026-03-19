@@ -13,6 +13,14 @@ export class AccessibilityService {
     this.reducedMotion = false;
     this.highContrast = false;
 
+    this._announceSetTimer = null;
+    this._announceClearTimer = null;
+    this._globalKeydownHandler = null;
+    this._motionQuery = null;
+    this._contrastQuery = null;
+    this._motionQueryHandler = null;
+    this._contrastQueryHandler = null;
+
     // Accessibility preferences
     this.preferences = {
       fontSize: 'normal', // small, normal, large
@@ -21,8 +29,6 @@ export class AccessibilityService {
       screenReader: false,
       keyboardOnly: false,
     };
-
-    this.init();
   }
 
   init() {
@@ -77,19 +83,7 @@ export class AccessibilityService {
   }
 
   detectScreenReader() {
-    // Common screen reader detection patterns
-    const hasScreenReader = !!(
-      window.speechSynthesis ||
-      window.speechSynthesisUtterances ||
-      window.chrome?.tts ||
-      window.braille ||
-      navigator.userAgent.includes('NVDA') ||
-      navigator.userAgent.includes('JAWS') ||
-      navigator.userAgent.includes('VoiceOver') ||
-      navigator.userAgent.includes('ChromeVox')
-    );
-
-    return hasScreenReader;
+    return false;
   }
 
   detectKeyboardUsage() {
@@ -193,7 +187,7 @@ export class AccessibilityService {
 
   setupKeyboardNavigation() {
     // Enhanced keyboard navigation
-    document.addEventListener('keydown', e => {
+    this._globalKeydownHandler = e => {
       // Tab navigation enhancement
       if (e.key === 'Tab') {
         this.handleTabNavigation(e);
@@ -208,18 +202,35 @@ export class AccessibilityService {
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
         this.handleArrowNavigation(e);
       }
-    });
+    };
+
+    document.addEventListener('keydown', this._globalKeydownHandler);
   }
 
   handleTabNavigation(event) {
-    // Get all focusable elements
-    const focusableElements = document.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
+    event.preventDefault();
 
-    const currentIndex = Array.from(focusableElements).indexOf(
-      document.activeElement
-    );
+    // Get all focusable elements
+    const focusableElements = Array.from(
+      document.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+    ).filter(el => {
+      if (!el) return false;
+      if (el.hasAttribute('disabled')) return false;
+      if (el.getAttribute('aria-disabled') === 'true') return false;
+      if (el.hasAttribute('hidden')) return false;
+      if (el.getAttribute('tabindex') === '-1') return false;
+      if (
+        typeof el.getClientRects === 'function' &&
+        el.getClientRects().length === 0
+      ) {
+        return false;
+      }
+      return true;
+    });
+
+    const currentIndex = focusableElements.indexOf(document.activeElement);
 
     // Handle tab wrapping
     if (event.shiftKey) {
@@ -270,21 +281,23 @@ export class AccessibilityService {
 
   setupPreferenceMonitoring() {
     // Monitor preference changes
-    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    motionQuery.addEventListener('change', e => {
+    this._motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    this._motionQueryHandler = e => {
       this.reducedMotion = e.matches;
       this.preferences.reducedMotion = e.matches;
       this.applyAccessibilityPreferences();
       this.announceToScreenReader('Reduced motion preference changed');
-    });
+    };
+    this._motionQuery.addEventListener('change', this._motionQueryHandler);
 
-    const contrastQuery = window.matchMedia('(prefers-contrast: high)');
-    contrastQuery.addEventListener('change', e => {
+    this._contrastQuery = window.matchMedia('(prefers-contrast: high)');
+    this._contrastQueryHandler = e => {
       this.highContrast = e.matches;
       this.preferences.highContrast = e.matches;
       this.applyAccessibilityPreferences();
       this.announceToScreenReader('High contrast preference changed');
-    });
+    };
+    this._contrastQuery.addEventListener('change', this._contrastQueryHandler);
   }
 
   applyAccessibilityPreferences() {
@@ -315,6 +328,10 @@ export class AccessibilityService {
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     );
 
+    if (!focusableElements || focusableElements.length === 0) {
+      return;
+    }
+
     const firstElement = focusableElements[0];
     const lastElement = focusableElements[focusableElements.length - 1];
 
@@ -324,13 +341,13 @@ export class AccessibilityService {
           // Shift + Tab
           if (document.activeElement === firstElement) {
             e.preventDefault();
-            lastElement.focus();
+            lastElement?.focus?.();
           }
         } else {
           // Tab
           if (document.activeElement === lastElement) {
             e.preventDefault();
-            firstElement.focus();
+            firstElement?.focus?.();
           }
         }
       }
@@ -358,17 +375,26 @@ export class AccessibilityService {
   announceToScreenReader(message, priority = 'polite') {
     if (!this.announcer) return;
 
+    if (this._announceSetTimer) {
+      clearTimeout(this._announceSetTimer);
+      this._announceSetTimer = null;
+    }
+    if (this._announceClearTimer) {
+      clearTimeout(this._announceClearTimer);
+      this._announceClearTimer = null;
+    }
+
     // Clear previous announcement
     this.announcer.textContent = '';
 
     // Set new message
-    setTimeout(() => {
+    this._announceSetTimer = setTimeout(() => {
       this.announcer.textContent = message;
       this.announcer.setAttribute('aria-live', priority);
     }, 100);
 
     // Clear after announcement
-    setTimeout(() => {
+    this._announceClearTimer = setTimeout(() => {
       this.announcer.textContent = '';
     }, 3000);
   }
@@ -440,6 +466,7 @@ export class AccessibilityService {
 
   toggleHighContrast() {
     this.preferences.highContrast = !this.preferences.highContrast;
+    this.highContrast = this.preferences.highContrast;
     this.applyAccessibilityPreferences();
     this.announceToScreenReader(
       `High contrast ${this.preferences.highContrast ? 'enabled' : 'disabled'}`
@@ -448,6 +475,7 @@ export class AccessibilityService {
 
   toggleReducedMotion() {
     this.preferences.reducedMotion = !this.preferences.reducedMotion;
+    this.reducedMotion = this.preferences.reducedMotion;
     this.applyAccessibilityPreferences();
     this.announceToScreenReader(
       `Reduced motion ${this.preferences.reducedMotion ? 'enabled' : 'disabled'}`
@@ -503,7 +531,17 @@ export class AccessibilityService {
       'input:not([aria-label]):not([aria-labelledby])'
     );
     const unlabeledInputs = Array.from(inputsWithoutLabels).filter(input => {
-      return !input.closest('label') && input.type !== 'hidden';
+      if (input.type === 'hidden') return false;
+      if (input.closest('label')) return false;
+
+      if (input.id) {
+        const explicitLabel = document.querySelector(
+          `label[for="${input.id}"]`
+        );
+        if (explicitLabel) return false;
+      }
+
+      return true;
     });
 
     if (unlabeledInputs.length > 0) {
@@ -531,11 +569,42 @@ export class AccessibilityService {
     }
 
     // Clear focus traps
+    this.focusTrapStack.forEach(trap => {
+      trap.element?.removeEventListener?.('keydown', trap.handler);
+    });
     this.focusTrapStack = [];
 
     // Remove event listeners
     if (this.cleanupInteractionDetection) {
       this.cleanupInteractionDetection();
+    }
+
+    if (this._globalKeydownHandler) {
+      document.removeEventListener('keydown', this._globalKeydownHandler);
+      this._globalKeydownHandler = null;
+    }
+
+    if (this._motionQuery && this._motionQueryHandler) {
+      this._motionQuery.removeEventListener('change', this._motionQueryHandler);
+      this._motionQuery = null;
+      this._motionQueryHandler = null;
+    }
+    if (this._contrastQuery && this._contrastQueryHandler) {
+      this._contrastQuery.removeEventListener(
+        'change',
+        this._contrastQueryHandler
+      );
+      this._contrastQuery = null;
+      this._contrastQueryHandler = null;
+    }
+
+    if (this._announceSetTimer) {
+      clearTimeout(this._announceSetTimer);
+      this._announceSetTimer = null;
+    }
+    if (this._announceClearTimer) {
+      clearTimeout(this._announceClearTimer);
+      this._announceClearTimer = null;
     }
 
     this.isInitialized = false;

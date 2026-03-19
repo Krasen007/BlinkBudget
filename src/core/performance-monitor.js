@@ -34,9 +34,14 @@ export class PerformanceMonitor {
     this.observers = new Map();
     this.isMonitoring = false;
     this.performanceSupported = this.checkPerformanceSupport();
+
+    this.continuousMonitorInterval = null;
+    this._interactionHandlers = null;
+    this._loadListener = null;
   }
 
   checkPerformanceSupport() {
+    if (typeof window === 'undefined') return false;
     return !!(window.performance && window.PerformanceObserver);
   }
 
@@ -72,6 +77,28 @@ export class PerformanceMonitor {
       }
     });
     this.observers.clear();
+
+    if (this.continuousMonitorInterval) {
+      clearInterval(this.continuousMonitorInterval);
+      this.continuousMonitorInterval = null;
+    }
+
+    if (this._interactionHandlers) {
+      document.removeEventListener('click', this._interactionHandlers.click, {
+        passive: true,
+      });
+      document.removeEventListener(
+        'touchstart',
+        this._interactionHandlers.touchstart,
+        { passive: true }
+      );
+      this._interactionHandlers = null;
+    }
+
+    if (this._loadListener) {
+      window.removeEventListener('load', this._loadListener);
+      this._loadListener = null;
+    }
   }
 
   initializeObservers() {
@@ -142,20 +169,33 @@ export class PerformanceMonitor {
       this.metrics.ttfb = navigation.responseStart - navigation.requestStart;
       this.metrics.domContentLoaded =
         navigation.domContentLoadedEventEnd - navigation.navigationStart;
-      this.metrics.loadComplete =
-        navigation.loadEventEnd - navigation.navigationStart;
+
+      if (navigation.loadEventEnd && navigation.loadEventEnd > 0) {
+        this.metrics.loadComplete =
+          navigation.loadEventEnd - navigation.navigationStart;
+        this.checkThreshold('loadComplete', this.metrics.loadComplete);
+      } else if (!this._loadListener) {
+        this._loadListener = () => {
+          const nav = performance.getEntriesByType('navigation')[0];
+          if (!nav || !nav.loadEventEnd) return;
+          this.metrics.loadComplete = nav.loadEventEnd - nav.navigationStart;
+          this.checkThreshold('loadComplete', this.metrics.loadComplete);
+          window.removeEventListener('load', this._loadListener);
+          this._loadListener = null;
+        };
+        window.addEventListener('load', this._loadListener, { once: true });
+      }
 
       // Check thresholds
       this.checkThreshold('ttfb', this.metrics.ttfb);
       this.checkThreshold('domContentLoaded', this.metrics.domContentLoaded);
-      this.checkThreshold('loadComplete', this.metrics.loadComplete);
     }
   }
 
   startContinuousMonitoring() {
     // Monitor memory usage
     if (performance.memory) {
-      this.memoryInterval = setInterval(() => {
+      this.continuousMonitorInterval = setInterval(() => {
         this.metrics.memoryUsage.push({
           used: performance.memory.usedJSHeapSize,
           total: performance.memory.totalJSHeapSize,
@@ -203,8 +243,18 @@ export class PerformanceMonitor {
     };
 
     // Monitor click events
-    document.addEventListener('click', measureLatency, { passive: true });
-    document.addEventListener('touchstart', measureLatency, { passive: true });
+    this._interactionHandlers = {
+      click: measureLatency,
+      touchstart: measureLatency,
+    };
+    document.addEventListener('click', this._interactionHandlers.click, {
+      passive: true,
+    });
+    document.addEventListener(
+      'touchstart',
+      this._interactionHandlers.touchstart,
+      { passive: true }
+    );
   }
 
   // Component performance measurement
@@ -239,11 +289,16 @@ export class PerformanceMonitor {
   checkThreshold(metric, value) {
     const target = this.metrics.targets[metric];
     if (target && value > target) {
+      const isUnitless = metric === 'cls';
+      const formattedValue = isUnitless
+        ? value.toFixed(3)
+        : `${value.toFixed(2)}ms`;
+      const formattedTarget = isUnitless ? String(target) : `${target}ms`;
       console.warn(
         `[PerformanceMonitor] ${metric.toUpperCase()} threshold exceeded:`,
         {
-          value: `${value.toFixed(2)}ms`,
-          target: `${target}ms`,
+          value: formattedValue,
+          target: formattedTarget,
           exceeded: `${(((value - target) / target) * 100).toFixed(1)}%`,
         }
       );
@@ -407,16 +462,18 @@ export class PerformanceMonitor {
   }
 
   // Lighthouse integration helper
-  async runLighthouse() {
+  async runLighthouse(options = {}) {
     if (!window.lighthouse) {
       console.warn('[PerformanceMonitor] Lighthouse not available');
       return null;
     }
 
     try {
-      const report = await window.lighthouse('https://localhost:3000', {
+      const url = options.url || window.location.origin;
+      const port = options.port || 9222;
+      const report = await window.lighthouse(url, {
         only: ['performance', 'accessibility'],
-        port: 9222,
+        port,
       });
 
       return report;

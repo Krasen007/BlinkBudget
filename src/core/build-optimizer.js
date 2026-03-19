@@ -20,6 +20,10 @@ export class BuildOptimizer {
       imageOptimization: true,
       cssPurging: true,
     };
+
+    this._bundleObserver = null;
+    this._interactionInterval = null;
+    this._clickHandler = null;
   }
 
   // Bundle Analysis
@@ -179,7 +183,10 @@ export class BuildOptimizer {
       };
 
       // Add loading="lazy" if not present
-      if (!img.loading || img.loading !== 'lazy') {
+      if (
+        (!img.loading || img.loading !== 'lazy') &&
+        this.isBelowTheFold(img)
+      ) {
         img.loading = 'lazy';
         optimization.optimizations.push('Added lazy loading');
       }
@@ -226,10 +233,19 @@ export class BuildOptimizer {
     ];
 
     criticalResources.forEach(resource => {
+      const existing = document.head.querySelector(
+        `link[rel="preload"][href="${resource.href}"][as="${resource.as}"]`
+      );
+      if (existing) return;
+
       const link = document.createElement('link');
       link.rel = 'preload';
       link.href = resource.href;
       link.as = resource.as;
+
+      if (resource.as === 'font') {
+        link.crossOrigin = 'anonymous';
+      }
 
       if (resource.type) {
         link.type = resource.type;
@@ -278,7 +294,11 @@ export class BuildOptimizer {
   }
 
   monitorBundleLoading() {
-    const observer = new PerformanceObserver(list => {
+    if (this._bundleObserver) {
+      this._bundleObserver.disconnect();
+    }
+
+    this._bundleObserver = new PerformanceObserver(list => {
       const entries = list.getEntries();
       entries.forEach(entry => {
         if (entry.name.includes('bundle') || entry.name.includes('chunk')) {
@@ -297,7 +317,7 @@ export class BuildOptimizer {
       });
     });
 
-    observer.observe({ entryTypes: ['resource'] });
+    this._bundleObserver.observe({ entryTypes: ['resource'] });
   }
 
   monitorResourceLoading() {
@@ -329,7 +349,11 @@ export class BuildOptimizer {
     let interactionCount = 0;
     let totalResponseTime = 0;
 
-    document.addEventListener('click', event => {
+    if (this._clickHandler) {
+      document.removeEventListener('click', this._clickHandler);
+    }
+
+    this._clickHandler = event => {
       const startTime = performance.now();
 
       requestAnimationFrame(() => {
@@ -345,10 +369,16 @@ export class BuildOptimizer {
           });
         }
       });
-    });
+    };
+
+    document.addEventListener('click', this._clickHandler);
 
     // Report average interaction time
-    setInterval(() => {
+    if (this._interactionInterval) {
+      clearInterval(this._interactionInterval);
+    }
+
+    this._interactionInterval = setInterval(() => {
       if (interactionCount > 0) {
         const avgResponseTime = totalResponseTime / interactionCount;
         console.log(
@@ -368,8 +398,8 @@ export class BuildOptimizer {
     console.log('=====================\n');
   }
 
-  generateReport() {
-    const analysis = this.analyzeBundle();
+  async generateReport() {
+    const analysis = await this.analyzeBundle();
     const optimizations = this.generateOptimizations(analysis);
 
     return {
@@ -425,6 +455,7 @@ export class BuildOptimizer {
   // Utility methods
   formatBytes(bytes) {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    if (!Number.isFinite(bytes) || bytes < 0) return '0 Bytes';
     if (bytes === 0) return '0 Bytes';
 
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
@@ -436,6 +467,108 @@ export class BuildOptimizer {
   formatDuration(_ms) {
     if (_ms < 1000) return `${_ms.toFixed(0)}ms`;
     return `${(_ms / 1000).toFixed(2)}s`;
+  }
+
+  // Missing helper methods (safe defaults)
+  getBundleModules() {
+    return [];
+  }
+
+  getEntryPoints() {
+    return [];
+  }
+
+  checkTreeshaking() {
+    return Boolean(this.optimizations.treeshaking);
+  }
+
+  checkMinification() {
+    return Boolean(this.optimizations.minification);
+  }
+
+  getChunkSizes() {
+    return [];
+  }
+
+  getChunkLoadingStrategy() {
+    return 'default';
+  }
+
+  getChunkCachingStrategy() {
+    return 'default';
+  }
+
+  analyzeImages() {
+    const images = Array.from(document.querySelectorAll('img'));
+    return images.map(img => ({
+      src: img.src,
+      size: this.estimateAssetSize(img.src || ''),
+    }));
+  }
+
+  analyzeFonts() {
+    const fonts = Array.from(
+      document.querySelectorAll(
+        'link[rel="preload"][as="font"], link[rel="stylesheet"]'
+      )
+    );
+    return fonts.map(link => ({
+      href: link.href,
+      type: link.type || null,
+    }));
+  }
+
+  analyzeCssAssets() {
+    const css = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
+    return css.map(link => ({ href: link.href }));
+  }
+
+  analyzeCompression() {
+    return { enabled: Boolean(this.optimizations.compression) };
+  }
+
+  getDependencyCount() {
+    return 0;
+  }
+
+  findDuplicateDependencies() {
+    return [];
+  }
+
+  findOutdatedDependencies() {
+    return [];
+  }
+
+  getDependencyBundleSize() {
+    return 0;
+  }
+
+  isBelowTheFold(img) {
+    if (!img) return true;
+    if (img.getAttribute('fetchpriority') === 'high') return false;
+    if (img.hasAttribute('data-nolazy')) return false;
+    const cls = img.className || '';
+    if (typeof cls === 'string' && /(hero|logo|above-the-fold)/i.test(cls)) {
+      return false;
+    }
+    return true;
+  }
+
+  stopMonitoring() {
+    if (this._bundleObserver) {
+      this._bundleObserver.disconnect();
+      this._bundleObserver = null;
+    }
+
+    if (this._clickHandler) {
+      document.removeEventListener('click', this._clickHandler);
+      this._clickHandler = null;
+    }
+
+    if (this._interactionInterval) {
+      clearInterval(this._interactionInterval);
+      this._interactionInterval = null;
+    }
   }
 }
 

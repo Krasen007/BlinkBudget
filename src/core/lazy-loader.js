@@ -3,6 +3,15 @@
  * Implements lazy loading for images, components, and routes
  */
 
+const cssEscape = value => {
+  const str = String(value ?? '');
+  if (globalThis.CSS && typeof globalThis.CSS.escape === 'function') {
+    return globalThis.CSS.escape(str);
+  }
+
+  return str.replace(/["\\\]]/g, '\\$&');
+};
+
 export class LazyLoader {
   constructor() {
     this.observers = new Map();
@@ -20,6 +29,14 @@ export class LazyLoader {
     };
 
     this.init();
+  }
+
+  cleanupFailedElement(element) {
+    if (!element) return;
+    if (this.loadingItems.has(element)) {
+      this.loadingItems.delete(element);
+      this.loadingCount = Math.max(0, this.loadingCount - 1);
+    }
   }
 
   init() {
@@ -69,10 +86,21 @@ export class LazyLoader {
       });
     });
 
-    mutationObserver.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
+    const startObserving = () => {
+      if (!document.body) return;
+      mutationObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+    };
+
+    if (document.body) {
+      startObserving();
+    } else {
+      document.addEventListener('DOMContentLoaded', startObserving, {
+        once: true,
+      });
+    }
 
     this.observers.set('mutation', mutationObserver);
   }
@@ -197,10 +225,14 @@ export class LazyLoader {
       }
     } catch (error) {
       console.error('[LazyLoader] Failed to load element:', error);
+      this.cleanupFailedElement(element);
       if (this.config.enableRetry) {
-        this.retryLoad(element, lazyType, src);
+        this.retryLoad(element);
       }
+      return;
     }
+
+    this.cleanupFailedElement(element);
   }
 
   async loadImage(element, src) {
@@ -233,10 +265,18 @@ export class LazyLoader {
       const Component = module.default || module;
 
       // Instantiate component
-      const component = new Component(
-        element,
-        JSON.parse(element.getAttribute('data-props') || '{}')
-      );
+      let props = {};
+      try {
+        props = JSON.parse(element.getAttribute('data-props') || '{}');
+      } catch (e) {
+        console.warn(
+          '[LazyLoader] Invalid data-props JSON, using empty props',
+          e
+        );
+        props = {};
+      }
+
+      const component = new Component(element, props);
 
       this.removePlaceholder(element);
       this.markAsLoaded(element);
@@ -256,6 +296,9 @@ export class LazyLoader {
     // Route loading implementation
     try {
       const response = await fetch(src);
+      if (!response.ok) {
+        throw new Error(`Failed to load route: ${src} (${response.status})`);
+      }
       const html = await response.text();
 
       element.innerHTML = html;
@@ -272,7 +315,10 @@ export class LazyLoader {
   async loadScript(element, src) {
     return new Promise((resolve, reject) => {
       // Check for existing script with same src
-      const existingScript = document.querySelector(`script[src="${src}"]`);
+      const escapedSrc = cssEscape(src);
+      const existingScript = document.querySelector(
+        `script[src="${escapedSrc}"]`
+      );
 
       if (existingScript) {
         // If script is already loaded, resolve immediately
@@ -321,8 +367,9 @@ export class LazyLoader {
   async loadStyle(element, src) {
     return new Promise((resolve, reject) => {
       // Check for existing stylesheet with same href
+      const escapedSrc = cssEscape(src);
       const existingLink = document.querySelector(
-        `link[rel="stylesheet"][href="${src}"]`
+        `link[rel="stylesheet"][href="${escapedSrc}"]`
       );
       if (existingLink) {
         // If stylesheet is already loaded, resolve immediately
@@ -398,10 +445,15 @@ export class LazyLoader {
     element.dispatchEvent(new CustomEvent('lazy:loaded'));
   }
 
-  async retryLoad(element, _type, _src) {
+  async retryLoad(element) {
     const retryCount = parseInt(
       element.getAttribute('data-retry-count') || '0'
     );
+
+    if (retryCount + 1 > this.config.maxRetries) {
+      this.cleanupFailedElement(element);
+      return;
+    }
 
     element.setAttribute('data-retry-count', (retryCount + 1).toString());
 
@@ -410,13 +462,11 @@ export class LazyLoader {
       () => {
         // Check if element is still connected to DOM before retry
         if (!element.isConnected || !document.contains(element)) {
-          this.loadingItems.delete(element);
-          this.loadingCount--;
+          this.cleanupFailedElement(element);
           return;
         }
 
-        this.loadingItems.delete(element);
-        this.loadingCount--;
+        this.cleanupFailedElement(element);
         this.loadElement(element);
       },
       this.config.retryDelay * (retryCount + 1)
@@ -427,7 +477,22 @@ export class LazyLoader {
     // Find and initialize components in loaded content
     container.querySelectorAll('[data-component]').forEach(element => {
       const componentName = element.getAttribute('data-component');
-      const props = JSON.parse(element.getAttribute('data-props') || '{}');
+
+      if (!/^[A-Za-z0-9_-]+$/.test(componentName || '')) {
+        console.error('[LazyLoader] Invalid component name:', componentName);
+        return;
+      }
+
+      let props = {};
+      try {
+        props = JSON.parse(element.getAttribute('data-props') || '{}');
+      } catch (e) {
+        console.warn(
+          '[LazyLoader] Invalid data-props JSON, using empty props',
+          e
+        );
+        props = {};
+      }
 
       // Dynamic component initialization
       import(`./components/${componentName}.js`)
@@ -447,8 +512,9 @@ export class LazyLoader {
   // Utility methods
   preloadImage(src) {
     // Check for existing preload link
+    const escapedSrc = cssEscape(src);
     const existingLink = document.querySelector(
-      `link[rel="preload"][as="image"][href="${src}"]`
+      `link[rel="preload"][as="image"][href="${escapedSrc}"]`
     );
     if (existingLink) {
       return; // Already preloaded
@@ -463,8 +529,9 @@ export class LazyLoader {
 
   preloadComponent(src) {
     // Check for existing modulepreload link
+    const escapedSrc = cssEscape(src);
     const existingLink = document.querySelector(
-      `link[rel="modulepreload"][href="${src}"]`
+      `link[rel="modulepreload"][href="${escapedSrc}"]`
     );
     if (existingLink) {
       return; // Already preloaded

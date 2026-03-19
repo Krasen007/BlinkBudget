@@ -71,14 +71,14 @@ export class EnvValidator {
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: {
         type: 'string',
         required: false,
-        pattern: /^pk_test_|pk_live_/,
+        pattern: /^(pk_test_|pk_live_)/,
         description: 'Stripe publishable key',
       },
 
       STRIPE_SECRET_KEY: {
         type: 'string',
         required: false,
-        pattern: /^sk_test_|sk_live_/,
+        pattern: /^(sk_test_|sk_live_)/,
         description: 'Stripe secret key',
       },
 
@@ -97,7 +97,7 @@ export class EnvValidator {
         description: 'OpenAI API key',
       },
 
-      RESSEND_API_KEY: {
+      RESEND_API_KEY: {
         type: 'string',
         required: false,
         pattern: /^re_[A-Za-z0-9]+$/,
@@ -158,6 +158,18 @@ export class EnvValidator {
     const value = this.getEnvValue(key);
     const isPublic = key.startsWith('NEXT_PUBLIC_');
 
+    if (
+      config.required &&
+      (value === null || value === undefined || value === '')
+    ) {
+      this.errors.push({
+        variable: key,
+        message: 'Required environment variable missing',
+        value: isPublic ? value : '[HIDDEN]',
+      });
+      return;
+    }
+
     // Skip validation for optional variables that aren't set
     if (!config.required && !value) {
       return;
@@ -168,7 +180,7 @@ export class EnvValidator {
       this.errors.push({
         variable: key,
         message: `Expected type ${config.type}, got ${typeof value}`,
-        value: isPublic ? '[HIDDEN]' : value,
+        value: isPublic ? value : '[HIDDEN]',
       });
       return;
     }
@@ -179,7 +191,7 @@ export class EnvValidator {
         variable: key,
         message: `Invalid format for ${config.description}`,
         pattern: config.pattern.toString(),
-        value: isPublic ? '[HIDDEN]' : value,
+        value: isPublic ? value : '[HIDDEN]',
       });
       return;
     }
@@ -343,7 +355,6 @@ export class EnvValidator {
   isSecretPattern(value) {
     const secretPatterns = [
       /^sk_/,
-      /^pk_/,
       /-----BEGIN/,
       /-----END/,
       /^[A-Za-z0-9_-]{20,}$/,
@@ -405,12 +416,15 @@ export class EnvValidator {
       if (config.required) {
         example[key] = this.generateExampleValue(config);
       } else {
-        example[key] = `# ${config.description} (optional)`;
+        example[key] =
+          `# ${key}=${this.generateExampleValue(config)} # ${config.description} (optional)`;
       }
     });
 
     const content = Object.entries(example)
-      .map(([key, value]) => `${key}=${value}`)
+      .map(([key, value]) =>
+        String(value).startsWith('#') ? value : `${key}=${value}`
+      )
       .join('\n');
 
     return content;
@@ -467,6 +481,9 @@ export class EnvValidator {
       }
     }
 
+    result.errors = this.errors;
+    result.isValid = this.errors.length === 0;
+    this.isValid = result.isValid;
     return result;
   }
 }

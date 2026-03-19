@@ -35,6 +35,7 @@ export class BaseComponent {
       loading: false,
       error: null,
       focused: false,
+      disabled: false,
     };
   }
 
@@ -101,20 +102,28 @@ export class BaseComponent {
    * Setup focus management
    */
   setupFocusManagement() {
+    if (this._focusSetupDone) return;
+    this._focusSetupDone = true;
+
     this.element.setAttribute('tabindex', this.state.disabled ? '-1' : '0');
 
-    this.addEventListener('focus', () => {
+    this._handleFocus = () => {
       this.setState({ focused: true });
       this.onFocus();
-    });
+    };
 
-    this.addEventListener('blur', () => {
+    this._handleBlur = () => {
       this.setState({ focused: false });
       this.onBlur();
-    });
+    };
+
+    this._handleKeyDown = e => this.handleKeyDown(e);
+
+    this.addEventListener('focus', this._handleFocus);
+    this.addEventListener('blur', this._handleBlur);
 
     // Add keyboard navigation
-    this.addEventListener('keydown', e => this.handleKeyDown(e));
+    this.addEventListener('keydown', this._handleKeyDown);
   }
 
   /**
@@ -218,7 +227,9 @@ export class BaseComponent {
     if (!this.eventListeners.has(type)) {
       this.eventListeners.set(type, []);
     }
-    this.eventListeners.get(type).push({ handler: wrappedHandler, options });
+    this.eventListeners
+      .get(type)
+      .push({ original: handler, handler: wrappedHandler, options });
   }
 
   /**
@@ -229,13 +240,12 @@ export class BaseComponent {
 
     const listeners = this.eventListeners.get(type);
     if (listeners) {
-      const index = listeners.findIndex(l => l.handler === handler);
+      const index = listeners.findIndex(
+        l => l.original === handler || l.handler === handler
+      );
       if (index !== -1) {
-        this.element.removeEventListener(
-          type,
-          handler,
-          listeners[index].options
-        );
+        const entry = listeners[index];
+        this.element.removeEventListener(type, entry.handler, entry.options);
         listeners.splice(index, 1);
       }
     }
@@ -503,22 +513,56 @@ export function createErrorBoundary(fallback, onError) {
     constructor(element, options) {
       super(element, options);
       this.originalContent = this.element.innerHTML;
+      this.fallback = fallback;
     }
 
     render() {
       if (this.state.error) {
         this.element.innerHTML = '';
 
+        const fallbackContent =
+          typeof this.fallback === 'function'
+            ? this.fallback({
+                error: this.state.error,
+                retry: () => this.retry(),
+              })
+            : this.fallback;
+
+        if (fallbackContent) {
+          if (typeof fallbackContent === 'string') {
+            const container = this.createElement('div', ['error-fallback']);
+            container.textContent = fallbackContent;
+            this.element.appendChild(container);
+          } else if (fallbackContent instanceof Node) {
+            this.element.appendChild(fallbackContent);
+          } else {
+            const container = this.createElement('div', ['error-fallback']);
+            container.textContent = 'An error occurred';
+            this.element.appendChild(container);
+          }
+          return;
+        }
+
         const errorElement = this.createElement('div', ['card', 'error-state']);
-        errorElement.innerHTML = `
-          <div class="card-content">
-            <h3>Something went wrong</h3>
-            <p>${this.state.error.message || 'An unexpected error occurred'}</p>
-            <button class="btn btn-primary" onclick="this.parentElement.parentElement.parentElement.component.retry()">
-              Try Again
-            </button>
-          </div>
-        `;
+        const cardContent = this.createElement('div', ['card-content']);
+        const title = this.createElement('h3');
+        title.textContent = 'Something went wrong';
+
+        const message = this.createElement('p');
+        const errorMessage =
+          this.state.error && this.state.error.message
+            ? this.state.error.message
+            : 'An unexpected error occurred';
+        message.textContent = errorMessage;
+
+        const retryBtn = this.createElement('button', ['btn', 'btn-primary']);
+        retryBtn.textContent = 'Try Again';
+        retryBtn.addEventListener('click', () => this.retry());
+
+        cardContent.appendChild(title);
+        cardContent.appendChild(message);
+        cardContent.appendChild(retryBtn);
+        errorElement.appendChild(cardContent);
 
         this.element.appendChild(errorElement);
       } else {
@@ -532,7 +576,7 @@ export function createErrorBoundary(fallback, onError) {
 
     onError(error) {
       this.setState({ error });
-      if (onError) onError(error);
+      if (onError) onError(error, { component: this, element: this.element });
     }
   };
 }

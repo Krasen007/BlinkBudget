@@ -307,7 +307,7 @@
   transition: background-color var(--transition-normal);
 }
 
-/* Duplicate .card:hover removed - see line 206-209 for primary definition */
+/* Duplicate .card:hover removed - see line 192-195 for primary definition */
 
 .dashboard-stat-card {
   min-height: var(--touch-target-min);

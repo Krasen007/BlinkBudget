@@ -134,14 +134,10 @@
 
 .btn-icon-left {
   order: -1;
-  margin-right: var(--spacing-sm);
-  margin-left: 0;
 }
 
 .btn-icon-right {
   order: 1;
-  margin-left: var(--spacing-sm);
-  margin-right: 0;
 }
 
 /* Button Loading Spinner */
@@ -169,10 +165,6 @@
 }
 
 /* Focus Management for Accessibility */
-.btn:focus {
-  outline: none;
-}
-
 .btn:not(:focus-visible) {
   outline: none;
 }
@@ -189,7 +181,6 @@
 /* Button Groups */
 .btn-group {
   display: flex;
-  gap: var(--spacing-sm);
   align-items: center;
 }
 
@@ -274,7 +265,7 @@
   }
 }
 
-/* Dark Mode Support (if implemented) */
+/* Light Mode Support (if implemented) */
 @media (prefers-color-scheme: light) {
   .btn-secondary {
     background-color: var(--color-surface);
@@ -314,18 +305,6 @@
 }
 
 /* Success/Error State Animations */
-.btn-success {
-  background: var(--gradient-success);
-}
-
-.btn-error {
-  background: var(--gradient-error);
-}
-
-.btn-warning {
-  background: var(--gradient-warning);
-}
-
 /* Icon Button Variants */
 .btn-icon-only {
   min-height: var(--touch-target-min);

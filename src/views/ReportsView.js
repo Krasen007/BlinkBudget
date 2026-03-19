@@ -1164,8 +1164,19 @@ export const ReportsView = () => {
         typeof currentTimePeriod?.days === 'number'
           ? currentTimePeriod.days
           : currentTimePeriod?.startDate && currentTimePeriod?.endDate
-            ? (currentTimePeriod.endDate - currentTimePeriod.startDate) /
-              (1000 * 60 * 60 * 24)
+            ? (() => {
+                const startMs =
+                  currentTimePeriod.startDate instanceof Date
+                    ? currentTimePeriod.startDate.getTime()
+                    : Date.parse(currentTimePeriod.startDate);
+                const endMs =
+                  currentTimePeriod.endDate instanceof Date
+                    ? currentTimePeriod.endDate.getTime()
+                    : Date.parse(currentTimePeriod.endDate);
+
+                const diffDays = (endMs - startMs) / (1000 * 60 * 60 * 24);
+                return Number.isFinite(diffDays) ? diffDays : 30;
+              })()
             : 30; // fallback to monthly
 
       if (days <= 7) {

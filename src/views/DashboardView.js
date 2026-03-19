@@ -428,11 +428,16 @@ export const DashboardView = () => {
       addBtn.style.flexShrink = '0'; // Prevent button from shrinking
       content.appendChild(addBtn);
     } else {
-      console.warn('Add Transaction button failed to render', { addBtn });
+      console.warn('Add Transaction button failed to render', {
+        addBtn,
+        currentAccountFilter,
+        isMobile: Boolean(window.mobileUtils && window.mobileUtils.isMobile()),
+      });
       // Create a fallback disabled button
       const fallbackBtn = document.createElement('button');
       fallbackBtn.textContent = '+ Add Transaction';
       fallbackBtn.disabled = true;
+      fallbackBtn.className = 'btn btn-primary btn-disabled';
       fallbackBtn.style.width = '100%';
       fallbackBtn.style.margin = '0';
       fallbackBtn.style.marginBottom = SPACING.XS;

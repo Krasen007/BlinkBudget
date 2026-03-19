@@ -5,6 +5,19 @@
 
 import { BaseComponent } from './BaseComponent.js';
 
+const ICONS = Object.freeze({});
+
+const applySafeIconContent = (iconEl, iconKey) => {
+  if (!iconEl) return;
+  const safeKey = String(iconKey ?? '');
+
+  if (ICONS[safeKey]) {
+    iconEl.innerHTML = ICONS[safeKey];
+  } else {
+    iconEl.textContent = safeKey;
+  }
+};
+
 export class EnhancedInput extends BaseComponent {
   constructor(element, options = {}) {
     super(element, {
@@ -69,6 +82,7 @@ export class EnhancedInput extends BaseComponent {
       focused: false,
       dirty: false,
       validated: false,
+      error: this.options?.error ?? null,
     };
   }
 
@@ -94,6 +108,10 @@ export class EnhancedInput extends BaseComponent {
   render() {
     this.element.innerHTML = '';
 
+    if (!this.errorId) {
+      this.errorId = `${this.getInputId()}-error`;
+    }
+
     const container = this.createElement('div', ['input-container']);
 
     // Label
@@ -118,7 +136,8 @@ export class EnhancedInput extends BaseComponent {
     // Icon (left)
     if (this.options.icon && this.options.iconPosition === 'left') {
       const icon = this.createElement('div', ['input-icon', 'input-icon-left']);
-      icon.innerHTML = this.options.icon;
+      const iconKey = String(this.options.icon);
+      applySafeIconContent(icon, iconKey);
       icon.setAttribute('aria-hidden', 'true');
       inputWrapper.appendChild(icon);
     }
@@ -133,7 +152,8 @@ export class EnhancedInput extends BaseComponent {
         'input-icon',
         'input-icon-right',
       ]);
-      icon.innerHTML = this.options.icon;
+      const iconKey = String(this.options.icon);
+      applySafeIconContent(icon, iconKey);
       icon.setAttribute('aria-hidden', 'true');
       inputWrapper.appendChild(icon);
     }
@@ -155,7 +175,17 @@ export class EnhancedInput extends BaseComponent {
       container.appendChild(helper);
     }
 
+    if (this.state.error) {
+      const errorEl = this.createElement('div', ['input-error-message']);
+      errorEl.id = this.errorId;
+      errorEl.textContent = this.state.error;
+      errorEl.setAttribute('aria-live', 'polite');
+      container.appendChild(errorEl);
+    }
+
     this.element.appendChild(container);
+
+    this.bindEvents();
   }
 
   createInputElement() {
@@ -192,7 +222,7 @@ export class EnhancedInput extends BaseComponent {
 
     if (this.state.error) {
       input.setAttribute('aria-invalid', 'true');
-      input.setAttribute('aria-errormessage', this.state.error);
+      input.setAttribute('aria-errormessage', this.errorId);
     }
 
     // Store reference for event handling
@@ -213,83 +243,97 @@ export class EnhancedInput extends BaseComponent {
 
     if (!this.inputElement) return;
 
+    if (this._inputAbortController) {
+      this._inputAbortController.abort();
+    }
+    this._inputAbortController = new AbortController();
+    const { signal } = this._inputAbortController;
+
     // Input events
-    this.inputElement.addEventListener('input', e => {
-      this.options.value = e.target.value;
-      this.setState({ dirty: true });
+    this.inputElement.addEventListener(
+      'input',
+      e => {
+        this.options.value = e.target.value;
+        this.setState({ dirty: true });
 
-      if (this.options.onChange) {
-        this.options.onChange(e.target.value, e);
-      }
+        if (this.options.onChange) {
+          this.options.onChange(e.target.value, e);
+        }
 
-      // Validate on input if dirty
-      if (this.state.dirty) {
+        // Validate on input if dirty
+        if (this.state.dirty) {
+          this.validate();
+        }
+      },
+      { signal }
+    );
+
+    this.inputElement.addEventListener(
+      'focus',
+      e => {
+        this.setState({ focused: true });
+        this.setupElement();
+
+        if (this.options.onFocus) {
+          this.options.onFocus(e);
+        }
+      },
+      { signal }
+    );
+
+    this.inputElement.addEventListener(
+      'blur',
+      e => {
+        this.setState({ focused: false });
+        this.setupElement();
+
+        // Validate on blur
         this.validate();
-      }
-    });
 
-    this.inputElement.addEventListener('focus', e => {
-      this.setState({ focused: true });
-      this.setupElement();
-
-      if (this.options.onFocus) {
-        this.options.onFocus(e);
-      }
-    });
-
-    this.inputElement.addEventListener('blur', e => {
-      this.setState({ focused: false });
-      this.setupElement();
-
-      // Validate on blur
-      this.validate();
-
-      if (this.options.onBlur) {
-        this.options.onBlur(e);
-      }
-    });
+        if (this.options.onBlur) {
+          this.options.onBlur(e);
+        }
+      },
+      { signal }
+    );
 
     // Keyboard navigation
-    this.inputElement.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        this.inputElement.blur();
-      }
-    });
+    this.inputElement.addEventListener(
+      'keydown',
+      e => {
+        if (e.key === 'Escape') {
+          this.inputElement.blur();
+        }
+      },
+      { signal }
+    );
   }
 
   validate() {
     let error = null;
+    const value = String(this.options.value ?? '');
 
     // Built-in validation
-    if (this.options.required && !this.options.value.trim()) {
+    if (this.options.required && !value.trim()) {
       error = 'This field is required';
     }
 
-    if (
-      this.options.minLength &&
-      this.options.value.length < this.options.minLength
-    ) {
+    if (this.options.minLength && value.length < this.options.minLength) {
       error = `Minimum ${this.options.minLength} characters required`;
     }
 
-    if (
-      this.options.maxLength &&
-      this.options.value.length > this.options.maxLength
-    ) {
+    if (this.options.maxLength && value.length > this.options.maxLength) {
       error = `Maximum ${this.options.maxLength} characters allowed`;
     }
 
     // Pattern validation
-    if (
-      this.options.pattern &&
-      !new RegExp(this.options.pattern).test(this.options.value)
-    ) {
+    if (this.options.pattern && !new RegExp(this.options.pattern).test(value)) {
       error = 'Invalid format';
     }
 
     // Custom validation
     if (this.options.validate && !error) {
-      const customError = this.options.validate(this.options.value);
+      const customError = this.options.validate(value);
       if (customError) {
         error = customError;
       }
@@ -299,6 +343,10 @@ export class EnhancedInput extends BaseComponent {
     this.setState({ error, validated: true });
     this.setupElement();
     this.render();
+
+    if (this.inputElement) {
+      this.bindEvents();
+    }
 
     // Emit validation event
     this.emit('validate', {
@@ -337,18 +385,21 @@ export class EnhancedInput extends BaseComponent {
     this.setState({ error });
     this.setupElement();
     this.render();
+    this.bindEvents();
   }
 
   clearError() {
     this.setState({ error: null });
     this.setupElement();
     this.render();
+    this.bindEvents();
   }
 
   setDisabled(disabled) {
     this.options.disabled = disabled;
     this.setupElement();
     this.render();
+    this.bindEvents();
   }
 
   focus() {
@@ -385,6 +436,11 @@ export class EnhancedInput extends BaseComponent {
 
   onDestroy() {
     super.onDestroy();
+
+    if (this._inputAbortController) {
+      this._inputAbortController.abort();
+      this._inputAbortController = null;
+    }
     this.inputElement = null;
   }
 }

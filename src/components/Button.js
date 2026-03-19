@@ -70,6 +70,27 @@ export class Button extends BaseComponent {
     } else {
       this.element.classList.remove('btn-loading');
     }
+
+    this.updateAriaAttributes();
+  }
+
+  updateAriaAttributes() {
+    if (!this.element) return;
+
+    const role = this.getRole();
+    const ariaLabel = this.getAriaLabel();
+
+    if (role) {
+      this.element.setAttribute('role', role);
+    } else {
+      this.element.removeAttribute('role');
+    }
+
+    if (ariaLabel) {
+      this.element.setAttribute('aria-label', ariaLabel);
+    } else {
+      this.element.removeAttribute('aria-label');
+    }
   }
 
   render() {
@@ -128,21 +149,22 @@ export class Button extends BaseComponent {
         this.element.setAttribute('rel', 'noopener noreferrer');
       }
     }
+
+    this.updateAriaAttributes();
   }
 
   bindEvents() {
     super.bindEvents();
 
-    if (this.options.onClick && !this.options.disabled) {
-      this.addEventListener('click', e => {
-        if (!this.options.disabled && !this.options.loading) {
-          if (this.options.preventDefault) {
-            e.preventDefault();
-          }
-          this.options.onClick(e);
-        }
-      });
-    }
+    this.addEventListener('click', e => {
+      if (!this.options.onClick) return;
+      if (this.options.disabled || this.options.loading) return;
+
+      if (this.options.preventDefault) {
+        e.preventDefault();
+      }
+      this.options.onClick(e);
+    });
 
     // Touch event handlers for mobile optimization
     this.addEventListener(
@@ -173,6 +195,7 @@ export class Button extends BaseComponent {
 
     // Keyboard support
     this.addEventListener('keydown', e => {
+      if (this.element && this.element.tagName === 'BUTTON') return;
       if (
         (e.key === 'Enter' || e.key === ' ') &&
         !this.options.disabled &&
@@ -244,7 +267,8 @@ export class Button extends BaseComponent {
  */
 export const ButtonComponent = (props = {}) => {
   const button = document.createElement('button');
-  new Button(button, props);
+  const instance = new Button(button, props);
+  button.buttonInstance = instance;
   return button;
 };
 

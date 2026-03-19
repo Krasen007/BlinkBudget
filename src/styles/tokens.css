@@ -240,6 +240,7 @@
   /* Card padding responsive scale */
   --card-padding-mobile: var(--spacing-lg); /* 16px */
   --card-padding-tablet: var(--spacing-xl); /* 24px */
+  --card-padding-desktop: var(--spacing-2xl); /* 32px */
 
   /* Section vertical spacing responsive scale */
   --section-spacing-mobile: var(--spacing-3xl); /* 48px */

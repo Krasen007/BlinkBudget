@@ -12,6 +12,8 @@ export class ErrorBoundary extends BaseComponent {
       showErrorDetails: false,
       ...options,
     });
+
+    this._retryTimer = null;
   }
 
   getDefaultOptions() {
@@ -121,11 +123,19 @@ export class ErrorBoundary extends BaseComponent {
   }
 
   getRole() {
-    return 'alert';
+    return this.state.error ? 'alert' : null;
   }
 
   getAriaLabel() {
     return this.state.error ? 'Error occurred' : null;
+  }
+
+  destroy() {
+    if (this._retryTimer) {
+      clearTimeout(this._retryTimer);
+      this._retryTimer = null;
+    }
+    super.destroy();
   }
 }
 
@@ -159,7 +169,11 @@ export function withErrorBoundary(Component, errorBoundaryOptions = {}) {
       retry() {
         super.retry();
         // Re-initialize child component
-        setTimeout(() => {
+        if (this._retryTimer) {
+          clearTimeout(this._retryTimer);
+        }
+        this._retryTimer = setTimeout(() => {
+          if (this.isDestroyed) return;
           this.renderContent();
         }, 100);
       }

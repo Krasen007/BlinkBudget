@@ -171,7 +171,10 @@ export class EmptyState extends BaseComponent {
     if (this.options.action) {
       const actionButton = this.createElement('button', ['btn', 'btn-primary']);
       actionButton.textContent = this.options.action.text;
-      actionButton.addEventListener('click', this.options.action.onClick);
+
+      this._actionClickHandler = this.options.action.onClick;
+      this._actionButton = actionButton;
+      actionButton.addEventListener('click', this._actionClickHandler);
       container.appendChild(actionButton);
     }
 
@@ -198,6 +201,15 @@ export class ProgressIndicator extends BaseComponent {
       size: 'medium', // 'small', 'medium', 'large'
       ...options,
     });
+
+    this._progressTextId = `progress-text-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  }
+
+  getDefaultState() {
+    return {
+      ...super.getDefaultState(),
+      value: typeof this.options.value !== 'undefined' ? this.options.value : 0,
+    };
   }
 
   getDefaultOptions() {
@@ -247,6 +259,7 @@ export class ProgressIndicator extends BaseComponent {
     // Percentage text
     if (this.options.showPercentage) {
       const percentageText = this.createElement('div', ['progress-text']);
+      percentageText.id = this._progressTextId;
       percentageText.textContent = `${Math.round(percentage)}%`;
       container.appendChild(percentageText);
     }
@@ -267,7 +280,7 @@ export class ProgressIndicator extends BaseComponent {
   }
 
   getAriaDescribedBy() {
-    return 'progress-text';
+    return this.options.showPercentage ? this._progressTextId : null;
   }
 }
 
@@ -275,94 +288,100 @@ export class ProgressIndicator extends BaseComponent {
  * Higher-order component for loading states
  */
 export function withLoadingState(Component, loadingOptions = {}) {
-  return function LoadingStateWrapper(props) {
-    return class WrappedComponent extends BaseComponent {
-      constructor(element) {
-        super(element);
-        this.componentProps = props;
-        this.childComponent = null;
-        this.loadingComponent = null;
-      }
+  return class WrappedComponent extends BaseComponent {
+    constructor(element, props = {}) {
+      super(element);
+      this.componentProps = props;
+      this.childComponent = null;
+      this.loadingComponent = null;
+    }
 
-      getDefaultState() {
-        return {
-          loading: props.loading || false,
-          error: props.error || null,
-          empty: props.empty || false,
-        };
-      }
+    getDefaultState() {
+      return {
+        ...super.getDefaultState(),
+        loading: this.componentProps.loading || false,
+        error: this.componentProps.error || null,
+        empty: this.componentProps.empty || false,
+      };
+    }
 
-      render() {
-        this.element.innerHTML = '';
+    render() {
+      this.element.innerHTML = '';
 
-        if (this.state.loading) {
-          this.renderLoading();
-        } else if (this.state.error) {
-          this.renderError();
-        } else if (this.state.empty) {
-          this.renderEmpty();
-        } else {
-          this.renderContent();
-        }
+      if (this.state.loading) {
+        this.renderLoading();
+      } else if (this.state.error) {
+        this.renderError();
+      } else if (this.state.empty) {
+        this.renderEmpty();
+      } else {
+        this.renderContent();
       }
+    }
 
-      renderLoading() {
-        const loadingContainer = this.createElement('div');
-        this.element.appendChild(loadingContainer);
-        this.loadingComponent = new LoadingState(
-          loadingContainer,
-          loadingOptions
-        );
-      }
+    renderLoading() {
+      const loadingContainer = this.createElement('div');
+      this.element.appendChild(loadingContainer);
+      this.loadingComponent = new LoadingState(
+        loadingContainer,
+        loadingOptions
+      );
+    }
 
-      renderError() {
-        const errorContainer = this.createElement('div');
-        this.element.appendChild(errorContainer);
-        this.loadingComponent = new ErrorBoundary(errorContainer, {
-          fallbackContent: this.state.error.message || 'An error occurred',
-          retryable: true,
-        });
-      }
+    renderError() {
+      const errorContainer = this.createElement('div');
+      this.element.appendChild(errorContainer);
 
-      renderEmpty() {
-        const emptyContainer = this.createElement('div');
-        this.element.appendChild(emptyContainer);
-        this.loadingComponent = new EmptyState(emptyContainer, {
-          title: 'No data available',
-          description: 'There are no items to display.',
-        });
-      }
+      const errorMessage =
+        typeof this.state.error === 'string'
+          ? this.state.error
+          : this.state.error && this.state.error.message
+            ? this.state.error.message
+            : 'An error occurred';
 
-      renderContent() {
-        const container = this.createElement('div');
-        this.element.appendChild(container);
-        this.childComponent = new Component(container, this.componentProps);
-      }
+      this.loadingComponent = new ErrorBoundary(errorContainer, {
+        fallbackContent: errorMessage,
+        retryable: true,
+      });
+    }
 
-      setState(newState) {
-        super.setState(newState);
-        // Update child component props if needed
-        if (this.childComponent && this.childComponent.setProps) {
-          this.childComponent.setProps({ ...this.componentProps, ...newState });
-        }
-      }
+    renderEmpty() {
+      const emptyContainer = this.createElement('div');
+      this.element.appendChild(emptyContainer);
+      this.loadingComponent = new EmptyState(emptyContainer, {
+        title: 'No data available',
+        description: 'There are no items to display.',
+      });
+    }
 
-      destroy() {
-        if (
-          this.childComponent &&
-          typeof this.childComponent.destroy === 'function'
-        ) {
-          this.childComponent.destroy();
-        }
-        if (
-          this.loadingComponent &&
-          typeof this.loadingComponent.destroy === 'function'
-        ) {
-          this.loadingComponent.destroy();
-        }
-        super.destroy();
+    renderContent() {
+      const container = this.createElement('div');
+      this.element.appendChild(container);
+      this.childComponent = new Component(container, this.componentProps);
+    }
+
+    setState(newState) {
+      super.setState(newState);
+      if (this.childComponent && this.childComponent.setProps) {
+        this.childComponent.setProps({ ...this.componentProps, ...newState });
       }
-    };
+    }
+
+    destroy() {
+      if (
+        this.childComponent &&
+        typeof this.childComponent.destroy === 'function'
+      ) {
+        this.childComponent.destroy();
+      }
+      if (
+        this.loadingComponent &&
+        typeof this.loadingComponent.destroy === 'function'
+      ) {
+        this.loadingComponent.destroy();
+      }
+      super.destroy();
+    }
   };
 }
 

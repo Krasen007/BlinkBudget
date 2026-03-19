@@ -355,9 +355,13 @@
 /* Performance Optimizations */
 .spinner,
 .skeleton,
-.loading-dot,
-.progress-fill {
+.loading-dot {
   will-change: transform;
+  backface-visibility: hidden;
+}
+
+.progress-fill {
+  will-change: width;
   backface-visibility: hidden;
 }
 
@@ -391,7 +395,7 @@
   }
 }
 
-/* Dark Mode Support (if implemented) */
+/* Light Mode Support (if implemented) */
 @media (prefers-color-scheme: light) {
   .error-fallback {
     background-color: var(--color-error-light);

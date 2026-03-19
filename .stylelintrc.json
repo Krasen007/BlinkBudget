@@ -98,8 +98,6 @@
           "user-select",
           "backdrop-filter",
           "background-clip",
-          "height",
-          "min-height",
           "image-rendering"
         ]
       }

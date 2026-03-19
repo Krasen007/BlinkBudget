@@ -212,6 +212,7 @@
 
 .input-field[type='number'] {
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 .input-field[type='number']::-webkit-inner-spin-button,
@@ -222,11 +223,13 @@
 }
 
 /* Input Validation States */
-.input-field:valid {
+.input-field:focus:valid,
+.input-field.user-valid {
   border-color: var(--color-success);
 }
 
-.input-field:invalid {
+.input-field:focus:invalid,
+.input-field.user-invalid {
   border-color: var(--color-error);
 }
 
@@ -280,10 +283,10 @@
   }
 }
 
-/* Dark Mode Support (if implemented) */
+/* Light Mode Support (if implemented) */
 @media (prefers-color-scheme: light) {
   .input-field {
-    background-color: white;
+    background-color: var(--color-background);
     color: var(--color-text-main);
     border-color: var(--color-border-strong);
   }
@@ -336,6 +339,13 @@
   );
   background-size: 200% 100%;
   animation: input-shimmer 1.5s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .input-loading .input-field {
+    animation: none;
+    background-position: 0 0;
+  }
 }
 
 @keyframes input-shimmer {
