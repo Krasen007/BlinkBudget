@@ -1,26 +1,8 @@
-## Version 1.28 - Performance & Bug Fixes
-
-### 🚀 Performance Improvements
-- **App optimizations** - General performance enhancements and speed improvements
-- **Faster loading** - Optimized components and reduced processing overhead
-
-### 🐛 Bug Fixes
-- **Quick presets** - Fixed dynamic amount buttons not updating properly
-- **Date editing** - Corrected date picker behavior when modifying transactions
-- **Dashboard UI** - Resolved display issues and improved layout consistency
-- **Test suite** - Fixed failing tests to ensure reliable quality assurance
-
-### 📈 New Features
-- **Inflation Trends** - Added inflation analysis tools
-- **Baseline analysi**
-
----
-
-359e75d optimizations
-a4e5bcb rabbit fixes
-67e06eb add buggy Inflation Trends
-7180228 update plans
-013fddf Fix quick presets not updating
-b9f9c26 fix date but when editing transactions
-94611c4 fix ui bug in dashboard, and fix tests
-Added Inflation Trends and Baseline
+v1.29
+ 
+ - UI foundation: added Enhanced Button component built on a BaseComponent foundation.
+ - Performance: added performance monitoring, lazy loading, and build optimization tooling.
+ - Accessibility: introduced accessibility services and improvements.
+ - Reliability: fixed edit transaction date behavior.
+ - Reports: fixed Top Movers calculation issues.
+ - Docs: cleaned up documentation and removed outdated documents.

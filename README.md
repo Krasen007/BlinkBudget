@@ -54,6 +54,7 @@
 - **Real-time balance calculations** across all accounts
 - **Account filtering** - View transactions by specific account or all accounts
 - **Transaction history** with edit/delete capabilities
+- **Reliable transaction editing** - Improved date editing behavior
 - **Visual feedback** for recently added transactions
 - **Dashboard layout** with improved spacing and optimized action buttons
 - **Fast chart loading** with intelligent caching system and cache invalidation
@@ -69,7 +70,7 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 - **Long-term Goal Planning** - Define specific financial objectives and track your progress over years or decades.
 - **Projected Account Balances** - Visualize how your current spending habits will impact your future bank balances.
 - **Risk Assessment & Warnings** - Automatically identifies potential financial risks and provides actionable alerts based on your patterns.
-- **Comprehensive Analytics** - Deep dive into your finances with "Top Movers" analysis, historical timeline comparisons, and inflation trend analysis to understand how your purchasing power changes over time.
+- **Comprehensive Analytics** - Deep dive into your finances with "Top Movers" analysis (with improved calculation accuracy), historical timeline comparisons, and inflation trend analysis to understand how your purchasing power changes over time.
 - **Dynamic Charting** - Toggle between daily and monthly views for precise trend analysis.
 
 ### User Experience & UI
@@ -85,6 +86,7 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 - **Helpful tips on each section**
 - **Enhanced security** with comprehensive privacy compliance
 - **Improved accessibility** with "Skip to Content" links, ARIA roles, and proper form label associations
+- **Modern component foundation** - BaseComponent building blocks and an Enhanced Button component for consistent UI behavior
 - **Enhanced color schemes** with improved text contrast for better readability
 
 ### Backup & Restore
@@ -111,6 +113,7 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 - **Storage**: Firebase (Sync) + localStorage for offline-capable data persistence
 - **Testing**: Vitest with jsdom environment
 - **Build**: Vite with PostCSS optimization
+- **Performance**: Built-in performance monitoring and optimization utilities
 - **PWA**: vite-plugin-pwa for service worker and manifest management
 - **Package Manager**: Yarn for improved dependency management
 - **Android**: Trusted Web Activity (TWA) with Bubblewrap CLI for Play Store deployment
