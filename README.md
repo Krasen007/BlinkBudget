@@ -28,7 +28,7 @@
 - **Offline-capable** with localStorage and Service Worker persistence
 - **Smart Suggestions Engine** - Intelligent transaction categorization and insights
 - **Ghost Transactions** - See historical transaction data when dates are modified
-- **Dynamic quick amount presets** - Buttons automatically update based on your most frequently used transaction amounts with reset functionality
+- **Dynamic quick amount presets** - Buttons automatically update based on your most frequently used transaction amounts with usage counters and reset functionality
 
 ### Transaction Management
 

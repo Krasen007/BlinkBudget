@@ -1,8 +1,17 @@
-v1.29
- 
- - UI foundation: added Enhanced Button component built on a BaseComponent foundation.
- - Performance: added performance monitoring, lazy loading, and build optimization tooling.
- - Accessibility: introduced accessibility services and improvements.
- - Reliability: fixed edit transaction date behavior.
- - Reports: fixed Top Movers calculation issues.
- - Docs: cleaned up documentation and removed outdated documents.
+# Version 1.30
+
+## New Features
+- **Quick Amount Usage Count**: Added usage counters to quick amount preset buttons showing how many times each amount has been used
+
+## Bug Fixes  
+- **Date Preservation**: Fixed DateInput to preserve original transaction timestamp when editing
+- **Transaction Date**: Fixed date editing issues in transactions
+- **Calculation Fix**: Resolved calculation problems in top movers section
+
+## Improvements
+- **Enhanced Button Component**: Upgraded button system with performance monitoring, accessibility services, and lazy loading
+- **Documentation Cleanup**: Removed outdated documents and cleaned up project structure
+
+## Previous Changes
+- Version bump to 1.28
+- Code optimization and refactoring
