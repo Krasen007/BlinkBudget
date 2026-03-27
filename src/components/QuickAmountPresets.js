@@ -9,6 +9,7 @@
  */
 
 import { AmountPresetService } from '../core/amount-preset-service.js';
+import { TransactionService } from '../core/transaction-service.js';
 import { getCopyString } from '../utils/copy-strings.js';
 
 export const QuickAmountPresets = ({ onPresetSelect }) => {
@@ -24,12 +25,14 @@ export const QuickAmountPresets = ({ onPresetSelect }) => {
    * Render the preset buttons
    */
   const renderButtons = () => {
+    console.log('renderButtons() called');
     // Clear existing buttons
     container.innerHTML = '';
 
     const presets = AmountPresetService.getPresets() || [];
     const displayPresets = presets.length > 0 ? presets : [5, 10, 20, 50];
 
+    console.log('Displaying presets:', displayPresets);
     displayPresets.forEach(amount => {
       const button = document.createElement('button');
       button.type = 'button';
@@ -54,6 +57,7 @@ export const QuickAmountPresets = ({ onPresetSelect }) => {
       button.style.cursor = 'pointer';
       button.style.transition = 'all var(--transition-fast)';
       button.style.outline = 'none';
+      button.style.position = 'relative';
 
       button.addEventListener('focus', () => {
         button.style.boxShadow = 'var(--focus-shadow-strong)';
@@ -119,6 +123,32 @@ export const QuickAmountPresets = ({ onPresetSelect }) => {
           }
         }
       });
+
+      // Get all transactions for counting
+      const transactions = TransactionService.getAll();
+
+      // Count transactions with this amount
+      const amountCount = transactions.filter(t => t.amount === amount).length;
+
+      // Add counter badge to button
+      const counterBadge = document.createElement('span');
+      counterBadge.className = 'quick-amount-badge';
+      counterBadge.textContent = amountCount;
+      counterBadge.setAttribute('aria-hidden', 'true');
+
+      counterBadge.style.fontSize = '0.55rem';
+      counterBadge.style.fontWeight = 'normal';
+      counterBadge.style.color = 'var(--color-text-muted)';
+      counterBadge.style.padding = '0 2px';
+      counterBadge.style.lineHeight = '1';
+      counterBadge.style.position = 'absolute';
+      counterBadge.style.bottom = '2px';
+      counterBadge.style.right = '2px';
+      counterBadge.style.transform = 'translateY(-50%)';
+      counterBadge.style.textShadow = '0 1px 2px rgba(0, 0, 0, 0.25)';
+      counterBadge.style.textTransform = 'uppercase';
+
+      button.appendChild(counterBadge);
 
       container.appendChild(button);
     });
