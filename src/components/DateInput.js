@@ -74,9 +74,16 @@ export const DateInput = (options = {}) => {
   container.appendChild(realDate);
 
   // Expose methods for external consumption
-  container.getDate = () => realDate.value;
+  container.getDate = () => {
+    // If value is a full ISO timestamp, return it; otherwise return date-only
+    return realDate.value.includes('T') ? realDate.value : realDate.value;
+  };
   container.setDate = isoDate => {
     realDate.value = isoDate;
+    // Store the original full timestamp in dataset for timestamp preservation
+    if (typeof isoDate === 'string' && isoDate.includes('T')) {
+      realDate.dataset.timestamp = isoDate;
+    }
   };
 
   return container;
