@@ -233,7 +233,13 @@ export class LazyLoader {
   }
 
   async loadImage(element, src) {
+    // Validate image URL before processing
     if (!src) return;
+    
+    // Allow data: URLs for images but validate other URLs
+    if (!src.startsWith('data:image/') && !this.isValidUrl(src)) {
+      throw new Error(`Invalid image URL: ${src}`);
+    }
 
     // Create new image to preload
     const img = new Image();
@@ -368,9 +374,21 @@ export class LazyLoader {
       };
 
       // Set sanitized script source
-      script.src = this.sanitizeUrl(src);
+      const sanitizedSrc = this.sanitizeUrl(src);
+      script.src = sanitizedSrc;
       script.async = true;
-      script.crossOrigin = 'anonymous'; // Add CORS for security
+      
+      // Only set crossOrigin for cross-origin scripts to avoid breaking same-origin loads
+      try {
+        const scriptOrigin = new URL(sanitizedSrc, window.location.href).origin;
+        if (scriptOrigin !== window.location.origin) {
+          script.crossOrigin = 'anonymous';
+        }
+      } catch {
+        // If URL parsing fails, set crossOrigin as fallback
+        script.crossOrigin = 'anonymous';
+      }
+      
       document.head.appendChild(script);
     });
   }
@@ -383,7 +401,8 @@ export class LazyLoader {
 
     return new Promise((resolve, reject) => {
       // Check for existing stylesheet with same href
-      const escapedSrc = cssEscape(src);
+      const sanitizedSrc = this.sanitizeUrl(src);
+      const escapedSrc = cssEscape(sanitizedSrc);
       const existingLink = document.querySelector(
         `link[rel="stylesheet"][href="${escapedSrc}"]`
       );
@@ -422,7 +441,7 @@ export class LazyLoader {
       };
 
       link.rel = 'stylesheet';
-      link.href = src;
+      link.href = sanitizedSrc;
       document.head.appendChild(link);
     });
   }
@@ -538,7 +557,7 @@ export class LazyLoader {
       }
       
       // Disallow dangerous protocols
-      const allowedProtocols = ['http:', 'https:', 'data:'];
+      const allowedProtocols = ['http:', 'https:'];
       if (!allowedProtocols.includes(urlObj.protocol)) {
         return false;
       }
@@ -569,8 +588,28 @@ export class LazyLoader {
         }
       }
       
-      // Only allow .js files
-      if (!urlObj.pathname.endsWith('.js')) {
+      // Only allow .js files with secure path validation
+      try {
+        // Decode and normalize path to prevent traversal attacks
+        const decodedPath = decodeURIComponent(urlObj.pathname);
+        const pathSegments = decodedPath.split('/').filter(segment => segment !== '');
+        
+        // Reject path traversal attempts
+        if (pathSegments.includes('..') || pathSegments.includes('') || decodedPath.includes('\0')) {
+          return false;
+        }
+        
+        // Check final path segment ends with .js
+        const finalSegment = pathSegments[pathSegments.length - 1] || '';
+        if (!finalSegment.endsWith('.js')) {
+          return false;
+        }
+        
+        // Additional safety: verify content type (optional, can be async)
+        // This would require a HEAD request which may impact performance
+        // Consider adding for high-security environments
+        
+      } catch {
         return false;
       }
       
@@ -598,23 +637,57 @@ export class LazyLoader {
   }
 
   sanitizeHtml(html) {
-    // Use existing security utility for HTML sanitization
+    // Use layered sanitization for better security than brittle regex
     if (!html || typeof html !== 'string') return '';
     
-    // First use sanitizeInput to strip dangerous HTML, then allow safe structure
-    const sanitized = sanitizeInput(html, 10000); // Large limit for HTML content
-    
-    // Additional sanitization for specific dangerous elements that might pass through
-    return sanitized
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
-      .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
-      .replace(/<embed\b[^<]*(?:(?!<\/embed>)<[^<]*)*<\/embed>/gi, '')
-      .replace(/on\w+="[^"]*"/gi, '') // Remove event handlers
-      .replace(/on\w+='[^']*'/gi, '') // Remove event handlers (single quotes)
-      .replace(/javascript:/gi, '') // Remove javascript: protocol
-      .replace(/vbscript:/gi, '') // Remove vbscript: protocol
-      .replace(/data:(?!image\/)/gi, ''); // Allow data: images but block other data: URLs
+    try {
+      // First use existing sanitizeInput to strip dangerous content
+      const preSanitized = sanitizeInput(html, 10000);
+      
+      // Create a temporary DOM element for safer parsing
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = preSanitized;
+      
+      // Remove dangerous elements
+      const dangerousElements = tempDiv.querySelectorAll('script, iframe, object, embed');
+      dangerousElements.forEach(element => element.remove());
+      
+      // Remove dangerous attributes from all elements
+      const allElements = tempDiv.querySelectorAll('*');
+      allElements.forEach(element => {
+        // Remove event handlers
+        Array.from(element.attributes).forEach(attr => {
+          // eslint-disable-next-line no-script-url
+          if (attr.name.startsWith('on') || 
+              attr.value.toLowerCase().includes('javascript:') || 
+              attr.value.toLowerCase().includes('vbscript:')) {
+            element.removeAttribute(attr.name);
+          }
+          
+          // Remove dangerous data: URLs except for images
+          if (attr.name === 'href' && 
+              attr.value.startsWith('data:') && 
+              !attr.value.startsWith('data:image/')) {
+            element.removeAttribute(attr.name);
+          }
+        });
+      });
+      
+      return tempDiv.innerHTML;
+    } catch (error) {
+      // Fallback to basic sanitization if DOM-based approach fails
+      console.warn('[LazyLoader] DOM sanitization failed, using fallback:', error);
+      return sanitizeInput(html, 10000)
+        .replace(/<script\b[^<]*>.*?<\/script>/gi, '')
+        .replace(/<iframe\b[^<]*>.*?<\/iframe>/gi, '')
+        .replace(/<object\b[^<]*>.*?<\/object>/gi, '')
+        .replace(/<embed\b[^<]*>.*?<\/embed>/gi, '')
+        .replace(/on\w+="[^"]*"/gi, '')
+        .replace(/on\w+='[^']*'/gi, '')
+        .replace(/javascript:/gi, '')
+        .replace(/vbscript:/gi, '')
+        .replace(/data:(?!image\/)/gi, '');
+    }
   }
 
   // Utility methods
