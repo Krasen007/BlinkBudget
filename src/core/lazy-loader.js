@@ -1,7 +1,4 @@
-/**
- * Lazy Loader - WebApp.md Performance Optimization
- * Implements lazy loading for images, components, and routes
- */
+import { sanitizeInput } from '../utils/security-utils.js';
 
 const cssEscape = value => {
   const str = String(value ?? '');
@@ -293,6 +290,11 @@ export class LazyLoader {
   }
 
   async loadRoute(element, src) {
+    // Validate and sanitize inputs
+    if (!this.isValidUrl(src)) {
+      throw new Error(`Invalid route URL: ${src}`);
+    }
+
     // Route loading implementation
     try {
       const response = await fetch(src);
@@ -301,7 +303,9 @@ export class LazyLoader {
       }
       const html = await response.text();
 
-      element.innerHTML = html;
+      // Sanitize HTML before injection
+      const sanitizedHtml = this.sanitizeHtml(html);
+      element.innerHTML = sanitizedHtml;
       this.removePlaceholder(element);
       this.markAsLoaded(element);
 
@@ -313,6 +317,11 @@ export class LazyLoader {
   }
 
   async loadScript(element, src) {
+    // Validate and sanitize script URL
+    if (!this.isValidScriptUrl(src)) {
+      throw new Error(`Invalid script URL: ${src}`);
+    }
+
     return new Promise((resolve, reject) => {
       // Check for existing script with same src
       const escapedSrc = cssEscape(src);
@@ -358,13 +367,20 @@ export class LazyLoader {
         reject(new Error(`Failed to load script: ${src}`));
       };
 
-      script.src = src;
+      // Set sanitized script source
+      script.src = this.sanitizeUrl(src);
       script.async = true;
+      script.crossOrigin = 'anonymous'; // Add CORS for security
       document.head.appendChild(script);
     });
   }
 
   async loadStyle(element, src) {
+    // Validate and sanitize stylesheet URL
+    if (!this.isValidUrl(src)) {
+      throw new Error(`Invalid stylesheet URL: ${src}`);
+    }
+
     return new Promise((resolve, reject) => {
       // Check for existing stylesheet with same href
       const escapedSrc = cssEscape(src);
@@ -507,6 +523,98 @@ export class LazyLoader {
           );
         });
     });
+  }
+
+  // Security validation and sanitization methods
+  isValidUrl(url) {
+    if (!url || typeof url !== 'string') return false;
+    
+    try {
+      const urlObj = new URL(url, window.location.origin);
+      
+      // Only allow same-origin or HTTPS URLs
+      if (urlObj.origin !== window.location.origin && urlObj.protocol !== 'https:') {
+        return false;
+      }
+      
+      // Disallow dangerous protocols
+      const allowedProtocols = ['http:', 'https:', 'data:'];
+      if (!allowedProtocols.includes(urlObj.protocol)) {
+        return false;
+      }
+      
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  isValidScriptUrl(url) {
+    if (!this.isValidUrl(url)) return false;
+    
+    try {
+      const urlObj = new URL(url, window.location.origin);
+      
+      // Only allow JavaScript files from same origin or trusted CDNs
+      if (urlObj.origin !== window.location.origin) {
+        // Add trusted CDN domains here if needed
+        const trustedDomains = [
+          'cdn.jsdelivr.net',
+          'unpkg.com',
+          'cdnjs.cloudflare.com'
+        ];
+        
+        if (!trustedDomains.includes(urlObj.hostname)) {
+          return false;
+        }
+      }
+      
+      // Only allow .js files
+      if (!urlObj.pathname.endsWith('.js')) {
+        return false;
+      }
+      
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  sanitizeUrl(url) {
+    if (!url || typeof url !== 'string') return '';
+    
+    try {
+      const urlObj = new URL(url, window.location.origin);
+      
+      // Remove dangerous URL components
+      urlObj.hash = '';
+      urlObj.username = '';
+      urlObj.password = '';
+      
+      return urlObj.toString();
+    } catch {
+      return '';
+    }
+  }
+
+  sanitizeHtml(html) {
+    // Use existing security utility for HTML sanitization
+    if (!html || typeof html !== 'string') return '';
+    
+    // First use sanitizeInput to strip dangerous HTML, then allow safe structure
+    const sanitized = sanitizeInput(html, 10000); // Large limit for HTML content
+    
+    // Additional sanitization for specific dangerous elements that might pass through
+    return sanitized
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+      .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
+      .replace(/<embed\b[^<]*(?:(?!<\/embed>)<[^<]*)*<\/embed>/gi, '')
+      .replace(/on\w+="[^"]*"/gi, '') // Remove event handlers
+      .replace(/on\w+='[^']*'/gi, '') // Remove event handlers (single quotes)
+      .replace(/javascript:/gi, '') // Remove javascript: protocol
+      .replace(/vbscript:/gi, '') // Remove vbscript: protocol
+      .replace(/data:(?!image\/)/gi, ''); // Allow data: images but block other data: URLs
   }
 
   // Utility methods
