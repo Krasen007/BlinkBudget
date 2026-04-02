@@ -489,11 +489,24 @@ export async function createCategoryTrendsChart(
   const topCategories = currentData.categoryBreakdown.categories.slice(0, 6);
   const monthlyData = generateMonthlyTrendData(allTransactions, topCategories);
 
+  // Filter out the current month to avoid incomplete data skewing the chart
+  const now = new Date();
+  const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  
+  const filteredMonths = monthlyData.months.filter(month => month !== currentMonthKey);
+  const filteredCategoryData = {};
+  
+  topCategories.forEach(category => {
+    filteredCategoryData[category.name] = (monthlyData.categoryData[category.name] || []).filter(
+      (_value, index) => monthlyData.months[index] !== currentMonthKey
+    );
+  });
+
   const chartData = {
-    labels: monthlyData.months,
+    labels: filteredMonths,
     datasets: topCategories.map((category, index) => ({
       label: category.name,
-      data: monthlyData.categoryData[category.name] || [],
+      data: filteredCategoryData[category.name] || [],
       borderColor:
         categoryColorMap.get(category.name) ||
         getChartColors(topCategories.length)[index],

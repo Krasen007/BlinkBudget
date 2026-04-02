@@ -159,63 +159,73 @@ export const BaselineAnalysis = ({
   };
 
   const createPeriodChart = baseline => {
-    const chartContainer = document.createElement('div');
-    chartContainer.className = 'period-chart';
+      const chartContainer = document.createElement('div');
+      chartContainer.className = 'period-chart';
 
-    const chartTitle = document.createElement('h4');
-    chartTitle.textContent = 'Spending History';
-    chartTitle.className = 'chart-title';
-    chartContainer.appendChild(chartTitle);
+      const chartTitle = document.createElement('h4');
+      chartTitle.textContent = 'Spending History';
+      chartTitle.className = 'chart-title';
+      chartContainer.appendChild(chartTitle);
 
-    const chart = document.createElement('div');
-    chart.className = 'chart-bars';
+      const chart = document.createElement('div');
+      chart.className = 'chart-bars';
+      chart.style.position = 'relative';
 
-    // Create bar chart
-    const maxValue = Math.max(...baseline.periods.map(p => p.total));
+      // Create bar chart
+      const maxValue = Math.max(...baseline.periods.map(p => p.total));
 
-    baseline.periods.forEach(period => {
-      const barContainer = document.createElement('div');
-      barContainer.className = 'bar-container';
-
-      const bar = document.createElement('div');
-      bar.className = 'bar';
-      const height = maxValue > 0 ? (period.total / maxValue) * 100 : 0;
-      bar.style.height = `${height}%`;
-
-      // Color based on relation to average
-      if (period.total <= baseline.floor) {
-        bar.classList.add('bar-floor');
-      } else if (period.total >= baseline.ceiling) {
-        bar.classList.add('bar-ceiling');
+      if (maxValue === 0) {
+        const noDataMsg = document.createElement('div');
+        noDataMsg.style.cssText = 'width: 100%; text-align: center; color: var(--color-text-muted); padding: var(--spacing-md);';
+        noDataMsg.textContent = 'No spending data available';
+        chart.appendChild(noDataMsg);
       } else {
-        bar.classList.add('bar-average');
+        baseline.periods.forEach(period => {
+          const barContainer = document.createElement('div');
+          barContainer.className = 'bar-container';
+
+          const bar = document.createElement('div');
+          bar.className = 'bar';
+          const height = maxValue > 0 ? (period.total / maxValue) * 100 : 0;
+          bar.style.height = `${Math.max(height, 2)}%`;
+
+          // Color based on relation to average
+          if (period.total <= baseline.floor) {
+            bar.classList.add('bar-floor');
+          } else if (period.total >= baseline.ceiling) {
+            bar.classList.add('bar-ceiling');
+          } else {
+            bar.classList.add('bar-average');
+          }
+
+          const label = document.createElement('div');
+          label.className = 'bar-label';
+          label.textContent = formatPeriodLabel(period.period, baseline.period);
+
+          const value = document.createElement('div');
+          value.className = 'bar-value';
+          value.textContent = `€${period.total.toFixed(0)}`;
+
+          barContainer.appendChild(bar);
+          barContainer.appendChild(label);
+          barContainer.appendChild(value);
+          chart.appendChild(barContainer);
+        });
       }
 
-      const label = document.createElement('div');
-      label.className = 'bar-label';
-      label.textContent = formatPeriodLabel(period.period, baseline.period);
+      chartContainer.appendChild(chart);
 
-      const value = document.createElement('div');
-      value.className = 'bar-value';
-      value.textContent = `$${period.total.toFixed(0)}`;
+      // Add average line
+      if (maxValue > 0) {
+        const avgLine = document.createElement('div');
+        avgLine.className = 'average-line';
+        avgLine.style.bottom = `${(baseline.average / maxValue) * 100}%`;
+        avgLine.title = `Average: €${baseline.average.toFixed(2)}`;
+        chart.appendChild(avgLine);
+      }
 
-      barContainer.appendChild(bar);
-      barContainer.appendChild(label);
-      barContainer.appendChild(value);
-      chart.appendChild(barContainer);
-    });
-
-    chartContainer.appendChild(chart);
-
-    // Add average line
-    const avgLine = document.createElement('div');
-    avgLine.className = 'average-line';
-    avgLine.style.bottom = `${(baseline.average / maxValue) * 100}%`;
-    avgLine.title = `Average: $${baseline.average.toFixed(2)}`;
-    chart.appendChild(avgLine);
-
-    return chartContainer;
-  };
+      return chartContainer;
+    };
 
   const createInsightsSection = insights => {
     const section = document.createElement('div');

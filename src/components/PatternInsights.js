@@ -527,12 +527,12 @@ function groupTransactionsByDay(transactions) {
 
     const date = new Date(transaction.timestamp);
     const dayKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
-    const hour = date.getUTCHours(); // Use UTC hours to avoid timezone issues
+    const hour = date.getHours(); // Use local hours to match user's timezone
 
-    // Determine time period
+    // Determine time period - matching PatternAnalyzer definitions
     let period;
-    if (hour >= 5 && hour < 9) period = 'earlyMorning';
-    else if (hour >= 9 && hour < 12) period = 'morning';
+    if (hour >= 5 && hour < 8) period = 'earlyMorning';
+    else if (hour >= 8 && hour < 12) period = 'morning';
     else if (hour >= 12 && hour < 17) period = 'afternoon';
     else if (hour >= 17 && hour < 21) period = 'evening';
     else period = 'night';

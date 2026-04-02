@@ -160,7 +160,7 @@ export function getPersonalBenchmarking(transactions, timePeriod) {
       benchmarking.push({
         category,
         current,
-        lastMonth,
+        lastMonth: lastMonthAmount,
         change: Math.round(change * 10) / 10,
         trend,
         period: `vs ${lastMonthLabel}`,
