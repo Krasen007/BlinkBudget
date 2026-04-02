@@ -1,17 +1,16 @@
-# Version 1.30
+# Changelog v1.31
 
-## New Features
-- **Quick Amount Usage Count**: Added usage counters to quick amount preset buttons showing how many times each amount has been used
+- **Core Analytics & UX Refinement**: 
+  - Restructured the "Time of Day Patterns" dashboard into easier-to-read week-based rows with compact day visualizations.
+  - Implemented an advanced Anomaly Detection and Optimization Engine with Bulgarian and English language support.
+  - Optimized data processing to use local timezones, resolving errors where spending was shifted into the wrong day.
 
-## Bug Fixes  
-- **Date Preservation**: Fixed DateInput to preserve original transaction timestamp when editing
-- **Transaction Date**: Fixed date editing issues in transactions
-- **Calculation Fix**: Resolved calculation problems in top movers section
+- **Spending Patterns & Insights**:
+  - Improved the "Category Trends" chart to prioritize your top 6 spending categories while keeping the rest easily accessible.
+  - Enhanced the overall "Spending Baseline" analysis with more accurate historical charts and benchmarking calculations.
+  - Refined reports to exclude the current (incomplete) month, providing a clearer look at your past spending trends.
 
-## Improvements
-- **Enhanced Button Component**: Upgraded button system with performance monitoring, accessibility services, and lazy loading
-- **Documentation Cleanup**: Removed outdated documents and cleaned up project structure
-
-## Previous Changes
-- Version bump to 1.28
-- Code optimization and refactoring
+- **Security & Stability**:
+  - Significantly hardened application security by implementing advanced XSS protection and stricter URL validation within the image loading service.
+  - Resolved multiple calculation errors in benchmarking and anomaly details.
+  - Streamlined the application by removing the defunct "Scenarios" and "Spending Predictions" features for a faster, cleaner experience.

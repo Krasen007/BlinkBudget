@@ -59,18 +59,17 @@
 - **Dashboard layout** with improved spacing and optimized action buttons
 - **Fast chart loading** with intelligent caching system and cache invalidation
 - **Enhanced data visualization** with consistent colors for transactions
-- **Improved reports view** with informative messages for insufficient data and modular chart rendering
 
 ### Financial Planning & Insights
 
 BlinkBudget includes a sophisticated financial planning engine that helps you look beyond today's expenses:
 
-- **Interactive Scenario Modeling** - Forecast your net worth based on adjustable variables (investment returns, monthly savings, inflation).
+- **Anomaly Detection Service** - Automatically identifies unusually large transactions or irregular spending patterns.
+- **Automated Optimization Engine** - Tailored suggestions to switch categories or reduce spending to meet savings goals.
 - **Investment Portfolio Tracking** - Monitor your total net worth with manual entry support for various investment types.
 - **Long-term Goal Planning** - Define specific financial objectives and track your progress over years or decades.
-- **Projected Account Balances** - Visualize how your current spending habits will impact your future bank balances.
-- **Risk Assessment & Warnings** - Automatically identifies potential financial risks and provides actionable alerts based on your patterns.
-- **Comprehensive Analytics** - Deep dive into your finances with "Top Movers" analysis (with improved calculation accuracy), historical timeline comparisons, and inflation trend analysis to understand how your purchasing power changes over time.
+- **Projected Account Balances** - Forecast future balances based on your historical spending and incoming funds.
+- **Comprehensive Analytics** - Deep dive into your finances with "Top Movers" analysis, historical timeline comparisons, and baseline variability insights.
 - **Dynamic Charting** - Toggle between daily and monthly views for precise trend analysis.
 
 ### User Experience & UI
@@ -84,7 +83,7 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 - **Android TWA support** - Trusted Web Activity for native Android app experience with Play Store deployment
 - **Keyboard shortcut (Escape key)** to exit Settings and return to dashboard
 - **Helpful tips on each section**
-- **Enhanced security** with comprehensive privacy compliance
+- **Top-tier Security** - Advanced XSS protection, strict URL validation, and comprehensive privacy compliance
 - **Improved accessibility** with "Skip to Content" links, ARIA roles, and proper form label associations
 - **Modern component foundation** - BaseComponent building blocks and an Enhanced Button component for consistent UI behavior
 - **Enhanced color schemes** with improved text contrast for better readability
