@@ -53,17 +53,17 @@ const REDUCTION_RECOMMENDATIONS = {
     description: 'Review miscellaneous',
   },
   Заведения: {
-    minThreshold: 30,
+    minThreshold: 50,
     maxReductionPercent: 0.4,
     description: 'Limit dining out',
   },
   Забавления: {
-    minThreshold: 20,
+    minThreshold: 50,
     maxReductionPercent: 0.25,
     description: 'Review streaming services',
   },
   Гориво: {
-    minThreshold: 40,
+    minThreshold: 50,
     maxReductionPercent: 0.2,
     description: 'Combine errands',
   },

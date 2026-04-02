@@ -61,10 +61,5 @@ export const InsightsSection = currentData => {
 
   section.appendChild(insightsGrid);
 
-  if (data.predictions && data.predictions.hasEnoughData) {
-    const predictions = PredictionsSection(data);
-    section.appendChild(predictions);
-  }
-
   return section;
 };

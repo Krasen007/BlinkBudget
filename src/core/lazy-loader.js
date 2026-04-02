@@ -235,7 +235,7 @@ export class LazyLoader {
   async loadImage(element, src) {
     // Validate image URL before processing
     if (!src) return;
-    
+
     // Allow data: URLs for images but validate other URLs
     if (!src.startsWith('data:image/') && !this.isValidUrl(src)) {
       throw new Error(`Invalid image URL: ${src}`);
@@ -377,7 +377,7 @@ export class LazyLoader {
       const sanitizedSrc = this.sanitizeUrl(src);
       script.src = sanitizedSrc;
       script.async = true;
-      
+
       // Only set crossOrigin for cross-origin scripts to avoid breaking same-origin loads
       try {
         const scriptOrigin = new URL(sanitizedSrc, window.location.href).origin;
@@ -388,7 +388,7 @@ export class LazyLoader {
         // If URL parsing fails, set crossOrigin as fallback
         script.crossOrigin = 'anonymous';
       }
-      
+
       document.head.appendChild(script);
     });
   }
@@ -547,21 +547,24 @@ export class LazyLoader {
   // Security validation and sanitization methods
   isValidUrl(url) {
     if (!url || typeof url !== 'string') return false;
-    
+
     try {
       const urlObj = new URL(url, window.location.origin);
-      
+
       // Only allow same-origin or HTTPS URLs
-      if (urlObj.origin !== window.location.origin && urlObj.protocol !== 'https:') {
+      if (
+        urlObj.origin !== window.location.origin &&
+        urlObj.protocol !== 'https:'
+      ) {
         return false;
       }
-      
+
       // Disallow dangerous protocols
       const allowedProtocols = ['http:', 'https:'];
       if (!allowedProtocols.includes(urlObj.protocol)) {
         return false;
       }
-      
+
       return true;
     } catch {
       return false;
@@ -570,49 +573,54 @@ export class LazyLoader {
 
   isValidScriptUrl(url) {
     if (!this.isValidUrl(url)) return false;
-    
+
     try {
       const urlObj = new URL(url, window.location.origin);
-      
+
       // Only allow JavaScript files from same origin or trusted CDNs
       if (urlObj.origin !== window.location.origin) {
         // Add trusted CDN domains here if needed
         const trustedDomains = [
           'cdn.jsdelivr.net',
           'unpkg.com',
-          'cdnjs.cloudflare.com'
+          'cdnjs.cloudflare.com',
         ];
-        
+
         if (!trustedDomains.includes(urlObj.hostname)) {
           return false;
         }
       }
-      
+
       // Only allow .js files with secure path validation
       try {
         // Decode and normalize path to prevent traversal attacks
         const decodedPath = decodeURIComponent(urlObj.pathname);
-        const pathSegments = decodedPath.split('/').filter(segment => segment !== '');
-        
+        const pathSegments = decodedPath
+          .split('/')
+          .filter(segment => segment !== '');
+
         // Reject path traversal attempts
-        if (pathSegments.includes('..') || pathSegments.includes('') || decodedPath.includes('\0')) {
+        if (
+          pathSegments.includes('..') ||
+          pathSegments.includes('') ||
+          decodedPath.includes('\0')
+        ) {
           return false;
         }
-        
+
         // Check final path segment ends with .js
         const finalSegment = pathSegments[pathSegments.length - 1] || '';
         if (!finalSegment.endsWith('.js')) {
           return false;
         }
-        
+
         // Additional safety: verify content type (optional, can be async)
         // This would require a HEAD request which may impact performance
         // Consider adding for high-security environments
-        
       } catch {
         return false;
       }
-      
+
       return true;
     } catch {
       return false;
@@ -621,15 +629,15 @@ export class LazyLoader {
 
   sanitizeUrl(url) {
     if (!url || typeof url !== 'string') return '';
-    
+
     try {
       const urlObj = new URL(url, window.location.origin);
-      
+
       // Remove dangerous URL components
       urlObj.hash = '';
       urlObj.username = '';
       urlObj.password = '';
-      
+
       return urlObj.toString();
     } catch {
       return '';
@@ -639,44 +647,54 @@ export class LazyLoader {
   sanitizeHtml(html) {
     // Use layered sanitization for better security than brittle regex
     if (!html || typeof html !== 'string') return '';
-    
+
     try {
       // First use existing sanitizeInput to strip dangerous content
       const preSanitized = sanitizeInput(html, 10000);
-      
+
       // Create a temporary DOM element for safer parsing
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = preSanitized;
-      
+
       // Remove dangerous elements
-      const dangerousElements = tempDiv.querySelectorAll('script, iframe, object, embed');
+      const dangerousElements = tempDiv.querySelectorAll(
+        'script, iframe, object, embed'
+      );
       dangerousElements.forEach(element => element.remove());
-      
+
       // Remove dangerous attributes from all elements
       const allElements = tempDiv.querySelectorAll('*');
       allElements.forEach(element => {
         // Remove event handlers
         Array.from(element.attributes).forEach(attr => {
-          // eslint-disable-next-line no-script-url
-          if (attr.name.startsWith('on') || 
-              attr.value.toLowerCase().includes('javascript:') || 
-              attr.value.toLowerCase().includes('vbscript:')) {
+          // Check for dangerous protocols using regex instead of includes
+          const attrValue = attr.value.toLowerCase();
+          const hasDangerousProtocol = /^javascript:|^vbscript:/.test(
+            attrValue
+          );
+
+          if (attr.name.startsWith('on') || hasDangerousProtocol) {
             element.removeAttribute(attr.name);
           }
-          
+
           // Remove dangerous data: URLs except for images
-          if (attr.name === 'href' && 
-              attr.value.startsWith('data:') && 
-              !attr.value.startsWith('data:image/')) {
+          if (
+            attr.name === 'href' &&
+            attr.value.startsWith('data:') &&
+            !attr.value.startsWith('data:image/')
+          ) {
             element.removeAttribute(attr.name);
           }
         });
       });
-      
+
       return tempDiv.innerHTML;
     } catch (error) {
       // Fallback to basic sanitization if DOM-based approach fails
-      console.warn('[LazyLoader] DOM sanitization failed, using fallback:', error);
+      console.warn(
+        '[LazyLoader] DOM sanitization failed, using fallback:',
+        error
+      );
       return sanitizeInput(html, 10000)
         .replace(/<script\b[^<]*>.*?<\/script>/gi, '')
         .replace(/<iframe\b[^<]*>.*?<\/iframe>/gi, '')
