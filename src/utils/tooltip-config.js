@@ -117,12 +117,6 @@ export const TOOLTIP_CONFIG = {
 
   // Financial Planning Tooltips
   financialPlanning: {
-    'scenario-modeling': {
-      content:
-        'Forecast your future based on different savings and investment scenarios.',
-      position: 'top',
-      delay: 300,
-    },
     'net-worth-chart': {
       content: 'Track your total financial picture over time.',
       position: 'top',
@@ -305,11 +299,7 @@ export const TOOLTIP_PRIORITY = {
   ],
 
   // Low priority - show as users explore
-  low: [
-    'settings.account-management',
-    'financialPlanning.scenario-modeling',
-    'reports.top-movers',
-  ],
+  low: ['settings.account-management', 'reports.top-movers'],
 };
 
 // Tooltip triggers - when to show specific tooltips
@@ -325,18 +315,13 @@ export const TOOLTIP_TRIGGERS = {
     'smartFeatures.smart-suggestions',
   ],
 
-  afterOneWeek: ['financialPlanning.scenario-modeling', 'settings.export-data'],
-
   // Feature discovery triggers
   onAccountPage: [
     'settings.account-management',
     'addTransaction.account-selector',
   ],
 
-  onPlanningPage: [
-    'financialPlanning.scenario-modeling',
-    'financialPlanning.goal-planning',
-  ],
+  onPlanningPage: ['financialPlanning.goal-planning'],
 
   onReportsPage: ['reports.top-movers', 'reports.category-breakdown'],
 };

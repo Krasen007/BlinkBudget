@@ -254,7 +254,7 @@ export const ForecastsSection = (
 
   section.appendChild(
     createUsageNote(
-      'Forecasts use your past 3+ months of transactions to predict income and expenses. Adjust assumptions in the scenario tab to see how changes affect future balances.'
+      'Forecasts use your past 3+ months of transactions to predict income and expenses.'
     )
   );
 

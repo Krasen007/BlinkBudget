@@ -647,7 +647,7 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
 
   section.appendChild(
     createUsageNote(
-      'Create and track goals (target amount, date, current savings). The planner calculates required monthly savings and progress. Use scenarios to model different savings rates.'
+      'Create and track goals (target amount, date, current savings). The planner calculates required monthly savings and progress.'
     )
   );
 

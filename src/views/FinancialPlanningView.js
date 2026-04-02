@@ -7,7 +7,6 @@
  * - Long-term goal planning
  * - Advanced insights and analytics
  * - Risk assessment and warnings
- * - Scenario planning and modeling
  *
  * Requirements: 1.1-1.6, 2.1-2.6, 3.1-3.7, 4.1-4.7, 5.1-5.6, 6.1-6.6, 7.1-7.6, 8.1-8.6, 9.1-9.6, 10.1-10.6, 11.1-11.6
  */
@@ -18,7 +17,6 @@ import { AccountService } from '../core/Account/account-service.js';
 import { ForecastEngine } from '../core/forecast-engine.js';
 import { AccountBalancePredictor } from '../core/Account/account-balance-predictor.js';
 import { RiskAssessor } from '../core/risk-assessor.js';
-import { GoalPlanner } from '../core/goal-planner.js';
 import { ChartRenderer } from '../components/ChartRenderer.js';
 
 import { COLORS, SPACING, TIMING, STORAGE_KEYS } from '../utils/constants.js';
@@ -31,7 +29,6 @@ import { ForecastsSection } from './financial-planning/ForecastsSection.js';
 import { InvestmentsSection } from './financial-planning/InvestmentsSection.js';
 import { GoalsSection } from './financial-planning/GoalsSection.js';
 import { InsightsSection } from './financial-planning/InsightsSection.js';
-import { ScenariosSection } from './financial-planning/ScenariosSection.js';
 import { BudgetsSection } from './financial-planning/BudgetsSection.js';
 
 export const FinancialPlanningView = () => {
@@ -47,7 +44,6 @@ export const FinancialPlanningView = () => {
   const forecastEngine = new ForecastEngine();
   const balancePredictor = new AccountBalancePredictor();
   const riskAssessor = new RiskAssessor();
-  const goalPlanner = new GoalPlanner();
   const chartRenderer = new ChartRenderer();
 
   // Track active charts for cleanup
@@ -151,7 +147,6 @@ export const FinancialPlanningView = () => {
       { id: 'investments', label: 'Investments', icon: '💰' },
       { id: 'goals', label: 'Goals', icon: '🎯' },
       { id: 'insights', label: 'Insights', icon: '💡' },
-      { id: 'scenarios', label: 'Scenarios', icon: '🔄' },
       { id: 'budgets', label: 'Budgets', icon: '📉' },
     ];
 
@@ -233,9 +228,6 @@ export const FinancialPlanningView = () => {
       case 'insights':
         renderInsightsSection();
         break;
-      case 'scenarios':
-        renderScenariosSection();
-        break;
       case 'budgets':
         await renderBudgetsSection();
         break;
@@ -295,18 +287,6 @@ export const FinancialPlanningView = () => {
       activeCharts
     );
     content.appendChild(insightsResult.element);
-  }
-
-  /**
-   * Render Scenarios section - What-if modeling
-   */
-  function renderScenariosSection() {
-    const scenariosElement = ScenariosSection(
-      goalPlanner,
-      chartRenderer,
-      activeCharts
-    );
-    content.appendChild(scenariosElement);
   }
 
   /**
