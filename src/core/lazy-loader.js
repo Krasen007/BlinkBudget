@@ -236,7 +236,12 @@ export class LazyLoader {
     // Validate image URL before processing
     if (!src) return;
 
-    // Allow data: URLs for images but validate other URLs
+    // Security: explicitly reject SVG data URIs as they can contain executable content
+    if (src.startsWith('data:image/svg')) {
+      throw new Error('SVG data URIs are not allowed for security reasons (XSS prevention)');
+    }
+
+    // Allow other data: URLs for images but validate external URLs
     if (!src.startsWith('data:image/') && !this.isValidUrl(src)) {
       throw new Error(`Invalid image URL: ${src}`);
     }
@@ -679,7 +684,8 @@ export class LazyLoader {
           if (
             urlAttributes.includes(attr.name) &&
             trimmedLower.startsWith('data:') &&
-            !trimmedLower.startsWith('data:image/')
+            trimmedLower.startsWith('data:image/') &&
+            !trimmedLower.startsWith('data:image/svg')
           ) {
             element.removeAttribute(attr.name);
           }

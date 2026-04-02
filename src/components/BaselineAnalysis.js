@@ -190,7 +190,7 @@ export const BaselineAnalysis = ({
 
         const bar = document.createElement('div');
         bar.className = 'bar';
-        const height = maxValue > 0 ? (periodData.total / maxValue) * 100 : 0;
+        const height = (periodData.total / maxValue) * 100;
         bar.style.height = `${Math.max(height, 2)}%`;
 
         // Color based on relation to average

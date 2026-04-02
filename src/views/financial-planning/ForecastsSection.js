@@ -254,7 +254,7 @@ export const ForecastsSection = (
 
   section.appendChild(
     createUsageNote(
-      'Forecasts use your past 3+ months of transactions to predict income and expenses.'
+      'Forecasts use your past 3 months of transactions to predict income and expenses.'
     )
   );
 

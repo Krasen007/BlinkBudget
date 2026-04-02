@@ -115,9 +115,11 @@ export class AnomalyService {
 
       // Add a global summary insight if there are multiple categories involved
       if (Object.keys(categorySpikes).length > 1) {
-        // Build detailed transaction list for the message (limit to first 5)
         const MAX_DISPLAY_TRANSACTIONS = 5;
-        const displaySpikes = spikes.slice(0, MAX_DISPLAY_TRANSACTIONS);
+        const sortedSpikes = [...spikes].sort(
+          (a, b) => Math.abs(b.amount || 0) - Math.abs(a.amount || 0)
+        );
+        const displaySpikes = sortedSpikes.slice(0, MAX_DISPLAY_TRANSACTIONS);
         const transactionDetails = displaySpikes
           .map(
             t =>

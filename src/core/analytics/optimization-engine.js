@@ -11,10 +11,12 @@ import { CustomCategoryService } from '../custom-category-service.js';
 // Minimum threshold for optimization recommendations (in currency units)
 const MIN_OPTIMIZATION_THRESHOLD = 50;
 
-// Category-specific optimization strategies
-// These can be extended or customized per category
-// Category-specific optimization patterns
-// These use regex to match category names, allowing for custom categories to be recognized
+// Default reduction percent for generic categories
+const DEFAULT_CATEGORY_REDUCTION_PERCENT = 0.15;
+
+// Strategy presets for known spending patterns.
+// These are hardcoded as predefined heuristics that the engine attempts to map 
+// to account/category names to provide tailored financial advice.
 const SUBSTITUTION_PATTERNS = [
   {
     match: /заведения|ресторант|кафе|eating out|restaurant|dining|cafe/i,
@@ -67,7 +69,7 @@ const REDUCTION_PATTERNS = [
     description: 'Review miscellaneous',
   },
   {
-    match: /заведения|ресторант|кафе|dining/i,
+    match: /заведения|ресторант|кафе|eating out|restaurant|dining|cafe/i,
     maxReductionPercent: 0.4,
     description: 'Limit dining out',
   },
@@ -245,8 +247,8 @@ export class OptimizationEngine {
         allExpenseCategories.includes(category.name)
       ) {
         // Generic reduction recommendation for any category above threshold
-        const defaultReductionPercent = 0.15; // 15% default reduction
-        const savings = category.amount * defaultReductionPercent;
+        const totalSavings =
+          category.amount * DEFAULT_CATEGORY_REDUCTION_PERCENT;
         const id = `reduction_${category.name.toLowerCase()}`;
 
         if (!this.persistedData.dismissedInsights.includes(id)) {
@@ -255,13 +257,13 @@ export class OptimizationEngine {
             type: 'reduction',
             category: category.name,
             currentSpending: category.amount,
-            reductionPercent: defaultReductionPercent * 100,
-            potentialSavings: savings,
-            message: `Reducing ${category.name} by ${(defaultReductionPercent * 100).toFixed(0)}% could save ${this._formatCurrency(savings)}/month`,
+            reductionPercent: DEFAULT_CATEGORY_REDUCTION_PERCENT * 100,
+            potentialSavings: totalSavings,
+            message: `Reducing ${category.name} by ${(DEFAULT_CATEGORY_REDUCTION_PERCENT * 100).toFixed(0)}% could save ${this._formatCurrency(totalSavings)}/month`,
             description: 'Review and optimize spending',
             difficulty: 'medium',
             actionable: true,
-            priority: savings > averageExpense * 0.15 ? 'high' : 'medium',
+            priority: totalSavings > averageExpense * 0.15 ? 'high' : 'medium',
           });
         }
       }
@@ -468,12 +470,14 @@ export class OptimizationEngine {
     }
 
     if (suggestions.length === 0) {
+      const genericReductionSavings =
+        category.amount * DEFAULT_CATEGORY_REDUCTION_PERCENT;
       suggestions.push({
         type: 'reduction',
         category: categoryId,
-        reductionPercent: 10,
-        description: 'Review for 10% reduction',
-        potentialSavings: category.amount * 0.1,
+        reductionPercent: DEFAULT_CATEGORY_REDUCTION_PERCENT * 100,
+        description: `Review for ${(DEFAULT_CATEGORY_REDUCTION_PERCENT * 100).toFixed(0)}% reduction`,
+        potentialSavings: genericReductionSavings,
         difficulty: 'easy',
       });
     }

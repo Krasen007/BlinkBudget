@@ -458,7 +458,8 @@ function createTimeOfDaySection(analysis, transactions, timePeriod) {
   const startDate = new Date(timePeriod.startDate);
   const endDate = new Date(timePeriod.endDate);
   const periodDays = Object.keys(dailyData).filter(dayKey => {
-    const dayDate = new Date(dayKey);
+    const [year, month, day] = dayKey.split('-').map(Number);
+    const dayDate = new Date(year, month - 1, day);
     return dayDate >= startDate && dayDate <= endDate;
   });
 
@@ -483,10 +484,11 @@ function createTimeOfDaySection(analysis, transactions, timePeriod) {
     let currentWeekStart = null;
 
     sortedDays.forEach(dayKey => {
-      const dayDate = new Date(dayKey);
+      const [year, month, day] = dayKey.split('-').map(Number);
+      const dayDate = new Date(year, month - 1, day);
       const weekStart = new Date(dayDate);
       weekStart.setDate(dayDate.getDate() - dayDate.getDay()); // Start of week (Sunday)
-      const weekKey = weekStart.toISOString().split('T')[0];
+      const weekKey = `${weekStart.getFullYear()}-${String(weekStart.getMonth() + 1).padStart(2, '0')}-${String(weekStart.getDate()).padStart(2, '0')}`;
 
       if (currentWeekStart !== weekKey) {
         if (currentWeek.length > 0) {
