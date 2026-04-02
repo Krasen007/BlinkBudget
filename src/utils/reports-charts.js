@@ -486,11 +486,14 @@ export async function createCategoryTrendsChart(
   section.appendChild(chartDiv);
 
   // Generate monthly data for top 6 categories
-  const topCategories = currentData.categoryBreakdown.categories.slice(0, 6);
+  const topCategories = currentData.categoryBreakdown.categories.slice(0, 99);
   const monthlyData = generateMonthlyTrendData(allTransactions, topCategories);
 
   // Filter out the current month to avoid incomplete data skewing the chart
-  const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const currentMonthKey = now.toLocaleDateString('en-US', {
+    month: 'short',
+    year: 'numeric',
+  });
 
   const filteredMonths = monthlyData.months.filter(
     month => month !== currentMonthKey
@@ -520,6 +523,7 @@ export async function createCategoryTrendsChart(
       borderWidth: 3,
       fill: false,
       tension: 0.4,
+      hidden: index >= 6, // Hide categories beyond the top 6 to prevent clutter, but keep in legend
     })),
   };
 
