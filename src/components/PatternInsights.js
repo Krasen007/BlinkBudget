@@ -439,7 +439,7 @@ function createTimeOfDaySection(analysis, transactions, timePeriod) {
     display: flex;
     flex-direction: column;
     gap: ${SPACING.MD};
-    max-height: 600px;
+    max-height: 400px;
     overflow-y: auto;
   `;
 
@@ -661,9 +661,9 @@ function createCompactDayChart(dayKey, dayData, periodColors) {
   const [year, month, day] = dayKey.split('-').map(Number);
   const localDate = new Date(year, month - 1, day);
   const dayLabel = document.createElement('div');
-  dayLabel.textContent = localDate.toLocaleDateString('en-US', { 
-    weekday: 'short', 
-    day: 'numeric' 
+  dayLabel.textContent = localDate.toLocaleDateString('en-US', {
+    weekday: 'short',
+    day: 'numeric',
   });
   dayLabel.style.cssText = `
     font-size: ${FONT_SIZES.XS};
@@ -711,114 +711,6 @@ function createCompactDayChart(dayKey, dayData, periodColors) {
   });
 
   dayContainer.appendChild(periodsContainer);
-
-  return dayContainer;
-}
-
-/**
- * Create daily time chart with colored bars
- */
-function createDailyTimeChart(dayKey, dayData, periodColors) {
-  const dayContainer = document.createElement('div');
-  dayContainer.style.cssText = `
-    border: 1px solid ${COLORS.BORDER};
-    border-radius: ${SPACING.SM};
-    padding: ${SPACING.SM};
-    background: ${COLORS.BACKGROUND};
-  `;
-
-  // Day header - parse dayKey as local date to avoid timezone shifts
-  const [year, month, day] = dayKey.split('-').map(Number);
-  const localDate = new Date(year, month - 1, day); // month-1 because JS months are 0-indexed
-
-  const dayHeader = document.createElement('div');
-  dayHeader.textContent = formatDateForDisplay(localDate);
-  dayHeader.style.cssText = `
-    font-weight: 600;
-    color: ${COLORS.TEXT_MAIN};
-    margin-bottom: ${SPACING.SM};
-    font-size: ${FONT_SIZES.SM};
-  `;
-  dayContainer.appendChild(dayHeader);
-
-  // Time periods container
-  const periodsContainer = document.createElement('div');
-  periodsContainer.style.cssText = `
-    display: flex;
-    gap: ${SPACING.XS};
-    height: 40px;
-    align-items: flex-end;
-  `;
-
-  // Calculate max amount for scaling
-  const maxAmount = Math.max(
-    ...Object.values(dayData.periods).map(p => p.total)
-  );
-
-  // Create bars for each period
-  Object.entries(dayData.periods).forEach(([period, data]) => {
-    if (data.total > 0) {
-      const bar = document.createElement('div');
-      bar.className = 'time-period-bar';
-      const heightPercent = maxAmount > 0 ? (data.total / maxAmount) * 100 : 0;
-
-      bar.style.cssText = `
-        height: ${Math.max(heightPercent, 5)}%;
-        width: 20px;
-        background: ${periodColors[period]};
-        border-radius: 2px;
-        position: relative;
-        cursor: pointer;
-        transition: transform 0.2s ease;
-      `;
-
-      // Tooltip on hover
-      bar.title = `${period}: ${formatCurrency(data.total)} (${data.count} transactions)`;
-
-      periodsContainer.appendChild(bar);
-    }
-  });
-
-  dayContainer.appendChild(periodsContainer);
-
-  // Legend
-  const legend = document.createElement('div');
-  legend.style.cssText = `
-    display: flex;
-    gap: ${SPACING.XS};
-    margin-top: ${SPACING.XS};
-    flex-wrap: wrap;
-  `;
-
-  Object.entries(dayData.periods).forEach(([period, data]) => {
-    if (data.total > 0) {
-      const legendItem = document.createElement('div');
-      legendItem.style.cssText = `
-        display: flex;
-        align-items: center;
-        gap: 2px;
-        font-size: ${FONT_SIZES.XS};
-        color: ${COLORS.TEXT_MUTED};
-      `;
-
-      const colorDot = document.createElement('div');
-      colorDot.style.cssText = `
-        width: 8px;
-        height: 8px;
-        background: ${periodColors[period]};
-        border-radius: 50%;
-      `;
-
-      const label = document.createElement('span');
-      label.textContent = formatPeriodLabel(period);
-
-      legendItem.appendChild(colorDot);
-      legendItem.appendChild(label);
-      legend.appendChild(legendItem);
-    }
-  });
-
-  dayContainer.appendChild(legend);
 
   return dayContainer;
 }

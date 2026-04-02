@@ -119,14 +119,18 @@ export class AnomalyService {
         const MAX_DISPLAY_TRANSACTIONS = 5;
         const displaySpikes = spikes.slice(0, MAX_DISPLAY_TRANSACTIONS);
         const transactionDetails = displaySpikes
-          .map(t => `${t.category || 'Uncategorized'}: ${formatCurrency(Math.abs(t.amount || 0))}`)
+          .map(
+            t =>
+              `${t.category || 'Uncategorized'}: ${formatCurrency(Math.abs(t.amount || 0))}`
+          )
           .join(', ');
-        
+
         const remainingCount = spikes.length - MAX_DISPLAY_TRANSACTIONS;
-        const detailsText = remainingCount > 0 
-          ? `${transactionDetails}, and ${remainingCount} more...`
-          : transactionDetails;
-        
+        const detailsText =
+          remainingCount > 0
+            ? `${transactionDetails}, and ${remainingCount} more...`
+            : transactionDetails;
+
         insights.push({
           id: 'spending_spikes_summary',
           type: 'anomaly',

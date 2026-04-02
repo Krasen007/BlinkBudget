@@ -6,86 +6,95 @@
  */
 
 import { MetricsService } from './MetricsService.js';
-import { CATEGORY_OPTIONS } from '../../utils/constants.js';
+import { CustomCategoryService } from '../custom-category-service.js';
 
 // Minimum threshold for optimization recommendations (in currency units)
 const MIN_OPTIMIZATION_THRESHOLD = 50;
 
 // Category-specific optimization strategies
 // These can be extended or customized per category
-const SUBSTITUTION_RECOMMENDATIONS = {
-  Заведения: {
+// Category-specific optimization patterns
+// These use regex to match category names, allowing for custom categories to be recognized
+const SUBSTITUTION_PATTERNS = [
+  {
+    match: /заведения|ресторант|кафе|eating out|restaurant|dining|cafe/i,
     alternative: 'Храна',
     description: 'Cook at home instead of dining out',
     potentialSavingsPercent: 0.6,
     difficulty: 'medium',
   },
-  Забавления: {
+  {
+    match: /забавления|хоби|entertainment|hobbies/i,
     alternative: null,
     description: 'Review subscriptions',
     potentialSavingsPercent: 0.3,
     difficulty: 'easy',
   },
-  Гориво: {
+  {
+    match: /гориво|бензин|дизел|fuel|gasoline/i,
     alternative: 'Транспорт',
     description: 'Consider public transport',
     potentialSavingsPercent: 0.4,
     difficulty: 'hard',
   },
-  Дрехи: {
+  {
+    match: /дрехи|shopping|clothes/i,
     alternative: null,
     description: 'Shop during sales',
     potentialSavingsPercent: 0.35,
     difficulty: 'medium',
   },
-  Сметки: {
+  {
+    match: /сметки|битови|utilities|bills/i,
     alternative: null,
     description: 'Compare providers',
     potentialSavingsPercent: 0.15,
     difficulty: 'medium',
   },
-  Телефон: {
+  {
+    match: /телефон|mobile|phone/i,
     alternative: null,
     description: 'Switch to affordable plan',
     potentialSavingsPercent: 0.25,
     difficulty: 'easy',
   },
-};
+];
 
-// Dynamic reduction recommendations - applies to all categories with threshold
-const REDUCTION_RECOMMENDATIONS = {
-  Други: {
-    minThreshold: MIN_OPTIMIZATION_THRESHOLD,
+const REDUCTION_PATTERNS = [
+  {
+    match: /други|misc/i,
     maxReductionPercent: 0.3,
     description: 'Review miscellaneous',
   },
-  Заведения: {
-    minThreshold: MIN_OPTIMIZATION_THRESHOLD,
+  {
+    match: /заведения|ресторант|кафе|dining/i,
     maxReductionPercent: 0.4,
     description: 'Limit dining out',
   },
-  Забавления: {
-    minThreshold: MIN_OPTIMIZATION_THRESHOLD,
+  {
+    match: /забавления|хоби|entertainment/i,
     maxReductionPercent: 0.25,
     description: 'Review streaming services',
   },
-  Гориво: {
-    minThreshold: MIN_OPTIMIZATION_THRESHOLD,
+  {
+    match: /гориво|бензин|fuel/i,
     maxReductionPercent: 0.2,
     description: 'Combine errands',
   },
-};
+];
 
-const ELIMINATION_RECOMMENDATIONS = {
-  Баланс: {
+const ELIMINATION_PATTERNS = [
+  {
+    match: /баланс|adjustment/i,
     description: 'Adjustment category',
     alternative: 'Review if transfer',
   },
-  Подаръци: {
+  {
+    match: /подаръци|gifts/i,
     description: 'Set a budget for gifts',
     alternative: 'Set fixed amount',
   },
-};
+];
 
 export class OptimizationEngine {
   constructor() {
@@ -179,7 +188,7 @@ export class OptimizationEngine {
   _generateSubstitutionInsights(categories, averageExpense) {
     const insights = [];
     categories.forEach(category => {
-      const rec = SUBSTITUTION_RECOMMENDATIONS[category.name];
+      const rec = SUBSTITUTION_PATTERNS.find(p => p.match.test(category.name));
       if (rec && category.amount > averageExpense * 0.5) {
         const savings = category.amount * rec.potentialSavingsPercent;
         const id = `substitution_${category.name.toLowerCase()}`;
@@ -204,15 +213,16 @@ export class OptimizationEngine {
 
   _generateReductionInsights(categories, averageExpense) {
     const insights = [];
-    
-    // Get all expense categories from constants for reference
-    const allExpenseCategories = CATEGORY_OPTIONS.expense || [];
-    
+
+    // Get all expense categories from the category manager to ensure we include user-defined ones
+    const allExpenseCategories =
+      CustomCategoryService.getAllCategoryNames('expense') || [];
+
     categories.forEach(category => {
-      // Check if category has specific recommendation
-      const rec = REDUCTION_RECOMMENDATIONS[category.name];
-      
-      if (rec && category.amount >= rec.minThreshold) {
+      // Check if category matches specific recommendation pattern
+      const rec = REDUCTION_PATTERNS.find(p => p.match.test(category.name));
+
+      if (rec && category.amount >= MIN_OPTIMIZATION_THRESHOLD) {
         const savings = category.amount * rec.maxReductionPercent;
         const id = `reduction_${category.name.toLowerCase()}`;
         if (!this.persistedData.dismissedInsights.includes(id)) {
@@ -238,7 +248,7 @@ export class OptimizationEngine {
         const defaultReductionPercent = 0.15; // 15% default reduction
         const savings = category.amount * defaultReductionPercent;
         const id = `reduction_${category.name.toLowerCase()}`;
-        
+
         if (!this.persistedData.dismissedInsights.includes(id)) {
           insights.push({
             id,
@@ -263,7 +273,7 @@ export class OptimizationEngine {
     const insights = [];
     const essential = ['Храна', 'Сметки', 'Кредит', 'Лекар', 'Застраховки'];
     categories.forEach(category => {
-      const rec = ELIMINATION_RECOMMENDATIONS[category.name];
+      const rec = ELIMINATION_PATTERNS.find(p => p.match.test(category.name));
       if (rec) {
         const id = `elimination_${category.name.toLowerCase()}`;
         if (!this.persistedData.dismissedInsights.includes(id)) {
@@ -421,7 +431,7 @@ export class OptimizationEngine {
 
     if (!category) return suggestions;
 
-    const subRec = SUBSTITUTION_RECOMMENDATIONS[categoryId];
+    const subRec = SUBSTITUTION_PATTERNS.find(p => p.match.test(categoryId));
     if (subRec) {
       suggestions.push({
         type: 'substitution',
@@ -433,7 +443,7 @@ export class OptimizationEngine {
       });
     }
 
-    const redRec = REDUCTION_RECOMMENDATIONS[categoryId];
+    const redRec = REDUCTION_PATTERNS.find(p => p.match.test(categoryId));
     if (redRec) {
       suggestions.push({
         type: 'reduction',
@@ -445,7 +455,7 @@ export class OptimizationEngine {
       });
     }
 
-    const elimRec = ELIMINATION_RECOMMENDATIONS[categoryId];
+    const elimRec = ELIMINATION_PATTERNS.find(p => p.match.test(categoryId));
     if (elimRec) {
       suggestions.push({
         type: 'elimination',

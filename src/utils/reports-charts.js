@@ -491,14 +491,16 @@ export async function createCategoryTrendsChart(
 
   // Filter out the current month to avoid incomplete data skewing the chart
   const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  
-  const filteredMonths = monthlyData.months.filter(month => month !== currentMonthKey);
+
+  const filteredMonths = monthlyData.months.filter(
+    month => month !== currentMonthKey
+  );
   const filteredCategoryData = {};
-  
+
   topCategories.forEach(category => {
-    filteredCategoryData[category.name] = (monthlyData.categoryData[category.name] || []).filter(
-      (_value, index) => monthlyData.months[index] !== currentMonthKey
-    );
+    filteredCategoryData[category.name] = (
+      monthlyData.categoryData[category.name] || []
+    ).filter((_value, index) => monthlyData.months[index] !== currentMonthKey);
   });
 
   const chartData = {

@@ -600,10 +600,7 @@ export class LazyLoader {
           .filter(segment => segment !== '');
 
         // Reject path traversal attempts
-        if (
-          pathSegments.includes('..') ||
-          decodedPath.includes('\0')
-        ) {
+        if (pathSegments.includes('..') || decodedPath.includes('\0')) {
           return false;
         }
 
@@ -696,7 +693,7 @@ export class LazyLoader {
         '[LazyLoader] DOM sanitization failed - returning empty string for safety:',
         error
       );
-      throw new Error('DOM sanitization failed');
+      throw new Error('DOM sanitization failed', { cause: error });
     }
   }
 
