@@ -490,7 +490,6 @@ export async function createCategoryTrendsChart(
   const monthlyData = generateMonthlyTrendData(allTransactions, topCategories);
 
   // Filter out the current month to avoid incomplete data skewing the chart
-  const now = new Date();
   const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   
   const filteredMonths = monthlyData.months.filter(month => month !== currentMonthKey);

@@ -6,7 +6,13 @@
  */
 
 import { MetricsService } from './MetricsService.js';
+import { CATEGORY_OPTIONS } from '../../utils/constants.js';
 
+// Minimum threshold for optimization recommendations (in currency units)
+const MIN_OPTIMIZATION_THRESHOLD = 50;
+
+// Category-specific optimization strategies
+// These can be extended or customized per category
 const SUBSTITUTION_RECOMMENDATIONS = {
   Заведения: {
     alternative: 'Храна',
@@ -46,24 +52,25 @@ const SUBSTITUTION_RECOMMENDATIONS = {
   },
 };
 
+// Dynamic reduction recommendations - applies to all categories with threshold
 const REDUCTION_RECOMMENDATIONS = {
   Други: {
-    minThreshold: 50,
+    minThreshold: MIN_OPTIMIZATION_THRESHOLD,
     maxReductionPercent: 0.3,
     description: 'Review miscellaneous',
   },
   Заведения: {
-    minThreshold: 50,
+    minThreshold: MIN_OPTIMIZATION_THRESHOLD,
     maxReductionPercent: 0.4,
     description: 'Limit dining out',
   },
   Забавления: {
-    minThreshold: 50,
+    minThreshold: MIN_OPTIMIZATION_THRESHOLD,
     maxReductionPercent: 0.25,
     description: 'Review streaming services',
   },
   Гориво: {
-    minThreshold: 50,
+    minThreshold: MIN_OPTIMIZATION_THRESHOLD,
     maxReductionPercent: 0.2,
     description: 'Combine errands',
   },
@@ -197,8 +204,14 @@ export class OptimizationEngine {
 
   _generateReductionInsights(categories, averageExpense) {
     const insights = [];
+    
+    // Get all expense categories from constants for reference
+    const allExpenseCategories = CATEGORY_OPTIONS.expense || [];
+    
     categories.forEach(category => {
+      // Check if category has specific recommendation
       const rec = REDUCTION_RECOMMENDATIONS[category.name];
+      
       if (rec && category.amount >= rec.minThreshold) {
         const savings = category.amount * rec.maxReductionPercent;
         const id = `reduction_${category.name.toLowerCase()}`;
@@ -212,6 +225,30 @@ export class OptimizationEngine {
             potentialSavings: savings,
             message: `Reducing ${category.name} by ${(rec.maxReductionPercent * 100).toFixed(0)}% could save ${this._formatCurrency(savings)}/month`,
             description: rec.description,
+            difficulty: 'medium',
+            actionable: true,
+            priority: savings > averageExpense * 0.15 ? 'high' : 'medium',
+          });
+        }
+      } else if (
+        category.amount >= MIN_OPTIMIZATION_THRESHOLD &&
+        allExpenseCategories.includes(category.name)
+      ) {
+        // Generic reduction recommendation for any category above threshold
+        const defaultReductionPercent = 0.15; // 15% default reduction
+        const savings = category.amount * defaultReductionPercent;
+        const id = `reduction_${category.name.toLowerCase()}`;
+        
+        if (!this.persistedData.dismissedInsights.includes(id)) {
+          insights.push({
+            id,
+            type: 'reduction',
+            category: category.name,
+            currentSpending: category.amount,
+            reductionPercent: defaultReductionPercent * 100,
+            potentialSavings: savings,
+            message: `Reducing ${category.name} by ${(defaultReductionPercent * 100).toFixed(0)}% could save ${this._formatCurrency(savings)}/month`,
+            description: 'Review and optimize spending',
             difficulty: 'medium',
             actionable: true,
             priority: savings > averageExpense * 0.15 ? 'high' : 'medium',

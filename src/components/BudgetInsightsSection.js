@@ -5,7 +5,6 @@
 
 import { COLORS, SPACING } from '../utils/constants.js';
 import { InsightCard } from './InsightCard.js';
-import { PredictionsSection } from './PredictionsSection.js';
 
 /**
  * Create insights section
