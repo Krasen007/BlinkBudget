@@ -47,14 +47,17 @@ export function PatternInsights(
     border-radius: var(--radius-lg);
   `;
 
-  // Add CSS for hover effects
-  const style = document.createElement('style');
-  style.textContent = `
-    .pattern-insights .time-period-bar:hover {
-      transform: scaleY(1.1);
-    }
-  `;
-  document.head.appendChild(style);
+  // Add CSS for hover effects (idempotent - only once)
+  if (!document.getElementById('pattern-insights-styles')) {
+    const style = document.createElement('style');
+    style.id = 'pattern-insights-styles';
+    style.textContent = `
+      .pattern-insights .time-period-bar:hover {
+        transform: scaleY(1.1);
+      }
+    `;
+    document.head.appendChild(style);
+  }
 
   // Header
   const header = document.createElement('div');
@@ -526,7 +529,8 @@ function groupTransactionsByDay(transactions) {
     if (transaction.type === 'transfer') return; // Skip transfers
 
     const date = new Date(transaction.timestamp);
-    const dayKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
+    // Use local date components to avoid timezone issues
+    const dayKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     const hour = date.getHours(); // Use local hours to match user's timezone
 
     // Determine time period - matching PatternAnalyzer definitions

@@ -602,7 +602,6 @@ export class LazyLoader {
         // Reject path traversal attempts
         if (
           pathSegments.includes('..') ||
-          pathSegments.includes('') ||
           decodedPath.includes('\0')
         ) {
           return false;
@@ -667,21 +666,23 @@ export class LazyLoader {
       allElements.forEach(element => {
         // Remove event handlers
         Array.from(element.attributes).forEach(attr => {
-          // Check for dangerous protocols using regex instead of includes
-          const attrValue = attr.value.toLowerCase();
+          // Trim attribute value and check for dangerous protocols
+          const trimmedValue = attr.value.trim();
+          const trimmedLower = trimmedValue.toLowerCase();
           const hasDangerousProtocol = /^javascript:|^vbscript:/.test(
-            attrValue
+            trimmedLower
           );
 
           if (attr.name.startsWith('on') || hasDangerousProtocol) {
             element.removeAttribute(attr.name);
           }
 
-          // Remove dangerous data: URLs except for images
+          // Remove dangerous data: URLs except for images on URL-like attributes
+          const urlAttributes = ['href', 'src', 'action', 'formaction'];
           if (
-            attr.name === 'href' &&
-            attr.value.startsWith('data:') &&
-            !attr.value.startsWith('data:image/')
+            urlAttributes.includes(attr.name) &&
+            trimmedLower.startsWith('data:') &&
+            !trimmedLower.startsWith('data:image/')
           ) {
             element.removeAttribute(attr.name);
           }
@@ -690,21 +691,12 @@ export class LazyLoader {
 
       return tempDiv.innerHTML;
     } catch (error) {
-      // Fallback to basic sanitization if DOM-based approach fails
+      // Fail safely - throw error instead of using fragile regex fallback
       console.warn(
-        '[LazyLoader] DOM sanitization failed, using fallback:',
+        '[LazyLoader] DOM sanitization failed - returning empty string for safety:',
         error
       );
-      return sanitizeInput(html, 10000)
-        .replace(/<script\b[^<]*>.*?<\/script>/gi, '')
-        .replace(/<iframe\b[^<]*>.*?<\/iframe>/gi, '')
-        .replace(/<object\b[^<]*>.*?<\/object>/gi, '')
-        .replace(/<embed\b[^<]*>.*?<\/embed>/gi, '')
-        .replace(/on\w+="[^"]*"/gi, '')
-        .replace(/on\w+='[^']*'/gi, '')
-        .replace(/javascript:/gi, '')
-        .replace(/vbscript:/gi, '')
-        .replace(/data:(?!image\/)/gi, '');
+      throw new Error('DOM sanitization failed');
     }
   }
 

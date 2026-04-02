@@ -5,6 +5,9 @@
  * Helps users understand their spending patterns and variability.
  */
 
+// Currency symbol constant for consistent display
+const CURRENCY_SYMBOL = '€';
+
 export const BaselineAnalysis = ({
   category = null,
   period = 'monthly',
@@ -61,7 +64,7 @@ export const BaselineAnalysis = ({
     // Average
     const avgMetric = createMetric({
       label: 'Average',
-      value: `$${baseline.average.toFixed(2)}`,
+      value: `${CURRENCY_SYMBOL}${baseline.average.toFixed(2)}`,
       type: 'primary',
       trend: 'neutral',
     });
@@ -69,7 +72,7 @@ export const BaselineAnalysis = ({
     // Floor
     const floorMetric = createMetric({
       label: 'Floor (Min)',
-      value: `$${baseline.floor.toFixed(2)}`,
+      value: `${CURRENCY_SYMBOL}${baseline.floor.toFixed(2)}`,
       type:
         floorToAverageRatio(baseline.floor, baseline.average) < 70
           ? 'positive'
@@ -80,7 +83,7 @@ export const BaselineAnalysis = ({
     // Ceiling
     const ceilingMetric = createMetric({
       label: 'Ceiling (Max)',
-      value: `$${baseline.ceiling.toFixed(2)}`,
+      value: `${CURRENCY_SYMBOL}${baseline.ceiling.toFixed(2)}`,
       type: 'warning',
       trend: 'up',
     });
@@ -180,19 +183,19 @@ export const BaselineAnalysis = ({
         noDataMsg.textContent = 'No spending data available';
         chart.appendChild(noDataMsg);
       } else {
-        baseline.periods.forEach(period => {
+        baseline.periods.forEach(periodData => {
           const barContainer = document.createElement('div');
           barContainer.className = 'bar-container';
 
           const bar = document.createElement('div');
           bar.className = 'bar';
-          const height = maxValue > 0 ? (period.total / maxValue) * 100 : 0;
+          const height = maxValue > 0 ? (periodData.total / maxValue) * 100 : 0;
           bar.style.height = `${Math.max(height, 2)}%`;
 
           // Color based on relation to average
-          if (period.total <= baseline.floor) {
+          if (periodData.total <= baseline.floor) {
             bar.classList.add('bar-floor');
-          } else if (period.total >= baseline.ceiling) {
+          } else if (periodData.total >= baseline.ceiling) {
             bar.classList.add('bar-ceiling');
           } else {
             bar.classList.add('bar-average');
@@ -200,11 +203,11 @@ export const BaselineAnalysis = ({
 
           const label = document.createElement('div');
           label.className = 'bar-label';
-          label.textContent = formatPeriodLabel(period.period, baseline.period);
+          label.textContent = formatPeriodLabel(periodData.period, baseline.period);
 
           const value = document.createElement('div');
           value.className = 'bar-value';
-          value.textContent = `€${period.total.toFixed(0)}`;
+          value.textContent = `${CURRENCY_SYMBOL}${periodData.total.toFixed(0)}`;
 
           barContainer.appendChild(bar);
           barContainer.appendChild(label);
@@ -220,7 +223,7 @@ export const BaselineAnalysis = ({
         const avgLine = document.createElement('div');
         avgLine.className = 'average-line';
         avgLine.style.bottom = `${(baseline.average / maxValue) * 100}%`;
-        avgLine.title = `Average: €${baseline.average.toFixed(2)}`;
+        avgLine.title = `Average: ${CURRENCY_SYMBOL}${baseline.average.toFixed(2)}`;
         chart.appendChild(avgLine);
       }
 

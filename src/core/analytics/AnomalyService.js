@@ -115,15 +115,22 @@ export class AnomalyService {
 
       // Add a global summary insight if there are multiple categories involved
       if (Object.keys(categorySpikes).length > 1) {
-        // Build detailed transaction list for the message
-        const transactionDetails = spikes
-          .map(t => `${t.category}: ${formatCurrency(Math.abs(t.amount || 0))}`)
+        // Build detailed transaction list for the message (limit to first 5)
+        const MAX_DISPLAY_TRANSACTIONS = 5;
+        const displaySpikes = spikes.slice(0, MAX_DISPLAY_TRANSACTIONS);
+        const transactionDetails = displaySpikes
+          .map(t => `${t.category || 'Uncategorized'}: ${formatCurrency(Math.abs(t.amount || 0))}`)
           .join(', ');
+        
+        const remainingCount = spikes.length - MAX_DISPLAY_TRANSACTIONS;
+        const detailsText = remainingCount > 0 
+          ? `${transactionDetails}, and ${remainingCount} more...`
+          : transactionDetails;
         
         insights.push({
           id: 'spending_spikes_summary',
           type: 'anomaly',
-          message: `Detected ${spikes.length} unusually large transactions across ${Object.keys(categorySpikes).length} categories: ${transactionDetails}. Total: ${formatCurrency(totalSpikeAmount)} (${spikePercentage.toFixed(1)}% of total spending).`,
+          message: `Detected ${spikes.length} unusually large transactions across ${Object.keys(categorySpikes).length} categories: ${detailsText}. Total: ${formatCurrency(totalSpikeAmount)} (${spikePercentage.toFixed(1)}% of total spending).`,
           severity: spikePercentage > 30 ? 'high' : 'medium',
           actionable: true,
           recommendation:
