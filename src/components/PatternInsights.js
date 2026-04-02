@@ -438,8 +438,8 @@ function createTimeOfDaySection(analysis, transactions, timePeriod) {
   dailyContainer.style.cssText = `
     display: flex;
     flex-direction: column;
-    gap: ${SPACING.SM};
-    max-height: 400px;
+    gap: ${SPACING.MD};
+    max-height: 600px;
     overflow-y: auto;
   `;
 
@@ -477,9 +477,37 @@ function createTimeOfDaySection(analysis, transactions, timePeriod) {
     // Sort days chronologically
     const sortedDays = periodDays.sort();
 
-    sortedDays.forEach(day => {
-      const dayChart = createDailyTimeChart(day, dailyData[day], periodColors);
-      dailyContainer.appendChild(dayChart);
+    // Group days by week
+    const weekGroups = [];
+    let currentWeek = [];
+    let currentWeekStart = null;
+
+    sortedDays.forEach(dayKey => {
+      const dayDate = new Date(dayKey);
+      const weekStart = new Date(dayDate);
+      weekStart.setDate(dayDate.getDate() - dayDate.getDay()); // Start of week (Sunday)
+      const weekKey = weekStart.toISOString().split('T')[0];
+
+      if (currentWeekStart !== weekKey) {
+        if (currentWeek.length > 0) {
+          weekGroups.push({ weekStart: currentWeekStart, days: currentWeek });
+        }
+        currentWeek = [dayKey];
+        currentWeekStart = weekKey;
+      } else {
+        currentWeek.push(dayKey);
+      }
+    });
+
+    // Add last week
+    if (currentWeek.length > 0) {
+      weekGroups.push({ weekStart: currentWeekStart, days: currentWeek });
+    }
+
+    // Render each week as a row
+    weekGroups.forEach(week => {
+      const weekRow = createWeekRow(week, dailyData, periodColors);
+      dailyContainer.appendChild(weekRow);
     });
   }
 
@@ -573,6 +601,118 @@ function formatPeriodLabel(period) {
     night: 'Night',
   };
   return labels[period] || period;
+}
+
+/**
+ * Create a week row showing multiple days horizontally
+ */
+function createWeekRow(week, dailyData, periodColors) {
+  const weekContainer = document.createElement('div');
+  weekContainer.style.cssText = `
+    border: 1px solid ${COLORS.BORDER};
+    border-radius: ${SPACING.SM};
+    padding: ${SPACING.SM};
+    background: ${COLORS.BACKGROUND};
+  `;
+
+  // Week header
+  const weekStartDate = new Date(week.weekStart);
+  const weekHeader = document.createElement('div');
+  weekHeader.textContent = `Week of ${formatDateForDisplay(weekStartDate)}`;
+  weekHeader.style.cssText = `
+    font-weight: 600;
+    color: ${COLORS.TEXT_MAIN};
+    margin-bottom: ${SPACING.SM};
+    font-size: ${FONT_SIZES.SM};
+  `;
+  weekContainer.appendChild(weekHeader);
+
+  // Days container (horizontal layout)
+  const daysContainer = document.createElement('div');
+  daysContainer.style.cssText = `
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: ${SPACING.XS};
+  `;
+
+  week.days.forEach(dayKey => {
+    const dayData = dailyData[dayKey];
+    const dayChart = createCompactDayChart(dayKey, dayData, periodColors);
+    daysContainer.appendChild(dayChart);
+  });
+
+  weekContainer.appendChild(daysContainer);
+  return weekContainer;
+}
+
+/**
+ * Create compact day chart for week view
+ */
+function createCompactDayChart(dayKey, dayData, periodColors) {
+  const dayContainer = document.createElement('div');
+  dayContainer.style.cssText = `
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: ${SPACING.XS};
+  `;
+
+  // Day label
+  const [year, month, day] = dayKey.split('-').map(Number);
+  const localDate = new Date(year, month - 1, day);
+  const dayLabel = document.createElement('div');
+  dayLabel.textContent = localDate.toLocaleDateString('en-US', { 
+    weekday: 'short', 
+    day: 'numeric' 
+  });
+  dayLabel.style.cssText = `
+    font-size: ${FONT_SIZES.XS};
+    color: ${COLORS.TEXT_MUTED};
+    text-align: center;
+  `;
+  dayContainer.appendChild(dayLabel);
+
+  // Time periods container (vertical bars)
+  const periodsContainer = document.createElement('div');
+  periodsContainer.style.cssText = `
+    display: flex;
+    gap: 2px;
+    height: 60px;
+    align-items: flex-end;
+  `;
+
+  // Calculate max amount for scaling
+  const maxAmount = Math.max(
+    ...Object.values(dayData.periods).map(p => p.total)
+  );
+
+  // Create bars for each period
+  Object.entries(dayData.periods).forEach(([period, data]) => {
+    if (data.total > 0) {
+      const bar = document.createElement('div');
+      bar.className = 'time-period-bar';
+      const heightPercent = maxAmount > 0 ? (data.total / maxAmount) * 100 : 0;
+
+      bar.style.cssText = `
+        height: ${Math.max(heightPercent, 5)}%;
+        width: 12px;
+        background: ${periodColors[period]};
+        border-radius: 2px;
+        position: relative;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+      `;
+
+      // Tooltip on hover
+      bar.title = `${formatPeriodLabel(period)}: ${formatCurrency(data.total)} (${data.count} tx)`;
+
+      periodsContainer.appendChild(bar);
+    }
+  });
+
+  dayContainer.appendChild(periodsContainer);
+
+  return dayContainer;
 }
 
 /**
