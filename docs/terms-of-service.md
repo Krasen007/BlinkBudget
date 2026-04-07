@@ -1,9 +1,9 @@
 # Terms of Service
 
-**Last Updated:** [Date]  
-**Effective Date:** [Date]
+**Last Updated:** April 7, 2026  
+**Effective Date:** April 7, 2026
 
-BlinkBudget is an open-source expense tracking application designed to help individuals manage their personal finances. These Terms of Service govern your use of the BlinkBudget application and services.
+BlinkBudget is an open-source expense tracking application designed to help individuals manage their personal finances. These Terms of Service govern your use of BlinkBudget application and services.
 
 ## 1. Acceptance of Terms
 
@@ -23,7 +23,7 @@ BlinkBudget is a free, open-source expense tracking application that provides:
 
 ### 3.1 Open Source License
 
-BlinkBudget is licensed under the GNU General Public License v3.0 (GPL-3.0). This means:
+BlinkBudget is licensed under GNU General Public License v3.0 (GPL-3.0). This means:
 
 - You are free to use, modify, and distribute the software
 - Any modifications must also be licensed under GPL-3.0
@@ -33,19 +33,19 @@ BlinkBudget is licensed under the GNU General Public License v3.0 (GPL-3.0). Thi
 
 - **Personal Use:** BlinkBudget is intended for personal financial management
 - **Commercial Use:** Businesses may use the software for internal expense tracking
-- **Redistribution:** You may redistribute the original or modified software under GPL-3.0 terms
+- **Redistribution:** You may redistribute original or modified software under GPL-3.0 terms
 
 ## 4. User Responsibilities
 
 ### 4.1 Account Security
 
-- You are responsible for maintaining the security of your account credentials
+- You are responsible for maintaining security of your account credentials
 - You must notify us immediately of any unauthorized account access
 - You are responsible for all activities that occur under your account
 
 ### 4.2 Data Accuracy
 
-- You are responsible for the accuracy of financial data you enter
+- You are responsible for accuracy of financial data you enter
 - BlinkBudget is not responsible for errors in your financial records
 - You should verify important financial calculations independently
 
@@ -89,8 +89,8 @@ You may not use BlinkBudget to:
 
 ### 6.2 Support
 
-- **Community Support:** Support is provided through community forums and GitHub issues
-- **Documentation:** Comprehensive documentation is available
+- **Community Support:** Support is provided through GitHub issues
+- **Documentation:** Comprehensive documentation is available in the project README
 - **No Guaranteed Support:** We do not provide guaranteed individual support
 
 ## 7. Limitations and Disclaimers
@@ -128,7 +128,7 @@ While we implement reasonable security measures:
 ### 8.2 User Contributions
 
 - You retain rights to any code or documentation you contribute
-- Contributions must be compatible with the GPL-3.0 license
+- Contributions must be compatible with GPL-3.0 license
 - We may incorporate contributions into the main project
 
 ## 9. Termination
@@ -185,9 +185,9 @@ These terms are governed by the laws of the jurisdiction where the service is op
 
 We may update these Terms of Service from time to time. Changes will be effective when posted. We will notify users of significant changes through:
 
-- Posting in the application
-- Updates to our website
-- Community announcements
+- Posting updates in the application repository
+- Updates to the project documentation
+- Community announcements via GitHub
 
 ## 14. Severability
 
@@ -201,9 +201,8 @@ These Terms of Service, along with our Privacy Policy, constitute the entire agr
 
 For questions about these Terms of Service, please contact us:
 
-- **Email:** legal@blinkbudget.app
-- **GitHub:** [Create an issue in our repository]
-- **Documentation:** Available in the app's help section
+- **GitHub:** [Create an issue in our repository](https://github.com/Krasen007/BlinkBudget/issues)
+- **Documentation:** Available in the project README and docs folder
 
 ---
 

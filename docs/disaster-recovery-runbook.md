@@ -1,6 +1,6 @@
 # Disaster Recovery Runbook
 
-This runbook provides step-by-step procedures for handling disaster recovery scenarios for BlinkBudget, ensuring business continuity and data integrity.
+This runbook provides procedures for handling disaster recovery scenarios for BlinkBudget, ensuring business continuity and data integrity.
 
 ## Table of Contents
 
@@ -20,21 +20,19 @@ This runbook provides step-by-step procedures for handling disaster recovery sce
 
 ### Primary Team
 
-- **DevOps Lead**: [Contact Information]
-- **Full Stack Developer**: [Contact Information]
-- **Product Owner**: [Contact Information]
+- **Developer**: Available via GitHub issues
+- **Project Maintainer**: Available via GitHub issues
 
 ### External Services
 
-- **Firebase Support**: [Contact Information]
-- **Netlify Support**: [Contact Information]
-- **Snyk Support**: [Contact Information]
+- **Firebase Support**: https://firebase.google.com/support
+- **Netlify Support**: https://www.netlify.com/support
+- **GitHub Support**: https://support.github.com
 
 ### Communication Channels
 
-- **Emergency Slack Channel**: #blinkbudget-emergency
-- **Email Distribution**: emergency@blinkbudget.app
-- **Phone Tree**: [List of contacts]
+- **GitHub Issues**: https://github.com/Krasen007/BlinkBudget/issues
+- **Project Repository**: https://github.com/Krasen007/BlinkBudget
 
 ---
 
@@ -92,8 +90,8 @@ This runbook provides step-by-step procedures for handling disaster recovery sce
 
 3. **Initial Triage**
    - Classify disaster level (1-4)
-   - Activate appropriate response team
    - Document initial findings
+   - Create GitHub issue for tracking
 
 ### Step 2: Immediate Containment (First 30 minutes)
 
@@ -101,63 +99,25 @@ This runbook provides step-by-step procedures for handling disaster recovery sce
 
    ```bash
    # If security breach suspected, rotate secrets immediately
-
-   # Rotate Firebase API keys and service accounts
-   gcloud auth login  # Authenticate with required permissions
-   gcloud config set project PROJECT_ID  # Set target project
-
-   # Revoke existing service account keys
-   gcloud iam service-accounts keys list --iam-account=SERVICE_ACCOUNT_EMAIL
-   gcloud iam service-accounts keys delete KEY_ID --iam-account=SERVICE_ACCOUNT_EMAIL
-
-   # Create new service account key
-   gcloud iam service-accounts keys create KEY_NAME.json --iam-account=SERVICE_ACCOUNT_EMAIL
-
    # Update Firebase API keys in console
    # Visit: https://console.firebase.google.com/project/PROJECT_ID/settings/serviceaccounts
    # Generate new web API key and update all client applications
 
    # Update Netlify environment variables
-   netlify login  # Authenticate with required permissions
-   netlify switch SITE_ID  # Set target site
-
-   # Update environment variables
-   netlify env:set VAR_NAME "new_value" --context=production
-   netlify env:set VAR_NAME "new_value" --context=deploy-preview
+   # Visit: https://app.netlify.com/sites/SITE_ID/settings/environment
 
    # Trigger redeploy to apply new environment variables
    netlify trigger deploy --prod
-
-   # Generic secret rotation (example with AWS Secrets Manager)
-   aws configure set profile.admin  # Use admin profile with required permissions
-
-   # Create new secret version
-   aws secretsmanager create-secret-version --secret-id SECRET_ARN \
-     --secret-string '{"API_KEY":"new_key_value"}' --version-stage AWSCURRENT
-
-   # Update dependent services to use new secret version
-   # Update application code to fetch latest secret version
-
-   # Disable old secret version after verification
-   aws secretsmanager update-secret-version-stage --secret-id SECRET_ARN \
-     --version-stage AWSPREVIOUS --move-to-version-id PREVIOUS_VERSION_ID
-
-   # Verify secret propagation
-   aws secretsmanager get-secret-value --secret-id SECRET_ARN --version-stage AWSCURRENT
-
-   # Rollback command (if needed)
-   aws secretsmanager restore-secret-version --secret-id SECRET_ARN --version-id PREVIOUS_VERSION_ID
    ```
 
 2. **Activate Monitoring**
-   - Enable enhanced logging
-   - Set up alerts for critical metrics
-   - Monitor system resources
+   - Check Firebase Console for authentication events
+   - Monitor Netlify dashboard for deployment status
+   - Review GitHub Actions for build failures
 
 3. **Communication**
-   - Notify core team
-   - Send initial status update
-   - Set up emergency communication channel
+   - Create GitHub issue for tracking
+   - Document initial findings
 
 ---
 
@@ -168,57 +128,28 @@ This runbook provides step-by-step procedures for handling disaster recovery sce
 #### Recovery from Backup
 
 1. **Assess Backup Availability**
+   - Check Firebase Console for recent backups
+   - Review backup service logs
 
-   ```bash
-   # Check latest backup verification
-   curl -X GET "https://us-central1-your-project.cloudfunctions.net/getBackupVerificationStatus"
-   ```
-
-2. **Initiate Emergency Backup**
-
-   ```bash
-   # Create emergency backup if needed
-   curl -X POST "https://us-central1-your-project.cloudfunctions.net/emergencyBackup?userId=USER_ID"
-   ```
-
-3. **Restore from Backup**
+2. **Manual Recovery Process**
 
    ```javascript
-   // Using the BackupService (wrapped in async function)
+   // Using the BackupService
    (async () => {
      try {
-       // Dynamic import for CommonJS compatibility
        const { BackupService } = await import('./src/core/backup-service.js');
-
        const result = await BackupService.restoreBackup();
        console.log(`Restored ${result} transactions`);
      } catch (error) {
        console.error('Backup restoration failed:', error);
-       process.exit(1);
      }
    })();
    ```
 
-4. **Verify Data Integrity**
-   ```bash
-   # Run backup verification
-   curl -X POST "https://us-central1-your-project.cloudfunctions.net/manualBackupVerification?userId=USER_ID"
-   ```
-
-#### Manual Recovery Process
-
-1. **Access Firebase Console**
-   - Navigate to Firestore Database
-   - Check user data collections
-
-2. **Export Available Data**
-   - Use Firebase Console export feature
-   - Export to JSON or CSV format
-
-3. **Data Validation**
-   - Verify data completeness
-   - Check for corruption
+3. **Verify Data Integrity**
+   - Check transaction counts
    - Validate data relationships
+   - Test data operations
 
 ### Scenario 2: Local Storage Corruption
 
@@ -254,17 +185,9 @@ This runbook provides step-by-step procedures for handling disaster recovery sce
    - Identify affected time ranges
 
 2. **Selective Restore**
-
-   ```javascript
-   // Restore specific time range
-   const backup = await BackupService.fetchBackup();
-   const missingData = backup.transactions.filter(
-     tx => tx.date >= startDate && tx.date <= endDate
-   );
-
-   // Restore missing transactions
-   missingData.forEach(tx => TransactionService.add(tx));
-   ```
+   - Use BackupService for targeted recovery
+   - Restore specific data ranges
+   - Verify integrity
 
 ---
 
@@ -278,17 +201,19 @@ This runbook provides step-by-step procedures for handling disaster recovery sce
 
    ```bash
    # Check Netlify deploy logs
-   netlify deploy --list
+   # Visit: https://app.netlify.com/sites/SITE_ID/deploys
 
    # Check GitHub Actions status
-   # Visit: https://github.com/your-org/blinkbudget/actions
+   # Visit: https://github.com/Krasen007/BlinkBudget/actions
    ```
 
 2. **Rollback if Needed**
 
    ```bash
-   # Rollback to previous working version
-   netlify rollback --site-id=$NETLIFY_SITE_ID [PREVIOUS_DEPLOY_ID]
+   # Rollback to previous working version via Netlify dashboard
+   # Or revert to previous commit and push
+   git checkout [PREVIOUS_COMMIT]
+   git push origin main
    ```
 
 3. **Redeploy if Needed**
@@ -303,34 +228,26 @@ This runbook provides step-by-step procedures for handling disaster recovery sce
 #### Recovery Steps
 
 1. **Identify Bottleneck**
-   - Check Core Web Vitals
+   - Check Netlify analytics
    - Monitor bundle size
-   - Analyze database queries
+   - Analyze Firebase performance
 
 2. **Implement Temporary Fixes**
    - Enable aggressive caching
    - Disable non-essential features
-   - Scale up resources if needed
-
-3. **Monitor Performance**
-   - Set up performance alerts
-   - Monitor user experience metrics
-   - Track recovery progress
+   - Monitor performance metrics
 
 ### Scenario 3: Security Incident
 
 #### Recovery Steps
 
 1. **Immediate Lockdown**
-
-   ```bash
-   # Rotate all secrets
-   # Update Firebase rules
-   # Enable enhanced monitoring
-   ```
+   - Rotate all secrets
+   - Update Firebase rules
+   - Enable enhanced monitoring
 
 2. **Investigation**
-   - Review audit logs
+   - Review Firebase audit logs
    - Identify breach scope
    - Document findings
 
@@ -347,40 +264,28 @@ This runbook provides step-by-step procedures for handling disaster recovery sce
 
 1. **Initial Alert (Within 15 minutes)**
 
-   ```
-   🚨 EMERGENCY ALERT - BlinkBudget
-
-   Status: [CRITICAL/HIGH/MEDIUM/LOW]
-   Issue: [Brief description]
-   Impact: [Number of users affected]
-   ETA: [Estimated resolution time]
-   Updates: [Channel for updates]
-   ```
+   Create GitHub issue with:
+   - Status: CRITICAL/HIGH/MEDIUM/LOW
+   - Issue description
+   - Impact assessment
+   - Current status
 
 2. **Progress Updates (Every 30 minutes)**
-   - Current status
-   - Actions taken
-   - Next steps
-   - Revised ETA
+   - Update GitHub issue with progress
+   - Document actions taken
+   - Note next steps
 
 3. **Resolution Notification**
-   - Issue resolved
-   - Root cause analysis
-   - Preventive measures
-   - Lessons learned
+   - Mark issue as resolved
+   - Document root cause analysis
+   - Note preventive measures
 
 ### External Communication
 
 1. **User Notification (If needed)**
-   - Status page update
-   - In-app notification
-   - Email announcement
-   - Social media update
-
-2. **Stakeholder Communication**
-   - Management updates
-   - Partner notifications
-   - Regulatory reporting (if required)
+   - Update README with status
+   - Create GitHub release for fixes
+   - Document recovery steps
 
 ---
 
@@ -398,21 +303,18 @@ This runbook provides step-by-step procedures for handling disaster recovery sce
    - What went well
    - What could be improved
    - Process changes needed
-   - Training requirements
 
 ### Step 2: System Hardening
 
 1. **Security Review**
    - Update security rules
    - Enhance monitoring
-   - Improve alerting
    - Test recovery procedures
 
 2. **Performance Optimization**
    - Address bottlenecks
    - Optimize queries
    - Improve caching
-   - Scale resources
 
 ### Step 3: Monitoring Enhancement
 
@@ -424,7 +326,6 @@ This runbook provides step-by-step procedures for handling disaster recovery sce
 2. **Add New Metrics**
    - Based on incident patterns
    - Early warning indicators
-   - Predictive monitoring
 
 ---
 
@@ -436,9 +337,6 @@ This runbook provides step-by-step procedures for handling disaster recovery sce
 
    ```bash
    # Test backup integrity
-   npm run validate-env
-
-   # Test backup restoration
    node -e "
    const { BackupService } = require('./src/core/backup-service.js');
    BackupService.verifyBackup().then(console.log);
@@ -459,7 +357,7 @@ This runbook provides step-by-step procedures for handling disaster recovery sce
 
    ```bash
    # Run security scan
-   snyk test --severity-threshold=high
+   npx snyk test --severity-threshold=high
 
    # Check security headers
    curl -I https://blinkbudget.netlify.app | grep -E "(X-Frame|X-XSS|X-Content)"
@@ -495,7 +393,7 @@ This runbook provides step-by-step procedures for handling disaster recovery sce
        console.log('Health check passed');
      } catch (error) {
        console.error('Health check failed:', error);
-       // Trigger alert
+       // Create GitHub issue
      }
    }, 60000); // Every minute
    ```
@@ -522,23 +420,20 @@ This runbook provides step-by-step procedures for handling disaster recovery sce
 
 3. **Quarterly Tasks**
    - Full disaster recovery drill
-   - Security penetration testing
-   - Capacity planning review
+   - Security review
    - Documentation update
 
 ### Backup Strategy
 
 1. **Multiple Backup Layers**
    - Real-time sync to Firebase
-   - Daily automated backups
-   - Weekly full exports
-   - Monthly archive backups
+   - Daily automated backups via BackupService
+   - Manual backup capabilities
 
 2. **Backup Verification**
    - Automated daily verification
    - Weekly manual verification
    - Monthly restore testing
-   - Quarterly disaster recovery drill
 
 ---
 
@@ -550,40 +445,31 @@ This runbook provides step-by-step procedures for handling disaster recovery sce
 # Immediate service status check
 curl -I https://blinkbudget.netlify.app
 
-# Force emergency backup
-curl -X POST "https://us-central1-your-project.cloudfunctions.net/emergencyBackup?userId=USER_ID"
-
-# Verify backup integrity
-curl -X POST "https://us-central1-your-project.cloudfunctions.net/manualBackupVerification?userId=USER_ID"
-
-# Get system status
-curl -X GET "https://us-central1-your-project.cloudfunctions.net/getBackupVerificationStatus"
-
-# Emergency rollback
-netlify rollback --site-id=$NETLIFY_SITE_ID [PREVIOUS_DEPLOY_ID]
+# Emergency rollback (via Netlify dashboard)
+# Visit: https://app.netlify.com/sites/SITE_ID/deploys
 
 # Force redeploy
 git checkout main
 git push origin main
+
+# Run security scan
+npx snyk test --severity-threshold=high
+
+# Check application health
+npm run check && npm test
 ```
 
 ### Monitoring Commands
 
 ```bash
-# Check backup verification logs
-firebase functions:log --only verifyAllBackups
-
-# Monitor real-time logs
-firebase functions:log --only emergencyBackup
-
 # Check deployment status
-netlify deploy --list
+# Visit: https://app.netlify.com/sites/SITE_ID/deploys
 
-# Run security scan
-snyk test --severity-threshold=high
+# Monitor Firebase usage
+# Visit: https://console.firebase.google.com/
 
-# Check application health
-npm run check && npm test
+# Check GitHub Actions
+# Visit: https://github.com/Krasen007/BlinkBudget/actions
 ```
 
 ---
@@ -594,26 +480,21 @@ npm run check && npm test
 EMERGENCY CONTACTS
 ==================
 
-Primary DevOps: [Name] - [Phone] - [Email]
-Secondary DevOps: [Name] - [Phone] - [Email]
-Firebase Support: [Phone] - [Email]
-Netlify Support: [Phone] - [Email]
+Developer: Available via GitHub issues
+Project Maintainer: Available via GitHub issues
 
 SERVICE PROVIDERS
 =================
 
 Firebase Console: https://console.firebase.google.com/
 Netlify Dashboard: https://app.netlify.com/
-GitHub Repository: https://github.com/your-org/blinkbudget
-Snyk Dashboard: https://app.snyk.io/
+GitHub Repository: https://github.com/Krasen007/BlinkBudget
 
 CRITICAL URLs
 =============
 
 Production App: https://blinkbudget.netlify.app
-Staging App: https://blinkbudget-staging.netlify.app
-Status Page: https://status.blinkbudget.app
-Emergency Documentation: [Link to runbook]
+GitHub Issues: https://github.com/Krasen007/BlinkBudget/issues
 ```
 
 ---
@@ -622,8 +503,7 @@ Emergency Documentation: [Link to runbook]
 
 | Version | Date           | Changes                           | Author      |
 | ------- | -------------- | --------------------------------- | ----------- |
-| 1.0     | [Current Date] | Initial disaster recovery runbook | DevOps Team |
-| 1.1     | [Future Date]  | [Changes made]                    | [Author]    |
+| 1.0     | April 7, 2026  | Initial disaster recovery runbook | Project Team |
 
 ---
 

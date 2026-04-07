@@ -1,4 +1,4 @@
-﻿# Inline Comment Standards
+# Inline Comment Standards
 
 ## Overview
 
@@ -229,5 +229,63 @@ const CONFIG = {
 
 ---
 
+## Existing Code Examples
+
+### AmountPresetService (src/core/amount-preset-service.js)
+
+```javascript
+/**
+ * Amount Preset Service
+ *
+ * Tracks and manages quick amount presets based on user transaction frequency.
+ * Feature 3.4.1 - Quick Amount Presets
+ *
+ * Stores in localStorage with key amount_presets
+ */
+
+/**
+ * AmountPresetService
+ * Provides methods to track amount frequency and calculate top presets
+ */
+export const AmountPresetService = {
+  /**
+   * Get the current stored presets data
+   * @returns {Object} Presets data object
+   */
+  _getStoredPresets() {
+    // Implementation
+  },
+
+  /**
+   * Record an amount usage - increment count for that amount
+   * @param {number} amount - The transaction amount to record
+   */
+  recordAmount(amount) {
+    // Implementation
+  }
+};
+```
+
+### ExpandableSection (src/components/ExpandableSection.js)
+
+```javascript
+/**
+ * ExpandableSection Component
+ * Part of Feature 3.5.2: Progressive Disclosure Interface
+ */
+
+export const ExpandableSection = ({
+  title,
+  defaultExpanded = false,
+  storageKey = null,
+  content = null,
+  icon = null,
+}) => {
+  // Implementation
+};
+```
+
+---
+
 _Standards Version: 1.0_
-_Last Updated: February 22, 2026_
+_Last Updated: April 7, 2026_

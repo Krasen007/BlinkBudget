@@ -85,13 +85,12 @@ BlinkBudget uses a hybrid local-cloud architecture designed for privacy and perf
 - **Firebase (Google):** Used for authentication and optional cloud storage
 - **Netlify:** Used for application hosting
 - These providers have strict data protection agreements and access only to the minimum data necessary
-- GDPR-compliant Data Processing Agreements (DPAs) are in place with both Firebase and Netlify under GDPR Article 28, governing all data processing and limiting access to necessary data only. Users may request a copy of these DPAs by contacting privacy@blinkbudget.app
+- GDPR-compliant Data Processing Agreements (DPAs) are in place with both Firebase and Netlify under GDPR Article 28, governing all data processing and limiting access to necessary data only. Users may request a copy of these DPAs by creating a GitHub issue
 
 ### 4.3 Legal Requirements
 
 - We may disclose information if required by law or to protect our rights
 - Any such disclosure will be limited to what is legally required
-- We will notify users when legally permitted to do so
 
 ## 5. Data Retention
 
@@ -168,16 +167,14 @@ If you use cloud synchronization, your data may be stored and processed in data 
 We may update this Privacy Policy from time to time. We will notify users of significant changes by:
 
 - Posting the updated policy in the app
-- Sending email notifications for major changes
 - Providing a summary of changes
 
 ## 11. Contact Information
 
 If you have questions about this Privacy Policy or want to exercise your rights, please contact us:
 
-- **Email:** privacy@blinkbudget.app
-- **GitHub:** [Create an issue in our repository]
-- **Documentation:** Available in the app's help section
+- **GitHub**: [Create an issue in our repository]
+- **Documentation**: Available in the app's help section
 
 ## 12. Data Subject Rights (GDPR)
 
@@ -187,8 +184,8 @@ If you are located in the EU, you have the following rights under GDPR:
 - **Right to Rectification:** Correct inaccurate data (available through individual transaction editing)
 - **Right to Erasure:** Request deletion of your data (available through Settings > Account Deletion)
 - **Right to Portability:** Transfer your data to another service (available through JSON export)
-- **Right to Object:** Object to certain data processing (contact privacy@blinkbudget.app)
-- **Right to Restrict:** Limit processing of your data (contact privacy@blinkbudget.app)
+- **Right to Object:** Object to certain data processing (create a GitHub issue)
+- **Right to Restrict:** Limit processing of your data (create a GitHub issue)
 
 **Technical Implementation:**
 

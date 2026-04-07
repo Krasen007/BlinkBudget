@@ -310,35 +310,17 @@ npm install -g audit-ci
 
 - **Daily**: Automated dependency scanning
 - **Weekly**: Automated security test suite
-- **Monthly**: Manual penetration testing
-- **Quarterly**: Full security audit
+- **Monthly**: Manual security review
 - **Pre-release**: Comprehensive security validation
 
-## Responsibilities
+## Current Testing Tools
 
-### QA Engineer
-
-- Execute security test cases
-- Report security vulnerabilities
-- Verify security fixes
-- Maintain security test suite
-
-### Developer
-
-- Implement security fixes
-- Follow secure coding practices
-- Participate in security reviews
-- Address security findings
-
-### DevOps
-
-- Configure security tools
-- Monitor security alerts
-- Maintain secure infrastructure
-- Implement security monitoring
+- **npm audit**: Built-in dependency vulnerability scanner
+- **Snyk**: Automated vulnerability monitoring (configured)
+- **Environment Validation**: `config/validate-env.cjs`
+- **Security Headers**: Configured in netlify.toml
 
 ---
 
-**Last Updated**: [Date]  
-**Next Review**: [Date]  
+**Last Updated**: April 7, 2026  
 **Version**: 1.0
