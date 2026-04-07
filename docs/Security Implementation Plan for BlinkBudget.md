@@ -61,6 +61,18 @@ service cloud.firestore {
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
+    match /transactions/{transactionId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+    match /accounts/{accountId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+    match /budgets/{budgetId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+    match /categories/{categoryId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
   }
 }
 ```
@@ -68,7 +80,9 @@ service cloud.firestore {
 ### Environment Security
 
 - Use environment-specific Firebase configurations
-- Rotate API keys regularly
+- Firebase API keys are public identifiers and don't require rotation
+- Enforce security via Firebase Security Rules and Authentication
+- Restrict API usage via Firebase project settings and OAuth/custom tokens
 - Monitor for unauthorized access
 
 ## Current Security Tools

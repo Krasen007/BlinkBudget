@@ -310,8 +310,8 @@ npm install -g audit-ci
 
 - **Daily**: Automated dependency scanning
 - **Weekly**: Automated security test suite
-- **Monthly**: Manual security review
-- **Pre-release**: Comprehensive security validation
+- **Monthly**: Manual penetration testing
+- **Quarterly**: Full security audit / penetration test
 
 ## Current Testing Tools
 
@@ -320,7 +320,35 @@ npm install -g audit-ci
 - **Environment Validation**: `config/validate-env.cjs`
 - **Security Headers**: Configured in netlify.toml
 
----
+## Responsibilities
+
+### Role-Based Accountability
+
+Each security task has assigned ownership:
+
+#### QA Engineer
+- **Monthly Manual Reviews**: Conduct monthly manual penetration testing
+- **Pre-release Validation**: Comprehensive security validation before releases
+- **Test Case Maintenance**: Maintain and update security test cases
+- **Vulnerability Tracking**: Monitor and track security findings
+
+#### Developer
+- **Code Security**: Implement secure coding practices and fix vulnerabilities
+- **Dependency Management**: Keep dependencies updated and apply patches
+- **Security Feature Implementation**: Implement authentication, encryption, and access controls
+- **Code Review**: Participate in security-focused code reviews
+
+#### DevOps
+- **Environment Security**: Secure CI/CD pipelines and manage secrets
+- **Infrastructure Protection**: Configure firewalls, rate limiting, and monitoring
+- **Security Headers**: Implement and maintain security headers in deployment
+- **Backup Recovery**: Ensure backup systems are functional and tested
+
+### Cross-Functional Responsibilities
+
+- **Security Training**: All team members complete security awareness training
+- **Incident Response**: Participate in security incident response procedures
+- **Documentation**: Maintain security documentation and runbooks
 
 **Last Updated**: April 7, 2026  
 **Version**: 1.0

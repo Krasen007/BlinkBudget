@@ -1,4 +1,31 @@
-# Disaster Recovery Runbook
+## Before Using This Runbook
+
+### Placeholders to Replace
+
+This runbook contains the following placeholders that must be replaced with your actual values:
+
+- `PROJECT_ID`: Your Firebase project ID (found in Firebase Console → Project Settings)
+- `SITE_ID`: Your Netlify site ID (found in Netlify Dashboard → Site Settings)
+
+### How to Find These Values
+
+1. **Firebase PROJECT_ID**:
+   - Visit https://console.firebase.google.com
+   - Select your project
+   - Go to Project Settings → General
+   - Copy the "Project ID"
+
+2. **Netlify SITE_ID**:
+   - Visit https://app.netlify.com
+   - Select your site
+   - Go to Site Settings → General
+   - Copy the "Site ID" from the URL or settings page
+
+### Security Note
+
+Always replace or redact these placeholders before sharing this document with external parties.
+
+---
 
 This runbook provides procedures for handling disaster recovery scenarios for BlinkBudget, ensuring business continuity and data integrity.
 
@@ -20,8 +47,17 @@ This runbook provides procedures for handling disaster recovery scenarios for Bl
 
 ### Primary Team
 
+#### Level 1 (Critical) - Immediate Synchronous Escalation
+
+- **Developer**: +1-XXX-XXX-XXXX, developer@blinkbudget.netlify.app
+- **Project Maintainer**: +1-XXX-XXX-XXXX, maintainer@blinkbudget.netlify.app
+- **Backup Contact**: John Doe, +1-XXX-XXX-XXXX, backup@blinkbudget.netlify.app
+
+#### Level 2-4 (Non-Critical) - GitHub Issues
+
 - **Developer**: Available via GitHub issues
 - **Project Maintainer**: Available via GitHub issues
+- **Note**: GitHub issues reserved for Level 2-4 incidents only
 
 ### External Services
 
@@ -99,15 +135,30 @@ This runbook provides procedures for handling disaster recovery scenarios for Bl
 
    ```bash
    # If security breach suspected, rotate secrets immediately
-   # Update Firebase API keys in console
-   # Visit: https://console.firebase.google.com/project/PROJECT_ID/settings/serviceaccounts
-   # Generate new web API key and update all client applications
-
-   # Update Netlify environment variables
-   # Visit: https://app.netlify.com/sites/SITE_ID/settings/environment
-
-   # Trigger redeploy to apply new environment variables
-   netlify trigger deploy --prod
+   
+   # Firebase API Key Rotation
+   # 1. Open Firebase Console: https://console.firebase.google.com/project/PROJECT_ID/settings/serviceaccounts
+   # 2. Locate existing web API key in "API Keys" section
+   # 3. Click "Delete" to revoke the existing key
+   # 4. Click "Create API Key" to generate new key
+   # 5. Update all client applications with new key
+   # 6. Update environment variables in CI/CD pipelines
+   
+   # Netlify Environment Variable Update
+   # Option A: Dashboard
+   # 1. Visit: https://app.netlify.com/sites/SITE_ID/settings/environment
+   # 2. Edit/add variables and save
+   # 3. Trigger deploy manually or wait for automatic build
+   
+   # Option B: CLI
+   # 1. Set variable: netlify env:set VAR "value" --site SITE_ID
+   # 2. Trigger deploy: netlify deploy --prod or netlify build
+   
+   # Post-Rotation Verification
+   # 1. Verify deployments are using new secrets
+   # 2. Update any shared secret stores or vaults
+   # 3. Confirm all CI/CD pipelines updated
+   # 4. Monitor for any authentication failures
    ```
 
 2. **Activate Monitoring**
@@ -128,8 +179,9 @@ This runbook provides procedures for handling disaster recovery scenarios for Bl
 #### Recovery from Backup
 
 1. **Assess Backup Availability**
-   - Check Firebase Console for recent backups
+   - Check Firestore collection 'backups' for recent backup documents
    - Review backup service logs
+   - Verify backup document structure and timestamps
 
 2. **Manual Recovery Process**
 
@@ -185,8 +237,32 @@ This runbook provides procedures for handling disaster recovery scenarios for Bl
    - Identify affected time ranges
 
 2. **Selective Restore**
-   - Use BackupService for targeted recovery
-   - Restore specific data ranges
+   ```javascript
+   // Using the BackupService for targeted recovery
+   (async () => {
+     try {
+       const { BackupService } = await import('./src/core/backup-service.js');
+       
+       // Restore specific date range
+       const result = await BackupService.restoreBackup({
+         startDate: '2026-01-01',
+         endDate: '2026-01-31',
+         dataTypes: ['transactions', 'accounts', 'categories']
+       });
+       
+       console.log(`Restored ${result.count} records`);
+       
+       // Post-restore verification
+       // 1. Verify restored data integrity
+       // 2. Check for duplicates
+       // 3. Run functional tests on restored subset
+       // 4. Confirm data matches expected date ranges
+       
+     } catch (error) {
+       console.error('Backup restoration failed:', error);
+     }
+   })();
+   ```
    - Verify integrity
 
 ---
@@ -209,9 +285,18 @@ This runbook provides procedures for handling disaster recovery scenarios for Bl
 
 2. **Rollback if Needed**
 
-   ```bash
-   # Rollback to previous working version via Netlify dashboard
-   # Or revert to previous commit and push
+   **Option A: Netlify Dashboard Rollback (Immediate)**
+   - Visit https://app.netlify.com/sites/SITE_ID/deploys
+   - Locate the last successful deploy
+   - Click "Publish deploy" to immediately rollback
+   - This requires no git work and is instant
+
+   **Option B: Git Revert (Permanent Fix)**
+   - Use `git revert HEAD` to revert the last commit
+   - Or revert a specific commit: `git revert <commit-hash>`
+   - Push the revert: `git push origin main`
+   - Netlify will auto-deploy the reverted commit
+   - **Warning**: Avoid `git checkout` to prevent detached HEAD state
    git checkout [PREVIOUS_COMMIT]
    git push origin main
    ```

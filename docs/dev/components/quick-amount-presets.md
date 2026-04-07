@@ -26,7 +26,7 @@ The Quick Amount Presets component displays a row of preset amount buttons on th
 
 ### Data Flow
 
-Transaction Form -> AmountPresetService.getPresets() -> localStorage -> Preset Buttons -> Amount Input Field
+Transaction Form -> AmountPresetService.getPresets() (reads localStorage) -> Preset Buttons -> Amount Input Field
 
 ## API Reference
 
@@ -74,9 +74,10 @@ unsubscribe();
     10: 25,    // Amount 10.00 used 25 times
     5: 20,     // Amount 5.00 used 20 times
     20: 15,    // Amount 20.00 used 15 times
+    25.50: 8,   // Amount 25.50 used 8 times
     50: 10     // Amount 50.00 used 10 times
   }, 
-  presets: [10, 5, 20, 50]  // Top 4 amounts sorted by frequency
+  presets: [10, 5, 20, 25.50, 50]  // Top 4 amounts sorted by frequency (decimal format)
 }
 ```
 

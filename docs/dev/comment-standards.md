@@ -240,6 +240,14 @@ const CONFIG = {
  * Tracks and manages quick amount presets based on user transaction frequency.
  * Feature 3.4.1 - Quick Amount Presets
  *
+ * @module AmountPresetService
+ * @requires TransactionService
+ * @requires StorageService
+ * @example
+ * // Initialize and use the service
+ * const presets = AmountPresetService.getPresets();
+ * AmountPresetService.recordAmount(25.50);
+ *
  * Stores in localStorage with key amount_presets
  */
 
@@ -250,6 +258,7 @@ const CONFIG = {
 export const AmountPresetService = {
   /**
    * Get the current stored presets data
+   * @private Internal method for retrieving stored presets
    * @returns {Object} Presets data object
    */
   _getStoredPresets() {
@@ -271,7 +280,16 @@ export const AmountPresetService = {
 ```javascript
 /**
  * ExpandableSection Component
+ *
  * Part of Feature 3.5.2: Progressive Disclosure Interface
+ *
+ * @param {Object} props - Component props
+ * @param {string} props.title - Section title text
+ * @param {boolean} props.defaultExpanded - Initial expanded state (default: false)
+ * @param {string} props.storageKey - localStorage key for persistence (default: null)
+ * @param {HTMLElement} props.content - Content element to display (default: null)
+ * @param {string} props.icon - Icon text to display before title (default: null)
+ * @returns {HTMLElement} Rendered component object
  */
 
 export const ExpandableSection = ({

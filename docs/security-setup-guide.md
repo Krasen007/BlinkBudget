@@ -193,12 +193,45 @@ npx snyk test --severity-threshold=high
    - Check authDomain format
    - Review Firebase security rules
 
-## Current Security Tools
+## Rate Limiting
 
-- **Environment Validation**: `config/validate-env.cjs`
-- **Dependency Scanning**: npm audit, Snyk
-- **Security Headers**: netlify.toml configuration
-- **Firebase Security Rules**: Server-side access control
+### Authentication Protection
+
+Implement rate limiting to protect authentication endpoints:
+
+#### Recommended Thresholds
+- **Login Attempts**: 5 attempts per minute per IP
+- **Password Reset**: 3 requests per hour per email
+- **Account Creation**: 2 accounts per hour per IP
+- **API Requests**: 100 requests per minute per authenticated user
+
+#### Implementation Options
+
+**Firebase Authentication**:
+- Use Firebase Security Rules with rate limiting logic
+- Implement Cloud Functions for advanced rate limiting
+- Enable Firebase Authentication rate limiting in console
+- Monitor authentication logs for suspicious patterns
+
+**Netlify Protection**:
+- Use Netlify Edge Functions for rate limiting
+- Implement IP-based blocking for repeated failures
+- Configure Netlify Edge Rate Limiting rules
+- Consider proxying through Cloudflare or similar WAF
+
+### Monitoring and Alerting
+
+#### Metrics to Track
+- Rate limit hits and 429 responses
+- Spike in failed authentication attempts
+- IP reputation and geolocation anomalies
+- Unusual user behavior patterns
+
+#### Alert Integration
+- Configure alerts for rate limit threshold breaches
+- Integrate with existing Snyk/monitoring stack
+- Set up automated IP blocking for repeated violations
+- Monitor for distributed attack patterns
 
 ---
 

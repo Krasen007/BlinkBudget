@@ -166,14 +166,29 @@ If you use cloud synchronization, your data may be stored and processed in data 
 
 We may update this Privacy Policy from time to time. We will notify users of significant changes by:
 
-- Posting the updated policy in the app
-- Providing a summary of changes
+- **In-App Posting**: We will post the updated policy in the app with a summary of changes
+- **Change Summary**: We will provide a clear summary of what changed and why it matters
+
+### Material Changes
+
+A change is considered "material" if it affects:
+- How we collect or use personal data
+- The purposes for which we use personal data
+- Your rights regarding personal data
+- Who we share personal data with
+
+### Notification Process
+
+- Email notifications will be sent to the email address associated with your account
+- Users can opt-out of marketing emails but not policy change notifications
+- We maintain a record of all policy change notifications sent
+- Updated policy and summary will be available at https://blinkbudget.netlify.app/privacy-policy
 
 ## 11. Contact Information
 
 If you have questions about this Privacy Policy or want to exercise your rights, please contact us:
 
-- **GitHub**: [Create an issue in our repository]
+- **GitHub Issues**: [Create an issue in our repository](https://github.com/Krasen007/BlinkBudget/issues)
 - **Documentation**: Available in the app's help section
 
 ## 12. Data Subject Rights (GDPR)
@@ -184,8 +199,8 @@ If you are located in the EU, you have the following rights under GDPR:
 - **Right to Rectification:** Correct inaccurate data (available through individual transaction editing)
 - **Right to Erasure:** Request deletion of your data (available through Settings > Account Deletion)
 - **Right to Portability:** Transfer your data to another service (available through JSON export)
-- **Right to Object:** Object to certain data processing (create a GitHub issue)
-- **Right to Restrict:** Limit processing of your data (create a GitHub issue)
+- **Right to Object:** Object to certain data processing (create a GitHub issue with "Privacy Request - Object" in title)
+- **Right to Restrict:** Limit processing of your data (create a GitHub issue with "Privacy Request - Restrict" in title)
 
 **Technical Implementation:**
 
