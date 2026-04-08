@@ -55,11 +55,6 @@ export const BackupService = {
         return;
       }
 
-      const progressId = 'backup-create';
-      showProgressIndicator(progressId, 'Creating backup...', document.body, {
-        showCancel: false,
-      });
-
       try {
         await this.createBackup();
         SettingsService.saveSetting('lastBackupDate', today);
@@ -75,7 +70,6 @@ export const BackupService = {
         );
 
         console.log('[Backup] Daily backup created successfully');
-        hideProgressIndicator(progressId);
       } catch (error) {
         console.error('[Backup] Failed to create backup:', error);
         window.dispatchEvent(
@@ -87,7 +81,6 @@ export const BackupService = {
             },
           })
         );
-        hideProgressIndicator(progressId);
       }
     }
   },
