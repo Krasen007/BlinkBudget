@@ -19,6 +19,8 @@ export const NavigationState = {
     REPORTS_VIEW_PREFERENCES: 'navigation_reports_view_preferences',
     LAST_ACTIVE_VIEW: 'navigation_last_active_view',
     VIEW_HISTORY: 'navigation_view_history',
+    DASHBOARD_CATEGORY_FILTER: 'navigation_dashboard_category_filter',
+    DASHBOARD_TIME_PERIOD: 'navigation_dashboard_time_period',
   },
 
   /**
@@ -282,6 +284,153 @@ export const NavigationState = {
   },
 
   /**
+   * Save dashboard filter state from Reports view
+   * @param {Object} filterData - Filter data with category, timePeriod, and source
+   */
+  saveDashboardFilter(filterData) {
+    try {
+      if (!filterData || typeof filterData !== 'object') {
+        console.warn('[NavigationState] Invalid filterData parameter');
+        return;
+      }
+
+      const filterState = {
+        ...filterData,
+        savedAt: new Date().toISOString(),
+      };
+
+      sessionStorage.setItem(
+        this.STATE_KEYS.DASHBOARD_CATEGORY_FILTER,
+        JSON.stringify(filterState)
+      );
+
+      // Also save time period separately for easier access
+      if (filterData.timePeriod) {
+        this.saveDashboardTimePeriod(filterData.timePeriod);
+      }
+    } catch (error) {
+      console.error('[NavigationState] Failed to save dashboard filter:', error);
+    }
+  },
+
+  /**
+   * Restore dashboard filter state
+   * @returns {Object|null} Saved filter data or null if none saved
+   */
+  restoreDashboardFilter() {
+    try {
+      const savedData = sessionStorage.getItem(
+        this.STATE_KEYS.DASHBOARD_CATEGORY_FILTER
+      );
+      if (!savedData) return null;
+
+      const filterData = safeJsonParse(savedData);
+
+      // Validate saved data
+      if (!filterData || !filterData.category) {
+        console.warn('[NavigationState] Invalid saved dashboard filter data');
+        return null;
+      }
+
+      return filterData;
+    } catch (error) {
+      console.error('[NavigationState] Failed to restore dashboard filter:', error);
+      return null;
+    }
+  },
+
+  /**
+   * Save dashboard time period context
+   * @param {Object} timePeriod - Time period object
+   */
+  saveDashboardTimePeriod(timePeriod) {
+    try {
+      if (!timePeriod || !timePeriod.startDate || !timePeriod.endDate) {
+        console.warn('[NavigationState] Invalid timePeriod parameter for dashboard');
+        return;
+      }
+
+      const timePeriodData = {
+        type: timePeriod.type,
+        startDate: timePeriod.startDate instanceof Date 
+          ? timePeriod.startDate.toISOString() 
+          : timePeriod.startDate,
+        endDate: timePeriod.endDate instanceof Date 
+          ? timePeriod.endDate.toISOString() 
+          : timePeriod.endDate,
+        label: timePeriod.label,
+        savedAt: new Date().toISOString(),
+      };
+
+      sessionStorage.setItem(
+        this.STATE_KEYS.DASHBOARD_TIME_PERIOD,
+        JSON.stringify(timePeriodData)
+      );
+    } catch (error) {
+      console.error('[NavigationState] Failed to save dashboard time period:', error);
+    }
+  },
+
+  /**
+   * Restore dashboard time period context
+   * @returns {Object|null} Restored time period object or null if none saved
+   */
+  restoreDashboardTimePeriod() {
+    try {
+      const savedData = sessionStorage.getItem(
+        this.STATE_KEYS.DASHBOARD_TIME_PERIOD
+      );
+      if (!savedData) return null;
+
+      const timePeriodData = safeJsonParse(savedData);
+
+      // Validate saved data
+      if (!timePeriodData.startDate || !timePeriodData.endDate) {
+        console.warn('[NavigationState] Invalid saved dashboard time period data');
+        return null;
+      }
+
+      // Reconstruct time period object
+      const timePeriod = {
+        type: timePeriodData.type,
+        startDate: timePeriodData.startDate instanceof Date 
+          ? timePeriodData.startDate 
+          : new Date(timePeriodData.startDate),
+        endDate: timePeriodData.endDate instanceof Date 
+          ? timePeriodData.endDate 
+          : new Date(timePeriodData.endDate),
+        label: timePeriodData.label,
+      };
+
+      // Validate dates
+      if (
+        isNaN(timePeriod.startDate.getTime()) ||
+        isNaN(timePeriod.endDate.getTime())
+      ) {
+        console.warn('[NavigationState] Invalid saved dashboard time period dates');
+        return null;
+      }
+
+      return timePeriod;
+    } catch (error) {
+      console.error('[NavigationState] Failed to restore dashboard time period:', error);
+      return null;
+    }
+  },
+
+  /**
+   * Clear dashboard filter state
+   */
+  clearDashboardFilter() {
+    try {
+      sessionStorage.removeItem(this.STATE_KEYS.DASHBOARD_CATEGORY_FILTER);
+      sessionStorage.removeItem(this.STATE_KEYS.DASHBOARD_TIME_PERIOD);
+    } catch (error) {
+      console.error('[NavigationState] Failed to clear dashboard filter:', error);
+    }
+  },
+
+  /**
    * Get a summary of current navigation state (for debugging)
    * @returns {Object} Summary of current state
    */
@@ -292,6 +441,8 @@ export const NavigationState = {
       viewPreferences: this.restoreViewPreferences(),
       lastActiveView: this.getLastActiveView(),
       viewHistory: this.getViewHistory(),
+      dashboardFilter: this.restoreDashboardFilter(),
+      dashboardTimePeriod: this.restoreDashboardTimePeriod(),
     };
   },
 

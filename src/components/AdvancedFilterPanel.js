@@ -535,5 +535,8 @@ export const AdvancedFilterPanel = ({
   // Enable real-time updates
   addRealtimeListeners();
 
+  // Expose updateFormValues for external access
+  panel.updateFormValues = updateFormValues;
+
   return panel;
 };

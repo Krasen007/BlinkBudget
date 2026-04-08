@@ -8,11 +8,13 @@ import { FilteringService } from '../core/analytics/FilteringService.js';
 import { AuthService } from '../core/auth-service.js';
 import { SettingsService } from '../core/settings-service.js';
 import { Router } from '../core/router.js';
+import { NavigationState } from '../core/navigation-state.js';
 import { COLORS, SPACING, STORAGE_KEYS } from '../utils/constants.js';
 
 import { getTransactionToHighlight } from '../utils/success-feedback.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
 import { AdvancedFilterPanel } from '../components/AdvancedFilterPanel.js';
+import { showSuccessToast } from '../utils/toast-notifications.js';
 
 export const DashboardView = () => {
   const container = document.createElement('div');
@@ -32,7 +34,12 @@ export const DashboardView = () => {
   leftSide.style.alignItems = 'center';
   leftSide.style.gap = SPACING.XS;
 
-  // Title
+  // Title and filter status container
+  const titleContainer = document.createElement('div');
+  titleContainer.style.display = 'flex';
+  titleContainer.style.alignItems = 'center';
+  titleContainer.style.gap = SPACING.XS;
+
   const title = document.createElement('h2');
   const updateTitle = userObj => {
     const u = userObj || AuthService.user;
@@ -40,13 +47,16 @@ export const DashboardView = () => {
     /* global __APP_VERSION__ */
     const version =
       typeof __APP_VERSION__ !== 'undefined' ? ` v${__APP_VERSION__}` : '';
+    
     title.textContent = name
       ? `Hi, ${name}!${version}`
       : `Welcome back!${version}`;
   };
   updateTitle();
-  leftSide.appendChild(title);
+  titleContainer.appendChild(title);
   title.className = 'view-title';
+
+  leftSide.appendChild(titleContainer);
 
   // Right side controls - use navigation helper
   const rightControls = createNavigationButtons('dashboard');
@@ -78,6 +88,35 @@ export const DashboardView = () => {
     sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER) || null;
   let advancedFilters = null;
 
+  // Check for dashboard filter state from Reports view
+  const dashboardFilter = NavigationState.restoreDashboardFilter();
+  if (dashboardFilter && dashboardFilter.source === 'reports') {
+    // Apply category filter from Reports
+    currentCategoryFilter = dashboardFilter.category;
+    sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER, dashboardFilter.category);
+    
+    // Apply time period filter if available
+    if (dashboardFilter.timePeriod) {
+      // For month filtering, we need the first day of the month in YYYY-MM-DD format
+      const startDate = dashboardFilter.timePeriod.startDate instanceof Date 
+        ? dashboardFilter.timePeriod.startDate
+        : new Date(dashboardFilter.timePeriod.startDate);
+      
+      // Format as YYYY-MM-01 for proper month filtering
+      const monthFilter = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-01`;
+      currentMonthFilter = monthFilter;
+      sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER, monthFilter);
+    }
+    
+    // Clear the navigation state after applying
+    NavigationState.clearDashboardFilter();
+    
+      }
+
+  // Initialize title after all variables are set
+  updateTitle();
+
+  
   const accounts = AccountService.getAccounts();
 
   const allOption = document.createElement('option');
@@ -130,12 +169,19 @@ export const DashboardView = () => {
   let filterPanel;
 
   if (advancedFilteringEnabled) {
+    // Prepare initial filters if category filter is active
+    const initialFilters = currentCategoryFilter ? {
+      categories: [currentCategoryFilter],
+      categoryFilterType: 'include'
+    } : {};
+    
     filterPanel = AdvancedFilterPanel({
       onFiltersChange: filters => {
         console.log('Dashboard filters applied:', filters);
         advancedFilters = filters;
         renderDashboard();
       },
+      initialFilters
     });
     container.appendChild(filterPanel);
   }
@@ -443,6 +489,54 @@ export const DashboardView = () => {
       fallbackBtn.style.marginBottom = SPACING.XS;
       fallbackBtn.style.flexShrink = '0';
       content.appendChild(fallbackBtn);
+    }
+
+    // Add clear filter button if filter is active from Reports
+    if (currentCategoryFilter && currentCategoryFilter !== 'all') {
+      const clearFilterButton = ButtonComponent({
+        text: 'Clear Filter',
+        variant: 'ghost',
+        onClick: () => {
+          // Clear all filters
+          currentCategoryFilter = null;
+          sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER);
+          currentMonthFilter = null;
+          sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
+          advancedFilters = null;
+          
+          // Update AdvancedFilterPanel if it exists
+          if (filterPanel && filterPanel.updateFormValues) {
+            filterPanel.updateFormValues();
+          }
+          
+          // Update title and re-render
+          updateTitle();
+          renderDashboard();
+          showSuccessToast('Filter cleared');
+        },
+      });
+      clearFilterButton.style.width = '100%';
+      clearFilterButton.style.marginTop = SPACING.XS;
+      clearFilterButton.style.marginBottom = SPACING.XS;
+      content.appendChild(clearFilterButton);
+      
+      // Add filter status indicator
+      const filterStatus = document.createElement('div');
+      filterStatus.style.cssText = `
+        text-align: center;
+        color: var(--color-text-muted);
+        font-size: var(--font-size-sm);
+        margin-top: ${SPACING.XS};
+        margin-bottom: ${SPACING.XS};
+        padding: ${SPACING.XS};
+        background: var(--color-surface);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--color-border);
+      `;
+      filterStatus.textContent = currentCategoryFilter && currentCategoryFilter !== 'all'
+        ? `Currently filtered by: ${currentCategoryFilter}${dashboardFilter && dashboardFilter.timePeriod ? ` (${dashboardFilter.timePeriod.label || 'selected period'})` : ''}`
+        : 'No active filters';
+      content.appendChild(filterStatus);
     }
 
     // Recent Transactions

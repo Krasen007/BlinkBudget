@@ -261,18 +261,20 @@ export const ReportsView = () => {
   }
 
   /**
-   * Handle category card click - scroll back up to chart
+   * Handle category card click - navigate to dashboard with category filter
    */
-  function handleCategoryCardClick() {
-    const chartSection = container.querySelector(
-      '[data-chart-type="category-breakdown"]'
-    );
-    if (chartSection) {
-      chartSection.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-      });
-    }
+  function handleCategoryCardClick(category) {
+    // Save filter state for dashboard
+    const filterData = {
+      category: category.name,
+      timePeriod: currentTimePeriod,
+      source: 'reports'
+    };
+    
+    NavigationState.saveDashboardFilter(filterData);
+    
+    // Navigate to dashboard
+    Router.navigate('dashboard');
   }
 
   /**
