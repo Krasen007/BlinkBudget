@@ -878,7 +878,7 @@ export const ReportsView = () => {
       const budgetStatusMap = {};
       if (budgetStatus && Array.isArray(budgetStatus)) {
         budgetStatus.forEach(budget => {
-          budgetStatusMap[budget.name] = budget;
+          budgetStatusMap[budget.categoryName] = budget;
         });
       }
 

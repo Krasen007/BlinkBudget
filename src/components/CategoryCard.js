@@ -12,6 +12,9 @@ import { formatCurrency } from '../utils/financial-planning-helpers.js';
  * @param {number} index - Index for color assignment
  * @param {Map} categoryColorMap - Consistent color mapping
  * @param {Function} onClick - Click handler for details
+ * @param {Object} frequencyData - Optional frequency analysis data
+ * @param {Array} insights - Optional insights data
+ * @param {Object} budgetStatus - Optional budget status information
  */
 export const CategoryCard = (
   category,
@@ -19,7 +22,8 @@ export const CategoryCard = (
   categoryColorMap,
   onClick,
   frequencyData = null,
-  insights = []
+  insights = [],
+  budgetStatus = null
 ) => {
   const card = document.createElement('button');
   card.className = 'category-card';
@@ -119,6 +123,33 @@ export const CategoryCard = (
     }
   }
 
+  // Budget status display
+  if (budgetStatus && budgetStatus[category.name]) {
+    const budget = budgetStatus[category.name];
+    const budgetEl = document.createElement('div');
+    budgetEl.style.fontSize = '0.75rem';
+    budgetEl.style.marginTop = SPACING.XS;
+    budgetEl.style.textAlign = 'center';
+    budgetEl.style.padding = '2px 6px';
+    budgetEl.style.borderRadius = 'var(--radius-sm)';
+    
+    if (budget.isExceeded) {
+      budgetEl.style.background = 'rgba(239, 68, 68, 0.1)';
+      budgetEl.style.color = COLORS.DANGER;
+      budgetEl.textContent = `Over budget by ${formatCurrency(budget.actual - budget.amountLimit)}`;
+    } else if (budget.isWarning) {
+      budgetEl.style.background = 'rgba(251, 191, 36, 0.1)';
+      budgetEl.style.color = COLORS.WARNING;
+      budgetEl.textContent = `${budget.utilization.toFixed(0)}% used`;
+    } else {
+      budgetEl.style.background = 'rgba(34, 197, 94, 0.1)';
+      budgetEl.style.color = COLORS.SUCCESS;
+      budgetEl.textContent = `${formatCurrency(budget.remaining)} left`;
+    }
+    
+    card.appendChild(budgetEl);
+  }
+
   // Insights snippet
   if (insights && insights.length > 0) {
     const relevantInsight = insights.find(
@@ -132,7 +163,7 @@ export const CategoryCard = (
       insightEl.style.marginTop = SPACING.XS;
       insightEl.style.fontStyle = 'italic';
       insightEl.style.textAlign = 'center';
-      insightEl.textContent = `💡 ${relevantInsight.message.split('.')[0]}`;
+      insightEl.textContent = `?? ${relevantInsight.message.split('.')[0]}`;
       card.appendChild(insightEl);
     }
   }
