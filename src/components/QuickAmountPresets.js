@@ -25,14 +25,14 @@ export const QuickAmountPresets = ({ onPresetSelect }) => {
    * Render the preset buttons
    */
   const renderButtons = () => {
-    console.log('renderButtons() called');
+    // console.log('renderButtons() called');
     // Clear existing buttons
     container.innerHTML = '';
 
     const presets = AmountPresetService.getPresets() || [];
     const displayPresets = presets.length > 0 ? presets : [5, 10, 20, 50];
 
-    console.log('Displaying presets:', displayPresets);
+    // console.log('Displaying presets:', displayPresets);
     displayPresets.forEach(amount => {
       const button = document.createElement('button');
       button.type = 'button';

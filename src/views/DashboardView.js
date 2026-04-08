@@ -14,7 +14,6 @@ import { COLORS, SPACING, STORAGE_KEYS } from '../utils/constants.js';
 import { getTransactionToHighlight } from '../utils/success-feedback.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
 import { AdvancedFilterPanel } from '../components/AdvancedFilterPanel.js';
-import { showSuccessToast } from '../utils/toast-notifications.js';
 
 export const DashboardView = () => {
   const container = document.createElement('div');
@@ -512,7 +511,6 @@ export const DashboardView = () => {
           // Update title and re-render
           updateTitle();
           renderDashboard();
-          showSuccessToast('Filter cleared');
         },
       });
       clearFilterButton.style.width = '100%';
