@@ -48,13 +48,14 @@
 - **Data integrity validation** - Smart checks that recognize all transaction types without false warnings
 - **Filter transactions by category** tap on the name to show
 - **Date filtering functionality** tap on the name to show
+- **Integrated category filtering** between Reports and Dashboard views for consistent analysis across all sections
 
 ### Dashboard & Analytics
 
 - **Real-time balance calculations** across all accounts
 - **Account filtering** - View transactions by specific account or all accounts
 - **Transaction history** with edit/delete capabilities
-- **Reliable transaction editing** - Improved date editing behavior
+- **Reliable transaction editing** - Improved date editing behavior with restored budget amount state display
 - **Visual feedback** for recently added transactions
 - **Dashboard layout** with improved spacing and optimized action buttons
 - **Fast chart loading** with intelligent caching system and cache invalidation
@@ -77,7 +78,7 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 - **Responsive layout** optimized for mobile devices
 - **Mobile experience** optimized for better touch interactions
 - **Touch-friendly interface** with proper touch targets (56px minimum)
-- **Mobile navigation** with bottom tab bar
+- **Mobile navigation** with bottom tab bar and improved navigation consistency
 - **Keyboard-aware UI** that adapts to virtual keyboard
 - **PWA support** - Installable as a standalone app with offline support
 - **Android TWA support** - Trusted Web Activity for native Android app experience with Play Store deployment
