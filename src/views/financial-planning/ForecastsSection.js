@@ -261,8 +261,28 @@ export const ForecastsSection = (
   if (
     !planningData ||
     !planningData.transactions ||
-    planningData.transactions.length < 3
+    planningData.transactions.length === 0
   ) {
+    const placeholder = createPlaceholder(
+      'No Transaction Data Available',
+      'Your transaction data may be syncing from the cloud. Please refresh the page or check your internet connection.',
+      '🔄'
+    );
+    section.appendChild(placeholder);
+    
+    // Add a refresh button
+    const refreshBtn = document.createElement('button');
+    refreshBtn.textContent = 'Refresh Data';
+    refreshBtn.className = 'btn btn-primary';
+    refreshBtn.style.marginTop = SPACING.MD;
+    refreshBtn.onclick = () => {
+      window.location.reload();
+    };
+    section.appendChild(refreshBtn);
+    return section;
+  }
+
+  if (planningData.transactions.length < 3) {
     const placeholder = createPlaceholder(
       'Insufficient Data for Forecasting',
       'Add at least 3 months of transaction history to generate accurate financial forecasts.',
@@ -273,7 +293,67 @@ export const ForecastsSection = (
   }
 
   try {
+    // Clear forecast cache to ensure updated filtering is applied
+    if (forecastEngine && typeof forecastEngine.clearCache === 'function') {
+      forecastEngine.clearCache();
+      console.log('[Forecasts] Cache cleared for updated filtering');
+    }
+
+    // Debug: Log transaction data
+    const nonGhostTransactions = planningData.transactions.filter(t => !t.isGhost);
+    console.log('[Forecasts] Total transactions (non-ghost):', nonGhostTransactions.length);
+    console.log('[Forecasts] Total transactions (including ghost):', planningData.transactions.length);
+    
+    const incomeTransactions = nonGhostTransactions.filter(t => t.type === 'income');
+    const expenseTransactions = nonGhostTransactions.filter(t => t.type === 'expense');
+    console.log('[Forecasts] Income transactions:', incomeTransactions.length);
+    console.log('[Forecasts] Expense transactions:', expenseTransactions.length);
+    
+    if (incomeTransactions.length > 0) {
+      const totalIncome = incomeTransactions.reduce((sum, t) => sum + t.amount, 0);
+      console.log(`[Forecasts] Total income amount: €${totalIncome.toFixed(2)}`);
+      
+      // List all income transactions with details
+      console.log('\n=== ALL INCOME TRANSACTIONS USED IN FORECAST ===');
+      const sortedIncome = [...incomeTransactions].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      sortedIncome.forEach((t, index) => {
+        const date = new Date(t.timestamp).toLocaleDateString();
+        const description = t.description || t.category || 'No description';
+        const category = t.category || 'None';
+        console.log(`${index + 1}. ${description}`);
+        console.log(`   Date: ${date}`);
+        console.log(`   Amount: €${t.amount.toFixed(2)}`);
+        console.log(`   Category: ${category}`);
+        console.log(`   ID: ${t.id}`);
+        console.log('');
+      });
+      
+      // Show monthly breakdown
+      const monthlyBreakdown = {};
+      incomeTransactions.forEach(t => {
+        const date = new Date(t.timestamp);
+        const monthKey = `${date.getFullYear()}-${date.getMonth() + 1}`;
+        if (!monthlyBreakdown[monthKey]) {
+          monthlyBreakdown[monthKey] = { count: 0, total: 0, transactions: [] };
+        }
+        monthlyBreakdown[monthKey].count++;
+        monthlyBreakdown[monthKey].total += t.amount;
+        monthlyBreakdown[monthKey].transactions.push(t);
+      });
+      
+      console.log('=== MONTHLY INCOME BREAKDOWN ===');
+      Object.entries(monthlyBreakdown)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .forEach(([month, data]) => {
+          console.log(`${month}: €${data.total.toFixed(2)} (${data.count} transactions)`);
+          data.transactions.forEach(t => {
+            console.log(`  - ${(t.description || 'No description').substring(0, 30)}...: €${t.amount.toFixed(2)}`);
+          });
+        });
+    }
+
     // Generate forecasts
+    console.log('\n=== GENERATING FORECASTS WITH UPDATED FILTERING ===');
     const incomeForecasts = forecastEngine.generateIncomeForecasts(
       planningData.transactions,
       6
@@ -282,6 +362,23 @@ export const ForecastsSection = (
       planningData.transactions,
       6
     );
+
+    // Debug: Log forecast results
+    console.log('[Forecasts] Generated income forecasts:', incomeForecasts.length);
+    console.log('[Forecasts] First income forecast:', incomeForecasts[0]);
+    console.log('[Forecasts] Generated expense forecasts:', expenseForecasts.length);
+    
+    // Show the difference between raw and filtered data
+    const rawIncomeTransactions = planningData.transactions.filter(t => 
+      t && t.type === 'income' && typeof t.amount === 'number' && t.timestamp && !t.isGhost
+    );
+    const rawTotalIncome = rawIncomeTransactions.reduce((sum, t) => sum + t.amount, 0);
+    const filteredTotalIncome = incomeTransactions.reduce((sum, t) => sum + t.amount, 0);
+    console.log(`\n=== COMPARISON ===`);
+    console.log(`Raw income transactions: ${rawIncomeTransactions.length}`);
+    console.log(`Raw total income: $${rawTotalIncome.toFixed(2)}`);
+    console.log(`Filtered total income: $${filteredTotalIncome.toFixed(2)}`);
+    console.log(`Difference: $${(rawTotalIncome - filteredTotalIncome).toFixed(2)} (${((rawTotalIncome - filteredTotalIncome) / rawTotalIncome * 100).toFixed(1)}% filtered out)`);
 
     // Create forecast summary cards
     const summaryGrid = document.createElement('div');

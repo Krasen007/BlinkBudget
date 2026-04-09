@@ -27,7 +27,7 @@ export class ForecastEngine {
         return this._generateBasicForecast('income', 0, months);
       }
 
-      const incomeTransactions = transactions.filter(
+      const allIncomeTransactions = transactions.filter(
         t =>
           t &&
           t.type === 'income' &&
@@ -36,11 +36,33 @@ export class ForecastEngine {
           !t.isGhost
       );
 
+      const incomeTransactions = allIncomeTransactions.filter(
+        t =>
+          !this._isRefundOrCredit(t) &&
+          !this._isProblematicTransaction(t)
+      );
+
+      // Debug logging
+      if (allIncomeTransactions.length !== incomeTransactions.length) {
+        const filteredOut = allIncomeTransactions.length - incomeTransactions.length;
+        console.log(`[ForecastEngine] Filtered out ${filteredOut} problematic income transactions`);
+        
+        allIncomeTransactions.forEach(t => {
+          if (this._isRefundOrCredit(t)) {
+            console.log(`[ForecastEngine] Excluded refund/credit: ${t.description} - $${t.amount}`);
+          } else if (this._isProblematicTransaction(t)) {
+            console.log(`[ForecastEngine] Excluded problematic: ${t.description} - $${t.amount}`);
+          }
+        });
+      }
+
       if (incomeTransactions.length < this.minDataPoints) {
         return this._generateBasicForecast('income', 0, months);
       }
 
       const monthlyData = this._aggregateByMonth(incomeTransactions);
+      console.log('[ForecastEngine] Monthly data values:', monthlyData.values.map(v => v.toFixed(2)));
+      
       const seasonalPatterns = this.detectSeasonalPatterns(incomeTransactions);
       const recurringTransactions =
         this.identifyRecurringTransactions(incomeTransactions);
@@ -50,9 +72,15 @@ export class ForecastEngine {
         monthlyData.values,
         this.defaultAlpha
       );
+      
+      console.log('[ForecastEngine] Exponential smoothing results:');
+      baseForecasts.forEach((value, index) => {
+        console.log(`  Month ${index + 1}: ${value.toFixed(2)}`);
+      });
 
       // Continue exponential smoothing trend into the future
       const lastSmoothedValue = baseForecasts[baseForecasts.length - 1] || 0;
+      console.log(`[ForecastEngine] Last smoothed value: ${lastSmoothedValue.toFixed(2)}`);
 
       for (let i = 0; i < months; i++) {
         const futureDate = new Date();
@@ -72,6 +100,15 @@ export class ForecastEngine {
 
         const baseAmount = projectedBase * seasonalMultiplier;
         const predictedAmount = Math.max(0, baseAmount + recurringAmount);
+        
+        if (i === 0) { // Log first month details
+          console.log(`[ForecastEngine] First forecast calculation:`);
+          console.log(`  Trend: ${trend.toFixed(2)}`);
+          console.log(`  Seasonal multiplier: ${seasonalMultiplier.toFixed(2)}`);
+          console.log(`  Recurring amount: ${recurringAmount.toFixed(2)}`);
+          console.log(`  Projected base: ${projectedBase.toFixed(2)}`);
+          console.log(`  Final predicted amount: ${predictedAmount.toFixed(2)}`);
+        }
 
         const confidence = this._calculateConfidence(monthlyData.values, i);
         const confidenceInterval = this._calculateConfidenceInterval(
@@ -117,7 +154,8 @@ export class ForecastEngine {
           t.type === 'expense' &&
           typeof t.amount === 'number' &&
           t.timestamp &&
-          !t.isGhost
+          !t.isGhost &&
+          !this._isProblematicTransaction(t)
       );
 
       if (expenseTransactions.length < this.minDataPoints) {
@@ -259,10 +297,10 @@ export class ForecastEngine {
           for (let month = 0; month < 12; month++) {
             patterns[type][month] =
               monthlyAverages[type][month] / yearlyAverage;
-            // Cap extreme values
+            // Cap extreme values to be more conservative
             patterns[type][month] = Math.max(
-              0.5,
-              Math.min(2.0, patterns[type][month])
+              0.8, // Increased from 0.5 to avoid extreme cuts
+              Math.min(1.2, patterns[type][month]) // Decreased from 2.0
             );
           }
         }
@@ -595,6 +633,74 @@ export class ForecastEngine {
     });
 
     return totalRecurring;
+  }
+
+  /**
+   * Check if transaction is a refund or credit that should be excluded from income forecasts
+   * @param {Object} transaction - Transaction object
+   * @returns {boolean} True if this is a refund/credit
+   */
+  _isRefundOrCredit(transaction) {
+    if (!transaction) return false;
+    
+    const description = (transaction.description || '').toLowerCase();
+    const category = (transaction.category || '').toLowerCase();
+    const note = (transaction.note || '').toLowerCase();
+    
+    // Common refund/credit keywords
+    const refundKeywords = [
+      'refund', 'return', 'credit', 'reversal', 'chargeback', 
+      'reimbursement', 'payment received', 'money back', 'cashback',
+      'refund from', 'return of', 'credit from', 'adjustment'
+    ];
+    
+    // Check if any refund keywords are present
+    const hasRefundKeyword = refundKeywords.some(keyword => 
+      description.includes(keyword) || 
+      category.includes(keyword) || 
+      note.includes(keyword)
+    );
+    
+    // Check for categories that typically indicate refunds
+    const refundCategories = [
+      'refunds', 'returns', 'credits', 'adjustments', 'reimbursements'
+    ];
+    
+    const isRefundCategory = refundCategories.some(cat => 
+      category.includes(cat)
+    );
+    
+    // Check for unusually large amounts that might be refunds (higher threshold for legitimate income)
+    const isUnusuallyLarge = transaction.amount > 10000; // Very high threshold to catch actual errors
+    
+    return hasRefundKeyword || isRefundCategory || isUnusuallyLarge;
+  }
+
+  /**
+   * Check if transaction is problematic and should be excluded from forecasts
+   * @param {Object} transaction - Transaction object
+   * @returns {boolean} True if transaction is problematic
+   */
+  _isProblematicTransaction(transaction) {
+    if (!transaction) return false;
+    
+    // Check for zero or negative amounts in income
+    if (transaction.amount <= 0) return true;
+    
+    // Check for future dates
+    const transactionDate = new Date(transaction.timestamp);
+    const now = new Date();
+    if (transactionDate > now) return true;
+    
+    // Check for very old transactions (over 2 years)
+    const twoYearsAgo = new Date();
+    twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+    if (transactionDate < twoYearsAgo) return true;
+    
+    // Check for missing essential fields
+    if (!transaction.description && !transaction.category) return true;
+    
+    return false;
   }
 
   /**

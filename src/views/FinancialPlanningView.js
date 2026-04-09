@@ -302,6 +302,50 @@ export const FinancialPlanningView = () => {
   // createPlaceholder is now imported from financial-planning-helpers.js
 
   /**
+   * Ensure data is synced from cloud before generating forecasts
+   */
+  async function ensureDataSynced() {
+    try {
+      const { AuthService } = await import('../core/auth-service.js');
+      const { SyncService } = await import('../core/sync-service.js');
+      
+      if (AuthService.getUserId()) {
+        // Trigger a pull from cloud to ensure we have the latest data
+        await SyncService.pullFromCloud(AuthService.getUserId());
+      }
+    } catch (error) {
+      console.warn('[Planning] Could not ensure data sync:', error);
+    }
+  }
+
+  /**
+   * Force sync from cloud when no local data is found
+   */
+  async function forceSyncFromCloud() {
+    try {
+      const { AuthService } = await import('../core/auth-service.js');
+      const { SyncService } = await import('../core/sync-service.js');
+      
+      const userId = AuthService.getUserId();
+      if (!userId) {
+        console.warn('[Planning] User not authenticated, cannot sync from cloud');
+        return;
+      }
+
+      console.log('[Planning] Forcing sync from Firebase...');
+      await SyncService.pullFromCloud(userId);
+      
+      // Trigger a storage update event to refresh UI
+      window.dispatchEvent(new CustomEvent('storage-updated', {
+        detail: { key: STORAGE_KEYS.TRANSACTIONS }
+      }));
+      
+    } catch (error) {
+      console.error('[Planning] Force sync failed:', error);
+    }
+  }
+
+  /**
    * Load planning data from various services
    */
   async function loadPlanningData() {
@@ -310,9 +354,23 @@ export const FinancialPlanningView = () => {
     try {
       isLoading = true;
 
+      // Ensure data is synced before loading
+      await ensureDataSynced();
+
       // Get transaction and account data
       const transactions = TransactionService.getAll();
       const accounts = AccountService.getAccounts();
+
+      // Validate we have actual transaction data
+      if (transactions.length === 0) {
+        console.warn('[Planning] No transactions found, attempting to force sync from cloud');
+        await forceSyncFromCloud();
+        // Try again after sync
+        const syncedTransactions = TransactionService.getAll();
+        if (syncedTransactions.length > 0) {
+          console.log(`[Planning] Successfully synced ${syncedTransactions.length} transactions`);
+        }
+      }
 
       // Load investment data, goals, and budgets (prefer local cache first)
       const investmentsKey = STORAGE_KEYS.INVESTMENTS;
