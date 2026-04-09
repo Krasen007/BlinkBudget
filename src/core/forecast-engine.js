@@ -42,27 +42,12 @@ export class ForecastEngine {
           !this._isProblematicTransaction(t)
       );
 
-      // Debug logging
-      if (allIncomeTransactions.length !== incomeTransactions.length) {
-        const filteredOut = allIncomeTransactions.length - incomeTransactions.length;
-        console.log(`[ForecastEngine] Filtered out ${filteredOut} problematic income transactions`);
-        
-        allIncomeTransactions.forEach(t => {
-          if (this._isRefundOrCredit(t)) {
-            console.log(`[ForecastEngine] Excluded refund/credit: ${t.description} - $${t.amount}`);
-          } else if (this._isProblematicTransaction(t)) {
-            console.log(`[ForecastEngine] Excluded problematic: ${t.description} - $${t.amount}`);
-          }
-        });
-      }
 
       if (incomeTransactions.length < this.minDataPoints) {
         return this._generateBasicForecast('income', 0, months);
       }
 
       const monthlyData = this._aggregateByMonth(incomeTransactions);
-      console.log('[ForecastEngine] Monthly data values:', monthlyData.values.map(v => v.toFixed(2)));
-      
       const seasonalPatterns = this.detectSeasonalPatterns(incomeTransactions);
       const recurringTransactions =
         this.identifyRecurringTransactions(incomeTransactions);
@@ -73,14 +58,8 @@ export class ForecastEngine {
         this.defaultAlpha
       );
       
-      console.log('[ForecastEngine] Exponential smoothing results:');
-      baseForecasts.forEach((value, index) => {
-        console.log(`  Month ${index + 1}: ${value.toFixed(2)}`);
-      });
-
       // Continue exponential smoothing trend into the future
       const lastSmoothedValue = baseForecasts[baseForecasts.length - 1] || 0;
-      console.log(`[ForecastEngine] Last smoothed value: ${lastSmoothedValue.toFixed(2)}`);
 
       for (let i = 0; i < months; i++) {
         const futureDate = new Date();
@@ -100,15 +79,6 @@ export class ForecastEngine {
 
         const baseAmount = projectedBase * seasonalMultiplier;
         const predictedAmount = Math.max(0, baseAmount + recurringAmount);
-        
-        if (i === 0) { // Log first month details
-          console.log(`[ForecastEngine] First forecast calculation:`);
-          console.log(`  Trend: ${trend.toFixed(2)}`);
-          console.log(`  Seasonal multiplier: ${seasonalMultiplier.toFixed(2)}`);
-          console.log(`  Recurring amount: ${recurringAmount.toFixed(2)}`);
-          console.log(`  Projected base: ${projectedBase.toFixed(2)}`);
-          console.log(`  Final predicted amount: ${predictedAmount.toFixed(2)}`);
-        }
 
         const confidence = this._calculateConfidence(monthlyData.values, i);
         const confidenceInterval = this._calculateConfidenceInterval(

@@ -332,7 +332,6 @@ export const FinancialPlanningView = () => {
         return;
       }
 
-      console.log('[Planning] Forcing sync from Firebase...');
       await SyncService.pullFromCloud(userId);
       
       // Trigger a storage update event to refresh UI
@@ -363,41 +362,14 @@ export const FinancialPlanningView = () => {
 
       // Validate we have actual transaction data
       if (transactions.length === 0) {
-        console.warn('[Planning] No transactions found, attempting to force sync from cloud');
         await forceSyncFromCloud();
-        // Try again after sync
-        const syncedTransactions = TransactionService.getAll();
-        if (syncedTransactions.length > 0) {
-          console.log(`[Planning] Successfully synced ${syncedTransactions.length} transactions`);
-        }
-      }
-
-      // Load investment data, goals, and budgets (prefer local cache first)
-      const investmentsKey = STORAGE_KEYS.INVESTMENTS;
-      const goalsKey = STORAGE_KEYS.GOALS;
-      const budgetsKey = STORAGE_KEYS.BUDGETS;
-
-      const investmentsCacheRaw = localStorage.getItem(investmentsKey);
-      const goalsCacheRaw = localStorage.getItem(goalsKey);
-      const budgetsCacheRaw = localStorage.getItem(budgetsKey);
-
-      if (investmentsCacheRaw || goalsCacheRaw || budgetsCacheRaw) {
-        console.log(`[Sync] Planning data loaded from cache:`, {
-          investments: !!investmentsCacheRaw,
-          goals: !!goalsCacheRaw,
-          budgets: !!budgetsCacheRaw,
-        });
       }
 
       // Import StorageService dynamically
       const { StorageService } = await import('../core/storage.js');
-      const investments = StorageService.getInvestments
-        ? StorageService.getInvestments()
-        : [];
+      const investments = StorageService.getInvestments ? StorageService.getInvestments() : [];
       const goals = StorageService.getGoals ? StorageService.getGoals() : [];
-      const budgets = StorageService.getBudgets
-        ? StorageService.getBudgets()
-        : [];
+      const budgets = StorageService.getBudgets ? StorageService.getBudgets() : [];
 
       planningData = {
         transactions,
