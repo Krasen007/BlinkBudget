@@ -294,6 +294,12 @@ export const NavigationState = {
         return;
       }
 
+      // Validate that required category field exists and is valid
+      if (!filterData.category || typeof filterData.category !== 'string' || filterData.category.trim() === '') {
+        console.warn('[NavigationState] Invalid or missing category field in filterData');
+        return;
+      }
+
       const filterState = {
         ...filterData,
         savedAt: new Date().toISOString(),

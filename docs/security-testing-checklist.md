@@ -311,7 +311,11 @@ npm install -g audit-ci
 - **Daily**: Automated dependency scanning
 - **Weekly**: Automated security test suite
 - **Monthly**: Manual penetration testing
+- **Daily**: Automated dependency scanning
+- **Weekly**: Automated security test suite
+- **Monthly**: Manual penetration testing
 - **Quarterly**: Full security audit / penetration test
+- **Pre-release**: Comprehensive security validation before each release
 
 ## Current Testing Tools
 

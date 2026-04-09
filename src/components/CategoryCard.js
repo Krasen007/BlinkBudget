@@ -163,7 +163,7 @@ export const CategoryCard = (
       insightEl.style.marginTop = SPACING.XS;
       insightEl.style.fontStyle = 'italic';
       insightEl.style.textAlign = 'center';
-      insightEl.textContent = `?? ${relevantInsight.message.split('.')[0]}`;
+      insightEl.textContent = `💡 ${relevantInsight.message.split('.')[0]}`;
       card.appendChild(insightEl);
     }
   }

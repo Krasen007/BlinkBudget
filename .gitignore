@@ -132,5 +132,5 @@ javabuild/
 android.keystore
 app-release*
 androidTWA/
-mempalace.yaml
-entities.json
+/mempalace.yaml
+/entities.json

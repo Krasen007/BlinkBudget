@@ -87,9 +87,15 @@ export const DashboardView = () => {
     sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER) || null;
   let advancedFilters = null;
 
+  // Track current filter state for display purposes
+  let currentDashboardFilter = null;
+
   // Check for dashboard filter state from Reports view
   const dashboardFilter = NavigationState.restoreDashboardFilter();
   if (dashboardFilter && dashboardFilter.source === 'reports') {
+    // Update current filter state for display
+    currentDashboardFilter = dashboardFilter;
+    
     // Apply category filter from Reports
     currentCategoryFilter = dashboardFilter.category;
     sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER, dashboardFilter.category);
@@ -101,8 +107,8 @@ export const DashboardView = () => {
         ? dashboardFilter.timePeriod.startDate
         : new Date(dashboardFilter.timePeriod.startDate);
       
-      // Format as YYYY-MM-01 for proper month filtering
-      const monthFilter = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-01`;
+      // Format as YYYY-MM-01 for proper month filtering using UTC to prevent timezone shifts
+      const monthFilter = `${startDate.getUTCFullYear()}-${String(startDate.getUTCMonth() + 1).padStart(2, '0')}-01`;
       currentMonthFilter = monthFilter;
       sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER, monthFilter);
     }
@@ -501,6 +507,7 @@ export const DashboardView = () => {
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER);
           currentMonthFilter = null;
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
+          currentDashboardFilter = null;
           advancedFilters = null;
           
           // Update AdvancedFilterPanel if it exists
@@ -532,7 +539,7 @@ export const DashboardView = () => {
         border: 1px solid var(--color-border);
       `;
       filterStatus.textContent = currentCategoryFilter && currentCategoryFilter !== 'all'
-        ? `Currently filtered by: ${currentCategoryFilter}${dashboardFilter && dashboardFilter.timePeriod ? ` (${dashboardFilter.timePeriod.label || 'selected period'})` : ''}`
+        ? `Currently filtered by: ${currentCategoryFilter}${currentDashboardFilter && currentDashboardFilter.timePeriod ? ` (${currentDashboardFilter.timePeriod.label || 'selected period'})` : ''}`
         : 'No active filters';
       content.appendChild(filterStatus);
     }
