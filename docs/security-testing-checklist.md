@@ -331,18 +331,21 @@ npm install -g audit-ci
 Each security task has assigned ownership:
 
 #### QA Engineer
+
 - **Monthly Manual Reviews**: Conduct monthly manual penetration testing
 - **Pre-release Validation**: Comprehensive security validation before releases
 - **Test Case Maintenance**: Maintain and update security test cases
 - **Vulnerability Tracking**: Monitor and track security findings
 
 #### Developer
+
 - **Code Security**: Implement secure coding practices and fix vulnerabilities
 - **Dependency Management**: Keep dependencies updated and apply patches
 - **Security Feature Implementation**: Implement authentication, encryption, and access controls
 - **Code Review**: Participate in security-focused code reviews
 
 #### DevOps
+
 - **Environment Security**: Secure CI/CD pipelines and manage secrets
 - **Infrastructure Protection**: Configure firewalls, rate limiting, and monitoring
 - **Security Headers**: Implement and maintain security headers in deployment

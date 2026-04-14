@@ -295,8 +295,14 @@ export const NavigationState = {
       }
 
       // Validate that required category field exists and is valid
-      if (!filterData.category || typeof filterData.category !== 'string' || filterData.category.trim() === '') {
-        console.warn('[NavigationState] Invalid or missing category field in filterData');
+      if (
+        !filterData.category ||
+        typeof filterData.category !== 'string' ||
+        filterData.category.trim() === ''
+      ) {
+        console.warn(
+          '[NavigationState] Invalid or missing category field in filterData'
+        );
         return;
       }
 
@@ -315,7 +321,10 @@ export const NavigationState = {
         this.saveDashboardTimePeriod(filterData.timePeriod);
       }
     } catch (error) {
-      console.error('[NavigationState] Failed to save dashboard filter:', error);
+      console.error(
+        '[NavigationState] Failed to save dashboard filter:',
+        error
+      );
     }
   },
 
@@ -340,7 +349,10 @@ export const NavigationState = {
 
       return filterData;
     } catch (error) {
-      console.error('[NavigationState] Failed to restore dashboard filter:', error);
+      console.error(
+        '[NavigationState] Failed to restore dashboard filter:',
+        error
+      );
       return null;
     }
   },
@@ -352,18 +364,22 @@ export const NavigationState = {
   saveDashboardTimePeriod(timePeriod) {
     try {
       if (!timePeriod || !timePeriod.startDate || !timePeriod.endDate) {
-        console.warn('[NavigationState] Invalid timePeriod parameter for dashboard');
+        console.warn(
+          '[NavigationState] Invalid timePeriod parameter for dashboard'
+        );
         return;
       }
 
       const timePeriodData = {
         type: timePeriod.type,
-        startDate: timePeriod.startDate instanceof Date 
-          ? timePeriod.startDate.toISOString() 
-          : timePeriod.startDate,
-        endDate: timePeriod.endDate instanceof Date 
-          ? timePeriod.endDate.toISOString() 
-          : timePeriod.endDate,
+        startDate:
+          timePeriod.startDate instanceof Date
+            ? timePeriod.startDate.toISOString()
+            : timePeriod.startDate,
+        endDate:
+          timePeriod.endDate instanceof Date
+            ? timePeriod.endDate.toISOString()
+            : timePeriod.endDate,
         label: timePeriod.label,
         savedAt: new Date().toISOString(),
       };
@@ -373,7 +389,10 @@ export const NavigationState = {
         JSON.stringify(timePeriodData)
       );
     } catch (error) {
-      console.error('[NavigationState] Failed to save dashboard time period:', error);
+      console.error(
+        '[NavigationState] Failed to save dashboard time period:',
+        error
+      );
     }
   },
 
@@ -392,19 +411,23 @@ export const NavigationState = {
 
       // Validate saved data
       if (!timePeriodData.startDate || !timePeriodData.endDate) {
-        console.warn('[NavigationState] Invalid saved dashboard time period data');
+        console.warn(
+          '[NavigationState] Invalid saved dashboard time period data'
+        );
         return null;
       }
 
       // Reconstruct time period object
       const timePeriod = {
         type: timePeriodData.type,
-        startDate: timePeriodData.startDate instanceof Date 
-          ? timePeriodData.startDate 
-          : new Date(timePeriodData.startDate),
-        endDate: timePeriodData.endDate instanceof Date 
-          ? timePeriodData.endDate 
-          : new Date(timePeriodData.endDate),
+        startDate:
+          timePeriodData.startDate instanceof Date
+            ? timePeriodData.startDate
+            : new Date(timePeriodData.startDate),
+        endDate:
+          timePeriodData.endDate instanceof Date
+            ? timePeriodData.endDate
+            : new Date(timePeriodData.endDate),
         label: timePeriodData.label,
       };
 
@@ -413,13 +436,18 @@ export const NavigationState = {
         isNaN(timePeriod.startDate.getTime()) ||
         isNaN(timePeriod.endDate.getTime())
       ) {
-        console.warn('[NavigationState] Invalid saved dashboard time period dates');
+        console.warn(
+          '[NavigationState] Invalid saved dashboard time period dates'
+        );
         return null;
       }
 
       return timePeriod;
     } catch (error) {
-      console.error('[NavigationState] Failed to restore dashboard time period:', error);
+      console.error(
+        '[NavigationState] Failed to restore dashboard time period:',
+        error
+      );
       return null;
     }
   },
@@ -432,7 +460,10 @@ export const NavigationState = {
       sessionStorage.removeItem(this.STATE_KEYS.DASHBOARD_CATEGORY_FILTER);
       sessionStorage.removeItem(this.STATE_KEYS.DASHBOARD_TIME_PERIOD);
     } catch (error) {
-      console.error('[NavigationState] Failed to clear dashboard filter:', error);
+      console.error(
+        '[NavigationState] Failed to clear dashboard filter:',
+        error
+      );
     }
   },
 

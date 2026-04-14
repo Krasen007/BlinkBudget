@@ -47,6 +47,7 @@ The primary security consideration stems from the client-side nature of the appl
 ### Input Sanitization
 
 Implement input sanitization for user-provided data:
+
 - Transaction notes and descriptions
 - Account names and categories
 - Budget names and descriptions
@@ -54,6 +55,7 @@ Implement input sanitization for user-provided data:
 ### Firebase Security Rules
 
 Ensure proper Firestore security rules:
+
 ```javascript
 rules_version = '2';
 service cloud.firestore {

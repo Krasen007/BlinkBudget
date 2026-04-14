@@ -268,11 +268,11 @@ export const ReportsView = () => {
     const filterData = {
       category: category.name,
       timePeriod: currentTimePeriod,
-      source: 'reports'
+      source: 'reports',
     };
-    
+
     NavigationState.saveDashboardFilter(filterData);
-    
+
     // Navigate to dashboard
     Router.navigate('dashboard');
   }

@@ -238,7 +238,9 @@ export class LazyLoader {
 
     // Security: explicitly reject SVG data URIs as they can contain executable content
     if (src.startsWith('data:image/svg')) {
-      throw new Error('SVG data URIs are not allowed for security reasons (XSS prevention)');
+      throw new Error(
+        'SVG data URIs are not allowed for security reasons (XSS prevention)'
+      );
     }
 
     // Allow other data: URLs for images but validate external URLs

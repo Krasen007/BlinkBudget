@@ -172,6 +172,7 @@ We may update this Privacy Policy from time to time. We will notify users of sig
 ### Material Changes
 
 A change is considered "material" if it affects:
+
 - How we collect or use personal data
 - The purposes for which we use personal data
 - Your rights regarding personal data

@@ -37,11 +37,8 @@ export class ForecastEngine {
       );
 
       const incomeTransactions = allIncomeTransactions.filter(
-        t =>
-          !this._isRefundOrCredit(t) &&
-          !this._isProblematicTransaction(t)
+        t => !this._isRefundOrCredit(t) && !this._isProblematicTransaction(t)
       );
-
 
       if (incomeTransactions.length < this.minDataPoints) {
         return this._generateBasicForecast('income', 0, months);
@@ -57,7 +54,7 @@ export class ForecastEngine {
         monthlyData.values,
         this.defaultAlpha
       );
-      
+
       // Continue exponential smoothing trend into the future
       const lastSmoothedValue = baseForecasts[baseForecasts.length - 1] || 0;
 
@@ -612,37 +609,52 @@ export class ForecastEngine {
    */
   _isRefundOrCredit(transaction) {
     if (!transaction) return false;
-    
+
     const description = (transaction.description || '').toLowerCase();
     const category = (transaction.category || '').toLowerCase();
     const note = (transaction.note || '').toLowerCase();
-    
+
     // Common refund/credit keywords
     const refundKeywords = [
-      'refund', 'return', 'credit', 'reversal', 'chargeback', 
-      'reimbursement', 'payment received', 'money back', 'cashback',
-      'refund from', 'return of', 'credit from', 'adjustment'
+      'refund',
+      'return',
+      'credit',
+      'reversal',
+      'chargeback',
+      'reimbursement',
+      'payment received',
+      'money back',
+      'cashback',
+      'refund from',
+      'return of',
+      'credit from',
+      'adjustment',
     ];
-    
+
     // Check if any refund keywords are present
-    const hasRefundKeyword = refundKeywords.some(keyword => 
-      description.includes(keyword) || 
-      category.includes(keyword) || 
-      note.includes(keyword)
+    const hasRefundKeyword = refundKeywords.some(
+      keyword =>
+        description.includes(keyword) ||
+        category.includes(keyword) ||
+        note.includes(keyword)
     );
-    
+
     // Check for categories that typically indicate refunds
     const refundCategories = [
-      'refunds', 'returns', 'credits', 'adjustments', 'reimbursements'
+      'refunds',
+      'returns',
+      'credits',
+      'adjustments',
+      'reimbursements',
     ];
-    
-    const isRefundCategory = refundCategories.some(cat => 
+
+    const isRefundCategory = refundCategories.some(cat =>
       category.includes(cat)
     );
-    
+
     // Check for unusually large amounts that might be refunds (higher threshold for legitimate income)
     const isUnusuallyLarge = transaction.amount > 10000; // Very high threshold to catch actual errors
-    
+
     return hasRefundKeyword || isRefundCategory || isUnusuallyLarge;
   }
 
@@ -653,23 +665,23 @@ export class ForecastEngine {
    */
   _isProblematicTransaction(transaction) {
     if (!transaction) return false;
-    
+
     // Check for zero or negative amounts in income
     if (transaction.amount <= 0) return true;
-    
+
     // Check for future dates
     const transactionDate = new Date(transaction.timestamp);
     const now = new Date();
     if (transactionDate > now) return true;
-    
+
     // Check for very old transactions (over 2 years)
     const twoYearsAgo = new Date();
     twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
     if (transactionDate < twoYearsAgo) return true;
-    
+
     // Check for missing essential fields
     if (!transaction.description && !transaction.category) return true;
-    
+
     return false;
   }
 

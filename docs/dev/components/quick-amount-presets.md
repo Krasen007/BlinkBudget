@@ -42,7 +42,7 @@ const presets = AmountPresetService.getPresets();
 ### Recording Usage
 
 ```javascript
-AmountPresetService.recordAmount(25.50);
+AmountPresetService.recordAmount(25.5);
 ```
 
 ### Getting Frequency Data
@@ -55,7 +55,7 @@ const frequencyData = AmountPresetService.getFrequencyData();
 ### Subscribing to Changes
 
 ```javascript
-const unsubscribe = AmountPresetService.onPresetsChange((newPresets) => {
+const unsubscribe = AmountPresetService.onPresetsChange(newPresets => {
   console.log('Presets updated:', newPresets);
 });
 
@@ -70,13 +70,13 @@ unsubscribe();
 ```javascript
 // Stored with key 'amount_presets'
 {
-  amounts: { 
+  amounts: {
     10: 25,    // Amount 10.00 used 25 times
     5: 20,     // Amount 5.00 used 20 times
     20: 15,    // Amount 20.00 used 15 times
     25.50: 8,   // Amount 25.50 used 8 times
     50: 10     // Amount 50.00 used 10 times
-  }, 
+  },
   presets: [10, 5, 20, 25.50, 50]  // Top 4 amounts sorted by frequency (decimal format)
 }
 ```
@@ -85,14 +85,14 @@ unsubscribe();
 
 ### AmountPresetService Methods
 
-| Method | Description | Parameters | Returns |
-|--------|-------------|------------|---------|
-| `getPresets()` | Get current top 4 presets | none | `Array<number>` |
-| `recordAmount(amount)` | Record usage of an amount | `number` amount | `void` |
-| `getFrequencyData()` | Get all frequency data | none | `Object` |
-| `getAmountCount(amount)` | Get count for specific amount | `number` amount | `number` |
-| `resetPresets()` | Clear all preset data | none | `void` |
-| `onPresetsChange(callback)` | Subscribe to preset changes | `Function` callback | `Function` unsubscribe |
+| Method                      | Description                   | Parameters          | Returns                |
+| --------------------------- | ----------------------------- | ------------------- | ---------------------- |
+| `getPresets()`              | Get current top 4 presets     | none                | `Array<number>`        |
+| `recordAmount(amount)`      | Record usage of an amount     | `number` amount     | `void`                 |
+| `getFrequencyData()`        | Get all frequency data        | none                | `Object`               |
+| `getAmountCount(amount)`    | Get count for specific amount | `number` amount     | `number`               |
+| `resetPresets()`            | Clear all preset data         | none                | `void`                 |
+| `onPresetsChange(callback)` | Subscribe to preset changes   | `Function` callback | `Function` unsubscribe |
 
 ### Constants
 
@@ -131,14 +131,14 @@ presets.forEach(amount => {
   button.addEventListener('click', () => {
     // Fill amount field
     amountField.value = amount;
-    
+
     // Record usage
     AmountPresetService.recordAmount(amount);
   });
 });
 
 // Listen for preset updates
-const unsubscribe = AmountPresetService.onPresetsChange((newPresets) => {
+const unsubscribe = AmountPresetService.onPresetsChange(newPresets => {
   updatePresetButtons(newPresets);
 });
 ```

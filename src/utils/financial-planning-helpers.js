@@ -173,7 +173,7 @@ export function calculateSavingsRate(totalIncome, totalExpenses) {
  * @returns {string} The formatted currency string
  */
 export function formatCurrency(value, currency = 'EUR') {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('en-EU', {
     style: 'currency',
     currency: currency,
   }).format(value);

@@ -41,8 +41,8 @@ The ExpandableSection component creates a collapsible section with a title and e
 import { ExpandableSection } from '../components/ExpandableSection.js';
 
 const section = ExpandableSection({
-  title: "Transaction Details",
-  defaultExpanded: false
+  title: 'Transaction Details',
+  defaultExpanded: false,
 });
 ```
 
@@ -50,10 +50,10 @@ const section = ExpandableSection({
 
 ```javascript
 const section = ExpandableSection({
-  title: "Advanced Options",
-  storageKey: "advanced-options-expanded",
-  icon: "Gear",
-  defaultExpanded: true
+  title: 'Advanced Options',
+  storageKey: 'advanced-options-expanded',
+  icon: 'Gear',
+  defaultExpanded: true,
 });
 ```
 
@@ -61,12 +61,12 @@ const section = ExpandableSection({
 
 ```javascript
 const content = document.createElement('div');
-content.textContent = "This is the expandable content";
+content.textContent = 'This is the expandable content';
 
 const section = ExpandableSection({
-  title: "Settings",
+  title: 'Settings',
   content: content,
-  storageKey: "settings-expanded"
+  storageKey: 'settings-expanded',
 });
 ```
 
@@ -95,11 +95,11 @@ const section = ExpandableSection({
 
 ### Properties
 
-| Property  | Type        | Description                    |
-| --------- | ----------- | ------------------------------ |
-| container | HTMLElement | Main component container      |
-| toggle    | HTMLElement | Toggle button element         |
-| content   | HTMLElement | Content container element     |
+| Property  | Type        | Description               |
+| --------- | ----------- | ------------------------- |
+| container | HTMLElement | Main component container  |
+| toggle    | HTMLElement | Toggle button element     |
+| content   | HTMLElement | Content container element |
 
 ## Implementation Details
 
@@ -158,9 +158,13 @@ toggle.addEventListener('keydown', e => {
 });
 
 // Touch events for mobile feedback
-toggle.addEventListener('touchstart', () => {
-  toggle.style.transform = 'scale(0.98)';
-}, { passive: true });
+toggle.addEventListener(
+  'touchstart',
+  () => {
+    toggle.style.transform = 'scale(0.98)';
+  },
+  { passive: true }
+);
 ```
 
 ## Accessibility Implementation
@@ -169,7 +173,8 @@ toggle.addEventListener('touchstart', () => {
 
 ```javascript
 toggle.setAttribute('aria-expanded', expanded.toString());
-toggle.setAttribute('aria-label', 
+toggle.setAttribute(
+  'aria-label',
   expanded ? `Collapse section: ${title}` : `Expand section: ${title}`
 );
 ```
@@ -222,10 +227,10 @@ expenseContent.innerHTML = `
 `;
 
 const expenseSection = ExpandableSection({
-  title: "Expense Details",
+  title: 'Expense Details',
   content: expenseContent,
-  storageKey: "expense-details-expanded",
-  icon: "Receipt"
+  storageKey: 'expense-details-expanded',
+  icon: 'Receipt',
 });
 ```
 
@@ -233,9 +238,9 @@ const expenseSection = ExpandableSection({
 
 ```javascript
 const settingsSection = ExpandableSection({
-  title: "Application Settings",
+  title: 'Application Settings',
   defaultExpanded: false,
-  storageKey: "app-settings-expanded"
+  storageKey: 'app-settings-expanded',
 });
 
 // Later add content

@@ -132,7 +132,7 @@ export const CategoryCard = (
     budgetEl.style.textAlign = 'center';
     budgetEl.style.padding = '2px 6px';
     budgetEl.style.borderRadius = 'var(--radius-sm)';
-    
+
     if (budget.isExceeded) {
       budgetEl.style.background = 'rgba(239, 68, 68, 0.1)';
       budgetEl.style.color = COLORS.DANGER;
@@ -146,7 +146,7 @@ export const CategoryCard = (
       budgetEl.style.color = COLORS.SUCCESS;
       budgetEl.textContent = `${formatCurrency(budget.remaining)} left`;
     }
-    
+
     card.appendChild(budgetEl);
   }
 

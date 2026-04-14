@@ -135,7 +135,7 @@ This runbook provides procedures for handling disaster recovery scenarios for Bl
 
    ```bash
    # If security breach suspected, rotate secrets immediately
-   
+
    # Firebase API Key Rotation
    # 1. Open Firebase Console: https://console.firebase.google.com/project/PROJECT_ID/settings/serviceaccounts
    # 2. Locate existing web API key in "API Keys" section
@@ -143,17 +143,17 @@ This runbook provides procedures for handling disaster recovery scenarios for Bl
    # 4. Click "Create API Key" to generate new key
    # 5. Update all client applications with new key
    # 6. Update environment variables in CI/CD pipelines
-   
+
    # Netlify Environment Variable Update
    # Option A: Dashboard
    # 1. Visit: https://app.netlify.com/sites/SITE_ID/settings/environment
    # 2. Edit/add variables and save
    # 3. Trigger deploy manually or wait for automatic build
-   
+
    # Option B: CLI
    # 1. Set variable: netlify env:set VAR "value" --site SITE_ID
    # 2. Trigger deploy: netlify deploy --prod or netlify build
-   
+
    # Post-Rotation Verification
    # 1. Verify deployments are using new secrets
    # 2. Update any shared secret stores or vaults
@@ -242,27 +242,27 @@ This runbook provides procedures for handling disaster recovery scenarios for Bl
    (async () => {
      try {
        const { BackupService } = await import('./src/core/backup-service.js');
-       
+
        // Restore specific date range
        const result = await BackupService.restoreBackup({
          startDate: '2026-01-01',
          endDate: '2026-01-31',
-         dataTypes: ['transactions', 'accounts', 'categories']
+         dataTypes: ['transactions', 'accounts', 'categories'],
        });
-       
+
        console.log(`Restored ${result.count} records`);
-       
+
        // Post-restore verification
        // 1. Verify restored data integrity
        // 2. Check for duplicates
        // 3. Run functional tests on restored subset
        // 4. Confirm data matches expected date ranges
-       
      } catch (error) {
        console.error('Backup restoration failed:', error);
      }
    })();
    ```
+
    - Verify integrity
 
 ---
@@ -297,8 +297,11 @@ This runbook provides procedures for handling disaster recovery scenarios for Bl
    - Push the revert: `git push origin main`
    - Netlify will auto-deploy the reverted commit
    - **Warning**: Avoid `git checkout` to prevent detached HEAD state
-   git checkout [PREVIOUS_COMMIT]
-   git push origin main
+     git checkout [PREVIOUS_COMMIT]
+     git push origin main
+
+   ```
+
    ```
 
 3. **Redeploy if Needed**
@@ -586,9 +589,9 @@ GitHub Issues: https://github.com/Krasen007/BlinkBudget/issues
 
 ## Revision History
 
-| Version | Date           | Changes                           | Author      |
-| ------- | -------------- | --------------------------------- | ----------- |
-| 1.0     | April 7, 2026  | Initial disaster recovery runbook | Project Team |
+| Version | Date          | Changes                           | Author       |
+| ------- | ------------- | --------------------------------- | ------------ |
+| 1.0     | April 7, 2026 | Initial disaster recovery runbook | Project Team |
 
 ---
 

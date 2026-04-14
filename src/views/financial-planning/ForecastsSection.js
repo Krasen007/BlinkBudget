@@ -269,7 +269,7 @@ export const ForecastsSection = (
       '🔄'
     );
     section.appendChild(placeholder);
-    
+
     // Add a refresh button
     const refreshBtn = document.createElement('button');
     refreshBtn.textContent = 'Refresh Data';

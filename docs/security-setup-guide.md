@@ -29,6 +29,7 @@ The project includes a validation script at `config/validate-env.cjs` that:
 - Prevents builds with missing or invalid configuration
 
 Run validation:
+
 ```bash
 node config/validate-env.cjs
 ```
@@ -50,6 +51,7 @@ The application implements security headers in `netlify.toml`:
 ### CORS Configuration
 
 CORS headers are configured for API endpoints:
+
 ```toml
 [[headers]]
   for = "/api/*"
@@ -179,6 +181,7 @@ npx snyk test --severity-threshold=high
 ### Common Issues
 
 1. **Build failures due to missing environment variables**:
+
    ```bash
    node config/validate-env.cjs
    ```
@@ -200,6 +203,7 @@ npx snyk test --severity-threshold=high
 Implement rate limiting to protect authentication endpoints:
 
 #### Recommended Thresholds
+
 - **Login Attempts**: 5 attempts per minute per IP
 - **Password Reset**: 3 requests per hour per email
 - **Account Creation**: 2 accounts per hour per IP
@@ -208,12 +212,14 @@ Implement rate limiting to protect authentication endpoints:
 #### Implementation Options
 
 **Firebase Authentication**:
+
 - Use Firebase Security Rules with rate limiting logic
 - Implement Cloud Functions for advanced rate limiting
 - Enable Firebase Authentication rate limiting in console
 - Monitor authentication logs for suspicious patterns
 
 **Netlify Protection**:
+
 - Use Netlify Edge Functions for rate limiting
 - Implement IP-based blocking for repeated failures
 - Configure Netlify Edge Rate Limiting rules
@@ -222,12 +228,14 @@ Implement rate limiting to protect authentication endpoints:
 ### Monitoring and Alerting
 
 #### Metrics to Track
+
 - Rate limit hits and 429 responses
 - Spike in failed authentication attempts
 - IP reputation and geolocation anomalies
 - Unusual user behavior patterns
 
 #### Alert Integration
+
 - Configure alerts for rate limit threshold breaches
 - Integrate with existing Snyk/monitoring stack
 - Set up automated IP blocking for repeated violations

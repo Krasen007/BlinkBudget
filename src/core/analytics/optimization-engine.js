@@ -15,7 +15,7 @@ const MIN_OPTIMIZATION_THRESHOLD = 50;
 const DEFAULT_CATEGORY_REDUCTION_PERCENT = 0.15;
 
 // Strategy presets for known spending patterns.
-// These are hardcoded as predefined heuristics that the engine attempts to map 
+// These are hardcoded as predefined heuristics that the engine attempts to map
 // to account/category names to provide tailored financial advice.
 const SUBSTITUTION_PATTERNS = [
   {

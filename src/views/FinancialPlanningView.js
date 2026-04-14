@@ -308,7 +308,7 @@ export const FinancialPlanningView = () => {
     try {
       const { AuthService } = await import('../core/auth-service.js');
       const { SyncService } = await import('../core/sync-service.js');
-      
+
       if (AuthService.getUserId()) {
         // Trigger a pull from cloud to ensure we have the latest data
         await SyncService.pullFromCloud(AuthService.getUserId());
@@ -325,20 +325,23 @@ export const FinancialPlanningView = () => {
     try {
       const { AuthService } = await import('../core/auth-service.js');
       const { SyncService } = await import('../core/sync-service.js');
-      
+
       const userId = AuthService.getUserId();
       if (!userId) {
-        console.warn('[Planning] User not authenticated, cannot sync from cloud');
+        console.warn(
+          '[Planning] User not authenticated, cannot sync from cloud'
+        );
         return;
       }
 
       await SyncService.pullFromCloud(userId);
-      
+
       // Trigger a storage update event to refresh UI
-      window.dispatchEvent(new CustomEvent('storage-updated', {
-        detail: { key: STORAGE_KEYS.TRANSACTIONS }
-      }));
-      
+      window.dispatchEvent(
+        new CustomEvent('storage-updated', {
+          detail: { key: STORAGE_KEYS.TRANSACTIONS },
+        })
+      );
     } catch (error) {
       console.error('[Planning] Force sync failed:', error);
     }
@@ -367,9 +370,13 @@ export const FinancialPlanningView = () => {
 
       // Import StorageService dynamically
       const { StorageService } = await import('../core/storage.js');
-      const investments = StorageService.getInvestments ? StorageService.getInvestments() : [];
+      const investments = StorageService.getInvestments
+        ? StorageService.getInvestments()
+        : [];
       const goals = StorageService.getGoals ? StorageService.getGoals() : [];
-      const budgets = StorageService.getBudgets ? StorageService.getBudgets() : [];
+      const budgets = StorageService.getBudgets
+        ? StorageService.getBudgets()
+        : [];
 
       planningData = {
         transactions,
