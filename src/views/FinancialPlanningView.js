@@ -336,12 +336,14 @@ export const FinancialPlanningView = () => {
 
       await SyncService.pullFromCloud(userId);
 
-      // Trigger a storage update event to refresh UI
-      window.dispatchEvent(
-        new CustomEvent('storage-updated', {
-          detail: { key: STORAGE_KEYS.TRANSACTIONS },
-        })
-      );
+      // Trigger a storage update event to refresh UI (deferred until after load completes)
+      setTimeout(() => {
+        window.dispatchEvent(
+          new CustomEvent('storage-updated', {
+            detail: { key: STORAGE_KEYS.TRANSACTIONS },
+          })
+        );
+      }, 0);
     } catch (error) {
       console.error('[Planning] Force sync failed:', error);
     }
@@ -360,12 +362,14 @@ export const FinancialPlanningView = () => {
       await ensureDataSynced();
 
       // Get transaction and account data
-      const transactions = TransactionService.getAll();
+      let transactions = TransactionService.getAll();
       const accounts = AccountService.getAccounts();
 
       // Validate we have actual transaction data
       if (transactions.length === 0) {
         await forceSyncFromCloud();
+        // Reload transactions after sync to get updated data
+        transactions = TransactionService.getAll();
       }
 
       // Import StorageService dynamically

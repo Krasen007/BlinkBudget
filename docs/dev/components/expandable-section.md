@@ -17,7 +17,6 @@ The ExpandableSection component creates a collapsible section with a title and e
 - State persistence in localStorage
 - Custom icon support
 - Programmatic expand/collapse
-- Event-driven updates
 
 ### Accessibility
 
@@ -89,9 +88,9 @@ const section = ExpandableSection({
 | expand()            | Expand the section    |
 | collapse()          | Collapse the section  |
 | toggleSection()     | Toggle expanded state |
-| isExpanded()        | Get current state     |
+| isExpanded()        | Returns boolean for quick truthy checks - whether section is currently expanded |
 | setContent(element) | Replace content       |
-| getExpandedState()  | Get current state     |
+| getExpandedState()  | Returns current expanded state as boolean - same as isExpanded() for consistency |
 
 ### Properties
 

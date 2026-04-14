@@ -226,6 +226,7 @@ const CONFIG = {
 | @references | External references                          |
 | @config     | Configuration object                         |
 | @property   | Object property                              |
+| @private    | Marks internal/private members not for public API. Use for methods/properties that should not be accessed externally. Example: `@private` on internal utility functions or helper methods. |
 
 ---
 

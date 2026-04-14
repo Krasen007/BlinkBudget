@@ -85,7 +85,7 @@ BlinkBudget uses a hybrid local-cloud architecture designed for privacy and perf
 - **Firebase (Google):** Used for authentication and optional cloud storage
 - **Netlify:** Used for application hosting
 - These providers have strict data protection agreements and access only to the minimum data necessary
-- GDPR-compliant Data Processing Agreements (DPAs) are in place with both Firebase and Netlify under GDPR Article 28, governing all data processing and limiting access to necessary data only. Users may request a copy of these DPAs by creating a GitHub issue
+- GDPR-compliant Data Processing Agreements (DPAs) are in place with both Firebase and Netlify under GDPR Article 28, governing all data processing and limiting access to necessary data only. Users may request a copy of these DPAs through our private contact channel.
 
 ### 4.3 Legal Requirements
 
@@ -187,10 +187,15 @@ A change is considered "material" if it affects:
 
 ## 11. Contact Information
 
-If you have questions about this Privacy Policy or want to exercise your rights, please contact us:
+### Public Channels (General Inquiries)
+- **GitHub Issues**: [Create an issue in our repository](https://github.com/Krasen007/BlinkBudget/issues) - For bug reports, feature requests, and general questions
+- **Documentation**: Available in app's help section - For usage guides and troubleshooting
 
-- **GitHub Issues**: [Create an issue in our repository](https://github.com/Krasen007/BlinkBudget/issues)
-- **Documentation**: Available in the app's help section
+### Private Channels (Sensitive Data Requests)
+- **Privacy Requests**: For GDPR rights requests, data export, account deletion, or any matters containing sensitive information, please email us privately at `privacy@blinkbudget.netlify.app`
+- **Security Issues**: For security vulnerabilities or account compromise concerns, contact us privately at `security@blinkbudget.netlify.app`
+
+**Important**: Do not submit sensitive personal information through public GitHub issues. Use the private channels above for any request involving your personal data or account security.
 
 ## 12. Data Subject Rights (GDPR)
 
@@ -200,8 +205,8 @@ If you are located in the EU, you have the following rights under GDPR:
 - **Right to Rectification:** Correct inaccurate data (available through individual transaction editing)
 - **Right to Erasure:** Request deletion of your data (available through Settings > Account Deletion)
 - **Right to Portability:** Transfer your data to another service (available through JSON export)
-- **Right to Object:** Object to certain data processing (create a GitHub issue with "Privacy Request - Object" in title)
-- **Right to Restrict:** Limit processing of your data (create a GitHub issue with "Privacy Request - Restrict" in title)
+- **Right to Object:** Object to certain data processing (submit a private request through our privacy channel with "Privacy Request - Object" in subject)
+- **Right to Restrict:** Limit processing of your data (submit a private request through our privacy channel with "Privacy Request - Restrict" in title)
 
 **Technical Implementation:**
 

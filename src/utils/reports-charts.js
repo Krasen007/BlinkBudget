@@ -44,7 +44,7 @@ function createCategoryTooltipConfig(detailsContainer) {
         const percentage =
           total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
 
-        const formattedValue = new Intl.NumberFormat('en-EU', {
+        const formattedValue = new Intl.NumberFormat('de-DE', {
           style: 'currency',
           currency: 'EUR',
         }).format(value);
@@ -69,7 +69,7 @@ function createCategoryTooltipConfig(detailsContainer) {
         const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
         const percentage =
           total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
-        const formattedValue = new Intl.NumberFormat('en-EU', {
+        const formattedValue = new Intl.NumberFormat('de-DE', {
           style: 'currency',
           currency: 'EUR',
         }).format(value);
@@ -135,7 +135,7 @@ export async function createCategoryBreakdownChart(
 
   const totalIncomeValue = document.createElement('span');
   const totalIncome = currentData.incomeVsExpenses?.totalIncome || 0;
-  totalIncomeValue.textContent = new Intl.NumberFormat('en-EU', {
+  totalIncomeValue.textContent = new Intl.NumberFormat('de-DE', {
     style: 'currency',
     currency: 'EUR',
   }).format(totalIncome);
@@ -163,7 +163,7 @@ export async function createCategoryBreakdownChart(
     (sum, cat) => sum + cat.amount,
     0
   );
-  totalSpentValue.textContent = new Intl.NumberFormat('en-EU', {
+  totalSpentValue.textContent = new Intl.NumberFormat('de-DE', {
     style: 'currency',
     currency: 'EUR',
   }).format(totalSpent);
@@ -266,7 +266,7 @@ export async function createCategoryBreakdownChart(
 
   labels.forEach((label, i) => {
     const value = datasets.data[i];
-    const percentage = ((value / total) * 100).toFixed(1);
+    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
 
     const item = document.createElement('div');
     item.className = 'legend-item';
@@ -287,7 +287,7 @@ export async function createCategoryBreakdownChart(
     colorBox.style.backgroundColor = datasets.backgroundColor[i];
 
     const text = document.createElement('span');
-    text.innerHTML = `<span style="color: var(--color-text-main); font-weight: 500;">${label}</span> <span style="color: var(--color-text-muted); opacity: 0.8;">${percentage}%</span>`;
+    text.innerHTML = `<span style="color: var(--color-text-main); font-weight: 500;">${escapeHtml(label)}</span> <span style="color: var(--color-text-muted); opacity: 0.8;">${percentage}%</span>`;
 
     item.appendChild(colorBox);
     item.appendChild(text);

@@ -74,10 +74,9 @@ unsubscribe();
     10: 25,    // Amount 10.00 used 25 times
     5: 20,     // Amount 5.00 used 20 times
     20: 15,    // Amount 20.00 used 15 times
-    25.50: 8,   // Amount 25.50 used 8 times
     50: 10     // Amount 50.00 used 10 times
   },
-  presets: [10, 5, 20, 25.50, 50]  // Top 4 amounts sorted by frequency (decimal format)
+  presets: [10, 5, 20, 50]  // Top 4 amounts sorted by frequency (decimal format)
 }
 ```
 

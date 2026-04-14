@@ -6,6 +6,10 @@ This runbook contains the following placeholders that must be replaced with your
 
 - `PROJECT_ID`: Your Firebase project ID (found in Firebase Console → Project Settings)
 - `SITE_ID`: Your Netlify site ID (found in Netlify Dashboard → Site Settings)
+- `+1-XXX-XXX-XXXX`: Developer phone number
+- `developer@blinkbudget.netlify.app`: Developer email address
+- `maintainer@blinkbudget.netlify.app`: Project maintainer email address
+- `John Doe`: Backup contact name
 
 ### How to Find These Values
 
@@ -137,12 +141,23 @@ This runbook provides procedures for handling disaster recovery scenarios for Bl
    # If security breach suspected, rotate secrets immediately
 
    # Firebase API Key Rotation
-   # 1. Open Firebase Console: https://console.firebase.google.com/project/PROJECT_ID/settings/serviceaccounts
-   # 2. Locate existing web API key in "API Keys" section
-   # 3. Click "Delete" to revoke the existing key
-   # 4. Click "Create API Key" to generate new key
-   # 5. Update all client applications with new key
-   # 6. Update environment variables in CI/CD pipelines
+   **Note**: Firebase web API keys are public identifiers and generally don't require rotation unless compromised. Focus on enforcing security rules and access restrictions.
+   
+   ## Web API Keys (Public Identifiers)
+   - Rotation generally unnecessary unless keys are exposed/compromised
+   - Primary security measure: Enforce Firebase Security Rules and referrer restrictions
+   - If rotation needed: Delete old key, create new one, update client applications
+   
+   ## Service Account Keys / OAuth Secrets (Private Credentials)
+   - **Do rotate regularly** (every 90 days recommended)
+   - **Immediate rotation** required if compromise suspected
+   - **Rotation Steps**:
+     1. Open Firebase Console: https://console.firebase.google.com/project/PROJECT_ID/settings/serviceaccounts
+     2. Locate service account or OAuth client secrets
+     3. Generate new key/secret
+     4. Update all servers/CI with new credentials
+     5. Validate new credentials work
+     6. Revoke old credentials immediately
 
    # Netlify Environment Variable Update
    # Option A: Dashboard
@@ -191,7 +206,7 @@ This runbook provides procedures for handling disaster recovery scenarios for Bl
      try {
        const { BackupService } = await import('./src/core/backup-service.js');
        const result = await BackupService.restoreBackup();
-       console.log(`Restored ${result} transactions`);
+       console.log(`Restored ${result.count} records`);
      } catch (error) {
        console.error('Backup restoration failed:', error);
      }
@@ -296,9 +311,10 @@ This runbook provides procedures for handling disaster recovery scenarios for Bl
    - Or revert a specific commit: `git revert <commit-hash>`
    - Push the revert: `git push origin main`
    - Netlify will auto-deploy the reverted commit
-   - **Warning**: Avoid `git checkout` to prevent detached HEAD state
+   - **⚠️ INCORRECT — DO NOT RUN**: The following commands create detached HEAD state and should not be used:
      git checkout [PREVIOUS_COMMIT]
      git push origin main
+   - **Recommended rollback method**: Use `git revert` instead of `git checkout` for safe rollbacks
 
    ```
 

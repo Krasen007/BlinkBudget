@@ -266,8 +266,8 @@ export class ForecastEngine {
               monthlyAverages[type][month] / yearlyAverage;
             // Cap extreme values to be more conservative
             patterns[type][month] = Math.max(
-              0.8, // Increased from 0.5 to avoid extreme cuts
-              Math.min(1.2, patterns[type][month]) // Decreased from 2.0
+              0.6, // More moderate lower bound
+              Math.min(1.6, patterns[type][month]) // More moderate upper bound
             );
           }
         }
@@ -614,29 +614,25 @@ export class ForecastEngine {
     const category = (transaction.category || '').toLowerCase();
     const note = (transaction.note || '').toLowerCase();
 
-    // Common refund/credit keywords
+    // Common refund/credit keywords - using specific patterns to reduce false positives
     const refundKeywords = [
       'refund',
       'return',
-      'credit',
       'reversal',
       'chargeback',
       'reimbursement',
-      'payment received',
       'money back',
-      'cashback',
       'refund from',
       'return of',
       'credit from',
-      'adjustment',
     ];
 
-    // Check if any refund keywords are present
+    // Check if any refund keywords are present using word boundaries for better matching
     const hasRefundKeyword = refundKeywords.some(
-      keyword =>
-        description.includes(keyword) ||
-        category.includes(keyword) ||
-        note.includes(keyword)
+      keyword => {
+        const regex = new RegExp(`\\b${keyword}\\b`, 'i');
+        return regex.test(description) || regex.test(category) || regex.test(note);
+      }
     );
 
     // Check for categories that typically indicate refunds
@@ -652,10 +648,7 @@ export class ForecastEngine {
       category.includes(cat)
     );
 
-    // Check for unusually large amounts that might be refunds (higher threshold for legitimate income)
-    const isUnusuallyLarge = transaction.amount > 10000; // Very high threshold to catch actual errors
-
-    return hasRefundKeyword || isRefundCategory || isUnusuallyLarge;
+    return hasRefundKeyword || isRefundCategory;
   }
 
   /**
@@ -669,10 +662,13 @@ export class ForecastEngine {
     // Check for zero or negative amounts in income
     if (transaction.amount <= 0) return true;
 
-    // Check for future dates
+    // Check for future dates - normalize to date-only to avoid timezone issues
     const transactionDate = new Date(transaction.timestamp);
     const now = new Date();
-    if (transactionDate > now) return true;
+    // Compare only date portions (year, month, day) to avoid timezone misclassification
+    const transactionDateOnly = new Date(transactionDate.getFullYear(), transactionDate.getMonth(), transactionDate.getDate());
+    const nowDateOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    if (transactionDateOnly > nowDateOnly) return true;
 
     // Check for very old transactions (over 2 years)
     const twoYearsAgo = new Date();

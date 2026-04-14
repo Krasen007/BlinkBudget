@@ -188,7 +188,7 @@ npx snyk test --severity-threshold=high
 
 2. **CORS errors**:
    - Check netlify.toml headers configuration
-   - Verify Firebase CORS rules
+   - Verify backend/service CORS configuration
    - Ensure correct origin URLs
 
 3. **Firebase authentication issues**:

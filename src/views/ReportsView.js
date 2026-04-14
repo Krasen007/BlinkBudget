@@ -264,6 +264,11 @@ export const ReportsView = () => {
    * Handle category card click - navigate to dashboard with category filter
    */
   function handleCategoryCardClick(category) {
+    // Defensive guard - return early if category is null/undefined
+    if (!category || !category.name) {
+      return;
+    }
+
     // Save filter state for dashboard
     const filterData = {
       category: category.name,

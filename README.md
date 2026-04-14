@@ -32,14 +32,14 @@
 
 ### Transaction Management
 
-- **Multiple transaction types**: Expenses, Income, Transfers, Refunds with improved validation and error reporting
-- **Optional descriptions** - Add notes to transactions or leave them empty - your choice
-- **Custom Category Management** - Create, edit, and manage your own expense categories for personalized tracking
-- **Category Reordering** - Organize your expense categories in the order that works best for you
-- **Smart Transaction Icons** - Visual indicators for different transaction types:
-  - **Refunds** shown with ↑ arrow (money coming back)
-  - **Transfers** shown with ⇆ arrow (money moving between accounts)
-- **Smart categorization** with visual category chips:
+- **Multiple transaction types**: Support for Expenses, Income, Transfers, and Refunds, with enhanced validation and error reporting
+- **Optional transaction descriptions**: Add notes to transactions or leave them blank, as you prefer
+- **Custom Category Management**: Create, edit, and manage your own expense categories for personalized tracking
+- **Category Reordering**: Organize your expense categories in a way that works best for you
+- **Streamlined transaction indicators**: Simplified notifications and indicators for different transaction types:
+  - **Refunds** are marked with an ↑ arrow to indicate money coming back
+  - **Transfers** are marked with a ⇆ arrow to indicate money moving between accounts
+- **Smart categorization**: Visual category chips for easy identification:
   - Food & Groceries, Dining & Coffee, Housing & Bills
   - Transportation, Leisure & Shopping, Personal Care
   - Plus your custom categories for complete control
@@ -49,6 +49,7 @@
 - **Filter transactions by category** tap on the name to show
 - **Date filtering functionality** tap on the name to show
 - **Integrated category filtering** between Reports and Dashboard views for consistent analysis across all sections
+- **Smart time period navigation** with dynamic labels showing specific months and years
 
 ### Dashboard & Analytics
 
@@ -60,6 +61,8 @@
 - **Dashboard layout** with improved spacing and optimized action buttons
 - **Fast chart loading** with intelligent caching system and cache invalidation
 - **Enhanced data visualization** with consistent colors for transactions
+- **Improved chart layout** with custom legend positioning and better tooltip placement
+- **Seamless category filtering** between Reports and Dashboard views for consistent analysis
 
 ### Financial Planning & Insights
 
@@ -75,10 +78,6 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 
 ### User Experience & UI
 
-- **Responsive layout** optimized for mobile devices
-- **Mobile experience** optimized for better touch interactions
-- **Touch-friendly interface** with proper touch targets (56px minimum)
-- **Mobile navigation** with bottom tab bar and improved navigation consistency
 - **Keyboard-aware UI** that adapts to virtual keyboard
 - **PWA support** - Installable as a standalone app with offline support
 - **Android TWA support** - Trusted Web Activity for native Android app experience with Play Store deployment

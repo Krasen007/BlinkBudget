@@ -1,17 +1,28 @@
-## Version 1.32 Changes
+## Version 1.32 - Latest Updates
 
-### UI/UX Improvements
-- Removed unnecessary toast notifications for cleaner interface
-- Eliminated distracting backup progress indicator
-- Fixed budget amount display in category cards to show correct state
+### 🎨 UI/UX Improvements
+- **Enhanced Reports Charts**: Improved category breakdown chart layout with custom legend positioning and better tooltip placement
+- **Smart Time Period Labels**: "Last Month" and "This Year" buttons now dynamically show specific month/year names when clicked
+- **Cleaner Visual Experience**: Removed distracting backup progress indicators and unnecessary toast messages
+- **Fixed Chart Display**: Resolved visual bugs and sizing issues in reports charts
 
-### Feature Enhancements  
-- Added category filter integration between Reports and Dashboard views
-- Improved navigation consistency across different sections
+### 🔧 Bug Fixes & Performance
+- **Budget State Restoration**: Fixed budget amount display in category cards when editing transactions
+- **Financial Planning Logic**: Corrected data processing issues in financial planning calculations
+- **Category Filter Integration**: Seamless navigation between Reports and Dashboard with consistent category filtering
+- **General Stability**: Various bug fixes and performance optimizations
 
-### Documentation & Maintenance
-- Updated project documentation
-- Cleaned up build configuration by removing unused Java TWA files
+### 📱 Mobile & Navigation
+- **Improved Touch Interactions**: Better responsive behavior for chart interactions on mobile devices
+- **Streamlined Interface**: Cleaner visual hierarchy and reduced clutter throughout the app
 
-### Bug Fixes
-- Restored proper budget amount state display functionality
+### 🛠️ Technical Updates
+- **Code Quality**: Linting fixes and code cleanup
+- **Documentation**: Updated project documentation and build configuration
+- **Build Optimization**: Moved Java TWA build files to reduce repository clutter
+
+---
+
+## Previous Versions
+### Version 1.31
+- [Previous changelog entries would be here]
