@@ -102,7 +102,7 @@ export async function createCategoryBreakdownChart(
   header.style.display = 'flex';
   header.style.justifyContent = 'space-between';
   header.style.alignItems = 'center';
-  header.style.marginBottom = SPACING.MD;
+  header.style.marginBottom = SPACING.SM; // Reduced padding
 
   const title = document.createElement('h3');
   title.textContent = 'Spending by Category';
@@ -184,8 +184,6 @@ export async function createCategoryBreakdownChart(
   // Chart container - fixed height
   const chartDiv = document.createElement('div');
   chartDiv.style.position = 'relative';
-  chartDiv.style.height = '400px';
-  chartDiv.style.marginBottom = SPACING.MD;
   chartDiv.style.width = '100%';
 
   const canvas = document.createElement('canvas');
@@ -200,8 +198,8 @@ export async function createCategoryBreakdownChart(
   detailsContainer.className = 'chart-mobile-details';
   detailsContainer.style.background = 'var(--color-background)';
   detailsContainer.style.borderRadius = 'var(--radius-md)';
-  detailsContainer.style.padding = SPACING.MD;
-  detailsContainer.style.marginTop = SPACING.MD; // Increased spacing
+  detailsContainer.style.padding = `${SPACING.XS} ${SPACING.MD}`; // Compact padding
+  detailsContainer.style.marginTop = SPACING.SM; // Reduced spacing
   detailsContainer.style.display = 'block'; // Always visible
   detailsContainer.style.overflow = 'auto'; // Allow scrolling if needed
   detailsContainer.style.width = '100%';
@@ -214,8 +212,6 @@ export async function createCategoryBreakdownChart(
             ${initialAction} on a category slice to see details
         </div>
     `;
-
-  section.appendChild(detailsContainer);
 
   // Get consistent colors for all categories
   const categoryColors = getCategoryColors(
@@ -236,61 +232,76 @@ export async function createCategoryBreakdownChart(
   };
 
   // Create initial pie chart with responsive legend
-  const legendPosition = window.innerWidth < 768 ? 'bottom' : 'right';
-  const categoryCount = categoryData.categories.length;
-
-  // Adjust legend settings based on category count
-  const legendFontSize = categoryCount > 15 ? 10 : categoryCount > 10 ? 11 : 12;
-  const legendPadding = categoryCount > 15 ? 6 : categoryCount > 10 ? 8 : 10;
-  const legendBoxWidth = categoryCount > 15 ? 12 : 15;
+  // Final chart sizing and spacing
+  chartDiv.style.height = '300px'; // More compact to avoid empty space
+  chartDiv.style.marginBottom = SPACING.XS; // Minimise gap above legend
 
   const currentChart = await chartRenderer.createPieChart(canvas, chartData, {
     responsive: true,
-    maintainAspectRatio: false,
+    maintainAspectRatio: true,
+    aspectRatio: window.innerWidth < 768 ? 1.5 : 2, // Wider aspect ratio for better legend placement
     layout: {
-      padding: {
-        top: 10,
-        bottom: 10,
-        left: legendPosition === 'right' ? 10 : 0,
-        right: legendPosition === 'right' ? 10 : 0,
-      },
+      padding: 10,
     },
     plugins: {
       legend: {
-        position: legendPosition,
-        align: 'start',
-        labels: {
-          boxWidth: legendBoxWidth,
-          padding: legendPadding,
-          font: {
-            size: legendFontSize,
-          },
-          generateLabels: chart => {
-            const data = chart.data;
-            if (data.labels.length && data.datasets.length) {
-              return data.labels.map((label, i) => {
-                const meta = chart.getDatasetMeta(0);
-                const style = meta.controller.getStyle(i);
-                return {
-                  text: label,
-                  fillStyle: style.backgroundColor,
-                  strokeStyle: style.borderColor,
-                  lineWidth: style.borderWidth,
-                  hidden: !chart.getDataVisibility(i),
-                  index: i,
-                };
-              });
-            }
-            return [];
-          },
-        },
-        // Remove max height/width constraints to allow legend to expand naturally
-        maxHeight: undefined,
-        maxWidth: undefined,
+        display: false, // Use custom HTML legend below
       },
       tooltip: createCategoryTooltipConfig(detailsContainer),
     },
   });
+
+  // Create custom legend
+  const legendContainer = document.createElement('div');
+  legendContainer.className = 'chartjs-legend';
+  legendContainer.style.marginTop = SPACING.SM; // Reduced spacing
+  legendContainer.style.display = 'flex';
+  legendContainer.style.flexWrap = 'wrap';
+  legendContainer.style.justifyContent = 'center';
+  legendContainer.style.gap = SPACING.SM;
+
+  const labels = chartData.labels;
+  const datasets = chartData.datasets[0];
+
+  labels.forEach((label, i) => {
+    const item = document.createElement('div');
+    item.style.display = 'flex';
+    item.style.alignItems = 'center';
+    item.style.gap = '8px';
+    item.style.padding = '6px 12px';
+    item.style.background = 'rgba(255, 255, 255, 0.05)';
+    item.style.borderRadius = 'var(--radius-md)';
+    item.style.cursor = 'pointer';
+    item.style.fontSize = '0.85rem';
+    item.style.transition = 'all 0.2s ease';
+
+    const colorBox = document.createElement('span');
+    colorBox.style.width = '10px';
+    colorBox.style.height = '10px';
+    colorBox.style.borderRadius = '50%';
+    colorBox.style.backgroundColor = datasets.backgroundColor[i];
+
+    const text = document.createElement('span');
+    text.textContent = label;
+    text.style.color = 'var(--color-text-main)';
+
+    item.appendChild(colorBox);
+    item.appendChild(text);
+
+    item.onclick = () => {
+      const isVisible = currentChart.getDataVisibility(i);
+      currentChart.toggleDataVisibility(i);
+      currentChart.update();
+      item.style.opacity = isVisible ? '0.4' : '1';
+      item.style.textDecoration = isVisible ? 'line-through' : 'none';
+    };
+
+    legendContainer.appendChild(item);
+  });
+
+  // Append legend above details
+  section.appendChild(legendContainer);
+  section.appendChild(detailsContainer);
 
   // Add click handler for category selection
   canvas.addEventListener('chartSegmentClick', event => {
