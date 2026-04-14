@@ -223,9 +223,11 @@ export const TimePeriodSelector = (options = {}) => {
 
     // Set initial label for Last Month and Year buttons
     if (period.key === 'lastMonth') {
-      labelSpan.textContent = 'Last Month';
+      labelSpan.textContent =
+        period.key === initialKey ? initialPeriod.label : 'Last Month';
     } else if (period.key === 'year') {
-      labelSpan.textContent = 'This Year';
+      labelSpan.textContent =
+        period.key === initialKey ? initialPeriod.label : 'This Year';
     } else {
       labelSpan.textContent = period.label;
     }
@@ -649,8 +651,17 @@ export const TimePeriodSelector = (options = {}) => {
       currentPeriod = newPeriod;
 
       // Update UI
-      setActiveButton(periodButtons.get(period.key));
+      const button = periodButtons.get(period.key);
+      setActiveButton(button);
       hideCustomRangeSelector();
+
+      // Update button label if it's a navigatable period (Last Month or This Year)
+      if (period.key === 'lastMonth' || period.key === 'year') {
+        const labelSpan = button.querySelector('.tab-label');
+        if (labelSpan) {
+          labelSpan.textContent = newPeriod.label;
+        }
+      }
 
       // Notify parent component
       if (onChange) {
