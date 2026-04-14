@@ -44,7 +44,7 @@ function createCategoryTooltipConfig(detailsContainer) {
         const percentage =
           total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
 
-        const formattedValue = new Intl.NumberFormat('de-DE', {
+        const formattedValue = new Intl.NumberFormat('en-US', {
           style: 'currency',
           currency: 'EUR',
         }).format(value);
@@ -69,7 +69,7 @@ function createCategoryTooltipConfig(detailsContainer) {
         const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
         const percentage =
           total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
-        const formattedValue = new Intl.NumberFormat('de-DE', {
+        const formattedValue = new Intl.NumberFormat('en-US', {
           style: 'currency',
           currency: 'EUR',
         }).format(value);
@@ -135,7 +135,7 @@ export async function createCategoryBreakdownChart(
 
   const totalIncomeValue = document.createElement('span');
   const totalIncome = currentData.incomeVsExpenses?.totalIncome || 0;
-  totalIncomeValue.textContent = new Intl.NumberFormat('de-DE', {
+  totalIncomeValue.textContent = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'EUR',
   }).format(totalIncome);
@@ -163,7 +163,7 @@ export async function createCategoryBreakdownChart(
     (sum, cat) => sum + cat.amount,
     0
   );
-  totalSpentValue.textContent = new Intl.NumberFormat('de-DE', {
+  totalSpentValue.textContent = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'EUR',
   }).format(totalSpent);
