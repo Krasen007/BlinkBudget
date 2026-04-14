@@ -54,16 +54,16 @@
 .chart-mobile-details {
   background: var(--color-background);
   border-radius: var(--radius-md);
-  padding: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
   margin-top: var(--spacing-sm);
   display: block;
-  min-height: 90px;
-  max-height: 120px;
-  overflow: auto;
-  transition: none;
-  box-sizing: border-box;
+  min-height: 60px;
+  max-height: 80px; /* Cap height to keep it compact */
+  overflow-y: auto;
+  font-size: 0.85rem; /* Slightly smaller text */
   position: relative;
-  z-index: 1;
+  z-index: 2; /* Higher than canvas but same as section */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Subtle depth */
 }
 
 /* Scroll affordance for better UX */
@@ -141,6 +141,8 @@
   border-radius: 6px !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
   z-index: 1000 !important;
+  position: absolute;
+  pointer-events: none;
 }
 
 /* Mobile-specific tooltip optimizations */
@@ -748,27 +750,24 @@
 /* Category Breakdown Section - Ensure it's clearly separated and handles expansion gracefully */
 .view-reports .category-breakdown-section {
   border-bottom: none;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
   padding-bottom: var(--spacing-md);
   overflow: visible;
   min-height: auto;
   max-height: none;
-  display: block;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: var(--spacing-md) !important;
   width: 100%;
   isolation: isolate;
-  transform: translateZ(0);
-  transition: all 0.3s ease;
-  z-index: 3;
+  position: relative;
+  z-index: 10; /* Keep on top without overlapping next sections flow */
 }
 
-/* Expansion states */
-.view-reports .category-breakdown-section.expanded {
-  margin-bottom: calc(var(--spacing-xl) * 4);
-  padding-bottom: calc(var(--spacing-lg) * 3);
-}
-
-.view-reports .category-breakdown-section.expanded + .income-expense-section {
-  margin-top: calc(var(--spacing-xl) * 4);
+/* Ensure next sections are pushed down naturally */
+.view-reports .category-breakdown-section + .income-expense-section,
+.view-reports .category-breakdown-section + .category-selector-section {
+  clear: both;
 }
 
 .view-reports

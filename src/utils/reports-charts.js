@@ -201,12 +201,11 @@ export async function createCategoryBreakdownChart(
   detailsContainer.style.background = 'var(--color-background)';
   detailsContainer.style.borderRadius = 'var(--radius-md)';
   detailsContainer.style.padding = SPACING.MD;
-  detailsContainer.style.marginTop = SPACING.SM;
+  detailsContainer.style.marginTop = SPACING.MD; // Increased spacing
   detailsContainer.style.display = 'block'; // Always visible
-  detailsContainer.style.minHeight = '60px'; // Prevent jumping
-  detailsContainer.style.maxHeight = '60px'; // Prevent expansion
-  detailsContainer.style.overflow = 'hidden'; // Hide overflow
-  detailsContainer.style.transition = 'none'; // Remove any transitions that might cause expansion
+  detailsContainer.style.overflow = 'auto'; // Allow scrolling if needed
+  detailsContainer.style.width = '100%';
+  detailsContainer.style.boxSizing = 'border-box';
 
   // Add default instruction text
   const initialAction = window.innerWidth < 768 ? 'Tap' : 'Hover';
