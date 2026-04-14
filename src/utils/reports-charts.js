@@ -44,9 +44,9 @@ function createCategoryTooltipConfig(detailsContainer) {
         const percentage =
           total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
 
-        const formattedValue = new Intl.NumberFormat('en-US', {
+        const formattedValue = new Intl.NumberFormat('en-EU', {
           style: 'currency',
-          currency: 'USD',
+          currency: 'EUR',
         }).format(value);
 
         // Create structured HTML for the details container
@@ -69,9 +69,9 @@ function createCategoryTooltipConfig(detailsContainer) {
         const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
         const percentage =
           total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
-        const formattedValue = new Intl.NumberFormat('en-US', {
+        const formattedValue = new Intl.NumberFormat('en-EU', {
           style: 'currency',
-          currency: 'USD',
+          currency: 'EUR',
         }).format(value);
 
         return `${label}: ${formattedValue} (${percentage}%)`;
@@ -135,7 +135,7 @@ export async function createCategoryBreakdownChart(
 
   const totalIncomeValue = document.createElement('span');
   const totalIncome = currentData.incomeVsExpenses?.totalIncome || 0;
-  totalIncomeValue.textContent = new Intl.NumberFormat('en-US', {
+  totalIncomeValue.textContent = new Intl.NumberFormat('en-EU', {
     style: 'currency',
     currency: 'EUR',
   }).format(totalIncome);
@@ -163,9 +163,9 @@ export async function createCategoryBreakdownChart(
     (sum, cat) => sum + cat.amount,
     0
   );
-  totalSpentValue.textContent = new Intl.NumberFormat('en-US', {
+  totalSpentValue.textContent = new Intl.NumberFormat('en-EU', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'EUR',
   }).format(totalSpent);
   totalSpentValue.style.fontSize = '1.25rem';
   totalSpentValue.style.fontWeight = 'bold';
@@ -262,17 +262,22 @@ export async function createCategoryBreakdownChart(
 
   const labels = chartData.labels;
   const datasets = chartData.datasets[0];
+  const total = datasets.data.reduce((a, b) => a + b, 0);
 
   labels.forEach((label, i) => {
+    const value = datasets.data[i];
+    const percentage = ((value / total) * 100).toFixed(1);
+
     const item = document.createElement('div');
+    item.className = 'legend-item';
     item.style.display = 'flex';
     item.style.alignItems = 'center';
     item.style.gap = '8px';
-    item.style.padding = '6px 12px';
+    item.style.padding = '6px 14px';
     item.style.background = 'rgba(255, 255, 255, 0.05)';
     item.style.borderRadius = 'var(--radius-md)';
     item.style.cursor = 'pointer';
-    item.style.fontSize = '0.85rem';
+    item.style.fontSize = '0.8125rem';
     item.style.transition = 'all 0.2s ease';
 
     const colorBox = document.createElement('span');
@@ -282,8 +287,7 @@ export async function createCategoryBreakdownChart(
     colorBox.style.backgroundColor = datasets.backgroundColor[i];
 
     const text = document.createElement('span');
-    text.textContent = label;
-    text.style.color = 'var(--color-text-main)';
+    text.innerHTML = `<span style="color: var(--color-text-main); font-weight: 500;">${label}</span> <span style="color: var(--color-text-muted); opacity: 0.8;">${percentage}%</span>`;
 
     item.appendChild(colorBox);
     item.appendChild(text);
