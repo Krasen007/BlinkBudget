@@ -83,13 +83,13 @@ const section = ExpandableSection({
 
 ### Return Object
 
-| Method              | Description           |
-| ------------------- | --------------------- |
-| expand()            | Expand the section    |
-| collapse()          | Collapse the section  |
-| toggleSection()     | Toggle expanded state |
-| isExpanded()        | Returns boolean for quick truthy checks - whether section is currently expanded |
-| setContent(element) | Replace content       |
+| Method              | Description                                                                      |
+| ------------------- | -------------------------------------------------------------------------------- |
+| expand()            | Expand the section                                                               |
+| collapse()          | Collapse the section                                                             |
+| toggleSection()     | Toggle expanded state                                                            |
+| isExpanded()        | Returns boolean for quick truthy checks - whether section is currently expanded  |
+| setContent(element) | Replace content                                                                  |
 | getExpandedState()  | Returns current expanded state as boolean - same as isExpanded() for consistency |
 
 ### Properties

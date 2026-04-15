@@ -188,10 +188,12 @@ A change is considered "material" if it affects:
 ## 11. Contact Information
 
 ### Public Channels (General Inquiries)
+
 - **GitHub Issues**: [Create an issue in our repository](https://github.com/Krasen007/BlinkBudget/issues) - For bug reports, feature requests, and general questions
 - **Documentation**: Available in app's help section - For usage guides and troubleshooting
 
 ### Private Channels (Sensitive Data Requests)
+
 - **Privacy Requests**: For GDPR rights requests, data export, account deletion, or any matters containing sensitive information, please email us privately at `privacy@blinkbudget.netlify.app`
 - **Security Issues**: For security vulnerabilities or account compromise concerns, contact us privately at `security@blinkbudget.netlify.app`
 

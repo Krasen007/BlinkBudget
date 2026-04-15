@@ -734,7 +734,8 @@ export const ReportsView = () => {
           if (!container) return;
 
           // Safe selector lookup using iteration to prevent injection
-          const allCategoryCards = container.querySelectorAll('[data-category]');
+          const allCategoryCards =
+            container.querySelectorAll('[data-category]');
           let targetCard = null;
           for (const card of allCategoryCards) {
             if (card.getAttribute('data-category') === savedCategory) {

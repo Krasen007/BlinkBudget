@@ -142,12 +142,12 @@ This runbook provides procedures for handling disaster recovery scenarios for Bl
 
    # Firebase API Key Rotation
    **Note**: Firebase web API keys are public identifiers and generally don't require rotation unless compromised. Focus on enforcing security rules and access restrictions.
-   
+
    ## Web API Keys (Public Identifiers)
    - Rotation generally unnecessary unless keys are exposed/compromised
    - Primary security measure: Enforce Firebase Security Rules and referrer restrictions
    - If rotation needed: Delete old key, create new one, update client applications
-   
+
    ## Service Account Keys / OAuth Secrets (Private Credentials)
    - **Do rotate regularly** (every 90 days recommended)
    - **Immediate rotation** required if compromise suspected
@@ -252,6 +252,7 @@ This runbook provides procedures for handling disaster recovery scenarios for Bl
    - Identify affected time ranges
 
 2. **Selective Restore**
+
    ```javascript
    // Using the BackupService for targeted recovery
    (async () => {

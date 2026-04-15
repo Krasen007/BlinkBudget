@@ -213,19 +213,19 @@ const CONFIG = {
 
 ## JSDoc Tags Reference
 
-| Tag         | Usage                                        |
-| ----------- | -------------------------------------------- |
-| @module     | Identifies the module name                   |
-| @requires   | Lists dependencies                           |
-| @param      | Function parameter with type and description |
-| @returns    | Return value description                     |
-| @throws     | Error types that may be thrown               |
-| @example    | Usage example                                |
-| @algorithm  | Marks algorithm documentation                |
-| @complexity | Time and space complexity                    |
-| @references | External references                          |
-| @config     | Configuration object                         |
-| @property   | Object property                              |
+| Tag         | Usage                                                                                                                                                                                      |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| @module     | Identifies the module name                                                                                                                                                                 |
+| @requires   | Lists dependencies                                                                                                                                                                         |
+| @param      | Function parameter with type and description                                                                                                                                               |
+| @returns    | Return value description                                                                                                                                                                   |
+| @throws     | Error types that may be thrown                                                                                                                                                             |
+| @example    | Usage example                                                                                                                                                                              |
+| @algorithm  | Marks algorithm documentation                                                                                                                                                              |
+| @complexity | Time and space complexity                                                                                                                                                                  |
+| @references | External references                                                                                                                                                                        |
+| @config     | Configuration object                                                                                                                                                                       |
+| @property   | Object property                                                                                                                                                                            |
 | @private    | Marks internal/private members not for public API. Use for methods/properties that should not be accessed externally. Example: `@private` on internal utility functions or helper methods. |
 
 ---
