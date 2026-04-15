@@ -504,7 +504,7 @@ export const DashboardView = () => {
     if (currentCategoryFilter && currentCategoryFilter !== 'all') {
       const clearFilterButton = ButtonComponent({
         text: 'Clear Filter',
-        variant: 'ghost',
+        variant: 'primary',
         onClick: () => {
           // Clear all filters
           currentCategoryFilter = null;
@@ -525,8 +525,9 @@ export const DashboardView = () => {
         },
       });
       clearFilterButton.style.width = '100%';
-      clearFilterButton.style.marginTop = SPACING.XS;
+      clearFilterButton.style.margin = '0';
       clearFilterButton.style.marginBottom = SPACING.XS;
+      clearFilterButton.style.flexShrink = '0'; // Prevent button from shrinking
       content.appendChild(clearFilterButton);
 
       // Add filter status indicator
