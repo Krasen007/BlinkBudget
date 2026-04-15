@@ -538,15 +538,62 @@ export const DashboardView = () => {
         font-size: var(--font-size-sm);
         margin-top: ${SPACING.XS};
         margin-bottom: ${SPACING.XS};
-        padding: ${SPACING.XS};
+        padding: ${SPACING.SM};
         background: var(--color-surface);
         border-radius: var(--radius-md);
         border: 1px solid var(--color-border);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        user-select: none;
       `;
+      
+      // Add hover effect
+      filterStatus.addEventListener('mouseenter', () => {
+        filterStatus.style.color = 'var(--color-primary)';
+        filterStatus.style.borderColor = 'var(--color-primary)';
+        filterStatus.style.background = 'var(--color-surface-elevated)';
+      });
+      
+      filterStatus.addEventListener('mouseleave', () => {
+        filterStatus.style.color = 'var(--color-text-muted)';
+        filterStatus.style.borderColor = 'var(--color-border)';
+        filterStatus.style.background = 'var(--color-surface)';
+      });
+      
+      // Add click handler to navigate back to reports
+      filterStatus.addEventListener('click', () => {
+        // Save the current filter state to return to reports with same context
+        if (currentDashboardFilter && currentDashboardFilter.timePeriod) {
+          // Convert dates to Date objects if they're strings
+          const timePeriod = {
+            ...currentDashboardFilter.timePeriod,
+            startDate: currentDashboardFilter.timePeriod.startDate instanceof Date
+              ? currentDashboardFilter.timePeriod.startDate
+              : new Date(currentDashboardFilter.timePeriod.startDate),
+            endDate: currentDashboardFilter.timePeriod.endDate instanceof Date
+              ? currentDashboardFilter.timePeriod.endDate
+              : new Date(currentDashboardFilter.timePeriod.endDate),
+          };
+          NavigationState.saveTimePeriod(timePeriod);
+        }
+        
+        // Save the category filter to highlight it in reports view
+        if (currentCategoryFilter && currentCategoryFilter !== 'all') {
+          NavigationState.saveReportsCategoryFilter(currentCategoryFilter);
+        }
+        
+        // Navigate back to reports view
+        Router.navigate('reports');
+      });
+      
       filterStatus.textContent =
         currentCategoryFilter && currentCategoryFilter !== 'all'
           ? `Currently filtered by: ${currentCategoryFilter}${currentDashboardFilter && currentDashboardFilter.timePeriod ? ` (${currentDashboardFilter.timePeriod.label || 'selected period'})` : ''}`
           : 'No active filters';
+          
+      // Add title attribute for accessibility
+      filterStatus.title = 'Click to return to Reports view';
+      
       content.appendChild(filterStatus);
     }
 

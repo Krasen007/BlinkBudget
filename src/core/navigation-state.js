@@ -17,6 +17,7 @@ export const NavigationState = {
     REPORTS_TIME_PERIOD: 'navigation_reports_time_period',
     REPORTS_CHART_TYPE: 'navigation_reports_chart_type',
     REPORTS_VIEW_PREFERENCES: 'navigation_reports_view_preferences',
+    REPORTS_CATEGORY_FILTER: 'navigation_reports_category_filter',
     LAST_ACTIVE_VIEW: 'navigation_last_active_view',
     VIEW_HISTORY: 'navigation_view_history',
     DASHBOARD_CATEGORY_FILTER: 'navigation_dashboard_category_filter',
@@ -468,6 +469,62 @@ export const NavigationState = {
   },
 
   /**
+   * Save reports category filter state
+   * @param {string} category - Category name to filter
+   */
+  saveReportsCategoryFilter(category) {
+    try {
+      if (!category || typeof category !== 'string' || category.trim() === '') {
+        console.warn('[NavigationState] Invalid category parameter');
+        return;
+      }
+
+      sessionStorage.setItem(
+        this.STATE_KEYS.REPORTS_CATEGORY_FILTER,
+        category
+      );
+    } catch (error) {
+      console.error(
+        '[NavigationState] Failed to save reports category filter:',
+        error
+      );
+    }
+  },
+
+  /**
+   * Restore reports category filter state
+   * @returns {string|null} Saved category name or null if none saved
+   */
+  restoreReportsCategoryFilter() {
+    try {
+      const category = sessionStorage.getItem(
+        this.STATE_KEYS.REPORTS_CATEGORY_FILTER
+      );
+      return category || null;
+    } catch (error) {
+      console.error(
+        '[NavigationState] Failed to restore reports category filter:',
+        error
+      );
+      return null;
+    }
+  },
+
+  /**
+   * Clear reports category filter state
+   */
+  clearReportsCategoryFilter() {
+    try {
+      sessionStorage.removeItem(this.STATE_KEYS.REPORTS_CATEGORY_FILTER);
+    } catch (error) {
+      console.error(
+        '[NavigationState] Failed to clear reports category filter:',
+        error
+      );
+    }
+  },
+
+  /**
    * Get a summary of current navigation state (for debugging)
    * @returns {Object} Summary of current state
    */
@@ -480,6 +537,7 @@ export const NavigationState = {
       viewHistory: this.getViewHistory(),
       dashboardFilter: this.restoreDashboardFilter(),
       dashboardTimePeriod: this.restoreDashboardTimePeriod(),
+      reportsCategoryFilter: this.restoreReportsCategoryFilter(),
     };
   },
 

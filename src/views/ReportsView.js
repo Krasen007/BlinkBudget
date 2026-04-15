@@ -138,7 +138,7 @@ export const ReportsView = () => {
   });
 
   // State management
-  let currentTimePeriod = getCurrentMonthPeriod();
+  let currentTimePeriod = NavigationState.restoreTimePeriod() || getCurrentMonthPeriod();
   let currentAdvancedFilters = null;
   let isLoading = false;
   let currentData = null;
@@ -693,6 +693,45 @@ export const ReportsView = () => {
       }
 
       await renderCharts(chartContainer);
+
+      // Update time period selector if we restored a saved time period
+      const savedTimePeriod = NavigationState.restoreTimePeriod();
+      if (savedTimePeriod && timePeriodSelectorComponent && timePeriodSelectorComponent.setPeriod) {
+        timePeriodSelectorComponent.setPeriod(savedTimePeriod);
+      }
+
+      // Check for saved category filter and scroll to it
+      const savedCategory = NavigationState.restoreReportsCategoryFilter();
+      if (savedCategory) {
+        // Use setTimeout to ensure DOM is fully rendered
+        setTimeout(() => {
+          const categoryCard = container.querySelector(`[data-category="${savedCategory}"]`);
+          if (categoryCard) {
+            categoryCard.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center',
+            });
+
+            // Highlight effect
+            const originalBorder = categoryCard.style.borderColor;
+            const originalShadow = categoryCard.style.boxShadow;
+
+            categoryCard.style.borderColor = COLORS.PRIMARY;
+            categoryCard.style.boxShadow = `0 0 15px ${COLORS.PRIMARY}44`;
+
+            setTimeout(() => {
+              categoryCard.style.borderColor = originalBorder;
+              categoryCard.style.boxShadow = originalShadow;
+            }, 1500);
+          }
+
+          // Clear the saved filter after use
+          NavigationState.clearReportsCategoryFilter();
+        }, 300);
+      }
+
+      // Note: We don't clear the saved time period to allow persistence across navigations
+      // Users can manually change the time period if needed
 
       showContentState();
     } catch (error) {
