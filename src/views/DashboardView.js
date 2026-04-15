@@ -111,8 +111,8 @@ export const DashboardView = () => {
           ? dashboardFilter.timePeriod.startDate
           : new Date(dashboardFilter.timePeriod.startDate);
 
-      // Format as YYYY-MM-01 for proper month filtering using UTC to prevent timezone shifts
-      const monthFilter = `${startDate.getUTCFullYear()}-${String(startDate.getUTCMonth() + 1).padStart(2, '0')}-01`;
+      // Format as YYYY-MM-01 for proper month filtering using local time to match the reports view
+      const monthFilter = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-01`;
       currentMonthFilter = monthFilter;
       sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER, monthFilter);
     }
