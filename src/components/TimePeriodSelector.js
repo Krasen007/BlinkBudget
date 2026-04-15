@@ -141,6 +141,61 @@ export const TimePeriodSelector = (options = {}) => {
     },
   ];
 
+  // Helper functions for arrow navigation
+  function createArrow(direction) {
+    const arrow = document.createElement('span');
+    arrow.innerHTML = direction === 'left' ? '←' : '→';
+    arrow.style.fontSize = '1em';
+    arrow.style.position = 'absolute';
+    arrow.style[direction === 'left' ? 'left' : 'right'] = '0';
+    arrow.style.top = '0';
+    arrow.style.bottom = '0';
+    arrow.style.display = 'flex';
+    arrow.style.alignItems = 'center';
+    arrow.style.padding = `0 ${SPACING.SM}`;
+    arrow.style.cursor = 'pointer';
+    arrow.style[
+      direction === 'left' ? 'borderTopLeftRadius' : 'borderTopRightRadius'
+    ] = 'var(--radius-md)';
+    arrow.style[
+      direction === 'left'
+        ? 'borderBottomLeftRadius'
+        : 'borderBottomRightRadius'
+    ] = 'var(--radius-md)';
+    arrow.style.transition = 'background 0.2s ease';
+    arrow.style.zIndex = '1';
+
+    // ARIA and keyboard support
+    arrow.tabIndex = 0;
+    arrow.setAttribute('role', 'button');
+    arrow.setAttribute(
+      'aria-label',
+      direction === 'left' ? 'Previous period' : 'Next period'
+    );
+
+    arrow.addEventListener('mouseenter', () => {
+      arrow.style.background = 'rgba(255, 255, 255, 0.1)';
+    });
+    arrow.addEventListener('mouseleave', () => {
+      arrow.style.background = 'transparent';
+    });
+
+    // Keyboard support
+    arrow.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+        e.preventDefault();
+        arrow.click();
+      }
+    });
+
+    return arrow;
+  }
+
+  function updateRightArrowVisibility(rightArrow, currentOffset) {
+    // Only show right arrow if we're in the past (offset < 0 for months, < 0 for years)
+    rightArrow.style.display = currentOffset < 0 ? 'flex' : 'none';
+  }
+
   // Add custom period option if enabled
   if (showCustomRange) {
     periods.push({ key: 'custom', label: 'Custom Range', getValue: null });
@@ -242,62 +297,6 @@ export const TimePeriodSelector = (options = {}) => {
       arrowContainer.style.alignItems = 'center';
       arrowContainer.style.justifyContent = 'center'; // Center the text
       arrowContainer.style.width = '100%';
-
-      // Helper: create an arrow (left or right)
-      function createArrow(direction) {
-        const arrow = document.createElement('span');
-        arrow.innerHTML = direction === 'left' ? '←' : '→';
-        arrow.style.fontSize = '1em';
-        arrow.style.position = 'absolute';
-        arrow.style[direction === 'left' ? 'left' : 'right'] = '0';
-        arrow.style.top = '0';
-        arrow.style.bottom = '0';
-        arrow.style.display = 'flex';
-        arrow.style.alignItems = 'center';
-        arrow.style.padding = `0 ${SPACING.SM}`;
-        arrow.style.cursor = 'pointer';
-        arrow.style[
-          direction === 'left' ? 'borderTopLeftRadius' : 'borderTopRightRadius'
-        ] = 'var(--radius-md)';
-        arrow.style[
-          direction === 'left'
-            ? 'borderBottomLeftRadius'
-            : 'borderBottomRightRadius'
-        ] = 'var(--radius-md)';
-        arrow.style.transition = 'background 0.2s ease';
-        arrow.style.zIndex = '1';
-
-        // ARIA and keyboard support
-        arrow.tabIndex = 0;
-        arrow.setAttribute('role', 'button');
-        arrow.setAttribute(
-          'aria-label',
-          direction === 'left' ? 'Previous period' : 'Next period'
-        );
-
-        arrow.addEventListener('mouseenter', () => {
-          arrow.style.background = 'rgba(255, 255, 255, 0.1)';
-        });
-        arrow.addEventListener('mouseleave', () => {
-          arrow.style.background = 'transparent';
-        });
-
-        // Keyboard support
-        arrow.addEventListener('keydown', e => {
-          if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
-            e.preventDefault();
-            arrow.click();
-          }
-        });
-
-        return arrow;
-      }
-
-      // Helper: update right arrow visibility based on current offset
-      function updateRightArrowVisibility(rightArrow, currentOffset) {
-        // Only show right arrow if we're in the past (offset < 0 for months, < 0 for years)
-        rightArrow.style.display = currentOffset < 0 ? 'flex' : 'none';
-      }
 
       const leftArrow = createArrow('left');
       const rightArrow = createArrow('right');
@@ -943,6 +942,44 @@ export const TimePeriodSelector = (options = {}) => {
       const matchingPeriod = periods.find(p => p.key === period.type);
       if (matchingPeriod) {
         setActiveButton(periodButtons.get(matchingPeriod.key));
+      } else {
+        // Handle custom monthly periods (like February, etc.)
+        // Check if this is a monthly period that's not the current month
+        if (period.type === 'monthly') {
+          const now = new Date();
+          const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+          const periodStart = new Date(period.startDate);
+
+          // If it's not the current month, use the Last Month button
+          if (
+            periodStart.getFullYear() !== currentMonthStart.getFullYear() ||
+            periodStart.getMonth() !== currentMonthStart.getMonth()
+          ) {
+            // Calculate month offset from current month
+            const yearDiff = periodStart.getFullYear() - now.getFullYear();
+            const monthDiff = periodStart.getMonth() - now.getMonth();
+            const totalMonthOffset = yearDiff * 12 + monthDiff;
+
+            // Activate the Last Month button
+            setActiveButton(periodButtons.get('lastMonth'));
+
+            // Update the Last Month button label
+            const lastMonthButton = periodButtons.get('lastMonth');
+            const labelSpan = lastMonthButton.querySelector('.tab-label');
+            if (labelSpan) {
+              labelSpan.textContent = period.label;
+            }
+
+            // Update the month offset
+            lastMonthButton.dataset.monthOffset = totalMonthOffset.toString();
+
+            // Update arrow visibility
+            const rightArrow = lastMonthButton.querySelector('.arrow-right');
+            if (rightArrow) {
+              updateRightArrowVisibility(rightArrow, totalMonthOffset);
+            }
+          }
+        }
       }
     }
   };
