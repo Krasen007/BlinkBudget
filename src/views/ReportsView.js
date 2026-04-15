@@ -138,7 +138,8 @@ export const ReportsView = () => {
   });
 
   // State management
-  let currentTimePeriod = NavigationState.restoreTimePeriod() || getCurrentMonthPeriod();
+  let currentTimePeriod =
+    NavigationState.restoreTimePeriod() || getCurrentMonthPeriod();
   let currentAdvancedFilters = null;
   let isLoading = false;
   let currentData = null;
@@ -146,6 +147,22 @@ export const ReportsView = () => {
   let timePeriodSelectorComponent = null;
   let advancedFilterPanelComponent = null;
   const categoryColorMap = new Map();
+
+  // Helper function to highlight a category card
+  function highlightCategoryCard(categoryCard, duration = 1500) {
+    const originalBorder = categoryCard.style.borderColor;
+    const originalShadow = categoryCard.style.boxShadow;
+
+    categoryCard.style.borderColor = COLORS.PRIMARY;
+    categoryCard.style.boxShadow = `0 0 15px ${COLORS.PRIMARY}44`;
+
+    const timeoutId = setTimeout(() => {
+      categoryCard.style.borderColor = originalBorder;
+      categoryCard.style.boxShadow = originalShadow;
+    }, duration);
+
+    return timeoutId;
+  }
 
   // Create header Container
   const headerContainer = createHeader();
@@ -239,24 +256,30 @@ export const ReportsView = () => {
   function handleCategoryChartClick(label) {
     if (!label) return;
 
-    const categoryCard = container.querySelector(`[data-category="${label}"]`);
-    if (categoryCard) {
-      categoryCard.scrollIntoView({
+    // Safe selector lookup using iteration to prevent injection
+    const allCategoryCards = container.querySelectorAll('[data-category]');
+    let targetCard = null;
+    for (const card of allCategoryCards) {
+      if (card.getAttribute('data-category') === label) {
+        targetCard = card;
+        break;
+      }
+    }
+
+    if (targetCard) {
+      targetCard.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
       });
 
       // Brief highlight effect
-      const originalBorder = categoryCard.style.borderColor;
-      const originalShadow = categoryCard.style.boxShadow;
+      const highlightTimeoutId = highlightCategoryCard(targetCard, 1000);
 
-      categoryCard.style.borderColor = COLORS.PRIMARY;
-      categoryCard.style.boxShadow = `0 0 15px ${COLORS.PRIMARY}44`;
-
-      setTimeout(() => {
-        categoryCard.style.borderColor = originalBorder;
-        categoryCard.style.boxShadow = originalShadow;
-      }, 1000);
+      // Store timeout ID for cleanup
+      if (!container.cleanupTimeouts) {
+        container.cleanupTimeouts = [];
+      }
+      container.cleanupTimeouts.push(highlightTimeoutId);
     }
   }
 
@@ -694,40 +717,56 @@ export const ReportsView = () => {
 
       await renderCharts(chartContainer);
 
-      // Update time period selector if we restored a saved time period
-      const savedTimePeriod = NavigationState.restoreTimePeriod();
-      if (savedTimePeriod && timePeriodSelectorComponent && timePeriodSelectorComponent.setPeriod) {
-        timePeriodSelectorComponent.setPeriod(savedTimePeriod);
+      // Update time period selector if we have a custom time period
+      if (
+        currentTimePeriod &&
+        timePeriodSelectorComponent &&
+        timePeriodSelectorComponent.setPeriod
+      ) {
+        timePeriodSelectorComponent.setPeriod(currentTimePeriod);
       }
 
       // Check for saved category filter and scroll to it
       const savedCategory = NavigationState.restoreReportsCategoryFilter();
       if (savedCategory) {
         // Use setTimeout to ensure DOM is fully rendered
-        setTimeout(() => {
-          const categoryCard = container.querySelector(`[data-category="${savedCategory}"]`);
-          if (categoryCard) {
-            categoryCard.scrollIntoView({
+        const scrollTimeoutId = setTimeout(() => {
+          if (!container) return;
+
+          // Safe selector lookup using iteration to prevent injection
+          const allCategoryCards = container.querySelectorAll('[data-category]');
+          let targetCard = null;
+          for (const card of allCategoryCards) {
+            if (card.getAttribute('data-category') === savedCategory) {
+              targetCard = card;
+              break;
+            }
+          }
+
+          if (targetCard) {
+            targetCard.scrollIntoView({
               behavior: 'smooth',
               block: 'center',
             });
 
             // Highlight effect
-            const originalBorder = categoryCard.style.borderColor;
-            const originalShadow = categoryCard.style.boxShadow;
+            const highlightTimeoutId = highlightCategoryCard(targetCard, 1500);
 
-            categoryCard.style.borderColor = COLORS.PRIMARY;
-            categoryCard.style.boxShadow = `0 0 15px ${COLORS.PRIMARY}44`;
-
-            setTimeout(() => {
-              categoryCard.style.borderColor = originalBorder;
-              categoryCard.style.boxShadow = originalShadow;
-            }, 1500);
+            // Store timeout ID for cleanup
+            if (container.cleanupTimeouts) {
+              container.cleanupTimeouts.push(highlightTimeoutId);
+            }
           }
 
           // Clear the saved filter after use
           NavigationState.clearReportsCategoryFilter();
         }, 300);
+
+        // Store timeout ID for cleanup
+        if (!container.cleanupTimeouts) {
+          container.cleanupTimeouts = [];
+        }
+        container.cleanupTimeouts.push(scrollTimeoutId);
       }
 
       // Note: We don't clear the saved time period to allow persistence across navigations
@@ -1584,6 +1623,14 @@ export const ReportsView = () => {
 
   // Initial data load
   loadReportData();
+
+  // Cleanup function to clear timeouts on unmount
+  container.cleanup = () => {
+    if (container.cleanupTimeouts) {
+      container.cleanupTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
+      container.cleanupTimeouts = [];
+    }
+  };
 
   return container;
 };

@@ -164,6 +164,7 @@ export const TimePeriodSelector = (options = {}) => {
     ] = 'var(--radius-md)';
     arrow.style.transition = 'background 0.2s ease';
     arrow.style.zIndex = '1';
+    arrow.className = `arrow-${direction}`;
 
     // ARIA and keyboard support
     arrow.tabIndex = 0;
@@ -947,7 +948,11 @@ export const TimePeriodSelector = (options = {}) => {
         // Check if this is a monthly period that's not the current month
         if (period.type === 'monthly') {
           const now = new Date();
-          const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+          const currentMonthStart = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            1
+          );
           const periodStart = new Date(period.startDate);
 
           // If it's not the current month, use the Last Month button

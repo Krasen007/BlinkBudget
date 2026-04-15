@@ -137,17 +137,20 @@ export const CategoryCard = (
       budgetEl.style.background = 'rgba(239, 68, 68, 0.1)';
       budgetEl.style.color = COLORS.DANGER;
       const actual = typeof budget?.actual === 'number' ? budget.actual : 0;
-      const amountLimit = typeof budget?.amountLimit === 'number' ? budget.amountLimit : 0;
+      const amountLimit =
+        typeof budget?.amountLimit === 'number' ? budget.amountLimit : 0;
       budgetEl.textContent = `Over budget by ${formatCurrency(actual - amountLimit)}`;
     } else if (budget.isWarning) {
       budgetEl.style.background = 'rgba(251, 191, 36, 0.1)';
       budgetEl.style.color = COLORS.WARNING;
-      const utilization = typeof budget?.utilization === 'number' ? budget.utilization : 0;
+      const utilization =
+        typeof budget?.utilization === 'number' ? budget.utilization : 0;
       budgetEl.textContent = `${utilization.toFixed(0)}% used`;
     } else {
       budgetEl.style.background = 'rgba(34, 197, 94, 0.1)';
       budgetEl.style.color = COLORS.SUCCESS;
-      const remaining = typeof budget?.remaining === 'number' ? budget.remaining : 0;
+      const remaining =
+        typeof budget?.remaining === 'number' ? budget.remaining : 0;
       budgetEl.textContent = `${formatCurrency(remaining)} left`;
     }
 

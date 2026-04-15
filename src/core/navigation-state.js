@@ -479,9 +479,10 @@ export const NavigationState = {
         return;
       }
 
+      const trimmedCategory = category.trim();
       sessionStorage.setItem(
         this.STATE_KEYS.REPORTS_CATEGORY_FILTER,
-        category
+        trimmedCategory
       );
     } catch (error) {
       console.error(

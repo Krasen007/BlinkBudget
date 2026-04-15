@@ -628,12 +628,13 @@ export class ForecastEngine {
     ];
 
     // Check if any refund keywords are present using word boundaries for better matching
-    const hasRefundKeyword = refundKeywords.some(
-      keyword => {
-        const regex = new RegExp(`\\b${keyword}\\b`, 'i');
-        return regex.test(description) || regex.test(category) || regex.test(note);
-      }
-    );
+    const hasRefundKeyword = refundKeywords.some(keyword => {
+      const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`\\b${escapedKeyword}\\b`, 'i');
+      return (
+        regex.test(description) || regex.test(category) || regex.test(note)
+      );
+    });
 
     // Check for categories that typically indicate refunds
     const refundCategories = [
@@ -666,8 +667,16 @@ export class ForecastEngine {
     const transactionDate = new Date(transaction.timestamp);
     const now = new Date();
     // Compare only date portions (year, month, day) to avoid timezone misclassification
-    const transactionDateOnly = new Date(transactionDate.getFullYear(), transactionDate.getMonth(), transactionDate.getDate());
-    const nowDateOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const transactionDateOnly = new Date(
+      transactionDate.getFullYear(),
+      transactionDate.getMonth(),
+      transactionDate.getDate()
+    );
+    const nowDateOnly = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
     if (transactionDateOnly > nowDateOnly) return true;
 
     // Check for very old transactions (over 2 years)

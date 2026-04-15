@@ -90,6 +90,11 @@ export const DashboardView = () => {
   // Track current filter state for display purposes
   let currentDashboardFilter = null;
 
+  // Helper to ensure date is a Date object
+  function ensureDate(value) {
+    return value instanceof Date ? value : new Date(value);
+  }
+
   // Check for dashboard filter state from Reports view
   const dashboardFilter = NavigationState.restoreDashboardFilter();
   if (dashboardFilter && dashboardFilter.source === 'reports') {
@@ -106,10 +111,7 @@ export const DashboardView = () => {
     // Apply time period filter if available
     if (dashboardFilter.timePeriod) {
       // For month filtering, we need the first day of the month in YYYY-MM-DD format
-      const startDate =
-        dashboardFilter.timePeriod.startDate instanceof Date
-          ? dashboardFilter.timePeriod.startDate
-          : new Date(dashboardFilter.timePeriod.startDate);
+      const startDate = ensureDate(dashboardFilter.timePeriod.startDate);
 
       // Format as YYYY-MM-01 for proper month filtering using local time to match the reports view
       const monthFilter = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-01`;
@@ -240,8 +242,8 @@ export const DashboardView = () => {
           const tDate = new Date(t.timestamp);
           const filterDate = new Date(currentMonthFilter);
           if (
-            tDate.getUTCMonth() !== filterDate.getUTCMonth() ||
-            tDate.getUTCFullYear() !== filterDate.getUTCFullYear()
+            tDate.getMonth() !== filterDate.getMonth() ||
+            tDate.getFullYear() !== filterDate.getFullYear()
           ) {
             return false;
           }
@@ -546,20 +548,20 @@ export const DashboardView = () => {
         transition: all 0.2s ease;
         user-select: none;
       `;
-      
+
       // Add hover effect
       filterStatus.addEventListener('mouseenter', () => {
         filterStatus.style.color = 'var(--color-primary)';
         filterStatus.style.borderColor = 'var(--color-primary)';
         filterStatus.style.background = 'var(--color-surface-elevated)';
       });
-      
+
       filterStatus.addEventListener('mouseleave', () => {
         filterStatus.style.color = 'var(--color-text-muted)';
         filterStatus.style.borderColor = 'var(--color-border)';
         filterStatus.style.background = 'var(--color-surface)';
       });
-      
+
       // Add click handler to navigate back to reports
       filterStatus.addEventListener('click', () => {
         // Save the current filter state to return to reports with same context
@@ -567,33 +569,29 @@ export const DashboardView = () => {
           // Convert dates to Date objects if they're strings
           const timePeriod = {
             ...currentDashboardFilter.timePeriod,
-            startDate: currentDashboardFilter.timePeriod.startDate instanceof Date
-              ? currentDashboardFilter.timePeriod.startDate
-              : new Date(currentDashboardFilter.timePeriod.startDate),
-            endDate: currentDashboardFilter.timePeriod.endDate instanceof Date
-              ? currentDashboardFilter.timePeriod.endDate
-              : new Date(currentDashboardFilter.timePeriod.endDate),
+            startDate: ensureDate(currentDashboardFilter.timePeriod.startDate),
+            endDate: ensureDate(currentDashboardFilter.timePeriod.endDate),
           };
           NavigationState.saveTimePeriod(timePeriod);
         }
-        
+
         // Save the category filter to highlight it in reports view
         if (currentCategoryFilter && currentCategoryFilter !== 'all') {
           NavigationState.saveReportsCategoryFilter(currentCategoryFilter);
         }
-        
+
         // Navigate back to reports view
         Router.navigate('reports');
       });
-      
+
       filterStatus.textContent =
         currentCategoryFilter && currentCategoryFilter !== 'all'
           ? `Currently filtered by: ${currentCategoryFilter}${currentDashboardFilter && currentDashboardFilter.timePeriod ? ` (${currentDashboardFilter.timePeriod.label || 'selected period'})` : ''}`
           : 'No active filters';
-          
+
       // Add title attribute for accessibility
       filterStatus.title = 'Click to return to Reports view';
-      
+
       content.appendChild(filterStatus);
     }
 
