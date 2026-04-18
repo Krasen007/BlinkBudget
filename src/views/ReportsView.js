@@ -354,10 +354,21 @@ export const ReportsView = () => {
       const cachedData = analyticsEngine.cache.get(cacheKey);
 
       if (cachedData) {
-        console.log('[ReportsView] Using full cached report data', {
+        console.log('[ReportsView] Using cached analytics data', {
           key: cacheKey,
         });
-        currentData = cachedData;
+
+        // Fetch fresh transactions since they're no longer cached
+        const allTransactions = TransactionService.getAll();
+        if (!Array.isArray(allTransactions)) {
+          throw new Error('Invalid transaction data format - expected array');
+        }
+
+        // Combine fresh transactions with cached derived analytics
+        currentData = {
+          ...cachedData,
+          transactions: allTransactions,
+        };
         renderReports();
         isLoading = false;
         return;
@@ -526,9 +537,17 @@ export const ReportsView = () => {
         );
       }
 
-      // NEW: Cache the full report data
-      analyticsEngine.cache.set(cacheKey, currentData);
-      console.log('[ReportsView] Cached report data', { key: cacheKey });
+      // NEW: Cache derived analytics only (without raw transactions)
+      const analyticsToCache = {
+        timePeriod: currentData.timePeriod,
+        insights: currentData.insights,
+        categoryBreakdown: currentData.categoryBreakdown,
+        incomeVsExpenses: currentData.incomeVsExpenses,
+        costOfLiving: currentData.costOfLiving,
+        predictions: currentData.predictions,
+      };
+      analyticsEngine.cache.set(cacheKey, analyticsToCache);
+      console.log('[ReportsView] Cached analytics data', { key: cacheKey });
 
       const processingTime = Date.now() - startTime;
       if (processingTime > 2000) {

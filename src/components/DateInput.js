@@ -91,6 +91,10 @@ export const DateInput = (options = {}) => {
     if (typeof isoDate === 'string' && isoDate.includes('T')) {
       realDate.dataset.timestamp = isoDate;
       container.dataset.timestamp = isoDate;
+    } else {
+      // Clear timestamp when setting a date-only string or null/empty
+      delete realDate.dataset.timestamp;
+      delete container.dataset.timestamp;
     }
   };
 

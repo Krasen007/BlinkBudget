@@ -148,8 +148,8 @@ export const InflationTrends = (
       }
 
       // Convert to Chart.js format
-      const labels = extractLabels(chartData);
-      const datasets = chartData.map(dataset => ({
+      const { labels, datasets: normalizedDatasets } = normalizeAndExtractLabels(chartData);
+      const datasets = normalizedDatasets.map(dataset => ({
         label: dataset.label,
         data: dataset.data.map(point => point.y),
         backgroundColor: dataset.backgroundColor,
@@ -183,10 +183,11 @@ export const InflationTrends = (
   };
 
   /**
-   * Extract labels from chart data and fill missing months with null values
+   * Normalize chart data and extract labels (pure function)
+   * Returns both sorted labels and normalized datasets without mutating input
    */
-  const extractLabels = chartData => {
-    if (chartData.length === 0) return [];
+  const normalizeAndExtractLabels = chartData => {
+    if (chartData.length === 0) return { labels: [], datasets: [] };
 
     // Get all unique months from all datasets
     const allMonths = new Set();
@@ -199,24 +200,32 @@ export const InflationTrends = (
     // Sort months
     const sortedMonths = Array.from(allMonths).sort();
 
-    // Fill in missing months for each dataset with null values
-    chartData.forEach(dataset => {
-      const existingMonths = new Set(dataset.data.map(point => point.x));
+    // Create normalized datasets without mutating original
+    const normalizedDatasets = chartData.map(dataset => {
+      // Deep copy dataset data
+      const dataCopy = [...dataset.data];
+      const existingMonths = new Set(dataCopy.map(point => point.x));
       const missingMonths = sortedMonths.filter(
         month => !existingMonths.has(month)
       );
 
       // Add null data points for missing months
       missingMonths.forEach(month => {
-        dataset.data.push({ x: month, y: null });
+        dataCopy.push({ x: month, y: null });
       });
 
       // Sort data points by month
-      dataset.data.sort((a, b) => a.x.localeCompare(b.x));
+      dataCopy.sort((a, b) => a.x.localeCompare(b.x));
+
+      // Return normalized dataset with original properties
+      return {
+        ...dataset,
+        data: dataCopy,
+      };
     });
 
     // Format labels
-    return sortedMonths.map(month => {
+    const labels = sortedMonths.map(month => {
       const [year, monthNum] = month.split('-');
       const date = new Date(year, monthNum - 1);
       return date.toLocaleDateString('en-US', {
@@ -224,6 +233,8 @@ export const InflationTrends = (
         year: '2-digit',
       });
     });
+
+    return { labels, datasets: normalizedDatasets };
   };
 
   /**

@@ -292,15 +292,22 @@ export class AnalyticsEngine {
    * Analyze frequency patterns for categories (simple implementation)
    */
   analyzeFrequencyPatterns(transactions, timePeriod, targetCategories = null) {
-    const cacheKey = `frequency_${JSON.stringify(timePeriod)}_${JSON.stringify(targetCategories || [])}`;
+    const cacheKey = `frequency_${JSON.stringify(timePeriod)}_${JSON.stringify(targetCategories || [])}_${this._transactionsSignature(transactions)}`;
     const cached = this.cache.get(cacheKey);
     if (cached) return cached;
 
     // Filter transactions by time period
-    const filteredTransactions = FilteringService.filterByTimePeriod(
+    let filteredTransactions = FilteringService.filterByTimePeriod(
       transactions,
       timePeriod
     );
+
+    // Further filter by target categories if provided
+    if (targetCategories && targetCategories.length > 0) {
+      filteredTransactions = filteredTransactions.filter(t =>
+        targetCategories.includes(t.category)
+      );
+    }
 
     // Calculate frequency per category
     const categoryFrequency = {};

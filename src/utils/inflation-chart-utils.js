@@ -193,7 +193,14 @@ export const getChartOptions = (chartType = 'line') => {
         },
       },
       tooltip: {
-        enabled: false, // Disable tooltip since data is already displayed
+        enabled: true,
+        callbacks: {
+          label: function (context) {
+            const label = context.label || '';
+            const value = context.parsed.y;
+            return `${label}: ${value.toFixed(2)}%`;
+          },
+        },
       },
     },
     scales: {

@@ -28,6 +28,21 @@ import { BaselineAnalysis } from '../../components/BaselineAnalysis.js';
 import { getCurrentMonthPeriod } from '../../utils/reports-utils.js';
 
 /**
+ * Helper function to get transaction amount with consistent refund handling
+ * @param {Object} t - Transaction object
+ * @returns {number} Normalized amount (negative for refunds, positive for expenses)
+ */
+const getTransactionAmount = t => {
+  const amount = typeof t.amount === 'number' ? t.amount : Number(t.amount) || 0;
+  if (t.type === TRANSACTION_TYPES.REFUND) {
+    return -Math.abs(amount);
+  } else if (t.type === TRANSACTION_TYPES.EXPENSE) {
+    return amount;
+  }
+  return 0;
+};
+
+/**
  * Create top movers analysis
  */
 function createTopMoversSection(
@@ -469,14 +484,7 @@ function createTimelineSection(
           if (t.isGhost) return sum;
           const ts = new Date(t.timestamp);
           if (ts >= start && ts < end) {
-            const amount =
-              typeof t.amount === 'number' ? t.amount : Number(t.amount) || 0;
-            if (t.type === TRANSACTION_TYPES.EXPENSE) {
-              return sum + amount;
-            } else if (t.type === TRANSACTION_TYPES.REFUND) {
-              // Refunds reduce expenses
-              return sum - amount;
-            }
+            return sum + getTransactionAmount(t);
           }
           return sum;
         }, 0);
@@ -544,14 +552,7 @@ function createTimelineSection(
             if (t.isGhost) return sum;
             const dateStr = t.timestamp.split('T')[0];
             if (dateStr === key) {
-              const amount =
-                typeof t.amount === 'number' ? t.amount : Number(t.amount) || 0;
-              if (t.type === TRANSACTION_TYPES.EXPENSE) {
-                return sum + amount;
-              } else if (t.type === TRANSACTION_TYPES.REFUND) {
-                // Refunds reduce expenses
-                return sum - amount;
-              }
+              return sum + getTransactionAmount(t);
             }
             return sum;
           }, 0);
@@ -565,14 +566,7 @@ function createTimelineSection(
             if (t.isGhost) return sum;
             const ts = new Date(t.timestamp);
             if (ts >= monthStart && ts <= targetDateCalc) {
-              const amount =
-                typeof t.amount === 'number' ? t.amount : Number(t.amount) || 0;
-              if (t.type === TRANSACTION_TYPES.EXPENSE) {
-                return sum + amount;
-              } else if (t.type === TRANSACTION_TYPES.REFUND) {
-                // Refunds reduce expenses
-                return sum - amount;
-              }
+              return sum + getTransactionAmount(t);
             }
             return sum;
           }, 0);

@@ -6,11 +6,16 @@
  */
 
 import { COLORS, SPACING } from '../utils/constants.js';
+import { SettingsService } from '../core/settings-service.js';
 
-const currencyFormatter = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'EUR',
-});
+const getCurrencyFormatter = () => {
+  const currency = SettingsService.getSetting('currency') || 'EUR';
+  const locale = SettingsService.getSetting('locale') || 'en-IE';
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency,
+  });
+};
 
 export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
   const container = document.createElement('div');
@@ -115,7 +120,7 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
     const currentSpan = document.createElement('div');
     const safeCurrent =
       typeof current === 'number' && isFinite(current) ? current : 0;
-    currentSpan.textContent = currencyFormatter.format(safeCurrent);
+    currentSpan.textContent = getCurrencyFormatter().format(safeCurrent);
     currentSpan.style.color = COLORS.TEXT_MAIN;
     currentSpan.style.textAlign = 'right';
     currentSpan.style.fontFamily = 'monospace';
@@ -128,7 +133,7 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
       typeof recommended === 'number' && isFinite(recommended)
         ? recommended
         : 0;
-    recommendedSpan.textContent = currencyFormatter.format(safeRecommended);
+    recommendedSpan.textContent = getCurrencyFormatter().format(safeRecommended);
     recommendedSpan.style.color = COLORS.TEXT_MUTED;
     recommendedSpan.style.fontWeight = '600';
     recommendedSpan.style.textAlign = 'right';

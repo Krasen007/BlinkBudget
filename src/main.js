@@ -58,9 +58,8 @@ const preloadReportsData = async () => {
       return;
     }
 
-    // Calculate and cache analytics data
+    // Calculate and cache analytics data (without raw transactions)
     const analyticsData = {
-      transactions,
       timePeriod: currentTimePeriod,
       insights: analyticsEngine.generateSpendingInsights(
         transactions,

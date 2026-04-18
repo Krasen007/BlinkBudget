@@ -62,8 +62,7 @@ export class PlanningDataManager {
       const goalsCacheRaw = localStorage.getItem(goalsKey);
       if (goalsCacheRaw) console.log(`[Sync] ${goalsKey} loaded from cache`);
       const budgetsCacheRaw = localStorage.getItem(budgetsKey);
-      if (budgetsCacheRaw)
-        console.log(`[Sync] ${budgetsKey} loaded from cache`);
+      if (budgetsCacheRaw) console.log(`[Sync] ${budgetsKey} loaded from cache`);
 
       const investments = StorageService.getInvestments
         ? StorageService.getInvestments()
