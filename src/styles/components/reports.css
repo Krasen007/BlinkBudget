@@ -598,8 +598,8 @@
 
 /* Category Selector Section Styles */
 .category-selector-section {
-  margin-top: var(--spacing-xl) !important;
-  margin-bottom: var(--spacing-xl) !important;
+  margin-top: var(--spacing-xs) !important;
+  margin-bottom: var(--spacing-xs) !important;
   position: relative !important;
   clear: both !important; /* Ensure it clears any floating elements */
 }
@@ -607,8 +607,8 @@
 .category-selector-section .category-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-md);
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
 }
 
 .category-card {
@@ -758,17 +758,17 @@
 .view-reports
   .category-breakdown-section.expanded
   ~ .category-selector-section {
-  margin-top: calc(var(--spacing-xl) * 5);
+  margin-top: var(--spacing-xs);
 }
 
 /* Ensure category selector is always pushed down when content above expands */
 .view-reports .income-expense-section ~ .category-selector-section {
-  margin-top: calc(var(--spacing-xl) * 4);
+  margin-top: var(--spacing-xs);
 }
 /* Income vs Expenses Container - Separate container with proper isolation */
 .view-reports .income-expense-container {
-  margin-top: var(--spacing-xl);
-  margin-bottom: var(--spacing-lg);
+  margin-top: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
   position: relative;
   clear: both;
   display: block;
@@ -784,8 +784,8 @@
 
 /* Category Selector Section Styles */
 .view-reports .category-selector-section {
-  margin-top: calc(var(--spacing-xl) * 1.5);
-  margin-bottom: calc(var(--spacing-xl) * 1.5);
+  margin-top: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
   position: relative;
   clear: both;
   display: block;
@@ -799,13 +799,13 @@
 
 /* Force separation between income-expense and category sections */
 .view-reports .income-expense-section + .category-selector-section {
-  margin-top: calc(var(--spacing-xl) * 2);
+  margin-top: var(--spacing-xs);
   clear: both;
 }
 
 /* Force separation between different section types */
 .view-reports .income-expense-section + * {
-  margin-top: var(--spacing-lg);
+  margin-top: var(--spacing-xs);
   clear: both;
 }
 

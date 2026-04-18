@@ -22,21 +22,19 @@ export const InsightsSection = currentData => {
 
   const title = document.createElement('h3');
   title.textContent = 'Financial Insights';
-  title.style.margin = `0 0 ${SPACING.MD} 0`;
+  title.style.margin = `0 0 ${SPACING.XS} 0`;
   title.style.color = COLORS.TEXT_MAIN;
   section.appendChild(title);
 
   const description = document.createElement('p');
-  description.textContent =
-    'AI-powered insights based on your spending patterns and trends.';
-  description.style.margin = `0 0 ${SPACING.LG} 0`;
+  description.style.margin = `0 0 ${SPACING.XS} 0`;
   description.style.color = COLORS.TEXT_MUTED;
   section.appendChild(description);
 
   const insightsGrid = document.createElement('div');
   insightsGrid.style.display = 'flex';
   insightsGrid.style.flexDirection = 'column';
-  insightsGrid.style.gap = SPACING.MD;
+  insightsGrid.style.gap = SPACING.XS;
 
   if (
     data.insights &&

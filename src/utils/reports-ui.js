@@ -43,7 +43,7 @@ export function createLoadingState() {
     style: {
       fontSize: '0.875rem',
       color: COLORS.TEXT_MUTED,
-      marginTop: SPACING.SM,
+      marginTop: SPACING.XS,
       display: 'none',
     },
   });
@@ -188,12 +188,12 @@ export function showEmptyState(
   addButton.style.cursor = 'pointer';
   addButton.style.fontSize = 'var(--font-size-md)';
   addButton.style.fontWeight = '500';
-  addButton.style.marginTop = SPACING.MD;
+  addButton.style.marginTop = SPACING.XS;
 
   if (scenario === 'no-transactions') {
     icon.innerHTML = '📊';
     message.innerHTML = `
-            <h3 style="margin: 0 0 ${SPACING.SM} 0; color: ${COLORS.TEXT_MAIN};">No Transactions Yet</h3>
+            <h3 style="margin: 0 0 ${SPACING.XS} 0; color: ${COLORS.TEXT_MAIN};">No Transactions Yet</h3>
             <p style="margin: 0; max-width: 300px; line-height: 1.5;">
                 Start tracking your expenses to see beautiful insights about your spending patterns.
             </p>
@@ -204,7 +204,7 @@ export function showEmptyState(
     icon.innerHTML = '📅';
 
     const title = document.createElement('h3');
-    title.style.margin = `0 0 ${SPACING.SM} 0`;
+    title.style.margin = `0 0 ${SPACING.XS} 0`;
     title.style.color = COLORS.TEXT_MAIN;
     title.textContent = 'No Data for This Period';
 
@@ -225,7 +225,7 @@ export function showEmptyState(
   } else {
     icon.innerHTML = '📊';
     message.innerHTML = `
-            <h3 style="margin: 0 0 ${SPACING.SM} 0; color: ${COLORS.TEXT_MAIN};">No Data Available</h3>
+            <h3 style="margin: 0 0 ${SPACING.XS} 0; color: ${COLORS.TEXT_MAIN};">No Data Available</h3>
             <p style="margin: 0; max-width: 300px; line-height: 1.5;">
                 No data to display at this time.
             </p>
@@ -283,7 +283,7 @@ export function showErrorState(errorState, customMessage, onRetry) {
     'There was an error loading your financial data. Please try again.';
 
   message.innerHTML = `
-        <h3 style="margin: 0 0 ${SPACING.SM} 0; color: ${COLORS.ERROR};">${escapeHtml(errorTitle)}</h3>
+        <h3 style="margin: 0 0 ${SPACING.XS} 0; color: ${COLORS.ERROR};">${escapeHtml(errorTitle)}</h3>
         <p style="margin: 0; max-width: 400px; line-height: 1.5; color: ${COLORS.TEXT_MUTED};">
             ${escapeHtml(errorDescription)}
         </p>
@@ -292,8 +292,8 @@ export function showErrorState(errorState, customMessage, onRetry) {
   // Action buttons container
   const buttonContainer = document.createElement('div');
   buttonContainer.style.display = 'flex';
-  buttonContainer.style.gap = SPACING.MD;
-  buttonContainer.style.marginTop = SPACING.MD;
+  buttonContainer.style.gap = SPACING.XS;
+  buttonContainer.style.marginTop = SPACING.XS;
   buttonContainer.style.flexWrap = 'wrap';
   buttonContainer.style.justifyContent = 'center';
 
@@ -352,19 +352,19 @@ export function showUnsupportedBrowserError(container, missingFeatures) {
   const icon = document.createElement('div');
   icon.innerHTML = '🌐';
   icon.style.fontSize = '4rem';
-  icon.style.marginBottom = SPACING.LG;
+  icon.style.marginBottom = SPACING.XS;
 
   const title = document.createElement('h2');
   title.textContent = 'Browser Not Supported';
   title.style.color = COLORS.ERROR;
-  title.style.marginBottom = SPACING.MD;
+  title.style.marginBottom = SPACING.XS;
 
   const message = document.createElement('div');
   message.textContent =
     "Your browser doesn't support some features required for BlinkBudget to work properly.";
   message.style.color = COLORS.TEXT_MUTED;
   message.style.lineHeight = '1.6';
-  message.style.marginBottom = SPACING.LG;
+  message.style.marginBottom = SPACING.XS;
 
   function escapeHtml(text) {
     const div = document.createElement('div');
@@ -379,7 +379,7 @@ export function showUnsupportedBrowserError(container, missingFeatures) {
     `;
   featuresList.style.fontSize = '0.875rem';
   featuresList.style.color = COLORS.TEXT_MUTED;
-  featuresList.style.marginBottom = SPACING.LG;
+  featuresList.style.marginBottom = SPACING.XS;
 
   const recommendedBrowsers = document.createElement('div');
   recommendedBrowsers.innerHTML = `
@@ -413,7 +413,7 @@ export function showBrowserWarning(container, limitedFeatures) {
   warning.style.border = '1px solid rgba(251, 191, 36, 0.3)';
   warning.style.borderRadius = 'var(--radius-md)';
   warning.style.padding = SPACING.MD;
-  warning.style.margin = `${SPACING.MD} 0`;
+  warning.style.margin = `${SPACING.XS} 0`;
   warning.style.fontSize = '0.875rem';
   warning.style.color = '#92400e';
 
@@ -460,7 +460,7 @@ export function showPerformanceWarning(container, processingTime) {
       border: '1px solid rgba(251, 191, 36, 0.3)',
       borderRadius: 'var(--radius-md)',
       padding: SPACING.MD,
-      margin: `${SPACING.MD} 0`,
+      margin: `${SPACING.XS} 0`,
       fontSize: '0.875rem',
       color: '#92400e',
     },
@@ -513,7 +513,7 @@ export function showChartRenderingWarning(container, failedCharts) {
       border: '1px solid rgba(239, 68, 68, 0.3)',
       borderRadius: 'var(--radius-md)',
       padding: SPACING.MD,
-      margin: `${SPACING.MD} 0`,
+      margin: `${SPACING.XS} 0`,
       fontSize: '0.875rem',
       color: '#dc2626',
     },

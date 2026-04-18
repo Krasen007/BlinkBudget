@@ -179,7 +179,7 @@ export const ReportsView = () => {
     const leftSide = document.createElement('div');
     leftSide.style.display = 'flex';
     leftSide.style.alignItems = 'center';
-    leftSide.style.gap = SPACING.MD;
+    leftSide.style.gap = SPACING.XS;
 
     // Back button (always visible)
     const backButton = document.createElement('button');
@@ -632,10 +632,10 @@ export const ReportsView = () => {
         fallbackWarning.style.padding = SPACING.SM;
         fallbackWarning.style.background = 'rgba(251, 191, 36, 0.1)';
         fallbackWarning.style.border = '1px solid rgba(251, 191, 36, 0.3)';
-        fallbackWarning.style.borderRadius = 'var(--radius-md)';
+        fallbackWarning.style.borderRadius = 'var(--radius-xs)';
         fallbackWarning.style.color = '#92400e';
         fallbackWarning.style.fontSize = '0.875rem';
-        fallbackWarning.style.marginBottom = SPACING.MD;
+        fallbackWarning.style.marginBottom = SPACING.XS;
         fallbackWarning.innerHTML = `
                     ⚠️ Using simplified calculations due to data processing issues. 
                     Some advanced insights may not be available.
@@ -766,7 +766,7 @@ export const ReportsView = () => {
           budgetsSummary,
           currentTimePeriod
         );
-        summaryCard.style.marginBottom = SPACING.LG;
+        summaryCard.style.marginBottom = SPACING.XS;
         chartsSection.appendChild(summaryCard);
       }
       chartRenderResults.push({ name: 'Budget Summary', success: true });
@@ -822,6 +822,8 @@ export const ReportsView = () => {
       incomeExpenseContainer.style.position = 'relative';
       incomeExpenseContainer.style.zIndex = '1';
       incomeExpenseContainer.style.clear = 'both';
+      incomeExpenseContainer.style.marginTop = SPACING.XS;
+      incomeExpenseContainer.style.marginBottom = SPACING.XS;
 
       const incomeResult = await createIncomeExpenseChart(
         chartRenderer,
@@ -881,6 +883,8 @@ export const ReportsView = () => {
       categorySelectorSection.style.clear = 'both';
       categorySelectorSection.style.position = 'relative';
       categorySelectorSection.style.zIndex = '2';
+      categorySelectorSection.style.marginTop = SPACING.XS;
+      categorySelectorSection.style.marginBottom = SPACING.XS;
       chartsSection.appendChild(categorySelectorSection);
       chartRenderResults.push({ name: 'Category Selector', success: true });
     } catch (selectorError) {
@@ -990,7 +994,7 @@ export const ReportsView = () => {
 
     content.style.maxWidth = '100%';
     content.style.boxSizing = 'border-box';
-    content.style.gap = SPACING.MD;
+    content.style.gap = SPACING.XS;
 
     // Sync charts-section horizontal padding with header
     const chartsSections = content.querySelectorAll('.charts-section');

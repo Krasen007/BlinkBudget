@@ -102,7 +102,7 @@ export async function createCategoryBreakdownChart(
   header.style.display = 'flex';
   header.style.justifyContent = 'space-between';
   header.style.alignItems = 'center';
-  header.style.marginBottom = SPACING.SM; // Reduced padding
+  header.style.marginBottom = SPACING.XS;
 
   const title = document.createElement('h3');
   title.textContent = 'Spending by Category';
@@ -199,7 +199,7 @@ export async function createCategoryBreakdownChart(
   detailsContainer.style.background = 'var(--color-background)';
   detailsContainer.style.borderRadius = 'var(--radius-md)';
   detailsContainer.style.padding = `${SPACING.XS} ${SPACING.MD}`; // Compact padding
-  detailsContainer.style.marginTop = SPACING.SM; // Reduced spacing
+  detailsContainer.style.marginTop = SPACING.XS;
   detailsContainer.style.display = 'block'; // Always visible
   detailsContainer.style.overflow = 'auto'; // Allow scrolling if needed
   detailsContainer.style.width = '100%';
@@ -234,7 +234,7 @@ export async function createCategoryBreakdownChart(
   // Create initial pie chart with responsive legend
   // Final chart sizing and spacing
   chartDiv.style.height = '300px'; // More compact to avoid empty space
-  chartDiv.style.marginBottom = SPACING.XS; // Minimise gap above legend
+  chartDiv.style.marginBottom = SPACING.XS;
 
   const currentChart = await chartRenderer.createPieChart(canvas, chartData, {
     responsive: true,
@@ -254,11 +254,11 @@ export async function createCategoryBreakdownChart(
   // Create custom legend
   const legendContainer = document.createElement('div');
   legendContainer.className = 'chartjs-legend';
-  legendContainer.style.marginTop = SPACING.SM; // Reduced spacing
+  legendContainer.style.marginTop = SPACING.XS;
   legendContainer.style.display = 'flex';
   legendContainer.style.flexWrap = 'wrap';
   legendContainer.style.justifyContent = 'center';
-  legendContainer.style.gap = SPACING.SM;
+  legendContainer.style.gap = SPACING.XS;
 
   const labels = chartData.labels;
   const datasets = chartData.datasets[0];
@@ -344,6 +344,47 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   title.style.color = COLORS.TEXT_MAIN;
   section.appendChild(title);
 
+  // Prepare chart data first
+  const incomeExpenseData = currentData.incomeVsExpenses;
+
+  // Format currency values
+  const formatCurrency = amount => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'EUR',
+    }).format(amount);
+  };
+
+  // Create details content as part of the section
+  const detailsContent = document.createElement('div');
+  detailsContent.style.display = 'grid';
+  detailsContent.style.gridTemplateColumns =
+    'repeat(auto-fit, minmax(150px, 1fr))';
+  detailsContent.style.gap = SPACING.XS;
+  detailsContent.style.textAlign = 'center';
+  detailsContent.style.marginBottom = SPACING.XS;
+  detailsContent.innerHTML = `
+    <div>
+      <div style="font-size: 0.875rem; color: var(--color-text-muted); margin-bottom: 4px;">Income</div>
+      <div style="font-size: 1.125rem; font-weight: bold; color: ${COLORS.INCOME_COLOR};">
+        ${formatCurrency(incomeExpenseData.totalIncome)}
+      </div>
+    </div>
+    <div>
+      <div style="font-size: 0.875rem; color: var(--color-text-muted); margin-bottom: 4px;">Expenses</div>
+      <div style="font-size: 1.125rem; font-weight: bold; color: rgba(239, 68, 68, 1);">
+        ${formatCurrency(incomeExpenseData.totalExpenses)}
+      </div>
+    </div>
+    <div>
+      <div style="font-size: 0.875rem; color: var(--color-text-muted); margin-bottom: 4px;">Net Balance</div>
+      <div style="font-size: 1.125rem; font-weight: bold; color: ${incomeExpenseData.netBalance >= 0 ? COLORS.INCOME_COLOR : 'rgba(239, 68, 68, 1)'};">
+        ${formatCurrency(incomeExpenseData.netBalance)}
+      </div>
+    </div>
+  `;
+  section.appendChild(detailsContent);
+
   // Chart container
   const chartDiv = document.createElement('div');
   chartDiv.style.position = 'relative';
@@ -364,8 +405,6 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   chartDiv.appendChild(canvas);
   section.appendChild(chartDiv);
 
-  // Prepare chart data
-  const incomeExpenseData = currentData.incomeVsExpenses;
   const chartData = {
     labels: ['Income', 'Expenses', 'Net Balance'],
     datasets: [
@@ -403,15 +442,26 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
         beginAtZero: false,
       },
     },
+    interaction: {
+      mode: null,
+      intersect: false,
+    },
+    hover: {
+      mode: null,
+    },
     plugins: {
       tooltip: {
-        position: 'nearest',
-        yAlign: 'auto',
-        padding: 20,
-        caretSize: 8,
-        caretPadding: 10,
+        enabled: false, // Disable tooltip
+      },
+      legend: {
+        display: false,
       },
     },
+    options: {
+      events: [], // Disable all chart events
+    },
+    onHover: null, // Disable hover events
+    onClick: null, // Disable click events
   });
 
   return { section, chart };
@@ -457,14 +507,14 @@ export async function createCategoryTrendsChart(
     const icon = document.createElement('div');
     icon.style.cssText = `
       font-size: 2rem;
-      margin-bottom: ${SPACING.MD};
+      margin-bottom: ${SPACING.XS};
     `;
     icon.textContent = '📈';
 
     const title = document.createElement('h3');
     title.textContent = 'Category Trends';
     title.style.cssText = `
-      margin: 0 0 ${SPACING.SM} 0;
+      margin: 0 0 ${SPACING.XS} 0;
       color: ${COLORS.TEXT_MAIN};
       font-weight: 600;
     `;
@@ -491,7 +541,7 @@ export async function createCategoryTrendsChart(
 
   const title = document.createElement('h3');
   title.textContent = 'Category Trends Over Time';
-  title.style.margin = `0 0 ${SPACING.MD} 0`;
+  title.style.margin = `0 0 ${SPACING.XS} 0`;
   title.style.color = COLORS.TEXT_MAIN;
   section.appendChild(title);
 

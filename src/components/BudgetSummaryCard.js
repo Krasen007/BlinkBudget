@@ -76,7 +76,7 @@ export const BudgetSummaryCard = (summary, timePeriod = null) => {
   const details = document.createElement('div');
   details.style.display = 'grid';
   details.style.gridTemplateColumns = '1fr 1fr 1fr';
-  details.style.gap = SPACING.MD;
+  details.style.gap = SPACING.XS;
   details.style.marginTop = SPACING.XS;
 
   const createDetail = (label, value, color) => {

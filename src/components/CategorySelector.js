@@ -29,19 +29,19 @@ export const CategorySelector = (
   section.style.background = COLORS.SURFACE;
   section.style.borderRadius = 'var(--radius-lg)';
   section.style.padding = SPACING.MD;
-  section.style.marginTop = SPACING.XL;
-  section.style.marginBottom = SPACING.XL;
+  section.style.marginTop = SPACING.XS;
+  section.style.marginBottom = SPACING.XS;
 
   const title = document.createElement('h3');
   title.textContent = 'Explore Categories';
-  title.style.margin = `0 0 ${SPACING.MD} 0`;
+  title.style.margin = `0 0 ${SPACING.XS} 0`;
   title.style.color = COLORS.TEXT_MAIN;
   section.appendChild(title);
 
   const description = document.createElement('p');
   description.textContent =
     'Click on any category below to see detailed spending patterns and visit frequency.';
-  description.style.margin = `0 0 ${SPACING.LG} 0`;
+  description.style.margin = `0 0 ${SPACING.XS} 0`;
   description.style.color = COLORS.TEXT_MUTED;
   section.appendChild(description);
 
