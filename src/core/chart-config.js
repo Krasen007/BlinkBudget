@@ -45,7 +45,7 @@ export function defaultChartOptions() {
           const value = data.parsed ?? data.raw; // Use nullish coalescing to preserve 0 values
           const formattedValue = new Intl.NumberFormat('en-US', {
             style: 'currency',
-            currency: 'USD',
+            currency: 'EUR',
           }).format(value);
           return `${datasetLabel}: ${formattedValue}`;
         },
@@ -509,7 +509,7 @@ export function createThemedChartOptions(chartType, customOptions = {}) {
                       fontColor: 'hsl(0, 0%, 100%)', // Ensure text is visible
                       ariaLabel: `${label}: ${new Intl.NumberFormat('en-US', {
                         style: 'currency',
-                        currency: 'USD',
+                        currency: 'EUR',
                       }).format(value)} (${percentage}% of total)`,
                     };
                   });
@@ -557,7 +557,7 @@ export function createThemedChartOptions(chartType, customOptions = {}) {
               callback: function (value) {
                 return new Intl.NumberFormat('en-US', {
                   style: 'currency',
-                  currency: 'USD',
+                  currency: 'EUR',
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                 }).format(value);
@@ -605,7 +605,7 @@ export function createThemedChartOptions(chartType, customOptions = {}) {
               callback: function (value) {
                 return new Intl.NumberFormat('en-US', {
                   style: 'currency',
-                  currency: 'USD',
+                  currency: 'EUR',
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                 }).format(value);
@@ -698,7 +698,7 @@ function updateAriaLiveRegion(chart, activeElements) {
 
     const formattedValue = new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'EUR',
     }).format(value);
 
     let announcement = `${label}: ${formattedValue}`;

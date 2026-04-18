@@ -374,7 +374,7 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
         data: [
           incomeExpenseData.totalIncome,
           incomeExpenseData.totalExpenses,
-          Math.abs(incomeExpenseData.netBalance),
+          incomeExpenseData.netBalance,
         ],
         backgroundColor: [
           'rgba(34, 197, 94, 0.8)',
@@ -398,6 +398,11 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   const chart = await chartRenderer.createBarChart(canvas, chartData, {
     responsive: true,
     maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: false,
+      },
+    },
     plugins: {
       tooltip: {
         position: 'nearest',
