@@ -1,5 +1,6 @@
 /**
- * Date Format Selection Section Component
+ * Date Format Section Component
+ * Automatically detects date format from device locale
  */
 
 import { SettingsService } from '../core/settings-service.js';
@@ -10,7 +11,30 @@ import {
   DATE_FORMATS,
 } from '../utils/constants.js';
 
-export const DateFormatSection = ({ onFormatChange }) => {
+// Auto-detect date format from device locale
+function detectDateFormat() {
+  const locale = navigator.language || navigator.userLanguage || 'en-US';
+
+  // Check locale format
+  if (locale.startsWith('en-US')) {
+    return DATE_FORMATS.US;
+  } else if (
+    locale.startsWith('en-GB') ||
+    locale.startsWith('en-IE') ||
+    locale.startsWith('fr-') ||
+    locale.startsWith('de-') ||
+    locale.startsWith('es-') ||
+    locale.startsWith('it-') ||
+    locale.startsWith('pt-')
+  ) {
+    return DATE_FORMATS.EU;
+  }
+
+  // Default to ISO for most other locales
+  return DATE_FORMATS.ISO;
+}
+
+export const DateFormatSection = ({ onFormatChange: _onFormatChange }) => {
   const section = document.createElement('div');
   section.className = 'card mobile-settings-card';
   section.style.marginBottom = SPACING.LG;
@@ -24,56 +48,66 @@ export const DateFormatSection = ({ onFormatChange }) => {
   });
   section.appendChild(title);
 
-  const currentFormat =
-    SettingsService.getSetting('dateFormat') || DATE_FORMATS.DEFAULT;
+  // Auto-detect and save format if not already set
+  let currentFormat = SettingsService.getSetting('dateFormat');
+  if (!currentFormat) {
+    currentFormat = detectDateFormat();
+    SettingsService.saveSetting('dateFormat', currentFormat);
+  }
 
-  const createOption = (label, value) => {
-    const row = document.createElement('div');
-    row.className = 'mobile-settings-option touch-target';
-    Object.assign(row.style, {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: SPACING.LG,
-      cursor: 'pointer',
-      minHeight: TOUCH_TARGETS.MIN_HEIGHT,
-      borderRadius: 'var(--radius-md)',
-      transition: 'background-color var(--transition-fast)',
-      marginBottom: SPACING.SM,
-      border: '1px solid var(--color-border)',
-    });
+  // Display detected format (read-only)
+  const infoRow = document.createElement('div');
+  infoRow.className = 'mobile-settings-option';
+  Object.assign(infoRow.style, {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: SPACING.LG,
+    minHeight: TOUCH_TARGETS.MIN_HEIGHT,
+    borderRadius: 'var(--radius-md)',
+    marginBottom: SPACING.SM,
+    border: '1px solid var(--color-border)',
+    backgroundColor: 'var(--color-surface)',
+  });
 
-    const lbl = document.createElement('span');
-    lbl.textContent = label;
-    Object.assign(lbl.style, {
-      fontSize: FONT_SIZES.BASE,
-      fontWeight: '500',
-    });
+  const label = document.createElement('span');
+  label.textContent = 'Auto-detected from device';
+  Object.assign(label.style, {
+    fontSize: FONT_SIZES.BASE,
+    fontWeight: '500',
+    color: 'var(--color-text-muted)',
+  });
 
-    const check = document.createElement('span');
-    check.textContent = currentFormat === value ? '✓' : '';
-    Object.assign(check.style, {
-      color: 'var(--color-primary)',
-      fontWeight: 'bold',
-      fontSize: FONT_SIZES.LG,
-    });
+  const formatValue = document.createElement('span');
+  const formatLabel =
+    currentFormat === DATE_FORMATS.US
+      ? 'MM/DD/YYYY'
+      : currentFormat === DATE_FORMATS.EU
+        ? 'DD/MM/YYYY'
+        : 'YYYY-MM-DD';
+  formatValue.textContent = formatLabel;
+  Object.assign(formatValue.style, {
+    fontSize: FONT_SIZES.BASE,
+    fontWeight: '600',
+    color: 'var(--color-text-main)',
+  });
 
-    row.appendChild(lbl);
-    row.appendChild(check);
+  infoRow.appendChild(label);
+  infoRow.appendChild(formatValue);
+  section.appendChild(infoRow);
 
-    row.addEventListener('click', () => {
-      SettingsService.saveSetting('dateFormat', value);
-      if (onFormatChange) {
-        onFormatChange();
-      }
-    });
-
-    return row;
-  };
-
-  section.appendChild(createOption('MM/DD/YYYY', DATE_FORMATS.US));
-  section.appendChild(createOption('YYYY-MM-DD', DATE_FORMATS.ISO));
-  section.appendChild(createOption('DD/MM/YYYY', DATE_FORMATS.EU));
+  // Add explanatory note
+  const note = document.createElement('p');
+  note.textContent =
+    'Date format is automatically detected from your device settings for a seamless experience.';
+  Object.assign(note.style, {
+    fontSize: FONT_SIZES.SM,
+    color: 'var(--color-text-muted)',
+    marginTop: SPACING.SM,
+    marginBottom: '0',
+    lineHeight: '1.4',
+  });
+  section.appendChild(note);
 
   return section;
 };

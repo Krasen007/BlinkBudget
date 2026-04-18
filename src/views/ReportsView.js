@@ -15,8 +15,6 @@ import { TransactionService } from '../core/transaction-service.js';
 import { AccountService } from '../core/Account/account-service.js';
 import { Router } from '../core/router.js';
 import { NavigationState } from '../core/navigation-state.js';
-import { SettingsService } from '../core/settings-service.js';
-import { BaselineAnalysis } from '../components/BaselineAnalysis.js';
 import {
   COLORS,
   SPACING,
@@ -26,8 +24,6 @@ import {
 } from '../utils/constants.js';
 import { debounce } from '../utils/touch-utils.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
-import { AdvancedFilterPanel } from '../components/AdvancedFilterPanel.js';
-import { FilteringService } from '../core/analytics/FilteringService.js';
 
 // Import utility modules
 import {
@@ -54,18 +50,12 @@ import {
 import {
   createCategoryBreakdownChart,
   createIncomeExpenseChart,
-  createCategoryTrendsChart,
   getCategoryColors,
 } from '../utils/reports-charts.js';
 import { CategorySelector } from '../components/CategorySelector.js';
 import { InsightsSection } from '../components/BudgetInsightsSection.js';
-import { PatternInsights } from '../components/PatternInsights.js';
 import { BudgetSummaryCard } from '../components/BudgetSummaryCard.js';
 import { BudgetPlanner } from '../core/budget-planner.js';
-import { BenchmarkingSection } from '../components/BenchmarkingSection.js';
-import { BudgetRecommendationsSection } from '../components/BudgetRecommendationsSection.js';
-import { TrendAnalysisSection } from '../components/TrendAnalysisSection.js';
-import { OptimizationInsights } from '../components/OptimizationInsights.js';
 
 export const ReportsView = () => {
   const container = document.createElement('div');
@@ -140,12 +130,10 @@ export const ReportsView = () => {
   // State management
   let currentTimePeriod =
     NavigationState.restoreTimePeriod() || getCurrentMonthPeriod();
-  let currentAdvancedFilters = null;
   let isLoading = false;
   let currentData = null;
   const activeCharts = new Map();
   let timePeriodSelectorComponent = null;
-  let advancedFilterPanelComponent = null;
   const categoryColorMap = new Map();
 
   // Helper function to highlight a category card
@@ -224,28 +212,12 @@ export const ReportsView = () => {
       className: 'reports-time-selector',
     });
 
-    // Advanced Filter Panel (Conditional)
-    const advancedFilteringEnabled =
-      SettingsService.getSetting('advancedFilteringEnabled') === true;
-    if (advancedFilteringEnabled) {
-      advancedFilterPanelComponent = AdvancedFilterPanel({
-        onFiltersChange: filters => {
-          currentAdvancedFilters = filters;
-          loadReportData(true); // Fast reload
-        },
-      });
-    }
-
     // Create header container that includes both header and time period selector
     const headerContainer = document.createElement('div');
     headerContainer.className = 'view-header view-sticky view-header-container';
 
     headerContainer.appendChild(header);
     headerContainer.appendChild(timePeriodSelectorComponent);
-
-    if (advancedFilterPanelComponent) {
-      headerContainer.appendChild(advancedFilterPanelComponent);
-    }
 
     return headerContainer;
   }
@@ -407,26 +379,7 @@ export const ReportsView = () => {
           throw new Error('Invalid transaction data format - expected array');
         }
 
-        // Apply advanced filters if they exist
         transactions = allTransactions;
-        if (currentAdvancedFilters) {
-          try {
-            transactions = FilteringService.applyFilters(
-              transactions,
-              currentAdvancedFilters
-            );
-          } catch (filterError) {
-            console.error('Filter application failed:', filterError);
-            // Fallback to all transactions or handle gracefully
-            // keeping transactions as is might be confusing, so maybe empty?
-            // But usually safe to just show all and warn.
-            // For now, let's just log and proceed with unfiltered (or partial) if applyFilters threw mid-way?
-            // Actually applyFilters returns new array. If it throws, transactions is still allTransactions.
-            console.warn(
-              'Proceeding with unfiltered data due to filter error.'
-            );
-          }
-        }
       } catch (storageError) {
         console.error('Storage access error:', storageError);
 
@@ -800,6 +753,7 @@ export const ReportsView = () => {
 
       const chartRenderResults = [];
 
+      // Core Spending Insights (Simplified per Tasteful Software Audit)
       // Budget Summary / This Month
       await renderBudgetSummary(chartsSection, chartRenderResults);
 
@@ -809,32 +763,11 @@ export const ReportsView = () => {
       // Explore Categories
       await renderCategorySelector(chartsSection, chartRenderResults);
 
-      // Financial Insights
+      // Financial Insights - simple, actionable insights
       await renderFinancialInsights(chartsSection, chartRenderResults);
 
-      // Optimization Insights - cost-saving recommendations
-      renderOptimizationInsights(chartsSection, chartRenderResults);
-
-      // Income vs Expenses
+      // Income vs Expenses - simplified view
       await renderIncomeExpense(chartsSection, chartRenderResults);
-
-      // Spending patterns
-      await renderPatternInsights(chartsSection, chartRenderResults);
-
-      // Trend Analysis - spending direction, consistency scores, MoM
-      renderTrendAnalysisSection(chartsSection, chartRenderResults);
-
-      // Category Trends
-      await renderCategoryTrends(chartsSection, chartRenderResults);
-
-      // Personal Benchmarking - Feature 3.3.3 Comparative Analytics
-      renderBenchmarkingSection(chartsSection, chartRenderResults);
-
-      // Budget Recommendations - Feature 3.3.4 Predictive Budget
-      renderBudgetRecommendationsSection(chartsSection, chartRenderResults);
-
-      // Baseline Analysis - Floor vs Average Spending Patterns
-      renderBaselineAnalysisSection(chartsSection, chartRenderResults);
 
       chartContainer.appendChild(chartsSection);
 
@@ -990,99 +923,6 @@ export const ReportsView = () => {
   }
 
   /**
-   * Render category trends chart with error handling
-   */
-  async function renderCategoryTrends(chartsSection, chartRenderResults) {
-    try {
-      const trendsResult = await createCategoryTrendsChart(
-        chartRenderer,
-        currentData,
-        categoryColorMap
-      );
-      if (trendsResult) {
-        chartsSection.appendChild(trendsResult.section);
-        if (trendsResult.chart)
-          activeCharts.set('category-trends', trendsResult.chart);
-        chartRenderResults.push({ name: 'Category Trends', success: true });
-      }
-    } catch (trendsError) {
-      console.error('Failed to render category trends chart:', trendsError);
-      chartRenderResults.push({
-        name: 'Category Trends',
-        success: false,
-        error: trendsError,
-      });
-    }
-  }
-
-  /**
-   * Render pattern insights with error handling
-   */
-  function renderPatternInsights(chartsSection, chartRenderResults) {
-    try {
-      const patternInsightsSection = PatternInsights(
-        currentData.transactions,
-        currentTimePeriod,
-        null // previousPeriod - could be implemented later
-      );
-      patternInsightsSection.style.setProperty('margin-top', '0', 'important');
-      chartsSection.appendChild(patternInsightsSection);
-      chartRenderResults.push({
-        name: 'Spending Pattern Analysis',
-        success: true,
-      });
-    } catch (patternError) {
-      console.error('Failed to render pattern insights section:', patternError);
-      chartRenderResults.push({
-        name: 'Spending Pattern Analysis',
-        success: false,
-        error: patternError,
-      });
-    }
-  }
-
-  /**
-   * Render trend analysis section with direction indicators, consistency scores, and MoM
-   */
-  function renderTrendAnalysisSection(chartsSection, chartRenderResults) {
-    try {
-      // Get trend data from analytics engine
-      const trends = analyticsEngine.getTrendAnalysis
-        ? analyticsEngine.getTrendAnalysis(null, currentData.transactions)
-        : { trends: [] };
-
-      const consistency = analyticsEngine.getConsistencyScores
-        ? analyticsEngine.getConsistencyScores(currentData.transactions)
-        : {};
-
-      if (trends.trends && trends.trends.length > 0) {
-        const section = TrendAnalysisSection({
-          trends: trends.trends,
-          consistencyScores: consistency,
-          transactions: currentData.transactions,
-        });
-        section.style.setProperty(
-          'margin-top',
-          'var(--spacing-md)',
-          'important'
-        );
-        chartsSection.appendChild(section);
-        chartRenderResults.push({ name: 'Trend Analysis', success: true });
-      } else {
-        // Even with no trends, mark as success to avoid error display
-        chartRenderResults.push({ name: 'Trend Analysis', success: true });
-      }
-    } catch (error) {
-      console.warn('[ReportsView] Failed to render trend analysis:', error);
-      chartRenderResults.push({
-        name: 'Trend Analysis',
-        success: false,
-        error,
-      });
-    }
-  }
-
-  /**
    * Render financial insights with error handling
    */
   function renderFinancialInsights(chartsSection, chartRenderResults) {
@@ -1100,227 +940,6 @@ export const ReportsView = () => {
           error: insightsError,
         });
       }
-    }
-  }
-
-  /**
-   * Render optimization insights with error handling
-   */
-  function renderOptimizationInsights(chartsSection, chartRenderResults) {
-    try {
-      const optInsights = analyticsEngine.getOptimizationInsights
-        ? analyticsEngine.getOptimizationInsights(
-            currentData.transactions,
-            currentTimePeriod
-          )
-        : [];
-
-      if (optInsights && optInsights.length > 0) {
-        const section = OptimizationInsights(optInsights);
-        section.style.setProperty(
-          'margin-top',
-          'var(--spacing-md)',
-          'important'
-        );
-        chartsSection.appendChild(section);
-        chartRenderResults.push({
-          name: 'Optimization Insights',
-          success: true,
-        });
-      } else {
-        chartRenderResults.push({
-          name: 'Optimization Insights',
-          success: true,
-        });
-      }
-    } catch (error) {
-      console.warn(
-        '[ReportsView] Failed to render optimization insights:',
-        error
-      );
-      chartRenderResults.push({
-        name: 'Optimization Insights',
-        success: false,
-        error,
-      });
-    }
-  }
-
-  /**
-   * Render benchmarking section - Feature 3.3.3 Comparative Analytics
-   */
-  function renderBenchmarkingSection(chartsSection, chartRenderResults) {
-    try {
-      const benchmarkingData = analyticsEngine.getPersonalBenchmarking
-        ? analyticsEngine.getPersonalBenchmarking(
-            currentData.transactions,
-            currentTimePeriod
-          )
-        : null;
-
-      if (benchmarkingData && benchmarkingData.length > 0) {
-        const benchmarkingSection = BenchmarkingSection(
-          benchmarkingData,
-          currentTimePeriod
-        );
-        benchmarkingSection.style.setProperty(
-          'margin-top',
-          'var(--spacing-md)',
-          'important'
-        );
-        chartsSection.appendChild(benchmarkingSection);
-        chartRenderResults.push({
-          name: 'Personal Benchmarking',
-          success: true,
-        });
-      } else {
-        chartRenderResults.push({
-          name: 'Personal Benchmarking',
-          success: true,
-        });
-      }
-    } catch (benchmarkingError) {
-      console.warn(
-        '[ReportsView] Failed to render benchmarking section:',
-        benchmarkingError
-      );
-      chartRenderResults.push({
-        name: 'Personal Benchmarking',
-        success: false,
-        error: benchmarkingError,
-      });
-    }
-  }
-
-  /**
-   * Render budget recommendations section - Feature 3.3.4 Predictive Budget
-   */
-  function renderBudgetRecommendationsSection(
-    chartsSection,
-    chartRenderResults
-  ) {
-    try {
-      const recommendationsData = analyticsEngine.getBudgetRecommendations
-        ? analyticsEngine.getBudgetRecommendations(
-            currentData.transactions,
-            currentTimePeriod
-          )
-        : null;
-
-      if (recommendationsData && recommendationsData.length > 0) {
-        const recommendationsSection =
-          BudgetRecommendationsSection(recommendationsData);
-        recommendationsSection.style.setProperty(
-          'margin-top',
-          'var(--spacing-md)',
-          'important'
-        );
-        chartsSection.appendChild(recommendationsSection);
-        chartRenderResults.push({
-          name: 'Budget Recommendations',
-          success: true,
-        });
-      } else {
-        chartRenderResults.push({
-          name: 'Budget Recommendations',
-          success: true,
-        });
-      }
-    } catch (recommendationsError) {
-      console.warn(
-        '[ReportsView] Failed to render budget recommendations section:',
-        recommendationsError
-      );
-      chartRenderResults.push({
-        name: 'Budget Recommendations',
-        success: false,
-        error: recommendationsError,
-      });
-    }
-  }
-
-  /**
-   * Render baseline analysis section - Floor vs Average Spending Patterns
-   */
-  function renderBaselineAnalysisSection(chartsSection, chartRenderResults) {
-    try {
-      // Determine period based on current time period
-      let baselinePeriod = 'monthly';
-      const days =
-        typeof currentTimePeriod?.days === 'number'
-          ? currentTimePeriod.days
-          : currentTimePeriod?.startDate && currentTimePeriod?.endDate
-            ? (() => {
-                const startMs =
-                  currentTimePeriod.startDate instanceof Date
-                    ? currentTimePeriod.startDate.getTime()
-                    : Date.parse(currentTimePeriod.startDate);
-                const endMs =
-                  currentTimePeriod.endDate instanceof Date
-                    ? currentTimePeriod.endDate.getTime()
-                    : Date.parse(currentTimePeriod.endDate);
-
-                const diffDays = (endMs - startMs) / (1000 * 60 * 60 * 24);
-                return Number.isFinite(diffDays) ? diffDays : 30;
-              })()
-            : 30; // fallback to monthly
-
-      if (days <= 7) {
-        baselinePeriod = 'weekly';
-      } else if (days >= 365) {
-        baselinePeriod = 'yearly';
-      }
-
-      // Create baseline analysis component
-      const baselineAnalysis = BaselineAnalysis({
-        period: baselinePeriod,
-        accountId: null, // Show overall baseline for all accounts
-        showInsights: true,
-        compact: false,
-      });
-
-      baselineAnalysis.style.setProperty(
-        'margin-top',
-        'var(--spacing-md)',
-        'important'
-      );
-      chartsSection.appendChild(baselineAnalysis);
-
-      chartRenderResults.push({ name: 'Baseline Analysis', success: true });
-    } catch (baselineError) {
-      chartRenderResults.push({
-        name: 'Baseline Analysis',
-        success: false,
-        error: baselineError,
-      });
-      console.warn(
-        '[ReportsView] Failed to render baseline analysis section:',
-        baselineError
-      );
-
-      // Show fallback message
-      const fallbackSection = document.createElement('div');
-      fallbackSection.className = 'chart-section';
-      fallbackSection.style.setProperty(
-        'margin-top',
-        'var(--spacing-md)',
-        'important'
-      );
-      fallbackSection.innerHTML = `
-        <div class="chart-container">
-          <h3 class="chart-title">Baseline Analysis</h3>
-          <div class="chart-placeholder">
-            <div class="placeholder-icon">📊</div>
-            <div class="placeholder-text">
-              Baseline analysis temporarily unavailable
-            </div>
-            <div class="placeholder-subtext">
-              Please try refreshing the page
-            </div>
-          </div>
-        </div>
-      `;
-      chartsSection.appendChild(fallbackSection);
     }
   }
 

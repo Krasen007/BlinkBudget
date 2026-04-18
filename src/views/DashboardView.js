@@ -4,16 +4,13 @@ import { TransactionList } from '../components/TransactionList.js';
 import { createQuickAmountPresets } from '../components/QuickAmountPresets.js';
 import { AccountService } from '../core/Account/account-service.js';
 import { TransactionService } from '../core/transaction-service.js';
-import { FilteringService } from '../core/analytics/FilteringService.js';
 import { AuthService } from '../core/auth-service.js';
-import { SettingsService } from '../core/settings-service.js';
 import { Router } from '../core/router.js';
 import { NavigationState } from '../core/navigation-state.js';
 import { COLORS, SPACING, STORAGE_KEYS } from '../utils/constants.js';
 
 import { getTransactionToHighlight } from '../utils/success-feedback.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
-import { AdvancedFilterPanel } from '../components/AdvancedFilterPanel.js';
 
 export const DashboardView = () => {
   const container = document.createElement('div');
@@ -85,7 +82,6 @@ export const DashboardView = () => {
     sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER) || null;
   let currentMonthFilter =
     sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER) || null;
-  let advancedFilters = null;
 
   // Track current filter state for display purposes
   let currentDashboardFilter = null;
@@ -172,31 +168,6 @@ export const DashboardView = () => {
   content.id = 'dashboard-content';
   container.appendChild(content);
 
-  // Advanced Filter Panel (Conditional)
-  const advancedFilteringEnabled =
-    SettingsService.getSetting('advancedFilteringEnabled') === true;
-  let filterPanel;
-
-  if (advancedFilteringEnabled) {
-    // Prepare initial filters if category filter is active
-    const initialFilters = currentCategoryFilter
-      ? {
-          categories: [currentCategoryFilter],
-          categoryFilterType: 'include',
-        }
-      : {};
-
-    filterPanel = AdvancedFilterPanel({
-      onFiltersChange: filters => {
-        console.log('Dashboard filters applied:', filters);
-        advancedFilters = filters;
-        renderDashboard();
-      },
-      initialFilters,
-    });
-    container.appendChild(filterPanel);
-  }
-
   const renderDashboard = () => {
     content.innerHTML = '';
 
@@ -204,18 +175,8 @@ export const DashboardView = () => {
     const allTransactions = TransactionService.getAll();
     const currentAccounts = AccountService.getAccounts();
 
-    // 1. First apply advanced filters if they exist
-    let transactions = allTransactions;
-    if (advancedFilters) {
-      // Include ghosts in filtering because list wants them
-      transactions = FilteringService.applyFilters(transactions, {
-        ...advancedFilters,
-        includeGhosts: true,
-      });
-    }
-
-    // 2. Then apply legacy filters (Account, Quick Date, Quick Category)
-    transactions = transactions
+    // Apply filters (Account, Quick Date, Quick Category)
+    const transactions = allTransactions
       .filter(t => {
         // Account Filter
         if (
@@ -262,8 +223,7 @@ export const DashboardView = () => {
       currentAccountFilter !== 'all' ||
       currentDateFilter !== null ||
       currentCategoryFilter !== null ||
-      currentMonthFilter !== null ||
-      advancedFilters !== null;
+      currentMonthFilter !== null;
 
     // Calculate ALL TIME net worth for Total Available
     let allTimeIncome = 0;
@@ -514,12 +474,6 @@ export const DashboardView = () => {
           currentMonthFilter = null;
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
           currentDashboardFilter = null;
-          advancedFilters = null;
-
-          // Update AdvancedFilterPanel if it exists
-          if (filterPanel && filterPanel.updateFormValues) {
-            filterPanel.updateFormValues();
-          }
 
           // Update title and re-render
           updateTitle();

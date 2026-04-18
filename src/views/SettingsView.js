@@ -115,17 +115,69 @@ export const SettingsView = () => {
   });
   content.appendChild(dateFormatSection);
 
-  // Data Management Section
-  const dataSection = DataManagementSection();
-  content.appendChild(dataSection);
-
-  // Backup & Restore Section
-  const backupSection = BackupRestoreSection();
-  content.appendChild(backupSection);
-
   // General Section
   const generalSection = GeneralSection();
   content.appendChild(generalSection);
+
+  // Advanced Settings Toggle
+  const advancedToggleContainer = document.createElement('div');
+  advancedToggleContainer.style.cssText = `
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  `;
+
+  const advancedToggleLabel = document.createElement('span');
+  advancedToggleLabel.textContent = '⚙️ Advanced Settings';
+  advancedToggleLabel.style.cssText = `
+    font-weight: 600;
+    font-size: var(--font-size-base);
+    color: var(--color-text-main);
+  `;
+
+  const advancedToggleIcon = document.createElement('span');
+  advancedToggleIcon.textContent = '▶';
+  advancedToggleIcon.style.cssText = `
+    transition: transform 0.2s ease;
+    color: var(--color-text-muted);
+  `;
+
+  let advancedSettingsVisible = false;
+  const advancedSettingsSection = document.createElement('div');
+  advancedSettingsSection.style.cssText = `
+    display: none;
+    margin-top: var(--spacing-md);
+  `;
+
+  advancedToggleContainer.appendChild(advancedToggleLabel);
+  advancedToggleContainer.appendChild(advancedToggleIcon);
+  content.appendChild(advancedToggleContainer);
+  content.appendChild(advancedSettingsSection);
+
+  advancedToggleContainer.addEventListener('click', () => {
+    advancedSettingsVisible = !advancedSettingsVisible;
+    advancedSettingsSection.style.display = advancedSettingsVisible
+      ? 'block'
+      : 'none';
+    advancedToggleIcon.style.transform = advancedSettingsVisible
+      ? 'rotate(90deg)'
+      : 'rotate(0deg)';
+  });
+
+  // Advanced Settings Sections (hidden by default)
+  // Data Management Section
+  const dataSection = DataManagementSection();
+  advancedSettingsSection.appendChild(dataSection);
+
+  // Backup & Restore Section
+  const backupSection = BackupRestoreSection();
+  advancedSettingsSection.appendChild(backupSection);
 
   /* Disabled until further notice */
   // // Smart Suggestions Section
@@ -138,15 +190,15 @@ export const SettingsView = () => {
 
   // Security & Privacy Section
   const securitySection = SecuritySection();
-  content.appendChild(securitySection);
-
-  // Feedback Link Section
-  const feedbackSection = FeedbackLink();
-  content.appendChild(feedbackSection);
+  advancedSettingsSection.appendChild(securitySection);
 
   // Account Deletion Section
   const accountDeletionSection = AccountDeletionSection();
-  content.appendChild(accountDeletionSection);
+  advancedSettingsSection.appendChild(accountDeletionSection);
+
+  // Feedback Link Section (keep visible)
+  const feedbackSection = FeedbackLink();
+  content.appendChild(feedbackSection);
 
   const handleStorageUpdate = e => {
     console.log(
