@@ -457,9 +457,7 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
         display: false,
       },
     },
-    options: {
-      events: [], // Disable all chart events
-    },
+    events: [], // Disable all chart events
     onHover: null, // Disable hover events
     onClick: null, // Disable click events
   });

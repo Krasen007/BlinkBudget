@@ -12,8 +12,6 @@
  */
 
 import { Router } from '../core/router.js';
-import { TransactionService } from '../core/transaction-service.js';
-import { AccountService } from '../core/Account/account-service.js';
 import { ForecastEngine } from '../core/forecast-engine.js';
 import { AccountBalancePredictor } from '../core/Account/account-balance-predictor.js';
 import { RiskAssessor } from '../core/risk-assessor.js';
@@ -30,6 +28,7 @@ import { InvestmentsSection } from './financial-planning/InvestmentsSection.js';
 import { GoalsSection } from './financial-planning/GoalsSection.js';
 import { InsightsSection } from './financial-planning/InsightsSection.js';
 import { BudgetsSection } from './financial-planning/BudgetsSection.js';
+import { planningDataManager } from '../core/financial-planning/PlanningDataManager.js';
 
 export const FinancialPlanningView = () => {
   const container = document.createElement('div');
@@ -303,15 +302,22 @@ export const FinancialPlanningView = () => {
 
   /**
    * Ensure data is synced from cloud before generating forecasts
+   * Only syncs if data is stale (older than 5 minutes) or not yet loaded
    */
   async function ensureDataSynced() {
     try {
       const { AuthService } = await import('../core/auth-service.js');
       const { SyncService } = await import('../core/sync-service.js');
 
-      if (AuthService.getUserId()) {
-        // Trigger a pull from cloud to ensure we have the latest data
-        await SyncService.pullFromCloud(AuthService.getUserId());
+      const userId = AuthService.getUserId();
+      if (!userId) return;
+
+      // Only sync if data is stale or not yet loaded
+      if (planningDataManager.needsRefresh()) {
+        console.log('[Planning] Data is stale, syncing from cloud...');
+        await SyncService.pullFromCloud(userId);
+      } else {
+        console.log('[Planning] Using cached data (fresh)');
       }
     } catch (error) {
       console.warn('[Planning] Could not ensure data sync:', error);
@@ -350,7 +356,7 @@ export const FinancialPlanningView = () => {
   }
 
   /**
-   * Load planning data from various services
+   * Load planning data using PlanningDataManager with caching
    */
   async function loadPlanningData() {
     if (isLoading) return;
@@ -358,38 +364,17 @@ export const FinancialPlanningView = () => {
     try {
       isLoading = true;
 
-      // Ensure data is synced before loading
+      // Ensure data is synced only if stale
       await ensureDataSynced();
 
-      // Get transaction and account data
-      let transactions = TransactionService.getAll();
-      const accounts = AccountService.getAccounts();
+      // Use PlanningDataManager to load data with caching
+      planningData = await planningDataManager.loadData();
 
-      // Validate we have actual transaction data
-      if (transactions.length === 0) {
+      // Validate we have actual transaction data, if not force sync
+      if (!planningData || !planningData.transactions || planningData.transactions.length === 0) {
         await forceSyncFromCloud();
-        // Reload transactions after sync to get updated data
-        transactions = TransactionService.getAll();
+        planningData = await planningDataManager.loadData();
       }
-
-      // Import StorageService dynamically
-      const { StorageService } = await import('../core/storage.js');
-      const investments = StorageService.getInvestments
-        ? StorageService.getInvestments()
-        : [];
-      const goals = StorageService.getGoals ? StorageService.getGoals() : [];
-      const budgets = StorageService.getBudgets
-        ? StorageService.getBudgets()
-        : [];
-
-      planningData = {
-        transactions,
-        accounts,
-        investments,
-        goals,
-        budgets,
-        lastUpdated: new Date(),
-      };
 
       // Re-render current section with new data
       renderSection(currentSection);
@@ -415,6 +400,8 @@ export const FinancialPlanningView = () => {
       e.detail.key === STORAGE_KEYS.GOALS ||
       e.detail.key === STORAGE_KEYS.BUDGETS
     ) {
+      // Refresh the PlanningDataManager cache to ensure fresh data
+      planningDataManager.refresh();
       loadPlanningData();
     }
   };

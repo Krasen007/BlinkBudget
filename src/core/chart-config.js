@@ -194,16 +194,7 @@ export function defaultChartOptions() {
 
     // Simplified animation with BlinkBudget timing
     animation: {
-      duration: function () {
-        // Check for reduced motion preference
-        if (
-          window.matchMedia &&
-          window.matchMedia('(prefers-reduced-motion: reduce)').matches
-        ) {
-          return 0; // No animation for users who prefer reduced motion
-        }
-        return 0; // Disabled for faster view switching
-      },
+      duration: 0, // Disabled for faster view switching
       easing: 'easeOutQuart', // Simpler easing
       animateRotate: false, // Disabled for faster loading
       animateScale: false, // Disable scale animation for simplicity

@@ -47,9 +47,11 @@ export const DateFormatSection = () => {
   });
   section.appendChild(title);
 
-  // Auto-detect and save format if not already set
+  // Auto-detect and save format if not already set or invalid
   let currentFormat = SettingsService.getSetting('dateFormat');
-  if (!currentFormat) {
+  const validFormats = [DATE_FORMATS.US, DATE_FORMATS.EU, DATE_FORMATS.ISO];
+  
+  if (!currentFormat || !validFormats.includes(currentFormat)) {
     currentFormat = detectDateFormat();
     try {
       SettingsService.saveSetting('dateFormat', currentFormat);

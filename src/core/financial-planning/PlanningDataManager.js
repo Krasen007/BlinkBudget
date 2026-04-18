@@ -51,20 +51,24 @@ export class PlanningDataManager {
       const transactions = TransactionService.getAll();
       const accounts = AccountService.getAccounts();
 
-      // Load investment data and goals (prefer local cache first)
+      // Load investment data, goals, and budgets (prefer local cache first)
       const investmentsKey = STORAGE_KEYS.INVESTMENTS;
       const goalsKey = STORAGE_KEYS.GOALS;
+      const budgetsKey = STORAGE_KEYS.BUDGETS;
 
       const investmentsCacheRaw = localStorage.getItem(investmentsKey);
       if (investmentsCacheRaw)
         console.log(`[Sync] ${investmentsKey} loaded from cache`);
       const goalsCacheRaw = localStorage.getItem(goalsKey);
       if (goalsCacheRaw) console.log(`[Sync] ${goalsKey} loaded from cache`);
+      const budgetsCacheRaw = localStorage.getItem(budgetsKey);
+      if (budgetsCacheRaw) console.log(`[Sync] ${budgetsKey} loaded from cache`);
 
       const investments = StorageService.getInvestments
         ? StorageService.getInvestments()
         : [];
       const goals = StorageService.getGoals ? StorageService.getGoals() : [];
+      const budgets = StorageService.getBudgets ? StorageService.getBudgets() : [];
 
       const timestamp = new Date();
 
@@ -73,6 +77,7 @@ export class PlanningDataManager {
         accounts,
         investments,
         goals,
+        budgets,
         lastUpdated: timestamp,
       };
 
