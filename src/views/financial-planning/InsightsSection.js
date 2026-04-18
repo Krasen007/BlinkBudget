@@ -19,6 +19,14 @@ import {
 } from '../../utils/financial-planning-helpers.js';
 import { InsightsGenerator } from '../../core/insights-generator.js';
 import { InflationTrends } from '../../components/InflationTrends.js';
+import { getAnalyticsEngine } from '../../core/analytics/AnalyticsInstance.js';
+import { PatternInsights } from '../../components/PatternInsights.js';
+import { TrendAnalysisSection } from '../../components/TrendAnalysisSection.js';
+import { BenchmarkingSection } from '../../components/BenchmarkingSection.js';
+import { BudgetRecommendationsSection } from '../../components/BudgetRecommendationsSection.js';
+import { OptimizationInsights } from '../../components/OptimizationInsights.js';
+import { BaselineAnalysis } from '../../components/BaselineAnalysis.js';
+import { getCurrentMonthPeriod } from '../../utils/reports-utils.js';
 
 /**
  * Create top movers analysis
@@ -720,6 +728,215 @@ function createTimelineSection(
 }
 
 /**
+ * Render optimization insights with error handling
+ */
+function renderOptimizationInsights(section, planningData) {
+  try {
+    const analyticsEngine = getAnalyticsEngine();
+    const currentTimePeriod = getCurrentMonthPeriod();
+
+    const optInsights = analyticsEngine.getOptimizationInsights
+      ? analyticsEngine.getOptimizationInsights(
+          planningData.transactions,
+          currentTimePeriod
+        )
+      : [];
+
+    if (optInsights && optInsights.length > 0) {
+      const optSection = OptimizationInsights(optInsights);
+      optSection.style.setProperty(
+        'margin-top',
+        'var(--spacing-md)',
+        'important'
+      );
+      section.appendChild(optSection);
+    }
+  } catch (error) {
+    console.warn(
+      '[InsightsSection] Failed to render optimization insights:',
+      error
+    );
+  }
+}
+
+/**
+ * Render pattern insights with error handling
+ */
+function renderPatternInsights(section, planningData) {
+  try {
+    const currentTimePeriod = getCurrentMonthPeriod();
+
+    const patternInsightsSection = PatternInsights(
+      planningData.transactions,
+      currentTimePeriod,
+      null // previousPeriod - could be implemented later
+    );
+    patternInsightsSection.style.setProperty('margin-top', '0', 'important');
+    section.appendChild(patternInsightsSection);
+  } catch (patternError) {
+    console.error('Failed to render pattern insights section:', patternError);
+  }
+}
+
+/**
+ * Render trend analysis section with direction indicators, consistency scores, and MoM
+ */
+function renderTrendAnalysisSection(section, planningData) {
+  try {
+    const analyticsEngine = getAnalyticsEngine();
+
+    const trends = analyticsEngine.getTrendAnalysis
+      ? analyticsEngine.getTrendAnalysis(null, planningData.transactions)
+      : { trends: [] };
+
+    const consistency = analyticsEngine.getConsistencyScores
+      ? analyticsEngine.getConsistencyScores(planningData.transactions)
+      : {};
+
+    if (trends.trends && trends.trends.length > 0) {
+      const trendSection = TrendAnalysisSection({
+        trends: trends.trends,
+        consistencyScores: consistency,
+        transactions: planningData.transactions,
+      });
+      trendSection.style.setProperty(
+        'margin-top',
+        'var(--spacing-md)',
+        'important'
+      );
+      section.appendChild(trendSection);
+    }
+  } catch (error) {
+    console.warn('[InsightsSection] Failed to render trend analysis:', error);
+  }
+}
+
+/**
+ * Render benchmarking section - Feature 3.3.3 Comparative Analytics
+ */
+function renderBenchmarkingSection(section, planningData) {
+  try {
+    const analyticsEngine = getAnalyticsEngine();
+    const currentTimePeriod = getCurrentMonthPeriod();
+
+    const benchmarkingData = analyticsEngine.getPersonalBenchmarking
+      ? analyticsEngine.getPersonalBenchmarking(
+          planningData.transactions,
+          currentTimePeriod
+        )
+      : null;
+
+    if (benchmarkingData && benchmarkingData.length > 0) {
+      const benchmarkingSection = BenchmarkingSection(
+        benchmarkingData,
+        currentTimePeriod
+      );
+      benchmarkingSection.style.setProperty(
+        'margin-top',
+        'var(--spacing-md)',
+        'important'
+      );
+      section.appendChild(benchmarkingSection);
+    }
+  } catch (benchmarkingError) {
+    console.warn(
+      '[InsightsSection] Failed to render benchmarking section:',
+      benchmarkingError
+    );
+  }
+}
+
+/**
+ * Render budget recommendations section - Feature 3.3.4 Predictive Budget
+ */
+function renderBudgetRecommendationsSection(section, planningData) {
+  try {
+    const analyticsEngine = getAnalyticsEngine();
+    const currentTimePeriod = getCurrentMonthPeriod();
+
+    const recommendationsData = analyticsEngine.getBudgetRecommendations
+      ? analyticsEngine.getBudgetRecommendations(
+          planningData.transactions,
+          currentTimePeriod
+        )
+      : null;
+
+    if (recommendationsData && recommendationsData.length > 0) {
+      const recommendationsSection =
+        BudgetRecommendationsSection(recommendationsData);
+      recommendationsSection.style.setProperty(
+        'margin-top',
+        'var(--spacing-md)',
+        'important'
+      );
+      section.appendChild(recommendationsSection);
+    }
+  } catch (recommendationsError) {
+    console.warn(
+      '[InsightsSection] Failed to render budget recommendations section:',
+      recommendationsError
+    );
+  }
+}
+
+/**
+ * Render baseline analysis section - Floor vs Average Spending Patterns
+ */
+function renderBaselineAnalysisSection(section, planningData) {
+  try {
+    const currentTimePeriod = getCurrentMonthPeriod();
+
+    // Determine period based on current time period
+    let baselinePeriod = 'monthly';
+    const days =
+      typeof currentTimePeriod?.days === 'number'
+        ? currentTimePeriod.days
+        : currentTimePeriod?.startDate && currentTimePeriod?.endDate
+          ? (() => {
+              const startMs =
+                currentTimePeriod.startDate instanceof Date
+                  ? currentTimePeriod.startDate.getTime()
+                  : Date.parse(currentTimePeriod.startDate);
+              const endMs =
+                currentTimePeriod.endDate instanceof Date
+                  ? currentTimePeriod.endDate.getTime()
+                  : Date.parse(currentTimePeriod.endDate);
+
+              const diffDays = (endMs - startMs) / (1000 * 60 * 60 * 24);
+              return Number.isFinite(diffDays) ? diffDays : 30;
+            })()
+          : 30; // fallback to monthly
+
+    if (days <= 7) {
+      baselinePeriod = 'weekly';
+    } else if (days >= 365) {
+      baselinePeriod = 'yearly';
+    }
+
+    // Create baseline analysis component with planning data
+    const baselineAnalysis = BaselineAnalysis({
+      period: baselinePeriod,
+      accountId: null, // Show overall baseline for all accounts
+      showInsights: true,
+      compact: false,
+      transactions: planningData.transactions,
+    });
+
+    baselineAnalysis.style.setProperty(
+      'margin-top',
+      'var(--spacing-md)',
+      'important'
+    );
+    section.appendChild(baselineAnalysis);
+  } catch (baselineError) {
+    console.warn(
+      '[InsightsSection] Failed to render baseline analysis section:',
+      baselineError
+    );
+  }
+}
+
+/**
  * Insights Section Component
  * @param {Object} planningData - Financial planning data including transactions
  * @param {Object} chartRenderer - Chart renderer service instance
@@ -788,6 +1005,24 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
     sharedMonthState
   );
   section.appendChild(inflationTrendsComponent.element);
+
+  // Optimization Insights - cost-saving recommendations
+  renderOptimizationInsights(section, planningData);
+
+  // Spending patterns
+  renderPatternInsights(section, planningData);
+
+  // Trend Analysis - spending direction, consistency scores, MoM
+  renderTrendAnalysisSection(section, planningData);
+
+  // Personal Benchmarking - Feature 3.3.3 Comparative Analytics
+  renderBenchmarkingSection(section, planningData);
+
+  // Budget Recommendations - Feature 3.3.4 Predictive Budget
+  renderBudgetRecommendationsSection(section, planningData);
+
+  // Baseline Analysis - Floor vs Average Spending Patterns
+  renderBaselineAnalysisSection(section, planningData);
 
   // Set up synchronized navigation - all sections update together
   sharedMonthState.onNavigate = () => {
