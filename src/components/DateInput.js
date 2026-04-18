@@ -54,6 +54,12 @@ export const DateInput = (options = {}) => {
     : getTodayISO();
   realDate.value = initialDate;
 
+  // Store the original full timestamp in dataset for time preservation during edits
+  if (value && typeof value === 'string' && value.includes('T')) {
+    realDate.dataset.timestamp = value;
+    container.dataset.timestamp = value;
+  }
+
   // Connect label to input
   label.setAttribute('for', inputId);
 
@@ -75,14 +81,16 @@ export const DateInput = (options = {}) => {
 
   // Expose methods for external consumption
   container.getDate = () => {
-    // If value is a full ISO timestamp, return it; otherwise return date-only
-    return realDate.value.includes('T') ? realDate.value : realDate.value;
+    // Return the current date value (date-only format YYYY-MM-DD)
+    return realDate.value;
   };
   container.setDate = isoDate => {
     realDate.value = isoDate;
     // Store the original full timestamp in dataset for timestamp preservation
+    // Store on both the input element and the container for accessibility
     if (typeof isoDate === 'string' && isoDate.includes('T')) {
       realDate.dataset.timestamp = isoDate;
+      container.dataset.timestamp = isoDate;
     }
   };
 
