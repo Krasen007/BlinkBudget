@@ -20,7 +20,6 @@ import {
 import { InsightsGenerator } from '../../core/insights-generator.js';
 import { InflationTrends } from '../../components/InflationTrends.js';
 import { getAnalyticsEngine } from '../../core/analytics/AnalyticsInstance.js';
-import { PatternInsights } from '../../components/PatternInsights.js';
 import { TrendAnalysisSection } from '../../components/TrendAnalysisSection.js';
 import { BenchmarkingSection } from '../../components/BenchmarkingSection.js';
 import { BudgetRecommendationsSection } from '../../components/BudgetRecommendationsSection.js';
@@ -777,25 +776,6 @@ function renderOptimizationInsights(section, planningData) {
 }
 
 /**
- * Render pattern insights with error handling
- */
-function renderPatternInsights(section, planningData) {
-  try {
-    const currentTimePeriod = getCurrentMonthPeriod();
-
-    const patternInsightsSection = PatternInsights(
-      planningData.transactions,
-      currentTimePeriod,
-      null // previousPeriod - could be implemented later
-    );
-    patternInsightsSection.style.setProperty('margin-top', '0', 'important');
-    section.appendChild(patternInsightsSection);
-  } catch (patternError) {
-    console.error('Failed to render pattern insights section:', patternError);
-  }
-}
-
-/**
  * Render trend analysis section with direction indicators, consistency scores, and MoM
  */
 function renderTrendAnalysisSection(section, planningData) {
@@ -1025,9 +1005,6 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
 
   // Optimization Insights - cost-saving recommendations
   renderOptimizationInsights(section, planningData);
-
-  // Spending patterns
-  renderPatternInsights(section, planningData);
 
   // Trend Analysis - spending direction, consistency scores, MoM
   renderTrendAnalysisSection(section, planningData);
