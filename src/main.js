@@ -18,6 +18,77 @@ import { PrivacyService } from './core/privacy-service.js';
 
 InstallService.init();
 
+/**
+ * Pre-load ReportsView data for instant navigation
+ */
+const preloadReportsData = async () => {
+  try {
+    console.log('[Main] Pre-loading ReportsView data...');
+
+    // Pre-load Chart.js
+    const { preloadChartJS } = await import('./core/chart-loader.js');
+    await preloadChartJS();
+
+    // Get transactions and analytics engine
+    const { TransactionService } =
+      await import('./core/transaction-service.js');
+    const { getAnalyticsEngine } =
+      await import('./core/analytics/AnalyticsInstance.js');
+    const { getCurrentMonthPeriod } = await import('./utils/reports-utils.js');
+
+    const transactions = TransactionService.getAll();
+    const analyticsEngine = getAnalyticsEngine();
+
+    // Pre-calculate analytics for current month
+    const currentTimePeriod = getCurrentMonthPeriod();
+
+    const startStr =
+      currentTimePeriod.startDate instanceof Date
+        ? currentTimePeriod.startDate.toISOString()
+        : currentTimePeriod.startDate;
+    const endStr =
+      currentTimePeriod.endDate instanceof Date
+        ? currentTimePeriod.endDate.toISOString()
+        : currentTimePeriod.endDate;
+    const cacheKey = `report_data_${startStr}_${endStr}`;
+
+    // Check if already cached
+    if (analyticsEngine.cache.get(cacheKey)) {
+      console.log('[Main] ReportsView data already cached');
+      return;
+    }
+
+    // Calculate and cache analytics data
+    const analyticsData = {
+      transactions,
+      timePeriod: currentTimePeriod,
+      insights: analyticsEngine.generateSpendingInsights(
+        transactions,
+        currentTimePeriod
+      ),
+      categoryBreakdown: analyticsEngine.calculateCategoryBreakdown(
+        transactions,
+        currentTimePeriod
+      ),
+      incomeVsExpenses: analyticsEngine.calculateIncomeVsExpenses(
+        transactions,
+        currentTimePeriod
+      ),
+      costOfLiving: analyticsEngine.calculateCostOfLiving(
+        transactions,
+        currentTimePeriod
+      ),
+    };
+
+    analyticsEngine.cache.set(cacheKey, analyticsData);
+
+    console.log('[Main] ReportsView data pre-loaded successfully');
+  } catch (error) {
+    console.warn('[Main] Failed to pre-load ReportsView data:', error);
+    // Don't block app initialization if pre-loading fails
+  }
+};
+
 const initApp = () => {
   const app = document.querySelector('#app');
   ViewManager.init(app);
@@ -79,6 +150,9 @@ const initApp = () => {
       import('./core/backup-service.js').then(({ BackupService }) => {
         BackupService.init();
       });
+
+      // Pre-load ReportsView data for instant navigation
+      preloadReportsData();
 
       // Initialize tutorial system after user is authenticated
       import('./components/tutorial/TutorialManager.js')

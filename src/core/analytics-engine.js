@@ -288,6 +288,42 @@ export class AnalyticsEngine {
     return result;
   }
 
+  /**
+   * Analyze frequency patterns for categories (simple implementation)
+   */
+  analyzeFrequencyPatterns(transactions, timePeriod, targetCategories = null) {
+    const cacheKey = `frequency_${JSON.stringify(timePeriod)}_${JSON.stringify(targetCategories || [])}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
+
+    // Filter transactions by time period
+    const filteredTransactions = FilteringService.filterByTimePeriod(
+      transactions,
+      timePeriod
+    );
+
+    // Calculate frequency per category
+    const categoryFrequency = {};
+    filteredTransactions.forEach(t => {
+      if (t.category) {
+        categoryFrequency[t.category] =
+          (categoryFrequency[t.category] || 0) + 1;
+      }
+    });
+
+    // Convert to array format expected by CategorySelector
+    const categories = Object.entries(categoryFrequency).map(
+      ([category, count]) => ({
+        category,
+        count,
+        frequency: count,
+      })
+    );
+
+    this.cache.set(cacheKey, { categories });
+    return { categories };
+  }
+
   // ========== Quick Amount Presets (Feature 3.4.1) ==========
 
   /**

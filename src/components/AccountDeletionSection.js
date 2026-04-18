@@ -240,7 +240,7 @@ export const AccountDeletionSection = () => {
   helpText.innerHTML = `
     <div style="margin-top: ${SPACING.MD}; padding-top: ${SPACING.MD}; border-top: 1px solid var(--color-border);">
       <p style="font-size: ${FONT_SIZES.XS}; color: var(--color-text-tertiary); line-height: 1.5; margin: 0;">
-        <strong>Need help?</strong> Contact us at support@blinkbudget.app for assistance with account deletion or data export requests.
+        <strong>Need help?</strong> Open GitHub issue for assistance with account deletion or data export requests.
       </p>
     </div>
   `;
