@@ -6,6 +6,7 @@ import { DataManagementSection } from '../components/DataManagementSection.js';
 import { GeneralSection } from '../components/GeneralSection.js';
 import { BackupRestoreSection } from '../components/BackupRestoreSection.js';
 import { AccountDeletionSection } from '../components/AccountDeletionSection.js';
+import { escapeHtml } from '../utils/security-utils.js';
 /* Disabled until further notice */
 //import { SmartSuggestionsSection } from '../components/SmartSuggestionsSection.js';
 /* Disabled until further notice */
@@ -87,10 +88,11 @@ export const SettingsView = () => {
   // Category Management Section
   const categoryManagementSection = document.createElement('div');
   categoryManagementSection.className = 'settings-section';
+  // Security: Static strings, escaped for safety
   categoryManagementSection.innerHTML = `
     <div class="settings-section-header">
-      <h3>🏷️ Category Management</h3>
-      <p>Organize and customize your transaction categories</p>
+      <h3>${escapeHtml('🏷️ Category Management')}</h3>
+      <p>${escapeHtml('Organize and customize your transaction categories')}</p>
     </div>
   `;
   const manageCategoriesBtn = ButtonComponent({

@@ -21,6 +21,7 @@ import { COLORS, SPACING, TIMING, STORAGE_KEYS } from '../utils/constants.js';
 
 import { debounce } from '../utils/touch-utils.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
+import { escapeHtml } from '../utils/security-utils.js';
 
 import { OverviewSection } from './financial-planning/OverviewSection.js';
 import { ForecastsSection } from './financial-planning/ForecastsSection.js';
@@ -160,9 +161,10 @@ export const FinancialPlanningView = () => {
       tab.setAttribute('aria-controls', `${section.id}-panel`);
       tab.id = `${section.id}-tab`;
 
+      // Security: Escape dynamic icon and label values
       tab.innerHTML = `
-        <span class="tab-icon">${section.icon}</span>
-        <span class="tab-label">${section.label}</span>
+        <span class="tab-icon">${escapeHtml(section.icon)}</span>
+        <span class="tab-label">${escapeHtml(section.label)}</span>
       `;
 
       // Click handler
@@ -371,7 +373,11 @@ export const FinancialPlanningView = () => {
       planningData = await planningDataManager.loadData();
 
       // Validate we have actual transaction data, if not force sync
-      if (!planningData || !planningData.transactions || planningData.transactions.length === 0) {
+      if (
+        !planningData ||
+        !planningData.transactions ||
+        planningData.transactions.length === 0
+      ) {
         await forceSyncFromCloud();
         planningData = await planningDataManager.loadData();
       }

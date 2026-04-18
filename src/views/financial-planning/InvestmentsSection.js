@@ -12,6 +12,7 @@
  */
 
 import { COLORS, SPACING } from '../../utils/constants.js';
+import { escapeHtml } from '../../utils/security-utils.js';
 import { createPortfolioCompositionChart } from '../../utils/financial-planning-charts.js';
 import {
   createUsageNote,
@@ -119,7 +120,7 @@ function generateTypeSpecificFields(
   basicFieldsContainer,
   typeSpecificFields
 ) {
-  // Clear both containers
+  // Security: Clearing container content, no user input involved
   basicFieldsContainer.innerHTML = '';
   typeSpecificFields.innerHTML = '';
 
@@ -788,6 +789,7 @@ function createInvestmentsList(chartRenderer, activeCharts) {
   investmentsList.style.marginTop = SPACING.MD;
 
   async function refreshInvestmentsList() {
+    // Security: Clearing list content, no user input involved
     investmentsList.innerHTML = '';
     let items;
     try {
@@ -1225,14 +1227,16 @@ export const InvestmentsSection = async (chartRenderer, activeCharts) => {
     portfolioToRender.assetAllocation
   ).some(val => val / portfolioToRender.totalValue > 0.7);
   if (highConcentration) {
+    // Security: Static strings, escaped for safety
     insights.innerHTML = `
-      <h4 style="margin-top:0">Portfolio Insights</h4>
-      <p style="font-size:0.9rem; color: ${COLORS.WARNING}"><strong>Concentration Risk:</strong> Consider more diversification to reduce risk.</p>
+      <h4 style="margin-top:0">${escapeHtml('Portfolio Insights')}</h4>
+      <p style="font-size:0.9rem; color: ${COLORS.WARNING}"><strong>${escapeHtml('Concentration Risk:')}</strong> ${escapeHtml('Consider more diversification to reduce risk.')}</p>
     `;
   } else {
+    // Security: Static strings, escaped for safety
     insights.innerHTML = `
-      <h4 style="margin-top:0">Portfolio Insights</h4>
-      <p style="font-size:0.9rem; color: ${COLORS.SUCCESS}"><strong>Good Diversification:</strong> Your portfolio allocation is well-balanced.</p>
+      <h4 style="margin-top:0">${escapeHtml('Portfolio Insights')}</h4>
+      <p style="font-size:0.9rem; color: ${COLORS.SUCCESS}"><strong>${escapeHtml('Good Diversification:')}</strong> ${escapeHtml('Your portfolio allocation is well-balanced.')}</p>
     `;
   }
   section.appendChild(insights);

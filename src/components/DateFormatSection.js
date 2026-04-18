@@ -50,7 +50,7 @@ export const DateFormatSection = () => {
   // Auto-detect and save format if not already set or invalid
   let currentFormat = SettingsService.getSetting('dateFormat');
   const validFormats = [DATE_FORMATS.US, DATE_FORMATS.EU, DATE_FORMATS.ISO];
-  
+
   if (!currentFormat || !validFormats.includes(currentFormat)) {
     currentFormat = detectDateFormat();
     try {

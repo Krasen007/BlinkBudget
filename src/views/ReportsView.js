@@ -183,7 +183,7 @@ export const ReportsView = () => {
 
     // Back button (always visible)
     const backButton = document.createElement('button');
-    backButton.innerHTML = '← Back';
+    backButton.textContent = '← Back';
     backButton.className = 'view-back-btn';
     backButton.title = 'Back to Dashboard';
 
@@ -332,6 +332,7 @@ export const ReportsView = () => {
 
       // Add header (which now includes time period selector) to container (outside scrollable content)
       if (!skipHeaderRecreation) {
+        // Security: Clearing container content, no user input involved
         container.innerHTML = '';
         const header = createHeader();
         container.appendChild(header);
@@ -586,7 +587,7 @@ export const ReportsView = () => {
    */
   async function renderReports() {
     try {
-      // Clear content
+      // Security: Clearing content, no user input involved
       content.innerHTML = '';
 
       cleanupCharts();
@@ -636,10 +637,9 @@ export const ReportsView = () => {
         fallbackWarning.style.color = '#92400e';
         fallbackWarning.style.fontSize = '0.875rem';
         fallbackWarning.style.marginBottom = SPACING.XS;
-        fallbackWarning.innerHTML = `
-                    ⚠️ Using simplified calculations due to data processing issues. 
-                    Some advanced insights may not be available.
-                `;
+        // Security: Static string, not user input
+        fallbackWarning.textContent =
+          '⚠️ Using simplified calculations due to data processing issues. Some advanced insights may not be available.';
         chartContainer.appendChild(fallbackWarning);
       }
 

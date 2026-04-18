@@ -13,7 +13,8 @@
 
 import { Router } from '../../core/router.js';
 import { createEnhancedEmptyState } from '../../utils/enhanced-empty-states.js';
-import { SPACING, COLORS } from '../../utils/constants.js';
+import { COLORS, SPACING } from '../../utils/constants.js';
+import { escapeHtml } from '../../utils/security-utils.js';
 import { createGoalProgressChart } from '../../utils/financial-planning-charts.js';
 import {
   createSectionContainer,
@@ -250,6 +251,7 @@ function createGoalsList(chartRenderer, activeCharts, section) {
   goalsList.style.marginTop = SPACING.MD;
 
   async function refreshGoalsList() {
+    // Security: Clearing list content, no user input involved
     goalsList.innerHTML = '';
     let items;
     try {
@@ -756,14 +758,16 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
   });
 
   if (behindSchedule.length > 0) {
+    // Security: Escape dynamic count value
     insights.innerHTML = `
-      <h4 style="margin-top:0">Goal Insights</h4>
-      <p style="font-size:0.9rem; color: ${COLORS.ERROR}"><strong>Recommendation:</strong> You have ${behindSchedule.length} goals that may need more aggressive savings to stay on track.</p>
+      <h4 style="margin-top:0">${escapeHtml('Goal Insights')}</h4>
+      <p style="font-size:0.9rem; color: ${COLORS.ERROR}"><strong>${escapeHtml('Recommendation:')}</strong> ${escapeHtml(`You have ${behindSchedule.length} goals that may need more aggressive savings to stay on track.`)}</p>
     `;
   } else {
+    // Security: Static strings, escaped for safety
     insights.innerHTML = `
-      <h4 style="margin-top:0">Goal Insights</h4>
-      <p style="font-size:0.9rem; color: ${COLORS.SUCCESS}"><strong>Recommendation:</strong> Your goals look well-paced. Keep up the consistent saving!</p>
+      <h4 style="margin-top:0">${escapeHtml('Goal Insights')}</h4>
+      <p style="font-size:0.9rem; color: ${COLORS.SUCCESS}"><strong>${escapeHtml('Recommendation:')}</strong> ${escapeHtml('Your goals look well-paced. Keep up the consistent saving!')}</p>
     `;
   }
   section.appendChild(insights);

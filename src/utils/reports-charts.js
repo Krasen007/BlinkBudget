@@ -26,7 +26,7 @@ function createCategoryTooltipConfig(detailsContainer) {
         const actionText = window.innerWidth < 768 ? 'Tap' : 'Hover';
         detailsContainer.innerHTML = `
                     <div style="text-align: center; color: var(--color-text-muted); font-size: 0.9em;">
-                        ${actionText} on a category slice to see details
+                        ${escapeHtml(actionText)} on a category slice to see details
                     </div>
                 `;
         return;
@@ -50,6 +50,7 @@ function createCategoryTooltipConfig(detailsContainer) {
         }).format(value);
 
         // Create structured HTML for the details container
+        // Security: All dynamic values are escaped
         detailsContainer.innerHTML = `
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <span style="font-weight: 600; color: var(--color-text-main);">${escapeHtml(label)}</span>
@@ -57,7 +58,7 @@ function createCategoryTooltipConfig(detailsContainer) {
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; font-size: 0.85em; color: var(--color-text-muted);">
                             <span>Percentage</span>
-                            <span>${percentage}%</span>
+                            <span>${escapeHtml(String(percentage))}%</span>
                         </div>
                     `;
       }
@@ -207,9 +208,10 @@ export async function createCategoryBreakdownChart(
 
   // Add default instruction text
   const initialAction = window.innerWidth < 768 ? 'Tap' : 'Hover';
+  // Security: initialAction is a static string, not user input
   detailsContainer.innerHTML = `
         <div style="text-align: center; color: var(--color-text-muted); font-size: 0.9em;">
-            ${initialAction} on a category slice to see details
+            ${escapeHtml(initialAction)} on a category slice to see details
         </div>
     `;
 
@@ -287,7 +289,8 @@ export async function createCategoryBreakdownChart(
     colorBox.style.backgroundColor = datasets.backgroundColor[i];
 
     const text = document.createElement('span');
-    text.innerHTML = `<span style="color: var(--color-text-main); font-weight: 500;">${escapeHtml(label)}</span> <span style="color: var(--color-text-muted); opacity: 0.8;">${percentage}%</span>`;
+    // Security: All dynamic values are escaped
+    text.innerHTML = `<span style="color: var(--color-text-main); font-weight: 500;">${escapeHtml(label)}</span> <span style="color: var(--color-text-muted); opacity: 0.8;">${escapeHtml(String(percentage))}%</span>`;
 
     item.appendChild(colorBox);
     item.appendChild(text);
@@ -363,23 +366,24 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   detailsContent.style.gap = SPACING.XS;
   detailsContent.style.textAlign = 'center';
   detailsContent.style.marginBottom = SPACING.XS;
+  // Security: All dynamic values are from trusted numeric data and formatted by Intl.NumberFormat
   detailsContent.innerHTML = `
     <div>
       <div style="font-size: 0.875rem; color: var(--color-text-muted); margin-bottom: 4px;">Income</div>
       <div style="font-size: 1.125rem; font-weight: bold; color: ${COLORS.INCOME_COLOR};">
-        ${formatCurrency(incomeExpenseData.totalIncome)}
+        ${escapeHtml(formatCurrency(incomeExpenseData.totalIncome))}
       </div>
     </div>
     <div>
       <div style="font-size: 0.875rem; color: var(--color-text-muted); margin-bottom: 4px;">Expenses</div>
       <div style="font-size: 1.125rem; font-weight: bold; color: rgba(239, 68, 68, 1);">
-        ${formatCurrency(incomeExpenseData.totalExpenses)}
+        ${escapeHtml(formatCurrency(incomeExpenseData.totalExpenses))}
       </div>
     </div>
     <div>
       <div style="font-size: 0.875rem; color: var(--color-text-muted); margin-bottom: 4px;">Net Balance</div>
       <div style="font-size: 1.125rem; font-weight: bold; color: ${incomeExpenseData.netBalance >= 0 ? COLORS.INCOME_COLOR : 'rgba(239, 68, 68, 1)'};">
-        ${formatCurrency(incomeExpenseData.netBalance)}
+        ${escapeHtml(formatCurrency(incomeExpenseData.netBalance))}
       </div>
     </div>
   `;

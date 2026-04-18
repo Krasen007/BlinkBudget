@@ -30,6 +30,7 @@ export const BudgetsSection = async planningData => {
   const transactions = planningData.transactions || [];
 
   const render = () => {
+    // Security: Clearing container content, no user input involved
     container.innerHTML = '';
 
     const summaryData = BudgetPlanner.getSummary(transactions);

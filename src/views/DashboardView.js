@@ -145,6 +145,7 @@ export const DashboardView = () => {
   const refreshAccountOptions = () => {
     const accounts = AccountService.getAccounts();
     const currentVal = accountSelect.value;
+    // Security: Clearing select options, no user input involved
     accountSelect.innerHTML = '';
 
     const allOption = document.createElement('option');
@@ -169,6 +170,7 @@ export const DashboardView = () => {
   container.appendChild(content);
 
   const renderDashboard = () => {
+    // Security: Clearing content, no user input involved
     content.innerHTML = '';
 
     // Always get fresh data
