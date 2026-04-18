@@ -179,7 +179,7 @@ export const TransactionService = {
     transactions[index] = {
       ...transactions[index],
       ...updates,
-      timestamp: updates.timestamp || new Date().toISOString(),
+      timestamp: updates.timestamp !== undefined ? updates.timestamp : transactions[index].timestamp,
       updatedAt: new Date().toISOString(),
     };
     this._persist(transactions);

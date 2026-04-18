@@ -93,9 +93,6 @@ export const AddView = ({ accountId, amount } = {}) => {
         sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, data.accountId);
       }
 
-      // Remove timestamp so transaction-service uses current time
-      delete data.timestamp;
-
       // Add the transaction and get the full transaction object
       const newTransaction = TransactionService.add(data);
 

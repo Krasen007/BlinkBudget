@@ -139,9 +139,6 @@ export const EditView = ({ id }) => {
             data.ghostId = addedGhost.id;
           }
         }
-      } else {
-        // Date didn't change - remove timestamp so transaction-service uses current time
-        delete data.timestamp;
       }
 
       // Update dashboard filter to show the account used for this transaction
