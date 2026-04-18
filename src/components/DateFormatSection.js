@@ -4,12 +4,7 @@
  */
 
 import { SettingsService } from '../core/settings-service.js';
-import {
-  SPACING,
-  TOUCH_TARGETS,
-  FONT_SIZES,
-  DATE_FORMATS,
-} from '../utils/constants.js';
+import { SPACING, FONT_SIZES, DATE_FORMATS } from '../utils/constants.js';
 
 // Auto-detect date format from device locale
 function detectDateFormat() {
@@ -21,6 +16,10 @@ function detectDateFormat() {
   } else if (
     locale.startsWith('en-GB') ||
     locale.startsWith('en-IE') ||
+    locale.startsWith('en-AU') ||
+    locale.startsWith('en-IN') ||
+    locale.startsWith('en-NZ') ||
+    locale.startsWith('en-ZA') ||
     locale.startsWith('fr-') ||
     locale.startsWith('de-') ||
     locale.startsWith('es-') ||
@@ -34,7 +33,7 @@ function detectDateFormat() {
   return DATE_FORMATS.ISO;
 }
 
-export const DateFormatSection = ({ onFormatChange: _onFormatChange }) => {
+export const DateFormatSection = () => {
   const section = document.createElement('div');
   section.className = 'card mobile-settings-card';
   section.style.marginBottom = SPACING.LG;
@@ -52,31 +51,21 @@ export const DateFormatSection = ({ onFormatChange: _onFormatChange }) => {
   let currentFormat = SettingsService.getSetting('dateFormat');
   if (!currentFormat) {
     currentFormat = detectDateFormat();
-    SettingsService.saveSetting('dateFormat', currentFormat);
+    try {
+      SettingsService.saveSetting('dateFormat', currentFormat);
+    } catch (error) {
+      console.error('[DateFormatSection] Failed to save date format:', error);
+      // Continue with detected format even if save fails
+    }
   }
 
   // Display detected format (read-only)
   const infoRow = document.createElement('div');
-  infoRow.className = 'mobile-settings-option';
-  Object.assign(infoRow.style, {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: SPACING.LG,
-    minHeight: TOUCH_TARGETS.MIN_HEIGHT,
-    borderRadius: 'var(--radius-md)',
-    marginBottom: SPACING.SM,
-    border: '1px solid var(--color-border)',
-    backgroundColor: 'var(--color-surface)',
-  });
+  infoRow.className = 'date-format-info-row';
 
   const label = document.createElement('span');
   label.textContent = 'Auto-detected from device';
-  Object.assign(label.style, {
-    fontSize: FONT_SIZES.BASE,
-    fontWeight: '500',
-    color: 'var(--color-text-muted)',
-  });
+  label.className = 'date-format-label';
 
   const formatValue = document.createElement('span');
   const formatLabel =
@@ -86,11 +75,7 @@ export const DateFormatSection = ({ onFormatChange: _onFormatChange }) => {
         ? 'DD/MM/YYYY'
         : 'YYYY-MM-DD';
   formatValue.textContent = formatLabel;
-  Object.assign(formatValue.style, {
-    fontSize: FONT_SIZES.BASE,
-    fontWeight: '600',
-    color: 'var(--color-text-main)',
-  });
+  formatValue.className = 'date-format-value';
 
   infoRow.appendChild(label);
   infoRow.appendChild(formatValue);
@@ -100,13 +85,7 @@ export const DateFormatSection = ({ onFormatChange: _onFormatChange }) => {
   const note = document.createElement('p');
   note.textContent =
     'Date format is automatically detected from your device settings for a seamless experience.';
-  Object.assign(note.style, {
-    fontSize: FONT_SIZES.SM,
-    color: 'var(--color-text-muted)',
-    marginTop: SPACING.SM,
-    marginBottom: '0',
-    lineHeight: '1.4',
-  });
+  note.className = 'date-format-note';
   section.appendChild(note);
 
   return section;

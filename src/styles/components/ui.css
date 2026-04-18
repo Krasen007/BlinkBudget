@@ -427,6 +427,81 @@
   background: var(--color-surface-hover);
 }
 
+/* Date Format Section Styles */
+.date-format-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-lg);
+  min-height: var(--touch-target-min);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+}
+
+.date-format-label {
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.date-format-value {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text-main);
+}
+
+.date-format-note {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-top: var(--spacing-sm);
+  margin-bottom: 0;
+  line-height: 1.4;
+}
+
+/* Advanced Settings Toggle Styles */
+.advanced-toggle {
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.advanced-toggle:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.advanced-toggle__label {
+  font-weight: 600;
+  font-size: var(--font-size-base);
+  color: var(--color-text-main);
+}
+
+.advanced-toggle__icon {
+  transition: transform 0.2s ease;
+  color: var(--color-text-muted);
+}
+
+.advanced-toggle__icon--expanded {
+  transform: rotate(90deg);
+}
+
+.advanced-settings-section {
+  display: none;
+  margin-top: var(--spacing-md);
+}
+
+.advanced-settings-section--visible {
+  display: block;
+}
+
 .transaction-item {
   transition: all var(--transition-fast);
   min-height: var(--touch-target-min);

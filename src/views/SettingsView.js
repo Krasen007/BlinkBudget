@@ -103,16 +103,7 @@ export const SettingsView = () => {
   content.appendChild(categoryManagementSection);
 
   // Date Format Section
-  const dateFormatSection = DateFormatSection({
-    onFormatChange: () => {
-      // Re-render view to show update
-      const parent = container.parentNode;
-      if (parent) {
-        parent.innerHTML = '';
-        parent.appendChild(SettingsView());
-      }
-    },
-  });
+  const dateFormatSection = DateFormatSection();
   content.appendChild(dateFormatSection);
 
   // General Section
@@ -121,53 +112,53 @@ export const SettingsView = () => {
 
   // Advanced Settings Toggle
   const advancedToggleContainer = document.createElement('div');
-  advancedToggleContainer.style.cssText = `
-    margin-bottom: var(--spacing-md);
-    padding: var(--spacing-md);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  `;
+  advancedToggleContainer.className = 'advanced-toggle';
+  advancedToggleContainer.tabIndex = '0';
+  advancedToggleContainer.role = 'button';
+  advancedToggleContainer.setAttribute('aria-expanded', 'false');
 
   const advancedToggleLabel = document.createElement('span');
   advancedToggleLabel.textContent = '⚙️ Advanced Settings';
-  advancedToggleLabel.style.cssText = `
-    font-weight: 600;
-    font-size: var(--font-size-base);
-    color: var(--color-text-main);
-  `;
+  advancedToggleLabel.className = 'advanced-toggle__label';
 
   const advancedToggleIcon = document.createElement('span');
   advancedToggleIcon.textContent = '▶';
-  advancedToggleIcon.style.cssText = `
-    transition: transform 0.2s ease;
-    color: var(--color-text-muted);
-  `;
+  advancedToggleIcon.className = 'advanced-toggle__icon';
 
   let advancedSettingsVisible = false;
   const advancedSettingsSection = document.createElement('div');
-  advancedSettingsSection.style.cssText = `
-    display: none;
-    margin-top: var(--spacing-md);
-  `;
+  advancedSettingsSection.className = 'advanced-settings-section';
+
+  const toggleAdvancedSettings = () => {
+    advancedSettingsVisible = !advancedSettingsVisible;
+    if (advancedSettingsVisible) {
+      advancedSettingsSection.classList.add(
+        'advanced-settings-section--visible'
+      );
+      advancedToggleIcon.classList.add('advanced-toggle__icon--expanded');
+    } else {
+      advancedSettingsSection.classList.remove(
+        'advanced-settings-section--visible'
+      );
+      advancedToggleIcon.classList.remove('advanced-toggle__icon--expanded');
+    }
+    advancedToggleContainer.setAttribute(
+      'aria-expanded',
+      advancedSettingsVisible
+    );
+  };
 
   advancedToggleContainer.appendChild(advancedToggleLabel);
   advancedToggleContainer.appendChild(advancedToggleIcon);
   content.appendChild(advancedToggleContainer);
   content.appendChild(advancedSettingsSection);
 
-  advancedToggleContainer.addEventListener('click', () => {
-    advancedSettingsVisible = !advancedSettingsVisible;
-    advancedSettingsSection.style.display = advancedSettingsVisible
-      ? 'block'
-      : 'none';
-    advancedToggleIcon.style.transform = advancedSettingsVisible
-      ? 'rotate(90deg)'
-      : 'rotate(0deg)';
+  advancedToggleContainer.addEventListener('click', toggleAdvancedSettings);
+  advancedToggleContainer.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleAdvancedSettings();
+    }
   });
 
   // Advanced Settings Sections (hidden by default)

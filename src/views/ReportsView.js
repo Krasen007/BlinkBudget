@@ -422,51 +422,18 @@ export const ReportsView = () => {
       } catch (analyticsError) {
         console.error('Progressive data loading error:', analyticsError);
 
-        console.warn('[ReportsView] Attempting fallback strategies...');
+        console.warn(
+          '[ReportsView] Attempting fallback to minimal analytics data...'
+        );
 
         try {
-          // Fallback: process data directly
-          analyticsData = {
+          analyticsData = createMinimalAnalyticsData(
             transactions,
-            timePeriod: currentTimePeriod,
-            insights: analyticsEngine.generateSpendingInsights(
-              transactions,
-              currentTimePeriod
-            ),
-            categoryBreakdown: analyticsEngine.calculateCategoryBreakdown(
-              transactions,
-              currentTimePeriod
-            ),
-            incomeVsExpenses: analyticsEngine.calculateIncomeVsExpenses(
-              transactions,
-              currentTimePeriod
-            ),
-            costOfLiving: analyticsEngine.calculateCostOfLiving(
-              transactions,
-              currentTimePeriod
-            ),
-          };
-        } catch (directProcessingError) {
-          console.error(
-            'Direct processing fallback failed:',
-            directProcessingError
+            currentTimePeriod
           );
-
-          try {
-            analyticsData = createMinimalAnalyticsData(
-              transactions,
-              currentTimePeriod
-            );
-          } catch (minimalProcessingError) {
-            console.error(
-              'Minimal processing fallback failed:',
-              minimalProcessingError
-            );
-            throw new Error(
-              'Unable to process your financial data. This might be due to corrupted data or a browser compatibility issue.',
-              { cause: minimalProcessingError }
-            );
-          }
+        } catch (minimalDataError) {
+          console.error('Minimal data fallback failed:', minimalDataError);
+          throw analyticsError;
         }
       }
 
@@ -479,15 +446,23 @@ export const ReportsView = () => {
 
         try {
           validateAnalyticsData(analyticsData);
-        } catch (secondValidationError) {
-          console.error(
-            'Analytics data validation failed after sanitization:',
-            secondValidationError
-          );
-          throw new Error(
-            'The processed financial data appears to be invalid. Please try refreshing the page or contact support if the issue persists.',
-            { cause: secondValidationError }
-          );
+        } catch (validationError) {
+          console.error('Analytics data validation failed:', validationError);
+
+          analyticsData = sanitizeAnalyticsData(analyticsData);
+
+          try {
+            validateAnalyticsData(analyticsData);
+          } catch (secondValidationError) {
+            console.error(
+              'Analytics data validation failed after sanitization:',
+              secondValidationError
+            );
+            throw new Error(
+              'The processed financial data appears to be invalid. Please try refreshing the page or contact support if the issue persists.',
+              { cause: secondValidationError }
+            );
+          }
         }
       }
 
@@ -746,10 +721,6 @@ export const ReportsView = () => {
     try {
       const chartsSection = document.createElement('div');
       chartsSection.className = 'charts-section';
-      chartsSection.style.display = 'flex';
-      chartsSection.style.flexDirection = 'column';
-      chartsSection.style.gap = SPACING.MD;
-      chartsSection.style.position = 'relative';
 
       const chartRenderResults = [];
 
@@ -925,7 +896,7 @@ export const ReportsView = () => {
   /**
    * Render financial insights with error handling
    */
-  function renderFinancialInsights(chartsSection, chartRenderResults) {
+  async function renderFinancialInsights(chartsSection, chartRenderResults) {
     if (currentData.insights && currentData.insights.length > 0) {
       try {
         const insightsSection = InsightsSection(currentData);

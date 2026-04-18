@@ -175,7 +175,7 @@ export const DashboardView = () => {
     const allTransactions = TransactionService.getAll();
     const currentAccounts = AccountService.getAccounts();
 
-    // Apply filters (Account, Quick Date, Quick Category)
+    // Apply filters (Account, Quick Date, Quick Month, Quick Category)
     const transactions = allTransactions
       .filter(t => {
         // Account Filter
