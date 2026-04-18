@@ -7,6 +7,11 @@
 
 import { COLORS, SPACING } from '../utils/constants.js';
 
+const currencyFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'EUR',
+});
+
 export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
   const container = document.createElement('div');
   container.className = 'budget-recommendations-section';
@@ -110,7 +115,7 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
     const currentSpan = document.createElement('div');
     const safeCurrent =
       typeof current === 'number' && isFinite(current) ? current : 0;
-    currentSpan.textContent = `$${safeCurrent.toFixed(2)}`;
+    currentSpan.textContent = currencyFormatter.format(safeCurrent);
     currentSpan.style.color = COLORS.TEXT_MAIN;
     currentSpan.style.textAlign = 'right';
     currentSpan.style.fontFamily = 'monospace';
@@ -123,7 +128,7 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
       typeof recommended === 'number' && isFinite(recommended)
         ? recommended
         : 0;
-    recommendedSpan.textContent = `$${safeRecommended.toFixed(2)}`;
+    recommendedSpan.textContent = currencyFormatter.format(safeRecommended);
     recommendedSpan.style.color = COLORS.TEXT_MUTED;
     recommendedSpan.style.fontWeight = '600';
     recommendedSpan.style.textAlign = 'right';

@@ -5,6 +5,11 @@
 
 import { COLORS, SPACING } from '../utils/constants.js';
 
+const currencyFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'EUR',
+});
+
 export const BenchmarkingSection = (benchmarkingData, _timePeriod) => {
   const section = document.createElement('div');
   section.className = 'benchmarking-section';
@@ -78,7 +83,7 @@ export const BenchmarkingSection = (benchmarkingData, _timePeriod) => {
       const currentSpan = document.createElement('div');
       const safeCurrent =
         typeof current === 'number' && isFinite(current) ? current : 0;
-      currentSpan.textContent = `$${safeCurrent.toFixed(2)}`;
+      currentSpan.textContent = currencyFormatter.format(safeCurrent);
       currentSpan.style.color = COLORS.TEXT_MAIN;
       currentSpan.style.textAlign = 'right';
       currentSpan.style.fontFamily = 'monospace';
@@ -89,7 +94,7 @@ export const BenchmarkingSection = (benchmarkingData, _timePeriod) => {
       const lastMonthSpan = document.createElement('div');
       const safeLastMonth =
         typeof lastMonth === 'number' && isFinite(lastMonth) ? lastMonth : 0;
-      lastMonthSpan.textContent = `$${safeLastMonth.toFixed(2)}`;
+      lastMonthSpan.textContent = currencyFormatter.format(safeLastMonth);
       lastMonthSpan.style.color = COLORS.TEXT_MUTED;
       lastMonthSpan.style.fontSize = 'var(--font-size-sm)';
       lastMonthSpan.style.textAlign = 'right';

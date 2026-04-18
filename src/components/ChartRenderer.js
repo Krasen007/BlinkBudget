@@ -238,7 +238,7 @@ export class ChartRenderer {
             callback: function (value) {
               return new Intl.NumberFormat('en-US', {
                 style: 'currency',
-                currency: 'USD',
+                currency: 'EUR',
                 minimumFractionDigits: 0,
               }).format(value);
             },
@@ -269,7 +269,7 @@ export class ChartRenderer {
               const value = context.parsed.y;
               const formattedValue = new Intl.NumberFormat('en-US', {
                 style: 'currency',
-                currency: 'USD',
+                currency: 'EUR',
               }).format(value);
 
               return `${label}: ${formattedValue}`;
@@ -844,7 +844,7 @@ export class ChartRenderer {
     const value = chart.data.datasets[0].data[index];
     const formattedValue = new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'EUR',
     }).format(value);
 
     let announcement = `${label}: ${formattedValue}`;
@@ -929,7 +929,7 @@ export class ChartRenderer {
         'en-US',
         {
           style: 'currency',
-          currency: 'USD',
+          currency: 'EUR',
         }
       ).format(maxValue)}.`;
     } else if (chartType === 'line') {
