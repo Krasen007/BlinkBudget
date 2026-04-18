@@ -63,7 +63,16 @@ export const InflationTrends = (
    * Helper to get transactions for the selected month in sharedState
    */
   const getSelectedMonthTransactions = () => {
-    if (!sharedMonthState) return data.transactions;
+    if (!sharedMonthState) {
+      // Exclude current month transactions when not using sharedMonthState
+      const now = new Date();
+      const endOfPreviousMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+      return data.transactions.filter(t => {
+        if (t.isGhost) return false;
+        const ts = new Date(t.timestamp);
+        return ts <= endOfPreviousMonth;
+      });
+    }
 
     const now = new Date();
     const targetDate = new Date(
@@ -77,6 +86,7 @@ export const InflationTrends = (
     const endOfMonth = new Date(currentYear, currentMonth + 1, 1);
 
     return data.transactions.filter(t => {
+      if (t.isGhost) return false;
       const ts = new Date(t.timestamp);
       return ts >= startOfMonth && ts < endOfMonth;
     });
@@ -92,13 +102,23 @@ export const InflationTrends = (
     try {
       // Calculate reference date based on sharedMonthState (end of selected month)
       const now = new Date();
+      const endOfPreviousMonth = new Date(now.getFullYear(), now.getMonth(), 0);
       const referenceDate = sharedMonthState
         ? new Date(
             now.getFullYear(),
             now.getMonth() + sharedMonthState.offset + 1,
             0
           )
-        : now;
+        : endOfPreviousMonth; // End of previous month to exclude current incomplete month
+
+      // Ensure reference date never includes current incomplete month
+      // If the calculated reference date is in the current month, use end of previous month instead
+      if (
+        referenceDate.getMonth() === now.getMonth() &&
+        referenceDate.getFullYear() === now.getFullYear()
+      ) {
+        referenceDate.setTime(endOfPreviousMonth.getTime());
+      }
 
       // Get categories from Top Movers for the selected month
       const monthTransactions = getSelectedMonthTransactions();
@@ -163,7 +183,7 @@ export const InflationTrends = (
   };
 
   /**
-   * Extract labels from chart data
+   * Extract labels from chart data and fill missing months with null values
    */
   const extractLabels = chartData => {
     if (chartData.length === 0) return [];
@@ -176,17 +196,34 @@ export const InflationTrends = (
       });
     });
 
-    // Sort and format labels
-    return Array.from(allMonths)
-      .sort()
-      .map(month => {
-        const [year, monthNum] = month.split('-');
-        const date = new Date(year, monthNum - 1);
-        return date.toLocaleDateString('en-US', {
-          month: 'short',
-          year: '2-digit',
-        });
+    // Sort months
+    const sortedMonths = Array.from(allMonths).sort();
+
+    // Fill in missing months for each dataset with null values
+    chartData.forEach(dataset => {
+      const existingMonths = new Set(dataset.data.map(point => point.x));
+      const missingMonths = sortedMonths.filter(
+        month => !existingMonths.has(month)
+      );
+
+      // Add null data points for missing months
+      missingMonths.forEach(month => {
+        dataset.data.push({ x: month, y: null });
       });
+
+      // Sort data points by month
+      dataset.data.sort((a, b) => a.x.localeCompare(b.x));
+    });
+
+    // Format labels
+    return sortedMonths.map(month => {
+      const [year, monthNum] = month.split('-');
+      const date = new Date(year, monthNum - 1);
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        year: '2-digit',
+      });
+    });
   };
 
   /**
@@ -385,7 +422,7 @@ const createPeriodSelector = () => {
   container.className = 'period-selector segmented-control';
 
   const periods = [
-    { value: 1, label: '1 month' },
+    { value: 2, label: '2 months' },
     { value: 3, label: '3 months' },
     { value: 6, label: '6 months' },
     { value: 12, label: '12 months' },

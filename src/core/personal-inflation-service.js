@@ -28,7 +28,9 @@ export const PersonalInflationService = {
     referenceDate = new Date()
   ) {
     const categoryTransactions = transactions
-      .filter(t => t.category === category && t.type === 'expense')
+      .filter(
+        t => t.category === category && !t.isGhost && t.type === 'expense'
+      )
       .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
     if (categoryTransactions.length < 2) return 0;
@@ -194,6 +196,7 @@ export const PersonalInflationService = {
         const d = new Date(t.timestamp);
         return (
           t.category === category &&
+          !t.isGhost &&
           t.type === 'expense' &&
           d >= cutoff &&
           d <= endWindow
@@ -291,7 +294,7 @@ export const PersonalInflationService = {
     referenceDate = new Date()
   ) {
     const categoryTransactions = transactions.filter(
-      t => t.category === category && t.type === 'expense'
+      t => t.category === category && !t.isGhost && t.type === 'expense'
     );
 
     if (categoryTransactions.length < 2) {

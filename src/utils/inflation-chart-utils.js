@@ -110,6 +110,7 @@ export const calculateMonthlySpending = (
     .filter(
       t =>
         t.category === category &&
+        !t.isGhost &&
         t.type === 'expense' &&
         new Date(t.timestamp) >= cutoff
     )
@@ -192,24 +193,7 @@ export const getChartOptions = (chartType = 'line') => {
         },
       },
       tooltip: {
-        callbacks: {
-          label: function (context) {
-            const label = context.dataset.label || '';
-            const value = context.parsed.y;
-            const formattedValue = new Intl.NumberFormat('en-US', {
-              style: 'currency',
-              currency: 'USD',
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
-            }).format(value);
-
-            // Extract full inflation suffix to prevent garbled labels
-            const inflationMatch = label.match(/\([^)]*% personal inflation\)/);
-            const fullSuffix = inflationMatch ? inflationMatch[0] : '';
-
-            return `${label.replace(fullSuffix, '').trim()}: ${formattedValue} ${fullSuffix}`;
-          },
-        },
+        enabled: false, // Disable tooltip since data is already displayed
       },
     },
     scales: {
@@ -219,7 +203,7 @@ export const getChartOptions = (chartType = 'line') => {
           callback: function (value) {
             return new Intl.NumberFormat('en-US', {
               style: 'currency',
-              currency: 'USD',
+              currency: 'EUR',
               minimumFractionDigits: 0,
               maximumFractionDigits: 0,
             }).format(value);
@@ -253,6 +237,7 @@ export const getChartOptions = (chartType = 'line') => {
         hoverRadius: 6,
       },
     };
+    baseOptions.spanGaps = false; // Don't connect points across missing data
   } else if (chartType === 'bar') {
     baseOptions.datasets = {
       bar: {
