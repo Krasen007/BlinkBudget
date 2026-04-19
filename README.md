@@ -56,7 +56,6 @@
 - **Real-time balance calculations** across all accounts
 - **Account filtering** - View transactions by specific account or all accounts
 - **Transaction history** with edit/delete capabilities
-- **Reliable transaction editing** - Improved date editing behavior with restored budget amount state display
 - **Visual feedback** for recently added transactions
 - **Dashboard layout** with improved spacing and optimized action buttons
 - **Fast chart loading** with intelligent caching system and cache invalidation
@@ -83,10 +82,11 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 - **Android TWA support** - Trusted Web Activity for native Android app experience with Play Store deployment
 - **Keyboard shortcut (Escape key)** to exit Settings and return to dashboard
 - **Helpful tips on each section**
-- **Top-tier Security** - Advanced XSS protection, strict URL validation, and comprehensive privacy compliance
+- **Top-tier Security** - Advanced XSS protection, strict URL validation, comprehensive privacy compliance, and regular security patches
 - **Improved accessibility** with "Skip to Content" links, ARIA roles, and proper form label associations
 - **Modern component foundation** - BaseComponent building blocks and an Enhanced Button component for consistent UI behavior
 - **Enhanced color schemes** with improved text contrast for better readability
+- **Improved Reports navigation** with filter preservation and breadcrumb indicators for quick category return
 
 ### Backup & Restore
 

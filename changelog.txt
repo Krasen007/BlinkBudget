@@ -1,26 +1,32 @@
-## Version 1.33 - Latest Updates
+# Changelog
 
-### ⚡ Performance & Caching
-- **Financial Planning Caching**: Implemented intelligent data caching for Financial Planning view - now only syncs from cloud when data is stale (older than 5 minutes), significantly reducing unnecessary network requests
-- **PlanningDataManager Integration**: Leveraged existing PlanningDataManager infrastructure for consistent data caching across the application
-- **Real-time Sync Preservation**: Background real-time sync continues to work seamlessly while caching reduces initial load overhead
+## Recent Updates
 
-### 🔧 Bug Fixes
-- **Chart Rendering**: Fixed chart display issues when rendering values below zero
-- **Dashboard Time Zones**: Corrected UTC method usage in Dashboard view for accurate time calculations
-- **Z-Index Issues**: Fixed layering problems in Spending by Category chart
-- **Margins & Layout**: Fixed margin issues across various components
+### Transaction Management
+- **Fixed timestamp handling**: When editing a transaction without changing the date, the original time is now preserved instead of being reset to current time
+- **Improved date/time consistency**: Ensured proper timestamp updates when adding or editing transactions
 
-### 📊 Reports & Navigation
-- **Reports View Navigation**: Improved navigation behavior and filter preservation when moving between views
-- **Filter Display**: Added "Currently filtered by" indicator with clickable return to reports categories
-- **Insights Tab Migration**: Moved analytics functionality from ReportsView to FinancialPlanningView Insights tab for better organization
-- **Button Consistency**: Updated button styling to match design system standards
+### Financial Planning & Reports
+- **Fixed caching issues**: Resolved data caching problems in the Financial Planning section
+- **Moved functionality**: ReportsView features integrated into Financial Planning Insights tab for better organization
+- **Fixed chart rendering**: Corrected display issues with charts showing negative values
+- **Fixed currency calculations**: Corrected currency and calculation errors in Financial Insights chart
 
-### 🛠️ Code Quality
-- **Linting Fixes**: Resolved ESLint issues and code style inconsistencies
-- **General Stability**: Various bug fixes and performance optimizations
+### User Interface Improvements
+- **Fixed Reports view navigation**: Improved navigation and filter preservation in Reports view
+- **Added filter breadcrumbs**: Added "Currently filtered by" indicators that allow quick return to category view
+- **Fixed Dashboard timing**: Resolved UTC method usage in Dashboard view for accurate date/time display
+- **Fixed z-index issues**: Corrected layering in Spending by Category section
+- **Improved button styling**: Standardized button appearance across the app
+- **Fixed margins**: Corrected spacing issues in various sections
 
----
+### Feature Removal
+- **Removed Time of Day Patterns**: Removed this analytics feature as it was not providing useful insights
 
-## Version 1.32
+### Code Quality & Security
+- **Snyk security fixes**: Applied security patches for dependency vulnerabilities
+- **Code linting**: Improved code consistency and formatting
+- **General optimizations**: Various performance improvements and bug fixes
+
+### Version
+- **Version 1.33**
