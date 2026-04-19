@@ -19,3 +19,5 @@ update the changelog.txt file itself.
 org.gradle.jvmargs=-Xmx1024m -Xms512m
 
 #18171F
+
+Netlify free usage: 0/300
