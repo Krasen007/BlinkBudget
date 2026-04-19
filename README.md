@@ -119,7 +119,7 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 
 ## Quick Start
 
-## Quick Start
+For everyday use you can use the web page blinkbudget.netlify.app, from there you can also install a PWA or if you wish you can get TWA Android App
 
 ### Android App (Trusted Web Activity)
 
@@ -127,9 +127,7 @@ Download and install the [BlinkBudget APK](https://github.com/Krasen007/BlinkBud
 
 **Note**: You may need to enable "Install from Unknown Sources" in your Android settings. The app is signed and safe to install.
 
-### Prerequisites
-
-### Prerequisites
+### Prerequisites from source
 
 - Node.js (v22 or higher)
 - yarn (v4 or higher)
