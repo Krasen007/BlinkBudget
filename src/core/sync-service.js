@@ -41,18 +41,6 @@ export const SyncService = {
   async init() {
     this.setupConnectionMonitoring(); // NEW: Setup connection monitoring
 
-    AuthService.init(async user => {
-      if (user) {
-        await this.pullFromCloud(user.uid);
-        // Only start real-time sync if the page is visible
-        if (!document.hidden) {
-          this.startRealtimeSync(user.uid);
-        }
-      } else {
-        this.stopSync();
-      }
-    });
-
     // Remove existing listener if any to avoid duplicates when `init()` is called multiple times
     if (this._conflictResolutionHandler) {
       window.removeEventListener(

@@ -24,7 +24,6 @@ import {
 } from '../../utils/financial-planning-helpers.js';
 import { refreshChart } from '../../utils/chart-refresh-helper.js';
 import { formatDateForDisplay } from '../../utils/date-utils.js';
-import { offlineDataManager } from '../../core/offline-data-manager.js';
 
 /**
  * Create goal form controls
@@ -160,20 +159,6 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
       const { StorageService } = await import('../../core/storage.js');
       StorageService.createGoal(name, target, tdate, current, {});
 
-      // Cache the operation for offline sync
-      if (!offlineDataManager.isOnline) {
-        offlineDataManager.addToSyncQueue({
-          type: 'saveGoal',
-          data: {
-            name,
-            targetAmount: target,
-            targetDate: tdate,
-            currentSavings: current,
-            options: {},
-          },
-        });
-      }
-
       // Refresh goals chart using helper
       const updatedGoals = StorageService.getGoals();
       await refreshChart({
@@ -183,12 +168,6 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
         section,
         chartType: 'goal-progress',
         activeCharts,
-      });
-
-      // Cache updated goals for offline access
-      offlineDataManager.cachePlanningData('goals', {
-        data: updatedGoals,
-        timestamp: Date.now(),
       });
 
       goalForm.style.display = 'none';
@@ -579,22 +558,6 @@ function createGoalsList(chartRenderer, activeCharts, section) {
                   activeCharts,
                 });
 
-                // Cache updated goals for offline access
-                offlineDataManager.cachePlanningData('goals', {
-                  data: updatedGoals,
-                  timestamp: Date.now(),
-                });
-
-                // Queue deletion for offline sync
-                if (!offlineDataManager.isOnline) {
-                  offlineDataManager.addToSyncQueue({
-                    type: 'deleteGoal',
-                    data: {
-                      goalId: goal.id,
-                    },
-                  });
-                }
-
                 // Refresh the list
                 await refreshGoalsList();
               } catch (err) {
@@ -653,32 +616,15 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
     )
   );
 
-  const isOffline = !offlineDataManager.isOnline;
-
-  // Try to load goals from cache first, then StorageService
+  // Load goals from StorageService (Firebase handles offline automatically)
   let goalsFromStorage;
-  const cachedGoals = offlineDataManager.getCachedPlanningData('goals');
-
-  if (isOffline && cachedGoals && cachedGoals.data) {
-    // Use cache only when offline
-    console.log('[GoalsSection] Using cached goals data');
-    goalsFromStorage = cachedGoals.data;
-  } else {
-    try {
-      // Import StorageService dynamically
-      const { StorageService } = await import('../../core/storage.js');
-      goalsFromStorage = StorageService.getGoals() || [];
-
-      // Cache goals for offline access
-      offlineDataManager.cachePlanningData('goals', {
-        data: goalsFromStorage,
-        timestamp: Date.now(),
-      });
-    } catch (err) {
-      console.warn('Error fetching goals from StorageService:', err);
-      // Fallback to cache if StorageService fails
-      goalsFromStorage = cachedGoals?.data || [];
-    }
+  try {
+    // Import StorageService dynamically
+    const { StorageService } = await import('../../core/storage.js');
+    goalsFromStorage = StorageService.getGoals() || [];
+  } catch (err) {
+    console.warn('Error fetching goals from StorageService:', err);
+    goalsFromStorage = [];
   }
 
   const sampleGoals = [

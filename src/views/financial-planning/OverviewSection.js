@@ -19,8 +19,6 @@ import {
   createPlaceholder,
   createUsageNote,
 } from '../../utils/financial-planning-helpers.js';
-import { offlineDataManager } from '../../core/offline-data-manager.js';
-
 /**
  * Overview Section Component
  * @param {Object} planningData - Financial planning data including transactions
@@ -34,15 +32,7 @@ export const OverviewSection = (planningData, riskAssessor) => {
     '📊'
   );
 
-  // Check for cached data first
-  const cachedData = offlineDataManager.getCachedPlanningData('overview');
-  const isOffline = !offlineDataManager.isOnline;
-  let dataToUse = planningData;
-
-  if (cachedData && (!planningData || isOffline)) {
-    console.log('[OverviewSection] Using cached planning data');
-    dataToUse = cachedData.data;
-  }
+  const dataToUse = planningData;
 
   section.appendChild(
     createUsageNote(
@@ -52,18 +42,11 @@ export const OverviewSection = (planningData, riskAssessor) => {
 
   if (!dataToUse) {
     const placeholder = createPlaceholder(
-      isOffline ? 'No Offline Data Available' : 'Loading Financial Data',
-      isOffline
-        ? 'Connect to the internet to load your financial overview for the first time.'
-        : 'Please wait while we analyze your financial information.',
-      isOffline ? '📡' : '⏳'
+      'Loading Financial Data',
+      'Please wait while we analyze your financial information.',
+      '⏳'
     );
     section.appendChild(placeholder);
-  } else {
-    // Cache the section state for offline access
-    if (!isOffline) {
-      offlineDataManager.cachePlanningData('overview', dataToUse);
-    }
   }
 
   // Quick stats cards
@@ -152,21 +135,6 @@ export const OverviewSection = (planningData, riskAssessor) => {
     riskScore = riskAssessor.calculateOverallRiskScore(riskFactors);
   } catch (error) {
     console.error('Error calculating risk assessments:', error);
-  }
-
-  // Cache the calculated data for offline access
-  if (!isOffline && dataToUse) {
-    offlineDataManager.cachePlanningData('overview', {
-      data: dataToUse,
-      timestamp: Date.now(),
-      stats: {
-        currentBalance,
-        monthlyExpenses,
-        savingsRate,
-        emergencyFundAssessment,
-        riskScore,
-      },
-    });
   }
 
   const stats = [

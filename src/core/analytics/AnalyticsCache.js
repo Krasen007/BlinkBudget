@@ -9,7 +9,8 @@
  * - Mutex to prevent TOCTOU races
  */
 
-import { offlineDataManager } from '../offline-data-manager.js';
+const CACHE_PREFIX = 'blinkbudget_analytics_';
+const CACHE_VERSION = '1.0.0';
 
 export class AnalyticsCache {
   constructor() {
@@ -55,6 +56,68 @@ export class AnalyticsCache {
   }
 
   /**
+   * Get data from localStorage with TTL validation
+   */
+  _getFromStorage(key) {
+    try {
+      const storageKey = CACHE_PREFIX + key;
+      const cached = localStorage.getItem(storageKey);
+
+      if (!cached) return null;
+
+      const cacheEntry = JSON.parse(cached);
+      const now = Date.now();
+
+      // Check TTL
+      if (now - cacheEntry.timestamp > cacheEntry.ttl) {
+        localStorage.removeItem(storageKey);
+        return null;
+      }
+
+      // Check version compatibility
+      if (cacheEntry.version !== CACHE_VERSION) {
+        localStorage.removeItem(storageKey);
+        return null;
+      }
+
+      return cacheEntry.data;
+    } catch (error) {
+      console.warn(`[AnalyticsCache] Failed to retrieve ${key}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Store data in localStorage with versioning
+   */
+  _setInStorage(key, data, ttl = this.PERSISTENT_CACHE_DURATION) {
+    try {
+      const storageKey = CACHE_PREFIX + key;
+      const cacheEntry = {
+        data,
+        timestamp: Date.now(),
+        version: CACHE_VERSION,
+        ttl,
+      };
+      localStorage.setItem(storageKey, JSON.stringify(cacheEntry));
+    } catch (error) {
+      console.warn(`[AnalyticsCache] Failed to cache ${key}:`, error);
+    }
+  }
+
+  /**
+   * Remove data from localStorage
+   */
+  _removeFromStorage(key) {
+    try {
+      const storageKey = CACHE_PREFIX + key;
+      localStorage.removeItem(storageKey);
+    } catch (error) {
+      console.warn(`[AnalyticsCache] Failed to remove ${key}:`, error);
+    }
+  }
+
+  /**
    * Set data in both caches with mutex protection
    */
   set(key, result) {
@@ -82,7 +145,7 @@ export class AnalyticsCache {
     }
 
     // Check persistent storage
-    const cached = offlineDataManager.getFromStorage('analytics_cache');
+    const cached = this._getFromStorage('analytics_cache');
     if (cached && cached[key]) {
       // Update in-memory cache with persistent data
       this.cache.set(key, cached[key].data);
@@ -102,7 +165,7 @@ export class AnalyticsCache {
     await this._acquireLock();
 
     try {
-      const cached = offlineDataManager.getFromStorage('analytics_cache');
+      const cached = this._getFromStorage('analytics_cache');
       if (cached && cached[key]) {
         return cached[key];
       }
@@ -117,14 +180,14 @@ export class AnalyticsCache {
    */
   async setToPersistentStorage(key, result) {
     // Read existing persistent data first without acquiring lock
-    const cached = offlineDataManager.getFromStorage('analytics_cache') || {};
+    const cached = this._getFromStorage('analytics_cache') || {};
 
     await this._acquireLock();
 
     try {
       const updated = { ...cached, [key]: result };
 
-      await offlineDataManager.setInStorage(
+      this._setInStorage(
         'analytics_cache',
         updated,
         this.PERSISTENT_CACHE_DURATION
@@ -158,15 +221,14 @@ export class AnalyticsCache {
 
       // Remove from persistent storage in batch
       try {
-        const cached =
-          offlineDataManager.getFromStorage('analytics_cache') || {};
+        const cached = this._getFromStorage('analytics_cache') || {};
         const keysToRemove = entries.map(([key]) => key);
 
         keysToRemove.forEach(key => {
           delete cached[key];
         });
 
-        await offlineDataManager.setInStorage(
+        this._setInStorage(
           'analytics_cache',
           cached,
           this.PERSISTENT_CACHE_DURATION
@@ -200,7 +262,7 @@ export class AnalyticsCache {
 
       // Clear persistent storage completely
       try {
-        await offlineDataManager.removeFromStorage('analytics_cache');
+        this._removeFromStorage('analytics_cache');
       } catch (error) {
         console.warn(
           '[AnalyticsCache] Failed to clear persistent storage:',
@@ -235,13 +297,13 @@ export class AnalyticsCache {
 
       // Also clear from persistent storage
       try {
-        const cached = offlineDataManager.getFromStorage('analytics_cache');
+        const cached = this._getFromStorage('analytics_cache');
         if (cached && typeof cached === 'object') {
           keysToDelete.forEach(key => {
             delete cached[key];
           });
 
-          await offlineDataManager.setInStorage(
+          this._setInStorage(
             'analytics_cache',
             cached,
             this.PERSISTENT_CACHE_DURATION
@@ -294,7 +356,7 @@ export class AnalyticsCache {
 
     // Clear persistent storage completely
     try {
-      offlineDataManager.removeFromStorage('analytics_cache');
+      this._removeFromStorage('analytics_cache');
     } catch (error) {
       console.warn(
         '[AnalyticsCache] Failed to clear persistent storage:',

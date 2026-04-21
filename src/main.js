@@ -154,6 +154,9 @@ const initApp = () => {
   // Network status
   document.body.appendChild(NetworkStatus());
 
+  // Initialize SyncService before auth to ensure it's ready
+  SyncService.init();
+
   // Auth Initialization
   AuthService.init(async user => {
     const currentRoute = Router.getCurrentRoute();
@@ -162,6 +165,10 @@ const initApp = () => {
       console.log('[Main] User authenticated, starting sync...');
       localStorage.setItem('auth_hint', 'true');
 
+      // Pull latest data from cloud for cross-device sync
+      await SyncService.pullFromCloud(user.uid);
+
+      // Start real-time sync listeners
       SyncService.startRealtimeSync(user.uid);
 
       // Initialize backup service after sync service
