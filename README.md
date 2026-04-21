@@ -26,7 +26,6 @@
 - **Auto-submit on category selection** - No save buttons needed
 - **Mobile-optimized interface** focused on speed and simplicity
 - **Offline-capable** with localStorage and Service Worker persistence
-- **Smart Suggestions Engine** - Intelligent transaction categorization and insights
 - **Ghost Transactions** - See historical transaction data when dates are modified
 - **Dynamic quick amount presets** - Buttons automatically update based on your most frequently used transaction amounts with usage counters and reset functionality
 
@@ -54,15 +53,9 @@
 ### Dashboard & Analytics
 
 - **Real-time balance calculations** across all accounts
-- **Account filtering** - View transactions by specific account or all accounts
 - **Transaction history** with edit/delete capabilities
 - **Visual feedback** for recently added transactions
-- **Dashboard layout** with improved spacing and optimized action buttons
-- **Fast chart loading** with intelligent caching system and cache invalidation
-- **Skeleton loading animations** for smoother perceived performance during data loading
-- **Background view preloading** for instant navigation between sections
 - **Enhanced data visualization** with consistent colors for transactions
-- **Improved chart layout** with custom legend positioning and better tooltip placement
 - **Seamless category filtering** between Reports and Dashboard views for consistent analysis
 
 ### Financial Planning & Insights
