@@ -711,139 +711,150 @@ export const ReportsView = () => {
     try {
       // Use requestAnimationFrame for smooth rendering
       requestAnimationFrame(async () => {
-        if (!currentData) {
+        try {
+          if (!currentData) {
+            showErrorState(
+              errorState,
+              'No data available to display reports.',
+              () => loadReportData()
+            );
+            if (!content.contains(errorState)) content.appendChild(errorState);
+            errorState.style.display = 'flex';
+            return;
+          }
+
+          if (
+            !currentData.transactions ||
+            currentData.transactions.length === 0
+          ) {
+            showEmptyState(
+              emptyState,
+              'no-data-for-period',
+              currentTimePeriod,
+              formatTimePeriod
+            );
+            if (!content.contains(emptyState)) content.appendChild(emptyState);
+            emptyState.style.display = 'flex';
+            return;
+          }
+
+          if (
+            currentData.categoryBreakdown &&
+            currentData.categoryBreakdown.categories
+          ) {
+            getCategoryColors(
+              currentData.categoryBreakdown.categories,
+              categoryColorMap
+            );
+          }
+
+          // Create or get chart container
+          let chartContainer = content.querySelector('.reports-chart-container');
+          if (!chartContainer) {
+            chartContainer = createChartContainer();
+            chartContainer.className = 'reports-chart-container';
+            content.appendChild(chartContainer);
+          }
+
+          // Add fallback warning if needed
+          if (
+            currentData.isFallback &&
+            !chartContainer.querySelector('.fallback-warning')
+          ) {
+            const fallbackWarning = document.createElement('div');
+            fallbackWarning.className = 'fallback-warning';
+            fallbackWarning.style.padding = SPACING.SM;
+            fallbackWarning.style.background = 'rgba(251, 191, 36, 0.1)';
+            fallbackWarning.style.border = '1px solid rgba(251, 191, 36, 0.3)';
+            fallbackWarning.style.borderRadius = 'var(--radius-xs)';
+            fallbackWarning.style.color = '#92400e';
+            fallbackWarning.style.fontSize = '0.875rem';
+            fallbackWarning.style.marginBottom = SPACING.XS;
+            // Security: Static string, not user input
+            fallbackWarning.textContent =
+              '⚠️ Using simplified calculations due to data processing issues. Some advanced insights may not be available.';
+            chartContainer.insertBefore(
+              fallbackWarning,
+              chartContainer.firstChild
+            );
+          }
+
+          // Show skeleton loaders initially
+          showSkeletonLoaders(chartContainer);
+
+          // Incrementally update sections instead of full re-render
+          await updateSectionsIncrementally(chartContainer);
+
+          // Update time period selector if we have a custom time period
+          if (
+            currentTimePeriod &&
+            timePeriodSelectorComponent &&
+            timePeriodSelectorComponent.setPeriod
+          ) {
+            timePeriodSelectorComponent.setPeriod(currentTimePeriod);
+          }
+
+          // Check for saved category filter and scroll to it
+          const savedCategory = NavigationState.restoreReportsCategoryFilter();
+          if (savedCategory) {
+            // Use setTimeout to ensure DOM is fully rendered
+            const scrollTimeoutId = setTimeout(() => {
+              if (!container) return;
+
+              // Safe selector lookup using iteration to prevent injection
+              const allCategoryCards =
+                container.querySelectorAll('[data-category]');
+              let targetCard = null;
+              for (const card of allCategoryCards) {
+                if (card.getAttribute('data-category') === savedCategory) {
+                  targetCard = card;
+                  break;
+                }
+              }
+
+              if (targetCard) {
+                targetCard.scrollIntoView({
+                  behavior: 'smooth',
+                  block: 'center',
+                });
+
+                // Highlight effect
+                const highlightTimeoutId = highlightCategoryCard(
+                  targetCard,
+                  1500
+                );
+
+                // Store timeout ID for cleanup
+                if (container.cleanupTimeouts) {
+                  container.cleanupTimeouts.push(highlightTimeoutId);
+                }
+              }
+
+              // Clear the saved filter after use
+              NavigationState.clearReportsCategoryFilter();
+            }, 300);
+
+            // Store timeout ID for cleanup
+            if (!container.cleanupTimeouts) {
+              container.cleanupTimeouts = [];
+            }
+            container.cleanupTimeouts.push(scrollTimeoutId);
+          }
+
+          // Note: We don't clear the saved time period to allow persistence across navigations
+          // Users can manually change the time period if needed
+
+          showContentState();
+        } catch (error) {
+          console.error('Error in requestAnimationFrame callback:', error);
           showErrorState(
             errorState,
-            'No data available to display reports.',
+            'Failed to render reports. Please try again.',
             () => loadReportData()
           );
           if (!content.contains(errorState)) content.appendChild(errorState);
           errorState.style.display = 'flex';
-          return;
         }
-
-        if (
-          !currentData.transactions ||
-          currentData.transactions.length === 0
-        ) {
-          showEmptyState(
-            emptyState,
-            'no-data-for-period',
-            currentTimePeriod,
-            formatTimePeriod
-          );
-          if (!content.contains(emptyState)) content.appendChild(emptyState);
-          emptyState.style.display = 'flex';
-          return;
-        }
-
-        if (
-          currentData.categoryBreakdown &&
-          currentData.categoryBreakdown.categories
-        ) {
-          getCategoryColors(
-            currentData.categoryBreakdown.categories,
-            categoryColorMap
-          );
-        }
-
-        // Create or get chart container
-        let chartContainer = content.querySelector('.reports-chart-container');
-        if (!chartContainer) {
-          chartContainer = createChartContainer();
-          chartContainer.className = 'reports-chart-container';
-          content.appendChild(chartContainer);
-        }
-
-        // Add fallback warning if needed
-        if (
-          currentData.isFallback &&
-          !chartContainer.querySelector('.fallback-warning')
-        ) {
-          const fallbackWarning = document.createElement('div');
-          fallbackWarning.className = 'fallback-warning';
-          fallbackWarning.style.padding = SPACING.SM;
-          fallbackWarning.style.background = 'rgba(251, 191, 36, 0.1)';
-          fallbackWarning.style.border = '1px solid rgba(251, 191, 36, 0.3)';
-          fallbackWarning.style.borderRadius = 'var(--radius-xs)';
-          fallbackWarning.style.color = '#92400e';
-          fallbackWarning.style.fontSize = '0.875rem';
-          fallbackWarning.style.marginBottom = SPACING.XS;
-          // Security: Static string, not user input
-          fallbackWarning.textContent =
-            '⚠️ Using simplified calculations due to data processing issues. Some advanced insights may not be available.';
-          chartContainer.insertBefore(
-            fallbackWarning,
-            chartContainer.firstChild
-          );
-        }
-
-        // Show skeleton loaders initially
-        showSkeletonLoaders(chartContainer);
-
-        // Incrementally update sections instead of full re-render
-        await updateSectionsIncrementally(chartContainer);
-
-        // Update time period selector if we have a custom time period
-        if (
-          currentTimePeriod &&
-          timePeriodSelectorComponent &&
-          timePeriodSelectorComponent.setPeriod
-        ) {
-          timePeriodSelectorComponent.setPeriod(currentTimePeriod);
-        }
-
-        // Check for saved category filter and scroll to it
-        const savedCategory = NavigationState.restoreReportsCategoryFilter();
-        if (savedCategory) {
-          // Use setTimeout to ensure DOM is fully rendered
-          const scrollTimeoutId = setTimeout(() => {
-            if (!container) return;
-
-            // Safe selector lookup using iteration to prevent injection
-            const allCategoryCards =
-              container.querySelectorAll('[data-category]');
-            let targetCard = null;
-            for (const card of allCategoryCards) {
-              if (card.getAttribute('data-category') === savedCategory) {
-                targetCard = card;
-                break;
-              }
-            }
-
-            if (targetCard) {
-              targetCard.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center',
-              });
-
-              // Highlight effect
-              const highlightTimeoutId = highlightCategoryCard(
-                targetCard,
-                1500
-              );
-
-              // Store timeout ID for cleanup
-              if (container.cleanupTimeouts) {
-                container.cleanupTimeouts.push(highlightTimeoutId);
-              }
-            }
-
-            // Clear the saved filter after use
-            NavigationState.clearReportsCategoryFilter();
-          }, 300);
-
-          // Store timeout ID for cleanup
-          if (!container.cleanupTimeouts) {
-            container.cleanupTimeouts = [];
-          }
-          container.cleanupTimeouts.push(scrollTimeoutId);
-        }
-
-        // Note: We don't clear the saved time period to allow persistence across navigations
-        // Users can manually change the time period if needed
-
-        showContentState();
       });
     } catch (error) {
       console.error('Error rendering reports:', error);
@@ -863,12 +874,14 @@ export const ReportsView = () => {
   async function updateSectionsIncrementally(chartContainer) {
     const chartRenderResults = [];
 
-    // Update each section independently
-    await updateBudgetSummary(chartContainer, chartRenderResults);
-    await updateCategoryBreakdown(chartContainer, chartRenderResults);
-    await updateCategorySelector(chartContainer, chartRenderResults);
-    await updateFinancialInsights(chartContainer, chartRenderResults);
-    await updateIncomeExpense(chartContainer, chartRenderResults);
+    // Update each section independently and concurrently
+    await Promise.all([
+      updateBudgetSummary(chartContainer, chartRenderResults),
+      updateCategoryBreakdown(chartContainer, chartRenderResults),
+      updateCategorySelector(chartContainer, chartRenderResults),
+      updateFinancialInsights(chartContainer, chartRenderResults),
+      updateIncomeExpense(chartContainer, chartRenderResults),
+    ]);
 
     const failedCharts = chartRenderResults.filter(result => !result.success);
     if (failedCharts.length > 0) {

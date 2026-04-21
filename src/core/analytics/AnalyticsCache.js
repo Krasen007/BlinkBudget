@@ -101,7 +101,61 @@ export class AnalyticsCache {
       };
       localStorage.setItem(storageKey, JSON.stringify(cacheEntry));
     } catch (error) {
-      console.warn(`[AnalyticsCache] Failed to cache ${key}:`, error);
+      // Check if error is quota-related
+      const isQuotaError =
+        error.name === 'QuotaExceededError' ||
+        (error instanceof DOMException &&
+          (error.code === 22 || error.code === 1014));
+
+      if (isQuotaError) {
+        // Attempt eviction of stale/old entries for the same CACHE_PREFIX
+        try {
+          const entries = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const storageKey = localStorage.key(i);
+            if (storageKey && storageKey.startsWith(CACHE_PREFIX)) {
+              try {
+                const value = localStorage.getItem(storageKey);
+                if (value) {
+                  const parsed = JSON.parse(value);
+                  entries.push({ key: storageKey, timestamp: parsed.timestamp || 0 });
+                }
+              } catch {
+                // Skip entries that can't be parsed
+                entries.push({ key: storageKey, timestamp: 0 });
+              }
+            }
+          }
+
+          // Sort by timestamp (oldest first) and remove up to 5 oldest entries
+          entries.sort((a, b) => a.timestamp - b.timestamp);
+          const toRemove = entries.slice(0, 5);
+          toRemove.forEach(entry => {
+            localStorage.removeItem(entry.key);
+          });
+
+          // Retry the set operation after eviction
+          const storageKey = CACHE_PREFIX + key;
+          const cacheEntry = {
+            data,
+            timestamp: Date.now(),
+            version: CACHE_VERSION,
+            ttl,
+          };
+          localStorage.setItem(storageKey, JSON.stringify(cacheEntry));
+        } catch (retryError) {
+          console.error(
+            `[AnalyticsCache] Failed to cache ${key} after quota eviction:`,
+            retryError
+          );
+        }
+      } else {
+        console.error(
+          `[AnalyticsCache] Failed to cache ${key}:`,
+          error,
+          `Key: ${key}`
+        );
+      }
     }
   }
 
@@ -136,6 +190,12 @@ export class AnalyticsCache {
 
   /**
    * Get data from cache with mutex protection
+   *
+   * Note: This method uses relaxed consistency for persistent storage reads.
+   * The persistent storage read is not protected by the mutex lock because
+   * get() is synchronous while the lock mechanism is async. This is acceptable
+   * for a cache where eventual consistency is sufficient. For strong consistency,
+   * use _getFromPersistentStorage(key) which is async and uses the lock.
    */
   get(key) {
     // Check in-memory cache first
@@ -144,7 +204,7 @@ export class AnalyticsCache {
       return this.cache.get(key);
     }
 
-    // Check persistent storage
+    // Check persistent storage (relaxed consistency - no lock)
     const cached = this._getFromStorage('analytics_cache');
     if (cached && cached[key]) {
       // Update in-memory cache with persistent data

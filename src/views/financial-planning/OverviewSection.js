@@ -32,15 +32,13 @@ export const OverviewSection = (planningData, riskAssessor) => {
     '📊'
   );
 
-  const dataToUse = planningData;
-
   section.appendChild(
     createUsageNote(
       'At-a-glance health summary: shows current balance, monthly expense averages, savings rate and emergency fund advice.'
     )
   );
 
-  if (!dataToUse) {
+  if (!planningData) {
     const placeholder = createPlaceholder(
       'Loading Financial Data',
       'Please wait while we analyze your financial information.',
@@ -58,12 +56,12 @@ export const OverviewSection = (planningData, riskAssessor) => {
   statsGrid.style.marginBottom = SPACING.XL;
 
   // Calculate real stats from transaction data - SAME LOGIC AS DASHBOARD
-  if (!dataToUse) {
+  if (!planningData) {
     section.appendChild(statsGrid);
     return section;
   }
 
-  const { transactions = [] } = dataToUse;
+  const { transactions = [] } = planningData;
   let allTimeIncome = 0;
   let allTimeExpense = 0;
   let monthlyExpenses = 0;

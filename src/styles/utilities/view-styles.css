@@ -1003,17 +1003,17 @@
 
 /* Landing View Hero Button Styles */
 .hero-button-container {
-  margin: 2rem 0;
-  padding: 1rem 0;
+  margin: var(--spacing-xl) 0;
+  padding: var(--spacing-lg) 0;
   display: flex;
   justify-content: center;
   width: 100%;
 }
 
 .hero-button--large {
-  font-size: 1.25rem;
-  padding: 1rem 3rem;
-  min-height: 56px;
+  font-size: var(--font-size-xl);
+  padding: var(--spacing-lg) var(--spacing-3xl);
+  min-height: var(--touch-target-standard);
   font-weight: 600;
   letter-spacing: 0.02em;
 }

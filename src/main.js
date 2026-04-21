@@ -160,8 +160,10 @@ const initApp = () => {
       console.log('[Main] User authenticated, starting sync...');
       localStorage.setItem('auth_hint', 'true');
 
-      // Pull latest data from cloud for cross-device sync
-      await SyncService.pullFromCloud(user.uid);
+      // Pull latest data from cloud for cross-device sync (non-blocking)
+      SyncService.pullFromCloud(user.uid).catch(error => {
+        console.warn('[Main] Failed to pull from cloud:', error);
+      });
 
       // Start real-time sync listeners
       SyncService.startRealtimeSync(user.uid);

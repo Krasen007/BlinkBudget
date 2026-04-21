@@ -448,7 +448,7 @@
   grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
   gap: var(--spacing-sm);
   padding: var(--spacing-sm);
-  background: rgba(156, 163, 175, 0.1);
+  background: var(--color-surface-hover);
   border-radius: var(--radius-sm);
   margin-bottom: var(--spacing-xs);
   font-weight: 600;
@@ -469,6 +469,8 @@
 .budget-recommendations-cell {
   text-align: right;
   font-family: monospace;
+  font-weight: 600;
+  font-size: var(--font-size-sm);
 }
 
 .budget-recommendations-cell:first-child {

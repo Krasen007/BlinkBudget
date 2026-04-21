@@ -108,7 +108,6 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
       getCurrencyFormatter().format(safeRecommended);
     recommendedSpan.className = 'budget-recommendations-cell';
     recommendedSpan.style.color = COLORS.TEXT_MUTED;
-    recommendedSpan.style.fontWeight = '600';
     itemDiv.appendChild(recommendedSpan);
 
     // vs Budget column (percentage difference)
@@ -134,8 +133,6 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
     vsBudgetSpan.textContent = vsBudgetText;
     vsBudgetSpan.className = 'budget-recommendations-cell';
     vsBudgetSpan.style.color = vsBudgetColor;
-    vsBudgetSpan.style.fontSize = 'var(--font-size-sm)';
-    vsBudgetSpan.style.fontWeight = '600';
     itemDiv.appendChild(vsBudgetSpan);
 
     // Confidence column
@@ -143,8 +140,6 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
     confSpan.textContent = `${rec.confidence || 0}%`;
     confSpan.className = 'budget-recommendations-cell';
     confSpan.style.color = getConfidenceColor(rec.confidence);
-    confSpan.style.fontSize = 'var(--font-size-sm)';
-    confSpan.style.fontWeight = '600';
     itemDiv.appendChild(confSpan);
     list.appendChild(itemDiv);
   });

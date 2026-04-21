@@ -326,6 +326,7 @@ body:has(.view-landing) .mobile-nav {
 }
 
 /* Hide network status on landing page */
+.view-landing ~ .network-status,
 body:has(.view-landing) .network-status {
   display: none !important;
 }
