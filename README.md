@@ -59,6 +59,8 @@
 - **Visual feedback** for recently added transactions
 - **Dashboard layout** with improved spacing and optimized action buttons
 - **Fast chart loading** with intelligent caching system and cache invalidation
+- **Skeleton loading animations** for smoother perceived performance during data loading
+- **Background view preloading** for instant navigation between sections
 - **Enhanced data visualization** with consistent colors for transactions
 - **Improved chart layout** with custom legend positioning and better tooltip placement
 - **Seamless category filtering** between Reports and Dashboard views for consistent analysis
@@ -78,7 +80,7 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 ### User Experience & UI
 
 - **Keyboard-aware UI** that adapts to virtual keyboard
-- **PWA support** - Installable as a standalone app with offline support
+- **PWA support** - Installable as a standalone app with offline support and visual update notifications
 - **Android TWA support** - Trusted Web Activity for native Android app experience with Play Store deployment
 - **Keyboard shortcut (Escape key)** to exit Settings and return to dashboard
 - **Helpful tips on each section**

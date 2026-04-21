@@ -2,31 +2,30 @@
 
 ## Recent Updates
 
+### PWA & Performance
+- **Added PWA update notifications**: Users now see a visual toast notification when a new app version is available, with an "Update" button to apply changes
+- **Simplified PWA configuration**: Removed redundant service worker and offline strategies for cleaner implementation
+- **Improved initialization flow**: Streamlined app startup sequence and background service loading
+- **Fixed build warnings**: Converted dynamic imports to static imports in main.js for better stability
+
+### Performance & Loading
+- **Added skeleton loading animations**: ReportsView now shows skeleton screens during incremental rendering for better perceived performance
+- **Implemented background view preloading**: Views load in the background for instant navigation
+- **Fixed redundant preloading**: Eliminated duplicate preloading operations
+- **Fixed ViewPreloader**: Corrected promise return for proper async handling
+
+### Code Quality & Architecture
+- **Refactored mobile utilities**: Consolidated overlapping mobile utility functions
+- **Moved inline styles to CSS**: Improved code maintainability by converting inline styles to CSS classes
+- **Fixed security guidance**: Updated documentation and implemented secure background data preloading
+- **Performance optimizations**: General improvements to error handling and code quality
+
 ### Transaction Management
-- **Fixed timestamp handling**: When editing a transaction without changing the date, the original time is now preserved instead of being reset to current time
-- **Improved date/time consistency**: Ensured proper timestamp updates when adding or editing transactions
+- **Fixed transaction sorting**: Preserved full timestamps when editing transactions to maintain correct chronological order
+- **Removed smart suggestions from TransactionForm**: Simplified form by removing AI-powered suggestions to focus on core functionality
 
-### Financial Planning & Reports
-- **Fixed caching issues**: Resolved data caching problems in the Financial Planning section
-- **Moved functionality**: ReportsView features integrated into Financial Planning Insights tab for better organization
-- **Fixed chart rendering**: Corrected display issues with charts showing negative values
-- **Fixed currency calculations**: Corrected currency and calculation errors in Financial Insights chart
-
-### User Interface Improvements
-- **Fixed Reports view navigation**: Improved navigation and filter preservation in Reports view
-- **Added filter breadcrumbs**: Added "Currently filtered by" indicators that allow quick return to category view
-- **Fixed Dashboard timing**: Resolved UTC method usage in Dashboard view for accurate date/time display
-- **Fixed z-index issues**: Corrected layering in Spending by Category section
-- **Improved button styling**: Standardized button appearance across the app
-- **Fixed margins**: Corrected spacing issues in various sections
-
-### Feature Removal
-- **Removed Time of Day Patterns**: Removed this analytics feature as it was not providing useful insights
-
-### Code Quality & Security
-- **Snyk security fixes**: Applied security patches for dependency vulnerabilities
-- **Code linting**: Improved code consistency and formatting
-- **General optimizations**: Various performance improvements and bug fixes
+### UI & UX
+- **Reverted landing page**: Returned to original landing page design for consistency
 
 ### Version
-- **Version 1.33**
+- **Version 1.34**
