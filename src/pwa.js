@@ -1,10 +1,17 @@
 import { registerSW } from 'virtual:pwa-register';
+import { ToastNotification } from './components/ToastNotification.js';
 
-registerSW({
+const updateSW = registerSW({
   onNeedRefresh() {
-    // Show a prompt to user to refresh, or just refresh automatically
-    // For now, let's just log it. A proper UI would be better.
-    console.log('New content available, click on reload button to update.');
+    // Show visual notification for update
+    ToastNotification({
+      message: 'A new version is available',
+      actionText: 'Update',
+      variant: 'info',
+      onAction: () => {
+        updateSW(true); // Trigger the update
+      },
+    });
   },
   onOfflineReady() {
     console.log('App is ready to work offline.');
