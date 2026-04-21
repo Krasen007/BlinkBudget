@@ -328,6 +328,17 @@ export const AuthService = {
 
     try {
       const provider = new GoogleAuthProvider();
+      // Add custom scopes if needed
+      provider.addScope('email');
+      provider.addScope('profile');
+
+      // Set custom parameters to prevent popup issues
+      provider.setCustomParameters({
+        prompt: 'select_account', // Force account selection
+        display: 'popup', // Explicitly request popup mode
+      });
+
+      console.log('[AuthService] Initiating Google sign-in with popup...');
       const userCredential = await signInWithPopup(auth, provider);
       // Make user object read-only to prevent manipulation
       this.user = Object.freeze({ ...userCredential.user });
@@ -336,23 +347,32 @@ export const AuthService = {
       // Update profile in background
       this._updateUserProfile(this.user).catch(console.warn);
 
+      console.log('[AuthService] Google sign-in successful');
       return { user: this.user, error: null };
     } catch (error) {
       // Log full error for debugging but return sanitized message
       console.warn(
         '[AuthService] Google login error:',
         error.code,
-        error.message
+        error.message,
+        error
       );
 
       let message = 'Google authentication failed. Please try again.';
       if (error.code === 'auth/popup-closed-by-user') {
-        message = 'Sign-in popup was closed before completion.';
+        message =
+          'Sign-in popup was closed before completion. Please try again and ensure you complete the login process.';
       } else if (error.code === 'auth/popup-blocked') {
         message =
-          'Sign-in popup was blocked by the browser. Please allow popups.';
+          'Sign-in popup was blocked by the browser. Please allow popups for this site in your browser settings and try again.';
       } else if (error.code === 'auth/cancelled-popup-request') {
-        message = 'Sign-in was cancelled.';
+        message = 'Sign-in was cancelled. Please try again.';
+      } else if (error.code === 'auth/unauthorized-domain') {
+        message =
+          'This domain is not authorized for Google sign-in. Please contact support.';
+      } else if (error.code === 'auth/timeout') {
+        message =
+          'Sign-in timed out. Please try again. If the issue persists, check your internet connection.';
       }
 
       return { user: null, error: message };
