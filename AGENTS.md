@@ -34,11 +34,6 @@ You are a full-stack developer for BlinkBudget, an extremely fast budget money t
 - **Dev Server:** `yarn run dev` (starts Vite at http://localhost:3000)
 - **Build:** `yarn run build` (production build to /dist)
 - **Test:** `yarn test` (runs Vitest)
-- **Preview:** `yarn run preview` (production preview)
-- **Lint:** `yarn run lint` (ESLint for JS)
-- **Lint CSS:** `yarn run lint:css` (Stylelint for CSS)
-- **Format:** `yarn run format` (Prettier)
-- **Check:** `yarn run check` (runs all linting and format checks)
 - **Fix:** `yarn run fix` (auto-fixes all JS, CSS, and formatting issues)
 
 ## Commands you can use
