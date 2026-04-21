@@ -1,6 +1,6 @@
 /**
  * ViewPreloader
- * Preloads all application views in the background for instant navigation.
+ * Preloads all application views and components in the background for instant navigation.
  * Uses dynamic imports with caching to ensure views load instantly when needed.
  * Also preloads cloud data from Firebase for instant access across all views.
  */
@@ -9,6 +9,7 @@ export const ViewPreloader = {
   cache: new Map(),
   preloadPromises: new Map(),
   dataPreloaded: false,
+  cloudPreloadPromise: null,
 
   /**
    * Preload a single view module
@@ -51,6 +52,16 @@ export const ViewPreloader = {
    */
   getCachedView(name) {
     return this.cache.get(name) || null;
+  },
+
+  /**
+   * Get a cached module (alias for getCachedView, for use with components)
+   * Caches both views and components for instant loading
+   * @param {string} name - The name/identifier for the module
+   * @returns {Object|null} The cached module or null if not cached
+   */
+  getCachedModule(name) {
+    return this.getCachedView(name);
   },
 
   /**
@@ -148,45 +159,61 @@ export const ViewPreloader = {
    * Pulls all data types and preloads planning data cache
    */
   async preloadCloudData() {
+    // Skip if already preloaded
     if (this.dataPreloaded) {
       console.log('[ViewPreloader] Cloud data already preloaded');
       return;
     }
 
+    // Return existing promise if already in flight
+    if (this.cloudPreloadPromise) {
+      return this.cloudPreloadPromise;
+    }
+
     console.log('[ViewPreloader] Starting cloud data preload...');
 
-    try {
-      // Import SyncService dynamically to avoid circular dependency
-      const { SyncService } = await import('./sync-service.js');
-      const { AuthService } = await import('./auth-service.js');
+    // Create preload promise
+    const promise = (async () => {
+      try {
+        // Import SyncService dynamically to avoid circular dependency
+        const { SyncService } = await import('./sync-service.js');
+        const { AuthService } = await import('./auth-service.js');
 
-      const userId = AuthService.getUserId();
-      if (!userId) {
-        console.log('[ViewPreloader] No user, skipping cloud data preload');
-        return;
+        const userId = AuthService.getUserId();
+        if (!userId) {
+          console.log('[ViewPreloader] No user, skipping cloud data preload');
+          return;
+        }
+
+        // Pull all data from cloud
+        await SyncService.pullFromCloud(userId);
+        console.log('[ViewPreloader] Cloud data pulled successfully');
+
+        // Preload planning data cache
+        const { planningDataManager } =
+          await import('./financial-planning/PlanningDataManager.js');
+        await planningDataManager.loadData();
+        console.log('[ViewPreloader] Planning data preloaded successfully');
+
+        // Preload goal-planner and investment-tracker services in parallel
+        await Promise.all([
+          import('./goal-planner.js'),
+          import('./investment-tracker.js'),
+        ]);
+        console.log('[ViewPreloader] Financial planning services preloaded');
+
+        this.dataPreloaded = true;
+        this.cloudPreloadPromise = null;
+        console.log('[ViewPreloader] Cloud data preloading complete');
+      } catch (error) {
+        this.cloudPreloadPromise = null;
+        console.warn('[ViewPreloader] Failed to preload cloud data:', error);
+        // Don't throw - allow app to function even if preload fails
       }
+    })();
 
-      // Pull all data from cloud
-      await SyncService.pullFromCloud(userId);
-      console.log('[ViewPreloader] Cloud data pulled successfully');
-
-      // Preload planning data cache
-      const { planningDataManager } =
-        await import('./financial-planning/PlanningDataManager.js');
-      await planningDataManager.loadData();
-      console.log('[ViewPreloader] Planning data preloaded successfully');
-
-      // Preload goal-planner and investment-tracker services
-      await import('./goal-planner.js');
-      await import('./investment-tracker.js');
-      console.log('[ViewPreloader] Financial planning services preloaded');
-
-      this.dataPreloaded = true;
-      console.log('[ViewPreloader] Cloud data preloading complete');
-    } catch (error) {
-      console.warn('[ViewPreloader] Failed to preload cloud data:', error);
-      // Don't throw - allow app to function even if preload fails
-    }
+    this.cloudPreloadPromise = promise;
+    return promise;
   },
 
   /**
@@ -196,6 +223,7 @@ export const ViewPreloader = {
     this.cache.clear();
     this.preloadPromises.clear();
     this.dataPreloaded = false;
+    this.cloudPreloadPromise = null;
     console.log('[ViewPreloader] Cache cleared');
   },
 };

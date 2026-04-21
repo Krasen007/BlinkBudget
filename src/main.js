@@ -155,7 +155,9 @@ const initApp = () => {
       preloadReportsData();
 
       // Preload all views in the background for instant navigation
-      ViewPreloader.preloadAll();
+      ViewPreloader.preloadAll().catch(error => {
+        console.warn('[Main] Failed to preload views:', error);
+      });
 
       // Initialize tutorial system after user is authenticated
       import('./components/tutorial/TutorialManager.js')

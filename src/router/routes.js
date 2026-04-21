@@ -14,13 +14,26 @@ import { AddView } from '../views/AddView.js';
 import { EditView } from '../views/EditView.js';
 import { ReportsView } from '../views/ReportsView.js';
 
+/**
+ * Helper to load a module from cache or import it dynamically
+ * @param {string} cacheKey - The cache key for the module
+ * @param {Function} importFn - The dynamic import function
+ * @returns {Promise<Object>} The module
+ */
+const loadCachedOrImport = async (cacheKey, importFn) => {
+  let module = ViewPreloader.getCachedView(cacheKey);
+  if (!module) {
+    module = await importFn();
+  }
+  return module;
+};
+
 export const routes = {
   landing: async () => {
-    let module = ViewPreloader.getCachedView('LandingView');
-    if (!module) {
-      module = await import('../views/LandingView.js');
-    }
-    const { LandingView } = module;
+    const { LandingView } = await loadCachedOrImport(
+      'LandingView',
+      () => import('../views/LandingView.js')
+    );
     NavigationState.setLastActiveView('landing');
     ViewManager.setView(LandingView());
     updateMobileNavigation('landing');
@@ -41,11 +54,10 @@ export const routes = {
     updateMobileNavigation('dashboard');
   },
   'category-manager': async () => {
-    let module = ViewPreloader.getCachedView('CustomCategoryManager');
-    if (!module) {
-      module = await import('../components/CustomCategoryManager.js');
-    }
-    const { CustomCategoryManager } = module;
+    const { CustomCategoryManager } = await loadCachedOrImport(
+      'CustomCategoryManager',
+      () => import('../components/CustomCategoryManager.js')
+    );
     NavigationState.setLastActiveView('category-manager');
     ViewManager.setView(
       CustomCategoryManager({
@@ -58,11 +70,10 @@ export const routes = {
     updateMobileNavigation('category-manager');
   },
   settings: async () => {
-    let module = ViewPreloader.getCachedView('SettingsView');
-    if (!module) {
-      module = await import('../views/SettingsView.js');
-    }
-    const { SettingsView } = module;
+    const { SettingsView } = await loadCachedOrImport(
+      'SettingsView',
+      () => import('../views/SettingsView.js')
+    );
     NavigationState.setLastActiveView('settings');
     ViewManager.setView(SettingsView());
     updateMobileNavigation('settings');
@@ -73,21 +84,19 @@ export const routes = {
     updateMobileNavigation('reports');
   },
   'financial-planning': async () => {
-    let module = ViewPreloader.getCachedView('FinancialPlanningView');
-    if (!module) {
-      module = await import('../views/FinancialPlanningView.js');
-    }
-    const { FinancialPlanningView } = module;
+    const { FinancialPlanningView } = await loadCachedOrImport(
+      'FinancialPlanningView',
+      () => import('../views/FinancialPlanningView.js')
+    );
     NavigationState.setLastActiveView('financial-planning');
     ViewManager.setView(FinancialPlanningView());
     updateMobileNavigation('financial-planning');
   },
   login: async () => {
-    let module = ViewPreloader.getCachedView('LoginView');
-    if (!module) {
-      module = await import('../views/LoginView.js');
-    }
-    const { LoginView } = module;
+    const { LoginView } = await loadCachedOrImport(
+      'LoginView',
+      () => import('../views/LoginView.js')
+    );
     NavigationState.setLastActiveView('login');
     ViewManager.setView(LoginView());
     updateMobileNavigation('login');
