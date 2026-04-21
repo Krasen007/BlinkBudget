@@ -162,6 +162,24 @@ export const ReportsView = () => {
   content.id = 'reports-content';
   container.appendChild(content);
 
+  // Persistent section containers for incremental rendering
+  const sectionContainers = {
+    budgetSummary: null,
+    categoryBreakdown: null,
+    categorySelector: null,
+    financialInsights: null,
+    incomeExpense: null,
+  };
+
+  // Skeleton loading states
+  const skeletonStates = {
+    budgetSummary: null,
+    categoryBreakdown: null,
+    categorySelector: null,
+    financialInsights: null,
+    incomeExpense: null,
+  };
+
   // State components
   const loadingState = createLoadingState();
   const emptyState = createEmptyState();
@@ -602,125 +620,231 @@ export const ReportsView = () => {
   }
 
   /**
+   * Create skeleton loader for a section
+   */
+  function createSkeletonLoader(sectionName, height = '200px') {
+    const skeleton = document.createElement('div');
+    skeleton.className = `skeleton-loader skeleton-${sectionName}`;
+    skeleton.style.height = height;
+    skeleton.style.background =
+      'linear-gradient(90deg, var(--color-surface) 25%, var(--color-border) 50%, var(--color-surface) 75%)';
+    skeleton.style.backgroundSize = '200% 100%';
+    skeleton.style.animation = 'skeleton-loading 1.5s ease-in-out infinite';
+    skeleton.style.borderRadius = 'var(--radius-md)';
+    skeleton.style.marginBottom = SPACING.XS;
+
+    // Add animation keyframes if not already present
+    if (!document.querySelector('#skeleton-animations')) {
+      const style = document.createElement('style');
+      style.id = 'skeleton-animations';
+      style.textContent = `
+        @keyframes skeleton-loading {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    return skeleton;
+  }
+
+  /**
+   * Show skeleton loaders for all sections
+   */
+  function showSkeletonLoaders(chartContainer) {
+    // Create skeleton for each section
+    if (!skeletonStates.budgetSummary) {
+      skeletonStates.budgetSummary = createSkeletonLoader(
+        'budget-summary',
+        '120px'
+      );
+      chartContainer.appendChild(skeletonStates.budgetSummary);
+    }
+
+    if (!skeletonStates.categoryBreakdown) {
+      skeletonStates.categoryBreakdown = createSkeletonLoader(
+        'category-breakdown',
+        '300px'
+      );
+      chartContainer.appendChild(skeletonStates.categoryBreakdown);
+    }
+
+    if (!skeletonStates.categorySelector) {
+      skeletonStates.categorySelector = createSkeletonLoader(
+        'category-selector',
+        '400px'
+      );
+      chartContainer.appendChild(skeletonStates.categorySelector);
+    }
+
+    if (!skeletonStates.financialInsights) {
+      skeletonStates.financialInsights = createSkeletonLoader(
+        'financial-insights',
+        '150px'
+      );
+      chartContainer.appendChild(skeletonStates.financialInsights);
+    }
+
+    if (!skeletonStates.incomeExpense) {
+      skeletonStates.incomeExpense = createSkeletonLoader(
+        'income-expense',
+        '250px'
+      );
+      chartContainer.appendChild(skeletonStates.incomeExpense);
+    }
+  }
+
+  /**
+   * Hide skeleton loader for a specific section
+   */
+  function hideSkeletonLoader(sectionName) {
+    if (skeletonStates[sectionName]) {
+      skeletonStates[sectionName].style.display = 'none';
+    }
+  }
+
+  /**
    * Render the complete reports interface
    */
   async function renderReports() {
     try {
-      // Security: Clearing content, no user input involved
-      content.innerHTML = '';
-
-      cleanupCharts();
-
-      if (!currentData) {
-        showErrorState(
-          errorState,
-          'No data available to display reports.',
-          () => loadReportData()
-        );
-        if (!content.contains(errorState)) content.appendChild(errorState);
-        errorState.style.display = 'flex';
-        return;
-      }
-
-      if (!currentData.transactions || currentData.transactions.length === 0) {
-        showEmptyState(
-          emptyState,
-          'no-data-for-period',
-          currentTimePeriod,
-          formatTimePeriod
-        );
-        if (!content.contains(emptyState)) content.appendChild(emptyState);
-        emptyState.style.display = 'flex';
-        return;
-      }
-
-      if (
-        currentData.categoryBreakdown &&
-        currentData.categoryBreakdown.categories
-      ) {
-        getCategoryColors(
-          currentData.categoryBreakdown.categories,
-          categoryColorMap
-        );
-      }
-
-      const chartContainer = createChartContainer();
-      content.appendChild(chartContainer);
-
-      if (currentData.isFallback) {
-        const fallbackWarning = document.createElement('div');
-        fallbackWarning.style.padding = SPACING.SM;
-        fallbackWarning.style.background = 'rgba(251, 191, 36, 0.1)';
-        fallbackWarning.style.border = '1px solid rgba(251, 191, 36, 0.3)';
-        fallbackWarning.style.borderRadius = 'var(--radius-xs)';
-        fallbackWarning.style.color = '#92400e';
-        fallbackWarning.style.fontSize = '0.875rem';
-        fallbackWarning.style.marginBottom = SPACING.XS;
-        // Security: Static string, not user input
-        fallbackWarning.textContent =
-          '⚠️ Using simplified calculations due to data processing issues. Some advanced insights may not be available.';
-        chartContainer.appendChild(fallbackWarning);
-      }
-
-      await renderCharts(chartContainer);
-
-      // Update time period selector if we have a custom time period
-      if (
-        currentTimePeriod &&
-        timePeriodSelectorComponent &&
-        timePeriodSelectorComponent.setPeriod
-      ) {
-        timePeriodSelectorComponent.setPeriod(currentTimePeriod);
-      }
-
-      // Check for saved category filter and scroll to it
-      const savedCategory = NavigationState.restoreReportsCategoryFilter();
-      if (savedCategory) {
-        // Use setTimeout to ensure DOM is fully rendered
-        const scrollTimeoutId = setTimeout(() => {
-          if (!container) return;
-
-          // Safe selector lookup using iteration to prevent injection
-          const allCategoryCards =
-            container.querySelectorAll('[data-category]');
-          let targetCard = null;
-          for (const card of allCategoryCards) {
-            if (card.getAttribute('data-category') === savedCategory) {
-              targetCard = card;
-              break;
-            }
-          }
-
-          if (targetCard) {
-            targetCard.scrollIntoView({
-              behavior: 'smooth',
-              block: 'center',
-            });
-
-            // Highlight effect
-            const highlightTimeoutId = highlightCategoryCard(targetCard, 1500);
-
-            // Store timeout ID for cleanup
-            if (container.cleanupTimeouts) {
-              container.cleanupTimeouts.push(highlightTimeoutId);
-            }
-          }
-
-          // Clear the saved filter after use
-          NavigationState.clearReportsCategoryFilter();
-        }, 300);
-
-        // Store timeout ID for cleanup
-        if (!container.cleanupTimeouts) {
-          container.cleanupTimeouts = [];
+      // Use requestAnimationFrame for smooth rendering
+      requestAnimationFrame(async () => {
+        if (!currentData) {
+          showErrorState(
+            errorState,
+            'No data available to display reports.',
+            () => loadReportData()
+          );
+          if (!content.contains(errorState)) content.appendChild(errorState);
+          errorState.style.display = 'flex';
+          return;
         }
-        container.cleanupTimeouts.push(scrollTimeoutId);
-      }
 
-      // Note: We don't clear the saved time period to allow persistence across navigations
-      // Users can manually change the time period if needed
+        if (
+          !currentData.transactions ||
+          currentData.transactions.length === 0
+        ) {
+          showEmptyState(
+            emptyState,
+            'no-data-for-period',
+            currentTimePeriod,
+            formatTimePeriod
+          );
+          if (!content.contains(emptyState)) content.appendChild(emptyState);
+          emptyState.style.display = 'flex';
+          return;
+        }
 
-      showContentState();
+        if (
+          currentData.categoryBreakdown &&
+          currentData.categoryBreakdown.categories
+        ) {
+          getCategoryColors(
+            currentData.categoryBreakdown.categories,
+            categoryColorMap
+          );
+        }
+
+        // Create or get chart container
+        let chartContainer = content.querySelector('.reports-chart-container');
+        if (!chartContainer) {
+          chartContainer = createChartContainer();
+          chartContainer.className = 'reports-chart-container';
+          content.appendChild(chartContainer);
+        }
+
+        // Add fallback warning if needed
+        if (
+          currentData.isFallback &&
+          !chartContainer.querySelector('.fallback-warning')
+        ) {
+          const fallbackWarning = document.createElement('div');
+          fallbackWarning.className = 'fallback-warning';
+          fallbackWarning.style.padding = SPACING.SM;
+          fallbackWarning.style.background = 'rgba(251, 191, 36, 0.1)';
+          fallbackWarning.style.border = '1px solid rgba(251, 191, 36, 0.3)';
+          fallbackWarning.style.borderRadius = 'var(--radius-xs)';
+          fallbackWarning.style.color = '#92400e';
+          fallbackWarning.style.fontSize = '0.875rem';
+          fallbackWarning.style.marginBottom = SPACING.XS;
+          // Security: Static string, not user input
+          fallbackWarning.textContent =
+            '⚠️ Using simplified calculations due to data processing issues. Some advanced insights may not be available.';
+          chartContainer.insertBefore(
+            fallbackWarning,
+            chartContainer.firstChild
+          );
+        }
+
+        // Show skeleton loaders initially
+        showSkeletonLoaders(chartContainer);
+
+        // Incrementally update sections instead of full re-render
+        await updateSectionsIncrementally(chartContainer);
+
+        // Update time period selector if we have a custom time period
+        if (
+          currentTimePeriod &&
+          timePeriodSelectorComponent &&
+          timePeriodSelectorComponent.setPeriod
+        ) {
+          timePeriodSelectorComponent.setPeriod(currentTimePeriod);
+        }
+
+        // Check for saved category filter and scroll to it
+        const savedCategory = NavigationState.restoreReportsCategoryFilter();
+        if (savedCategory) {
+          // Use setTimeout to ensure DOM is fully rendered
+          const scrollTimeoutId = setTimeout(() => {
+            if (!container) return;
+
+            // Safe selector lookup using iteration to prevent injection
+            const allCategoryCards =
+              container.querySelectorAll('[data-category]');
+            let targetCard = null;
+            for (const card of allCategoryCards) {
+              if (card.getAttribute('data-category') === savedCategory) {
+                targetCard = card;
+                break;
+              }
+            }
+
+            if (targetCard) {
+              targetCard.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+              });
+
+              // Highlight effect
+              const highlightTimeoutId = highlightCategoryCard(
+                targetCard,
+                1500
+              );
+
+              // Store timeout ID for cleanup
+              if (container.cleanupTimeouts) {
+                container.cleanupTimeouts.push(highlightTimeoutId);
+              }
+            }
+
+            // Clear the saved filter after use
+            NavigationState.clearReportsCategoryFilter();
+          }, 300);
+
+          // Store timeout ID for cleanup
+          if (!container.cleanupTimeouts) {
+            container.cleanupTimeouts = [];
+          }
+          container.cleanupTimeouts.push(scrollTimeoutId);
+        }
+
+        // Note: We don't clear the saved time period to allow persistence across navigations
+        // Users can manually change the time period if needed
+
+        showContentState();
+      });
     } catch (error) {
       console.error('Error rendering reports:', error);
       showErrorState(
@@ -733,49 +857,47 @@ export const ReportsView = () => {
     }
   }
 
-  /******************* UI OF APP ***********************************
-   * Render beautiful charts with progressive loading
+  /**
+   * Update sections incrementally instead of full re-render
    */
-  async function renderCharts(chartContainer) {
-    try {
-      const chartsSection = document.createElement('div');
-      chartsSection.className = 'charts-section';
+  async function updateSectionsIncrementally(chartContainer) {
+    const chartRenderResults = [];
 
-      const chartRenderResults = [];
+    // Update each section independently
+    await updateBudgetSummary(chartContainer, chartRenderResults);
+    await updateCategoryBreakdown(chartContainer, chartRenderResults);
+    await updateCategorySelector(chartContainer, chartRenderResults);
+    await updateFinancialInsights(chartContainer, chartRenderResults);
+    await updateIncomeExpense(chartContainer, chartRenderResults);
 
-      // Core Spending Insights (Simplified per Tasteful Software Audit)
-      // Budget Summary / This Month
-      await renderBudgetSummary(chartsSection, chartRenderResults);
-
-      // Spending by category PIE CHART
-      await renderCategoryBreakdown(chartsSection, chartRenderResults);
-
-      // Explore Categories
-      await renderCategorySelector(chartsSection, chartRenderResults);
-
-      // Financial Insights - simple, actionable insights
-      await renderFinancialInsights(chartsSection, chartRenderResults);
-
-      // Income vs Expenses - simplified view
-      await renderIncomeExpense(chartsSection, chartRenderResults);
-
-      chartContainer.appendChild(chartsSection);
-
-      const failedCharts = chartRenderResults.filter(result => !result.success);
-      if (failedCharts.length > 0) {
-        showChartRenderingWarning(container, failedCharts);
-      }
-    } catch (error) {
-      console.error('Error rendering charts:', error);
-      throw error;
+    const failedCharts = chartRenderResults.filter(result => !result.success);
+    if (failedCharts.length > 0) {
+      showChartRenderingWarning(container, failedCharts);
     }
   }
 
-  /**
-   * Render budget summary with error handling
+  /******************* UI OF APP ***********************************
+   * Render beautiful charts with progressive loading
    */
-  async function renderBudgetSummary(chartsSection, chartRenderResults) {
+
+  /**
+   * Update budget summary section incrementally
+   */
+  async function updateBudgetSummary(chartContainer, chartRenderResults) {
     try {
+      // Check if container exists, create if not
+      let section = sectionContainers.budgetSummary;
+      if (!section) {
+        section = document.createElement('div');
+        section.className = 'budget-summary-section';
+        section.id = 'budget-summary-section';
+        chartContainer.appendChild(section);
+        sectionContainers.budgetSummary = section;
+      }
+
+      // Clear existing content
+      section.innerHTML = '';
+
       const budgetsSummary = BudgetPlanner.getSummary(
         currentData.transactions,
         currentTimePeriod
@@ -786,14 +908,17 @@ export const ReportsView = () => {
           currentTimePeriod
         );
         summaryCard.style.marginBottom = SPACING.XS;
-        chartsSection.appendChild(summaryCard);
+        section.appendChild(summaryCard);
       }
+      // Hide skeleton loader when content is loaded
+      hideSkeletonLoader('budgetSummary');
       chartRenderResults.push({ name: 'Budget Summary', success: true });
     } catch (budgetError) {
       console.warn(
-        '[ReportsView] Failed to render budget summary:',
+        '[ReportsView] Failed to update budget summary:',
         budgetError
       );
+      hideSkeletonLoader('budgetSummary');
       chartRenderResults.push({
         name: 'Budget Summary',
         success: false,
@@ -803,10 +928,27 @@ export const ReportsView = () => {
   }
 
   /**
-   * Render category breakdown chart with error handling
+   * Update category breakdown section incrementally
    */
-  async function renderCategoryBreakdown(chartsSection, chartRenderResults) {
+  async function updateCategoryBreakdown(chartContainer, chartRenderResults) {
     try {
+      // Check if container exists, create if not
+      let section = sectionContainers.categoryBreakdown;
+      if (!section) {
+        section = document.createElement('div');
+        section.className = 'category-breakdown-section';
+        section.id = 'category-breakdown-section';
+        chartContainer.appendChild(section);
+        sectionContainers.categoryBreakdown = section;
+      }
+
+      // Clear existing content and destroy old chart
+      section.innerHTML = '';
+      const oldChart = activeCharts.get('category-breakdown');
+      if (oldChart && typeof oldChart.destroy === 'function') {
+        oldChart.destroy();
+      }
+
       const categoryResult = await createCategoryBreakdownChart(
         chartRenderer,
         currentData,
@@ -814,15 +956,18 @@ export const ReportsView = () => {
         categories => getCategoryColors(categories, categoryColorMap),
         handleCategoryChartClick
       );
-      chartsSection.appendChild(categoryResult.section);
+      section.appendChild(categoryResult.section);
       if (categoryResult.chart)
         activeCharts.set('category-breakdown', categoryResult.chart);
+      // Hide skeleton loader when content is loaded
+      hideSkeletonLoader('categoryBreakdown');
       chartRenderResults.push({ name: 'Category Breakdown', success: true });
     } catch (categoryError) {
       console.error(
-        'Failed to render category breakdown chart:',
+        'Failed to update category breakdown chart:',
         categoryError
       );
+      hideSkeletonLoader('categoryBreakdown');
       chartRenderResults.push({
         name: 'Category Breakdown',
         success: false,
@@ -832,45 +977,28 @@ export const ReportsView = () => {
   }
 
   /**
-   * Render income vs expenses chart with error handling
+   * Update category selector section incrementally
    */
-  async function renderIncomeExpense(chartsSection, chartRenderResults) {
+  async function updateCategorySelector(chartContainer, chartRenderResults) {
     try {
-      const incomeExpenseContainer = document.createElement('div');
-      incomeExpenseContainer.className = 'income-expense-container';
-      incomeExpenseContainer.style.position = 'relative';
-      incomeExpenseContainer.style.zIndex = '1';
-      incomeExpenseContainer.style.clear = 'both';
-      incomeExpenseContainer.style.marginTop = SPACING.XS;
-      incomeExpenseContainer.style.marginBottom = SPACING.XS;
+      // Check if container exists, create if not
+      let section = sectionContainers.categorySelector;
+      if (!section) {
+        section = document.createElement('div');
+        section.className = 'category-selector-section';
+        section.id = 'category-selector-section';
+        section.style.clear = 'both';
+        section.style.position = 'relative';
+        section.style.zIndex = '2';
+        section.style.marginTop = SPACING.XS;
+        section.style.marginBottom = SPACING.XS;
+        chartContainer.appendChild(section);
+        sectionContainers.categorySelector = section;
+      }
 
-      const incomeResult = await createIncomeExpenseChart(
-        chartRenderer,
-        currentData
-      );
-      incomeExpenseContainer.appendChild(incomeResult.section);
-      chartsSection.appendChild(incomeExpenseContainer);
-      if (incomeResult.chart)
-        activeCharts.set('income-expense', incomeResult.chart);
-      chartRenderResults.push({ name: 'Income vs Expenses', success: true });
-    } catch (incomeExpenseError) {
-      console.error(
-        'Failed to render income vs expense chart:',
-        incomeExpenseError
-      );
-      chartRenderResults.push({
-        name: 'Income vs Expenses',
-        success: false,
-        error: incomeExpenseError,
-      });
-    }
-  }
+      // Clear existing content
+      section.innerHTML = '';
 
-  /**
-   * Render category selector with error handling
-   */
-  async function renderCategorySelector(chartsSection, chartRenderResults) {
-    try {
       // Generate frequency analysis data
       const frequencyData = analyticsEngine.analyzeFrequencyPatterns(
         currentData.transactions,
@@ -897,17 +1025,15 @@ export const ReportsView = () => {
         categories => getCategoryColors(categories, categoryColorMap),
         handleCategoryCardClick,
         frequencyData.categories,
-        budgetStatusMap // Pass budget status to CategoryCard
+        budgetStatusMap
       );
-      categorySelectorSection.style.clear = 'both';
-      categorySelectorSection.style.position = 'relative';
-      categorySelectorSection.style.zIndex = '2';
-      categorySelectorSection.style.marginTop = SPACING.XS;
-      categorySelectorSection.style.marginBottom = SPACING.XS;
-      chartsSection.appendChild(categorySelectorSection);
+      section.appendChild(categorySelectorSection);
+      // Hide skeleton loader when content is loaded
+      hideSkeletonLoader('categorySelector');
       chartRenderResults.push({ name: 'Category Selector', success: true });
     } catch (selectorError) {
-      console.error('Failed to render category selector:', selectorError);
+      console.error('Failed to update category selector:', selectorError);
+      hideSkeletonLoader('categorySelector');
       chartRenderResults.push({
         name: 'Category Selector',
         success: false,
@@ -917,23 +1043,90 @@ export const ReportsView = () => {
   }
 
   /**
-   * Render financial insights with error handling
+   * Update financial insights section incrementally
    */
-  async function renderFinancialInsights(chartsSection, chartRenderResults) {
-    if (currentData.insights && currentData.insights.length > 0) {
-      try {
+  async function updateFinancialInsights(chartContainer, chartRenderResults) {
+    try {
+      // Check if container exists, create if not
+      let section = sectionContainers.financialInsights;
+      if (!section) {
+        section = document.createElement('div');
+        section.className = 'financial-insights-section';
+        section.id = 'financial-insights-section';
+        chartContainer.appendChild(section);
+        sectionContainers.financialInsights = section;
+      }
+
+      // Clear existing content
+      section.innerHTML = '';
+
+      if (currentData.insights && currentData.insights.length > 0) {
         const insightsSection = InsightsSection(currentData);
         insightsSection.style.setProperty('margin-top', '0', 'important');
-        chartsSection.appendChild(insightsSection);
-        chartRenderResults.push({ name: 'Financial Insights', success: true });
-      } catch (insightsError) {
-        console.error('Failed to render insights section:', insightsError);
-        chartRenderResults.push({
-          name: 'Financial Insights',
-          success: false,
-          error: insightsError,
-        });
+        section.appendChild(insightsSection);
       }
+      // Hide skeleton loader when content is loaded
+      hideSkeletonLoader('financialInsights');
+      chartRenderResults.push({ name: 'Financial Insights', success: true });
+    } catch (insightsError) {
+      console.error('Failed to update insights section:', insightsError);
+      hideSkeletonLoader('financialInsights');
+      chartRenderResults.push({
+        name: 'Financial Insights',
+        success: false,
+        error: insightsError,
+      });
+    }
+  }
+
+  /**
+   * Update income vs expense section incrementally
+   */
+  async function updateIncomeExpense(chartContainer, chartRenderResults) {
+    try {
+      // Check if container exists, create if not
+      let section = sectionContainers.incomeExpense;
+      if (!section) {
+        section = document.createElement('div');
+        section.className = 'income-expense-section';
+        section.id = 'income-expense-section';
+        section.style.position = 'relative';
+        section.style.zIndex = '1';
+        section.style.clear = 'both';
+        section.style.marginTop = SPACING.XS;
+        section.style.marginBottom = SPACING.XS;
+        chartContainer.appendChild(section);
+        sectionContainers.incomeExpense = section;
+      }
+
+      // Clear existing content and destroy old chart
+      section.innerHTML = '';
+      const oldChart = activeCharts.get('income-expense');
+      if (oldChart && typeof oldChart.destroy === 'function') {
+        oldChart.destroy();
+      }
+
+      const incomeResult = await createIncomeExpenseChart(
+        chartRenderer,
+        currentData
+      );
+      section.appendChild(incomeResult.section);
+      if (incomeResult.chart)
+        activeCharts.set('income-expense', incomeResult.chart);
+      // Hide skeleton loader when content is loaded
+      hideSkeletonLoader('incomeExpense');
+      chartRenderResults.push({ name: 'Income vs Expenses', success: true });
+    } catch (incomeExpenseError) {
+      console.error(
+        'Failed to update income vs expense chart:',
+        incomeExpenseError
+      );
+      hideSkeletonLoader('incomeExpense');
+      chartRenderResults.push({
+        name: 'Income vs Expenses',
+        success: false,
+        error: incomeExpenseError,
+      });
     }
   }
 
@@ -948,6 +1141,11 @@ export const ReportsView = () => {
       container.appendChild(loadingState);
     }
     loadingState.style.display = 'flex';
+
+    // Reset skeleton states for new load
+    Object.keys(skeletonStates).forEach(key => {
+      skeletonStates[key] = null;
+    });
   }
 
   /**
@@ -1097,9 +1295,23 @@ export const ReportsView = () => {
       analyticsEngine.invalidateCacheOnDataUpdate();
 
       clearTimeout(container._refreshTimeout);
-      container._refreshTimeout = setTimeout(() => {
-        loadReportData();
-      }, 300);
+
+      // Use requestIdleCallback for background updates when available
+      if ('requestIdleCallback' in window) {
+        container._refreshTimeout = setTimeout(() => {
+          window.requestIdleCallback(
+            () => {
+              loadReportData(true); // Skip header recreation for incremental updates
+            },
+            { timeout: 2000 }
+          );
+        }, 500); // Longer debounce for background updates
+      } else {
+        // Fallback for browsers without requestIdleCallback
+        container._refreshTimeout = setTimeout(() => {
+          loadReportData(true); // Skip header recreation for incremental updates
+        }, 500);
+      }
     }
   };
 
@@ -1222,6 +1434,24 @@ export const ReportsView = () => {
     }
 
     cleanupCharts();
+
+    // Remove skeleton elements from DOM
+    Object.values(skeletonStates).forEach(skeleton => {
+      if (skeleton && skeleton.parentNode) {
+        skeleton.parentNode.removeChild(skeleton);
+      }
+    });
+
+    // Reset skeleton states
+    Object.keys(skeletonStates).forEach(key => {
+      skeletonStates[key] = null;
+    });
+
+    // Remove skeleton animation styles
+    const skeletonStyles = document.querySelector('#skeleton-animations');
+    if (skeletonStyles) {
+      skeletonStyles.remove();
+    }
 
     document.documentElement.style.removeProperty('--visual-viewport-height');
 
