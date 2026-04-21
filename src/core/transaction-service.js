@@ -179,7 +179,10 @@ export const TransactionService = {
     transactions[index] = {
       ...transactions[index],
       ...updates,
-      timestamp: updates.timestamp !== undefined ? updates.timestamp : transactions[index].timestamp,
+      timestamp:
+        updates.timestamp !== undefined
+          ? updates.timestamp
+          : transactions[index].timestamp,
       updatedAt: new Date().toISOString(),
     };
     this._persist(transactions);
@@ -319,5 +322,9 @@ export const TransactionService = {
     if (sync) {
       SyncService.pushToCloud(TRANSACTIONS_KEY, transactions);
     }
+    // Dispatch storage-updated event for local changes so UI re-renders
+    window.dispatchEvent(
+      new CustomEvent('storage-updated', { detail: { key: TRANSACTIONS_KEY } })
+    );
   },
 };

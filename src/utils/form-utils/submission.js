@@ -20,6 +20,9 @@ export const getDateSource = (externalDateInput = null) => {
         get value() {
           return externalDateInput.getDate();
         },
+        get dataset() {
+          return externalDateInput.dataset;
+        },
       };
     }
     return externalDateInput;
