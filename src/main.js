@@ -9,12 +9,10 @@ import { routeGuard } from './router/guard.js';
 import { MobileNavigation } from './components/MobileNavigation.js';
 import { NetworkStatus } from './components/NetworkStatus.js';
 import { LoadingView } from './components/LoadingView.js';
-import './core/mobile.js'; // Initialize mobile utilities
+import './core/mobile-utils.js'; // Initialize consolidated mobile utilities
 import './pwa.js'; // Register PWA service worker
 import { InstallService } from './core/install.js';
 import { CacheInvalidator } from './core/cache-invalidator.js';
-import './core/mobile-viewport-manager.js';
-import './core/mobile-form-optimizer.js';
 import { PrivacyService } from './core/privacy-service.js';
 
 InstallService.init();
