@@ -76,82 +76,92 @@ export const ViewPreloader = {
   /**
    * Preload all views in the background
    * Should be called after app initialization
+   * @returns {Promise} Promise that resolves when all preloads complete
    */
   preloadAll() {
     console.log('[ViewPreloader] Starting background preload of all views...');
 
-    // Use setTimeout to not block initial render
-    setTimeout(() => {
-      const preloadTasks = [
-        this.preloadView(
-          'LandingView',
-          () => import('../views/LandingView.js')
-        ),
-        this.preloadView(
-          'SettingsView',
-          () => import('../views/SettingsView.js')
-        ),
-        this.preloadView(
-          'FinancialPlanningView',
-          () => import('../views/FinancialPlanningView.js')
-        ),
-        this.preloadView('LoginView', () => import('../views/LoginView.js')),
-        this.preloadView(
-          'CustomCategoryManager',
-          () => import('../components/CustomCategoryManager.js')
-        ),
-      ];
+    // Return a promise that resolves after all preloads complete
+    return new Promise(resolve => {
+      // Use setTimeout to not block initial render
+      setTimeout(() => {
+        const preloadTasks = [
+          this.preloadView(
+            'LandingView',
+            () => import('../views/LandingView.js')
+          ),
+          this.preloadView(
+            'SettingsView',
+            () => import('../views/SettingsView.js')
+          ),
+          this.preloadView(
+            'FinancialPlanningView',
+            () => import('../views/FinancialPlanningView.js')
+          ),
+          this.preloadView('LoginView', () => import('../views/LoginView.js')),
+          this.preloadView(
+            'CustomCategoryManager',
+            () => import('../components/CustomCategoryManager.js')
+          ),
+        ];
 
-      // Preload financial-planning sub-components
-      const financialPlanningPreloadTasks = [
-        this.preloadView(
-          'BudgetsSection',
-          () => import('../views/financial-planning/BudgetsSection.js')
-        ),
-        this.preloadView(
-          'ForecastsSection',
-          () => import('../views/financial-planning/ForecastsSection.js')
-        ),
-        this.preloadView(
-          'GoalsSection',
-          () => import('../views/financial-planning/GoalsSection.js')
-        ),
-        this.preloadView(
-          'InsightsSection',
-          () => import('../views/financial-planning/InsightsSection.js')
-        ),
-        this.preloadView(
-          'InvestmentsSection',
-          () => import('../views/financial-planning/InvestmentsSection.js')
-        ),
-        this.preloadView(
-          'OverviewSection',
-          () => import('../views/financial-planning/OverviewSection.js')
-        ),
-      ];
+        // Preload financial-planning sub-components
+        const financialPlanningPreloadTasks = [
+          this.preloadView(
+            'BudgetsSection',
+            () => import('../views/financial-planning/BudgetsSection.js')
+          ),
+          this.preloadView(
+            'ForecastsSection',
+            () => import('../views/financial-planning/ForecastsSection.js')
+          ),
+          this.preloadView(
+            'GoalsSection',
+            () => import('../views/financial-planning/GoalsSection.js')
+          ),
+          this.preloadView(
+            'InsightsSection',
+            () => import('../views/financial-planning/InsightsSection.js')
+          ),
+          this.preloadView(
+            'InvestmentsSection',
+            () => import('../views/financial-planning/InvestmentsSection.js')
+          ),
+          this.preloadView(
+            'OverviewSection',
+            () => import('../views/financial-planning/OverviewSection.js')
+          ),
+        ];
 
-      // Preload heavy components used in views
-      const componentPreloadTasks = [
-        this.preloadView(
-          'ChartLoader',
-          () => import('../core/chart-loader.js')
-        ),
-        this.preloadView(
-          'AnalyticsInstance',
-          () => import('../core/analytics/AnalyticsInstance.js')
-        ),
-      ];
+        // Preload heavy components used in views
+        const componentPreloadTasks = [
+          this.preloadView(
+            'ChartLoader',
+            () => import('../core/chart-loader.js')
+          ),
+          this.preloadView(
+            'AnalyticsInstance',
+            () => import('../core/analytics/AnalyticsInstance.js')
+          ),
+        ];
 
-      // Execute all preloads in parallel but don't await
-      Promise.all([
-        ...preloadTasks,
-        ...financialPlanningPreloadTasks,
-        ...componentPreloadTasks,
-        this.preloadCloudData(),
-      ]).then(() => {
-        console.log('[ViewPreloader] All views preloaded successfully');
-      });
-    }, 100); // Small delay to ensure initial view renders first
+        // Execute all preloads in parallel
+        Promise.all([
+          ...preloadTasks,
+          ...financialPlanningPreloadTasks,
+          ...componentPreloadTasks,
+          this.preloadCloudData(),
+        ])
+          .then(() => {
+            console.log('[ViewPreloader] All views preloaded successfully');
+            resolve();
+          })
+          .catch(error => {
+            console.warn('[ViewPreloader] Preload error:', error);
+            resolve(); // Resolve anyway to not block app
+          });
+      }, 100); // Small delay to ensure initial view renders first
+    });
   },
 
   /**
