@@ -119,7 +119,7 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 
 ## Quick Start
 
-For everyday use you can use the web page blinkbudget.netlify.app, from there you can also install a PWA or if you wish you can get TWA Android App
+For everyday use, visit the live web app at [blinkbudget.netlify.app](https://blinkbudget.netlify.app). From there, you can install it as a PWA or download the TWA Android App.
 
 ### Android App (Trusted Web Activity)
 

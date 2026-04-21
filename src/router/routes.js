@@ -6,6 +6,7 @@
 import { ViewManager } from '../core/view-manager.js';
 import { NavigationState } from '../core/navigation-state.js';
 import { updateMobileNavigation } from '../components/MobileNavigation.js';
+import { ViewPreloader } from '../core/view-preloader.js';
 
 // Statically import core views for instant loading
 import { DashboardView } from '../views/DashboardView.js';
@@ -15,7 +16,11 @@ import { ReportsView } from '../views/ReportsView.js';
 
 export const routes = {
   landing: async () => {
-    const { LandingView } = await import('../views/LandingView.js');
+    let module = ViewPreloader.getCachedView('LandingView');
+    if (!module) {
+      module = await import('../views/LandingView.js');
+    }
+    const { LandingView } = module;
     NavigationState.setLastActiveView('landing');
     ViewManager.setView(LandingView());
     updateMobileNavigation('landing');
@@ -36,8 +41,11 @@ export const routes = {
     updateMobileNavigation('dashboard');
   },
   'category-manager': async () => {
-    const { CustomCategoryManager } =
-      await import('../components/CustomCategoryManager.js');
+    let module = ViewPreloader.getCachedView('CustomCategoryManager');
+    if (!module) {
+      module = await import('../components/CustomCategoryManager.js');
+    }
+    const { CustomCategoryManager } = module;
     NavigationState.setLastActiveView('category-manager');
     ViewManager.setView(
       CustomCategoryManager({
@@ -50,7 +58,11 @@ export const routes = {
     updateMobileNavigation('category-manager');
   },
   settings: async () => {
-    const { SettingsView } = await import('../views/SettingsView.js');
+    let module = ViewPreloader.getCachedView('SettingsView');
+    if (!module) {
+      module = await import('../views/SettingsView.js');
+    }
+    const { SettingsView } = module;
     NavigationState.setLastActiveView('settings');
     ViewManager.setView(SettingsView());
     updateMobileNavigation('settings');
@@ -61,14 +73,21 @@ export const routes = {
     updateMobileNavigation('reports');
   },
   'financial-planning': async () => {
-    const { FinancialPlanningView } =
-      await import('../views/FinancialPlanningView.js');
+    let module = ViewPreloader.getCachedView('FinancialPlanningView');
+    if (!module) {
+      module = await import('../views/FinancialPlanningView.js');
+    }
+    const { FinancialPlanningView } = module;
     NavigationState.setLastActiveView('financial-planning');
     ViewManager.setView(FinancialPlanningView());
     updateMobileNavigation('financial-planning');
   },
   login: async () => {
-    const { LoginView } = await import('../views/LoginView.js');
+    let module = ViewPreloader.getCachedView('LoginView');
+    if (!module) {
+      module = await import('../views/LoginView.js');
+    }
+    const { LoginView } = module;
     NavigationState.setLastActiveView('login');
     ViewManager.setView(LoginView());
     updateMobileNavigation('login');

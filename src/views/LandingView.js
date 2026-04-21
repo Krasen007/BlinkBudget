@@ -31,7 +31,6 @@ export const LandingView = () => {
     { icon: '📱', text: 'Mobile Optimized' },
     { icon: '📊', text: 'Beautiful Insights' },
     { icon: '🔄', text: 'Offline Capable' },
-    { icon: '🎯', text: 'Interactive Tutorial' },
   ];
 
   featureItems.forEach(({ icon, text }) => {

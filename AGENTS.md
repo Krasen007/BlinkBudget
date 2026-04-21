@@ -121,12 +121,14 @@ el.style.padding = '10px';
 ### Security
 
 ```javascript
-// ✅ Good - sanitize user input before rendering
-const sanitized = escapeHtml(userInput);
-element.textContent = sanitized;
+// ✅ Good - use textContent for untrusted user input (automatically escapes HTML)
+element.textContent = userInput;
 
-// ❌ Bad - render unsanitized input
-element.innerHTML = userInput;
+// ❌ Bad - render unsanitized input with innerHTML
+element.innerHTML = userInput; // XSS vulnerability
+
+// Note: If you must use innerHTML, implement an escapeHtml utility first
+// to sanitize the input. However, prefer textContent whenever possible.
 ```
 
 ## Boundaries

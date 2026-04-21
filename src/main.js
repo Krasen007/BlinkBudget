@@ -3,6 +3,7 @@ import { AuthService } from './core/auth-service.js';
 import { SyncService } from './core/sync-service.js';
 import { NavigationState } from './core/navigation-state.js';
 import { ViewManager } from './core/view-manager.js';
+import { ViewPreloader } from './core/view-preloader.js';
 import { routes } from './router/routes.js';
 import { routeGuard } from './router/guard.js';
 import { MobileNavigation } from './components/MobileNavigation.js';
@@ -152,6 +153,9 @@ const initApp = () => {
 
       // Pre-load ReportsView data for instant navigation
       preloadReportsData();
+
+      // Preload all views in the background for instant navigation
+      ViewPreloader.preloadAll();
 
       // Initialize tutorial system after user is authenticated
       import('./components/tutorial/TutorialManager.js')

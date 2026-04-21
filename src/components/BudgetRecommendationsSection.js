@@ -133,7 +133,8 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
       typeof recommended === 'number' && isFinite(recommended)
         ? recommended
         : 0;
-    recommendedSpan.textContent = getCurrencyFormatter().format(safeRecommended);
+    recommendedSpan.textContent =
+      getCurrencyFormatter().format(safeRecommended);
     recommendedSpan.style.color = COLORS.TEXT_MUTED;
     recommendedSpan.style.fontWeight = '600';
     recommendedSpan.style.textAlign = 'right';
