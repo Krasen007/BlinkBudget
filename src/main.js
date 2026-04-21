@@ -3,7 +3,6 @@ import { AuthService } from './core/auth-service.js';
 import { SyncService } from './core/sync-service.js';
 import { NavigationState } from './core/navigation-state.js';
 import { ViewManager } from './core/view-manager.js';
-import { ViewPreloader } from './core/view-preloader.js';
 import { routes } from './router/routes.js';
 import { routeGuard } from './router/guard.js';
 import { MobileNavigation } from './components/MobileNavigation.js';
@@ -11,11 +10,31 @@ import { NetworkStatus } from './components/NetworkStatus.js';
 import { LoadingView } from './components/LoadingView.js';
 import './core/mobile-utils.js'; // Initialize consolidated mobile utilities
 import './pwa.js'; // Register PWA service worker
-import { InstallService } from './core/install.js';
-import { CacheInvalidator } from './core/cache-invalidator.js';
-import { PrivacyService } from './core/privacy-service.js';
 
-InstallService.init();
+/**
+ * Background initialization - loads non-critical services after dashboard is shown
+ */
+const initBackgroundServices = async () => {
+  try {
+    console.log('[Main] Starting background service initialization...');
+
+    // Initialize InstallService
+    const { InstallService } = await import('./core/install.js');
+    InstallService.init();
+
+    // Initialize CacheInvalidator
+    const { CacheInvalidator } = await import('./core/cache-invalidator.js');
+    CacheInvalidator.init();
+
+    // Initialize PrivacyService
+    const { PrivacyService } = await import('./core/privacy-service.js');
+    PrivacyService.init();
+
+    console.log('[Main] Background services initialized');
+  } catch (error) {
+    console.warn('[Main] Failed to initialize background services:', error);
+  }
+};
 
 /**
  * Pre-load ReportsView data for instant navigation
@@ -144,6 +163,7 @@ const initApp = () => {
       localStorage.setItem('auth_hint', 'true');
 
       SyncService.startRealtimeSync(user.uid);
+
       // Initialize backup service after sync service
       import('./core/backup-service.js').then(({ BackupService }) => {
         BackupService.init();
@@ -153,7 +173,9 @@ const initApp = () => {
       preloadReportsData();
 
       // Preload all views in the background for instant navigation
-      ViewPreloader.preloadAll();
+      import('./core/view-preloader.js').then(({ ViewPreloader }) => {
+        ViewPreloader.preloadAll();
+      });
 
       // Initialize tutorial system after user is authenticated
       import('./components/tutorial/TutorialManager.js')
@@ -215,16 +237,18 @@ const initApp = () => {
   });
 
   NavigationState.init();
-  // Initialize centralized cache invalidator
-  CacheInvalidator.init();
   // Initialize enhanced back button handling for mobile
   if (window.mobileUtils && window.mobileUtils.setupBackButtonHandling) {
     window.mobileUtils.setupBackButtonHandling();
   }
-  // Initialize privacy service after app is ready
-  PrivacyService.init();
   console.log('[Main] App initialized, starting router.');
   Router.init();
+
+  // Start background services after router is initialized
+  // This ensures the dashboard is shown first, then non-critical services load
+  setTimeout(() => {
+    initBackgroundServices();
+  }, 100);
 };
 
 initApp();
