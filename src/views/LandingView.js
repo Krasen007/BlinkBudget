@@ -53,13 +53,7 @@ export const LandingView = () => {
 
   // Add prominent Get Started button
   const buttonContainer = document.createElement('div');
-  buttonContainer.style.cssText = `
-    margin: 2rem 0;
-    padding: 1rem 0;
-    display: flex;
-    justify-content: center;
-    width: 100%;
-  `;
+  buttonContainer.className = 'hero-button-container';
 
   const getStartedBtn = ButtonComponent({
     text: 'Get Started',
@@ -68,13 +62,7 @@ export const LandingView = () => {
       Router.navigate('login');
     },
   });
-  getStartedBtn.style.cssText = `
-    font-size: 1.25rem;
-    padding: 1rem 3rem;
-    min-height: 56px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-  `;
+  getStartedBtn.classList.add('hero-button--large');
 
   buttonContainer.appendChild(getStartedBtn);
 

@@ -117,3 +117,30 @@
     display: none;
   }
 }
+
+/* Inflation message helpers */
+.inflation-message-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  flex-direction: column;
+}
+
+.inflation-message-wrapper.inflation-message-error {
+  color: var(--color-error);
+}
+
+.inflation-message-wrapper.inflation-message-muted {
+  color: var(--color-text-muted);
+}
+
+.inflation-message-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.inflation-message-subtitle {
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}

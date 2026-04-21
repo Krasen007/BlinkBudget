@@ -143,7 +143,7 @@ export const TransactionForm = ({
       // Include note field in the data for Add mode
       const completeData = {
         ...data,
-        description: noteField ? noteField.value : '',
+        description: noteField.value || '',
       };
       handleFormSubmit(completeData, onSubmit);
     },
@@ -206,26 +206,13 @@ export const TransactionForm = ({
 
   // 7. Note Field
   const noteField = document.createElement('textarea');
-  noteField.className = 'form-input';
+  noteField.className = 'form-input transaction-note-field';
   noteField.placeholder =
     getCopyString('transaction.notes') || 'Notes (optional)';
   noteField.value = initialValues.description || '';
   noteField.style.minHeight = '0px';
   noteField.style.resize = 'vertical';
   noteField.classList.add('touch-target-secondary');
-
-  // Style to match other form elements
-  noteField.style.width = '100%';
-  noteField.style.padding = 'var(--spacing-sm)';
-  noteField.style.fontSize = 'var(--font-size-base)';
-  noteField.style.border = '1px solid var(--color-border)';
-  noteField.style.borderRadius = 'var(--radius-md)';
-  noteField.style.backgroundColor = 'var(--color-surface)';
-  noteField.style.color = 'var(--color-text-main)';
-  noteField.style.fontFamily = 'inherit';
-  noteField.style.lineHeight = 'var(--line-height-normal)';
-  noteField.style.transition =
-    'border-color var(--transition-fast), box-shadow var(--transition-fast)';
 
   // 7. Layout Assembly
   form.appendChild(amountAccountRow);
@@ -327,9 +314,7 @@ export const TransactionForm = ({
         accountId: currentAccountId,
         toAccountId: categorySelector.selectedToAccount(),
         externalDateInput,
-        description: noteField
-          ? noteField.value
-          : initialValues.description || '',
+        description: noteField.value || initialValues.description || '',
       });
 
       handleFormSubmit(transactionData, onSubmit);

@@ -143,9 +143,10 @@ export const PrivacyService = {
       case 'transaction':
         // Remove optional metadata if enabled
         if (settings.dataMinimization.excludeOptionalMetadata) {
-          // Note: We preserve the full timestamp for transactions because
-          // the time component is essential for proper sorting/ordering
-          // Only remove truly optional fields like description/notes if needed
+          // Remove optional fields like description/notes while preserving
+          // essential data like timestamp for proper sorting/ordering
+          delete sanitized.description;
+          delete sanitized.notes;
         }
         break;
 

@@ -42,7 +42,7 @@ export class MobileFormOptimizer {
     }
 
     // Prevent zoom on iOS
-    input.style.fontSize = '16px';
+    input.classList.add('prevent-ios-zoom');
   }
 
   optimizeNoteInput(input) {
@@ -55,7 +55,7 @@ export class MobileFormOptimizer {
     input.spellcheck = true;
 
     // Prevent zoom on iOS
-    input.style.fontSize = '16px';
+    input.classList.add('prevent-ios-zoom');
   }
 
   optimizeCategoryInput(input) {
@@ -68,7 +68,7 @@ export class MobileFormOptimizer {
     input.spellcheck = false;
 
     // Prevent zoom on iOS
-    input.style.fontSize = '16px';
+    input.classList.add('prevent-ios-zoom');
   }
 
   setupKeyboardNavigation() {

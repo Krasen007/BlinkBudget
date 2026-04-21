@@ -410,3 +410,68 @@
     background-color: var(--color-muted);
   }
 }
+
+/* Budget Recommendations Section */
+.budget-recommendations-section {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.budget-recommendations-header {
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--color-text-main);
+}
+
+.budget-recommendations-title {
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--color-text-main);
+}
+
+.budget-recommendations-description {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.budget-recommendations-no-data {
+  color: var(--color-text-muted);
+  font-style: italic;
+  padding: var(--spacing-md);
+  text-align: center;
+}
+
+.budget-recommendations-header-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: rgba(156, 163, 175, 0.1);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--spacing-xs);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.budget-recommendations-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: var(--spacing-sm);
+  align-items: center;
+  padding: var(--spacing-sm);
+  background: var(--color-background);
+  border-radius: var(--radius-md);
+}
+
+.budget-recommendations-cell {
+  text-align: right;
+  font-family: monospace;
+}
+
+.budget-recommendations-cell:first-child {
+  text-align: left;
+  font-weight: 500;
+}

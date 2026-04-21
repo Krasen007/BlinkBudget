@@ -247,18 +247,17 @@ export const InflationTrends = (
     });
 
     const wrapper = document.createElement('div');
-    wrapper.style.cssText =
-      'display: flex; align-items: center; justify-content: center; height: 100%; color: var(--color-text-muted); flex-direction: column;';
+    wrapper.className = 'inflation-message-wrapper inflation-message-muted';
 
     const icon = document.createElement('div');
-    icon.style.cssText = 'font-size: 2rem; margin-bottom: 0.5rem;';
+    icon.className = 'inflation-message-icon';
     icon.textContent = '📊';
 
     const title = document.createElement('div');
     title.textContent = 'Not enough data for inflation analysis';
 
     const subtitle = document.createElement('div');
-    subtitle.style.cssText = 'font-size: 0.875rem; margin-top: 0.25rem;';
+    subtitle.className = 'inflation-message-subtitle';
     subtitle.textContent = 'Need at least 2 months of spending data';
 
     wrapper.append(icon, title, subtitle);
@@ -274,11 +273,10 @@ export const InflationTrends = (
     });
 
     const wrapper = document.createElement('div');
-    wrapper.style.cssText =
-      'display: flex; align-items: center; justify-content: center; height: 100%; color: var(--color-error); flex-direction: column;';
+    wrapper.className = 'inflation-message-wrapper inflation-message-error';
 
     const icon = document.createElement('div');
-    icon.style.cssText = 'font-size: 2rem; margin-bottom: 0.5rem;';
+    icon.className = 'inflation-message-icon';
     icon.textContent = '⚠️';
 
     const text = document.createElement('div');

@@ -11,7 +11,7 @@ export const TUTORIAL_STEPS = [
     description:
       "Track your expenses in just 3 clicks. Let's get you started with the fastest expense tracking experience!",
     content:
-      'No complicated forms or endless fields. Quick categorization. Beautiful insights to help you make smarter financial decisions.',
+      'No complicated forms or endless fields. Quickly categorize your transactions. Beautiful insights to help you make smarter financial decisions.',
     primaryAction: {
       id: 'start',
       text: "Let's start your first transaction →",
