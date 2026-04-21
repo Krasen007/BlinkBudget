@@ -16,6 +16,8 @@ import { ForecastEngine } from '../core/forecast-engine.js';
 import { AccountBalancePredictor } from '../core/Account/account-balance-predictor.js';
 import { RiskAssessor } from '../core/risk-assessor.js';
 import { ChartRenderer } from '../components/ChartRenderer.js';
+import { AuthService } from '../core/auth-service.js';
+import { SyncService } from '../core/sync-service.js';
 
 import { COLORS, SPACING, TIMING, STORAGE_KEYS } from '../utils/constants.js';
 
@@ -308,9 +310,6 @@ export const FinancialPlanningView = () => {
    */
   async function ensureDataSynced() {
     try {
-      const { AuthService } = await import('../core/auth-service.js');
-      const { SyncService } = await import('../core/sync-service.js');
-
       const userId = AuthService.getUserId();
       if (!userId) return;
 
@@ -331,9 +330,6 @@ export const FinancialPlanningView = () => {
    */
   async function forceSyncFromCloud() {
     try {
-      const { AuthService } = await import('../core/auth-service.js');
-      const { SyncService } = await import('../core/sync-service.js');
-
       const userId = AuthService.getUserId();
       if (!userId) {
         console.warn(

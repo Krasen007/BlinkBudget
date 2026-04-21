@@ -8,6 +8,14 @@ import { routeGuard } from './router/guard.js';
 import { MobileNavigation } from './components/MobileNavigation.js';
 import { NetworkStatus } from './components/NetworkStatus.js';
 import { LoadingView } from './components/LoadingView.js';
+import { InstallService } from './core/install.js';
+import { CacheInvalidator } from './core/cache-invalidator.js';
+import { PrivacyService } from './core/privacy-service.js';
+import { TransactionService } from './core/transaction-service.js';
+import { getAnalyticsEngine } from './core/analytics/AnalyticsInstance.js';
+import { getCurrentMonthPeriod } from './utils/reports-utils.js';
+import { preloadChartJS } from './core/chart-loader.js';
+import { ViewPreloader } from './core/view-preloader.js';
 import './core/mobile-utils.js'; // Initialize consolidated mobile utilities
 import './pwa.js'; // Register PWA service worker
 
@@ -19,15 +27,12 @@ const initBackgroundServices = async () => {
     console.log('[Main] Starting background service initialization...');
 
     // Initialize InstallService
-    const { InstallService } = await import('./core/install.js');
     InstallService.init();
 
     // Initialize CacheInvalidator
-    const { CacheInvalidator } = await import('./core/cache-invalidator.js');
     CacheInvalidator.init();
 
     // Initialize PrivacyService
-    const { PrivacyService } = await import('./core/privacy-service.js');
     PrivacyService.init();
 
     console.log('[Main] Background services initialized');
@@ -44,21 +49,15 @@ const preloadReportsData = async () => {
     console.log('[Main] Pre-loading ReportsView data...');
 
     // Pre-load Chart.js
-    const { preloadChartJS } = await import('./core/chart-loader.js');
     await preloadChartJS();
 
     // Get transactions and analytics engine
-    const { TransactionService } =
-      await import('./core/transaction-service.js');
-    const { getAnalyticsEngine } =
-      await import('./core/analytics/AnalyticsInstance.js');
-    const { getCurrentMonthPeriod } = await import('./utils/reports-utils.js');
-
     const transactions = TransactionService.getAll();
     const analyticsEngine = getAnalyticsEngine();
 
     // Pre-calculate analytics for current month
     const currentTimePeriod = getCurrentMonthPeriod();
+
 
     const startStr =
       currentTimePeriod.startDate instanceof Date
@@ -180,9 +179,7 @@ const initApp = () => {
       preloadReportsData();
 
       // Preload all views in the background for instant navigation
-      import('./core/view-preloader.js').then(({ ViewPreloader }) => {
-        ViewPreloader.preloadAll();
-      });
+      ViewPreloader.preloadAll();
 
       // Initialize tutorial system after user is authenticated
       import('./components/tutorial/TutorialManager.js')

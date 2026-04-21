@@ -5,6 +5,11 @@
  * Also preloads cloud data from Firebase for instant access across all views.
  */
 
+import { SyncService } from './sync-service.js';
+import { AuthService } from './auth-service.js';
+import { getAnalyticsEngine } from './analytics/AnalyticsInstance.js';
+import { preloadChartJS } from './chart-loader.js';
+
 export const ViewPreloader = {
   cache: new Map(),
   preloadPromises: new Map(),
@@ -135,14 +140,8 @@ export const ViewPreloader = {
 
         // Preload heavy components used in views
         const componentPreloadTasks = [
-          this.preloadView(
-            'ChartLoader',
-            () => import('../core/chart-loader.js')
-          ),
-          this.preloadView(
-            'AnalyticsInstance',
-            () => import('../core/analytics/AnalyticsInstance.js')
-          ),
+          preloadChartJS(),
+          getAnalyticsEngine(),
         ];
 
         // Execute all preloads in parallel
@@ -185,10 +184,6 @@ export const ViewPreloader = {
     // Create preload promise
     const promise = (async () => {
       try {
-        // Import SyncService dynamically to avoid circular dependency
-        const { SyncService } = await import('./sync-service.js');
-        const { AuthService } = await import('./auth-service.js');
-
         const userId = AuthService.getUserId();
         if (!userId) {
           console.log('[ViewPreloader] No user, skipping cloud data preload');

@@ -5,6 +5,7 @@
 
 import { ButtonComponent } from './Button.js';
 import { SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
+import { AuthService } from '../core/auth-service.js';
 
 export const AccountDeletionSection = () => {
   const section = document.createElement('div');
@@ -187,7 +188,6 @@ export const AccountDeletionSection = () => {
               });
 
               // Logout and redirect
-              const { AuthService } = await import('../core/auth-service.js');
               await AuthService.logout();
               window.location.hash = '#login';
             } else {
