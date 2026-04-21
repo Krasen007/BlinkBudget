@@ -302,18 +302,6 @@ export const TutorialOverlay = {
             </g>
           </svg>
         `;
-      case 'smart-features':
-        return `
-          <svg width="120" height="120" viewBox="0 0 120 120" style="margin-bottom: var(--spacing-lg);">
-            <g class="smart-features-animation">
-              <path d="M60 30 C40 30, 25 45, 25 60 C25 75, 40 90, 60 90 C80 90, 95 75, 95 60 C95 45, 80 30, 60 30 Z" 
-                    fill="var(--color-primary)" opacity="0.1"/>
-              <circle cx="60" cy="55" r="15" fill="var(--color-primary)" opacity="0.8"/>
-              <rect x="50" y="70" width="20" height="8" fill="var(--color-primary)" opacity="0.6"/>
-              <path d="M60 25 L60 15 M45 35 L35 25 M75 35 L85 25" stroke="var(--color-primary)" stroke-width="2" opacity="0.6"/>
-            </g>
-          </svg>
-        `;
       case 'accounts':
         return `
           <svg width="120" height="120" viewBox="0 0 120 120" style="margin-bottom: var(--spacing-lg);">

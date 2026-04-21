@@ -6,18 +6,13 @@
 
 import { AccountService } from '../core/Account/account-service.js';
 import { ClickTracker } from '../core/click-tracking-service.js';
-import { SettingsService } from '../core/settings-service.js';
 import { FONT_SIZES, COLORS } from '../utils/constants.js';
 import { createSelect } from '../utils/dom-factory.js';
 import { createTypeToggleGroup } from '../utils/form-utils/type-toggle.js';
 import { createCategorySelector } from '../utils/form-utils/category-chips.js';
 import { createAmountInput } from '../utils/form-utils/amount-input.js';
 import { setupFormKeyboardHandling } from '../utils/form-utils/keyboard.js';
-import { SmartAmountInput } from './SmartAmountInput.js';
-import { SmartNoteField } from './SmartNoteField.js';
-import { SmartCategorySelector } from './SmartCategorySelector.js';
 import { getCopyString } from '../utils/copy-strings.js';
-import { initializeCategoryIconsCSS } from '../utils/category-icons.js';
 import {
   validateAmount,
   validateCategory,
@@ -38,15 +33,6 @@ export const TransactionForm = ({
   onCancel = null,
   onDelete = null,
 }) => {
-  // Check if smart suggestions are enabled
-  const smartSuggestionsEnabled =
-    String(SettingsService.getSetting('smartSuggestionsEnabled')) === 'true'; // Handle string/boolean coercion, default false
-
-  // Initialize category icons CSS only if smart suggestions are enabled
-  if (smartSuggestionsEnabled) {
-    initializeCategoryIconsCSS();
-  }
-
   // 1. Form setup
   const form = document.createElement('form');
   form.className = 'transaction-form mobile-optimized';
@@ -112,52 +98,13 @@ export const TransactionForm = ({
     initialType: initialValues.type || 'expense',
   });
 
-  // 4. Amount Input (Smart or Classic based on setting)
-  let amountInput;
-  let smartAmountInput = null;
-  let smartNoteField = null;
-
-  if (smartSuggestionsEnabled) {
-    // Smart Amount Input
-    smartAmountInput = SmartAmountInput.create({
-      onAmountChange: amount => {
-        // Update category suggestions when amount changes
-        if (smartCategorySelector) {
-          smartCategorySelector.updateSmartMatch(amount);
-        }
-        // Update note suggestions when amount changes
-        if (smartNoteField) {
-          smartNoteField.updateContext(
-            smartCategorySelector?.getSelectedCategory(),
-            amount
-          );
-        }
-      },
-      onSuggestionSelect: suggestion => {
-        // Apply suggestion and update other fields
-        smartAmountInput.setAmount(suggestion.amount);
-        if (suggestion.category && smartCategorySelector) {
-          smartCategorySelector.setSelectedCategory(suggestion.category);
-          smartNoteField?.updateContext(suggestion.category, suggestion.amount);
-        }
-        // Record selection for learning
-        ClickTracker.recordClick();
-      },
-      initialValue: initialValues.amount?.toString() || '',
-    });
-    amountInput = smartAmountInput;
-    amountInput.id = 'transaction-amount-input';
-    // Add touch target classes
-    smartAmountInput.classList.add('touch-target-primary');
-  } else {
-    // Classic Amount Input
-    const amountState = createAmountInput({
-      initialValue: initialValues.amount || '',
-      externalDateInput,
-    });
-    amountInput = amountState.input;
-    amountInput.id = 'transaction-amount-input';
-  }
+  // 4. Amount Input
+  const amountState = createAmountInput({
+    initialValue: initialValues.amount || '',
+    externalDateInput,
+  });
+  const amountInput = amountState.input;
+  amountInput.id = 'transaction-amount-input';
 
   const amountGroup = document.createElement('div');
   amountGroup.style.flex = '1.5';
@@ -172,11 +119,7 @@ export const TransactionForm = ({
   amountGroup.appendChild(amountInput);
 
   // Add tutorial data attribute to amount input
-  if (smartAmountInput) {
-    smartAmountInput.setAttribute('data-tutorial-target', 'amount-input');
-  } else {
-    amountInput.setAttribute('data-tutorial-target', 'amount-input');
-  }
+  amountInput.setAttribute('data-tutorial-target', 'amount-input');
 
   // 5. Amount and Account Row
   const amountAccountRow = document.createElement('div');
@@ -187,78 +130,29 @@ export const TransactionForm = ({
   amountAccountRow.appendChild(accountGroup);
   amountAccountRow.style.marginBottom = 'var(--spacing-xs)';
 
-  // 6. Category Selector (Smart or Classic based on setting)
-  let categorySelector;
-  let smartCategorySelector = null;
-
-  if (smartSuggestionsEnabled) {
-    // Smart Category Selector
-    smartCategorySelector = SmartCategorySelector.create({
-      onCategorySelect: category => {
-        // Update note suggestions when category changes
-        if (smartNoteField) {
-          const currentAmount = smartAmountInput.getAmount();
-          smartNoteField.updateContext(category, currentAmount);
-        }
-        ClickTracker.recordClick();
-      },
-      onSmartMatchAccept: _smartMatch => {
-        // Handle smart match acceptance
-        ClickTracker.recordClick();
-      },
-      amount: smartAmountInput.getAmount(),
-      initialCategory: initialValues.category || '',
-    });
-
-    // Keep backward compatibility with existing category selector interface
-    categorySelector = {
-      container: smartCategorySelector,
-      setType: _type => {
-        // Type changes don't affect smart suggestions for now
-      },
-      selectedCategory: () => smartCategorySelector.getSelectedCategory(),
-      selectedToAccount: () => null, // Smart selector doesn't handle transfers
-      chipContainer: smartCategorySelector,
-      setSourceAccount: () => {
-        // Account changes don't affect smart suggestions for now
-      },
-    };
-    // Add touch target classes to category cards
-    smartCategorySelector.classList.add('touch-target-secondary');
-    // Add tutorial data attribute to category selector
-    smartCategorySelector.setAttribute(
-      'data-tutorial-target',
-      'category-selector'
-    );
-  } else {
-    // Classic Category Selector
-    categorySelector = createCategorySelector({
-      type: typeToggle.currentType(),
-      accounts,
-      currentAccountId,
-      initialCategory: initialValues.category || null,
-      initialToAccount: initialValues.toAccountId || null,
-      amountInput,
-      externalDateInput,
-      onSubmit: data => {
-        // Include note field in the data for Add mode
-        const completeData = {
-          ...data,
-          description: noteField
-            ? smartNoteField
-              ? smartNoteField.getNote()
-              : noteField.value
-            : '',
-        };
-        handleFormSubmit(completeData, onSubmit);
-      },
-    });
-    // Add tutorial data attribute to classic category selector
-    categorySelector.container.setAttribute(
-      'data-tutorial-target',
-      'category-selector'
-    );
-  }
+  // 6. Category Selector
+  const categorySelector = createCategorySelector({
+    type: typeToggle.currentType(),
+    accounts,
+    currentAccountId,
+    initialCategory: initialValues.category || null,
+    initialToAccount: initialValues.toAccountId || null,
+    amountInput,
+    externalDateInput,
+    onSubmit: data => {
+      // Include note field in the data for Add mode
+      const completeData = {
+        ...data,
+        description: noteField ? noteField.value : '',
+      };
+      handleFormSubmit(completeData, onSubmit);
+    },
+  });
+  // Add tutorial data attribute to category selector
+  categorySelector.container.setAttribute(
+    'data-tutorial-target',
+    'category-selector'
+  );
 
   // Setup type toggle change handler (after categorySelector is created)
   const originalSetType = typeToggle.setType;
@@ -310,50 +204,28 @@ export const TransactionForm = ({
     );
   });
 
-  // 7. Note Field (Smart or Classic based on setting)
-  let noteField = null;
+  // 7. Note Field
+  const noteField = document.createElement('textarea');
+  noteField.className = 'form-input';
+  noteField.placeholder =
+    getCopyString('transaction.notes') || 'Notes (optional)';
+  noteField.value = initialValues.description || '';
+  noteField.style.minHeight = '0px';
+  noteField.style.resize = 'vertical';
+  noteField.classList.add('touch-target-secondary');
 
-  if (smartSuggestionsEnabled) {
-    // Smart Note Field
-    smartNoteField = SmartNoteField.create({
-      onNoteChange: _note => {
-        // Note changes don't affect other fields for now
-      },
-      onSuggestionSelect: suggestion => {
-        smartNoteField.setNote(suggestion.note);
-        ClickTracker.recordClick();
-      },
-      category: smartCategorySelector.getSelectedCategory(),
-      amount: smartAmountInput.getAmount(),
-      initialValue: initialValues.description || '',
-    });
-    // Add touch target classes
-    smartNoteField.classList.add('touch-target-secondary');
-    noteField = smartNoteField;
-  } else {
-    // Classic Note Field
-    noteField = document.createElement('textarea');
-    noteField.className = 'form-input';
-    noteField.placeholder =
-      getCopyString('transaction.notes') || 'Notes (optional)';
-    noteField.value = initialValues.description || '';
-    noteField.style.minHeight = '0px';
-    noteField.style.resize = 'vertical';
-    noteField.classList.add('touch-target-secondary');
-
-    // Style to match other form elements
-    noteField.style.width = '100%';
-    noteField.style.padding = 'var(--spacing-sm)';
-    noteField.style.fontSize = 'var(--font-size-base)';
-    noteField.style.border = '1px solid var(--color-border)';
-    noteField.style.borderRadius = 'var(--radius-md)';
-    noteField.style.backgroundColor = 'var(--color-surface)';
-    noteField.style.color = 'var(--color-text-main)';
-    noteField.style.fontFamily = 'inherit';
-    noteField.style.lineHeight = 'var(--line-height-normal)';
-    noteField.style.transition =
-      'border-color var(--transition-fast), box-shadow var(--transition-fast)';
-  }
+  // Style to match other form elements
+  noteField.style.width = '100%';
+  noteField.style.padding = 'var(--spacing-sm)';
+  noteField.style.fontSize = 'var(--font-size-base)';
+  noteField.style.border = '1px solid var(--color-border)';
+  noteField.style.borderRadius = 'var(--radius-md)';
+  noteField.style.backgroundColor = 'var(--color-surface)';
+  noteField.style.color = 'var(--color-text-main)';
+  noteField.style.fontFamily = 'inherit';
+  noteField.style.lineHeight = 'var(--line-height-normal)';
+  noteField.style.transition =
+    'border-color var(--transition-fast), box-shadow var(--transition-fast)';
 
   // 7. Layout Assembly
   form.appendChild(amountAccountRow);
@@ -372,9 +244,7 @@ export const TransactionForm = ({
   form.appendChild(typeToggle.container);
 
   // Add note field directly
-  if (noteField) {
-    form.appendChild(noteField);
-  }
+  form.appendChild(noteField);
 
   // 7.5. Cancel Button (for Add mode)
   if (showCancelButton && onCancel) {
@@ -458,9 +328,7 @@ export const TransactionForm = ({
         toAccountId: categorySelector.selectedToAccount(),
         externalDateInput,
         description: noteField
-          ? smartNoteField
-            ? smartNoteField.getNote()
-            : noteField.value
+          ? noteField.value
           : initialValues.description || '',
       });
 

@@ -148,7 +148,8 @@ export const InflationTrends = (
       }
 
       // Convert to Chart.js format
-      const { labels, datasets: normalizedDatasets } = normalizeAndExtractLabels(chartData);
+      const { labels, datasets: normalizedDatasets } =
+        normalizeAndExtractLabels(chartData);
       const datasets = normalizedDatasets.map(dataset => ({
         label: dataset.label,
         data: dataset.data.map(point => point.y),

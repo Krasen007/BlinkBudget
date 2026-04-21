@@ -18,15 +18,9 @@ export class MobileFormOptimizer {
     const input = e.target;
 
     // Optimize based on input class or ID
-    if (
-      input.classList.contains('smart-amount-input') ||
-      input.id.includes('amount')
-    ) {
+    if (input.id.includes('amount')) {
       this.optimizeAmountInput(input);
-    } else if (
-      input.classList.contains('smart-note-input') ||
-      input.id.includes('note')
-    ) {
+    } else if (input.id.includes('note')) {
       this.optimizeNoteInput(input);
     } else if (
       input.classList.contains('category-input') ||

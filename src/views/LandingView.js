@@ -32,7 +32,6 @@ export const LandingView = () => {
     { icon: '📊', text: 'Beautiful Insights' },
     { icon: '🔄', text: 'Offline Capable' },
     { icon: '🎯', text: 'Interactive Tutorial' },
-    { icon: '🧠', text: 'Smart Suggestions' },
   ];
 
   featureItems.forEach(({ icon, text }) => {
@@ -52,6 +51,33 @@ export const LandingView = () => {
   description.className = 'hero-description';
   description.textContent =
     'Transform expense tracking into a swift, almost unconscious habit with actionable insights for smarter financial decisions.';
+
+  // Add prominent Get Started button
+  const buttonContainer = document.createElement('div');
+  buttonContainer.style.cssText = `
+    margin: 2rem 0;
+    padding: 1rem 0;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  `;
+
+  const getStartedBtn = ButtonComponent({
+    text: 'Get Started',
+    variant: 'primary',
+    onClick: () => {
+      Router.navigate('login');
+    },
+  });
+  getStartedBtn.style.cssText = `
+    font-size: 1.25rem;
+    padding: 1rem 3rem;
+    min-height: 56px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  `;
+
+  buttonContainer.appendChild(getStartedBtn);
 
   // Add tutorial preview section
   const tutorialSection = document.createElement('div');
@@ -74,7 +100,7 @@ export const LandingView = () => {
 
   const tutorialDescription = document.createElement('p');
   tutorialDescription.textContent =
-    'Start with our interactive tutorial that guides you through everything you need to know in just a few minutes. Learn the 3-click promise, smart categorization, and powerful insights.';
+    'Start with our interactive tutorial that guides you through everything you need to know in just a few minutes. Learn the 3-click promise, quick categorization, and powerful insights.';
   tutorialDescription.style.cssText = `
     margin: 0 0 1rem 0;
     line-height: 1.5;
@@ -93,7 +119,6 @@ export const LandingView = () => {
     '✨ 3-click expense logging',
     '🎯 Interactive walkthrough',
     '📱 Mobile-first experience',
-    '🧠 Smart categorization',
     '🎓 Learn at your own pace',
   ];
 
@@ -111,26 +136,13 @@ export const LandingView = () => {
   tutorialSection.appendChild(tutorialDescription);
   tutorialSection.appendChild(tutorialFeatures);
 
-  const buttonContainer = document.createElement('div');
-  buttonContainer.style.marginTop = '2rem';
-
-  const getStartedBtn = ButtonComponent({
-    text: 'Get Started',
-    variant: 'primary',
-    onClick: () => {
-      Router.navigate('login');
-    },
-  });
-
-  buttonContainer.appendChild(getStartedBtn);
-
   heroSection.appendChild(heroIcon);
   heroSection.appendChild(title);
   heroSection.appendChild(tagline);
   heroSection.appendChild(features);
   heroSection.appendChild(description);
-  heroSection.appendChild(tutorialSection);
   heroSection.appendChild(buttonContainer);
+  heroSection.appendChild(tutorialSection);
 
   container.appendChild(heroSection);
 

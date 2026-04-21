@@ -304,6 +304,32 @@ p {
   }
 }
 
+/* Landing View - Allow scrolling */
+.view-landing {
+  overflow-y: auto;
+  height: auto;
+  min-height: 100vh;
+}
+
+.view-landing .hero-placeholder {
+  height: auto;
+  min-height: 100vh;
+  overflow: visible;
+  padding: var(--spacing-xl) var(--spacing-md) var(--spacing-xl)
+    var(--spacing-md);
+}
+
+/* Hide mobile navigation on landing page */
+.view-landing ~ .mobile-nav,
+body:has(.view-landing) .mobile-nav {
+  display: none !important;
+}
+
+/* Hide network status on landing page */
+body:has(.view-landing) .network-status {
+  display: none !important;
+}
+
 /* Accessibility */
 .visually-hidden {
   position: absolute;

@@ -11,7 +11,7 @@ export const TUTORIAL_STEPS = [
     description:
       "Track your expenses in just 3 clicks. Let's get you started with the fastest expense tracking experience!",
     content:
-      'No complicated forms or endless fields. Smart categorization that learns from your habits. Beautiful insights to help you make smarter financial decisions.',
+      'No complicated forms or endless fields. Quick categorization. Beautiful insights to help you make smarter financial decisions.',
     primaryAction: {
       id: 'start',
       text: "Let's start your first transaction →",
@@ -89,9 +89,9 @@ export const TUTORIAL_STEPS = [
     id: 'category-selection',
     type: 'spotlight',
     target: '[data-tutorial-target="category-selector"]',
-    title: 'Smart Categories',
+    title: 'Quick Categories',
     content:
-      'Just tap one to save! We learn your favorite categories and remember typical amounts. No need to click a separate save button.\n\n🍔 Food & Groceries • ☕ Dining & Coffee • 🏠 Housing & Bills • 🚗 Transportation • 🛍️ Leisure & Shopping • 💇 Personal Care',
+      'Just tap one to save! No need to click a separate save button.\n\n🍔 Food & Groceries • ☕ Dining & Coffee • 🏠 Housing & Bills • 🚗 Transportation • 🛍️ Leisure & Shopping • 💇 Personal Care',
     position: 'auto',
     delay: 1500, // Wait longer for animations
     actions: [

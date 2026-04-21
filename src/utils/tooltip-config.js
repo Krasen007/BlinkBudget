@@ -220,15 +220,6 @@ export const TOOLTIP_CONFIG = {
       position: 'top',
       delay: 300,
     },
-  },
-
-  // Smart Features Tooltips
-  smartFeatures: {
-    'smart-suggestions': {
-      content: 'AI-powered suggestions based on your spending habits.',
-      position: 'top',
-      delay: 300,
-    },
     'ghost-transactions': {
       content: 'See historical transactions when changing dates for context.',
       position: 'top',
@@ -310,10 +301,7 @@ export const TOOLTIP_TRIGGERS = {
   // Contextual triggers
   afterFirstTransaction: ['dashboard.category-filter', 'dashboard.date-filter'],
 
-  afterThreeTransactions: [
-    'reports.top-movers',
-    'smartFeatures.smart-suggestions',
-  ],
+  afterThreeTransactions: ['reports.top-movers'],
 
   // Feature discovery triggers
   onAccountPage: [
@@ -339,10 +327,6 @@ export const TOOLTIP_TEMPLATES = {
   // Time-specific tooltip
   timePeriod: (period, total) =>
     `Viewing ${period}. Total spending: ${total}. Click to change time period.`,
-
-  // Smart suggestion tooltip
-  smartSuggestion: (suggestion, confidence) =>
-    `Suggested: ${suggestion} (${confidence}% confidence). Based on your habits.`,
 
   // Goal progress tooltip
   goalProgress: (goalName, progress, remaining) =>

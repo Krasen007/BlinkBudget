@@ -7,10 +7,6 @@ import { GeneralSection } from '../components/GeneralSection.js';
 import { BackupRestoreSection } from '../components/BackupRestoreSection.js';
 import { AccountDeletionSection } from '../components/AccountDeletionSection.js';
 import { escapeHtml } from '../utils/security-utils.js';
-/* Disabled until further notice */
-//import { SmartSuggestionsSection } from '../components/SmartSuggestionsSection.js';
-/* Disabled until further notice */
-//import { AdvancedFilteringSection } from '../components/AdvancedFilteringSection.js';
 import { SecuritySection } from '../components/SecuritySection.js';
 import { FeedbackLink } from '../components/FeedbackLink.js';
 import { SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
@@ -171,14 +167,6 @@ export const SettingsView = () => {
   // Backup & Restore Section
   const backupSection = BackupRestoreSection();
   advancedSettingsSection.appendChild(backupSection);
-
-  /* Disabled until further notice */
-  // // Smart Suggestions Section
-  // const smartSuggestionsSection = SmartSuggestionsSection();
-  // content.appendChild(smartSuggestionsSection);
-  /* Disabled until further notice */
-  // // Advanced Filtering Section
-  // const advancedFilteringSection = AdvancedFilteringSection();
   // content.appendChild(advancedFilteringSection);
 
   // Security & Privacy Section

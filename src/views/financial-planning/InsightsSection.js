@@ -33,7 +33,8 @@ import { getCurrentMonthPeriod } from '../../utils/reports-utils.js';
  * @returns {number} Normalized amount (negative for refunds, positive for expenses)
  */
 const getTransactionAmount = t => {
-  const amount = typeof t.amount === 'number' ? t.amount : Number(t.amount) || 0;
+  const amount =
+    typeof t.amount === 'number' ? t.amount : Number(t.amount) || 0;
   if (t.type === TRANSACTION_TYPES.REFUND) {
     return -Math.abs(amount);
   } else if (t.type === TRANSACTION_TYPES.EXPENSE) {
