@@ -14,7 +14,6 @@ import { PrivacyService } from './core/privacy-service.js';
 import { TransactionService } from './core/transaction-service.js';
 import { getAnalyticsEngine } from './core/analytics/AnalyticsInstance.js';
 import { getCurrentMonthPeriod } from './utils/reports-utils.js';
-import { preloadChartJS } from './core/chart-loader.js';
 import { ViewPreloader } from './core/view-preloader.js';
 import './core/mobile-utils.js'; // Initialize consolidated mobile utilities
 import './pwa.js'; // Register PWA service worker
@@ -47,9 +46,6 @@ const initBackgroundServices = async () => {
 const preloadReportsData = async () => {
   try {
     console.log('[Main] Pre-loading ReportsView data...');
-
-    // Pre-load Chart.js
-    await preloadChartJS();
 
     // Get transactions and analytics engine
     const transactions = TransactionService.getAll();
