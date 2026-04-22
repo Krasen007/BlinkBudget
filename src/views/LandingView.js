@@ -66,70 +66,12 @@ export const LandingView = () => {
 
   buttonContainer.appendChild(getStartedBtn);
 
-  // Add tutorial preview section
-  const tutorialSection = document.createElement('div');
-  tutorialSection.className = 'tutorial-preview';
-  tutorialSection.style.cssText = `
-    margin: 2rem 0;
-    padding: 1.5rem;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: var(--radius-lg);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  `;
-
-  const tutorialTitle = document.createElement('h3');
-  tutorialTitle.textContent = '🚀 New to BlinkBudget?';
-  tutorialTitle.style.cssText = `
-    margin: 0 0 1rem 0;
-    font-size: 1.2rem;
-    font-weight: 600;
-  `;
-
-  const tutorialDescription = document.createElement('p');
-  tutorialDescription.textContent =
-    'Start with our interactive tutorial that guides you through everything you need to know in just a few minutes. Learn the 3-click promise, quick categorization, and powerful insights.';
-  tutorialDescription.style.cssText = `
-    margin: 0 0 1rem 0;
-    line-height: 1.5;
-    opacity: 0.9;
-  `;
-
-  const tutorialFeatures = document.createElement('div');
-  tutorialFeatures.style.cssText = `
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1rem;
-  `;
-
-  const tutorialItems = [
-    '✨ 3-click expense logging',
-    '🎯 Interactive walkthrough',
-    '📱 Mobile-first experience',
-    '🎓 Learn at your own pace',
-  ];
-
-  tutorialItems.forEach(item => {
-    const itemDiv = document.createElement('div');
-    itemDiv.textContent = item;
-    itemDiv.style.cssText = `
-      font-size: 0.9rem;
-      opacity: 0.8;
-    `;
-    tutorialFeatures.appendChild(itemDiv);
-  });
-
-  tutorialSection.appendChild(tutorialTitle);
-  tutorialSection.appendChild(tutorialDescription);
-  tutorialSection.appendChild(tutorialFeatures);
-
   heroSection.appendChild(heroIcon);
   heroSection.appendChild(title);
   heroSection.appendChild(tagline);
   heroSection.appendChild(features);
   heroSection.appendChild(description);
   heroSection.appendChild(buttonContainer);
-  heroSection.appendChild(tutorialSection);
 
   container.appendChild(heroSection);
 

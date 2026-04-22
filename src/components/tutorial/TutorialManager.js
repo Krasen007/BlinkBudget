@@ -19,7 +19,6 @@ export class TutorialManager {
     this.overlay = null;
     this.tooltip = null;
     this.steps = TUTORIAL_STEPS;
-    this.spotlightElement = null;
     this.seenSteps = new Set();
     this.onComplete = null;
     this.timeouts = new Set(); // Track active timeouts
@@ -202,12 +201,7 @@ export class TutorialManager {
     });
 
     // Handle overlay visibility based on step type
-    const usesOverlay = [
-      'welcome',
-      'info',
-      'celebration',
-      'navigation',
-    ].includes(step.type);
+    const usesOverlay = ['welcome', 'info', 'celebration'].includes(step.type);
 
     if (this.overlay) {
       if (usesOverlay) {
@@ -225,12 +219,6 @@ export class TutorialManager {
     switch (step.type) {
       case 'welcome':
         this.showWelcomeStep(step);
-        break;
-      case 'navigation':
-        this.showNavigationStep(step);
-        break;
-      case 'spotlight':
-        this.showSpotlightStep(step);
         break;
       case 'info':
         this.showInfoStep(step);
@@ -258,98 +246,6 @@ export class TutorialManager {
     });
   }
 
-  /**
-   * Show spotlight step (highlight specific element)
-   */
-  showSpotlightStep(step) {
-    const delay = step.delay || 0;
-
-    if (delay > 0) {
-      this.setTimeout(() => {
-        this.executeSpotlightStep(step);
-      }, delay);
-    } else {
-      this.executeSpotlightStep(step);
-    }
-  }
-
-  /**
-   * Execute the actual spotlight step after delay
-   */
-  executeSpotlightStep(step) {
-    // Try to find the target element with retries
-    this.findTargetWithRetry(step.target, targetElement => {
-      // Check if we are still active and on the correct step before proceeding
-      if (!this.isActive || this.steps[this.currentStep]?.id !== step.id) {
-        return;
-      }
-
-      if (!targetElement) {
-        console.warn(`Tutorial target not found after retries: ${step.target}`);
-        this.emitEvent(TUTORIAL_EVENTS.TARGET_NOT_FOUND, {
-          target: step.target,
-        });
-        this.next();
-        return;
-      }
-
-      // Create spotlight
-      this.createSpotlight(targetElement);
-
-      // Show tooltip
-      this.showTooltipStep(step);
-    });
-  }
-
-  /**
-   * Find target element with retries for dynamic content
-   */
-  findTargetWithRetry(target, callback, retries = 8, delay = 1000) {
-    const targetElement = document.querySelector(target);
-
-    if (targetElement) {
-      callback(targetElement);
-    } else if (retries > 0) {
-      this.setTimeout(() => {
-        this.findTargetWithRetry(target, callback, retries - 1, delay);
-      }, delay);
-    } else {
-      callback(null);
-    }
-  }
-
-  /**
-   * Create spotlight effect around target element
-   */
-  createSpotlight(element) {
-    // Remove existing spotlight
-    if (this.spotlightElement) {
-      this.spotlightElement.remove();
-    }
-
-    const rect = element.getBoundingClientRect();
-    const spotlight = document.createElement('div');
-    spotlight.className = 'tutorial-spotlight';
-    spotlight.style.cssText = `
-      position: fixed;
-      top: ${rect.top - TUTORIAL_CONFIG.spotlightPadding}px;
-      left: ${rect.left - TUTORIAL_CONFIG.spotlightPadding}px;
-      width: ${rect.width + TUTORIAL_CONFIG.spotlightPadding * 2}px;
-      height: ${rect.height + TUTORIAL_CONFIG.spotlightPadding * 2}px;
-      border: 3px solid var(--color-primary);
-      border-radius: var(--radius-md);
-      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.75);
-      pointer-events: none;
-      z-index: 9999;
-      animation: tutorial-pulse 2s infinite;
-    `;
-
-    document.body.appendChild(spotlight);
-    this.spotlightElement = spotlight;
-
-    // Scroll element into view if needed
-    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
 
   /**
    * Show tooltip step
@@ -389,24 +285,6 @@ export class TutorialManager {
     });
   }
 
-  /**
-   * Show navigation step
-   */
-  showNavigationStep(step) {
-    this.overlay.showInfo({
-      title: step.title,
-      content: step.content,
-      illustration: step.illustration,
-      actions: step.actions || [],
-    });
-
-    // Navigate to the target route after a short delay
-    this.setTimeout(() => {
-      import('../../core/router.js').then(({ Router }) => {
-        Router.navigate(step.target);
-      });
-    }, 1000);
-  }
 
   /**
    * Show info step
@@ -444,12 +322,6 @@ export class TutorialManager {
         break;
       case 'dismiss':
         this.dismiss();
-        break;
-      case 'dashboard':
-        this.complete();
-        import('../../core/router.js').then(({ Router }) => {
-          Router.navigate('dashboard');
-        });
         break;
       default:
         // Custom action handlers
@@ -555,12 +427,6 @@ export class TutorialManager {
    * Cleanup current step
    */
   cleanup() {
-    // Remove spotlight
-    if (this.spotlightElement) {
-      this.spotlightElement.remove();
-      this.spotlightElement = null;
-    }
-
     // Remove tooltip
     if (this.tooltip) {
       this.tooltip.remove();

@@ -7,22 +7,7 @@ export const TutorialOverlay = {
   create({ onDismiss, onNext, onPrevious }) {
     const overlay = document.createElement('div');
     overlay.className = 'tutorial-overlay';
-    overlay.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(4px);
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: var(--spacing-lg);
-      opacity: 0;
-      transition: opacity var(--transition-normal);
-    `;
+    overlay.style.opacity = '0';
 
     // Fade in - Use CSS transitions for better performance
     // Force reflow before changing opacity to ensure transition runs
@@ -53,17 +38,8 @@ export const TutorialOverlay = {
   showWelcome(overlay, options) {
     const content = document.createElement('div');
     content.className = 'tutorial-welcome';
-    content.style.cssText = `
-      background: var(--color-surface);
-      border-radius: var(--radius-lg);
-      padding: var(--spacing-2xl);
-      max-width: 400px;
-      text-align: center;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-      opacity: 0;
-      transform: scale(0.9);
-      transition: all var(--transition-normal);
-    `;
+    content.style.opacity = '0';
+    content.style.transform = 'scale(0.9)';
 
     // Create welcome illustration
     const illustration = this.createWelcomeIllustration();
@@ -104,17 +80,8 @@ export const TutorialOverlay = {
   showCelebration(overlay, options) {
     const content = document.createElement('div');
     content.className = 'tutorial-celebration';
-    content.style.cssText = `
-      background: var(--color-surface);
-      border-radius: var(--radius-lg);
-      padding: var(--spacing-2xl);
-      max-width: 400px;
-      text-align: center;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-      opacity: 0;
-      transform: scale(0.9);
-      transition: all var(--transition-normal);
-    `;
+    content.style.opacity = '0';
+    content.style.transform = 'scale(0.9)';
 
     // Create celebration illustration
     const illustration = this.createCelebrationIllustration(
@@ -153,17 +120,8 @@ export const TutorialOverlay = {
   showInfo(overlay, options) {
     const content = document.createElement('div');
     content.className = 'tutorial-info';
-    content.style.cssText = `
-      background: var(--color-surface);
-      border-radius: var(--radius-lg);
-      padding: var(--spacing-2xl);
-      max-width: 500px;
-      text-align: center;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-      opacity: 0;
-      transform: scale(0.9);
-      transition: all var(--transition-normal);
-    `;
+    content.style.opacity = '0';
+    content.style.transform = 'scale(0.9)';
 
     // Create illustration if provided
     if (options.illustration) {

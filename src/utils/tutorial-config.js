@@ -14,7 +14,7 @@ export const TUTORIAL_STEPS = [
       'No complicated forms or endless fields. Quickly categorize your transactions. Beautiful insights to help you make smarter financial decisions.',
     primaryAction: {
       id: 'start',
-      text: "Let's start your first transaction →",
+      text: "Let's start →",
       variant: 'primary',
     },
     secondaryAction: {
@@ -33,7 +33,7 @@ export const TUTORIAL_STEPS = [
     actions: [
       {
         id: 'next',
-        text: 'Try it now →',
+        text: 'Next →',
         variant: 'primary',
       },
       {
@@ -44,38 +44,16 @@ export const TUTORIAL_STEPS = [
     ],
   },
   {
-    id: 'navigate-to-add',
-    type: 'navigation',
-    target: 'add-expense',
-    title: "Let's Add Your First Transaction",
-    content:
-      "We'll navigate to add transaction page where you can log expenses in just 3 clicks.",
-    actions: [
-      {
-        id: 'next',
-        text: 'Continue →',
-        variant: 'primary',
-      },
-      {
-        id: 'previous',
-        text: 'Previous',
-        variant: 'secondary',
-      },
-    ],
-  },
-  {
     id: 'amount-input',
-    type: 'spotlight',
-    target: '[data-tutorial-target="amount-input"]',
-    title: 'Your First Transaction',
+    type: 'info',
+    title: 'Add Your First Transaction',
     content:
-      "Let's log a sample expense together. Notice how simple this is. Enter any amount (try €5.50) and choose where this expense came from.",
-    position: 'top',
-    delay: 2000, // Wait longer for page to load
+      "Navigate to the add transaction page and enter any amount. Try something like €5.50 for a lunch expense.",
+    illustration: 'mobile',
     actions: [
       {
         id: 'next',
-        text: 'Continue →',
+        text: 'Next →',
         variant: 'primary',
       },
       {
@@ -87,17 +65,15 @@ export const TUTORIAL_STEPS = [
   },
   {
     id: 'category-selection',
-    type: 'spotlight',
-    target: '[data-tutorial-target="category-selector"]',
+    type: 'info',
     title: 'Quick Categories',
     content:
-      'Just tap one to save! No need to click a separate save button.\n\n🍔 Food & Groceries • ☕ Dining & Coffee • 🏠 Housing & Bills • 🚗 Transportation • 🛍️ Leisure & Shopping • 💇 Personal Care',
-    position: 'auto',
-    delay: 1500, // Wait longer for animations
+      'Just tap a category to save! No need to click a separate save button.\n\n🍔 Food & Groceries • ☕ Dining & Coffee • 🏠 Housing & Bills • 🚗 Transportation • 🛍️ Leisure & Shopping • 💇 Personal Care',
+    illustration: 'accounts',
     actions: [
       {
         id: 'next',
-        text: 'Pick a category to save →',
+        text: 'Next →',
         variant: 'primary',
       },
       {
@@ -107,68 +83,20 @@ export const TUTORIAL_STEPS = [
       },
     ],
   },
-  {
-    id: 'navigate-to-dashboard',
-    type: 'navigation',
-    target: 'dashboard',
-    title: 'Back to Your Dashboard',
-    content:
-      "Let's go back to your dashboard to see your complete financial picture.",
-    actions: [
-      {
-        id: 'next',
-        text: 'Explore dashboard →',
-        variant: 'primary',
-      },
-      {
-        id: 'previous',
-        text: 'Previous',
-        variant: 'secondary',
-      },
-    ],
-  },
-  {
-    id: 'dashboard-intro',
-    type: 'spotlight',
-    target: '[data-tutorial-target="dashboard"]',
-    title: 'Your Financial Dashboard',
-    content:
-      "This is your command center. Everything you need at a glance:\n\n**Balance Cards** - See your total across all accounts\n**Recent Transactions** - Your latest expenses, color-coded by category\n**Quick Stats** - Today's spending, monthly trends\n\n**Pro Tip:** Tap any category name to filter transactions by that category!",
-    position: 'bottom',
-    delay: 2000, // Wait longer for page to load
-    actions: [
-      {
-        id: 'next',
-        text: 'Explore dashboard →',
-        variant: 'primary',
-      },
-      {
-        id: 'previous',
-        text: 'Previous',
-        variant: 'secondary',
-      },
-    ],
-  },
-
   {
     id: 'congratulations',
     type: 'celebration',
-    title: 'Congratulations! 🎉',
+    title: 'You\'re All Set! 🎉',
     description:
-      "You've mastered the basics of BlinkBudget. Here's what to remember:",
+      "You've learned the basics of BlinkBudget.",
     content:
-      '**Key Takeaways:**\n• 3 clicks = expense logged\n• Categories auto-save your transactions\n• Dashboard shows your complete financial picture\n\n**Next Steps:**\n• Try adding a few more transactions\n\n**Welcome to effortless expense tracking!**',
+      '**Key Takeaways:**\n• 3 clicks = expense logged\n• Categories auto-save your transactions\n\n**Start tracking your expenses now!**',
     illustration: 'success-celebration',
     actions: [
       {
         id: 'complete',
-        text: 'Start using BlinkBudget →',
+        text: 'Start Using BlinkBudget →',
         variant: 'primary',
-      },
-      {
-        id: 'dashboard',
-        text: 'Go to Dashboard',
-        variant: 'secondary',
       },
     ],
   },
