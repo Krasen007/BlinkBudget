@@ -749,7 +749,9 @@ export const ReportsView = () => {
           }
 
           // Create or get chart container
-          let chartContainer = content.querySelector('.reports-chart-container');
+          let chartContainer = content.querySelector(
+            '.reports-chart-container'
+          );
           if (!chartContainer) {
             chartContainer = createChartContainer();
             chartContainer.className = 'reports-chart-container';

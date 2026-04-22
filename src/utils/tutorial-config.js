@@ -48,7 +48,7 @@ export const TUTORIAL_STEPS = [
     type: 'info',
     title: 'Add Your First Transaction',
     content:
-      "Navigate to the add transaction page and enter any amount. Try something like €5.50 for a lunch expense.",
+      'Navigate to the add transaction page and enter any amount. Try something like €5.50 for a lunch expense.',
     illustration: 'mobile',
     actions: [
       {
@@ -86,9 +86,8 @@ export const TUTORIAL_STEPS = [
   {
     id: 'congratulations',
     type: 'celebration',
-    title: 'You\'re All Set! 🎉',
-    description:
-      "You've learned the basics of BlinkBudget.",
+    title: "You're All Set! 🎉",
+    description: "You've learned the basics of BlinkBudget.",
     content:
       '**Key Takeaways:**\n• 3 clicks = expense logged\n• Categories auto-save your transactions\n\n**Start tracking your expenses now!**',
     illustration: 'success-celebration',

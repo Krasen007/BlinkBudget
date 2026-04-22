@@ -246,7 +246,6 @@ export class TutorialManager {
     });
   }
 
-
   /**
    * Show tooltip step
    */
@@ -284,7 +283,6 @@ export class TutorialManager {
       actions: step.actions || [],
     });
   }
-
 
   /**
    * Show info step

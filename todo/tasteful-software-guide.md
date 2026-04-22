@@ -1,6 +1,7 @@
 # Tasteful Software Guide for AI Agents
 
 ## Core Principle
+
 Taste is the ability to make good decisions about what to include and what to exclude. It is a compression function: given the infinite space of things you could build, taste selects the finite set of things you should build.
 
 ---
@@ -8,6 +9,7 @@ Taste is the ability to make good decisions about what to include and what to ex
 ## Strict Dos
 
 ### Feature Selection
+
 - **DO** start by identifying the single core problem you're solving
 - **DO** build the minimum set of features that solve that problem exceptionally well
 - **DO** make every feature earn its place through necessity, not possibility
@@ -18,6 +20,7 @@ Taste is the ability to make good decisions about what to include and what to ex
 - **DO** ensure the first ten seconds of the experience feel effortless
 
 ### Decision-Making
+
 - **DO** apply taste at every level: features, interactions, API responses, error states, data flow, defaults
 - **DO** treat every default as a deliberate taste decision
 - **DO** treat every omission as a deliberate taste decision
@@ -28,6 +31,7 @@ Taste is the ability to make good decisions about what to include and what to ex
 - **DO** find the right amount - the mean between extremes (Aristotle's principle of calibration)
 
 ### Execution
+
 - **DO** follow the "weniger, aber besser" principle: less, but better
 - **DO** design by subtraction - ask "what can I remove" at every stage
 - **DO** ensure every interaction feels considered
@@ -37,6 +41,7 @@ Taste is the ability to make good decisions about what to include and what to ex
 - **DO** embed understanding through years of specific decisions, not replicable from a prompt
 
 ### Product Shape
+
 - **DO** recognize that the entire shape of a product is the accumulated residue of thousands of small taste decisions
 - **DO** make choices that users may never consciously notice but will absolutely feel
 - **DO** build products that have a coherent theory about the problem domain
@@ -47,6 +52,7 @@ Taste is the ability to make good decisions about what to include and what to ex
 ## Strict Don'ts
 
 ### Feature Selection
+
 - **DON'T** build features just because you can - code being cheap is not a reason to add
 - **DON'T** add features without considering their interaction with existing features
 - **DON'T** increase surface area without decreasing cognitive load elsewhere
@@ -57,6 +63,7 @@ Taste is the ability to make good decisions about what to include and what to ex
 - **DON'T** treat features as purely additive - recognize their negative externalities
 
 ### Decision-Making
+
 - **DON'T** rely on stated preferences alone - users can't describe what doesn't exist yet
 - **DON'T** optimize for local maxima through A/B testing without a coherent vision
 - **DON'T** make decisions based solely on available data points
@@ -67,6 +74,7 @@ Taste is the ability to make good decisions about what to include and what to ex
 - **DON'T** rely on inertia as a moat - switching costs are approaching zero
 
 ### Execution
+
 - **DON'T** announce cleverness through the design
 - **DON'T** let the design get in the way of the experience
 - **DON'T** sacrifice simplicity for perceived completeness
@@ -76,6 +84,7 @@ Taste is the ability to make good decisions about what to include and what to ex
 - **DON'T** treat taste as static - a point of view compounds
 
 ### Product Shape
+
 - **DON'T** let the product shape be determined by engineering constraints
 - **DON'T** accumulate features without accumulating coherent vision
 - **DON'T** build disconnected features that don't serve a unified theory
@@ -101,21 +110,25 @@ If you cannot answer these questions clearly and affirmatively, do not build it.
 ## The Anti-Patterns to Avoid
 
 ### The Feature Factory
+
 - Building every feature you can think of because code is cheap
 - Measuring success by feature count rather than user experience
 - Treating features as additive without considering their interactions
 
 ### The CRUD App
+
 - A structured workflow wrapped in a UI with no deeper point of view
 - Value proposition: "we built this workflow so you don't have to"
 - Defensibility based purely on "we already built this and switching is annoying"
 
 ### The Aesthetic-Only Product
+
 - Clean UI and good onboarding without deeper taste
 - Superficial polish without considered interactions
 - Decoration rather than judgment
 
 ### The Data-Driven Without Vision
+
 - Optimizing for stated preferences without a theory of what users actually need
 - A/B testing to local maxima without coherent direction
 - Backward-looking design that compresses the past rather than imagining a better future
@@ -125,6 +138,7 @@ If you cannot answer these questions clearly and affirmatively, do not build it.
 ## The Ideal State
 
 A tasteful product:
+
 - Has a coherent theory about its problem domain
 - Makes every interaction feel considered
 - Gets defaults exactly right

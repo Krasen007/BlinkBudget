@@ -118,7 +118,10 @@ export class AnalyticsCache {
                 const value = localStorage.getItem(storageKey);
                 if (value) {
                   const parsed = JSON.parse(value);
-                  entries.push({ key: storageKey, timestamp: parsed.timestamp || 0 });
+                  entries.push({
+                    key: storageKey,
+                    timestamp: parsed.timestamp || 0,
+                  });
                 }
               } catch {
                 // Skip entries that can't be parsed

@@ -21,7 +21,6 @@
   transition: opacity var(--transition-normal);
 }
 
-
 /* Tutorial tooltip */
 .tutorial-tooltip {
   position: absolute;
@@ -79,7 +78,9 @@
   max-width: 400px;
   text-align: center;
   box-shadow: 0 20px 40px rgb(0 0 0 / 0.4);
-  transition: opacity var(--transition-normal), transform var(--transition-normal);
+  transition:
+    opacity var(--transition-normal),
+    transform var(--transition-normal);
 }
 
 .tutorial-welcome__illustration {
@@ -119,7 +120,9 @@
   max-width: 500px;
   text-align: center;
   box-shadow: 0 20px 40px rgb(0 0 0 / 0.4);
-  transition: opacity var(--transition-normal), transform var(--transition-normal);
+  transition:
+    opacity var(--transition-normal),
+    transform var(--transition-normal);
 }
 
 .tutorial-info__illustration {
@@ -159,7 +162,9 @@
   max-width: 400px;
   text-align: center;
   box-shadow: 0 20px 40px rgb(0 0 0 / 0.4);
-  transition: opacity var(--transition-normal), transform var(--transition-normal);
+  transition:
+    opacity var(--transition-normal),
+    transform var(--transition-normal);
 }
 
 .tutorial-celebration__illustration {

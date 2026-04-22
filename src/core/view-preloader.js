@@ -139,10 +139,7 @@ export const ViewPreloader = {
         ];
 
         // Preload heavy components used in views
-        const componentPreloadTasks = [
-          preloadChartJS(),
-          getAnalyticsEngine(),
-        ];
+        const componentPreloadTasks = [preloadChartJS(), getAnalyticsEngine()];
 
         // Execute all preloads in parallel
         Promise.all([

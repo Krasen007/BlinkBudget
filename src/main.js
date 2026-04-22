@@ -54,7 +54,6 @@ const preloadReportsData = async () => {
     // Pre-calculate analytics for current month
     const currentTimePeriod = getCurrentMonthPeriod();
 
-
     const startStr =
       currentTimePeriod.startDate instanceof Date
         ? currentTimePeriod.startDate.toISOString()
