@@ -328,7 +328,9 @@ export const AuthService = {
 
     // If user is already authenticated, return current user without popup
     if (this.user) {
-      console.log('[AuthService] User already authenticated, skipping Google popup');
+      console.log(
+        '[AuthService] User already authenticated, skipping Google popup'
+      );
       return { user: this.user, error: null };
     }
 

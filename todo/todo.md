@@ -21,21 +21,12 @@ DO NOT IMPLEMENT: Convert to TWA (Trusted Web Activity) - Use Bubblewrap to conv
 
 ---
 
-[x] Implement offline first loading for charts to be available on PWA even when there is no internet
-[ ] there is a white bar when using the PWA in light mode i must check how it is on the browser
-[ ] Chrome browser detects the app core and switches to dark or white mode but when I use the PWA it detects that I'm using light theme and it makes my bar white
 [ ] lazy load older transactions, they should be kept on server and only the transactions for the last 30 days should be cached on the device / PWA
 [ ] add option to mark a transaction as important, maybe a checkbox or a star icon and when the user marks a transaction as important it should be highlighted in the transactions list
 [ ] fix tutorial
-[ ] Add 'Notes' field to Transaction schema and UI forms.
 [ ] we should think about possible management UI for the app for the system admin to overview the users and their accounts and other metrics like the audit logs, also other possible things like user management, billing, etc.
 [ ] Update account-service.js and storage.js to implement an optional limit property for accounts, allowing the app to track credit limits and spending thresholds. This change exposes new API methods to calculate available credit and trigger utilization warnings, as originally outlined in the design spec.
-[ ] fix smart suggestions ui and integration
-[ ] fix advanced filtering ui
-[ ] add tests for Settings components (DateFormatSection, DataManagementSection, GeneralSection, BackupRestoreSection, AccountDeletionSection, SmartSuggestionsSection, AdvancedFilteringSection)
 [ ] consider removing googleapis for fonts
 [ ] investigate: data integrity check in settings is adding unexpected labels to categories - determine root cause and fix
 [ ] Add basic client-side security monitoring for failed login attempts and unusual data access patterns
-[ ] when i filter a category on the dashboard, by clicking on the name of the category, all transactions are shown in the transaction list, however i want to be able to filter by month, currently I can see February spent (current month) i want to be able to select a category like Храна and then see all transactions for January December etc via, this could be implemented via small arrow on the current month spent amount, it should be possible to go backward and forward, the arrow should appear only if there is transaction data
-[ ] do i need 3 separate build environments? 1 for web with lazy load, 1 for PWA for fast start with some views loaded only, and 1 for android app with all views already loaded on start?
 [ ] Implement ability to disable the Currency sign in the app or change it with custom value, current default is EUR but if the user is from a different country they might want to change it, maybe it should be auto detected? Think of the simplest solution regarding this.

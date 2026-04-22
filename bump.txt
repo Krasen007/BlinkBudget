@@ -20,4 +20,4 @@ org.gradle.jvmargs=-Xmx1024m -Xms512m
 
 #18171F
 
-Netlify free usage: 45/300 from Apr 19 to May 18
+Netlify free usage: 60/300 from Apr 19 to May 18
