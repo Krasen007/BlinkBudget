@@ -326,6 +326,12 @@ export const AuthService = {
       };
     }
 
+    // If user is already authenticated, return current user without popup
+    if (this.user) {
+      console.log('[AuthService] User already authenticated, skipping Google popup');
+      return { user: this.user, error: null };
+    }
+
     try {
       const provider = new GoogleAuthProvider();
       // Add custom scopes if needed

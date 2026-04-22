@@ -110,7 +110,7 @@ export const TUTORIAL_CONFIG = {
 
   // Animation settings
   animationDuration: 300,
-  spotlightPadding: 8,
+  spotlightPadding: 8, // Reserved for future reintroduction of spotlight steps
 
   // Positioning settings
   tooltipMaxWidth: 280,

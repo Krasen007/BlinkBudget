@@ -230,6 +230,9 @@ export class TutorialManager {
         this.showCelebrationStep(step);
         break;
       default:
+        console.warn(
+          `[Tutorial] Unknown step type: "${step.type}" for step id: "${step.id}". Skipping to next step.`
+        );
         this.next();
     }
   }

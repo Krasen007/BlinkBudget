@@ -37,6 +37,7 @@ export const SyncService = {
   _debounceTimeouts: new Map(), // Track active debounces per dataType
   _conflictResolutionHandler: null,
   isOnline: navigator.onLine, // NEW: Track connection status
+  _pendingPullPromise: null, // Track pending pull to prevent duplicates
 
   async init() {
     this.setupConnectionMonitoring(); // NEW: Setup connection monitoring
@@ -191,6 +192,12 @@ export const SyncService = {
   },
 
   async pullFromCloud(userId) {
+    // Return existing promise if pull is already in progress
+    if (this._pendingPullPromise) {
+      console.log('[Sync] Pull already in progress, reusing existing promise');
+      return this._pendingPullPromise;
+    }
+
     console.log('[Sync] Pulling data from cloud for user:', userId);
     const userDocRef = doc(getDb(), 'users', userId);
     const keys = [
@@ -202,20 +209,30 @@ export const SyncService = {
       STORAGE_KEYS.BUDGETS,
     ];
 
-    for (const key of keys) {
+    // Create and store the pull promise
+    this._pendingPullPromise = (async () => {
       try {
-        const snap = await getDocs(collection(userDocRef, key));
-        const dataDoc = snap.docs.find(d => d.id === 'data');
-        if (dataDoc) {
-          const rawData = dataDoc.data();
-          const processedData = rawData.items || rawData;
-          console.log(`[Sync] Found ${key} in cloud.`);
-          this.mergeLocalWithCloud(key, processedData);
+        for (const key of keys) {
+          try {
+            const snap = await getDocs(collection(userDocRef, key));
+            const dataDoc = snap.docs.find(d => d.id === 'data');
+            if (dataDoc) {
+              const rawData = dataDoc.data();
+              const processedData = rawData.items || rawData;
+              console.log(`[Sync] Found ${key} in cloud.`);
+              this.mergeLocalWithCloud(key, processedData);
+            }
+          } catch (error) {
+            console.error(`[Sync] Failed to pull ${key} from cloud:`, error);
+          }
         }
-      } catch (error) {
-        console.error(`[Sync] Failed to pull ${key} from cloud:`, error);
+      } finally {
+        // Clear the pending promise when done (success or error)
+        this._pendingPullPromise = null;
       }
-    }
+    })();
+
+    return this._pendingPullPromise;
   },
 
   startRealtimeSync(userId) {
