@@ -17,7 +17,11 @@ import { getCurrentMonthPeriod } from './utils/reports-utils.js';
 import './core/mobile-utils.js'; // Initialize consolidated mobile utilities
 import './pwa.js'; // Register PWA service worker
 
-InstallService.init();
+try {
+  InstallService.init();
+} catch (error) {
+  console.warn('[Main] Failed to initialize InstallService:', error);
+}
 
 /**
  * Pre-load ReportsView data for instant navigation
@@ -209,13 +213,21 @@ const initApp = () => {
 
   NavigationState.init();
   // Initialize centralized cache invalidator
-  CacheInvalidator.init();
+  try {
+    CacheInvalidator.init();
+  } catch (error) {
+    console.warn('[Main] Failed to initialize CacheInvalidator:', error);
+  }
   // Initialize enhanced back button handling for mobile
   if (window.mobileUtils && window.mobileUtils.setupBackButtonHandling) {
     window.mobileUtils.setupBackButtonHandling();
   }
-  // Initialize privacy service after app is ready
-  PrivacyService.init();
+  // Initialize privacy service before Router.init()
+  try {
+    PrivacyService.init();
+  } catch (error) {
+    console.warn('[Main] Failed to initialize PrivacyService:', error);
+  }
   console.log('[Main] App initialized, starting router.');
   Router.init();
 };
