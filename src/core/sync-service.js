@@ -76,9 +76,11 @@ export const SyncService = {
       this.stopSync();
     } else {
       const userId = AuthService.getUserId();
-      if (userId) {
+      if (userId && this.unsubscribes.length === 0) {
         console.log('[Sync] App visible, resuming real-time sync...');
         this.startRealtimeSync(userId);
+      } else if (userId && this.unsubscribes.length > 0) {
+        console.log('[Sync] App visible, sync already running');
       }
     }
   },
@@ -263,9 +265,11 @@ export const SyncService = {
             const rawData = doc.data();
             const processedData = rawData.items || rawData;
 
-            // Log whether this is cached data or fresh from server
+            // Only log if data is from server (cache loads are silent)
             const source = doc.metadata.fromCache ? 'cache' : 'server';
-            console.log(`[Sync] ${key} loaded from ${source}`);
+            if (source === 'server') {
+              console.log(`[Sync] ${key} updated from server`);
+            }
 
             this.mergeLocalWithCloud(key, processedData);
           }

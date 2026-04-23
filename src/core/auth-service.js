@@ -319,10 +319,20 @@ export const AuthService = {
     // Check Firebase availability first
     const firebaseCheck = checkFirebaseAvailability();
     if (!firebaseCheck.available) {
+      console.error('[AuthService] Firebase not available:', firebaseCheck.error);
       return {
         user: null,
         error: firebaseCheck.error,
         localMode: true,
+      };
+    }
+
+    // Verify auth instance is available
+    if (!auth) {
+      console.error('[AuthService] Auth instance is null/undefined');
+      return {
+        user: null,
+        error: 'Firebase Auth not initialized. Please refresh the page.',
       };
     }
 
@@ -343,10 +353,11 @@ export const AuthService = {
       // Set custom parameters to prevent popup issues
       provider.setCustomParameters({
         prompt: 'select_account', // Force account selection
-        display: 'popup', // Explicitly request popup mode
       });
 
       console.log('[AuthService] Initiating Google sign-in with popup...');
+      console.log('[AuthService] Auth instance:', auth);
+      console.log('[AuthService] Provider config:', provider);
       const userCredential = await signInWithPopup(auth, provider);
       // Make user object read-only to prevent manipulation
       this.user = Object.freeze({ ...userCredential.user });
