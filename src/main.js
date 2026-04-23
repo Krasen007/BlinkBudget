@@ -151,6 +151,15 @@ const initApp = () => {
   // Initialize SyncService before auth to ensure it's ready
   SyncService.init();
 
+  // Handle Google redirect result (for production)
+  AuthService.handleRedirectResult().then(result => {
+    if (result && result.user) {
+      console.log('[Main] Redirect result handled, user authenticated');
+    }
+  }).catch(error => {
+    console.warn('[Main] Failed to handle redirect result:', error);
+  });
+
   // Auth Initialization
   AuthService.init(async user => {
     const currentRoute = Router.getCurrentRoute();

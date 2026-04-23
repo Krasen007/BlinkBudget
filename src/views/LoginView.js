@@ -303,13 +303,17 @@ export const LoginView = () => {
       googleBtn.disabled = true;
       googleBtn.textContent = 'Connecting...';
 
-      const { error } = await AuthService.loginWithGoogle();
+      const result = await AuthService.loginWithGoogle();
 
-      if (error) {
-        errorMsg.textContent = error;
+      if (result.error) {
+        errorMsg.textContent = result.error;
         googleBtn.disabled = false;
         googleBtn.textContent = 'Sign in with Google';
-      } else {
+      } else if (result.redirecting) {
+        // Page will redirect, don't navigate
+        console.log('[LoginView] Redirecting to Google sign-in...');
+      } else if (result.user) {
+        // Popup sign-in successful (development)
         Router.navigate('dashboard');
       }
     },

@@ -1,6 +1,6 @@
 /**
  * Date Format Section Component
- * Automatically detects date format from device locale
+ * Allows manual selection of date format
  */
 
 import { SettingsService } from '../core/settings-service.js';
@@ -33,7 +33,7 @@ function detectDateFormat() {
   return DATE_FORMATS.ISO;
 }
 
-export const DateFormatSection = () => {
+export const DateFormatSection = ({ showAutoDetect = true, allowManualChange = false } = {}) => {
   const section = document.createElement('div');
   section.className = 'card mobile-settings-card';
   section.style.marginBottom = SPACING.LG;
@@ -62,33 +62,96 @@ export const DateFormatSection = () => {
   }
 
   // Display detected format (read-only)
-  const infoRow = document.createElement('div');
-  infoRow.className = 'date-format-info-row';
+  if (showAutoDetect) {
+    const infoRow = document.createElement('div');
+    infoRow.className = 'date-format-info-row';
 
-  const label = document.createElement('span');
-  label.textContent = 'Auto-detected from device';
-  label.className = 'date-format-label';
+    const label = document.createElement('span');
+    label.textContent = 'Auto-detected from device';
+    label.className = 'date-format-label';
 
-  const formatValue = document.createElement('span');
-  const formatLabel =
-    currentFormat === DATE_FORMATS.US
-      ? 'MM/DD/YYYY'
-      : currentFormat === DATE_FORMATS.EU
-        ? 'DD/MM/YYYY'
-        : 'YYYY-MM-DD';
-  formatValue.textContent = formatLabel;
-  formatValue.className = 'date-format-value';
+    const formatValue = document.createElement('span');
+    const formatLabel =
+      currentFormat === DATE_FORMATS.US
+        ? 'MM/DD/YYYY'
+        : currentFormat === DATE_FORMATS.EU
+          ? 'DD/MM/YYYY'
+          : 'YYYY-MM-DD';
+    formatValue.textContent = formatLabel;
+    formatValue.className = 'date-format-value';
 
-  infoRow.appendChild(label);
-  infoRow.appendChild(formatValue);
-  section.appendChild(infoRow);
+    infoRow.appendChild(label);
+    infoRow.appendChild(formatValue);
+    section.appendChild(infoRow);
 
-  // Add explanatory note
-  const note = document.createElement('p');
-  note.textContent =
-    'Date format is automatically detected from your device settings for a seamless experience.';
-  note.className = 'date-format-note';
-  section.appendChild(note);
+    // Add explanatory note
+    const note = document.createElement('p');
+    note.textContent =
+      'Date format is automatically detected from your device settings for a seamless experience.';
+    note.className = 'date-format-note';
+    section.appendChild(note);
+  }
+
+  // Add manual selection option
+  if (allowManualChange) {
+    const manualSection = document.createElement('div');
+    manualSection.style.marginTop = SPACING.MD;
+    manualSection.style.paddingTop = SPACING.MD;
+    manualSection.style.borderTop = '1px solid var(--border)';
+
+    const manualLabel = document.createElement('label');
+    manualLabel.textContent = 'Manually select date format:';
+    manualLabel.style.display = 'block';
+    manualLabel.style.marginBottom = SPACING.SM;
+    manualLabel.style.fontWeight = '500';
+
+    const select = document.createElement('select');
+    select.className = 'date-format-select';
+    Object.assign(select.style, {
+      width: '100%',
+      padding: SPACING.SM,
+      borderRadius: 'var(--radius-md)',
+      border: '1px solid var(--color-border)',
+      background: 'var(--color-surface)',
+      color: 'var(--color-text-main)',
+      fontSize: FONT_SIZES.BASE,
+      cursor: 'pointer',
+    });
+
+    const formats = [
+      { value: DATE_FORMATS.US, label: 'MM/DD/YYYY (US)' },
+      { value: DATE_FORMATS.EU, label: 'DD/MM/YYYY (European)' },
+      { value: DATE_FORMATS.ISO, label: 'YYYY-MM-DD (ISO)' },
+    ];
+
+    formats.forEach(format => {
+      const option = document.createElement('option');
+      option.value = format.value;
+      option.textContent = format.label;
+      if (format.value === currentFormat) {
+        option.selected = true;
+      }
+      select.appendChild(option);
+    });
+
+    select.addEventListener('change', () => {
+      const newFormat = select.value;
+      try {
+        SettingsService.saveSetting('dateFormat', newFormat);
+        console.log('[DateFormatSection] Date format changed to:', newFormat);
+        // Dispatch event to notify other components
+        window.dispatchEvent(
+          new CustomEvent('date-format-changed', { detail: { format: newFormat } })
+        );
+      } catch (error) {
+        console.error('[DateFormatSection] Failed to save date format:', error);
+      }
+    });
+
+    manualSection.appendChild(manualLabel);
+    manualSection.appendChild(select);
+    section.appendChild(manualSection);
+  }
 
   return section;
 };

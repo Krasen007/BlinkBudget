@@ -1,7 +1,6 @@
 import { ButtonComponent } from '../components/Button.js';
 import { Router } from '../core/router.js';
 import { AccountSection } from '../components/AccountSection.js';
-import { DateFormatSection } from '../components/DateFormatSection.js';
 import { DataManagementSection } from '../components/DataManagementSection.js';
 import { GeneralSection } from '../components/GeneralSection.js';
 import { BackupRestoreSection } from '../components/BackupRestoreSection.js';
@@ -10,6 +9,7 @@ import { escapeHtml } from '../utils/security-utils.js';
 import { SecuritySection } from '../components/SecuritySection.js';
 import { FeedbackLink } from '../components/FeedbackLink.js';
 import { SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
+import { DateFormatSection } from '../components/DateFormatSection.js';
 
 import { createButton } from '../utils/dom-factory.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
@@ -100,10 +100,6 @@ export const SettingsView = () => {
   categoryManagementSection.appendChild(manageCategoriesBtn);
   content.appendChild(categoryManagementSection);
 
-  // Date Format Section
-  const dateFormatSection = DateFormatSection();
-  content.appendChild(dateFormatSection);
-
   // General Section
   const generalSection = GeneralSection();
   content.appendChild(generalSection);
@@ -133,12 +129,18 @@ export const SettingsView = () => {
       advancedSettingsSection.classList.add(
         'advanced-settings-section--visible'
       );
+      advancedSettingsSection.classList.remove('advanced-settings-section--closing');
       advancedToggleIcon.classList.add('advanced-toggle__icon--expanded');
     } else {
-      advancedSettingsSection.classList.remove(
-        'advanced-settings-section--visible'
-      );
+      // Add closing animation class
+      advancedSettingsSection.classList.add('advanced-settings-section--closing');
+      advancedSettingsSection.classList.remove('advanced-settings-section--visible');
       advancedToggleIcon.classList.remove('advanced-toggle__icon--expanded');
+
+      // Wait for animation to complete, then hide
+      setTimeout(() => {
+        advancedSettingsSection.classList.remove('advanced-settings-section--closing');
+      }, 300);
     }
     advancedToggleContainer.setAttribute(
       'aria-expanded',
@@ -163,6 +165,10 @@ export const SettingsView = () => {
   // Data Management Section
   const dataSection = DataManagementSection();
   advancedSettingsSection.appendChild(dataSection);
+
+  // Date Format Section (with manual selection)
+  const dateFormatSection = DateFormatSection({ showAutoDetect: true, allowManualChange: true });
+  advancedSettingsSection.appendChild(dateFormatSection);
 
   // Backup & Restore Section
   const backupSection = BackupRestoreSection();
