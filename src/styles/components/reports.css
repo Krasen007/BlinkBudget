@@ -729,22 +729,22 @@
 .chart-section[data-section='category-breakdown'],
 .chart-section.category-breakdown,
 .chart-section:first-child {
-  margin-bottom: var(--spacing-lg) !important;
+  margin-bottom: var(--spacing-sm) !important;
   border-bottom: none !important;
-  padding-bottom: var(--spacing-md) !important;
+  padding-bottom: var(--spacing-sm) !important;
 }
 
 /* Category Breakdown Section - Ensure it's clearly separated and handles expansion gracefully */
 .view-reports .category-breakdown-section {
   border-bottom: none;
-  margin-bottom: var(--spacing-xl);
-  padding-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
   overflow: visible;
   min-height: auto;
   max-height: none;
   display: flex !important;
   flex-direction: column !important;
-  gap: var(--spacing-md) !important;
+  gap: var(--spacing-sm) !important;
   width: 100%;
   position: relative;
 }

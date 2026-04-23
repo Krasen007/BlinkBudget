@@ -110,10 +110,10 @@ export class PlanningDataManager {
 
   /**
    * Check if data needs refresh
-   * @param {number} maxAge - Maximum age in milliseconds (default: 5 minutes)
+   * @param {number} maxAge - Maximum age in milliseconds (default: 15 minutes)
    * @returns {boolean} True if data should be refreshed
    */
-  needsRefresh(maxAge = 5 * 60 * 1000) {
+  needsRefresh(maxAge = 15 * 60 * 1000) {
     if (!this.lastUpdated) return true;
     return Date.now() - this.lastUpdated.getTime() > maxAge;
   }
