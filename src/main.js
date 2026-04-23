@@ -14,31 +14,10 @@ import { PrivacyService } from './core/privacy-service.js';
 import { TransactionService } from './core/transaction-service.js';
 import { getAnalyticsEngine } from './core/analytics/AnalyticsInstance.js';
 import { getCurrentMonthPeriod } from './utils/reports-utils.js';
-import { ViewPreloader } from './core/view-preloader.js';
 import './core/mobile-utils.js'; // Initialize consolidated mobile utilities
 import './pwa.js'; // Register PWA service worker
 
-/**
- * Background initialization - loads non-critical services after dashboard is shown
- */
-const initBackgroundServices = async () => {
-  try {
-    console.log('[Main] Starting background service initialization...');
-
-    // Initialize InstallService
-    InstallService.init();
-
-    // Initialize CacheInvalidator
-    CacheInvalidator.init();
-
-    // Initialize PrivacyService
-    PrivacyService.init();
-
-    console.log('[Main] Background services initialized');
-  } catch (error) {
-    console.warn('[Main] Failed to initialize background services:', error);
-  }
-};
+InstallService.init();
 
 /**
  * Pre-load ReportsView data for instant navigation
@@ -46,6 +25,10 @@ const initBackgroundServices = async () => {
 const preloadReportsData = async () => {
   try {
     console.log('[Main] Pre-loading ReportsView data...');
+
+    // Pre-load Chart.js
+    const { preloadChartJS } = await import('./core/chart-loader.js');
+    await preloadChartJS();
 
     // Get transactions and analytics engine
     const transactions = TransactionService.getAll();
@@ -148,18 +131,6 @@ const initApp = () => {
   // Network status
   document.body.appendChild(NetworkStatus());
 
-  // Initialize SyncService before auth to ensure it's ready
-  SyncService.init();
-
-  // Handle Google redirect result (for production)
-  AuthService.handleRedirectResult().then(result => {
-    if (result && result.user) {
-      console.log('[Main] Redirect result handled, user authenticated');
-    }
-  }).catch(error => {
-    console.warn('[Main] Failed to handle redirect result:', error);
-  });
-
   // Auth Initialization
   AuthService.init(async user => {
     const currentRoute = Router.getCurrentRoute();
@@ -168,14 +139,7 @@ const initApp = () => {
       console.log('[Main] User authenticated, starting sync...');
       localStorage.setItem('auth_hint', 'true');
 
-      // Pull latest data from cloud for cross-device sync (non-blocking)
-      SyncService.pullFromCloud(user.uid).catch(error => {
-        console.warn('[Main] Failed to pull from cloud:', error);
-      });
-
-      // Start real-time sync listeners
       SyncService.startRealtimeSync(user.uid);
-
       // Initialize backup service after sync service
       import('./core/backup-service.js').then(({ BackupService }) => {
         BackupService.init();
@@ -183,9 +147,6 @@ const initApp = () => {
 
       // Pre-load ReportsView data for instant navigation
       preloadReportsData();
-
-      // Preload all views in the background for instant navigation
-      ViewPreloader.preloadAll();
 
       // Initialize tutorial system after user is authenticated
       import('./components/tutorial/TutorialManager.js')
@@ -247,18 +208,16 @@ const initApp = () => {
   });
 
   NavigationState.init();
+  // Initialize centralized cache invalidator
+  CacheInvalidator.init();
   // Initialize enhanced back button handling for mobile
   if (window.mobileUtils && window.mobileUtils.setupBackButtonHandling) {
     window.mobileUtils.setupBackButtonHandling();
   }
+  // Initialize privacy service after app is ready
+  PrivacyService.init();
   console.log('[Main] App initialized, starting router.');
   Router.init();
-
-  // Start background services after router is initialized
-  // This ensures the dashboard is shown first, then non-critical services load
-  setTimeout(() => {
-    initBackgroundServices();
-  }, 100);
 };
 
 initApp();

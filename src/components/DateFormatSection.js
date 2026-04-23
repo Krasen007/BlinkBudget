@@ -33,7 +33,10 @@ function detectDateFormat() {
   return DATE_FORMATS.ISO;
 }
 
-export const DateFormatSection = ({ showAutoDetect = true, allowManualChange = false } = {}) => {
+export const DateFormatSection = ({
+  showAutoDetect = true,
+  allowManualChange = false,
+} = {}) => {
   const section = document.createElement('div');
   section.className = 'card mobile-settings-card';
   section.style.marginBottom = SPACING.LG;
@@ -141,7 +144,9 @@ export const DateFormatSection = ({ showAutoDetect = true, allowManualChange = f
         console.log('[DateFormatSection] Date format changed to:', newFormat);
         // Dispatch event to notify other components
         window.dispatchEvent(
-          new CustomEvent('date-format-changed', { detail: { format: newFormat } })
+          new CustomEvent('date-format-changed', {
+            detail: { format: newFormat },
+          })
         );
       } catch (error) {
         console.error('[DateFormatSection] Failed to save date format:', error);

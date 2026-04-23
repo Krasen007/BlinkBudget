@@ -129,17 +129,25 @@ export const SettingsView = () => {
       advancedSettingsSection.classList.add(
         'advanced-settings-section--visible'
       );
-      advancedSettingsSection.classList.remove('advanced-settings-section--closing');
+      advancedSettingsSection.classList.remove(
+        'advanced-settings-section--closing'
+      );
       advancedToggleIcon.classList.add('advanced-toggle__icon--expanded');
     } else {
       // Add closing animation class
-      advancedSettingsSection.classList.add('advanced-settings-section--closing');
-      advancedSettingsSection.classList.remove('advanced-settings-section--visible');
+      advancedSettingsSection.classList.add(
+        'advanced-settings-section--closing'
+      );
+      advancedSettingsSection.classList.remove(
+        'advanced-settings-section--visible'
+      );
       advancedToggleIcon.classList.remove('advanced-toggle__icon--expanded');
 
       // Wait for animation to complete, then hide
       setTimeout(() => {
-        advancedSettingsSection.classList.remove('advanced-settings-section--closing');
+        advancedSettingsSection.classList.remove(
+          'advanced-settings-section--closing'
+        );
       }, 300);
     }
     advancedToggleContainer.setAttribute(
@@ -167,7 +175,10 @@ export const SettingsView = () => {
   advancedSettingsSection.appendChild(dataSection);
 
   // Date Format Section (with manual selection)
-  const dateFormatSection = DateFormatSection({ showAutoDetect: true, allowManualChange: true });
+  const dateFormatSection = DateFormatSection({
+    showAutoDetect: true,
+    allowManualChange: true,
+  });
   advancedSettingsSection.appendChild(dateFormatSection);
 
   // Backup & Restore Section

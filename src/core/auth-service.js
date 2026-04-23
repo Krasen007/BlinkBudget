@@ -6,8 +6,6 @@ import {
   signOut,
   GoogleAuthProvider,
   signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
   sendPasswordResetEmail,
 } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -321,7 +319,6 @@ export const AuthService = {
     // Check Firebase availability first
     const firebaseCheck = checkFirebaseAvailability();
     if (!firebaseCheck.available) {
-      console.error('[AuthService] Firebase not available:', firebaseCheck.error);
       return {
         user: null,
         error: firebaseCheck.error,
@@ -329,107 +326,36 @@ export const AuthService = {
       };
     }
 
-    // Verify auth instance is available
-    if (!auth) {
-      console.error('[AuthService] Auth instance is null/undefined');
-      return {
-        user: null,
-        error: 'Firebase Auth not initialized. Please refresh the page.',
-      };
-    }
-
-    // If user is already authenticated, return current user without popup
-    if (this.user) {
-      console.log(
-        '[AuthService] User already authenticated, skipping Google sign-in'
-      );
-      return { user: this.user, error: null };
-    }
-
-    // Check if this is a production environment (Netlify)
-    const isProduction = window.location.hostname !== 'localhost' &&
-                        window.location.hostname !== '127.0.0.1';
-
     try {
       const provider = new GoogleAuthProvider();
-      // Add custom scopes if needed
-      provider.addScope('email');
-      provider.addScope('profile');
+      const userCredential = await signInWithPopup(auth, provider);
+      // Make user object read-only to prevent manipulation
+      this.user = Object.freeze({ ...userCredential.user });
+      localStorage.setItem('auth_hint', 'true');
 
-      // Set custom parameters to prevent popup issues
-      provider.setCustomParameters({
-        prompt: 'select_account', // Force account selection
-      });
+      // Update profile in background
+      this._updateUserProfile(this.user).catch(console.warn);
 
-      if (isProduction) {
-        // Use redirect for production (more reliable)
-        console.log('[AuthService] Initiating Google sign-in with redirect...');
-        await signInWithRedirect(auth, provider);
-        // The function will not return here - page will redirect
-        // Result will be handled by getRedirectResult on page load
-        return { user: null, error: null, redirecting: true };
-      } else {
-        // Use popup for development (redirect doesn't work well with localhost)
-        console.log('[AuthService] Initiating Google sign-in with popup...');
-        const userCredential = await signInWithPopup(auth, provider);
-        // Make user object read-only to prevent manipulation
-        this.user = Object.freeze({ ...userCredential.user });
-        localStorage.setItem('auth_hint', 'true');
-
-        // Update profile in background
-        this._updateUserProfile(this.user).catch(console.warn);
-
-        console.log('[AuthService] Google sign-in successful');
-        return { user: this.user, error: null };
-      }
+      return { user: this.user, error: null };
     } catch (error) {
       // Log full error for debugging but return sanitized message
       console.warn(
         '[AuthService] Google login error:',
         error.code,
-        error.message,
-        error
+        error.message
       );
 
       let message = 'Google authentication failed. Please try again.';
       if (error.code === 'auth/popup-closed-by-user') {
-        message =
-          'Sign-in popup was closed before completion. Please try again and ensure you complete the login process.';
+        message = 'Sign-in popup was closed before completion.';
       } else if (error.code === 'auth/popup-blocked') {
         message =
-          'Sign-in popup was blocked by the browser. Please allow popups for this site in your browser settings and try again.';
+          'Sign-in popup was blocked by the browser. Please allow popups.';
       } else if (error.code === 'auth/cancelled-popup-request') {
-        message = 'Sign-in was cancelled. Please try again.';
-      } else if (error.code === 'auth/unauthorized-domain') {
-        message =
-          'This domain is not authorized for Google sign-in. Please contact support.';
-      } else if (error.code === 'auth/timeout') {
-        message =
-          'Sign-in timed out. Please try again. If the issue persists, check your internet connection.';
+        message = 'Sign-in was cancelled.';
       }
 
       return { user: null, error: message };
-    }
-  },
-
-  // Handle redirect result when returning from Google sign-in
-  async handleRedirectResult() {
-    console.log('[AuthService] Checking for redirect result...');
-    try {
-      const result = await getRedirectResult(auth);
-      console.log('[AuthService] Redirect result:', result);
-      if (result) {
-        this.user = Object.freeze({ ...result.user });
-        localStorage.setItem('auth_hint', 'true');
-        this._updateUserProfile(this.user).catch(console.warn);
-        console.log('[AuthService] Google redirect sign-in successful');
-        return { user: this.user, error: null };
-      }
-      console.log('[AuthService] No redirect result (user may have cancelled or no pending redirect)');
-      return { user: null, error: null };
-    } catch (error) {
-      console.error('[AuthService] Redirect result error:', error.code, error.message, error);
-      return { user: null, error: error.message };
     }
   },
 
