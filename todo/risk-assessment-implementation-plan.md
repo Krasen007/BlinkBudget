@@ -219,24 +219,7 @@ Add to `src/styles/components/financial-planning.css`:
 
 ## Testing Strategy
 
-### Unit Tests
-Create tests in `tests/core/risk-assessor-implementation.test.js`:
-- Test data preparation helpers
-- Test UI component rendering
-- Test integration with RiskAssessor methods
-
-### Integration Tests
-- Test OverviewSection with new risk cards
-- Test ForecastsSection with warnings
-- Test InsightsSection with new subsections
-
-### Manual Testing Checklist
-- [ ] Debt-to-income card displays correctly
-- [ ] Spending trend indicator shows accurate data
-- [ ] Low balance warnings appear when projected balance < threshold
-- [ ] Debt warnings display for high debt ratios
-- [ ] Investment warnings show for concentrated portfolios
-- [ ] Risk prioritization orders risks correctly
+Skip for now.
 
 ---
 

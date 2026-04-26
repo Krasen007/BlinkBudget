@@ -21,7 +21,6 @@ import { InsightsGenerator } from '../../core/insights-generator.js';
 import { InflationTrends } from '../../components/InflationTrends.js';
 import { getAnalyticsEngine } from '../../core/analytics/AnalyticsInstance.js';
 import { TrendAnalysisSection } from '../../components/TrendAnalysisSection.js';
-import { BenchmarkingSection } from '../../components/BenchmarkingSection.js';
 import { BudgetRecommendationsSection } from '../../components/BudgetRecommendationsSection.js';
 import { OptimizationInsights } from '../../components/OptimizationInsights.js';
 import { getCurrentMonthPeriod } from '../../utils/reports-utils.js';
@@ -802,40 +801,6 @@ function renderTrendAnalysisSection(section, planningData) {
   }
 }
 
-/**
- * Render benchmarking section - Feature 3.3.3 Comparative Analytics
- */
-function renderBenchmarkingSection(section, planningData) {
-  try {
-    const analyticsEngine = getAnalyticsEngine();
-    const currentTimePeriod = getCurrentMonthPeriod();
-
-    const benchmarkingData = analyticsEngine.getPersonalBenchmarking
-      ? analyticsEngine.getPersonalBenchmarking(
-          planningData.transactions,
-          currentTimePeriod
-        )
-      : null;
-
-    if (benchmarkingData && benchmarkingData.length > 0) {
-      const benchmarkingSection = BenchmarkingSection(
-        benchmarkingData,
-        currentTimePeriod
-      );
-      benchmarkingSection.style.setProperty(
-        'margin-top',
-        'var(--spacing-md)',
-        'important'
-      );
-      section.appendChild(benchmarkingSection);
-    }
-  } catch (benchmarkingError) {
-    console.warn(
-      '[InsightsSection] Failed to render benchmarking section:',
-      benchmarkingError
-    );
-  }
-}
 
 /**
  * Render budget recommendations section - Feature 3.3.4 Predictive Budget
@@ -947,8 +912,6 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
   // Trend Analysis - spending direction, consistency scores, MoM
   renderTrendAnalysisSection(section, planningData);
 
-  // Personal Benchmarking - Feature 3.3.3 Comparative Analytics
-  renderBenchmarkingSection(section, planningData);
 
   // Budget Recommendations - Feature 3.3.4 Predictive Budget
   renderBudgetRecommendationsSection(section, planningData);
