@@ -134,14 +134,6 @@ export const TransactionList = ({
               onCategoryClick(null);
             }
             break;
-          case 'show-tutorial':
-            // Show tutorial using the global tutorial manager
-            if (window.tutorialManager) {
-              window.tutorialManager.restart();
-            } else {
-              console.warn('Tutorial manager not available');
-            }
-            break;
         }
       },
       showTips: true,

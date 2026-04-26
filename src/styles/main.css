@@ -9,7 +9,6 @@
 /* 3. Component styles (depends on tokens and base) */
 @import './components/ui.css';
 @import './components/forms-dialogs.css';
-@import './components/tutorial.css';
 @import './components/reports.css';
 @import './components/inflation-trends.css';
 @import './components/webapp-components.css';

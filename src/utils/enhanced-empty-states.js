@@ -75,12 +75,7 @@ const EMPTY_STATE_CONTENT = {
       text: 'Add Your First Transaction',
       action: 'add-transaction',
     },
-    secondaryActions: [
-      {
-        text: 'View Tutorial',
-        action: 'show-tutorial',
-      },
-    ],
+    secondaryActions: [],
     tips: [
       'Try to log expenses within 3 clicks',
       'Use categories to organize spending',

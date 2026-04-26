@@ -118,9 +118,6 @@ export const TransactionForm = ({
 
   amountGroup.appendChild(amountInput);
 
-  // Add tutorial data attribute to amount input
-  amountInput.setAttribute('data-tutorial-target', 'amount-input');
-
   // 5. Amount and Account Row
   const amountAccountRow = document.createElement('div');
   amountAccountRow.style.display = 'flex';
@@ -148,11 +145,6 @@ export const TransactionForm = ({
       handleFormSubmit(completeData, onSubmit);
     },
   });
-  // Add tutorial data attribute to category selector
-  categorySelector.container.setAttribute(
-    'data-tutorial-target',
-    'category-selector'
-  );
 
   // Setup type toggle change handler (after categorySelector is created)
   const originalSetType = typeToggle.setType;

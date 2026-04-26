@@ -17,6 +17,7 @@ import {
   validateChartData,
 } from '../utils/inflation-chart-utils.js';
 import { InsightsGenerator } from '../core/insights-generator.js';
+import { generateId } from '../utils/id-utils.js';
 
 export const InflationTrends = (
   data,
@@ -27,7 +28,7 @@ export const InflationTrends = (
   const container = document.createElement('div');
   container.className = 'inflation-trends card';
 
-  const instanceId = crypto.randomUUID();
+  const instanceId = generateId();
 
   // State management
   let currentChartType = 'line';

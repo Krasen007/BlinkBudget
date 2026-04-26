@@ -152,41 +152,11 @@ const initApp = () => {
       // Pre-load ReportsView data for instant navigation
       preloadReportsData();
 
-      // Initialize tutorial system after user is authenticated
-      import('./components/tutorial/TutorialManager.js')
-        .then(({ TutorialManager }) => {
-          const initTutorial = async () => {
-            const tutorialManager = new TutorialManager();
-            const shouldShowTutorial = await tutorialManager.initialize();
-
-            if (shouldShowTutorial) {
-              // Show tutorial after a short delay to let app settle
-              tutorialManager.startWithDelay(1500);
-            }
-
-            // Store reference globally for potential future use
-            window.tutorialManager = tutorialManager;
-          };
-
-          initTutorial().catch(error => {
-            console.warn('[Main] Failed to initialize tutorial:', error);
-          });
-        })
-        .catch(error => {
-          console.warn('[Main] Failed to load tutorial module:', error);
-        });
-
       if (currentRoute === 'login' || currentRoute === 'landing') {
         Router.navigate('dashboard');
       }
     } else {
       console.log('[Main] No user, stopping sync.');
-
-      // Cleanup tutorial manager
-      if (window.tutorialManager) {
-        window.tutorialManager.destroy();
-        window.tutorialManager = null;
-      }
 
       // Remove mobile navigation when user logs out
       const existingNav = document.querySelector('.mobile-nav');
