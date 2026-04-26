@@ -73,7 +73,7 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 ### User Experience & UI
 
 - **Keyboard-aware UI** that adapts to virtual keyboard
-- **PWA support** - Installable as a standalone app with offline support and visual update notifications
+- **PWA support** - Installable as a standalone app with offline support and visual update notifications when new versions are available
 - **Android TWA support** - Trusted Web Activity for native Android app experience with Play Store deployment
 - **Keyboard shortcut (Escape key)** to exit Settings and return to dashboard
 - **Helpful tips on each section**

@@ -194,20 +194,17 @@ export async function createPortfolioCompositionChart(
   const section = document.createElement('div');
   section.className = 'chart-section portfolio-composition-section';
   section.setAttribute('data-chart-type', 'portfolio-composition');
-  section.style.background = COLORS.SURFACE;
-  section.style.borderRadius = 'var(--radius-lg)';
-  section.style.border = `1px solid ${COLORS.BORDER}`;
-  section.style.padding = SPACING.LG;
-  section.style.marginBottom = SPACING.LG;
 
   // Section header
   const header = document.createElement('div');
+  header.className = 'chart-section-header';
   header.style.display = 'flex';
   header.style.justifyContent = 'space-between';
   header.style.alignItems = 'center';
   header.style.marginBottom = SPACING.MD;
 
   const title = document.createElement('h3');
+  title.className = 'chart-section-title';
   title.textContent = options.title || 'Portfolio Composition';
   title.style.margin = '0';
   title.style.color = COLORS.TEXT_MAIN;
@@ -232,12 +229,7 @@ export async function createPortfolioCompositionChart(
 
   // Details container for hover information
   const detailsContainer = document.createElement('div');
-  detailsContainer.className = 'chart-details';
-  detailsContainer.style.background = 'var(--color-background)';
-  detailsContainer.style.borderRadius = 'var(--radius-md)';
-  detailsContainer.style.padding = SPACING.MD;
-  detailsContainer.style.marginTop = SPACING.SM;
-  detailsContainer.style.border = '1px solid var(--color-border)';
+  detailsContainer.className = 'chart-mobile-details';
   detailsContainer.style.minHeight = '60px';
 
   const initialAction = window.innerWidth < 768 ? 'Tap' : 'Hover';

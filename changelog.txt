@@ -2,6 +2,17 @@
 
 ## Recent Updates
 
+### Authentication & Security
+- **Improved Google sign-in**: Enhanced Google authentication implementation with better error handling
+- **Added auth safety checks**: Implemented additional security validations for authentication flows
+- **Fixed login issues**: Resolved various authentication-related bugs for smoother sign-in experience
+
+### UI & UX Improvements
+- **Removed tutorial**: Simplified the app by removing the tutorial, keeping true to the 3-click principle
+- **Cleaned empty states**: Improved empty state displays for goals and investments sections
+- **Updated animations**: Enhanced advanced settings animations for better visual feedback
+- **Smaller container separation**: Refined spacing between UI containers for cleaner layout
+
 ### PWA & Performance
 - **Added PWA update notifications**: Users now see a visual toast notification when a new app version is available, with an "Update" button to apply changes
 - **Simplified PWA configuration**: Removed redundant service worker and offline strategies for cleaner implementation
@@ -24,8 +35,5 @@
 - **Fixed transaction sorting**: Preserved full timestamps when editing transactions to maintain correct chronological order
 - **Removed smart suggestions from TransactionForm**: Simplified form by removing AI-powered suggestions to focus on core functionality
 
-### UI & UX
-- **Reverted landing page**: Returned to original landing page design for consistency
-
 ### Version
-- **Version 1.34**
+- **Version 1.35**
