@@ -20,10 +20,6 @@ export class RiskAssessor {
         moderate: 0.36, // 36% - concerning
         high: 0.5, // 50% - dangerous
       },
-      spendingTrend: {
-        warning: 0.15, // 15% increase month-over-month
-        critical: 0.25, // 25% increase month-over-month
-      },
       investmentConcentration: {
         singleAsset: 0.2, // 20% max in single asset
         singleSector: 0.3, // 30% max in single sector
@@ -208,128 +204,6 @@ export class RiskAssessor {
         riskLevel: 'unknown',
         message: 'Error calculating debt-to-income ratio',
         recommendation: 'Please check your financial data and try again',
-      };
-    }
-  }
-
-  /**
-   * Analyze spending trends for risk patterns
-   * @param {Array} expenseHistory - Historical expense data by month
-   * @returns {Object} Spending trend analysis
-   */
-  analyzeSpendingTrends(expenseHistory) {
-    try {
-      if (!expenseHistory || expenseHistory.length < 2) {
-        return {
-          trend: 'insufficient_data',
-          riskLevel: 'unknown',
-          message: 'Insufficient data to analyze spending trends',
-          recommendation:
-            'Track expenses for at least 2 months to identify trends',
-          monthlyChange: 0,
-          averageSpending: 0,
-        };
-      }
-
-      // Calculate month-over-month changes
-      const changes = [];
-      for (let i = 1; i < expenseHistory.length; i++) {
-        const current = expenseHistory[i].amount;
-        const previous = expenseHistory[i - 1].amount;
-
-        if (previous > 0) {
-          const change = (current - previous) / previous;
-          changes.push(change);
-        }
-      }
-
-      if (changes.length === 0) {
-        return {
-          trend: 'stable',
-          riskLevel: 'low',
-          message: 'Spending appears stable',
-          recommendation: 'Continue monitoring spending patterns',
-          monthlyChange: 0,
-          averageSpending: 0,
-        };
-      }
-
-      const averageChange =
-        changes.reduce((sum, change) => sum + change, 0) / changes.length;
-      const averageSpending =
-        expenseHistory.reduce((sum, month) => sum + month.amount, 0) /
-        expenseHistory.length;
-      const recentChange = changes[changes.length - 1]; // Most recent month-over-month change
-
-      let trend, riskLevel, message, recommendation;
-
-      if (recentChange >= this.riskThresholds.spendingTrend.critical) {
-        trend = 'rapidly_increasing';
-        riskLevel = 'critical';
-        message = `Critical: Spending increased ${(recentChange * 100).toFixed(1)}% last month`;
-        recommendation =
-          'Immediate action required: Review and cut non-essential expenses';
-      } else if (recentChange >= this.riskThresholds.spendingTrend.warning) {
-        trend = 'increasing';
-        riskLevel = 'high';
-        message = `Warning: Spending increased ${(recentChange * 100).toFixed(1)}% last month`;
-        recommendation =
-          'Monitor spending closely and identify areas to reduce expenses';
-      } else if (averageChange > 0.05) {
-        // 5% average increase
-        trend = 'gradually_increasing';
-        riskLevel = 'moderate';
-        message = `Spending trending upward: ${(averageChange * 100).toFixed(1)}% average monthly increase`;
-        recommendation =
-          'Review spending categories to identify and control increasing expenses';
-      } else if (recentChange < -0.1) {
-        // 10% decrease
-        trend = 'decreasing';
-        riskLevel = 'low';
-        message = `Good: Spending decreased ${Math.abs(recentChange * 100).toFixed(1)}% last month`;
-        recommendation =
-          'Excellent spending control. Continue current financial habits';
-      } else {
-        trend = 'stable';
-        riskLevel = 'low';
-        message = 'Spending levels are stable';
-        recommendation = 'Maintain current spending discipline';
-      }
-
-      return {
-        trend,
-        riskLevel,
-        message,
-        recommendation,
-        monthlyChange: Math.round(recentChange * 1000) / 10, // Percentage with 1 decimal
-        averageChange: Math.round(averageChange * 1000) / 10,
-        averageSpending: Math.round(averageSpending * 100) / 100,
-        dataPoints: expenseHistory.length,
-        analysis: {
-          recentTrend:
-            recentChange > 0
-              ? 'increasing'
-              : recentChange < 0
-                ? 'decreasing'
-                : 'stable',
-          overallTrend:
-            averageChange > 0
-              ? 'increasing'
-              : averageChange < 0
-                ? 'decreasing'
-                : 'stable',
-          volatility: this._calculateVolatility(changes),
-        },
-      };
-    } catch (error) {
-      console.error('Error analyzing spending trends:', error);
-      return {
-        trend: 'error',
-        riskLevel: 'unknown',
-        message: 'Error analyzing spending trends',
-        recommendation: 'Please check your expense data and try again',
-        monthlyChange: 0,
-        averageSpending: 0,
       };
     }
   }

@@ -40,34 +40,35 @@ This plan outlines the implementation of 6 unused methods from `src/core/risk-as
 
 ### 2. Spending Trend Analysis
 
-**Method:** `analyzeSpendingTrends(expenseHistory)`
+**Note:** The existing `TrendAnalysisService` (src/core/analytics/trend-analysis-service.js) is already fully implemented and provides comprehensive trend analysis including trend direction, month-over-month changes, consistency scores, category-level analysis, and seasonal pattern detection. The `TrendAnalysisSection` component is already integrated in InsightsSection.
+
+**Decision:** Use the existing TrendAnalysisService instead of implementing a separate risk-assessor method. The redundant `analyzeSpendingTrends` method has been removed from risk-assessor.js. For risk assessment purposes, wrap TrendAnalysisService output to add risk level classification (critical/high/moderate/low) based on trend thresholds.
 
 **Integration Point A:** `OverviewSection.js`
 
-- Add spending trend indicator to existing "Risk Level" card
+- Add spending trend indicator to existing "Risk Level" card using TrendAnalysisService output
 - Show trend icon (↑ stable ↓) with percentage change
-- Include trend in risk score calculation
+- Include trend in risk score calculation (map trend direction to risk level)
 
 **Integration Point B:** `InsightsSection.js`
 
-- Create dedicated "Spending Trends" subsection
-- Display month-over-month changes
-- Show volatility analysis
-- Provide trend recommendations
+- Leverage existing TrendAnalysisSection (already integrated)
+- Add risk level badges to trend indicators
+- Show volatility analysis with risk context
+- Provide trend recommendations based on risk level
 
 **UI Components Needed:**
 
-- Trend indicator widget (arrow + percentage)
-- Mini sparkline chart for recent spending
-- Volatility meter
-- Recommendation card
+- Reuse existing TrendAnalysisSection
+- Add risk level badges to trend indicators
+- Risk-aware recommendation cards
 
 **Data Requirements:**
 
-- Historical expense data by month (last 6-12 months)
-- Month-over-month change calculations
+- Historical expense data by month (last 6-12 months) - already handled by TrendAnalysisService
+- Month-over-month change calculations - already handled by TrendAnalysisService
 
-**Priority:** High - Important for financial awareness
+**Priority:** High - Important for financial awareness (leveraging existing implementation)
 
 ---
 
@@ -147,7 +148,7 @@ This plan outlines the implementation of 6 unused methods from `src/core/risk-as
 
 - Portfolio analysis with asset/sector allocations
 - Investment transaction data
-- May need to add investment data tracking if not present
+- Investment data tracking is already available via InvestmentTracker service (src/core/investment-tracker.js) which provides portfolio management, asset/sector/geographic allocation analysis, and performance tracking
 
 **Priority:** Low - Depends on investment feature usage
 
@@ -197,7 +198,7 @@ This plan outlines the implementation of 6 unused methods from `src/core/risk-as
 
 4. **Spending Trend Analysis** in InsightsSection (detailed)
 5. **Debt Warnings** in InsightsSection
-6. **Risk Prioritization** in OverviewSection + InsightsSection
+6. **Risk Prioritization** in OverviewSection + InsightsSection (incremental - aggregates available risk assessments from Phase 1 and 2; investment risks will be added in Phase 3)
 
 ### Phase 3: Investment Features (Low Priority)
 
@@ -214,20 +215,35 @@ Create utility functions in `src/utils/risk-data-helpers.js`:
 ```javascript
 // Calculate monthly debt from transactions
 export function calculateMonthlyDebt(transactions) {
-  // Filter debt-related transactions
-  // Sum monthly debt payments
+  // Validate: transactions must be an array and non-empty
+  // Sanitize: filter out null/undefined entries
+  // Validate: coerce/validate numeric amounts (log warning for invalid amounts)
+  // Filter: debt-related transactions (category 'Debt' or type 'debt')
+  // Sum: monthly debt payments
+  // Return: { amount, error } or throw documented error on validation failure
+  // Error messages: "no transaction data", "invalid transaction amount"
 }
 
 // Calculate monthly income from transactions
 export function calculateMonthlyIncome(transactions) {
-  // Filter income transactions
-  // Sum monthly income
+  // Validate: transactions must be an array and non-empty
+  // Sanitize: filter out null/undefined entries
+  // Validate: coerce/validate numeric amounts (log warning for invalid amounts)
+  // Filter: income transactions
+  // Sum: monthly income
+  // Return: { amount, error } or throw documented error when income is zero
+  // Error messages: "no transaction data", "invalid transaction amount", "zero income"
 }
 
 // Generate expense history array
 export function generateExpenseHistory(transactions, months = 12) {
-  // Group expenses by month
-  // Return array of { period, amount }
+  // Validate: transactions must be an array and non-empty
+  // Sanitize: filter out null/undefined entries
+  // Validate: coerce/validate numeric amounts (log warning for invalid amounts)
+  // Group: expenses by month
+  // Handle: months with partial data by returning pro-rated or flagged periods
+  // Return: array of { period, amount, isPartial: boolean }
+  // Error messages: "no transaction data", "invalid transaction amount"
 }
 ```
 
@@ -286,9 +302,13 @@ Skip for now.
 ## Notes
 
 - Some features require additional data tracking (e.g., investment portfolio data)
-- Consider adding data validation for edge cases (no income, no expenses, etc.)
+- Must add data validation for edge cases (no income, no expenses, etc.)
 - Risk thresholds in RiskAssessor constructor may need adjustment based on user feedback
 - Consider adding user-configurable risk thresholds in settings
+- Implement feature flags/rollout strategy for safe gradual releases of new risk features
+- Add user documentation/in-app help or tooltips explaining risk metrics and severity levels
+- Ensure accessibility: screen reader announcements for severity levels and text alternatives for charts
+- Implement internationalization and currency/localization handling for multi-region support
 
 ---
 
