@@ -46,24 +46,37 @@ export const TransactionListItem = ({
   let longPressed = false;
 
   const handleSplitTransaction = () => {
-    const result = TransactionService.split(transaction.id);
-    if (!result) return;
+    // Import ConfirmDialog dynamically
+    import('./ConfirmDialog.js').then(({ ConfirmDialog }) => {
+      ConfirmDialog({
+        title: 'Split Transaction',
+        message: `Split this transaction of ${CURRENCY_SYMBOL}${transaction.amount.toFixed(2)}?`,
+        confirmText: 'Split',
+        variant: 'primary',
+        onConfirm: () => {
+          const result = TransactionService.split(transaction.id);
+          if (!result) return;
 
-    const { first, second } = result;
+          const { first, second } = result;
 
-    // Mark both transactions for highlighting
-    // Store both IDs as comma-separated string
-    sessionStorage.setItem(
-      'highlightTransactionId',
-      `${first.id},${second.id}`
-    );
+          // Mark both transactions for highlighting
+          // Store both IDs as comma-separated string
+          sessionStorage.setItem(
+            'highlightTransactionId',
+            `${first.id},${second.id}`
+          );
 
-    // Trigger UI update
-    window.dispatchEvent(
-      new CustomEvent('storage-updated', {
-        detail: { key: 'transactions' },
-      })
-    );
+          // Trigger UI update
+          window.dispatchEvent(
+            new CustomEvent('storage-updated', {
+              detail: { key: 'transactions' },
+            })
+          );
+        },
+      });
+    }).catch(error => {
+      console.error('Failed to load ConfirmDialog:', error);
+    });
   };
 
   const startPress = () => {

@@ -855,6 +855,7 @@ export class ChartRenderer {
       chart.update('none');
     } catch (error) {
       console.warn('[ChartRenderer] Failed to focus segment:', error);
+      return; // Abort execution to prevent screen reader announcement with out-of-sync data
     }
 
     // Announce to screen readers with enhanced information

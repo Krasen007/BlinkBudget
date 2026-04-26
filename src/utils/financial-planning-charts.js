@@ -206,10 +206,6 @@ export async function createPortfolioCompositionChart(
   const title = document.createElement('h3');
   title.className = 'chart-section-title';
   title.textContent = options.title || 'Portfolio Composition';
-  title.style.margin = '0';
-  title.style.color = COLORS.TEXT_MAIN;
-  title.style.fontSize = '1.125rem';
-  title.style.fontWeight = '600';
 
   header.appendChild(title);
   section.appendChild(header);
@@ -321,9 +317,7 @@ export async function createPortfolioCompositionChart(
   });
 
   // Add click handler for asset class selection
-  canvas.addEventListener('chartSegmentClick', event => {
-    const clickData = event.detail;
-    console.log('Asset class clicked:', clickData);
+  canvas.addEventListener('chartSegmentClick', _event => {
     // Could trigger detailed view or filtering
   });
 

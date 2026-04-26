@@ -26,12 +26,21 @@
   margin-bottom: var(--spacing-lg);
 }
 
+/* Chart Section Title */
+.chart-section-title {
+  margin: 0;
+  color: var(--color-text-main);
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
 /* Specific styling for different chart sections */
 .chart-section:first-child {
   margin-top: 0 !important;
 }
 
-.chart-section:not(:last-child) {
+.chart-section:not(:last-child),
+.portfolio-composition-section:not(:last-child) {
   margin-bottom: var(--spacing-md) !important;
 }
 

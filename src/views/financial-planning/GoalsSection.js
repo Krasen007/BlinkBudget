@@ -661,7 +661,7 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
     );
     chartSection.classList.add('goals-progress-chart'); // Add class for tests
     if (!hasRealGoals) {
-      chartSection.style.opacity = '0.7';
+      chartSection.style.opacity = '0.9';
     }
     section.appendChild(chartSection);
     activeCharts.set('goal-progress', chart);

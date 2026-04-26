@@ -289,6 +289,13 @@ export const AuthService = {
         'medium'
       );
 
+      // Persist error to localStorage for debugging after page refresh
+      localStorage.setItem('last_auth_error', JSON.stringify({
+        code: error.code,
+        message: error.message,
+        timestamp: new Date().toISOString()
+      }));
+
       // Return sanitized error message to user
       let message = 'Account creation failed. Please try again.';
       if (error.code === 'auth/email-already-in-use') {
@@ -355,6 +362,18 @@ export const AuthService = {
         '[AuthService] Google login error:',
         error.code,
         error.message
+      );
+
+      // Log audit event for Google login failure
+      auditService.log(
+        auditEvents.LOGIN_FAILURE,
+        {
+          method: 'google',
+          error: error.message,
+          code: error.code,
+        },
+        null,
+        'medium'
       );
 
       // Persist error to localStorage for debugging after page refresh
@@ -482,6 +501,13 @@ export const AuthService = {
         null,
         'medium'
       );
+
+      // Persist error to localStorage for debugging after page refresh
+      localStorage.setItem('last_auth_error', JSON.stringify({
+        code: error.code,
+        message: error.message,
+        timestamp: new Date().toISOString()
+      }));
 
       // Return sanitized error message to user
       let message = 'Password reset failed. Please try again.';
