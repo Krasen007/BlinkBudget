@@ -6,7 +6,6 @@
 import { BackupService } from './backup-service.js';
 import { StorageService } from './storage.js';
 import { AuthService } from './auth-service.js';
-import { auditService, auditEvents } from './audit-service.js';
 import { SyncService } from './sync-service.js';
 
 export class EmergencyRecoveryService {
@@ -38,16 +37,6 @@ export class EmergencyRecoveryService {
     const startTime = Date.now();
 
     try {
-      auditService.log(
-        auditEvents.DATA_RECOVERY,
-        {
-          recoveryId,
-          attempt: this.recoveryAttempts,
-          options: _options,
-        },
-        AuthService.getUserId(),
-        'high'
-      );
 
       const results = {
         recoveryId,
@@ -84,19 +73,6 @@ export class EmergencyRecoveryService {
       results.duration = Date.now() - startTime;
       results.success = results.errors.length === 0;
 
-      // Log recovery completion
-      auditService.log(
-        auditEvents.DATA_RECOVERY,
-        {
-          recoveryId,
-          success: results.success,
-          duration: results.duration,
-          dataRestored: results.dataRestored,
-          errors: results.errors.length,
-        },
-        AuthService.getUserId(),
-        results.success ? 'medium' : 'high'
-      );
 
       this.recoveryLog.push(results);
       return results;
@@ -109,17 +85,6 @@ export class EmergencyRecoveryService {
         duration: Date.now() - startTime,
       };
 
-      auditService.log(
-        auditEvents.DATA_RECOVERY,
-        {
-          recoveryId,
-          success: false,
-          error: error.message,
-          duration: errorResult.duration,
-        },
-        AuthService.getUserId(),
-        'critical'
-      );
 
       this.recoveryLog.push(errorResult);
       throw error;

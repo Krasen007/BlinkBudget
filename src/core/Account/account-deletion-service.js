@@ -5,7 +5,6 @@
 
 import { AuthService } from '../auth-service.js';
 import { TransactionService } from '../transaction-service.js';
-import { auditService, auditEvents } from '../audit-service.js';
 import { auth } from '../firebase-config.js';
 import { deleteUser } from 'firebase/auth';
 
@@ -38,19 +37,6 @@ export class AccountDeletionService {
       const userId = AuthService.getUserId();
       const userEmail = AuthService.getUserEmail();
 
-      // Log deletion initiation
-      auditService.log(
-        auditEvents.ACCOUNT_DELETION,
-        {
-          deletionId,
-          userId,
-          userEmail,
-          stage: 'initiated',
-          options,
-        },
-        userId,
-        'critical'
-      );
 
       const result = {
         deletionId,
@@ -90,20 +76,6 @@ export class AccountDeletionService {
       result.duration = Date.now() - startTime;
       result.success = result.errors.length === 0;
 
-      // Log completion
-      auditService.log(
-        auditEvents.ACCOUNT_DELETION,
-        {
-          deletionId,
-          userId,
-          success: result.success,
-          duration: result.duration,
-          dataDeleted: result.dataDeleted,
-          errors: result.errors.length,
-        },
-        userId,
-        result.success ? 'high' : 'critical'
-      );
 
       this.deletionSteps.push(result);
       return result;
@@ -116,18 +88,6 @@ export class AccountDeletionService {
         duration: Date.now() - startTime,
       };
 
-      auditService.log(
-        auditEvents.ACCOUNT_DELETION,
-        {
-          deletionId,
-          userId: AuthService.getUserId(),
-          success: false,
-          error: error.message,
-          duration: errorResult.duration,
-        },
-        AuthService.getUserId(),
-        'critical'
-      );
 
       this.deletionSteps.push(errorResult);
       throw error;

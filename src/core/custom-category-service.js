@@ -9,7 +9,6 @@ import { SyncService } from './sync-service.js';
 import { AuthService } from './auth-service.js';
 import { generateId } from '../utils/id-utils.js';
 import { safeJsonParse } from '../utils/security-utils.js';
-import { auditService, auditEvents } from './audit-service.js';
 
 const CUSTOM_CATEGORIES_KEY =
   STORAGE_KEYS.CUSTOM_CATEGORIES || 'custom_categories';
@@ -90,17 +89,6 @@ export const CustomCategoryService = {
 
     this._persist(mergedCategories);
 
-    // Audit log category reordering
-    auditService.log(
-      auditEvents.DATA_UPDATE,
-      {
-        entityType: 'categories',
-        action: 'reorder',
-        count: orderedIds.length,
-      },
-      AuthService.getUserId(),
-      'low'
-    );
 
     return true;
   },
@@ -176,18 +164,6 @@ export const CustomCategoryService = {
 
     this._persist(mergedCategories);
 
-    // Audit log category move
-    auditService.log(
-      auditEvents.DATA_UPDATE,
-      {
-        entityType: 'category',
-        action: 'move',
-        categoryId: id,
-        direction,
-      },
-      AuthService.getUserId(),
-      'low'
-    );
 
     return true;
   },
@@ -341,18 +317,6 @@ export const CustomCategoryService = {
     categories.push(newCategory);
     this._persist(categories);
 
-    // Audit log category creation
-    auditService.log(
-      auditEvents.DATA_CREATE,
-      {
-        entityType: 'category',
-        entityId: newCategory.id,
-        name: newCategory.name,
-        type: newCategory.type,
-      },
-      AuthService.getUserId(),
-      'low'
-    );
 
     return newCategory;
   },
@@ -370,8 +334,6 @@ export const CustomCategoryService = {
     if (index === -1) {
       return null;
     }
-
-    const originalCategory = categories[index];
 
     // Check for duplicate names (excluding current category)
     if (updates.name) {
@@ -405,19 +367,6 @@ export const CustomCategoryService = {
 
     this._persist(categories);
 
-    // Audit log category update
-    auditService.log(
-      auditEvents.DATA_UPDATE,
-      {
-        entityType: 'category',
-        entityId: id,
-        changes: Object.keys(updates),
-        originalName: originalCategory.name,
-        newName: updates.name || originalCategory.name,
-      },
-      AuthService.getUserId(),
-      'low'
-    );
 
     return categories[index];
   },
@@ -438,17 +387,6 @@ export const CustomCategoryService = {
     const filteredCategories = categories.filter(cat => cat.id !== id);
     this._persist(filteredCategories);
 
-    // Audit log category deletion
-    auditService.log(
-      auditEvents.DATA_DELETE,
-      {
-        entityType: 'category',
-        entityId: id,
-        name: category.name,
-      },
-      AuthService.getUserId(),
-      'medium'
-    );
 
     return true;
   },

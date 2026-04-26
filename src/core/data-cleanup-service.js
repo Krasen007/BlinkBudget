@@ -4,8 +4,6 @@
  */
 
 import { TransactionService } from './transaction-service.js';
-import { AuthService } from './auth-service.js';
-import { auditService, auditEvents } from './audit-service.js';
 
 export const DataCleanupService = {
   /**
@@ -158,18 +156,6 @@ export const DataCleanupService = {
       results.errors += orphanedResults.errors;
       results.details.push(...orphanedResults.details);
 
-      // Log the cleanup operation
-      auditService.log(
-        auditEvents.DATA_INTEGRITY_CHECK,
-        {
-          action: 'data_cleanup',
-          fixed: results.fixed,
-          errors: results.errors,
-          details: results.details,
-        },
-        AuthService.getUserId(),
-        'medium'
-      );
 
       return results;
     } catch (error) {

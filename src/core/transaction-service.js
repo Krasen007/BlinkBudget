@@ -10,7 +10,6 @@ import { AuthService } from './auth-service.js';
 import { AccountService } from './Account/account-service.js';
 import { generateId } from '../utils/id-utils.js';
 import { safeJsonParse } from '../utils/security-utils.js';
-import { auditService, auditEvents } from './audit-service.js';
 import { PrivacyService } from './privacy-service.js';
 import { getAnalyticsEngine } from './analytics/AnalyticsInstance.js';
 
@@ -51,17 +50,6 @@ export const TransactionService = {
   getAllForExport() {
     const transactions = this.getAll();
 
-    // Audit log data export
-    auditService.log(
-      auditEvents.DATA_EXPORT,
-      {
-        entityType: 'transaction',
-        count: transactions.length,
-        format: 'json',
-      },
-      AuthService.getUserId(),
-      'medium'
-    );
 
     return transactions.map(transaction => {
       // Create a copy and remove internal fields
@@ -109,19 +97,6 @@ export const TransactionService = {
     transactions.unshift(sanitizedTransaction);
     this._persist(transactions);
 
-    // Audit log transaction creation
-    auditService.log(
-      auditEvents.DATA_CREATE,
-      {
-        entityType: 'transaction',
-        entityId: sanitizedTransaction.id,
-        amount: sanitizedTransaction.amount,
-        category: sanitizedTransaction.category,
-        accountId: sanitizedTransaction.accountId,
-      },
-      AuthService.getUserId(),
-      'low'
-    );
 
     // Invalidate analytics cache when new transaction is added
     const analyticsEngine = getAnalyticsEngine();
@@ -175,7 +150,6 @@ export const TransactionService = {
     const index = transactions.findIndex(t => t.id === id);
     if (index === -1) return null;
 
-    const originalTransaction = transactions[index];
     transactions[index] = {
       ...transactions[index],
       ...updates,
@@ -191,19 +165,6 @@ export const TransactionService = {
     const analyticsEngine = getAnalyticsEngine();
     analyticsEngine.invalidateCacheOnDataUpdate();
 
-    // Audit log transaction update
-    auditService.log(
-      auditEvents.DATA_UPDATE,
-      {
-        entityType: 'transaction',
-        entityId: id,
-        changes: Object.keys(updates),
-        originalAmount: originalTransaction.amount,
-        newAmount: updates.amount || originalTransaction.amount,
-      },
-      AuthService.getUserId(),
-      'low'
-    );
 
     return transactions[index];
   },
@@ -229,18 +190,6 @@ export const TransactionService = {
     const analyticsEngine = getAnalyticsEngine();
     analyticsEngine.invalidateCacheOnDataUpdate();
 
-    // Audit log transaction deletion
-    auditService.log(
-      auditEvents.DATA_DELETE,
-      {
-        entityType: 'transaction',
-        entityId: id,
-        amount: transaction.amount,
-        category: transaction.category,
-      },
-      AuthService.getUserId(),
-      'medium'
-    );
 
     return true;
   },
@@ -297,17 +246,6 @@ export const TransactionService = {
     const analyticsEngine = getAnalyticsEngine();
     analyticsEngine.invalidateCacheOnDataUpdate();
 
-    // Audit log bulk transaction deletion
-    auditService.log(
-      auditEvents.DATA_DELETE,
-      {
-        entityType: 'transaction',
-        operation: 'bulk_clear',
-        count: transactionCount,
-      },
-      AuthService.getUserId(),
-      'medium'
-    );
 
     this._persist([]);
 

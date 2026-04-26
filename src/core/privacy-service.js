@@ -4,7 +4,6 @@
  * Implements GDPR data minimization principles and privacy controls
  */
 
-import { auditService, auditEvents } from './audit-service.js';
 
 export const PrivacyService = {
   // Privacy settings key
@@ -67,17 +66,6 @@ export const PrivacyService = {
         JSON.stringify(updatedSettings)
       );
 
-      // Audit privacy setting changes
-      auditService.log(
-        auditEvents.SETTINGS_CHANGE,
-        {
-          settingType: 'privacy',
-          changes: Object.keys(newSettings),
-          newSettings: updatedSettings,
-        },
-        null,
-        'medium'
-      );
 
       return updatedSettings;
     } catch (error) {
@@ -220,26 +208,8 @@ export const PrivacyService = {
       );
       this.cleanupOldData('blinkbudget_analytics', cutoffDate);
 
-      auditService.log(
-        auditEvents.DATA_DELETE,
-        {
-          operation: 'retention_cleanup',
-          timestamp: new Date().toISOString(),
-        },
-        null,
-        'low'
-      );
     } catch (error) {
       console.error('Data retention cleanup failed:', error);
-      auditService.log(
-        auditEvents.DATA_INTEGRITY_CHECK,
-        {
-          operation: 'retention_cleanup_failed',
-          error: error.message,
-        },
-        null,
-        'medium'
-      );
     }
   },
 
@@ -375,16 +345,6 @@ export const PrivacyService = {
         }
       }
 
-      auditService.log(
-        auditEvents.DATA_EXPORT,
-        {
-          dataType: 'user_data_export',
-          keyCount: storageKeys.length,
-          timestamp: new Date().toISOString(),
-        },
-        null,
-        'medium'
-      );
 
       return exportData;
     } catch (error) {

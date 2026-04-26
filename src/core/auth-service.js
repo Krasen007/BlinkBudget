@@ -9,7 +9,6 @@ import {
   sendPasswordResetEmail,
 } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { auditService, auditEvents } from './audit-service.js';
 
 // Helper function to check if Firebase is available
 const checkFirebaseAvailability = () => {
@@ -54,25 +53,6 @@ function checkRateLimit(email, maxAttempts = 5, windowMs = 15 * 60 * 1000) {
 function clearRateLimit(email) {
   const key = email.toLowerCase().trim();
   rateLimitStore.delete(key);
-}
-
-// Privacy-preserving email normalizer for audit logs
-function normalizeForAudit(email) {
-  if (!email || typeof email !== 'string') {
-    return 'unknown';
-  }
-
-  const parts = email.split('@');
-  if (parts.length !== 2) {
-    return 'invalid';
-  }
-
-  const [local, domain] = parts;
-  if (local.length <= 2) {
-    return `${local[0]}***@${domain}`;
-  }
-
-  return `${local[0]}${local[1]}***@${domain}`;
 }
 
 export const AuthService = {
@@ -154,15 +134,6 @@ export const AuthService = {
         };
       }
 
-      // Log login attempt
-      auditService.log(
-        auditEvents.LOGIN_ATTEMPT,
-        {
-          email: normalizeForAudit(email),
-        },
-        null,
-        'high'
-      );
 
       const userCredential = await signInWithEmailAndPassword(
         auth,
@@ -173,16 +144,6 @@ export const AuthService = {
       this.user = Object.freeze({ ...userCredential.user });
       localStorage.setItem('auth_hint', 'true');
 
-      // Log successful login
-      auditService.log(
-        auditEvents.LOGIN_SUCCESS,
-        {
-          email: normalizeForAudit(email),
-          method: 'email_password',
-        },
-        this.user.uid,
-        'low'
-      );
 
       // Clear rate limit on successful login
       clearRateLimit(email);
@@ -192,17 +153,6 @@ export const AuthService = {
 
       return { user: this.user, error: null };
     } catch (error) {
-      // Log failed login with full error details for debugging
-      auditService.log(
-        auditEvents.LOGIN_FAILURE,
-        {
-          email: normalizeForAudit(email),
-          error: error.message,
-          code: error.code,
-        },
-        null,
-        'medium'
-      );
 
       // Return sanitized error message to user
       let message =
@@ -242,15 +192,6 @@ export const AuthService = {
     }
 
     try {
-      // Log signup attempt
-      auditService.log(
-        auditEvents.SIGNUP_ATTEMPT,
-        {
-          email: normalizeForAudit(email),
-        },
-        null,
-        'high'
-      );
 
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -261,33 +202,12 @@ export const AuthService = {
       this.user = Object.freeze({ ...userCredential.user });
       localStorage.setItem('auth_hint', 'true');
 
-      // Log successful signup
-      auditService.log(
-        auditEvents.SIGNUP_SUCCESS,
-        {
-          email,
-          method: 'email_password',
-        },
-        this.user.uid,
-        'low'
-      );
 
       // Update profile in background
       this._updateUserProfile(this.user).catch(console.warn);
 
       return { user: this.user, error: null };
     } catch (error) {
-      // Log failed signup with full error details for debugging
-      auditService.log(
-        auditEvents.SIGNUP_FAILURE,
-        {
-          email,
-          error: error.message,
-          code: error.code,
-        },
-        null,
-        'medium'
-      );
 
       // Persist error to localStorage for debugging after page refresh
       localStorage.setItem('last_auth_error', JSON.stringify({
@@ -364,17 +284,6 @@ export const AuthService = {
         error.message
       );
 
-      // Log audit event for Google login failure
-      auditService.log(
-        auditEvents.LOGIN_FAILURE,
-        {
-          method: 'google',
-          error: error.message,
-          code: error.code,
-        },
-        null,
-        'medium'
-      );
 
       // Persist error to localStorage for debugging after page refresh
       localStorage.setItem('last_auth_error', JSON.stringify({
@@ -408,34 +317,13 @@ export const AuthService = {
     }
 
     try {
-      const userId = this.getUserId();
       await signOut(auth);
       this.user = null;
       localStorage.removeItem('auth_hint');
 
-      // Log successful logout
-      auditService.log(
-        auditEvents.LOGOUT,
-        {
-          method: 'manual',
-        },
-        userId,
-        'low'
-      );
     } catch (error) {
       console.error('Logout failed', error);
 
-      // Log logout failure
-      auditService.log(
-        auditEvents.LOGOUT,
-        {
-          method: 'manual',
-          error: error.message,
-          errorCode: error.code,
-        },
-        this.getUserId(),
-        'medium'
-      );
     }
   },
 
@@ -466,41 +354,12 @@ export const AuthService = {
     }
 
     try {
-      // Log password reset attempt
-      auditService.log(
-        auditEvents.PASSWORD_RESET_ATTEMPT,
-        {
-          email: normalizeForAudit(email),
-        },
-        null,
-        'medium'
-      );
 
       await sendPasswordResetEmail(auth, email);
 
-      // Log successful password reset request
-      auditService.log(
-        auditEvents.PASSWORD_RESET_SUCCESS,
-        {
-          email,
-        },
-        null,
-        'low'
-      );
 
       return { error: null };
     } catch (error) {
-      // Log password reset failure with full details
-      auditService.log(
-        auditEvents.PASSWORD_RESET_FAILURE,
-        {
-          email,
-          error: error.message,
-          code: error.code,
-        },
-        null,
-        'medium'
-      );
 
       // Persist error to localStorage for debugging after page refresh
       localStorage.setItem('last_auth_error', JSON.stringify({

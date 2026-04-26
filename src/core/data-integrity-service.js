@@ -4,8 +4,6 @@
  */
 
 import { StorageService } from './storage.js';
-import { AuthService } from './auth-service.js';
-import { auditService, auditEvents } from './audit-service.js';
 
 export class DataIntegrityService {
   constructor() {
@@ -20,22 +18,11 @@ export class DataIntegrityService {
    * @param {Object} options - Check options
    * @returns {Promise<Object>} Integrity check results
    */
-  async performIntegrityCheck(options = {}) {
+  async performIntegrityCheck(_options = {}) {
     const checkId = this.generateCheckId();
     const startTime = Date.now();
 
-    try {
-      auditService.log(
-        auditEvents.DATA_INTEGRITY_CHECK,
-        {
-          checkId,
-          options,
-        },
-        AuthService.getUserId(),
-        'medium'
-      );
-
-      const results = {
+    const results = {
         checkId,
         timestamp: new Date().toISOString(),
         checks: [],
@@ -91,36 +78,8 @@ export class DataIntegrityService {
       this.integrityReport = results;
       this.corruptionDetected = results.summary.corruptionDetected;
 
-      // Log completion
-      auditService.log(
-        auditEvents.DATA_INTEGRITY_CHECK,
-        {
-          checkId,
-          success: !results.summary.corruptionDetected,
-          duration: results.duration,
-          issuesFound: results.issues.length,
-          corruptionDetected: results.summary.corruptionDetected,
-        },
-        AuthService.getUserId(),
-        results.summary.corruptionDetected ? 'high' : 'low'
-      );
 
       return results;
-    } catch (error) {
-      auditService.log(
-        auditEvents.DATA_INTEGRITY_CHECK,
-        {
-          checkId,
-          success: false,
-          error: error.message,
-          duration: Date.now() - startTime,
-        },
-        AuthService.getUserId(),
-        'critical'
-      );
-
-      throw error;
-    }
   }
 
   /**

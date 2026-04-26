@@ -10,7 +10,6 @@ import { GoalPlanner } from './goal-planner.js';
 import { InvestmentTracker } from './investment-tracker.js';
 import { BudgetService } from './budget-service.js';
 import { AuthService } from './auth-service.js';
-import { auditService, auditEvents } from './audit-service.js';
 
 export const EmergencyExportService = {
   /**
@@ -31,22 +30,6 @@ export const EmergencyExportService = {
     } = options;
 
     try {
-      // Log emergency export initiation
-      auditService.log(
-        auditEvents.DATA_EXPORT,
-        {
-          type: 'emergency',
-          format,
-          includeTransactions,
-          includeAccounts,
-          includeSettings,
-          includeGoals,
-          includeInvestments,
-          includeBudgets,
-        },
-        AuthService.getUserId(),
-        'medium'
-      );
 
       const exportData = {
         exportInfo: {
@@ -95,19 +78,6 @@ export const EmergencyExportService = {
         _compress
       );
 
-      // Log successful export
-      auditService.log(
-        auditEvents.DATA_EXPORT,
-        {
-          type: 'emergency',
-          status: 'success',
-          format,
-          size: JSON.stringify(exportData).length,
-          downloadUrl: downloadUrl ? 'generated' : 'failed',
-        },
-        AuthService.getUserId(),
-        'low'
-      );
 
       return {
         success: true,
@@ -120,17 +90,6 @@ export const EmergencyExportService = {
     } catch (error) {
       console.error('[EmergencyExport] Export failed:', error);
 
-      // Log export failure
-      auditService.log(
-        auditEvents.DATA_EXPORT,
-        {
-          type: 'emergency',
-          status: 'failed',
-          error: error.message,
-        },
-        AuthService.getUserId(),
-        'high'
-      );
 
       return {
         success: false,
