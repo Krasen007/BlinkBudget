@@ -326,6 +326,18 @@ export const AuthService = {
       };
     }
 
+    // Additional safety check for auth instance
+    if (!auth) {
+      const error = 'Firebase Auth instance is not available. Please refresh the page.';
+      console.error('[AuthService] Auth instance is null:', error);
+      localStorage.setItem('last_auth_error', JSON.stringify({
+        code: 'auth/not-initialized',
+        message: error,
+        timestamp: new Date().toISOString()
+      }));
+      return { user: null, error };
+    }
+
     try {
       const provider = new GoogleAuthProvider();
       const userCredential = await signInWithPopup(auth, provider);
@@ -344,6 +356,13 @@ export const AuthService = {
         error.code,
         error.message
       );
+
+      // Persist error to localStorage for debugging after page refresh
+      localStorage.setItem('last_auth_error', JSON.stringify({
+        code: error.code,
+        message: error.message,
+        timestamp: new Date().toISOString()
+      }));
 
       let message = 'Google authentication failed. Please try again.';
       if (error.code === 'auth/popup-closed-by-user') {
