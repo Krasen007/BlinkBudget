@@ -37,7 +37,6 @@ export class AccountDeletionService {
       const userId = AuthService.getUserId();
       const userEmail = AuthService.getUserEmail();
 
-
       const result = {
         deletionId,
         userId,
@@ -76,7 +75,6 @@ export class AccountDeletionService {
       result.duration = Date.now() - startTime;
       result.success = result.errors.length === 0;
 
-
       this.deletionSteps.push(result);
       return result;
     } catch (error) {
@@ -87,7 +85,6 @@ export class AccountDeletionService {
         timestamp: new Date().toISOString(),
         duration: Date.now() - startTime,
       };
-
 
       this.deletionSteps.push(errorResult);
       throw error;

@@ -4,7 +4,6 @@
  * Implements GDPR data minimization principles and privacy controls
  */
 
-
 export const PrivacyService = {
   // Privacy settings key
   PRIVACY_SETTINGS_KEY: 'blinkbudget_privacy_settings',
@@ -65,7 +64,6 @@ export const PrivacyService = {
         this.PRIVACY_SETTINGS_KEY,
         JSON.stringify(updatedSettings)
       );
-
 
       return updatedSettings;
     } catch (error) {
@@ -207,7 +205,6 @@ export const PrivacyService = {
         cutoffDate.getDate() - settings.dataRetention.analytics
       );
       this.cleanupOldData('blinkbudget_analytics', cutoffDate);
-
     } catch (error) {
       console.error('Data retention cleanup failed:', error);
     }
@@ -344,7 +341,6 @@ export const PrivacyService = {
           }
         }
       }
-
 
       return exportData;
     } catch (error) {

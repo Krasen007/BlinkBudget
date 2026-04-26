@@ -47,36 +47,51 @@ export const TransactionListItem = ({
 
   const handleSplitTransaction = () => {
     // Import ConfirmDialog dynamically
-    import('./ConfirmDialog.js').then(({ ConfirmDialog }) => {
-      ConfirmDialog({
-        title: 'Split Transaction',
-        message: `Split this transaction of ${CURRENCY_SYMBOL}${transaction.amount.toFixed(2)}?`,
-        confirmText: 'Split',
-        variant: 'primary',
-        onConfirm: () => {
-          const result = TransactionService.split(transaction.id);
-          if (!result) return;
+    import('./ConfirmDialog.js')
+      .then(({ ConfirmDialog }) => {
+        ConfirmDialog({
+          title: 'Split Transaction',
+          message: `Split this transaction of ${CURRENCY_SYMBOL}${transaction.amount.toFixed(2)}?`,
+          confirmText: 'Split',
+          variant: 'primary',
+          onConfirm: () => {
+            const result = TransactionService.split(transaction.id);
+            if (!result) {
+              import('../utils/toast-notifications.js').then(({ showErrorToast }) => {
+                showErrorToast('Failed to split transaction');
+              }).catch(() => {
+                console.error('Failed to split transaction and toast system unavailable');
+              });
+              return;
+            }
 
-          const { first, second } = result;
+            const { first, second } = result;
 
-          // Mark both transactions for highlighting
-          // Store both IDs as comma-separated string
-          sessionStorage.setItem(
-            'highlightTransactionId',
-            `${first.id},${second.id}`
-          );
+            // Mark both transactions for highlighting
+            // Store both IDs as comma-separated string
+            sessionStorage.setItem(
+              'highlightTransactionId',
+              `${first.id},${second.id}`
+            );
 
-          // Trigger UI update
-          window.dispatchEvent(
-            new CustomEvent('storage-updated', {
-              detail: { key: 'transactions' },
-            })
-          );
-        },
+            // Trigger UI update
+            window.dispatchEvent(
+              new CustomEvent('storage-updated', {
+                detail: { key: 'transactions' },
+              })
+            );
+          },
+        });
+      })
+      .catch(error => {
+        console.error('Failed to load ConfirmDialog:', error);
+        import('../utils/toast-notifications.js').then(({ showErrorToast }) => {
+          showErrorToast('Could not open confirmation dialog. Please try again.');
+        }).catch(() => {
+          // Fallback if toast system fails to load
+          console.error('Toast system also failed to load');
+        });
       });
-    }).catch(error => {
-      console.error('Failed to load ConfirmDialog:', error);
-    });
   };
 
   const startPress = () => {

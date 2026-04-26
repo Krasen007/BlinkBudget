@@ -156,7 +156,6 @@ export const DataCleanupService = {
       results.errors += orphanedResults.errors;
       results.details.push(...orphanedResults.details);
 
-
       return results;
     } catch (error) {
       console.error('Data cleanup failed:', error);

@@ -89,7 +89,6 @@ export const CustomCategoryService = {
 
     this._persist(mergedCategories);
 
-
     return true;
   },
 
@@ -163,7 +162,6 @@ export const CustomCategoryService = {
     const mergedCategories = [...otherUsersCategories, ...reordered];
 
     this._persist(mergedCategories);
-
 
     return true;
   },
@@ -317,7 +315,6 @@ export const CustomCategoryService = {
     categories.push(newCategory);
     this._persist(categories);
 
-
     return newCategory;
   },
 
@@ -367,7 +364,6 @@ export const CustomCategoryService = {
 
     this._persist(categories);
 
-
     return categories[index];
   },
 
@@ -386,7 +382,6 @@ export const CustomCategoryService = {
 
     const filteredCategories = categories.filter(cat => cat.id !== id);
     this._persist(filteredCategories);
-
 
     return true;
   },

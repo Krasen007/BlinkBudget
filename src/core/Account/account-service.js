@@ -86,7 +86,6 @@ export const AccountService = {
 
     this._persist(accounts);
 
-
     return account;
   },
 
@@ -110,7 +109,6 @@ export const AccountService = {
     }
 
     this._persist(accounts);
-
 
     return true;
   },
@@ -188,7 +186,6 @@ export const AccountService = {
   clear() {
     console.log('[AccountService] Clearing all accounts');
     localStorage.removeItem(ACCOUNTS_KEY);
-
   },
 
   /**
@@ -236,7 +233,6 @@ export const AccountService = {
     }
 
     this._persist(cleanedAccounts);
-
 
     return cleanedAccounts;
   },

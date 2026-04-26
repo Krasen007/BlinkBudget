@@ -134,7 +134,6 @@ export const AuthService = {
         };
       }
 
-
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
@@ -144,7 +143,6 @@ export const AuthService = {
       this.user = Object.freeze({ ...userCredential.user });
       localStorage.setItem('auth_hint', 'true');
 
-
       // Clear rate limit on successful login
       clearRateLimit(email);
 
@@ -153,7 +151,6 @@ export const AuthService = {
 
       return { user: this.user, error: null };
     } catch (error) {
-
       // Return sanitized error message to user
       let message =
         'Authentication failed. Please check your credentials and try again.';
@@ -192,7 +189,6 @@ export const AuthService = {
     }
 
     try {
-
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -202,19 +198,20 @@ export const AuthService = {
       this.user = Object.freeze({ ...userCredential.user });
       localStorage.setItem('auth_hint', 'true');
 
-
       // Update profile in background
       this._updateUserProfile(this.user).catch(console.warn);
 
       return { user: this.user, error: null };
     } catch (error) {
-
       // Persist error to localStorage for debugging after page refresh
-      localStorage.setItem('last_auth_error', JSON.stringify({
-        code: error.code,
-        message: error.message,
-        timestamp: new Date().toISOString()
-      }));
+      localStorage.setItem(
+        'last_auth_error',
+        JSON.stringify({
+          code: error.code,
+          message: error.message,
+          timestamp: new Date().toISOString(),
+        })
+      );
 
       // Return sanitized error message to user
       let message = 'Account creation failed. Please try again.';
@@ -255,13 +252,17 @@ export const AuthService = {
 
     // Additional safety check for auth instance
     if (!auth) {
-      const error = 'Firebase Auth instance is not available. Please refresh the page.';
+      const error =
+        'Firebase Auth instance is not available. Please refresh the page.';
       console.error('[AuthService] Auth instance is null:', error);
-      localStorage.setItem('last_auth_error', JSON.stringify({
-        code: 'auth/not-initialized',
-        message: error,
-        timestamp: new Date().toISOString()
-      }));
+      localStorage.setItem(
+        'last_auth_error',
+        JSON.stringify({
+          code: 'auth/not-initialized',
+          message: error,
+          timestamp: new Date().toISOString(),
+        })
+      );
       return { user: null, error };
     }
 
@@ -284,13 +285,15 @@ export const AuthService = {
         error.message
       );
 
-
       // Persist error to localStorage for debugging after page refresh
-      localStorage.setItem('last_auth_error', JSON.stringify({
-        code: error.code,
-        message: error.message,
-        timestamp: new Date().toISOString()
-      }));
+      localStorage.setItem(
+        'last_auth_error',
+        JSON.stringify({
+          code: error.code,
+          message: error.message,
+          timestamp: new Date().toISOString(),
+        })
+      );
 
       let message = 'Google authentication failed. Please try again.';
       if (error.code === 'auth/popup-closed-by-user') {
@@ -320,10 +323,8 @@ export const AuthService = {
       await signOut(auth);
       this.user = null;
       localStorage.removeItem('auth_hint');
-
     } catch (error) {
       console.error('Logout failed', error);
-
     }
   },
 
@@ -354,19 +355,19 @@ export const AuthService = {
     }
 
     try {
-
       await sendPasswordResetEmail(auth, email);
-
 
       return { error: null };
     } catch (error) {
-
       // Persist error to localStorage for debugging after page refresh
-      localStorage.setItem('last_auth_error', JSON.stringify({
-        code: error.code,
-        message: error.message,
-        timestamp: new Date().toISOString()
-      }));
+      localStorage.setItem(
+        'last_auth_error',
+        JSON.stringify({
+          code: error.code,
+          message: error.message,
+          timestamp: new Date().toISOString(),
+        })
+      );
 
       // Return sanitized error message to user
       let message = 'Password reset failed. Please try again.';

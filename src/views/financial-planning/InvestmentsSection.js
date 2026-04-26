@@ -1163,7 +1163,10 @@ export const InvestmentsSection = async (chartRenderer, activeCharts) => {
   const portfolioToRender = transformPortfolioData(portfolioData);
 
   // Create portfolio composition chart or sample chart
-  if (portfolioToRender.totalValue === 0 || Object.keys(portfolioToRender.assetAllocation).length === 0) {
+  if (
+    portfolioToRender.totalValue === 0 ||
+    Object.keys(portfolioToRender.assetAllocation).length === 0
+  ) {
     // Show sample portfolio chart for demonstration
     const samplePortfolio = {
       totalValue: 100000,

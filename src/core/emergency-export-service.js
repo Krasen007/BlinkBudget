@@ -30,7 +30,6 @@ export const EmergencyExportService = {
     } = options;
 
     try {
-
       const exportData = {
         exportInfo: {
           timestamp: new Date().toISOString(),
@@ -78,7 +77,6 @@ export const EmergencyExportService = {
         _compress
       );
 
-
       return {
         success: true,
         downloadUrl,
@@ -89,7 +87,6 @@ export const EmergencyExportService = {
       };
     } catch (error) {
       console.error('[EmergencyExport] Export failed:', error);
-
 
       return {
         success: false,

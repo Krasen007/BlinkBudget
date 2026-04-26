@@ -37,7 +37,6 @@ export class EmergencyRecoveryService {
     const startTime = Date.now();
 
     try {
-
       const results = {
         recoveryId,
         timestamp: new Date().toISOString(),
@@ -73,7 +72,6 @@ export class EmergencyRecoveryService {
       results.duration = Date.now() - startTime;
       results.success = results.errors.length === 0;
 
-
       this.recoveryLog.push(results);
       return results;
     } catch (error) {
@@ -84,7 +82,6 @@ export class EmergencyRecoveryService {
         timestamp: new Date().toISOString(),
         duration: Date.now() - startTime,
       };
-
 
       this.recoveryLog.push(errorResult);
       throw error;

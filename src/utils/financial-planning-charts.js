@@ -316,10 +316,7 @@ export async function createPortfolioCompositionChart(
     },
   });
 
-  // Add click handler for asset class selection
-  canvas.addEventListener('chartSegmentClick', _event => {
-    // Could trigger detailed view or filtering
-  });
+  // TODO: handle chartSegmentClick - trigger detailed view or filtering
 
   return { section, chart };
 }

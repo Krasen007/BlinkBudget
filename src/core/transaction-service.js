@@ -50,7 +50,6 @@ export const TransactionService = {
   getAllForExport() {
     const transactions = this.getAll();
 
-
     return transactions.map(transaction => {
       // Create a copy and remove internal fields
       const exportTx = { ...transaction };
@@ -96,7 +95,6 @@ export const TransactionService = {
 
     transactions.unshift(sanitizedTransaction);
     this._persist(transactions);
-
 
     // Invalidate analytics cache when new transaction is added
     const analyticsEngine = getAnalyticsEngine();
@@ -165,7 +163,6 @@ export const TransactionService = {
     const analyticsEngine = getAnalyticsEngine();
     analyticsEngine.invalidateCacheOnDataUpdate();
 
-
     return transactions[index];
   },
 
@@ -189,7 +186,6 @@ export const TransactionService = {
     // Invalidate analytics cache when transaction is deleted
     const analyticsEngine = getAnalyticsEngine();
     analyticsEngine.invalidateCacheOnDataUpdate();
-
 
     return true;
   },
@@ -245,7 +241,6 @@ export const TransactionService = {
     // Invalidate analytics cache when transactions are bulk deleted
     const analyticsEngine = getAnalyticsEngine();
     analyticsEngine.invalidateCacheOnDataUpdate();
-
 
     this._persist([]);
 

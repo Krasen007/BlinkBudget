@@ -801,7 +801,6 @@ function renderTrendAnalysisSection(section, planningData) {
   }
 }
 
-
 /**
  * Render budget recommendations section - Feature 3.3.4 Predictive Budget
  */
@@ -834,7 +833,6 @@ function renderBudgetRecommendationsSection(section, planningData) {
     );
   }
 }
-
 
 /**
  * Insights Section Component
@@ -911,7 +909,6 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
 
   // Trend Analysis - spending direction, consistency scores, MoM
   renderTrendAnalysisSection(section, planningData);
-
 
   // Budget Recommendations - Feature 3.3.4 Predictive Budget
   renderBudgetRecommendationsSection(section, planningData);

@@ -811,7 +811,10 @@ export class ChartRenderer {
         chart.setActiveElements([]);
         chart.update('none');
       } catch (error) {
-        console.warn('[ChartRenderer] Failed to clear active elements on blur:', error);
+        console.warn(
+          '[ChartRenderer] Failed to clear active elements on blur:',
+          error
+        );
       }
     };
 
@@ -834,7 +837,12 @@ export class ChartRenderer {
    */
   focusSegment(chart, index) {
     // Safety check: ensure chart and data exist
-    if (!chart || !chart.data || !chart.data.datasets || !chart.data.datasets[0]) {
+    if (
+      !chart ||
+      !chart.data ||
+      !chart.data.datasets ||
+      !chart.data.datasets[0]
+    ) {
       return;
     }
 

@@ -23,63 +23,62 @@ export class DataIntegrityService {
     const startTime = Date.now();
 
     const results = {
-        checkId,
-        timestamp: new Date().toISOString(),
-        checks: [],
-        summary: {
-          totalChecks: 0,
-          passedChecks: 0,
-          failedChecks: 0,
-          warnings: 0,
-          corruptionDetected: false,
-        },
-        dataMetrics: {
-          totalTransactions: 0,
-          totalAccounts: 0,
-          totalSettings: 0,
-          totalGoals: 0,
-          totalInvestments: 0,
-          totalBudgets: 0,
-        },
-        issues: [],
-        recommendations: [],
-      };
+      checkId,
+      timestamp: new Date().toISOString(),
+      checks: [],
+      summary: {
+        totalChecks: 0,
+        passedChecks: 0,
+        failedChecks: 0,
+        warnings: 0,
+        corruptionDetected: false,
+      },
+      dataMetrics: {
+        totalTransactions: 0,
+        totalAccounts: 0,
+        totalSettings: 0,
+        totalGoals: 0,
+        totalInvestments: 0,
+        totalBudgets: 0,
+      },
+      issues: [],
+      recommendations: [],
+    };
 
-      // Perform all integrity checks
-      await this.checkTransactionIntegrity(results);
-      await this.checkAccountIntegrity(results);
-      await this.checkSettingsIntegrity(results);
-      await this.checkDataConsistency(results);
-      await this.checkDataStructure(results);
-      await this.checkDuplicates(results);
-      await this.checkDataOrphans(results);
-      await this.checkDataCorruption(results);
+    // Perform all integrity checks
+    await this.checkTransactionIntegrity(results);
+    await this.checkAccountIntegrity(results);
+    await this.checkSettingsIntegrity(results);
+    await this.checkDataConsistency(results);
+    await this.checkDataStructure(results);
+    await this.checkDuplicates(results);
+    await this.checkDataOrphans(results);
+    await this.checkDataCorruption(results);
 
-      // Calculate summary
-      results.summary.totalChecks = results.checks.length;
-      results.summary.passedChecks = results.checks.filter(
-        c => c.status === 'passed'
-      ).length;
-      results.summary.failedChecks = results.checks.filter(
-        c => c.status === 'failed'
-      ).length;
-      results.summary.warnings = results.checks.filter(
-        c => c.status === 'warning'
-      ).length;
-      results.summary.corruptionDetected = results.issues.some(
-        i => i.severity === 'critical'
-      );
+    // Calculate summary
+    results.summary.totalChecks = results.checks.length;
+    results.summary.passedChecks = results.checks.filter(
+      c => c.status === 'passed'
+    ).length;
+    results.summary.failedChecks = results.checks.filter(
+      c => c.status === 'failed'
+    ).length;
+    results.summary.warnings = results.checks.filter(
+      c => c.status === 'warning'
+    ).length;
+    results.summary.corruptionDetected = results.issues.some(
+      i => i.severity === 'critical'
+    );
 
-      // Generate recommendations
-      this.generateRecommendations(results);
+    // Generate recommendations
+    this.generateRecommendations(results);
 
-      results.duration = Date.now() - startTime;
-      this.lastCheckTime = new Date();
-      this.integrityReport = results;
-      this.corruptionDetected = results.summary.corruptionDetected;
+    results.duration = Date.now() - startTime;
+    this.lastCheckTime = new Date();
+    this.integrityReport = results;
+    this.corruptionDetected = results.summary.corruptionDetected;
 
-
-      return results;
+    return results;
   }
 
   /**
@@ -731,14 +730,58 @@ export class DataIntegrityService {
    * Detect circular references
    */
   detectCircularReferences(transactions) {
-    // Simplified circular reference detection
     const circularRefs = [];
     const visited = new Set();
+    const onStack = new Set();
 
+    // Build adjacency map from transaction references
+    const adjacency = new Map();
+    for (const transaction of transactions) {
+      const refs = [];
+      // Check for parentId references
+      if (transaction.parentId) {
+        refs.push(transaction.parentId);
+      }
+      // Check for relatedIds references
+      if (transaction.relatedIds && Array.isArray(transaction.relatedIds)) {
+        refs.push(...transaction.relatedIds);
+      }
+      adjacency.set(transaction.id, refs);
+    }
+
+    // Depth-first search to detect cycles
+    const dfs = (nodeId, path = []) => {
+      if (onStack.has(nodeId)) {
+        // Found a cycle - record the circular reference
+        const cycleStart = path.indexOf(nodeId);
+        const cycle = path.slice(cycleStart).concat(nodeId);
+        circularRefs.push(cycle.join(' -> '));
+        return true;
+      }
+      if (visited.has(nodeId)) {
+        return false;
+      }
+
+      visited.add(nodeId);
+      onStack.add(nodeId);
+      path.push(nodeId);
+
+      const neighbors = adjacency.get(nodeId) || [];
+      for (const neighbor of neighbors) {
+        if (dfs(neighbor, [...path])) {
+          return true;
+        }
+      }
+
+      onStack.delete(nodeId);
+      path.pop();
+      return false;
+    };
+
+    // Run DFS from each unvisited node
     for (const transaction of transactions) {
       if (transaction.id && !visited.has(transaction.id)) {
-        // In a real implementation, this would check for actual circular references
-        // For now, just return empty array
+        dfs(transaction.id);
       }
     }
 
@@ -862,7 +905,7 @@ export class DataIntegrityService {
    * Generate unique check ID
    */
   generateCheckId() {
-    return `integrity_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `integrity_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
   }
 
   /**

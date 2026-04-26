@@ -176,7 +176,7 @@ export const InflationTrends = (
       currentChart = newChart;
 
       if (currentChart) {
-        activeCharts.set('inflation-trends', currentChart);
+        activeCharts.set(instanceId, currentChart);
       }
     } catch (error) {
       console.error('Error rendering inflation trends chart:', error);
@@ -335,7 +335,7 @@ export const InflationTrends = (
         .querySelectorAll('button')
         .forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      currentPeriod = parseInt(btn.value);
+      currentPeriod = parseInt(btn.value, 10);
       renderChart();
     }
   });
@@ -355,7 +355,7 @@ export const InflationTrends = (
     cleanup: () => {
       if (currentChart) {
         chartRenderer.destroyChart(currentChart);
-        activeCharts.delete('inflation-trends');
+        activeCharts.delete(instanceId);
       }
     },
   };
