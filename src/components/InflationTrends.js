@@ -53,7 +53,7 @@ export const InflationTrends = (
   chartContainer.style.height = '300px';
 
   // Create canvas element with unique ID
-  const canvasId = `inflation-trends-chart-${crypto.randomUUID()}`;
+  const canvasId = `inflation-trends-chart-${generateId()}`;
   const canvas = document.createElement('canvas');
   canvas.id = canvasId;
   canvas.style.width = '100%';

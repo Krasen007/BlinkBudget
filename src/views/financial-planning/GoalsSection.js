@@ -11,7 +11,6 @@
  * - Progress tracking display
  */
 
-import { Router } from '../../core/router.js';
 import { createEnhancedEmptyState } from '../../utils/enhanced-empty-states.js';
 import { COLORS, SPACING } from '../../utils/constants.js';
 import { escapeHtml } from '../../utils/security-utils.js';
@@ -240,9 +239,7 @@ function createGoalsList(chartRenderer, activeCharts, section) {
 
       if (!items.length) {
         const empty = createEnhancedEmptyState('no-data', {
-          onAction: () =>
-            Router.navigate('financial-planning/goals?action=add'),
-          showTips: true,
+          showTips: false,
         });
         goalsList.appendChild(empty);
         return;
@@ -659,9 +656,13 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
   try {
     const { section: chartSection, chart } = await createGoalProgressChart(
       chartRenderer,
-      goalsToRender
+      goalsToRender,
+      hasRealGoals ? {} : { title: 'Sample Goals (Demo)' }
     );
     chartSection.classList.add('goals-progress-chart'); // Add class for tests
+    if (!hasRealGoals) {
+      chartSection.style.opacity = '0.7';
+    }
     section.appendChild(chartSection);
     activeCharts.set('goal-progress', chart);
   } catch (error) {

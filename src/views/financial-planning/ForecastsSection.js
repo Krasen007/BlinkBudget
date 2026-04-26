@@ -311,8 +311,7 @@ export const ForecastsSection = (
     const summaryGrid = document.createElement('div');
     summaryGrid.className = 'forecast-summary-grid';
     summaryGrid.style.display = 'grid';
-    summaryGrid.style.gridTemplateColumns =
-      'repeat(auto-fit, minmax(250px, 1fr))';
+    summaryGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
     summaryGrid.style.gap = SPACING.MD;
     summaryGrid.style.marginBottom = SPACING.XL;
 

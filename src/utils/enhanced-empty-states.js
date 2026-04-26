@@ -103,12 +103,9 @@ const EMPTY_STATE_CONTENT = {
   [EMPTY_STATE_SCENARIOS.NO_DATA]: {
     title: 'No Data Available',
     message: "There's no data to display for this view.",
-    primaryAction: {
-      text: 'Refresh',
-      action: 'refresh',
-    },
+    primaryAction: null,
     secondaryActions: [],
-    tips: ['Try refreshing the page', 'Check your internet connection'],
+    tips: [],
   },
   [EMPTY_STATE_SCENARIOS.FILTER_NO_RESULTS]: {
     title: 'No Matching Results',

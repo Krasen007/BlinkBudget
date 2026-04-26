@@ -20,6 +20,7 @@ import {
   createPlaceholder,
 } from '../../utils/financial-planning-helpers.js';
 import { refreshChart } from '../../utils/chart-refresh-helper.js';
+import { createEnhancedEmptyState } from '../../utils/enhanced-empty-states.js';
 
 /**
  * Transform portfolio data from StorageService to the format expected by the chart
@@ -87,6 +88,7 @@ function createSelectField(label, name, options) {
   select.name = name;
   select.id = `inv-${name}`;
   select.setAttribute('aria-label', label);
+  select.className = 'mobile-form-select';
 
   const defaultOption = document.createElement('option');
   defaultOption.value = '';
@@ -338,6 +340,7 @@ function createInvestmentFormControls(chartRenderer, activeCharts) {
   typeSelect.name = 'investmentType';
   typeSelect.required = true;
   typeSelect.setAttribute('aria-label', 'Investment Type');
+  typeSelect.className = 'mobile-form-select';
 
   // Add investment type options
   const investmentTypes = [
@@ -798,9 +801,9 @@ function createInvestmentsList(chartRenderer, activeCharts) {
       items = StorageService.getInvestments() || [];
 
       if (!items.length) {
-        const empty = document.createElement('div');
-        empty.textContent = 'No investments yet.';
-        empty.style.color = COLORS.TEXT_MUTED;
+        const empty = createEnhancedEmptyState('no-data', {
+          showTips: false,
+        });
         investmentsList.appendChild(empty);
         return;
       }
@@ -1159,15 +1162,41 @@ export const InvestmentsSection = async (chartRenderer, activeCharts) => {
 
   const portfolioToRender = transformPortfolioData(portfolioData);
 
-  // Create portfolio composition chart
-  try {
-    const { section: chartSection, chart } =
-      await createPortfolioCompositionChart(chartRenderer, portfolioToRender);
-    chartSection.classList.add('portfolio-chart'); // Add class for tests
-    section.appendChild(chartSection);
-    activeCharts.set('portfolio-composition', chart);
-  } catch (error) {
-    console.error('Error creating portfolio composition chart:', error);
+  // Create portfolio composition chart or sample chart
+  if (portfolioToRender.totalValue === 0 || Object.keys(portfolioToRender.assetAllocation).length === 0) {
+    // Show sample portfolio chart for demonstration
+    const samplePortfolio = {
+      totalValue: 100000,
+      assetAllocation: {
+        stocks: 40000,
+        bonds: 25000,
+        etf: 20000,
+        realestate: 10000,
+        cash: 5000,
+      },
+    };
+    try {
+      const { section: chartSection, chart } =
+        await createPortfolioCompositionChart(chartRenderer, samplePortfolio, {
+          title: 'Sample Portfolio (Demo)',
+        });
+      chartSection.classList.add('portfolio-chart');
+      chartSection.style.opacity = '0.7';
+      section.appendChild(chartSection);
+      activeCharts.set('portfolio-composition', chart);
+    } catch (error) {
+      console.error('Error creating sample portfolio chart:', error);
+    }
+  } else {
+    try {
+      const { section: chartSection, chart } =
+        await createPortfolioCompositionChart(chartRenderer, portfolioToRender);
+      chartSection.classList.add('portfolio-chart'); // Add class for tests
+      section.appendChild(chartSection);
+      activeCharts.set('portfolio-composition', chart);
+    } catch (error) {
+      console.error('Error creating portfolio composition chart:', error);
+    }
   }
 
   // Add investment controls

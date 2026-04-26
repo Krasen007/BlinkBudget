@@ -807,8 +807,12 @@ export class ChartRenderer {
     const blurHandler = () => {
       canvas.style.outline = 'none';
       canvas.style.outlineOffset = '0';
-      chart.setActiveElements([]);
-      chart.update('none');
+      try {
+        chart.setActiveElements([]);
+        chart.update('none');
+      } catch (error) {
+        console.warn('[ChartRenderer] Failed to clear active elements on blur:', error);
+      }
     };
 
     canvas.addEventListener('focus', focusHandler);
@@ -829,6 +833,16 @@ export class ChartRenderer {
    * @param {number} index - Index of segment to focus
    */
   focusSegment(chart, index) {
+    // Safety check: ensure chart and data exist
+    if (!chart || !chart.data || !chart.data.datasets || !chart.data.datasets[0]) {
+      return;
+    }
+
+    // Safety check: ensure index is within bounds
+    if (index < 0 || index >= chart.data.datasets[0].data.length) {
+      return;
+    }
+
     const activeElements = [
       {
         datasetIndex: 0,
@@ -836,8 +850,12 @@ export class ChartRenderer {
       },
     ];
 
-    chart.setActiveElements(activeElements);
-    chart.update('none');
+    try {
+      chart.setActiveElements(activeElements);
+      chart.update('none');
+    } catch (error) {
+      console.warn('[ChartRenderer] Failed to focus segment:', error);
+    }
 
     // Announce to screen readers with enhanced information
     const label = chart.data.labels[index];
