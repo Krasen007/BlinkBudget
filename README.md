@@ -67,7 +67,7 @@ BlinkBudget includes a sophisticated financial planning engine that helps you lo
 - **Investment Portfolio Tracking** - Monitor your total net worth with manual entry support for various investment types.
 - **Long-term Goal Planning** - Define specific financial objectives and track your progress over years or decades.
 - **Projected Account Balances** - Forecast future balances based on your historical spending and incoming funds.
-- **Comprehensive Analytics** - Deep dive into your finances with "Top Movers" analysis, historical timeline comparisons, and baseline variability insights.
+- **Comprehensive Analytics** - Deep dive into your finances with "Top Movers" analysis and historical timeline comparisons.
 - **Dynamic Charting** - Toggle between daily and monthly views for precise trend analysis.
 
 ### User Experience & UI

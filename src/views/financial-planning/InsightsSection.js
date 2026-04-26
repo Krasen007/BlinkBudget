@@ -24,7 +24,6 @@ import { TrendAnalysisSection } from '../../components/TrendAnalysisSection.js';
 import { BenchmarkingSection } from '../../components/BenchmarkingSection.js';
 import { BudgetRecommendationsSection } from '../../components/BudgetRecommendationsSection.js';
 import { OptimizationInsights } from '../../components/OptimizationInsights.js';
-import { BaselineAnalysis } from '../../components/BaselineAnalysis.js';
 import { getCurrentMonthPeriod } from '../../utils/reports-utils.js';
 
 /**
@@ -871,62 +870,6 @@ function renderBudgetRecommendationsSection(section, planningData) {
   }
 }
 
-/**
- * Render baseline analysis section - Floor vs Average Spending Patterns
- */
-function renderBaselineAnalysisSection(section, planningData) {
-  try {
-    const currentTimePeriod = getCurrentMonthPeriod();
-
-    // Determine period based on current time period
-    let baselinePeriod = 'monthly';
-    const days =
-      typeof currentTimePeriod?.days === 'number'
-        ? currentTimePeriod.days
-        : currentTimePeriod?.startDate && currentTimePeriod?.endDate
-          ? (() => {
-              const startMs =
-                currentTimePeriod.startDate instanceof Date
-                  ? currentTimePeriod.startDate.getTime()
-                  : Date.parse(currentTimePeriod.startDate);
-              const endMs =
-                currentTimePeriod.endDate instanceof Date
-                  ? currentTimePeriod.endDate.getTime()
-                  : Date.parse(currentTimePeriod.endDate);
-
-              const diffDays = (endMs - startMs) / (1000 * 60 * 60 * 24);
-              return Number.isFinite(diffDays) ? diffDays : 30;
-            })()
-          : 30; // fallback to monthly
-
-    if (days <= 7) {
-      baselinePeriod = 'weekly';
-    } else if (days >= 365) {
-      baselinePeriod = 'yearly';
-    }
-
-    // Create baseline analysis component with planning data
-    const baselineAnalysis = BaselineAnalysis({
-      period: baselinePeriod,
-      accountId: null, // Show overall baseline for all accounts
-      showInsights: true,
-      compact: false,
-      transactions: planningData.transactions,
-    });
-
-    baselineAnalysis.style.setProperty(
-      'margin-top',
-      'var(--spacing-md)',
-      'important'
-    );
-    section.appendChild(baselineAnalysis);
-  } catch (baselineError) {
-    console.warn(
-      '[InsightsSection] Failed to render baseline analysis section:',
-      baselineError
-    );
-  }
-}
 
 /**
  * Insights Section Component
@@ -1009,9 +952,6 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
 
   // Budget Recommendations - Feature 3.3.4 Predictive Budget
   renderBudgetRecommendationsSection(section, planningData);
-
-  // Baseline Analysis - Floor vs Average Spending Patterns
-  renderBaselineAnalysisSection(section, planningData);
 
   // Set up synchronized navigation - all sections update together
   sharedMonthState.onNavigate = () => {
