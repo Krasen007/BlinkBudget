@@ -393,10 +393,8 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   const chartDiv = document.createElement('div');
   chartDiv.style.position = 'relative';
   chartDiv.style.width = '100%';
-  chartDiv.style.height = '400px';
   chartDiv.style.marginBottom = '0';
   chartDiv.style.padding = SPACING.SM;
-  chartDiv.style.paddingBottom = `calc(${SPACING.SM} + 20px)`;
   chartDiv.style.boxSizing = 'border-box';
   chartDiv.style.overflow = 'visible';
 

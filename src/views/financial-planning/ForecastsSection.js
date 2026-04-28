@@ -313,7 +313,6 @@ export const ForecastsSection = (
     summaryGrid.style.display = 'grid';
     summaryGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
     summaryGrid.style.gap = SPACING.MD;
-    summaryGrid.style.marginBottom = SPACING.XL;
 
     // Calculate totals for next 6 months
     const totalIncomeForecasted = incomeForecasts.reduce(

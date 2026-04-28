@@ -147,7 +147,6 @@ export const OverviewSection = (planningData) => {
   statsGrid.style.display = 'grid';
   statsGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
   statsGrid.style.gap = SPACING.MD;
-  statsGrid.style.marginBottom = SPACING.XL;
 
   // Calculate real stats from transaction data - SAME LOGIC AS DASHBOARD
   if (!planningData) {
@@ -307,7 +306,6 @@ export const OverviewSection = (planningData) => {
 function createEmergencyFundCard(assessment) {
   const card = document.createElement('div');
   card.className = 'card';
-  card.style.marginTop = SPACING.XL;
   card.style.padding = SPACING.LG;
   card.style.background = COLORS.SURFACE;
   card.style.border = `1px solid ${COLORS.BORDER}`;

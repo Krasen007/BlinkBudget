@@ -821,6 +821,10 @@ function createInvestmentsList(chartRenderer, activeCharts) {
         li.style.display = 'flex';
         li.style.justifyContent = 'space-between';
         li.style.alignItems = 'center';
+        li.style.background = COLORS.SURFACE;
+        li.style.border = `1px solid ${COLORS.BORDER}`;
+        li.style.borderRadius = 'var(--radius-lg)';
+        li.style.padding = SPACING.MD;
 
         const left = document.createElement('div');
         left.style.display = 'flex';
