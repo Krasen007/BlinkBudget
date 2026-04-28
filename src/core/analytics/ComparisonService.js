@@ -4,6 +4,15 @@
  * Merges: ComparisonService (recreated) + BudgetRecommendationService benchmarking
  */
 
+// Trend thresholds for different comparison contexts
+// Month-to-month comparisons use more sensitive threshold (5%) for detecting
+// smaller changes in spending patterns between consecutive months
+const TREND_THRESHOLD_MONTHLY = 5;
+
+// Broader period comparisons use less sensitive threshold (10%) to avoid
+// flagging normal seasonal variations as significant trends
+const TREND_THRESHOLD_PERIOD = 10;
+
 import { MetricsService } from './MetricsService.js';
 
 export class ComparisonService {
@@ -92,12 +101,22 @@ export class ComparisonService {
       const comparisonAmount = comparisonCat ? comparisonCat.amount : 0;
 
       const change = currentAmount - comparisonAmount;
-      const changePercent =
-        comparisonAmount > 0 ? (change / comparisonAmount) * 100 : 0;
-
+      let changePercent;
       let trend = 'stable';
-      if (changePercent > 10) trend = 'increasing';
-      else if (changePercent < -10) trend = 'decreasing';
+
+      if (comparisonAmount === 0 && currentAmount > 0) {
+        changePercent = null;
+        trend = 'new';
+      } else if (currentAmount === 0 && comparisonAmount > 0) {
+        changePercent = null;
+        trend = 'removed';
+      } else if (comparisonAmount > 0) {
+        changePercent = (change / comparisonAmount) * 100;
+        if (changePercent > TREND_THRESHOLD_PERIOD) trend = 'increasing';
+        else if (changePercent < -TREND_THRESHOLD_PERIOD) trend = 'decreasing';
+      } else {
+        changePercent = 0;
+      }
 
       categoryComparison.push({
         category,
@@ -201,7 +220,9 @@ export class ComparisonService {
     });
 
     const benchmarking = [];
-    const categories = currentBreakdown.categories.map(cat => cat.name);
+    const currentCategories = currentBreakdown.categories.map(cat => cat.name);
+    const lastMonthCategories = lastMonthBreakdown ? lastMonthBreakdown.categories.map(cat => cat.name) : [];
+    const categories = [...new Set([...currentCategories, ...lastMonthCategories])];
 
     categories.forEach(category => {
       const current = currentSpending[category] || 0;
@@ -214,7 +235,7 @@ export class ComparisonService {
         if (lastMonthAmount > 0) {
           change = ((current - lastMonthAmount) / lastMonthAmount) * 100;
           trend =
-            change > 5 ? 'increasing' : change < -5 ? 'decreasing' : 'stable';
+            change > TREND_THRESHOLD_MONTHLY ? 'increasing' : change < -TREND_THRESHOLD_MONTHLY ? 'decreasing' : 'stable';
         } else if (current > 0) {
           change = 0;
           trend = 'new';
@@ -277,15 +298,21 @@ export class ComparisonService {
       totalPeriods: historicalPeriods.length,
       overallTrends: {
         averageIncome:
-          historicalInsights.reduce((s, h) => s + h.summary.totalIncome, 0) /
-          historicalInsights.length,
+          historicalInsights.length > 0
+            ? historicalInsights.reduce((s, h) => s + h.summary.totalIncome, 0) /
+              historicalInsights.length
+            : 0,
         averageExpenses:
-          historicalInsights.reduce((s, h) => s + h.summary.totalExpenses, 0) /
-          historicalInsights.length,
+          historicalInsights.length > 0
+            ? historicalInsights.reduce((s, h) => s + h.summary.totalExpenses, 0) /
+              historicalInsights.length
+            : 0,
       },
       preservedAt: new Date().toISOString(),
     };
   }
 }
 
-export default ComparisonService;
+const comparisonService = new ComparisonService();
+
+export default comparisonService;

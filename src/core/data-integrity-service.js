@@ -751,13 +751,6 @@ export class DataIntegrityService {
 
     // Depth-first search to detect cycles
     const dfs = (nodeId, path = []) => {
-      if (onStack.has(nodeId)) {
-        // Found a cycle - record the circular reference
-        const cycleStart = path.indexOf(nodeId);
-        const cycle = path.slice(cycleStart).concat(nodeId);
-        circularRefs.push(cycle.join(' -> '));
-        return true;
-      }
       if (visited.has(nodeId)) {
         return false;
       }
@@ -766,16 +759,27 @@ export class DataIntegrityService {
       onStack.add(nodeId);
       path.push(nodeId);
 
-      const neighbors = adjacency.get(nodeId) || [];
-      for (const neighbor of neighbors) {
-        if (dfs(neighbor, [...path])) {
-          return true;
+      try {
+        if (onStack.has(nodeId)) {
+          // Found a cycle - record the circular reference
+          const cycleStart = path.indexOf(nodeId);
+          const cycle = path.slice(cycleStart).concat(nodeId);
+          circularRefs.push(cycle.join(' -> '));
         }
-      }
 
-      onStack.delete(nodeId);
-      path.pop();
-      return false;
+        const neighbors = adjacency.get(nodeId) || [];
+        let foundCycle = false;
+        for (const neighbor of neighbors) {
+          if (dfs(neighbor, [...path])) {
+            foundCycle = true;
+          }
+        }
+
+        return foundCycle;
+      } finally {
+        onStack.delete(nodeId);
+        path.pop();
+      }
     };
 
     // Run DFS from each unvisited node

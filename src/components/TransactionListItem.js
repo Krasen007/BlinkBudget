@@ -51,14 +51,24 @@ export const TransactionListItem = ({
       .then(({ ConfirmDialog }) => {
         ConfirmDialog({
           title: 'Split Transaction',
-          message: `Split this transaction of ${CURRENCY_SYMBOL}${transaction.amount.toFixed(2)}?`,
+          message: `Split this transaction of ${CURRENCY_SYMBOL}${(Number(transaction.amount) || 0).toFixed(2)}?`,
           confirmText: 'Split',
           variant: 'primary',
           onConfirm: () => {
-            const result = TransactionService.split(transaction.id);
-            if (!result) {
+            let result;
+            try {
+              result = TransactionService.split(transaction.id);
+              if (!result) {
+                import('../utils/toast-notifications.js').then(({ showErrorToast }) => {
+                  showErrorToast('Failed to split transaction');
+                }).catch(() => {
+                  console.error('Failed to split transaction and toast system unavailable');
+                });
+                return;
+              }
+            } catch (error) {
               import('../utils/toast-notifications.js').then(({ showErrorToast }) => {
-                showErrorToast('Failed to split transaction');
+                showErrorToast(`Failed to split transaction: ${error.message}`);
               }).catch(() => {
                 console.error('Failed to split transaction and toast system unavailable');
               });
@@ -89,7 +99,10 @@ export const TransactionListItem = ({
           showErrorToast('Could not open confirmation dialog. Please try again.');
         }).catch(() => {
           // Fallback if toast system fails to load
+          // Alert is acceptable here as a last-resort fallback when both
+          // ConfirmDialog and toast notification systems fail to load
           console.error('Toast system also failed to load');
+          alert('Could not open confirmation dialog. Please try again.');
         });
       });
   };

@@ -313,22 +313,22 @@ export const InflationTrends = (
   controls.appendChild(viewGroup);
   controls.appendChild(timeGroup);
 
-  // Handle changes
-  chartTypeSelector.addEventListener('change', e => {
+  // Handle changes - store listener functions for cleanup
+  const handleChartTypeChange = e => {
     if (e.target.tagName === 'INPUT') {
       currentChartType = e.target.value;
       renderChart();
     }
-  });
+  };
 
-  calcMethodSelector.addEventListener('change', e => {
+  const handleCalcMethodChange = e => {
     if (e.target.tagName === 'INPUT') {
       currentCalcMethod = e.target.value;
       renderChart();
     }
-  });
+  };
 
-  periodSelector.addEventListener('click', e => {
+  const handlePeriodClick = e => {
     const btn = e.target.closest('button');
     if (btn) {
       periodSelector
@@ -338,7 +338,11 @@ export const InflationTrends = (
       currentPeriod = parseInt(btn.value, 10);
       renderChart();
     }
-  });
+  };
+
+  chartTypeSelector.addEventListener('change', handleChartTypeChange);
+  calcMethodSelector.addEventListener('change', handleCalcMethodChange);
+  periodSelector.addEventListener('click', handlePeriodClick);
 
   // Assemble component
   container.appendChild(header);
@@ -357,6 +361,9 @@ export const InflationTrends = (
         chartRenderer.destroyChart(currentChart);
         activeCharts.delete(instanceId);
       }
+      chartTypeSelector.removeEventListener('change', handleChartTypeChange);
+      calcMethodSelector.removeEventListener('change', handleCalcMethodChange);
+      periodSelector.removeEventListener('click', handlePeriodClick);
     },
   };
 };

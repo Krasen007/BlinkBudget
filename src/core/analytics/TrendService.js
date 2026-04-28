@@ -31,8 +31,12 @@ export class TrendService {
 
   _loadPersistedData() {
     try {
-      const data = localStorage.getItem(STORAGE_KEY);
-      this.persistedData = data ? JSON.parse(data) : { lastAnalysisDate: null };
+      if (typeof localStorage !== 'undefined' && localStorage) {
+        const data = localStorage.getItem(STORAGE_KEY);
+        this.persistedData = data ? JSON.parse(data) : { lastAnalysisDate: null };
+      } else {
+        this.persistedData = { lastAnalysisDate: null };
+      }
     } catch {
       this.persistedData = { lastAnalysisDate: null };
     }
@@ -102,13 +106,13 @@ export class TrendService {
 
     Object.entries(categoryMap).forEach(([category, amounts]) => {
       if (amounts.length < 2) {
-        categoryConsistency[category] = 1.0;
+        categoryConsistency[category] = null;
         return;
       }
 
       const mean = amounts.reduce((s, v) => s + v, 0) / amounts.length;
       if (mean === 0) {
-        categoryConsistency[category] = 1.0;
+        categoryConsistency[category] = null;
         return;
       }
 
@@ -120,10 +124,10 @@ export class TrendService {
       categoryConsistency[category] = Math.max(0, Math.min(1, 1 - cv));
     });
 
+    const validConsistencies = Object.values(categoryConsistency).filter(v => v !== null);
     const overallConsistency =
-      Object.values(categoryConsistency).length > 0
-        ? Object.values(categoryConsistency).reduce((s, v) => s + v, 0) /
-          Object.values(categoryConsistency).length
+      validConsistencies.length > 0
+        ? validConsistencies.reduce((s, v) => s + v, 0) / validConsistencies.length
         : 1.0;
 
     return { categories: categoryConsistency, overall: overallConsistency };
@@ -142,7 +146,10 @@ export class TrendService {
       if (t.type !== TRANSACTION_TYPES.EXPENSE) return;
       if (categoryId && t.category !== categoryId) return;
 
-      const month = new Date(t.date || t.timestamp).getMonth();
+      const d = new Date(t.date || t.timestamp);
+      if (isNaN(d.getTime())) return;
+      const month = d.getMonth();
+      if (month < 0 || month > 11) return;
       monthTotals[month] += Math.abs(t.amount || 0);
       monthCounts[month]++;
     });
@@ -184,12 +191,13 @@ export class TrendService {
    * @param {string} categoryId - Category to analyze
    * @returns {Object} Spending direction data
    */
-  getSpendingDirection(categoryId, transactions) {
-    const recentMonths = this._getRecentMonthsData(categoryId, transactions, 3);
+  getSpendingDirection(categoryId, transactions, referenceDate = new Date()) {
+    const recentMonths = this._getRecentMonthsData(categoryId, transactions, 3, referenceDate);
     const previousMonths = this._getPreviousMonthsData(
       categoryId,
       transactions,
-      3
+      3,
+      referenceDate
     );
 
     const recentAvg =
@@ -238,7 +246,7 @@ export class TrendService {
   ) {
     const categoryTransactions = transactions
       .filter(
-        t => t.category === category && !t.isGhost && t.type === 'expense'
+        t => t.category === category && !t.isGhost && t.type === TRANSACTION_TYPES.EXPENSE
       )
       .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
@@ -313,13 +321,13 @@ export class TrendService {
     const effectiveReferenceDate = referenceDate
       ? new Date(referenceDate)
       : transactions && transactions.length
-        ? new Date(
-            Math.max(
-              ...transactions
-                .map(t => new Date(t.timestamp).getTime())
-                .filter(ts => Number.isFinite(ts))
-            )
-          )
+        ? (() => {
+            const maxTimestamp = transactions.reduce((max, t) => {
+              const ts = new Date(t.timestamp).getTime();
+              return Number.isFinite(ts) && ts > max ? ts : max;
+            }, -Infinity);
+            return maxTimestamp > -Infinity ? new Date(maxTimestamp) : new Date();
+          })()
         : new Date();
 
     const monthly = {};
@@ -368,7 +376,7 @@ export class TrendService {
   ) {
     const categories = [
       ...new Set(
-        transactions.filter(t => t.type === 'expense').map(t => t.category)
+        transactions.filter(t => t.type === TRANSACTION_TYPES.EXPENSE).map(t => t.category)
       ),
     ];
 
@@ -402,7 +410,7 @@ export class TrendService {
         return (
           t.category === category &&
           !t.isGhost &&
-          t.type === 'expense' &&
+          t.type === TRANSACTION_TYPES.EXPENSE &&
           d >= cutoff &&
           d <= endWindow
         );
@@ -412,7 +420,10 @@ export class TrendService {
         category,
         inflationRate,
         totalSpending: categoryTransactions.reduce(
-          (sum, t) => sum + t.amount,
+          (sum, t) => {
+            const amount = Number(t.amount) || 0;
+            return isNaN(amount) ? sum : sum + amount;
+          },
           0
         ),
         trend,
@@ -463,7 +474,7 @@ export class TrendService {
         const d = new Date(t.timestamp);
         return (
           t.category === category &&
-          t.type === 'expense' &&
+          t.type === TRANSACTION_TYPES.EXPENSE &&
           d >= cutoff &&
           d <= endWindow
         );
@@ -499,7 +510,7 @@ export class TrendService {
     referenceDate = new Date()
   ) {
     const categoryTransactions = transactions.filter(
-      t => t.category === category && !t.isGhost && t.type === 'expense'
+      t => t.category === category && !t.isGhost && t.type === TRANSACTION_TYPES.EXPENSE
     );
 
     if (categoryTransactions.length < 2) {
@@ -608,7 +619,7 @@ export class TrendService {
     Object.entries(categoryMap).forEach(([category, data]) => {
       if (data.length < 3) return;
 
-      const monthlyData = this._aggregateMonthlyDataByCategory(
+      const monthlyData = this._aggregateMonthlyData(
         transactions,
         category
       );
@@ -627,12 +638,8 @@ export class TrendService {
     return trends;
   }
 
-  _aggregateMonthlyDataByCategory(transactions, categoryId) {
-    return this._aggregateMonthlyData(transactions, categoryId);
-  }
-
-  _getRecentMonthsData(categoryId, transactions, count) {
-    const now = new Date();
+  _getRecentMonthsData(categoryId, transactions, count, referenceDate = new Date()) {
+    const now = referenceDate;
     const months = [];
 
     for (let i = 0; i < count; i++) {
@@ -643,8 +650,8 @@ export class TrendService {
     return this._getMonthlyTotalsForPeriods(categoryId, transactions, months);
   }
 
-  _getPreviousMonthsData(categoryId, transactions, count) {
-    const now = new Date();
+  _getPreviousMonthsData(categoryId, transactions, count, referenceDate = new Date()) {
+    const now = referenceDate;
     const months = [];
 
     for (let i = count; i < count * 2; i++) {

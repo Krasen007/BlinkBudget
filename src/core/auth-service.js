@@ -151,6 +151,16 @@ export const AuthService = {
 
       return { user: this.user, error: null };
     } catch (error) {
+      // Persist error to localStorage for debugging after page refresh
+      localStorage.setItem(
+        'last_auth_error',
+        JSON.stringify({
+          code: error.code,
+          message: error.message,
+          timestamp: new Date().toISOString(),
+        })
+      );
+
       // Return sanitized error message to user
       let message =
         'Authentication failed. Please check your credentials and try again.';

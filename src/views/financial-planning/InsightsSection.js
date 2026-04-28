@@ -744,12 +744,14 @@ function renderOptimizationInsights(section, planningData) {
     const analyticsEngine = getAnalyticsEngine();
     const currentTimePeriod = getCurrentMonthPeriod();
 
-    const optInsights = analyticsEngine.getOptimizationInsights
+    const optResult = analyticsEngine.getOptimizationInsights
       ? analyticsEngine.getOptimizationInsights(
           planningData.transactions,
           currentTimePeriod
         )
-      : [];
+      : { insights: [], incomeVsExpenses: null };
+
+    const optInsights = optResult.insights || [];
 
     if (optInsights && optInsights.length > 0) {
       const optSection = OptimizationInsights(optInsights);

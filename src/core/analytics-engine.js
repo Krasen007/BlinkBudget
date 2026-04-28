@@ -1,6 +1,3 @@
-import { recommendationService } from './analytics/RecommendationService.js';
-import { trendService } from './analytics/TrendService.js';
-import { ComparisonService } from './analytics/ComparisonService.js';
 /**
  * Analytics Engine for BlinkBudget Reports & Insights
  *
@@ -18,6 +15,9 @@ import { AnalyticsCache } from './analytics/AnalyticsCache.js';
 import { PredictionService } from './analytics/PredictionService.js';
 import { CategoryUsageService } from './analytics/category-usage-service.js';
 import { AmountPresetService } from './amount-preset-service.js';
+import { recommendationService } from './analytics/RecommendationService.js';
+import { trendService } from './analytics/TrendService.js';
+import comparisonService from './analytics/ComparisonService.js';
 
 export class AnalyticsEngine {
   constructor() {
@@ -501,7 +501,7 @@ export class AnalyticsEngine {
    * @returns {Object} Comparison results
    */
   comparePeriodsSpending(transactions, currentPeriod, comparisonPeriod) {
-    return ComparisonService.comparePeriodsSpending(
+    return comparisonService.comparePeriodsSpending(
       transactions,
       currentPeriod,
       comparisonPeriod
@@ -515,7 +515,7 @@ export class AnalyticsEngine {
    * @returns {Array} Benchmarking data
    */
   getPersonalBenchmarking(transactions, timePeriod) {
-    return ComparisonService.getPersonalBenchmarking(
+    return comparisonService.getPersonalBenchmarking(
       transactions,
       timePeriod
     );
@@ -528,7 +528,7 @@ export class AnalyticsEngine {
    * @returns {Object} Historical insights
    */
   getHistoricalInsights(transactions, historicalPeriods) {
-    return ComparisonService.getHistoricalInsights(
+    return comparisonService.getHistoricalInsights(
       transactions,
       historicalPeriods
     );

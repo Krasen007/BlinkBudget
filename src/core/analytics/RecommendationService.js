@@ -222,8 +222,8 @@ export class RecommendationService {
           average: Math.round(avg * 100) / 100,
           transactionCount: amounts.length,
           median: Math.round(median * 100) / 100,
-          highest: Math.max(...amounts),
-          lowest: Math.min(...amounts),
+          highest: amounts.length > 0 ? Math.max(...amounts) : null,
+          lowest: amounts.length > 0 ? Math.min(...amounts) : null,
         };
       }
     );
@@ -377,8 +377,8 @@ export class RecommendationService {
 
     const factors = Object.entries(monthlyAvg)
       .map(([month, avg]) => ({
-        month: parseInt(month),
-        label: new Date(2024, parseInt(month), 1).toLocaleDateString('en-US', {
+        month: parseInt(month, 10),
+        label: new Date(0, parseInt(month, 10), 1).toLocaleDateString('en-US', {
           month: 'long',
         }),
         average: Math.round(avg * 100) / 100,
@@ -402,7 +402,7 @@ export class RecommendationService {
     const insights = [];
 
     if (!transactions || transactions.length === 0) {
-      return insights;
+      return { insights, incomeVsExpenses: null };
     }
 
     const categoryBreakdown = MetricsService.calculateCategoryBreakdown(
@@ -442,7 +442,7 @@ export class RecommendationService {
 
     insights.push(...this._generateBudgetInsights(transactions, timePeriod));
     insights.sort((a, b) => b.potentialSavings - a.potentialSavings);
-    return insights;
+    return { insights, incomeVsExpenses };
   }
 
   _generateSubstitutionInsights(categories, averageExpense) {
@@ -624,7 +624,7 @@ export class RecommendationService {
    * Get total savings potential
    */
   getSavingsPotential(transactions, timePeriod) {
-    const insights = this.getOptimizationInsights(transactions, timePeriod);
+    const { insights, incomeVsExpenses } = this.getOptimizationInsights(transactions, timePeriod);
 
     const sub = insights
       .filter(i => i.type === 'substitution')
@@ -638,10 +638,6 @@ export class RecommendationService {
     const budg = insights
       .filter(i => i.type === 'budget')
       .reduce((s, i) => s + i.potentialSavings, 0);
-    const incomeVsExpenses = MetricsService.calculateIncomeVsExpenses(
-      transactions,
-      timePeriod
-    );
 
     const total = sub + red + elim + budg;
 

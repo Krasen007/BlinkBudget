@@ -204,7 +204,10 @@ export async function createPortfolioCompositionChart(
   header.style.marginBottom = SPACING.MD;
 
   const title = document.createElement('h3');
-  title.className = 'chart-section-title';
+  title.style.margin = '0';
+  title.style.color = COLORS.TEXT_MAIN;
+  title.style.fontSize = '1.125rem';
+  title.style.fontWeight = '600';
   title.textContent = options.title || 'Portfolio Composition';
 
   header.appendChild(title);
@@ -258,10 +261,42 @@ export async function createPortfolioCompositionChart(
     ],
   };
 
+  /**
+   * Handle chart segment click - dispatch custom event for filtering or detailed view
+   * @param {Event} event - Click event
+   * @param {Array} activeElements - Active chart elements
+   */
+  function chartSegmentClick(event, activeElements) {
+    if (!activeElements || activeElements.length === 0) return;
+
+    const element = activeElements[0];
+    const datasetIndex = element.datasetIndex;
+    const index = element.index;
+
+    const label = chartData.labels[index];
+    const value = chartData.datasets[datasetIndex].data[index];
+    const segmentId = `segment_${index}`;
+
+    // Dispatch custom event for the app to handle
+    canvas.dispatchEvent(
+      new CustomEvent('chartSegmentClick', {
+        detail: {
+          segmentId,
+          label,
+          value,
+          datasetIndex,
+          index,
+        },
+        bubbles: true,
+      })
+    );
+  }
+
   // Create pie chart with custom tooltip
   const chart = await chartRenderer.createPieChart(canvas, chartData, {
     responsive: true,
     maintainAspectRatio: false,
+    onClick: chartSegmentClick,
     plugins: {
       legend: {
         position: window.innerWidth < 768 ? 'bottom' : 'right',
@@ -315,8 +350,6 @@ export async function createPortfolioCompositionChart(
       },
     },
   });
-
-  // TODO: handle chartSegmentClick - trigger detailed view or filtering
 
   return { section, chart };
 }

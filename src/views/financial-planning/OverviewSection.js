@@ -78,7 +78,7 @@ function assessEmergencyFundAdequacy(monthlyExpenses, emergencyFund) {
       recommendation = `Build emergency fund to €${recommendedAmount.toFixed(2)} (6 months of expenses)`;
     } else if (monthsCovered > 0) {
       status = 'insufficient';
-      riskLevel = 'high';
+      riskLevel = 'critical';
       message = `Insufficient emergency fund: Only ${monthsCovered.toFixed(1)} months covered`;
       recommendation = `Urgent: Build emergency fund to at least €${(monthlyExpenses * 3).toFixed(2)} (3 months minimum)`;
     } else {
@@ -109,6 +109,8 @@ function assessEmergencyFundAdequacy(monthlyExpenses, emergencyFund) {
       monthsCovered: 0,
       targetAmount: 0,
       shortfall: 0,
+      currentAmount: 0,
+      monthlyExpenses: 0,
     };
   }
 }
@@ -203,6 +205,9 @@ export const OverviewSection = (planningData) => {
       : 0;
 
   // Assess emergency fund
+  // Note: Using currentBalance (net worth) as emergency fund proxy since account-level data
+  // is not available in planningData. In future, this should compute from designated savings accounts
+  // or accept an explicit emergencyFund input from user settings.
   const emergencyFund = Math.max(0, currentBalance);
   const emergencyFundAssessment = assessEmergencyFundAdequacy(
     monthlyExpenses,
@@ -379,7 +384,7 @@ function createEmergencyFundCard(assessment) {
     const detail = document.createElement('div');
     detail.innerHTML = `
       <div style="font-size: 0.75rem; color: ${COLORS.TEXT_MUTED}; margin-bottom: 4px;">${item.label}</div>
-      <div style="font-weight: '600'; color: ${COLORS.TEXT_MAIN}; font-size: 1rem;">${item.value}</div>
+      <div style="font-weight: 600; color: ${COLORS.TEXT_MAIN}; font-size: 1rem;">${item.value}</div>
     `;
     details.appendChild(detail);
   });
