@@ -99,10 +99,8 @@ export const TransactionListItem = ({
           showErrorToast('Could not open confirmation dialog. Please try again.');
         }).catch(() => {
           // Fallback if toast system fails to load
-          // Alert is acceptable here as a last-resort fallback when both
-          // ConfirmDialog and toast notification systems fail to load
-          console.error('Toast system also failed to load');
-          alert('Could not open confirmation dialog. Please try again.');
+          // At this point both ConfirmDialog and toast failed, log and accept failure
+          console.error('Toast system also failed to load - cannot show error to user');
         });
       });
   };
