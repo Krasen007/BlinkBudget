@@ -16,7 +16,6 @@ import { InsightsService } from './analytics/InsightsService.js';
 import { AnomalyService } from './analytics/AnomalyService.js';
 import { AnalyticsCache } from './analytics/AnalyticsCache.js';
 import { PredictionService } from './analytics/PredictionService.js';
-import { ComparisonService } from './analytics/ComparisonService.js';
 import { CategoryUsageService } from './analytics/category-usage-service.js';
 import { AmountPresetService } from './amount-preset-service.js';
 
@@ -255,38 +254,6 @@ export class AnalyticsEngine {
     return result;
   }
 
-  /**
-   * Compare spending patterns between periods
-   */
-  comparePeriodsSpending(transactions, currentPeriod, comparisonPeriod) {
-    const cacheKey = `comparison_${JSON.stringify(currentPeriod)}_${JSON.stringify(comparisonPeriod)}`;
-    const cached = this.cache.get(cacheKey);
-    if (cached) return cached;
-
-    const result = ComparisonService.comparePeriodsSpending(
-      transactions,
-      currentPeriod,
-      comparisonPeriod
-    );
-    this.cache.set(cacheKey, result);
-    return result;
-  }
-
-  /**
-   * Get historical insights
-   */
-  getHistoricalInsights(transactions, historicalPeriods) {
-    const cacheKey = `historicalInsights_${JSON.stringify(historicalPeriods)}`;
-    const cached = this.cache.get(cacheKey);
-    if (cached) return cached;
-
-    const result = ComparisonService.getHistoricalInsights(
-      transactions,
-      historicalPeriods
-    );
-    this.cache.set(cacheKey, result);
-    return result;
-  }
 
   /**
    * Analyze frequency patterns for categories (simple implementation)
