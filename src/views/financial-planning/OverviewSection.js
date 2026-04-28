@@ -22,9 +22,9 @@ import {
 // Risk thresholds for emergency fund assessment
 const RISK_THRESHOLDS = {
   emergencyFund: {
-    minimum: 3,    // 3 months minimum
+    minimum: 3, // 3 months minimum
     recommended: 6, // 6 months recommended
-    optimal: 12,   // 12 months optimal
+    optimal: 12, // 12 months optimal
   },
 };
 
@@ -39,8 +39,7 @@ function assessEmergencyFundAdequacy(monthlyExpenses, emergencyFund) {
     if (monthlyExpenses <= 0) {
       return {
         status: 'unknown',
-        message:
-          'Unable to assess emergency fund - insufficient expense data',
+        message: 'Unable to assess emergency fund - insufficient expense data',
         recommendation:
           'Track expenses for at least 3 months to get accurate assessment',
         monthsCovered: 0,
@@ -63,9 +62,7 @@ function assessEmergencyFundAdequacy(monthlyExpenses, emergencyFund) {
       message = `Excellent emergency fund: ${monthsCovered.toFixed(1)} months of expenses covered`;
       recommendation =
         'Consider investing excess emergency funds for better returns while maintaining liquidity';
-    } else if (
-      monthsCovered >= RISK_THRESHOLDS.emergencyFund.recommended
-    ) {
+    } else if (monthsCovered >= RISK_THRESHOLDS.emergencyFund.recommended) {
       status = 'good';
       riskLevel = 'low';
       message = `Good emergency fund: ${monthsCovered.toFixed(1)} months of expenses covered`;
@@ -119,7 +116,7 @@ function assessEmergencyFundAdequacy(monthlyExpenses, emergencyFund) {
  * @param {Object} planningData - Financial planning data including transactions
  * @returns {HTMLElement} DOM element containing overview section content
  */
-export const OverviewSection = (planningData) => {
+export const OverviewSection = planningData => {
   const section = createSectionContainer(
     'overview',
     'Financial Overview',
@@ -259,7 +256,9 @@ export const OverviewSection = (planningData) => {
     },
     {
       label: 'Risk Level',
-      value: emergencyFundAssessment.riskLevel.charAt(0).toUpperCase() + emergencyFundAssessment.riskLevel.slice(1),
+      value:
+        emergencyFundAssessment.riskLevel.charAt(0).toUpperCase() +
+        emergencyFundAssessment.riskLevel.slice(1),
       color:
         emergencyFundAssessment.riskLevel === 'low'
           ? COLORS.SUCCESS
@@ -340,7 +339,8 @@ function createEmergencyFundCard(assessment) {
   titleGroup.appendChild(title);
 
   const statusBadge = document.createElement('span');
-  statusBadge.textContent = assessment.status.charAt(0).toUpperCase() + assessment.status.slice(1);
+  statusBadge.textContent =
+    assessment.status.charAt(0).toUpperCase() + assessment.status.slice(1);
   statusBadge.style.padding = '4px 12px';
   statusBadge.style.borderRadius = '20px';
   statusBadge.style.fontSize = '0.75rem';
@@ -372,10 +372,19 @@ function createEmergencyFundCard(assessment) {
   details.style.borderTop = `1px solid ${COLORS.BORDER}`;
 
   const detailItems = [
-    { label: 'Current Amount', value: `€${assessment.currentAmount.toFixed(2)}` },
+    {
+      label: 'Current Amount',
+      value: `€${assessment.currentAmount.toFixed(2)}`,
+    },
     { label: 'Target Amount', value: `€${assessment.targetAmount.toFixed(2)}` },
     { label: 'Months Covered', value: assessment.monthsCovered.toFixed(1) },
-    { label: 'Shortfall', value: assessment.shortfall > 0 ? `€${assessment.shortfall.toFixed(2)}` : 'None' },
+    {
+      label: 'Shortfall',
+      value:
+        assessment.shortfall > 0
+          ? `€${assessment.shortfall.toFixed(2)}`
+          : 'None',
+    },
   ];
 
   detailItems.forEach(item => {
@@ -390,13 +399,14 @@ function createEmergencyFundCard(assessment) {
   const recommendation = document.createElement('div');
   recommendation.style.marginTop = SPACING.SM;
   recommendation.style.padding = SPACING.MD;
-  recommendation.style.background = assessment.riskLevel === 'low'
-    ? 'rgba(34, 197, 94, 0.1)'
-    : assessment.riskLevel === 'moderate'
-      ? 'rgba(234, 179, 8, 0.1)'
-      : assessment.riskLevel === 'critical'
-        ? 'rgba(239, 68, 68, 0.1)'
-        : 'rgba(156, 163, 175, 0.1)';
+  recommendation.style.background =
+    assessment.riskLevel === 'low'
+      ? 'rgba(34, 197, 94, 0.1)'
+      : assessment.riskLevel === 'moderate'
+        ? 'rgba(234, 179, 8, 0.1)'
+        : assessment.riskLevel === 'critical'
+          ? 'rgba(239, 68, 68, 0.1)'
+          : 'rgba(156, 163, 175, 0.1)';
   recommendation.style.borderRadius = 'var(--radius-md)';
   recommendation.style.border = `1px solid ${
     assessment.riskLevel === 'low'

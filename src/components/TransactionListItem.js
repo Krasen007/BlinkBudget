@@ -59,19 +59,29 @@ export const TransactionListItem = ({
             try {
               result = TransactionService.split(transaction.id);
               if (!result) {
-                import('../utils/toast-notifications.js').then(({ showErrorToast }) => {
-                  showErrorToast('Failed to split transaction');
-                }).catch(() => {
-                  console.error('Failed to split transaction and toast system unavailable');
-                });
+                import('../utils/toast-notifications.js')
+                  .then(({ showErrorToast }) => {
+                    showErrorToast('Failed to split transaction');
+                  })
+                  .catch(() => {
+                    console.error(
+                      'Failed to split transaction and toast system unavailable'
+                    );
+                  });
                 return;
               }
             } catch (error) {
-              import('../utils/toast-notifications.js').then(({ showErrorToast }) => {
-                showErrorToast(`Failed to split transaction: ${error.message}`);
-              }).catch(() => {
-                console.error('Failed to split transaction and toast system unavailable');
-              });
+              import('../utils/toast-notifications.js')
+                .then(({ showErrorToast }) => {
+                  showErrorToast(
+                    `Failed to split transaction: ${error.message}`
+                  );
+                })
+                .catch(() => {
+                  console.error(
+                    'Failed to split transaction and toast system unavailable'
+                  );
+                });
               return;
             }
 
@@ -95,13 +105,19 @@ export const TransactionListItem = ({
       })
       .catch(error => {
         console.error('Failed to load ConfirmDialog:', error);
-        import('../utils/toast-notifications.js').then(({ showErrorToast }) => {
-          showErrorToast('Could not open confirmation dialog. Please try again.');
-        }).catch(() => {
-          // Fallback if toast system fails to load
-          // At this point both ConfirmDialog and toast failed, log and accept failure
-          console.error('Toast system also failed to load - cannot show error to user');
-        });
+        import('../utils/toast-notifications.js')
+          .then(({ showErrorToast }) => {
+            showErrorToast(
+              'Could not open confirmation dialog. Please try again.'
+            );
+          })
+          .catch(() => {
+            // Fallback if toast system fails to load
+            // At this point both ConfirmDialog and toast failed, log and accept failure
+            console.error(
+              'Toast system also failed to load - cannot show error to user'
+            );
+          });
       });
   };
 

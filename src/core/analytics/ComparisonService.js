@@ -129,9 +129,7 @@ export class ComparisonService {
     });
 
     // Sort by absolute change
-    categoryComparison.sort(
-      (a, b) => Math.abs(b.change) - Math.abs(a.change)
-    );
+    categoryComparison.sort((a, b) => Math.abs(b.change) - Math.abs(a.change));
 
     // Analyze behavior changes
     const behaviorChanges = [];
@@ -160,9 +158,14 @@ export class ComparisonService {
       insights: behaviorChanges,
       summary: {
         totalCategories: categoryComparison.length,
-        increasedCategories: categoryComparison.filter(c => c.trend === 'increasing').length,
-        decreasedCategories: categoryComparison.filter(c => c.trend === 'decreasing').length,
-        stableCategories: categoryComparison.filter(c => c.trend === 'stable').length,
+        increasedCategories: categoryComparison.filter(
+          c => c.trend === 'increasing'
+        ).length,
+        decreasedCategories: categoryComparison.filter(
+          c => c.trend === 'decreasing'
+        ).length,
+        stableCategories: categoryComparison.filter(c => c.trend === 'stable')
+          .length,
       },
     };
   }
@@ -221,8 +224,12 @@ export class ComparisonService {
 
     const benchmarking = [];
     const currentCategories = currentBreakdown.categories.map(cat => cat.name);
-    const lastMonthCategories = lastMonthBreakdown ? lastMonthBreakdown.categories.map(cat => cat.name) : [];
-    const categories = [...new Set([...currentCategories, ...lastMonthCategories])];
+    const lastMonthCategories = lastMonthBreakdown
+      ? lastMonthBreakdown.categories.map(cat => cat.name)
+      : [];
+    const categories = [
+      ...new Set([...currentCategories, ...lastMonthCategories]),
+    ];
 
     categories.forEach(category => {
       const current = currentSpending[category] || 0;
@@ -235,7 +242,11 @@ export class ComparisonService {
         if (lastMonthAmount > 0) {
           change = ((current - lastMonthAmount) / lastMonthAmount) * 100;
           trend =
-            change > TREND_THRESHOLD_MONTHLY ? 'increasing' : change < -TREND_THRESHOLD_MONTHLY ? 'decreasing' : 'stable';
+            change > TREND_THRESHOLD_MONTHLY
+              ? 'increasing'
+              : change < -TREND_THRESHOLD_MONTHLY
+                ? 'decreasing'
+                : 'stable';
         } else if (current > 0) {
           change = 0;
           trend = 'new';
@@ -299,13 +310,17 @@ export class ComparisonService {
       overallTrends: {
         averageIncome:
           historicalInsights.length > 0
-            ? historicalInsights.reduce((s, h) => s + h.summary.totalIncome, 0) /
-              historicalInsights.length
+            ? historicalInsights.reduce(
+                (s, h) => s + h.summary.totalIncome,
+                0
+              ) / historicalInsights.length
             : 0,
         averageExpenses:
           historicalInsights.length > 0
-            ? historicalInsights.reduce((s, h) => s + h.summary.totalExpenses, 0) /
-              historicalInsights.length
+            ? historicalInsights.reduce(
+                (s, h) => s + h.summary.totalExpenses,
+                0
+              ) / historicalInsights.length
             : 0,
       },
       preservedAt: new Date().toISOString(),

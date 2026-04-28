@@ -254,7 +254,6 @@ export class AnalyticsEngine {
     return result;
   }
 
-
   /**
    * Analyze frequency patterns for categories (simple implementation)
    */
@@ -403,7 +402,10 @@ export class AnalyticsEngine {
    * @returns {Array} Optimization insights
    */
   getOptimizationInsights(transactions, timePeriod) {
-    return recommendationService.getOptimizationInsights(transactions, timePeriod);
+    return recommendationService.getOptimizationInsights(
+      transactions,
+      timePeriod
+    );
   }
 
   /**
@@ -475,10 +477,7 @@ export class AnalyticsEngine {
    * @returns {Object} Seasonal pattern data
    */
   detectSeasonalPatterns(categoryId, transactions) {
-    return trendService.detectSeasonalPatterns(
-      categoryId,
-      transactions
-    );
+    return trendService.detectSeasonalPatterns(categoryId, transactions);
   }
 
   /**
@@ -515,10 +514,7 @@ export class AnalyticsEngine {
    * @returns {Array} Benchmarking data
    */
   getPersonalBenchmarking(transactions, timePeriod) {
-    return comparisonService.getPersonalBenchmarking(
-      transactions,
-      timePeriod
-    );
+    return comparisonService.getPersonalBenchmarking(transactions, timePeriod);
   }
 
   /**
@@ -569,10 +565,7 @@ export class AnalyticsEngine {
    * @returns {Object} Recommended amount
    */
   getRecommendedAmount(categoryId, transactions) {
-    return recommendationService.getRecommendedAmount(
-      categoryId,
-      transactions
-    );
+    return recommendationService.getRecommendedAmount(categoryId, transactions);
   }
 
   /**

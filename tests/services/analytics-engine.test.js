@@ -354,5 +354,4 @@ describe('AnalyticsEngine', () => {
       ).toBeGreaterThanOrEqual(3);
     });
   });
-
 });

@@ -83,5 +83,4 @@ describe('Property 6: Insight Generation Accuracy', () => {
       });
     }
   });
-
 });

@@ -106,7 +106,10 @@ export class RecommendationService {
             lastAnalysisDate: null,
           };
     } catch (error) {
-      console.warn('[RecommendationService] Failed to load persisted data:', error);
+      console.warn(
+        '[RecommendationService] Failed to load persisted data:',
+        error
+      );
       this.persistedData = {
         dismissedInsights: [],
         lastAnalysisDate: null,
@@ -267,7 +270,8 @@ export class RecommendationService {
           100,
           Math.max(
             0,
-            100 - (Math.abs(current - historicalAverage) / historicalAverage) * 50
+            100 -
+              (Math.abs(current - historicalAverage) / historicalAverage) * 50
           )
         );
 
@@ -624,7 +628,10 @@ export class RecommendationService {
    * Get total savings potential
    */
   getSavingsPotential(transactions, timePeriod) {
-    const { insights, incomeVsExpenses } = this.getOptimizationInsights(transactions, timePeriod);
+    const { insights, incomeVsExpenses } = this.getOptimizationInsights(
+      transactions,
+      timePeriod
+    );
 
     const sub = insights
       .filter(i => i.type === 'substitution')

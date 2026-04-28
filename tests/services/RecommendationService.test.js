@@ -134,10 +134,13 @@ describe('RecommendationService', () => {
           accountId: 'main',
         },
       ];
-      const insights = recommendationService.getOptimizationInsights(incomeOnly, {
-        startDate: '2024-01-15',
-        endDate: '2024-01-18',
-      });
+      const insights = recommendationService.getOptimizationInsights(
+        incomeOnly,
+        {
+          startDate: '2024-01-15',
+          endDate: '2024-01-18',
+        }
+      );
       expect(insights).toBeInstanceOf(Array);
     });
   });
