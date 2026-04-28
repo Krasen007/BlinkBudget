@@ -1,6 +1,8 @@
 /**
  * InsightsService
- * Generates spending insights and pattern analysis.
+ * Generates general spending insights, anomaly detection, and behavior pattern analysis.
+ * Focus: High-level insights, spending patterns (frequency/timing/sizes), and anomaly detection.
+ * Note: Trend/seasonal patterns are handled by TrendService. Period comparisons by ComparisonService.
  */
 
 import { TRANSACTION_TYPES } from '../../utils/constants.js';

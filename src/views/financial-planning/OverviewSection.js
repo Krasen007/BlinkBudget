@@ -13,19 +13,111 @@
 
 import { COLORS, SPACING } from '../../utils/constants.js';
 import { StatsCard } from '../../components/financial-planning/StatsCard.js';
-import { EmergencyFundCard } from '../../components/financial-planning/EmergencyFundCard.js';
 import {
   createSectionContainer,
   createPlaceholder,
   createUsageNote,
 } from '../../utils/financial-planning-helpers.js';
+
+// Risk thresholds for emergency fund assessment
+const RISK_THRESHOLDS = {
+  emergencyFund: {
+    minimum: 3,    // 3 months minimum
+    recommended: 6, // 6 months recommended
+    optimal: 12,   // 12 months optimal
+  },
+};
+
+/**
+ * Assess emergency fund adequacy
+ * @param {number} monthlyExpenses - Monthly expenses
+ * @param {number} emergencyFund - Current emergency fund amount
+ * @returns {Object} Emergency fund assessment
+ */
+function assessEmergencyFundAdequacy(monthlyExpenses, emergencyFund) {
+  try {
+    if (monthlyExpenses <= 0) {
+      return {
+        status: 'unknown',
+        message:
+          'Unable to assess emergency fund - insufficient expense data',
+        recommendation:
+          'Track expenses for at least 3 months to get accurate assessment',
+        monthsCovered: 0,
+        targetAmount: 0,
+        shortfall: 0,
+        riskLevel: 'unknown',
+      };
+    }
+
+    const monthsCovered = emergencyFund / monthlyExpenses;
+    const recommendedAmount =
+      monthlyExpenses * RISK_THRESHOLDS.emergencyFund.recommended;
+    const shortfall = Math.max(0, recommendedAmount - emergencyFund);
+
+    let status, riskLevel, message, recommendation;
+
+    if (monthsCovered >= RISK_THRESHOLDS.emergencyFund.optimal) {
+      status = 'excellent';
+      riskLevel = 'low';
+      message = `Excellent emergency fund: ${monthsCovered.toFixed(1)} months of expenses covered`;
+      recommendation =
+        'Consider investing excess emergency funds for better returns while maintaining liquidity';
+    } else if (
+      monthsCovered >= RISK_THRESHOLDS.emergencyFund.recommended
+    ) {
+      status = 'good';
+      riskLevel = 'low';
+      message = `Good emergency fund: ${monthsCovered.toFixed(1)} months of expenses covered`;
+      recommendation =
+        'Emergency fund is adequate. Consider building towards 12 months for optimal security';
+    } else if (monthsCovered >= RISK_THRESHOLDS.emergencyFund.minimum) {
+      status = 'adequate';
+      riskLevel = 'moderate';
+      message = `Minimum emergency fund: ${monthsCovered.toFixed(1)} months of expenses covered`;
+      recommendation = `Build emergency fund to €${recommendedAmount.toFixed(2)} (6 months of expenses)`;
+    } else if (monthsCovered > 0) {
+      status = 'insufficient';
+      riskLevel = 'high';
+      message = `Insufficient emergency fund: Only ${monthsCovered.toFixed(1)} months covered`;
+      recommendation = `Urgent: Build emergency fund to at least €${(monthlyExpenses * 3).toFixed(2)} (3 months minimum)`;
+    } else {
+      status = 'none';
+      riskLevel = 'critical';
+      message = 'No emergency fund detected';
+      recommendation = `Critical: Start building emergency fund immediately. Target: €${recommendedAmount.toFixed(2)}`;
+    }
+
+    return {
+      status,
+      riskLevel,
+      message,
+      recommendation,
+      monthsCovered: Math.round(monthsCovered * 10) / 10,
+      currentAmount: emergencyFund,
+      targetAmount: recommendedAmount,
+      shortfall: Math.round(shortfall * 100) / 100,
+      monthlyExpenses,
+    };
+  } catch (error) {
+    console.error('Error assessing emergency fund:', error);
+    return {
+      status: 'error',
+      riskLevel: 'unknown',
+      message: 'Error calculating emergency fund assessment',
+      recommendation: 'Please check your financial data and try again',
+      monthsCovered: 0,
+      targetAmount: 0,
+      shortfall: 0,
+    };
+  }
+}
 /**
  * Overview Section Component
  * @param {Object} planningData - Financial planning data including transactions
- * @param {Object} riskAssessor - Risk assessment service instance
  * @returns {HTMLElement} DOM element containing overview section content
  */
-export const OverviewSection = (planningData, riskAssessor) => {
+export const OverviewSection = (planningData) => {
   const section = createSectionContainer(
     'overview',
     'Financial Overview',
@@ -110,30 +202,12 @@ export const OverviewSection = (planningData, riskAssessor) => {
       ? ((allTimeIncome - allTimeExpense) / effectiveIncome) * 100
       : 0;
 
-  // Generate risk assessments
-  let emergencyFundAssessment = null;
-  let riskScore = null;
-
-  try {
-    // Assume emergency fund is current balance (simplified)
-    emergencyFundAssessment = riskAssessor.assessEmergencyFundAdequacy(
-      monthlyExpenses,
-      Math.max(0, currentBalance)
-    );
-
-    // Calculate overall risk score
-    const riskFactors = [
-      {
-        category: 'Emergency Fund',
-        riskLevel: emergencyFundAssessment.riskLevel,
-        message: emergencyFundAssessment.message,
-      },
-    ];
-
-    riskScore = riskAssessor.calculateOverallRiskScore(riskFactors);
-  } catch (error) {
-    console.error('Error calculating risk assessments:', error);
-  }
+  // Assess emergency fund
+  const emergencyFund = Math.max(0, currentBalance);
+  const emergencyFundAssessment = assessEmergencyFundAdequacy(
+    monthlyExpenses,
+    emergencyFund
+  );
 
   const stats = [
     {
@@ -181,24 +255,24 @@ export const OverviewSection = (planningData, riskAssessor) => {
     },
     {
       label: 'Risk Level',
-      value: riskScore
-        ? riskScore.level.charAt(0).toUpperCase() + riskScore.level.slice(1)
-        : 'Unknown',
-      color: riskScore
-        ? riskScore.level === 'low'
+      value: emergencyFundAssessment.riskLevel.charAt(0).toUpperCase() + emergencyFundAssessment.riskLevel.slice(1),
+      color:
+        emergencyFundAssessment.riskLevel === 'low'
           ? COLORS.SUCCESS
-          : riskScore.level === 'moderate'
+          : emergencyFundAssessment.riskLevel === 'moderate'
             ? COLORS.WARNING
-            : COLORS.ERROR
-        : COLORS.TEXT_MUTED,
-      icon: riskScore
-        ? riskScore.level === 'low'
+            : emergencyFundAssessment.riskLevel === 'critical'
+              ? COLORS.ERROR
+              : COLORS.TEXT_MUTED,
+      icon:
+        emergencyFundAssessment.riskLevel === 'low'
           ? '✅'
-          : riskScore.level === 'moderate'
+          : emergencyFundAssessment.riskLevel === 'moderate'
             ? '⚠️'
-            : '🚨'
-        : '❓',
-      subtitle: riskScore ? riskScore.message : 'Calculating...',
+            : emergencyFundAssessment.riskLevel === 'critical'
+              ? '🚨'
+              : '❓',
+      subtitle: emergencyFundAssessment.message,
       calculationHelp: `
         <p><strong>Assessment:</strong> Based on emergency fund adequacy</p>
         <p>Risk level is determined by evaluating your emergency fund coverage relative to monthly expenses. Low risk indicates strong financial preparedness, while high risk suggests immediate attention is needed.</p>
@@ -213,11 +287,132 @@ export const OverviewSection = (planningData, riskAssessor) => {
 
   section.appendChild(statsGrid);
 
-  // Emergency Fund Status (if available)
-  if (emergencyFundAssessment && emergencyFundAssessment.status !== 'error') {
-    const emergencyFundCard = EmergencyFundCard(emergencyFundAssessment);
-    section.appendChild(emergencyFundCard);
-  }
+  // Emergency Fund Card
+  const emergencyFundCard = createEmergencyFundCard(emergencyFundAssessment);
+  section.appendChild(emergencyFundCard);
 
   return section;
 };
+
+/**
+ * Create emergency fund card
+ * @param {Object} assessment - Emergency fund assessment
+ * @returns {HTMLElement} Emergency fund card element
+ */
+function createEmergencyFundCard(assessment) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.style.marginTop = SPACING.XL;
+  card.style.padding = SPACING.LG;
+  card.style.background = COLORS.SURFACE;
+  card.style.border = `1px solid ${COLORS.BORDER}`;
+  card.style.borderRadius = 'var(--radius-lg)';
+  card.style.display = 'flex';
+  card.style.flexDirection = 'column';
+  card.style.gap = SPACING.MD;
+
+  const header = document.createElement('div');
+  header.style.display = 'flex';
+  header.style.alignItems = 'center';
+  header.style.justifyContent = 'space-between';
+  header.style.gap = SPACING.SM;
+
+  const titleGroup = document.createElement('div');
+  titleGroup.style.display = 'flex';
+  titleGroup.style.alignItems = 'center';
+  titleGroup.style.gap = SPACING.SM;
+
+  const icon = document.createElement('span');
+  icon.textContent = '🛡️';
+  icon.style.fontSize = '1.25rem';
+
+  const title = document.createElement('h3');
+  title.textContent = 'Emergency Fund';
+  title.style.margin = '0';
+  title.style.fontSize = '0.875rem';
+  title.style.fontWeight = '500';
+  title.style.color = COLORS.TEXT_MUTED;
+
+  titleGroup.appendChild(icon);
+  titleGroup.appendChild(title);
+
+  const statusBadge = document.createElement('span');
+  statusBadge.textContent = assessment.status.charAt(0).toUpperCase() + assessment.status.slice(1);
+  statusBadge.style.padding = '4px 12px';
+  statusBadge.style.borderRadius = '20px';
+  statusBadge.style.fontSize = '0.75rem';
+  statusBadge.style.fontWeight = '600';
+  statusBadge.style.backgroundColor =
+    assessment.riskLevel === 'low'
+      ? COLORS.SUCCESS
+      : assessment.riskLevel === 'moderate'
+        ? COLORS.WARNING
+        : assessment.riskLevel === 'critical'
+          ? COLORS.ERROR
+          : COLORS.TEXT_MUTED;
+  statusBadge.style.color = 'white';
+
+  header.appendChild(titleGroup);
+  header.appendChild(statusBadge);
+
+  const message = document.createElement('p');
+  message.textContent = assessment.message;
+  message.style.margin = '0';
+  message.style.fontSize = '0.875rem';
+  message.style.color = COLORS.TEXT_MAIN;
+
+  const details = document.createElement('div');
+  details.style.display = 'grid';
+  details.style.gridTemplateColumns = 'repeat(2, 1fr)';
+  details.style.gap = SPACING.MD;
+  details.style.paddingTop = SPACING.SM;
+  details.style.borderTop = `1px solid ${COLORS.BORDER}`;
+
+  const detailItems = [
+    { label: 'Current Amount', value: `€${assessment.currentAmount.toFixed(2)}` },
+    { label: 'Target Amount', value: `€${assessment.targetAmount.toFixed(2)}` },
+    { label: 'Months Covered', value: assessment.monthsCovered.toFixed(1) },
+    { label: 'Shortfall', value: assessment.shortfall > 0 ? `€${assessment.shortfall.toFixed(2)}` : 'None' },
+  ];
+
+  detailItems.forEach(item => {
+    const detail = document.createElement('div');
+    detail.innerHTML = `
+      <div style="font-size: 0.75rem; color: ${COLORS.TEXT_MUTED}; margin-bottom: 4px;">${item.label}</div>
+      <div style="font-weight: '600'; color: ${COLORS.TEXT_MAIN}; font-size: 1rem;">${item.value}</div>
+    `;
+    details.appendChild(detail);
+  });
+
+  const recommendation = document.createElement('div');
+  recommendation.style.marginTop = SPACING.SM;
+  recommendation.style.padding = SPACING.MD;
+  recommendation.style.background = assessment.riskLevel === 'low'
+    ? 'rgba(34, 197, 94, 0.1)'
+    : assessment.riskLevel === 'moderate'
+      ? 'rgba(234, 179, 8, 0.1)'
+      : assessment.riskLevel === 'critical'
+        ? 'rgba(239, 68, 68, 0.1)'
+        : 'rgba(156, 163, 175, 0.1)';
+  recommendation.style.borderRadius = 'var(--radius-md)';
+  recommendation.style.border = `1px solid ${
+    assessment.riskLevel === 'low'
+      ? COLORS.SUCCESS
+      : assessment.riskLevel === 'moderate'
+        ? COLORS.WARNING
+        : assessment.riskLevel === 'critical'
+          ? COLORS.ERROR
+          : COLORS.TEXT_MUTED
+  }`;
+  recommendation.innerHTML = `
+    <div style="font-size: 0.75rem; color: ${COLORS.TEXT_MUTED}; margin-bottom: 4px; font-weight: 500;">Recommendation</div>
+    <div style="font-weight: 500; color: ${COLORS.TEXT_MAIN}; font-size: 0.875rem;">${assessment.recommendation}</div>
+  `;
+
+  card.appendChild(header);
+  card.appendChild(message);
+  card.appendChild(details);
+  card.appendChild(recommendation);
+
+  return card;
+}

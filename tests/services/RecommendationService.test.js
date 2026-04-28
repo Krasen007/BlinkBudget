@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { OptimizationEngine } from '../../src/core/analytics/optimization-engine.js';
+import { RecommendationService } from '../../src/core/analytics/RecommendationService.js';
 import { TRANSACTION_TYPES } from '../../src/utils/constants.js';
 
-describe('OptimizationEngine', () => {
-  let optimizationEngine;
+describe('RecommendationService', () => {
+  let recommendationService;
   let sampleTransactions;
 
   beforeEach(() => {
@@ -13,8 +13,8 @@ describe('OptimizationEngine', () => {
       removeItem: () => {},
       clear: () => {},
     };
-    optimizationEngine = new OptimizationEngine();
-    optimizationEngine.clearDismissedInsights();
+    recommendationService = new RecommendationService();
+    recommendationService.clearDismissedInsights();
     sampleTransactions = [
       {
         id: '1',
@@ -45,14 +45,14 @@ describe('OptimizationEngine', () => {
 
   describe('getOptimizationInsights', () => {
     it('should generate optimization insights for transactions', () => {
-      const insights = optimizationEngine.getOptimizationInsights(
+      const insights = recommendationService.getOptimizationInsights(
         sampleTransactions,
         { startDate: '2024-01-15', endDate: '2024-01-18' }
       );
       expect(insights).toBeInstanceOf(Array);
     });
     it('should return empty array for empty transactions', () => {
-      const insights = optimizationEngine.getOptimizationInsights([], {
+      const insights = recommendationService.getOptimizationInsights([], {
         startDate: '2024-01-15',
         endDate: '2024-01-18',
       });
@@ -62,7 +62,7 @@ describe('OptimizationEngine', () => {
 
   describe('getSavingsPotential', () => {
     it('should calculate total savings potential', () => {
-      const savings = optimizationEngine.getSavingsPotential(
+      const savings = recommendationService.getSavingsPotential(
         sampleTransactions,
         { startDate: '2024-01-15', endDate: '2024-01-18' }
       );
@@ -70,7 +70,7 @@ describe('OptimizationEngine', () => {
       expect(savings).toHaveProperty('totalPotential');
     });
     it('should calculate potential savings rate', () => {
-      const savings = optimizationEngine.getSavingsPotential(
+      const savings = recommendationService.getSavingsPotential(
         sampleTransactions,
         { startDate: '2024-01-15', endDate: '2024-01-18' }
       );
@@ -80,7 +80,7 @@ describe('OptimizationEngine', () => {
 
   describe('getAlternativeSuggestions', () => {
     it('should return suggestions for valid category', () => {
-      const suggestions = optimizationEngine.getAlternativeSuggestions(
+      const suggestions = recommendationService.getAlternativeSuggestions(
         'Food',
         sampleTransactions,
         { startDate: '2024-01-15', endDate: '2024-01-18' }
@@ -88,7 +88,7 @@ describe('OptimizationEngine', () => {
       expect(suggestions).toBeInstanceOf(Array);
     });
     it('should return empty array for invalid category', () => {
-      const suggestions = optimizationEngine.getAlternativeSuggestions(
+      const suggestions = recommendationService.getAlternativeSuggestions(
         'InvalidCategory',
         sampleTransactions,
         { startDate: '2024-01-15', endDate: '2024-01-18' }
@@ -99,24 +99,24 @@ describe('OptimizationEngine', () => {
 
   describe('dismissInsight', () => {
     it('should dismiss insight and persist to storage', () => {
-      optimizationEngine.dismissInsight('test_insight');
-      const stats = optimizationEngine.getStats();
+      recommendationService.dismissInsight('test_insight');
+      const stats = recommendationService.getStats();
       expect(stats.dismissedCount).toBe(1);
     });
   });
 
   describe('restoreInsight', () => {
     it('should restore dismissed insight', () => {
-      optimizationEngine.dismissInsight('test_insight');
-      optimizationEngine.restoreInsight('test_insight');
-      const stats = optimizationEngine.getStats();
+      recommendationService.dismissInsight('test_insight');
+      recommendationService.restoreInsight('test_insight');
+      const stats = recommendationService.getStats();
       expect(stats.dismissedCount).toBe(0);
     });
   });
 
   describe('getStats', () => {
     it('should return optimization engine statistics', () => {
-      const stats = optimizationEngine.getStats();
+      const stats = recommendationService.getStats();
       expect(stats).toHaveProperty('dismissedCount');
       expect(stats).toHaveProperty('lastAnalysisDate');
     });
@@ -134,7 +134,7 @@ describe('OptimizationEngine', () => {
           accountId: 'main',
         },
       ];
-      const insights = optimizationEngine.getOptimizationInsights(incomeOnly, {
+      const insights = recommendationService.getOptimizationInsights(incomeOnly, {
         startDate: '2024-01-15',
         endDate: '2024-01-18',
       });

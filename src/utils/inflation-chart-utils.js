@@ -5,7 +5,7 @@
  * and creating visual indicators for personal inflation analysis.
  */
 
-import { PersonalInflationService } from '../core/personal-inflation-service.js';
+import { trendService } from '../core/analytics/TrendService.js';
 import { getChartColors } from '../core/chart-config.js';
 
 /**
@@ -31,7 +31,7 @@ export const prepareChartData = (
   if (categories && categories.length > 0) {
     // If specific categories provided (e.g. from Top Movers), calculate inflation for them
     topCategories = categories.map(catName => {
-      const inflationRate = PersonalInflationService.calculateCategoryInflation(
+      const inflationRate = trendService.calculateCategoryInflation(
         transactions,
         catName,
         period,
@@ -41,12 +41,12 @@ export const prepareChartData = (
       return {
         category: catName,
         inflationRate,
-        trend: PersonalInflationService.getTrendDirection(inflationRate),
+        trend: trendService.getTrendDirection(inflationRate),
       };
     });
   } else {
     // Fall back to top categories by inflation impact
-    topCategories = PersonalInflationService.getTopInflationCategories(
+    topCategories = trendService.getTopInflationCategories(
       transactions,
       6, // Default to 6 categories
       period,
@@ -63,7 +63,7 @@ export const prepareChartData = (
   const categoryColors = getChartColors(topCategories.length, false, 'solid');
 
   return topCategories.map((category, index) => {
-    const monthlyData = PersonalInflationService.getMonthlySpendingData(
+    const monthlyData = trendService.getMonthlySpendingData(
       transactions,
       category.category,
       period,

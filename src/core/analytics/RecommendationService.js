@@ -1,22 +1,15 @@
 /**
- * OptimizationEngine
- * Feature 3.3.1 - Advanced Actionable Insights
- *
- * Provides optimization suggestions based on spending patterns.
+ * RecommendationService
+ * Consolidated service for budget recommendations and optimization suggestions
+ * Merges: BudgetRecommendationService (budgets) + optimization-engine.js
  */
 
 import { MetricsService } from './MetricsService.js';
 import { CustomCategoryService } from '../custom-category-service.js';
 
-// Minimum threshold for optimization recommendations (in currency units)
 const MIN_OPTIMIZATION_THRESHOLD = 50;
-
-// Default reduction percent for generic categories
 const DEFAULT_CATEGORY_REDUCTION_PERCENT = 0.15;
 
-// Strategy presets for known spending patterns.
-// These are hardcoded as predefined heuristics that the engine attempts to map
-// to account/category names to provide tailored financial advice.
 const SUBSTITUTION_PATTERNS = [
   {
     match: /заведения|ресторант|кафе|eating out|restaurant|dining|cafe/i,
@@ -98,30 +91,23 @@ const ELIMINATION_PATTERNS = [
   },
 ];
 
-export class OptimizationEngine {
+export class RecommendationService {
   constructor() {
     this._loadPersistedData();
   }
 
   _loadPersistedData() {
     try {
-      const data = localStorage.getItem('blinkbudget_optimization_data');
+      const data = localStorage.getItem('blinkbudget_recommendation_data');
       this.persistedData = data
         ? JSON.parse(data)
         : {
-            savingsGoals: [],
-            customRecommendations: [],
             dismissedInsights: [],
             lastAnalysisDate: null,
           };
     } catch (error) {
-      console.warn(
-        '[OptimizationEngine] Failed to load persisted data:',
-        error
-      );
+      console.warn('[RecommendationService] Failed to load persisted data:', error);
       this.persistedData = {
-        savingsGoals: [],
-        customRecommendations: [],
         dismissedInsights: [],
         lastAnalysisDate: null,
       };
@@ -132,14 +118,286 @@ export class OptimizationEngine {
     try {
       this.persistedData.lastAnalysisDate = new Date().toISOString();
       localStorage.setItem(
-        'blinkbudget_optimization_data',
+        'blinkbudget_recommendation_data',
         JSON.stringify(this.persistedData)
       );
     } catch (err) {
-      console.warn('[OptimizationEngine] Failed to persist data', err);
+      console.warn('[RecommendationService] Failed to persist data', err);
     }
   }
 
+  // ========== Budget Recommendation Methods (from BudgetRecommendationService) ==========
+
+  /**
+   * Get historical periods for comparison
+   */
+  _getHistoricalPeriods(currentPeriod, monthsBack = 3) {
+    const periods = [];
+    const start = new Date(currentPeriod.startDate);
+    const maxMonthsBack = Math.min(monthsBack, 12);
+
+    for (let i = 1; i <= maxMonthsBack; i++) {
+      const periodStart = new Date(start);
+      periodStart.setMonth(periodStart.getMonth() - i);
+      const periodEnd = new Date(periodStart);
+      periodEnd.setMonth(periodEnd.getMonth() + 1);
+      periodEnd.setDate(0);
+
+      periods.push({
+        startDate: periodStart.toISOString().split('T')[0],
+        endDate: periodEnd.toISOString().split('T')[0],
+        label: periodStart.toLocaleDateString('en-US', {
+          month: 'short',
+          year: 'numeric',
+        }),
+      });
+    }
+
+    return periods;
+  }
+
+  /**
+   * Calculate average spending for a category across periods
+   */
+  _calculateCategoryAverage(transactions, category, periods) {
+    const amounts = [];
+
+    periods.forEach(period => {
+      const periodTransactions = transactions.filter(t => {
+        const tDate = t.date || t.timestamp;
+        if (!tDate) return false;
+        return (
+          tDate >= period.startDate &&
+          tDate <= period.endDate &&
+          t.category === category &&
+          t.type === 'expense'
+        );
+      });
+
+      if (periodTransactions.length > 0) {
+        const total = periodTransactions.reduce(
+          (sum, t) => sum + (t.amount || 0),
+          0
+        );
+        amounts.push(total);
+      }
+    });
+
+    if (amounts.length === 0) return 0;
+    return amounts.reduce((a, b) => a + b, 0) / amounts.length;
+  }
+
+  /**
+   * Get percentile rankings for categories
+   */
+  getPercentileRankings(transactions, timePeriod) {
+    if (!transactions || transactions.length === 0) {
+      return [];
+    }
+
+    const categorySpending = MetricsService.getCategorySpending(
+      transactions,
+      timePeriod
+    );
+
+    const rankings = Object.entries(categorySpending).map(
+      ([category, amounts]) => {
+        const sorted = [...amounts].sort((a, b) => a - b);
+        const sum = amounts.reduce((a, b) => a + b, 0);
+        const avg = sum / amounts.length;
+
+        let median = 0;
+        if (sorted.length > 0) {
+          const mid = Math.floor(sorted.length / 2);
+          if (sorted.length % 2 === 0) {
+            median = (sorted[mid - 1] + sorted[mid]) / 2;
+          } else {
+            median = sorted[mid];
+          }
+        }
+
+        return {
+          category,
+          total: sum,
+          average: Math.round(avg * 100) / 100,
+          transactionCount: amounts.length,
+          median: Math.round(median * 100) / 100,
+          highest: Math.max(...amounts),
+          lowest: Math.min(...amounts),
+        };
+      }
+    );
+
+    return rankings.sort((a, b) => b.total - a.total);
+  }
+
+  /**
+   * Get budget recommendations based on historical spending
+   */
+  getBudgetRecommendations(transactions, timePeriod) {
+    if (!transactions || transactions.length === 0) {
+      return [];
+    }
+
+    const periods = this._getHistoricalPeriods(timePeriod, 3);
+
+    const currentBreakdown = MetricsService.calculateCategoryBreakdown(
+      transactions,
+      timePeriod
+    );
+    const currentSpending = {};
+    currentBreakdown.categories.forEach(cat => {
+      currentSpending[cat.name] = cat.amount;
+    });
+
+    const recommendations = [];
+    const categories = Object.keys(currentSpending);
+
+    categories.forEach(category => {
+      const current = currentSpending[category];
+      const historicalAverage = this._calculateCategoryAverage(
+        transactions,
+        category,
+        periods
+      );
+
+      if (historicalAverage > 0) {
+        const recommended = Math.round(historicalAverage * 1.1 * 100) / 100;
+        const confidence = Math.min(
+          100,
+          Math.max(
+            0,
+            100 - (Math.abs(current - historicalAverage) / historicalAverage) * 50
+          )
+        );
+
+        let reasoning;
+        if (current > historicalAverage * 1.2) {
+          reasoning = `You're spending ${Math.round((current / historicalAverage - 1) * 100)}% more than usual. Consider reducing to stay on track.`;
+        } else if (current < historicalAverage * 0.8) {
+          reasoning = `Great job! You're spending ${Math.round((1 - current / historicalAverage) * 100)}% less than your average.`;
+        } else {
+          reasoning = `Your spending is within your normal range.`;
+        }
+
+        recommendations.push({
+          id: `rec_${category.replace(/\s+/g, '_')}`,
+          category,
+          currentBudget: current,
+          recommendedBudget: recommended,
+          historicalAverage,
+          confidence: Math.round(confidence),
+          reasoning,
+          priority:
+            Math.abs(current - historicalAverage) / historicalAverage > 0.3
+              ? 'high'
+              : 'normal',
+        });
+      }
+    });
+
+    return recommendations.sort((a, b) => {
+      if (a.priority === 'high' && b.priority !== 'high') return -1;
+      if (b.priority === 'high' && a.priority !== 'high') return 1;
+      return (
+        Math.abs(b.currentBudget - b.recommendedBudget) -
+        Math.abs(a.currentBudget - a.recommendedBudget)
+      );
+    });
+  }
+
+  /**
+   * Get recommended amount for a specific category
+   */
+  getRecommendedAmount(categoryId, transactions) {
+    if (!transactions || transactions.length === 0 || !categoryId) {
+      return { recommended: 0, confidence: 0 };
+    }
+
+    const categoryTransactions = transactions.filter(
+      t => t.type === 'expense' && t.category === categoryId
+    );
+
+    if (categoryTransactions.length === 0) {
+      return { recommended: 0, confidence: 0 };
+    }
+
+    const amounts = categoryTransactions.map(t => t.amount || 0);
+    const sum = amounts.reduce((a, b) => a + b, 0);
+    const avg = sum / amounts.length;
+
+    const confidence = Math.min(100, categoryTransactions.length * 10);
+    const recommended = Math.round(avg * 1.1 * 100) / 100;
+
+    return {
+      recommended,
+      average: Math.round(avg * 100) / 100,
+      confidence,
+      dataPoints: categoryTransactions.length,
+    };
+  }
+
+  /**
+   * Get seasonal adjustments for categories
+   */
+  getSeasonalAdjustments(categoryId, transactions) {
+    if (!transactions || transactions.length === 0 || !categoryId) {
+      return { adjustment: 1, factors: [] };
+    }
+
+    const monthlySpending = {};
+    transactions.forEach(t => {
+      if (t.type !== 'expense' || t.category !== categoryId) return;
+      const tDate = t.date || t.timestamp;
+      if (!tDate) return;
+
+      const month = new Date(tDate).getMonth();
+      if (!monthlySpending[month]) {
+        monthlySpending[month] = [];
+      }
+      monthlySpending[month].push(t.amount || 0);
+    });
+
+    const monthlyAvg = {};
+    Object.entries(monthlySpending).forEach(([month, amounts]) => {
+      const sum = amounts.reduce((a, b) => a + b, 0);
+      monthlyAvg[month] = sum / amounts.length;
+    });
+
+    const allAmounts = Object.values(monthlySpending).flat();
+    let overallAvg = 0;
+    if (allAmounts.length > 0) {
+      overallAvg = allAmounts.reduce((a, b) => a + b, 0) / allAmounts.length;
+    }
+
+    const currentMonth = new Date().getMonth();
+    const currentMonthAvg = monthlyAvg[currentMonth] || overallAvg;
+    const adjustment =
+      currentMonthAvg > 0 && overallAvg > 0 ? currentMonthAvg / overallAvg : 1;
+
+    const factors = Object.entries(monthlyAvg)
+      .map(([month, avg]) => ({
+        month: parseInt(month),
+        label: new Date(2024, parseInt(month), 1).toLocaleDateString('en-US', {
+          month: 'long',
+        }),
+        average: Math.round(avg * 100) / 100,
+        factor: overallAvg > 0 ? Math.round((avg / overallAvg) * 100) / 100 : 1,
+      }))
+      .sort((a, b) => a.month - b.month);
+
+    return {
+      adjustment: Math.round(adjustment * 100) / 100,
+      currentMonth: new Date().toLocaleDateString('en-US', { month: 'long' }),
+      factors,
+    };
+  }
+
+  // ========== Optimization Engine Methods ==========
+
+  /**
+   * Get optimization insights
+   */
   getOptimizationInsights(transactions, timePeriod) {
     const insights = [];
 
@@ -215,13 +473,10 @@ export class OptimizationEngine {
 
   _generateReductionInsights(categories, averageExpense) {
     const insights = [];
-
-    // Get all expense categories from the category manager to ensure we include user-defined ones
     const allExpenseCategories =
       CustomCategoryService.getAllCategoryNames('expense') || [];
 
     categories.forEach(category => {
-      // Check if category matches specific recommendation pattern
       const rec = REDUCTION_PATTERNS.find(p => p.match.test(category.name));
 
       if (rec && category.amount >= MIN_OPTIMIZATION_THRESHOLD) {
@@ -246,7 +501,6 @@ export class OptimizationEngine {
         category.amount >= MIN_OPTIMIZATION_THRESHOLD &&
         allExpenseCategories.includes(category.name)
       ) {
-        // Generic reduction recommendation for any category above threshold
         const totalSavings =
           category.amount * DEFAULT_CATEGORY_REDUCTION_PERCENT;
         const id = `reduction_${category.name.toLowerCase()}`;
@@ -321,9 +575,7 @@ export class OptimizationEngine {
   _generateBudgetInsights(transactions, _timePeriod) {
     const insights = [];
 
-    // Try to get BudgetPlanner if available
     try {
-      // Check if BudgetPlanner is available globally
       if (typeof window !== 'undefined' && window.BudgetPlanner) {
         const statuses = window.BudgetPlanner.getBudgetsStatus(transactions);
         if (statuses && Array.isArray(statuses)) {
@@ -368,6 +620,9 @@ export class OptimizationEngine {
     return insights;
   }
 
+  /**
+   * Get total savings potential
+   */
   getSavingsPotential(transactions, timePeriod) {
     const insights = this.getOptimizationInsights(transactions, timePeriod);
 
@@ -414,6 +669,9 @@ export class OptimizationEngine {
     };
   }
 
+  /**
+   * Get alternative suggestions for a category
+   */
   getAlternativeSuggestions(categoryId, transactions, timePeriod) {
     const suggestions = [];
     const breakdown = MetricsService.calculateCategoryBreakdown(
@@ -485,6 +743,9 @@ export class OptimizationEngine {
     return suggestions;
   }
 
+  /**
+   * Dismiss an optimization insight
+   */
   dismissInsight(insightId) {
     if (!this.persistedData.dismissedInsights.includes(insightId)) {
       this.persistedData.dismissedInsights.push(insightId);
@@ -492,6 +753,9 @@ export class OptimizationEngine {
     }
   }
 
+  /**
+   * Restore a dismissed insight
+   */
   restoreInsight(insightId) {
     const idx = this.persistedData.dismissedInsights.indexOf(insightId);
     if (idx > -1) {
@@ -500,17 +764,20 @@ export class OptimizationEngine {
     }
   }
 
+  /**
+   * Clear all dismissed insights
+   */
   clearDismissedInsights() {
     this.persistedData.dismissedInsights = [];
     this._persistData();
   }
 
+  /**
+   * Get service statistics
+   */
   getStats() {
     return {
       dismissedCount: this.persistedData.dismissedInsights.length,
-      savingsGoalsCount: this.persistedData.savingsGoals.length,
-      customRecommendationsCount:
-        this.persistedData.customRecommendations.length,
       lastAnalysisDate: this.persistedData.lastAnalysisDate,
     };
   }
@@ -525,6 +792,5 @@ export class OptimizationEngine {
   }
 }
 
-export const optimizationEngine = new OptimizationEngine();
-
-export default optimizationEngine;
+export const recommendationService = new RecommendationService();
+export default recommendationService;

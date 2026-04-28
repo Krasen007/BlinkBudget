@@ -1,6 +1,6 @@
-import { optimizationEngine } from './analytics/optimization-engine.js';
-import { trendAnalysisService } from './analytics/trend-analysis-service.js';
-import { budgetRecommendationService } from './analytics/BudgetRecommendationService.js';
+import { recommendationService } from './analytics/RecommendationService.js';
+import { trendService } from './analytics/TrendService.js';
+import { ComparisonService } from './analytics/ComparisonService.js';
 /**
  * Analytics Engine for BlinkBudget Reports & Insights
  *
@@ -394,7 +394,7 @@ export class AnalyticsEngine {
   // Legacy/Internal methods - mostly proxied if still needed by other services
   // but many are now static in their respective services.
 
-  // ========== Optimization Engine (Feature 3.3.1) ==========
+  // ========== Recommendation Service (Feature 3.3.1 & 3.3.3) ==========
 
   /**
    * Generate optimization insights
@@ -403,7 +403,7 @@ export class AnalyticsEngine {
    * @returns {Array} Optimization insights
    */
   getOptimizationInsights(transactions, timePeriod) {
-    return optimizationEngine.getOptimizationInsights(transactions, timePeriod);
+    return recommendationService.getOptimizationInsights(transactions, timePeriod);
   }
 
   /**
@@ -413,7 +413,7 @@ export class AnalyticsEngine {
    * @returns {Object} Savings potential breakdown
    */
   getSavingsPotential(transactions, timePeriod) {
-    return optimizationEngine.getSavingsPotential(transactions, timePeriod);
+    return recommendationService.getSavingsPotential(transactions, timePeriod);
   }
 
   /**
@@ -424,7 +424,7 @@ export class AnalyticsEngine {
    * @returns {Array} Alternative suggestions
    */
   getAlternativeSuggestions(categoryId, transactions, timePeriod) {
-    return optimizationEngine.getAlternativeSuggestions(
+    return recommendationService.getAlternativeSuggestions(
       categoryId,
       transactions,
       timePeriod
@@ -436,7 +436,7 @@ export class AnalyticsEngine {
    * @param {string} insightId - Insight ID
    */
   dismissOptimizationInsight(insightId) {
-    optimizationEngine.dismissInsight(insightId);
+    recommendationService.dismissInsight(insightId);
   }
 
   /**
@@ -444,10 +444,10 @@ export class AnalyticsEngine {
    * @returns {Object} Optimization statistics
    */
   getOptimizationStats() {
-    return optimizationEngine.getStats();
+    return recommendationService.getStats();
   }
 
-  // ========== Trend Analysis Service (Feature 3.3.2) ==========
+  // ========== Trend Service (Feature 3.3.2) ==========
 
   /**
    * Get trend analysis for categories
@@ -456,7 +456,7 @@ export class AnalyticsEngine {
    * @returns {Object} Trend analysis results
    */
   getTrendAnalysis(categoryId, transactions) {
-    return trendAnalysisService.getTrendAnalysis(categoryId, transactions);
+    return trendService.getTrendAnalysis(categoryId, transactions);
   }
 
   /**
@@ -465,7 +465,7 @@ export class AnalyticsEngine {
    * @returns {Object} Consistency scores
    */
   getConsistencyScores(transactions) {
-    return trendAnalysisService.getConsistencyScores(transactions);
+    return trendService.getConsistencyScores(transactions);
   }
 
   /**
@@ -475,7 +475,7 @@ export class AnalyticsEngine {
    * @returns {Object} Seasonal pattern data
    */
   detectSeasonalPatterns(categoryId, transactions) {
-    return trendAnalysisService.detectSeasonalPatterns(
+    return trendService.detectSeasonalPatterns(
       categoryId,
       transactions
     );
@@ -488,23 +488,53 @@ export class AnalyticsEngine {
    * @returns {Object} Spending direction
    */
   getSpendingDirection(categoryId, transactions) {
-    return trendAnalysisService.getSpendingDirection(categoryId, transactions);
+    return trendService.getSpendingDirection(categoryId, transactions);
   }
 
-  // ========== Budget Recommendation Service (Feature 3.3.3 & 3.3.4) ==========
+  // ========== Comparison Service (Feature 3.3.3) ==========
 
   /**
-   * Get personal benchmarking data - compare current vs historical spending
+   * Compare spending patterns between periods
+   * @param {Array} transactions - Transaction data
+   * @param {Object} currentPeriod - Current time period
+   * @param {Object} comparisonPeriod - Previous time period
+   * @returns {Object} Comparison results
+   */
+  comparePeriodsSpending(transactions, currentPeriod, comparisonPeriod) {
+    return ComparisonService.comparePeriodsSpending(
+      transactions,
+      currentPeriod,
+      comparisonPeriod
+    );
+  }
+
+  /**
+   * Get personal benchmarking data - compare current vs last month
    * @param {Array} transactions - Transaction data
    * @param {Object} timePeriod - Time period
    * @returns {Array} Benchmarking data
    */
   getPersonalBenchmarking(transactions, timePeriod) {
-    return budgetRecommendationService.getPersonalBenchmarking(
+    return ComparisonService.getPersonalBenchmarking(
       transactions,
       timePeriod
     );
   }
+
+  /**
+   * Get historical insights for multiple periods
+   * @param {Array} transactions - Transaction data
+   * @param {Array} historicalPeriods - Array of historical periods
+   * @returns {Object} Historical insights
+   */
+  getHistoricalInsights(transactions, historicalPeriods) {
+    return ComparisonService.getHistoricalInsights(
+      transactions,
+      historicalPeriods
+    );
+  }
+
+  // ========== Recommendation Service (Feature 3.3.4) ==========
 
   /**
    * Get percentile rankings for categories
@@ -513,7 +543,7 @@ export class AnalyticsEngine {
    * @returns {Array} Percentile rankings
    */
   getPercentileRankings(transactions, timePeriod) {
-    return budgetRecommendationService.getPercentileRankings(
+    return recommendationService.getPercentileRankings(
       transactions,
       timePeriod
     );
@@ -526,7 +556,7 @@ export class AnalyticsEngine {
    * @returns {Array} Budget recommendations
    */
   getBudgetRecommendations(transactions, timePeriod) {
-    return budgetRecommendationService.getBudgetRecommendations(
+    return recommendationService.getBudgetRecommendations(
       transactions,
       timePeriod
     );
@@ -539,7 +569,7 @@ export class AnalyticsEngine {
    * @returns {Object} Recommended amount
    */
   getRecommendedAmount(categoryId, transactions) {
-    return budgetRecommendationService.getRecommendedAmount(
+    return recommendationService.getRecommendedAmount(
       categoryId,
       transactions
     );
@@ -552,7 +582,7 @@ export class AnalyticsEngine {
    * @returns {Object} Seasonal adjustments
    */
   getSeasonalAdjustments(categoryId, transactions) {
-    return budgetRecommendationService.getSeasonalAdjustments(
+    return recommendationService.getSeasonalAdjustments(
       categoryId,
       transactions
     );

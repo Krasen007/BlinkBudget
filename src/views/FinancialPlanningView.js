@@ -14,7 +14,6 @@
 import { Router } from '../core/router.js';
 import { ForecastEngine } from '../core/forecast-engine.js';
 import { AccountBalancePredictor } from '../core/Account/account-balance-predictor.js';
-import { RiskAssessor } from '../core/risk-assessor.js';
 import { ChartRenderer } from '../components/ChartRenderer.js';
 import { AuthService } from '../core/auth-service.js';
 import { SyncService } from '../core/sync-service.js';
@@ -45,7 +44,6 @@ export const FinancialPlanningView = () => {
   // Initialize calculation engines
   const forecastEngine = new ForecastEngine();
   const balancePredictor = new AccountBalancePredictor();
-  const riskAssessor = new RiskAssessor();
   const chartRenderer = new ChartRenderer();
 
   // Track active charts for cleanup
@@ -243,7 +241,7 @@ export const FinancialPlanningView = () => {
    * Render Overview section - Financial health summary
    */
   function renderOverviewSection() {
-    const overviewElement = OverviewSection(planningData, riskAssessor);
+    const overviewElement = OverviewSection(planningData);
     content.appendChild(overviewElement);
   }
 

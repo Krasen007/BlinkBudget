@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { TrendAnalysisService } from '../../src/core/analytics/trend-analysis-service.js';
+import { TrendService } from '../../src/core/analytics/TrendService.js';
 import { TRANSACTION_TYPES } from '../../src/utils/constants.js';
 
-describe('TrendAnalysisService', () => {
+describe('TrendService', () => {
   let trendService;
   let sampleTransactions;
 
   beforeEach(() => {
-    trendService = new TrendAnalysisService();
+    trendService = new TrendService();
     sampleTransactions = [
       {
         id: '1',
