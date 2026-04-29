@@ -675,15 +675,25 @@ async function createSavingsGoalsSubsection() {
           goal,
           goal.progress.currentAmount,
           () => {
-            // Show goal details
+            // Show goal details using toast notification
             const details = `
 Goal: ${goal.name}
-Target: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(goal.target)}
+Target: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(goal.targetAmount)}
 Current: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(goal.progress.currentAmount)}
 Progress: ${Math.round(goal.progress.percentage)}%
 Remaining: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(goal.progress.remaining)}
             `;
-            alert(details);
+            
+            // Import and use toast notification
+            import('../../utils/toast-notifications.js')
+              .then(({ showInfoToast }) => {
+                showInfoToast(details, { duration: 5000 });
+              })
+              .catch(err => {
+                console.error('Failed to load toast notifications:', err);
+                // Fallback to alert if toast fails
+                alert(details);
+              });
           }
         );
         subsection.appendChild(goalCard);
@@ -754,16 +764,27 @@ Remaining: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR'
           cursor: pointer;
         `;
 
-        createBtn.addEventListener('click', () => {
+        createBtn.addEventListener('click', async () => {
+          const targetAmount = rec.target || 1000;
+          const targetDate = new Date();
+          targetDate.setMonth(targetDate.getMonth() + 6); // Default to 6 months from now
+          
           const newGoal = {
             id: Date.now().toString(),
             name: rec.title,
-            target: rec.target || 1000,
+            targetAmount: targetAmount,
             category: rec.category || 'General',
             createdDate: new Date().toISOString(),
-            targetDate: null
+            targetDate: targetDate
           };
-          SavingsGoalsService.saveSavingsGoal(newGoal);
+          
+          try {
+            await SavingsGoalsService.saveSavingsGoal(newGoal);
+            // Remove the recommendation card after successful creation
+            recCard.remove();
+          } catch (error) {
+            console.error('Failed to create savings goal:', error);
+          }
         });
 
         recCard.appendChild(recContent);

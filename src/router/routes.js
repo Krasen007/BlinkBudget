@@ -38,9 +38,9 @@ export const routes = {
     ViewManager.setView(LandingView());
     updateMobileNavigation('landing');
   },
-  dashboard: () => {
+  dashboard: (params = {}) => {
     NavigationState.setLastActiveView('dashboard');
-    ViewManager.setView(DashboardView());
+    ViewManager.setView(DashboardView(params));
     updateMobileNavigation('dashboard');
   },
   'add-expense': params => {

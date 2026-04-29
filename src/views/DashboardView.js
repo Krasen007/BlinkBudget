@@ -128,7 +128,7 @@ const preloadFinancialPlanningData = async () => {
   }
 };
 
-export const DashboardView = () => {
+export const DashboardView = (params = {}) => {
   const container = document.createElement('div');
   container.className = 'view-dashboard view-container';
 
@@ -667,7 +667,11 @@ export const DashboardView = () => {
     }
 
     // Recent Transactions
-    const highlightTransactionIds = getTransactionToHighlight();
+    const highlightTransactionIds = getTransactionToHighlight() || [];
+    // Add highlight transaction ID from params if provided
+    if (params.highlightTransactionId) {
+      highlightTransactionIds.push(params.highlightTransactionId);
+    }
     const transactionList = TransactionList({
       transactions,
       currentAccountFilter,
@@ -712,6 +716,18 @@ export const DashboardView = () => {
       },
     });
     content.appendChild(transactionList);
+
+    // Scroll to highlighted transaction if provided
+    if (params.highlightTransactionId) {
+      setTimeout(() => {
+        const transactionItems = content.querySelectorAll('.transaction-list-item');
+        transactionItems.forEach(item => {
+          if (item.dataset.transactionId === params.highlightTransactionId) {
+            item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        });
+      }, 100); // Small delay to ensure DOM is ready
+    }
   };
 
   renderDashboard();

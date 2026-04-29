@@ -21,9 +21,12 @@ import {
   BREAKPOINTS,
   TIMING,
   STORAGE_KEYS,
+  FONT_SIZES,
 } from '../utils/constants.js';
 import { debounce } from '../utils/touch-utils.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
+import { UnusualSpendingDetector } from '../core/unusual-spending-detector.js';
+import { UnusualSpendingCard } from '../components/ui/ActionCard.js';
 
 // Import utility modules
 import {
@@ -1182,6 +1185,51 @@ export const ReportsView = (params = {}) => {
         const insightsSection = InsightsSection(currentData);
         insightsSection.style.setProperty('margin-top', '0', 'important');
         section.appendChild(insightsSection);
+      }
+
+      // Add unusual spending alerts below Financial Insights
+      if (currentData.transactions && currentData.transactions.length > 0) {
+        const unusualTransactions = UnusualSpendingDetector.detectUnusualTransactions(currentData.transactions);
+        
+        if (unusualTransactions.length > 0) {
+          const alertsSection = document.createElement('div');
+          alertsSection.className = 'unusual-spending-alerts';
+          alertsSection.style.cssText = `
+            margin-top: ${SPACING.LG};
+            display: flex;
+            flex-direction: column;
+            gap: ${SPACING.SM};
+          `;
+
+          const alertsTitle = document.createElement('h4');
+          alertsTitle.textContent = 'Unusual Spending Detected';
+          alertsTitle.style.cssText = `
+            font-size: ${FONT_SIZES.SM};
+            font-weight: '600';
+            margin: '0 0 ${SPACING.XS} 0';
+            color: ${COLORS.TEXT_MAIN};
+          `;
+          alertsSection.appendChild(alertsTitle);
+
+          unusualTransactions.slice(0, 3).forEach(transaction => {
+            const unusualData = transaction.unusualSpending;
+            const alertCard = UnusualSpendingCard(
+              transaction,
+              unusualData.averageAmount,
+              () => {
+                // Navigate to Dashboard with transaction ID for highlighting
+                if (Router && typeof Router.navigate === 'function') {
+                  Router.navigate('dashboard', { highlightTransactionId: transaction.id });
+                } else {
+                  console.warn('Router.navigate not available');
+                }
+              }
+            );
+            alertsSection.appendChild(alertCard);
+          });
+
+          section.appendChild(alertsSection);
+        }
       }
       // Hide skeleton loader when content is loaded
       hideSkeletonLoader('financialInsights');

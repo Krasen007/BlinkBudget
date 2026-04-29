@@ -237,49 +237,6 @@ export const ActionCard = (options) => {
 };
 
 /**
- * Create a budget alert card
- * @param {Object} budget - Budget object
- * @param {number} spent - Amount spent
- * @param {number} budgetLimit - Budget limit
- * @param {Function} onViewDetails - Callback for viewing details
- * @returns {HTMLElement} Budget alert card
- */
-export const BudgetAlertCard = (budget, spent, budgetLimit, onViewDetails) => {
-  const percentage = (spent / budgetLimit) * 100;
-  const remaining = budgetLimit - spent;
-  
-  let type, title, description;
-  if (percentage >= 100) {
-    type = 'alert';
-    title = 'Budget Exceeded';
-    description = `You've spent ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(Math.abs(remaining))} over your ${budget.category} budget`;
-  } else if (percentage >= 80) {
-    type = 'warning';
-    title = 'Budget Warning';
-    description = `Only ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(remaining)} remaining in ${budget.category} budget`;
-  } else if (percentage >= 60) {
-    type = 'info';
-    title = 'Budget Progress';
-    description = `${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(remaining)} remaining in ${budget.category} budget`;
-  } else {
-    type = 'success';
-    title = 'Budget On Track';
-    description = `Good progress on ${budget.category} budget`;
-  }
-
-  return ActionCard({
-    title,
-    description,
-    type,
-    amount: spent,
-    percentage,
-    actionText: 'View Details',
-    onAction: onViewDetails,
-    icon: type === 'alert' ? '!' : type === 'warning' ? '!' : type === 'success' ? '!' : 'i',
-  });
-};
-
-/**
  * Create an unusual spending alert card
  * @param {Object} transaction - Unusual transaction
  * @param {number} averageAmount - Average amount for comparison

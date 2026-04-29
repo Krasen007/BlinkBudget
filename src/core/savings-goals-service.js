@@ -12,7 +12,7 @@ export class SavingsGoalsService {
    */
   static async getSavingsGoals() {
     const { StorageService } = await import('./storage.js');
-    return StorageService.getSavingsGoals() || [];
+    return StorageService.getGoals() || [];
   }
 
   /**
@@ -22,7 +22,7 @@ export class SavingsGoalsService {
    */
   static async saveSavingsGoal(goal) {
     const { StorageService } = await import('./storage.js');
-    return StorageService.saveSavingsGoal(goal);
+    return StorageService.addGoal(goal);
   }
 
   /**
@@ -31,7 +31,7 @@ export class SavingsGoalsService {
    */
   static async deleteSavingsGoal(goalId) {
     const { StorageService } = await import('./storage.js');
-    return StorageService.deleteSavingsGoal(goalId);
+    return StorageService.deleteGoal(goalId);
   }
 
   /**
@@ -69,8 +69,8 @@ export class SavingsGoalsService {
       return sum + (t.amount || 0);
     }, 0);
 
-    const percentage = goal.target > 0 ? (totalSaved / goal.target) * 100 : 0;
-    const remaining = Math.max(0, goal.target - totalSaved);
+    const percentage = goal.targetAmount > 0 ? (totalSaved / goal.targetAmount) * 100 : 0;
+    const remaining = Math.max(0, goal.targetAmount - totalSaved);
     const isCompleted = percentage >= 100;
     
     // Calculate estimated completion date based on recent saving rate
@@ -92,7 +92,7 @@ export class SavingsGoalsService {
 
     return {
       currentAmount: totalSaved,
-      targetAmount: goal.target,
+      targetAmount: goal.targetAmount,
       percentage: Math.min(percentage, 100),
       remaining,
       isCompleted,
@@ -186,7 +186,7 @@ export class SavingsGoalsService {
   static async getSavingsSummary(transactions = []) {
     const goalsWithProgress = await this.calculateGoalProgress(transactions);
     
-    const totalTarget = goalsWithProgress.reduce((sum, goal) => sum + goal.target, 0);
+    const totalTarget = goalsWithProgress.reduce((sum, goal) => sum + goal.targetAmount, 0);
     const totalSaved = goalsWithProgress.reduce((sum, goal) => sum + goal.progress.currentAmount, 0);
     const completedGoals = goalsWithProgress.filter(goal => goal.progress.isCompleted).length;
     const activeGoals = goalsWithProgress.length - completedGoals;

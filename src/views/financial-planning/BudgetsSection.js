@@ -12,7 +12,6 @@ import { BudgetForm } from '../../components/BudgetForm.js';
 import { BudgetProgress } from '../../components/BudgetProgress.js';
 import { BudgetSummaryCard } from '../../components/BudgetSummaryCard.js';
 import { BudgetPlanner } from '../../core/budget-planner.js';
-import { BudgetAlertCard } from '../../components/ui/ActionCard.js';
 
 /**
  * Create budgets management section
@@ -46,18 +45,16 @@ export const BudgetsSection = async planningData => {
     const summaryCard = BudgetSummaryCard(summaryData);
     container.appendChild(summaryCard);
 
-    // Budget Alerts Section
-    const alertsSection = document.createElement('div');
-    alertsSection.style.display = 'flex';
-    alertsSection.style.flexDirection = 'column';
-    alertsSection.style.gap = SPACING.MD;
-    alertsSection.style.marginBottom = SPACING.LG;
+    // Categories List
+    const listSection = document.createElement('div');
+    listSection.style.display = 'flex';
+    listSection.style.flexDirection = 'column';
+    listSection.style.gap = SPACING.MD;
 
-    const alertsTitle = document.createElement('h3');
-    alertsTitle.textContent = 'Budget Alerts';
-    alertsTitle.style.margin = '0';
-    alertsTitle.style.color = COLORS.TEXT_MAIN;
-    alertsSection.appendChild(alertsTitle);
+    const listTitle = document.createElement('h3');
+    listTitle.textContent = 'Category Budgets';
+    listTitle.style.margin = '0';
+    listSection.appendChild(listTitle);
 
     const categoryBreakdown = MetricsService.calculateCategoryBreakdown(
       transactions,
@@ -70,66 +67,6 @@ export const BudgetsSection = async planningData => {
       const budget = budgets.find(b => b.categoryName === cat.name);
       return { ...cat, budget };
     });
-
-    // Generate budget alerts
-    let hasAlerts = false;
-    categoriesWithBudgets.forEach(cat => {
-      if (cat.budget && cat.amount > 0) {
-        const utilization = (cat.amount / cat.budget.amountLimit) * 100;
-        
-        // Show alerts for budgets over 60% utilization
-        if (utilization >= 60) {
-          hasAlerts = true;
-          const alertCard = BudgetAlertCard(
-            cat.budget,
-            cat.amount,
-            cat.budget.amountLimit,
-            () => {
-              // Scroll to the category card
-              const categoryCards = container.querySelectorAll('.budget-category-card');
-              categoryCards.forEach(card => {
-                if (card.dataset.category === cat.name) {
-                  card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  card.style.animation = 'pulse 2s ease-in-out';
-                  setTimeout(() => {
-                    card.style.animation = '';
-                  }, 2000);
-                }
-              });
-            }
-          );
-          alertsSection.appendChild(alertCard);
-        }
-      }
-    });
-
-    if (!hasAlerts) {
-      const noAlertsMsg = document.createElement('div');
-      noAlertsMsg.textContent = 'Great job! All budgets are on track.';
-      noAlertsMsg.style.cssText = `
-        padding: ${SPACING.MD};
-        text-align: center;
-        color: ${COLORS.TEXT_MUTED};
-        font-size: ${FONT_SIZES.SM};
-        background: ${COLORS.SURFACE};
-        border: 1px solid ${COLORS.BORDER};
-        border-radius: var(--radius-md);
-      `;
-      alertsSection.appendChild(noAlertsMsg);
-    }
-
-    container.appendChild(alertsSection);
-
-    // Categories List
-    const listSection = document.createElement('div');
-    listSection.style.display = 'flex';
-    listSection.style.flexDirection = 'column';
-    listSection.style.gap = SPACING.MD;
-
-    const listTitle = document.createElement('h3');
-    listTitle.textContent = 'Category Budgets';
-    listTitle.style.margin = '0';
-    listSection.appendChild(listTitle);
 
     categoriesWithBudgets.forEach(cat => {
       const card = document.createElement('div');
