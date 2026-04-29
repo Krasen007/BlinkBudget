@@ -476,7 +476,7 @@ export class TrendService {
     referenceDate = new Date()
   ) {
     const cutoff = new Date(referenceDate);
-    cutoff.setMonth(cutoff.getMonth() - monthsBack);
+    cutoff.setMonth(cutoff.getMonth() - (monthsBack - 1));
     cutoff.setDate(1);
 
     const endWindow = new Date(referenceDate);

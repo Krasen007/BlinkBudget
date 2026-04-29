@@ -196,9 +196,41 @@ export const getChartOptions = (chartType = 'line') => {
         enabled: true,
         callbacks: {
           label: function (context) {
-            const label = context.label || '';
+            const dataset = context.dataset;
             const value = context.parsed.y;
-            return `${label}: ${value.toFixed(2)}%`;
+            const inflationRate = dataset.inflationRate
+              ? (dataset.inflationRate * 100).toFixed(1)
+              : null;
+
+            // Format currency value
+            const currencyValue = new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: 'EUR',
+            }).format(value);
+
+            // Build tooltip line
+            let tooltipText = `${dataset.category || dataset.label}: ${currencyValue}`;
+            if (inflationRate) {
+              tooltipText += ` (${inflationRate}% personal inflation)`;
+            }
+            return tooltipText;
+          },
+          afterBody: function (context) {
+            // Calculate and show MoM change if there's a previous data point
+            if (context.length > 0) {
+              const dataIndex = context[0].dataIndex;
+              const dataset = context[0].dataset;
+              const data = dataset.data;
+
+              if (dataIndex > 0 && data[dataIndex - 1]?.y > 0) {
+                const current = data[dataIndex].y;
+                const previous = data[dataIndex - 1].y;
+                const change = ((current - previous) / previous) * 100;
+                const arrow = change > 0 ? '↑' : change < 0 ? '↓' : '→';
+                return `MoM Change: ${arrow} ${Math.abs(change).toFixed(1)}%`;
+              }
+            }
+            return '';
           },
         },
       },

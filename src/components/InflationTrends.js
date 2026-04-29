@@ -223,6 +223,8 @@ export const InflationTrends = (
       return {
         ...dataset,
         data: dataCopy,
+        category: dataset.category,
+        inflationRate: dataset.inflationRate,
       };
     });
 
@@ -407,10 +409,7 @@ const createCalcMethodSelector = instanceId => {
   const container = document.createElement('div');
   container.className = 'calc-method-selector segmented-control';
 
-  const methods = [
-    { value: 'average', label: 'Average' },
-    { value: 'median', label: 'Median (less outliers)' },
-  ];
+  const methods = [{ value: 'average', label: 'Average' }];
 
   methods.forEach(method => {
     const wrapper = document.createElement('label');
@@ -440,7 +439,6 @@ const createPeriodSelector = () => {
   container.className = 'period-selector segmented-control';
 
   const periods = [
-    { value: 2, label: '2 months' },
     { value: 3, label: '3 months' },
     { value: 6, label: '6 months' },
     { value: 12, label: '12 months' },

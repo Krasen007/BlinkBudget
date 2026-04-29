@@ -27,8 +27,9 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
   container.appendChild(title);
 
   const description = document.createElement('p');
-  description.innerHTML = `AI-powered budget suggestions based on your spending patterns. 
-    <strong>Recommended</strong> amounts include a 10% buffer from your historical average. 
+  description.innerHTML = `
+    <strong>Spent</strong> shows your current spending, <strong>Budget</strong> shows your set limit (if any).
+    <strong>Recommended</strong> amounts include a 10% buffer from your historical average.
     <strong>Confidence</strong> shows how consistent your spending is (70%+ = high confidence).`;
   description.className = 'budget-recommendations-description';
   container.appendChild(description);
@@ -55,13 +56,7 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
   const headerDiv = document.createElement('div');
   headerDiv.className = 'budget-recommendations-header-row';
 
-  const headers = [
-    'Category',
-    'Current',
-    'Recommended',
-    'vs Budget',
-    'Confidence',
-  ];
+  const headers = ['Category', 'Spent', 'Budget', 'Recommended', 'Confidence'];
   headers.forEach(headerText => {
     const header = document.createElement('div');
     header.textContent = headerText;
@@ -87,7 +82,7 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
     categorySpan.className = 'budget-recommendations-cell';
     itemDiv.appendChild(categorySpan);
 
-    // Current spending column
+    // Spent column (current spending)
     const current = rec.currentBudget || 0;
     const currentSpan = document.createElement('div');
     const safeCurrent =
@@ -96,6 +91,19 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
     currentSpan.className = 'budget-recommendations-cell';
     currentSpan.style.color = COLORS.TEXT_MAIN;
     itemDiv.appendChild(currentSpan);
+
+    // Budget column (set budget amount)
+    const budgetAmount = rec.budgetAmount || 0;
+    const budgetSpan = document.createElement('div');
+    if (budgetAmount > 0) {
+      budgetSpan.textContent = getCurrencyFormatter().format(budgetAmount);
+      budgetSpan.style.color = COLORS.PRIMARY || '#3b82f6';
+    } else {
+      budgetSpan.textContent = '—';
+      budgetSpan.style.color = COLORS.TEXT_MUTED;
+    }
+    budgetSpan.className = 'budget-recommendations-cell';
+    itemDiv.appendChild(budgetSpan);
 
     // Recommended budget column
     const recommended = rec.recommendedBudget || 0;
@@ -109,31 +117,6 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
     recommendedSpan.className = 'budget-recommendations-cell';
     recommendedSpan.style.color = COLORS.TEXT_MUTED;
     itemDiv.appendChild(recommendedSpan);
-
-    // vs Budget column (percentage difference)
-    const vsBudgetSpan = document.createElement('div');
-    let vsBudgetText = '→0%';
-    let vsBudgetColor = COLORS.TEXT_MUTED;
-
-    if (recommended > 0) {
-      const diff = ((current - recommended) / recommended) * 100;
-      if (diff > 5) {
-        vsBudgetText = `↑${Math.abs(diff).toFixed(1)}%`;
-        vsBudgetColor = COLORS.ERROR;
-      } else if (diff < -5) {
-        vsBudgetText = `↓${Math.abs(diff).toFixed(1)}%`;
-        vsBudgetColor = COLORS.SUCCESS || '#22c55e';
-      } else {
-        // Show actual percentage for small differences within ±5%
-        vsBudgetText = `${diff > 0 ? '↑' : '↓'}${Math.abs(diff).toFixed(1)}%`;
-        vsBudgetColor = COLORS.TEXT_MUTED;
-      }
-    }
-
-    vsBudgetSpan.textContent = vsBudgetText;
-    vsBudgetSpan.className = 'budget-recommendations-cell';
-    vsBudgetSpan.style.color = vsBudgetColor;
-    itemDiv.appendChild(vsBudgetSpan);
 
     // Confidence column
     const confSpan = document.createElement('div');
