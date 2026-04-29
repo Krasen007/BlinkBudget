@@ -6,6 +6,7 @@
 
 import { MetricsService } from './MetricsService.js';
 import { CustomCategoryService } from '../custom-category-service.js';
+import { BudgetService } from '../budget-service.js';
 
 const MIN_OPTIMIZATION_THRESHOLD = 50;
 const DEFAULT_CATEGORY_REDUCTION_PERCENT = 0.15;
@@ -236,16 +237,17 @@ export class RecommendationService {
 
   /**
    * Get budget recommendations based on historical spending
+   * Includes all categories that have budgets set, plus categories with current spending
    */
   getBudgetRecommendations(transactions, timePeriod) {
-    if (!transactions || transactions.length === 0) {
-      return [];
-    }
+    // Ensure transactions is at least an empty array
+    const txs = transactions || [];
 
     const periods = this._getHistoricalPeriods(timePeriod, 3);
 
+    // Get current spending breakdown
     const currentBreakdown = MetricsService.calculateCategoryBreakdown(
-      transactions,
+      txs,
       timePeriod
     );
     const currentSpending = {};
@@ -253,35 +255,66 @@ export class RecommendationService {
       currentSpending[cat.name] = cat.amount;
     });
 
-    const recommendations = [];
-    const categories = Object.keys(currentSpending);
+    // Get all categories that have budgets set
+    const budgets = BudgetService.getAll();
+    const budgetCategories = budgets.map(b => b.categoryName);
 
-    categories.forEach(category => {
-      const current = currentSpending[category];
+    // Merge: categories with budgets + categories with current spending
+    const allCategories = [
+      ...new Set([...budgetCategories, ...Object.keys(currentSpending)]),
+    ];
+
+    // If no categories at all (no budgets, no spending), return empty
+    if (allCategories.length === 0) {
+      return [];
+    }
+
+    const recommendations = [];
+
+    allCategories.forEach(category => {
+      const current = currentSpending[category] || 0;
       const historicalAverage = this._calculateCategoryAverage(
-        transactions,
+        txs,
         category,
         periods
       );
 
-      if (historicalAverage > 0) {
-        const recommended = Math.round(historicalAverage * 1.1 * 100) / 100;
-        const confidence = Math.min(
-          100,
-          Math.max(
-            0,
-            100 -
-              (Math.abs(current - historicalAverage) / historicalAverage) * 50
-          )
-        );
+      // Get the budget amount if set
+      const budget = budgets.find(b => b.categoryName === category);
+      const budgetAmount = budget ? budget.amountLimit : 0;
+
+      if (historicalAverage > 0 || budgetAmount > 0) {
+        // Use historical average as base, or budget amount if no history
+        const baseAmount =
+          historicalAverage > 0 ? historicalAverage : budgetAmount;
+        const recommended = Math.round(baseAmount * 1.1 * 100) / 100;
+
+        // Calculate confidence based on historical data availability
+        const confidence =
+          historicalAverage > 0
+            ? Math.min(
+                100,
+                Math.max(
+                  0,
+                  100 -
+                    (Math.abs(current - historicalAverage) /
+                      historicalAverage) *
+                      50
+                )
+              )
+            : 50; // Default confidence when only budget exists (no historical data)
 
         let reasoning;
-        if (current > historicalAverage * 1.2) {
-          reasoning = `You're spending ${Math.round((current / historicalAverage - 1) * 100)}% more than usual. Consider reducing to stay on track.`;
-        } else if (current < historicalAverage * 0.8) {
-          reasoning = `Great job! You're spending ${Math.round((1 - current / historicalAverage) * 100)}% less than your average.`;
+        if (historicalAverage > 0) {
+          if (current > historicalAverage * 1.2) {
+            reasoning = `You're spending ${Math.round((current / historicalAverage - 1) * 100)}% more than usual. Consider reducing to stay on track.`;
+          } else if (current < historicalAverage * 0.8) {
+            reasoning = `Great job! You're spending ${Math.round((1 - current / historicalAverage) * 100)}% less than your average.`;
+          } else {
+            reasoning = `Your spending is within your normal range.`;
+          }
         } else {
-          reasoning = `Your spending is within your normal range.`;
+          reasoning = `Budget set but no historical spending data available. Start tracking to get personalized recommendations.`;
         }
 
         recommendations.push({
@@ -289,10 +322,12 @@ export class RecommendationService {
           category,
           currentBudget: current,
           recommendedBudget: recommended,
+          budgetAmount,
           historicalAverage,
           confidence: Math.round(confidence),
           reasoning,
           priority:
+            historicalAverage > 0 &&
             Math.abs(current - historicalAverage) / historicalAverage > 0.3
               ? 'high'
               : 'normal',

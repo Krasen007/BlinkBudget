@@ -221,7 +221,7 @@ export const SettingsView = () => {
     <span style="color: var(--color-text-muted, #888);">Current Version</span>
     <span style="font-weight: 600; color: var(--color-primary, #00d084);">v${escapeHtml(CURRENT_VERSION)}</span>
   `;
-  updatesSection.appendChild(versionInfo);  
+  updatesSection.appendChild(versionInfo);
 
   const checkUpdatesBtn = ButtonComponent({
     text: 'Check for Updates',
