@@ -14,6 +14,7 @@ import {
   BREAKPOINTS,
   CURRENCY_SYMBOL,
 } from '../utils/constants.js';
+import { highlightTransactionSuccess } from '../utils/success-feedback.js';
 
 export const TransactionListItem = ({
   transaction,
@@ -325,14 +326,13 @@ export const TransactionListItem = ({
 
   // Apply success highlight if this transaction should be highlighted
   if (shouldHighlight) {
-    // Apply green highlighting
-    item.style.backgroundColor = '#34724b';
-    item.style.transition = 'background-color 0.3s ease';
-    
-    // Remove highlighting after 2 seconds
+    // Add new transaction animation class
+    item.classList.add('transaction-item-new');
+
+    // Use a small delay to ensure the item is rendered before highlighting
     setTimeout(() => {
-      item.style.backgroundColor = '';
-    }, 2000);
+      highlightTransactionSuccess(item, 1500);
+    }, 100);
   }
 
   return item;
