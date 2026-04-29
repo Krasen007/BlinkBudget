@@ -16,6 +16,8 @@ import {
   EMPTY_STATE_SCENARIOS,
 } from '../utils/enhanced-empty-states.js';
 import { Router } from '../core/router.js';
+import { UnusualSpendingDetector } from '../core/unusual-spending-detector.js';
+import { UnusualSpendingCard } from './ui/ActionCard.js';
 
 export const TransactionList = ({
   transactions,
@@ -103,6 +105,58 @@ export const TransactionList = ({
   titleContainer.appendChild(listTitle);
   titleContainer.appendChild(metricsDisplay);
   listContainer.appendChild(titleContainer);
+
+  // Unusual Spending Alerts Section
+  if (transactions.length > 0) {
+    const unusualTransactions = UnusualSpendingDetector.detectUnusualTransactions(transactions);
+    
+    if (unusualTransactions.length > 0) {
+      const alertsSection = document.createElement('div');
+      alertsSection.className = 'unusual-spending-alerts';
+      alertsSection.style.cssText = `
+        margin-bottom: ${SPACING.MD};
+        display: flex;
+        flex-direction: column;
+        gap: ${SPACING.SM};
+      `;
+
+      const alertsTitle = document.createElement('h4');
+      alertsTitle.textContent = 'Unusual Spending Detected';
+      alertsTitle.style.cssText = `
+        font-size: ${FONT_SIZES.SM};
+        font-weight: '600';
+        margin: '0 0 ${SPACING.XS} 0';
+        color: ${COLORS.TEXT_MAIN};
+      `;
+      alertsSection.appendChild(alertsTitle);
+
+      unusualTransactions.slice(0, 3).forEach(transaction => {
+        const unusualData = transaction.unusualSpending;
+        const alertCard = UnusualSpendingCard(
+          transaction,
+          unusualData.averageAmount,
+          () => {
+            // Scroll to the specific transaction
+            const transactionItems = listContainer.querySelectorAll('.transaction-list-item');
+            transactionItems.forEach(item => {
+              if (item.dataset.transactionId === transaction.id) {
+                item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Apply green highlighting
+                item.style.backgroundColor = '#34724b';
+                item.style.transition = 'background-color 0.3s ease';
+                setTimeout(() => {
+                  item.style.backgroundColor = '';
+                }, 2000);
+              }
+            });
+          }
+        );
+        alertsSection.appendChild(alertCard);
+      });
+
+      listContainer.appendChild(alertsSection);
+    }
+  }
 
   if (transactions.length === 0) {
     // Determine empty state scenario

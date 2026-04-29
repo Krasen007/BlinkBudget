@@ -27,8 +27,9 @@ export const TransactionListItem = ({
   onCategoryClick = () => {},
 }) => {
   const item = document.createElement('li');
-  item.className = 'transaction-item';
+  item.className = 'transaction-item transaction-list-item';
   item.setAttribute('role', 'listitem');
+  item.dataset.transactionId = transaction.id;
 
   Object.assign(item.style, {
     display: 'flex',

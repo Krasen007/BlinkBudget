@@ -7,6 +7,8 @@
 
 import { COLORS } from '../utils/constants.js';
 import { SettingsService } from '../core/settings-service.js';
+import { UnusualSpendingDetector } from '../core/unusual-spending-detector.js';
+import { ActionCard } from './ui/ActionCard.js';
 
 const getCurrencyFormatter = () => {
   const currency = SettingsService.getSetting('currency') || 'EUR';
@@ -17,7 +19,7 @@ const getCurrencyFormatter = () => {
   });
 };
 
-export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
+export const BudgetRecommendationsSection = (recommendations, _timePeriod, transactions = null) => {
   const container = document.createElement('div');
   container.className = 'budget-recommendations-section';
 
@@ -25,6 +27,61 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
   title.textContent = 'Budget Recommendations';
   title.className = 'budget-recommendations-title';
   container.appendChild(title);
+
+  // Add unusual spending alerts if transactions provided
+  if (transactions && transactions.length > 0) {
+    const unusualRecommendations = UnusualSpendingDetector.getBudgetRecommendations(transactions);
+    const unusualAlerts = unusualRecommendations.filter(rec => 
+      rec.type === 'unusual_spending_alert' || rec.type === 'high_variance'
+    );
+
+    if (unusualAlerts.length > 0) {
+      const alertsSection = document.createElement('div');
+      alertsSection.style.cssText = `
+        margin-bottom: var(--spacing-md);
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+      `;
+
+      const alertsTitle = document.createElement('h4');
+      alertsTitle.textContent = 'Spending Pattern Alerts';
+      alertsTitle.style.cssText = `
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin: '0 0 var(--spacing-xs) 0';
+        color: ${COLORS.TEXT_MAIN};
+      `;
+      alertsSection.appendChild(alertsTitle);
+
+      unusualAlerts.slice(0, 3).forEach(alert => {
+        const alertCard = ActionCard({
+          title: alert.title,
+          description: alert.description,
+          type: alert.priority === 'high' ? 'warning' : 'info',
+          actionText: 'View Details',
+          onAction: () => {
+            // Scroll to the category in the recommendations table
+            const categoryRows = container.querySelectorAll('.budget-recommendations-row');
+            categoryRows.forEach(row => {
+              const categoryCell = row.querySelector('.budget-recommendations-cell');
+              if (categoryCell && categoryCell.textContent === alert.category) {
+                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                row.style.animation = 'pulse 2s ease-in-out';
+                setTimeout(() => {
+                  row.style.animation = '';
+                }, 2000);
+              }
+            });
+          },
+          icon: '!',
+        });
+        alertsSection.appendChild(alertCard);
+      });
+
+      container.appendChild(alertsSection);
+    }
+  }
 
   const description = document.createElement('p');
   description.innerHTML = `

@@ -22,6 +22,12 @@ export const DashboardStatsCard = ({
   showResetButton = false,
   onReset = () => {},
   isFiltered = false,
+  // New props for visual indicators
+  trend = null, // 'up', 'down', 'stable'
+  trendPercentage = null,
+  progressPercentage = null,
+  showProgressBar = false,
+  targetValue = null,
 }) => {
   const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
   const card = document.createElement('div');
@@ -72,6 +78,76 @@ export const DashboardStatsCard = ({
 
   card.appendChild(lbl);
   card.appendChild(val);
+
+  // Add trend indicator if provided
+  if (trend && trendPercentage !== null) {
+    const trendContainer = document.createElement('div');
+    trendContainer.style.cssText = `
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 4px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    `;
+
+    const trendIcon = document.createElement('span');
+    trendIcon.textContent = trend === 'up' ? ' rise_up' : trend === 'down' ? ' fall_down' : ' right';
+    trendIcon.style.color = trend === 'up' ? COLORS.ERROR : trend === 'down' ? COLORS.SUCCESS : COLORS.TEXT_MUTED;
+
+    const trendText = document.createElement('span');
+    trendText.textContent = `${Math.abs(trendPercentage).toFixed(1)}%`;
+    trendText.style.color = trend === 'up' ? COLORS.ERROR : trend === 'down' ? COLORS.SUCCESS : COLORS.TEXT_MUTED;
+
+    trendContainer.appendChild(trendIcon);
+    trendContainer.appendChild(trendText);
+    card.appendChild(trendContainer);
+  }
+
+  // Add progress bar if enabled
+  if (showProgressBar && progressPercentage !== null) {
+    const progressContainer = document.createElement('div');
+    progressContainer.style.cssText = `
+      margin-top: 8px;
+      width: 100%;
+    `;
+
+    const progressBarBg = document.createElement('div');
+    progressBarBg.style.cssText = `
+      width: 100%;
+      height: 4px;
+      background: ${COLORS.BORDER};
+      border-radius: 2px;
+      overflow: hidden;
+    `;
+
+    const progressBarFill = document.createElement('div');
+    const progressWidth = Math.min(Math.max(progressPercentage, 0), 100);
+    progressBarFill.style.cssText = `
+      height: 100%;
+      width: ${progressWidth}%;
+      background: ${color};
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    `;
+
+    progressBarBg.appendChild(progressBarFill);
+    progressContainer.appendChild(progressBarBg);
+
+    // Add target indicator if target provided
+    if (targetValue !== null) {
+      const targetText = document.createElement('div');
+      targetText.textContent = `Target: ${CURRENCY_SYMBOL}${targetValue.toFixed(2)}`;
+      targetText.style.cssText = `
+        font-size: 0.7rem;
+        color: ${COLORS.TEXT_MUTED};
+        margin-top: 2px;
+      `;
+      progressContainer.appendChild(targetText);
+    }
+
+    card.appendChild(progressContainer);
+  }
 
   // Add reset button if filters are active
   if (showResetButton && isFiltered) {
