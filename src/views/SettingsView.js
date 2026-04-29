@@ -1,4 +1,5 @@
 import { ButtonComponent } from '../components/Button.js';
+import { ToastNotification } from '../components/ToastNotification.js';
 import { Router } from '../core/router.js';
 import { AccountSection } from '../components/AccountSection.js';
 import { DataManagementSection } from '../components/DataManagementSection.js';
@@ -10,7 +11,11 @@ import { SecuritySection } from '../components/SecuritySection.js';
 import { FeedbackLink } from '../components/FeedbackLink.js';
 import { SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
 import { DateFormatSection } from '../components/DateFormatSection.js';
-
+import {
+  CURRENT_VERSION,
+  GITHUB_RELEASES_URL,
+  checkForUpdatesWithFeedback,
+} from '../pwa.js';
 import { createButton } from '../utils/dom-factory.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
 
@@ -193,6 +198,78 @@ export const SettingsView = () => {
   // Account Deletion Section
   const accountDeletionSection = AccountDeletionSection();
   advancedSettingsSection.appendChild(accountDeletionSection);
+
+  // App Updates Section (under advanced settings)
+  const updatesSection = document.createElement('div');
+  updatesSection.className = 'settings-section';
+  updatesSection.innerHTML = `
+    <div class="settings-section-header">
+      <h3>${escapeHtml('🔄 App Updates')}</h3>
+    </div>
+  `;
+
+  const versionInfo = document.createElement('div');
+  versionInfo.style.cssText = `
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--color-border, #333);
+    margin-bottom: 12px;
+  `;
+  versionInfo.innerHTML = `
+    <span style="color: var(--color-text-muted, #888);">Current Version</span>
+    <span style="font-weight: 600; color: var(--color-primary, #00d084);">v${escapeHtml(CURRENT_VERSION)}</span>
+  `;
+  updatesSection.appendChild(versionInfo);  
+
+  const checkUpdatesBtn = ButtonComponent({
+    text: 'Check for Updates',
+    variant: 'secondary',
+    onClick: async () => {
+      console.log('[PWA Update] Manual check triggered');
+
+      // Show checking toast
+      ToastNotification({
+        message: 'Checking for updates...',
+        variant: 'info',
+        duration: 2000,
+      });
+
+      const updateFound = await checkForUpdatesWithFeedback();
+
+      if (updateFound) {
+        // Update dialog will be shown by pwa.js onNeedRefresh
+        console.log('[PWA Update] Update found - dialog should appear');
+      } else {
+        ToastNotification({
+          message: 'You have the latest version!',
+          variant: 'success',
+          duration: 3000,
+        });
+        console.log('[PWA Update] No updates available');
+      }
+    },
+  });
+  checkUpdatesBtn.style.width = '100%';
+  updatesSection.appendChild(checkUpdatesBtn);
+
+  const releaseNotesLink = document.createElement('a');
+  releaseNotesLink.href = GITHUB_RELEASES_URL;
+  releaseNotesLink.target = '_blank';
+  releaseNotesLink.rel = 'noopener noreferrer';
+  releaseNotesLink.textContent = '📋 View Release Notes';
+  releaseNotesLink.style.cssText = `
+    display: block;
+    text-align: center;
+    margin-top: 12px;
+    color: var(--color-primary, #00d084);
+    text-decoration: none;
+    font-size: 0.9rem;
+  `;
+  updatesSection.appendChild(releaseNotesLink);
+
+  advancedSettingsSection.appendChild(updatesSection);
 
   // Feedback Link Section (keep visible)
   const feedbackSection = FeedbackLink();
