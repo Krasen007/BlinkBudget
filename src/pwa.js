@@ -11,6 +11,9 @@ let updateFoundCallback = null;
 let updateFoundTimeout = null;
 let pendingUpdate = false;
 
+// Export getter function for live state access
+export const hasPendingUpdate = () => pendingUpdate;
+
 /**
  * Show update confirmation dialog with GitHub releases link
  */
@@ -42,6 +45,8 @@ function showUpdateConfirmation(onConfirm) {
     width: 100%;
     text-align: center;
   `;
+  dialog.setAttribute('role', 'dialog');
+  dialog.setAttribute('aria-modal', 'true');
 
   dialog.innerHTML = `
     <div style="font-size: 48px; margin-bottom: 16px;">🎉</div>
@@ -88,20 +93,65 @@ function showUpdateConfirmation(onConfirm) {
   overlay.appendChild(dialog);
   document.body.appendChild(overlay);
 
-  // Handle buttons
-  dialog.querySelector('.update-later-btn').addEventListener('click', () => {
-    document.body.removeChild(overlay);
-  });
+  // Focus management and keyboard accessibility
+  const updateNowBtn = dialog.querySelector('.update-now-btn');
+  const laterBtn = dialog.querySelector('.update-later-btn');
+  const previouslyFocused = document.activeElement;
 
-  dialog.querySelector('.update-now-btn').addEventListener('click', () => {
+  // Set initial focus to primary action
+  updateNowBtn.focus();
+
+  // Simple focus trap for Tab navigation
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      document.body.removeChild(overlay);
+      return;
+    }
+    
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      if (e.shiftKey) {
+        // Shift+Tab: go backwards
+        if (document.activeElement === laterBtn) {
+          updateNowBtn.focus();
+        } else if (document.activeElement === updateNowBtn) {
+          laterBtn.focus();
+        }
+      } else {
+        // Tab: go forwards
+        if (document.activeElement === laterBtn) {
+          updateNowBtn.focus();
+        } else if (document.activeElement === updateNowBtn) {
+          laterBtn.focus();
+        }
+      }
+    }
+  };
+
+  overlay.addEventListener('keydown', handleKeyDown);
+
+  // Handle buttons
+  laterBtn.addEventListener('click', () => {
+    document.body.removeChild(overlay);
+    if (previouslyFocused) {
+      previouslyFocused.focus();
+    }
+  });
+  updateNowBtn.addEventListener('click', () => {
     document.body.removeChild(overlay);
     onConfirm();
+    if (previouslyFocused) {
+      previouslyFocused.focus();
+    }
   });
 
   // Close on overlay click
   overlay.addEventListener('click', e => {
     if (e.target === overlay) {
       document.body.removeChild(overlay);
+      if (previouslyFocused) {
+        previouslyFocused.focus();
+      }
     }
   });
 }
@@ -124,12 +174,16 @@ function showVersionConfirmation() {
  * Check if this is first launch after update
  */
 function checkFirstLaunchAfterUpdate() {
-  const lastVersion = localStorage.getItem('blinkbudget-version');
-  if (lastVersion && lastVersion !== CURRENT_VERSION) {
-    // Just updated - show confirmation
-    setTimeout(showVersionConfirmation, 1000);
+  try {
+    const lastVersion = localStorage.getItem('blinkbudget-version');
+    if (lastVersion && lastVersion !== CURRENT_VERSION) {
+      // Just updated - show confirmation
+      setTimeout(showVersionConfirmation, 1000);
+    }
+    localStorage.setItem('blinkbudget-version', CURRENT_VERSION);
+  } catch (error) {
+    console.warn('[PWA] Failed to access localStorage for version check:', error);
   }
-  localStorage.setItem('blinkbudget-version', CURRENT_VERSION);
 }
 
 const updateSW = registerSW({
@@ -186,13 +240,15 @@ function checkForUpdatesWithFeedback() {
         updateFoundCallback(false);
         updateFoundCallback = null;
       }
-      resolve(false);
     }, 3000);
 
     // Trigger the check
     navigator.serviceWorker.ready.then(registration => {
       console.log('[PWA Update] Calling registration.update()');
-      registration.update();
+      registration.update()
+        .catch(error => {
+          console.error('[PWA Update] Failed to check for updates:', error);
+        });
     });
   });
 }
@@ -203,5 +259,4 @@ export {
   CURRENT_VERSION,
   GITHUB_RELEASES_URL,
   checkForUpdatesWithFeedback,
-  pendingUpdate,
 };

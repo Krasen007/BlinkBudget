@@ -71,6 +71,9 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
   list.style.flexDirection = 'column';
   list.style.gap = 'var(--spacing-xs)';
 
+  // Get formatter once to avoid repeated calls in loop
+  const formatter = getCurrencyFormatter();
+
   recs.slice(0, 6).forEach(rec => {
     const itemDiv = document.createElement('div');
     itemDiv.className = 'budget-recommendations-row';
@@ -87,7 +90,7 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
     const currentSpan = document.createElement('div');
     const safeCurrent =
       typeof current === 'number' && isFinite(current) ? current : 0;
-    currentSpan.textContent = getCurrencyFormatter().format(safeCurrent);
+    currentSpan.textContent = formatter.format(safeCurrent);
     currentSpan.className = 'budget-recommendations-cell';
     currentSpan.style.color = COLORS.TEXT_MAIN;
     itemDiv.appendChild(currentSpan);
@@ -95,8 +98,8 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
     // Budget column (set budget amount)
     const budgetAmount = rec.budgetAmount || 0;
     const budgetSpan = document.createElement('div');
-    if (budgetAmount > 0) {
-      budgetSpan.textContent = getCurrencyFormatter().format(budgetAmount);
+    if (Number.isFinite(budgetAmount) && budgetAmount > 0) {
+      budgetSpan.textContent = formatter.format(budgetAmount);
       budgetSpan.style.color = COLORS.PRIMARY || '#3b82f6';
     } else {
       budgetSpan.textContent = '—';
@@ -108,12 +111,11 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod) => {
     // Recommended budget column
     const recommended = rec.recommendedBudget || 0;
     const recommendedSpan = document.createElement('div');
-    const safeRecommended =
-      typeof recommended === 'number' && isFinite(recommended)
-        ? recommended
-        : 0;
-    recommendedSpan.textContent =
-      getCurrencyFormatter().format(safeRecommended);
+    if (Number.isFinite(recommended) && recommended > 0) {
+      recommendedSpan.textContent = formatter.format(recommended);
+    } else {
+      recommendedSpan.textContent = '—';
+    }
     recommendedSpan.className = 'budget-recommendations-cell';
     recommendedSpan.style.color = COLORS.TEXT_MUTED;
     itemDiv.appendChild(recommendedSpan);

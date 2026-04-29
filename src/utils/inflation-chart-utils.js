@@ -216,19 +216,24 @@ export const getChartOptions = (chartType = 'line') => {
             return tooltipText;
           },
           afterBody: function (context) {
-            // Calculate and show MoM change if there's a previous data point
+            // Calculate and show MoM change for each dataset
             if (context.length > 0) {
-              const dataIndex = context[0].dataIndex;
-              const dataset = context[0].dataset;
-              const data = dataset.data;
+              const momChanges = context.map(ctx => {
+                const dataIndex = ctx.dataIndex;
+                const dataset = ctx.dataset;
+                const data = dataset.data;
 
-              if (dataIndex > 0 && data[dataIndex - 1]?.y > 0) {
-                const current = data[dataIndex].y;
-                const previous = data[dataIndex - 1].y;
-                const change = ((current - previous) / previous) * 100;
-                const arrow = change > 0 ? '↑' : change < 0 ? '↓' : '→';
-                return `MoM Change: ${arrow} ${Math.abs(change).toFixed(1)}%`;
-              }
+                if (dataIndex > 0 && data[dataIndex - 1]?.y > 0) {
+                  const current = data[dataIndex].y;
+                  const previous = data[dataIndex - 1].y;
+                  const change = ((current - previous) / previous) * 100;
+                  const arrow = change > 0 ? '↑' : change < 0 ? '↓' : '→';
+                  return `${dataset.label}: MoM Change: ${arrow} ${Math.abs(change).toFixed(1)}%`;
+                }
+                return null;
+              }).filter(Boolean); // Remove null entries
+
+              return momChanges.length > 0 ? momChanges.join('\n') : '';
             }
             return '';
           },

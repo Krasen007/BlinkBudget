@@ -213,9 +213,9 @@ export const SettingsView = () => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 0;
+    padding: ${SPACING.XS} 0;
     border-bottom: 1px solid var(--color-border, #333);
-    margin-bottom: 12px;
+    margin-bottom: ${SPACING.MD};
   `;
   versionInfo.innerHTML = `
     <span style="color: var(--color-text-muted, #888);">Current Version</span>
@@ -236,7 +236,17 @@ export const SettingsView = () => {
         duration: 2000,
       });
 
-      const updateFound = await checkForUpdatesWithFeedback();
+      let updateFound = false;
+      try {
+        updateFound = await checkForUpdatesWithFeedback();
+      } catch (error) {
+        console.error('[PWA Update] Manual check failed:', error);
+        ToastNotification({
+          message: 'Update check failed. Check your connection.',
+          variant: 'error',
+          duration: 3000,
+        });
+      }
 
       if (updateFound) {
         // Update dialog will be shown by pwa.js onNeedRefresh
@@ -258,6 +268,7 @@ export const SettingsView = () => {
   releaseNotesLink.href = GITHUB_RELEASES_URL;
   releaseNotesLink.target = '_blank';
   releaseNotesLink.rel = 'noopener noreferrer';
+  releaseNotesLink.setAttribute('aria-label', 'View Release Notes (opens in new tab)');
   releaseNotesLink.textContent = '📋 View Release Notes';
   releaseNotesLink.style.cssText = `
     display: block;

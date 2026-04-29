@@ -255,8 +255,16 @@ export class RecommendationService {
       currentSpending[cat.name] = cat.amount;
     });
 
-    // Get all categories that have budgets set
-    const budgets = BudgetService.getAll();
+    // Create Map for O(1) budget lookups instead of O(n²) find operations
+    const budgetMap = new Map();
+    let budgets = [];
+    try {
+      budgets = BudgetService.getAll();
+      budgets.forEach(b => budgetMap.set(b.categoryName, b.amountLimit));
+    } catch (err) {
+      console.error('[RecommendationService] Failed to load budgets:', err);
+    }
+
     const budgetCategories = budgets.map(b => b.categoryName);
 
     // Merge: categories with budgets + categories with current spending
@@ -279,9 +287,8 @@ export class RecommendationService {
         periods
       );
 
-      // Get the budget amount if set
-      const budget = budgets.find(b => b.categoryName === category);
-      const budgetAmount = budget ? budget.amountLimit : 0;
+      // Get budget amount if set - O(1) lookup using Map
+      const budgetAmount = budgetMap.get(category) || 0;
 
       if (historicalAverage > 0 || budgetAmount > 0) {
         // Use historical average as base, or budget amount if no history
