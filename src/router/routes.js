@@ -78,9 +78,9 @@ export const routes = {
     ViewManager.setView(SettingsView());
     updateMobileNavigation('settings');
   },
-  reports: () => {
+  reports: (params = {}) => {
     NavigationState.setLastActiveView('reports');
-    ViewManager.setView(ReportsView());
+    ViewManager.setView(ReportsView(params));
     updateMobileNavigation('reports');
   },
   'financial-planning': async (params = {}) => {

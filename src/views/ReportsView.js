@@ -28,6 +28,8 @@ import { createNavigationButtons } from '../utils/navigation-helper.js';
 // Import utility modules
 import {
   getCurrentMonthPeriod,
+  getCurrentQuarterPeriod,
+  getTodayPeriod,
   checkBrowserSupport,
   validateAnalyticsData,
   sanitizeAnalyticsData,
@@ -109,7 +111,52 @@ import { InsightsSection } from '../components/BudgetInsightsSection.js';
 import { BudgetSummaryCard } from '../components/BudgetSummaryCard.js';
 import { BudgetPlanner } from '../core/budget-planner.js';
 
-export const ReportsView = () => {
+/**
+ * Parse period from URL params and return corresponding time period
+ */
+function parsePeriodFromParams(params) {
+  if (!params || !params.period) return null;
+
+  const period = params.period.toLowerCase();
+
+  switch (period) {
+    case 'month':
+      return getCurrentMonthPeriod();
+    case 'lastmonth': {
+      // Get last month period
+      const now = new Date();
+      const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+      lastMonthEnd.setHours(23, 59, 59, 999);
+      return {
+        type: 'monthly',
+        startDate: lastMonthStart,
+        endDate: lastMonthEnd,
+        label: `${lastMonthStart.toLocaleString('default', { month: 'long' })} ${lastMonthStart.getFullYear()}`,
+      };
+    }
+    case 'today':
+      return getTodayPeriod();
+    case 'quarter':
+      return getCurrentQuarterPeriod();
+    case 'year': {
+      const year = new Date().getFullYear();
+      const yearStart = new Date(year, 0, 1);
+      const yearEnd = new Date(year, 11, 31);
+      yearEnd.setHours(23, 59, 59, 999);
+      return {
+        type: 'yearly',
+        startDate: yearStart,
+        endDate: yearEnd,
+        label: year.toString(),
+      };
+    }
+    default:
+      return null;
+  }
+}
+
+export const ReportsView = (params = {}) => {
   const container = document.createElement('div');
   container.className = 'view-reports view-container';
 
@@ -180,8 +227,9 @@ export const ReportsView = () => {
   });
 
   // State management
-  let currentTimePeriod =
-    NavigationState.restoreTimePeriod() || getCurrentMonthPeriod();
+  let currentTimePeriod = parsePeriodFromParams(params) ||
+    NavigationState.restoreTimePeriod() ||
+    getCurrentMonthPeriod();
   let isLoading = false;
   let currentData = null;
   const activeCharts = new Map();
@@ -364,12 +412,51 @@ export const ReportsView = () => {
     const oldCacheKey = getCacheKey(currentTimePeriod);
     localStorage.removeItem(oldCacheKey);
 
+    // Navigate with query parameter for period
+    const periodParam = getPeriodParamFromTimePeriod(newTimePeriod);
+    if (periodParam) {
+      Router.navigate('reports', { period: periodParam });
+    }
+
     // If this is a navigation action, only reload data without recreating the header
     if (options.isNavigation) {
       loadReportData(true); // Skip header recreation
     } else {
       // Full recreation for other time period changes
       loadReportData(false);
+    }
+  }
+
+  /**
+   * Convert time period to URL parameter
+   */
+  function getPeriodParamFromTimePeriod(timePeriod) {
+    if (!timePeriod || !timePeriod.type) return null;
+
+    switch (timePeriod.type) {
+      case 'monthly': {
+        // Check if it's current month or last month
+        const now = new Date();
+        const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const periodStart = new Date(timePeriod.startDate);
+
+        if (
+          periodStart.getFullYear() === currentMonthStart.getFullYear() &&
+          periodStart.getMonth() === currentMonthStart.getMonth()
+        ) {
+          return 'month';
+        } else {
+          return 'lastMonth';
+        }
+      }
+      case 'daily':
+        return 'today';
+      case 'quarterly':
+        return 'quarter';
+      case 'yearly':
+        return 'year';
+      default:
+        return null;
     }
   }
 
@@ -1307,6 +1394,29 @@ export const ReportsView = () => {
   window.addEventListener('resize', updateResponsiveLayout);
   window.addEventListener('orientationchange', handleOrientationChange);
 
+  // Handle hash changes to update period when navigating within reports
+  const handleHashChange = () => {
+    const hash = window.location.hash.slice(1);
+    const [route, paramString] = hash.split('?');
+    if (route === 'reports' && paramString) {
+      const params = new URLSearchParams(paramString);
+      const newPeriodParam = params.get('period');
+      if (newPeriodParam) {
+        const newPeriod = parsePeriodFromParams({ period: newPeriodParam });
+        if (newPeriod) {
+          const currentStart = new Date(currentTimePeriod.startDate).getTime();
+          const currentEnd = new Date(currentTimePeriod.endDate).getTime();
+          const newStart = new Date(newPeriod.startDate).getTime();
+          const newEnd = new Date(newPeriod.endDate).getTime();
+          if (currentStart !== newStart || currentEnd !== newEnd) {
+            handleTimePeriodChange(newPeriod, { isNavigation: true });
+          }
+        }
+      }
+    }
+  };
+  window.addEventListener('hashchange', handleHashChange);
+
   if (window.visualViewport) {
     window.visualViewport.addEventListener(
       'resize',
@@ -1441,6 +1551,7 @@ export const ReportsView = () => {
   container.cleanup = () => {
     window.removeEventListener('resize', updateResponsiveLayout);
     window.removeEventListener('orientationchange', handleOrientationChange);
+    window.removeEventListener('hashchange', handleHashChange);
     window.removeEventListener('storage-updated', handleStorageUpdate);
     window.removeEventListener('auth-state-changed', handleAuthChange);
     window.removeEventListener(
