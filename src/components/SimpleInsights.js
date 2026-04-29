@@ -76,13 +76,12 @@ function createInsightCard(insight, currency = 'EUR') {
   switch (insight.type) {
     case 'top_category':
       icon.textContent = '📊';
-      actionBtn.textContent = 'View insights';
       break;
     case 'spending_trend': {
       if (insight.direction === 'up') {
-        icon.textContent = '📈';
+        icon.textContent = '⬆️';
       } else if (insight.direction === 'down') {
-        icon.textContent = '�';
+        icon.textContent = '⬇️';
       } else {
         icon.textContent = '➡️';
       }
@@ -95,7 +94,7 @@ function createInsightCard(insight, currency = 'EUR') {
       icon.textContent = '❗';
       break;
     default:
-      icon.textContent = '�';
+      icon.textContent = '🤔';
   }
   
   // Add progress indicator for percentage-based insights

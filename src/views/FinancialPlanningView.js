@@ -83,7 +83,7 @@ export const FinancialPlanningView = (params = {}) => {
   container.className = 'view-financial-planning view-container';
 
   // State management
-  let currentSection = params.subRoute || 'overview';
+  let currentSection = params.section || 'overview';
   let isLoading = false;
   let planningData = null;
 
@@ -215,7 +215,7 @@ export const FinancialPlanningView = (params = {}) => {
 
       // Click handler
       tab.addEventListener('click', () => {
-        Router.navigate(`financial-planning/${section.id}`);
+        Router.navigate('financial-planning', { section: section.id });
       });
 
       nav.appendChild(tab);
@@ -452,10 +452,12 @@ export const FinancialPlanningView = (params = {}) => {
 
   // Handle hash changes to update section when navigating within financial-planning
   const handleHashChange = () => {
-    const segments = Router.getRouteSegments();
-    if (segments[0] === 'financial-planning' && segments[1]) {
-      const newSection = segments[1];
-      if (newSection !== currentSection) {
+    const hash = window.location.hash.slice(1);
+    const [route, paramString] = hash.split('?');
+    if (route === 'financial-planning' && paramString) {
+      const params = new URLSearchParams(paramString);
+      const newSection = params.get('section');
+      if (newSection && newSection !== currentSection) {
         switchSection(newSection);
       }
     }
