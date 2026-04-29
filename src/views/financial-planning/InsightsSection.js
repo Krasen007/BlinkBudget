@@ -23,6 +23,7 @@ import { getAnalyticsEngine } from '../../core/analytics/AnalyticsInstance.js';
 import { TrendAnalysisSection } from '../../components/TrendAnalysisSection.js';
 import { BudgetRecommendationsSection } from '../../components/BudgetRecommendationsSection.js';
 import { OptimizationInsights } from '../../components/OptimizationInsights.js';
+import { SimpleInsights } from '../../components/SimpleInsights.js';
 import { getCurrentMonthPeriod } from '../../utils/reports-utils.js';
 
 /**
@@ -837,6 +838,32 @@ function renderBudgetRecommendationsSection(section, planningData) {
 }
 
 /**
+ * Render simple insights section - streamlined actionable insights
+ */
+function renderSimpleInsightsSection(section, planningData) {
+  try {
+    const currentTimePeriod = getCurrentMonthPeriod();
+    const simpleInsightsComponent = SimpleInsights(
+      planningData.transactions,
+      currentTimePeriod,
+      'EUR'
+    );
+    
+    simpleInsightsComponent.style.setProperty(
+      'margin-top',
+      'var(--spacing-md)',
+      'important'
+    );
+    section.appendChild(simpleInsightsComponent);
+  } catch (error) {
+    console.warn(
+      '[InsightsSection] Failed to render simple insights section:',
+      error
+    );
+  }
+}
+
+/**
  * Insights Section Component
  * @param {Object} planningData - Financial planning data including transactions
  * @param {Object} chartRenderer - Chart renderer service instance
@@ -914,6 +941,9 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
 
   // Budget Recommendations - Feature 3.3.4 Predictive Budget
   renderBudgetRecommendationsSection(section, planningData);
+
+  // Simple Insights - streamlined actionable insights
+  renderSimpleInsightsSection(section, planningData);
 
   // Set up synchronized navigation - all sections update together
   sharedMonthState.onNavigate = () => {

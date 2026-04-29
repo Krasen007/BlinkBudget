@@ -19,6 +19,12 @@ export class Router {
     return hash.split('?')[0];
   }
 
+  // Get the current route path segments (e.g., ['financial-planning', 'insights'])
+  static getRouteSegments() {
+    const route = this.getCurrentRoute();
+    return route.split('/').filter(Boolean);
+  }
+
   // Navigate to a new route
   static navigate(route, params = {}) {
     const urlParams = new URLSearchParams(params).toString();
@@ -46,8 +52,31 @@ export class Router {
       }
     }
 
+    // Split route into segments for nested routing
+    const segments = route.split('/').filter(Boolean);
+    const mainRoute = segments[0] || 'dashboard';
+    const subRoute = segments[1] || null;
+
+    // Add sub-route to params if present
+    if (subRoute) {
+      params.subRoute = subRoute;
+    }
+
     const executeHandler = () => {
-      const handler = this.routes[route];
+      // Try exact match first
+      let handler = this.routes[route];
+
+      // If no exact match, try wildcard match (e.g., 'financial-planning/*')
+      if (!handler && segments.length > 1) {
+        const wildcardRoute = `${mainRoute}/*`;
+        handler = this.routes[wildcardRoute];
+      }
+
+      // Fall back to main route if no nested handler
+      if (!handler) {
+        handler = this.routes[mainRoute];
+      }
+
       if (handler) {
         handler(params);
       } else {

@@ -83,13 +83,13 @@ export const routes = {
     ViewManager.setView(ReportsView());
     updateMobileNavigation('reports');
   },
-  'financial-planning': async () => {
+  'financial-planning': async (params = {}) => {
     const { FinancialPlanningView } = await loadCachedOrImport(
       'FinancialPlanningView',
       () => import('../views/FinancialPlanningView.js')
     );
     NavigationState.setLastActiveView('financial-planning');
-    ViewManager.setView(FinancialPlanningView());
+    ViewManager.setView(FinancialPlanningView(params));
     updateMobileNavigation('financial-planning');
   },
   login: async () => {

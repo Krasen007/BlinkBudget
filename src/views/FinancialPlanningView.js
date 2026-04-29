@@ -78,12 +78,12 @@ function clearPlanningCache() {
   }
 }
 
-export const FinancialPlanningView = () => {
+export const FinancialPlanningView = (params = {}) => {
   const container = document.createElement('div');
   container.className = 'view-financial-planning view-container';
 
   // State management
-  let currentSection = 'overview';
+  let currentSection = params.subRoute || 'overview';
   let isLoading = false;
   let planningData = null;
 
@@ -215,7 +215,7 @@ export const FinancialPlanningView = () => {
 
       // Click handler
       tab.addEventListener('click', () => {
-        switchSection(section.id);
+        Router.navigate(`financial-planning/${section.id}`);
       });
 
       nav.appendChild(tab);
@@ -450,6 +450,18 @@ export const FinancialPlanningView = () => {
   // Event listeners
   window.addEventListener('resize', updateResponsiveLayout);
 
+  // Handle hash changes to update section when navigating within financial-planning
+  const handleHashChange = () => {
+    const segments = Router.getRouteSegments();
+    if (segments[0] === 'financial-planning' && segments[1]) {
+      const newSection = segments[1];
+      if (newSection !== currentSection) {
+        switchSection(newSection);
+      }
+    }
+  };
+  window.addEventListener('hashchange', handleHashChange);
+
   // Storage update handler
   const handleStorageUpdate = e => {
     if (
@@ -519,6 +531,7 @@ export const FinancialPlanningView = () => {
   // Cleanup function
   container.cleanup = () => {
     window.removeEventListener('resize', updateResponsiveLayout);
+    window.removeEventListener('hashchange', handleHashChange);
     window.removeEventListener('storage-updated', handleStorageUpdate);
     window.removeEventListener('sync-state', handleSyncState);
     window.removeEventListener('forecast-invalidate', handleForecastInvalidate);

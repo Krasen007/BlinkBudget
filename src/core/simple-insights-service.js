@@ -22,8 +22,9 @@ export class SimpleInsightsService {
           description: `You spent the most on ${topCategory.category} this month`,
           amount: topCategory.amount,
           percentage: topCategory.percentage,
-          action: 'View transactions',
-          priority: 'high',
+          category: topCategory.category,
+          action: 'View insights',
+          priority: 'medium',
         });
       }
 
@@ -37,8 +38,8 @@ export class SimpleInsightsService {
           amount: trend.change,
           percentage: trend.percentage,
           direction: trend.direction,
-          action: 'View trends',
-          priority: 'medium',
+          action: trend.direction === 'up' ? 'View trends' : trend.direction === 'down' ? 'View trends' : 'View trends',
+          priority: 'low',
         });
       }
 
@@ -52,7 +53,7 @@ export class SimpleInsightsService {
           amount: budgetAlert.amount,
           percentage: budgetAlert.percentage,
           severity: budgetAlert.severity,
-          action: 'Adjust budget',
+          action: 'View budgets',
           priority: 'high',
         });
       }
@@ -66,19 +67,33 @@ export class SimpleInsightsService {
           description: unusualSpending.description,
           amount: unusualSpending.amount,
           category: unusualSpending.category,
-          priority: 'medium',
+          action: 'View reports',
+          priority: 'high',
         });
       }
     } catch (error) {
       console.error('Error generating simple insights:', error);
     }
 
-    // Return only 3-4 most important insights
+    // Smart ordering: Budget alerts first, then unusual spending, then trends
     return insights
       .filter(Boolean)
       .sort((a, b) => {
-        const priorityOrder = { high: 3, medium: 2, low: 1 };
-        return priorityOrder[b.priority] - priorityOrder[a.priority];
+        // Priority order: budget_alert > unusual_spending > top_category > spending_trend
+        const typeOrder = {
+          budget_alert: 4,
+          unusual_spending: 3,
+          top_category: 2,
+          spending_trend: 1
+        };
+        
+        // If same type, use priority as tiebreaker
+        if (typeOrder[a.type] === typeOrder[b.type]) {
+          const priorityOrder = { high: 3, medium: 2, low: 1 };
+          return priorityOrder[b.priority] - priorityOrder[a.priority];
+        }
+        
+        return typeOrder[b.type] - typeOrder[a.type];
       })
       .slice(0, 4);
   }
@@ -93,10 +108,10 @@ export class SimpleInsightsService {
     let totalSpending = 0;
 
     transactions
-      .filter(t => t.amount < 0) // Only expenses
+      .filter(t => t.type === 'expense') // Only expenses
       .forEach(transaction => {
         const category = transaction.category || 'Uncategorized';
-        const amount = Math.abs(transaction.amount);
+        const amount = transaction.amount || 0;
         categoryTotals[category] = (categoryTotals[category] || 0) + amount;
         totalSpending += amount;
       });
@@ -124,8 +139,8 @@ export class SimpleInsightsService {
 
     // Get current period spending
     const currentSpending = transactions
-      .filter(t => t.amount < 0)
-      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+      .filter(t => t.type === 'expense')
+      .reduce((sum, t) => sum + (t.amount || 0), 0);
 
     // Get previous period spending for comparison
     let previousSpending;
@@ -137,8 +152,8 @@ export class SimpleInsightsService {
           previousPeriod
         );
         previousSpending = previousTransactions
-          .filter(t => t.amount < 0)
-          .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+          .filter(t => t.type === 'expense')
+          .reduce((sum, t) => sum + (t.amount || 0), 0);
       } catch (error) {
         console.warn('Could not calculate previous period spending:', error);
         // Set to null to indicate no prior data available
@@ -193,8 +208,8 @@ export class SimpleInsightsService {
     // This would integrate with BudgetService
     // For now, return a simple alert if spending is high
     const currentSpending = transactions
-      .filter(t => t.amount < 0)
-      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+      .filter(t => t.type === 'expense')
+      .reduce((sum, t) => sum + (t.amount || 0), 0);
 
     // Simple threshold - alert if spending > €2000
     if (currentSpending > 2000) {
@@ -216,22 +231,22 @@ export class SimpleInsightsService {
     if (!transactions || transactions.length === 0) return null;
 
     // Find transactions that are unusually large
-    const expenses = transactions.filter(t => t.amount < 0);
+    const expenses = transactions.filter(t => t.type === 'expense');
     if (expenses.length === 0) return null; // avoid divide-by-zero when no expenses
 
-    const amounts = expenses.map(t => Math.abs(t.amount));
+    const amounts = expenses.map(t => t.amount || 0);
     const average = amounts.reduce((sum, a) => sum + a, 0) / amounts.length;
     const threshold = average * 3; // 3x average is unusual
 
     const unusualTransactions = expenses.filter(
-      t => Math.abs(t.amount) > threshold
+      t => (t.amount || 0) > threshold
     );
 
     if (unusualTransactions.length > 0) {
       const unusual = unusualTransactions[0]; // Get first unusual transaction
       return {
-        description: `Unusual expense: €${Math.abs(unusual.amount).toFixed(2)} for ${unusual.category || 'Uncategorized'}`,
-        amount: Math.abs(unusual.amount),
+        description: `Unusual expense: €${(unusual.amount || 0).toFixed(2)} for ${unusual.category || 'Uncategorized'}`,
+        amount: unusual.amount || 0,
         category: unusual.category || 'Uncategorized',
       };
     }
@@ -275,7 +290,7 @@ export class SimpleInsightsService {
     if (!transactions || !period) return [];
 
     return transactions.filter(t => {
-      const transactionDate = new Date(t.date);
+      const transactionDate = new Date(t.timestamp);
       return (
         transactionDate >= period.startDate && transactionDate <= period.endDate
       );
