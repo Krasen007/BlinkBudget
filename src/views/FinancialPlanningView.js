@@ -32,6 +32,52 @@ import { InsightsSection } from './financial-planning/InsightsSection.js';
 import { BudgetsSection } from './financial-planning/BudgetsSection.js';
 import { planningDataManager } from '../core/financial-planning/PlanningDataManager.js';
 
+// Simple cache helpers for instant financial planning loading
+const CACHE_KEY = 'blinkbudget_financial_planning_cache';
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+function getCachedPlanningData() {
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (!cached) return null;
+
+    const { data, timestamp } = JSON.parse(cached);
+    const now = Date.now();
+
+    // Check if cache is still fresh
+    if (now - timestamp > CACHE_TTL_MS) {
+      localStorage.removeItem(CACHE_KEY);
+      return null;
+    }
+
+    console.log('[FinancialPlanning] Using cached planning data');
+    return data;
+  } catch (error) {
+    console.warn('[FinancialPlanning] Failed to read cache:', error);
+    return null;
+  }
+}
+
+function setCachedPlanningData(data) {
+  try {
+    const cacheEntry = {
+      data,
+      timestamp: Date.now(),
+    };
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cacheEntry));
+  } catch (error) {
+    console.warn('[FinancialPlanning] Failed to write cache:', error);
+  }
+}
+
+function clearPlanningCache() {
+  try {
+    localStorage.removeItem(CACHE_KEY);
+  } catch (error) {
+    console.warn('[FinancialPlanning] Failed to clear cache:', error);
+  }
+}
+
 export const FinancialPlanningView = () => {
   const container = document.createElement('div');
   container.className = 'view-financial-planning view-container';
@@ -360,6 +406,16 @@ export const FinancialPlanningView = () => {
     try {
       isLoading = true;
 
+      // Check for cached planning data for instant loading
+      const cachedData = getCachedPlanningData();
+      if (cachedData) {
+        console.log('[FinancialPlanning] Using cached data instantly');
+        planningData = cachedData;
+        renderSection(currentSection);
+        isLoading = false;
+        return;
+      }
+
       // Ensure data is synced only if stale
       await ensureDataSynced();
 
@@ -375,6 +431,9 @@ export const FinancialPlanningView = () => {
         await forceSyncFromCloud();
         planningData = await planningDataManager.loadData();
       }
+
+      // Cache the planning data for instant loading next time
+      setCachedPlanningData(planningData);
 
       // Re-render current section with new data
       renderSection(currentSection);
@@ -400,6 +459,9 @@ export const FinancialPlanningView = () => {
       e.detail.key === STORAGE_KEYS.GOALS ||
       e.detail.key === STORAGE_KEYS.BUDGETS
     ) {
+      // Clear cache when data changes to ensure fresh analytics
+      clearPlanningCache();
+
       // Refresh the PlanningDataManager cache to ensure fresh data
       planningDataManager.refresh();
       loadPlanningData();

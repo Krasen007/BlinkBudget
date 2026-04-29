@@ -8,9 +8,125 @@ import { AuthService } from '../core/auth-service.js';
 import { Router } from '../core/router.js';
 import { NavigationState } from '../core/navigation-state.js';
 import { COLORS, SPACING, STORAGE_KEYS } from '../utils/constants.js';
+import { getAnalyticsEngine } from '../core/analytics/AnalyticsInstance.js';
+import { getCurrentMonthPeriod } from '../utils/reports-utils.js';
 
 import { getTransactionToHighlight } from '../utils/success-feedback.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
+
+// Track if we've already preloaded reports in this session
+let hasPreloadedReports = false;
+let hasPreloadedFinancialPlanning = false;
+
+// Preload reports data in background when user is on dashboard
+const preloadReportsData = () => {
+  try {
+    console.log('[Dashboard] Pre-loading reports data in background...');
+
+    const transactions = TransactionService.getAll();
+    const analyticsEngine = getAnalyticsEngine();
+    const currentTimePeriod = getCurrentMonthPeriod();
+
+    // Skip if already preloaded in this session
+    if (hasPreloadedReports) {
+      console.log('[Dashboard] Reports already preloaded this session');
+      return;
+    }
+
+    // Check if already cached
+    const cacheKey = `blinkbudget_reports_cache_${currentTimePeriod.startDate}_${currentTimePeriod.endDate}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const { timestamp } = JSON.parse(cached);
+      const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+      if (Date.now() - timestamp < CACHE_TTL_MS) {
+        console.log('[Dashboard] Reports data already cached and fresh');
+        hasPreloadedReports = true;
+        return;
+      }
+    }
+
+    // Calculate and cache analytics data
+    const insights = analyticsEngine.generateSpendingInsights(
+      transactions,
+      currentTimePeriod
+    );
+    const categoryBreakdown = analyticsEngine.calculateCategoryBreakdown(
+      transactions,
+      currentTimePeriod
+    );
+    const incomeVsExpenses = analyticsEngine.calculateIncomeVsExpenses(
+      transactions,
+      currentTimePeriod
+    );
+    const costOfLiving = analyticsEngine.calculateCostOfLiving(
+      transactions,
+      currentTimePeriod
+    );
+
+    const cacheEntry = {
+      data: {
+        timePeriod: currentTimePeriod,
+        insights,
+        categoryBreakdown,
+        incomeVsExpenses,
+        costOfLiving,
+        transactions,
+      },
+      timestamp: Date.now(),
+    };
+    localStorage.setItem(cacheKey, JSON.stringify(cacheEntry));
+    hasPreloadedReports = true;
+
+    console.log('[Dashboard] Reports data pre-loaded and cached');
+  } catch (error) {
+    console.warn('[Dashboard] Failed to pre-load reports data:', error);
+    // Don't block dashboard if preloading fails
+  }
+};
+
+// Preload financial planning data in background when user is on dashboard
+const preloadFinancialPlanningData = async () => {
+  try {
+    console.log('[Dashboard] Pre-loading financial planning data in background...');
+
+    // Skip if already preloaded in this session
+    if (hasPreloadedFinancialPlanning) {
+      console.log('[Dashboard] Financial planning already preloaded this session');
+      return;
+    }
+
+    // Check if already cached
+    const cacheKey = 'blinkbudget_financial_planning_cache';
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const { timestamp } = JSON.parse(cached);
+      const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+      if (Date.now() - timestamp < CACHE_TTL_MS) {
+        console.log('[Dashboard] Financial planning data already cached and fresh');
+        hasPreloadedFinancialPlanning = true;
+        return;
+      }
+    }
+
+    // Import dynamically to avoid circular dependencies
+    const { planningDataManager } = await import('../core/financial-planning/PlanningDataManager.js');
+
+    // Load and cache planning data
+    const planningData = await planningDataManager.loadData();
+    const cacheEntry = {
+      data: planningData,
+      timestamp: Date.now(),
+    };
+    localStorage.setItem(cacheKey, JSON.stringify(cacheEntry));
+    hasPreloadedFinancialPlanning = true;
+
+    console.log('[Dashboard] Financial planning data pre-loaded and cached');
+  } catch (error) {
+    console.warn('[Dashboard] Failed to pre-load financial planning data:', error);
+    // Don't block dashboard if preloading fails
+  }
+};
 
 export const DashboardView = () => {
   const container = document.createElement('div');
@@ -599,6 +715,15 @@ export const DashboardView = () => {
   };
 
   renderDashboard();
+
+  // Preload data in background after dashboard renders
+  setTimeout(() => {
+    preloadReportsData();
+  }, 1000); // Delay to avoid blocking dashboard render
+
+  setTimeout(() => {
+    preloadFinancialPlanningData();
+  }, 2000); // Delay to avoid blocking dashboard render, staggered after reports
 
   const handleStorageUpdate = e => {
     if (e.detail.key === STORAGE_KEYS.ACCOUNTS) {

@@ -38,49 +38,41 @@ const preloadReportsData = async () => {
     const transactions = TransactionService.getAll();
     const analyticsEngine = getAnalyticsEngine();
 
-    // Pre-calculate analytics for current month
+    // Pre-calculate analytics for current month (warm up the calculations)
     const currentTimePeriod = getCurrentMonthPeriod();
+    const insights = analyticsEngine.generateSpendingInsights(
+      transactions,
+      currentTimePeriod
+    );
+    const categoryBreakdown = analyticsEngine.calculateCategoryBreakdown(
+      transactions,
+      currentTimePeriod
+    );
+    const incomeVsExpenses = analyticsEngine.calculateIncomeVsExpenses(
+      transactions,
+      currentTimePeriod
+    );
+    const costOfLiving = analyticsEngine.calculateCostOfLiving(
+      transactions,
+      currentTimePeriod
+    );
 
-    const startStr =
-      currentTimePeriod.startDate instanceof Date
-        ? currentTimePeriod.startDate.toISOString()
-        : currentTimePeriod.startDate;
-    const endStr =
-      currentTimePeriod.endDate instanceof Date
-        ? currentTimePeriod.endDate.toISOString()
-        : currentTimePeriod.endDate;
-    const cacheKey = `report_data_${startStr}_${endStr}`;
-
-    // Check if already cached
-    if (analyticsEngine.cache.get(cacheKey)) {
-      console.log('[Main] ReportsView data already cached');
-      return;
-    }
-
-    // Calculate and cache analytics data (without raw transactions)
-    const analyticsData = {
-      timePeriod: currentTimePeriod,
-      insights: analyticsEngine.generateSpendingInsights(
+    // Cache the preloaded data for instant report loading
+    const cacheKey = `blinkbudget_reports_cache_${currentTimePeriod.startDate}_${currentTimePeriod.endDate}`;
+    const cacheEntry = {
+      data: {
+        timePeriod: currentTimePeriod,
+        insights,
+        categoryBreakdown,
+        incomeVsExpenses,
+        costOfLiving,
         transactions,
-        currentTimePeriod
-      ),
-      categoryBreakdown: analyticsEngine.calculateCategoryBreakdown(
-        transactions,
-        currentTimePeriod
-      ),
-      incomeVsExpenses: analyticsEngine.calculateIncomeVsExpenses(
-        transactions,
-        currentTimePeriod
-      ),
-      costOfLiving: analyticsEngine.calculateCostOfLiving(
-        transactions,
-        currentTimePeriod
-      ),
+      },
+      timestamp: Date.now(),
     };
+    localStorage.setItem(cacheKey, JSON.stringify(cacheEntry));
 
-    analyticsEngine.cache.set(cacheKey, analyticsData);
-
-    console.log('[Main] ReportsView data pre-loaded successfully');
+    console.log('[Main] ReportsView data pre-loaded and cached successfully');
   } catch (error) {
     console.warn('[Main] Failed to pre-load ReportsView data:', error);
     // Don't block app initialization if pre-loading fails

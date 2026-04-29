@@ -11,7 +11,6 @@ import { FilteringService } from './analytics/FilteringService.js';
 import { MetricsService } from './analytics/MetricsService.js';
 import { InsightsService } from './analytics/InsightsService.js';
 import { AnomalyService } from './analytics/AnomalyService.js';
-import { AnalyticsCache } from './analytics/AnalyticsCache.js';
 import { PredictionService } from './analytics/PredictionService.js';
 import { CategoryUsageService } from './analytics/category-usage-service.js';
 import { AmountPresetService } from './amount-preset-service.js';
@@ -21,104 +20,11 @@ import comparisonService from './analytics/ComparisonService.js';
 
 export class AnalyticsEngine {
   constructor() {
-    this.cache = new AnalyticsCache();
-    this.memoizedCalculations = new Map();
-    this.dataVersion = Date.now(); // Track data changes for cache invalidation
+    // No caching needed - calculations are fast enough
   }
 
-  /**
-   * Memoize expensive calculations with TTL
-   */
-  memoize(key, calculation, ttlMs = 300000) {
-    // 5 minutes default TTL
-    const cached = this.memoizedCalculations.get(key);
-    if (cached && Date.now() - cached.timestamp < ttlMs) {
-      // Return Promise for async calculations, raw value for sync
-      return cached.isPromise ? Promise.resolve(cached.result) : cached.result;
-    }
 
-    const result = calculation();
 
-    // Handle Promise results
-    if (result && typeof result.then === 'function') {
-      // Store the pending Promise immediately so callers get the same in-flight promise
-      this.memoizedCalculations.set(key, {
-        result,
-        timestamp: Date.now(),
-        isPromise: true,
-      });
-
-      result
-        .then(resolvedValue => {
-          // Replace cached entry with resolved value and updated timestamp
-          this.memoizedCalculations.set(key, {
-            result: resolvedValue,
-            timestamp: Date.now(),
-            isPromise: true,
-          });
-        })
-        .catch(error => {
-          // Remove cache entry on rejection to avoid caching failures
-          this.memoizedCalculations.delete(key);
-          console.warn(
-            'Memoized calculation failed, cache entry removed:',
-            error
-          );
-        });
-
-      return result;
-    }
-
-    // Non-Promise result - cache immediately
-    this.memoizedCalculations.set(key, {
-      result,
-      timestamp: Date.now(),
-      isPromise: false,
-    });
-    return result;
-  }
-
-  /**
-   * Generate optimized cache key with better hit rates
-   */
-  generateOptimizedCacheKey(baseKey, params = {}) {
-    const paramHash = Object.keys(params)
-      .sort()
-      .map(key => `${key}:${JSON.stringify(params[key])}`)
-      .join('|');
-    return `${baseKey}_${paramHash}_${this.dataVersion}`;
-  }
-
-  // Create a short, deterministic signature for a transactions array to include
-  // in cache keys without embedding the full payload. This avoids very large
-  // cache keys while still ensuring different transaction sets produce
-  // different keys.
-  _transactionsSignature(transactions) {
-    if (!Array.isArray(transactions) || transactions.length === 0)
-      return 'none';
-
-    // Use a stronger hash algorithm than the original djb2-style
-    let combinedData = '';
-
-    // Serialize each transaction into a consistent string format
-    for (const t of transactions) {
-      const s = `${t.id || ''}|${t.date || t.timestamp || ''}|${t.amount ?? t.value ?? 0}|${t.category || ''}|${t.payee || ''}|${t.description || ''}`;
-      combinedData += s;
-    }
-
-    // Improved hash algorithm for browser compatibility - stronger than original
-    let hash = 5381;
-    for (let i = 0; i < combinedData.length; i++) {
-      hash = ((hash << 5) + hash) ^ combinedData.charCodeAt(i);
-    }
-
-    // Convert to hex and truncate to first 16 characters
-    const hashHex = Math.abs(hash)
-      .toString(16)
-      .padStart(8, '0')
-      .substring(0, 16);
-    return `${transactions.length}_${hashHex}`;
-  }
 
   /**
    * Filter transactions by time period
@@ -128,89 +34,35 @@ export class AnalyticsEngine {
   }
 
   /**
-   * Calculate category breakdown for expenses (optimized)
+   * Calculate category breakdown for expenses
    */
   calculateCategoryBreakdown(transactions, timePeriod) {
-    // Use a transactions signature in the key so different datasets don't collide.
-    // Use memoize(...) exclusively here to avoid duplicate TTL semantics with
-    // AnalyticsCache (memoize handles short-lived in-memory TTLs reliably).
-    const txSig = this._transactionsSignature(transactions);
-    const cacheKey = this.generateOptimizedCacheKey('categoryBreakdown', {
-      timePeriod,
-      txSig,
-    });
-
-    const result = this.memoize(cacheKey, () => {
-      return MetricsService.calculateCategoryBreakdown(
-        transactions,
-        timePeriod
-      );
-    });
-
-    return result;
+    return MetricsService.calculateCategoryBreakdown(transactions, timePeriod);
   }
 
   /**
-   * Calculate income vs expense summary (optimized)
+   * Calculate income vs expense summary
    */
   calculateIncomeVsExpenses(transactions, timePeriod) {
-    const txSig = this._transactionsSignature(transactions);
-    const cacheKey = this.generateOptimizedCacheKey('incomeVsExpenses', {
-      timePeriod,
-      txSig,
-    });
-    const cached = this.cache.get(cacheKey);
-    if (cached) return cached;
-
-    const result = this.memoize(cacheKey, () => {
-      return MetricsService.calculateIncomeVsExpenses(transactions, timePeriod);
-    });
-
-    // Set in both caches for expected test behavior
-    this.cache.set(cacheKey, result);
-    return result;
+    return MetricsService.calculateIncomeVsExpenses(transactions, timePeriod);
   }
 
   /**
    * Calculate cost of living summary
    */
   calculateCostOfLiving(transactions, timePeriod) {
-    const cacheKey = `costOfLiving_${JSON.stringify(timePeriod)}`;
-    const cached = this.cache.get(cacheKey);
-    if (cached) return cached;
-
-    const result = MetricsService.calculateCostOfLiving(
-      transactions,
-      timePeriod
-    );
-    this.cache.set(cacheKey, result);
-    return result;
+    return MetricsService.calculateCostOfLiving(transactions, timePeriod);
   }
 
   /**
-   * Generate spending insights (optimized)
+   * Generate spending insights
    */
   generateSpendingInsights(transactions, currentPeriod, previousPeriod = null) {
-    const txSig = this._transactionsSignature(transactions);
-    const cacheKey = this.generateOptimizedCacheKey('insights', {
+    return InsightsService.generateSpendingInsights(
+      transactions,
       currentPeriod,
-      previousPeriod,
-      txSig,
-    });
-    const cached = this.cache.get(cacheKey);
-    if (cached) return cached;
-
-    const result = this.memoize(cacheKey, () => {
-      return InsightsService.generateSpendingInsights(
-        transactions,
-        currentPeriod,
-        previousPeriod
-      );
-    });
-
-    // Set in both caches for expected test behavior
-    this.cache.set(cacheKey, result);
-    return result;
+      previousPeriod
+    );
   }
 
   /**
@@ -224,44 +76,28 @@ export class AnalyticsEngine {
    * Identify top spending categories
    */
   identifyTopSpendingCategories(transactions, timePeriod, topN = 5) {
-    const cacheKey = `topCategories_${JSON.stringify(timePeriod)}_${topN}`;
-    const cached = this.cache.get(cacheKey);
-    if (cached) return cached;
-
-    const result = MetricsService.identifyTopCategories(
+    return MetricsService.identifyTopCategories(
       transactions,
       timePeriod,
       topN
     );
-    this.cache.set(cacheKey, result);
-    return result;
   }
 
   /**
    * Predict future spending
    */
   predictFutureSpending(transactions, monthsToPredict = 3, options = {}) {
-    const cacheKey = `prediction_${monthsToPredict}_${JSON.stringify(options)}`;
-    const cached = this.cache.get(cacheKey);
-    if (cached) return cached;
-
-    const result = PredictionService.predictFutureSpending(
+    return PredictionService.predictFutureSpending(
       transactions,
       monthsToPredict,
       options
     );
-    this.cache.set(cacheKey, result);
-    return result;
   }
 
   /**
    * Analyze frequency patterns for categories (simple implementation)
    */
   analyzeFrequencyPatterns(transactions, timePeriod, targetCategories = null) {
-    const cacheKey = `frequency_${JSON.stringify(timePeriod)}_${JSON.stringify(targetCategories || [])}_${this._transactionsSignature(transactions)}`;
-    const cached = this.cache.get(cacheKey);
-    if (cached) return cached;
-
     // Filter transactions by time period
     let filteredTransactions = FilteringService.filterByTimePeriod(
       transactions,
@@ -293,7 +129,6 @@ export class AnalyticsEngine {
       })
     );
 
-    this.cache.set(cacheKey, { categories });
     return { categories };
   }
 
@@ -373,22 +208,6 @@ export class AnalyticsEngine {
     CategoryUsageService.resetUsageData();
   }
 
-  // Cache management (proxied to AnalyticsCache)
-  clearCache() {
-    this.memoizedCalculations.clear();
-    this.cache.clearAll();
-  }
-  invalidateCache(pattern) {
-    this.dataVersion = Date.now();
-    this.memoizedCalculations.clear();
-    this.cache.invalidate(pattern);
-  }
-  getCacheStats() {
-    return this.cache.getStats();
-  }
-  invalidateCacheOnDataUpdate() {
-    this.cache.clearAll();
-  }
 
   // Legacy/Internal methods - mostly proxied if still needed by other services
   // but many are now static in their respective services.

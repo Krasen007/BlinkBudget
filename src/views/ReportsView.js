@@ -35,6 +35,58 @@ import {
   formatTimePeriod,
 } from '../utils/reports-utils.js';
 
+// Simple cache helpers for instant report loading
+const CACHE_KEY_PREFIX = 'blinkbudget_reports_cache_';
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+function getCacheKey(timePeriod) {
+  const startStr =
+    timePeriod.startDate instanceof Date
+      ? timePeriod.startDate.toISOString()
+      : timePeriod.startDate;
+  const endStr =
+    timePeriod.endDate instanceof Date
+      ? timePeriod.endDate.toISOString()
+      : timePeriod.endDate;
+  return `${CACHE_KEY_PREFIX}${startStr}_${endStr}`;
+}
+
+function getCachedAnalytics(timePeriod) {
+  try {
+    const cacheKey = getCacheKey(timePeriod);
+    const cached = localStorage.getItem(cacheKey);
+    if (!cached) return null;
+
+    const { data, timestamp } = JSON.parse(cached);
+    const now = Date.now();
+
+    // Check if cache is still fresh
+    if (now - timestamp > CACHE_TTL_MS) {
+      localStorage.removeItem(cacheKey);
+      return null;
+    }
+
+    console.log('[ReportsView] Using cached analytics data');
+    return data;
+  } catch (error) {
+    console.warn('[ReportsView] Failed to read cache:', error);
+    return null;
+  }
+}
+
+function setCachedAnalytics(timePeriod, data) {
+  try {
+    const cacheKey = getCacheKey(timePeriod);
+    const cacheEntry = {
+      data,
+      timestamp: Date.now(),
+    };
+    localStorage.setItem(cacheKey, JSON.stringify(cacheEntry));
+  } catch (error) {
+    console.warn('[ReportsView] Failed to write cache:', error);
+  }
+}
+
 import {
   createLoadingState,
   createEmptyState,
@@ -308,9 +360,9 @@ export const ReportsView = () => {
 
     NavigationState.saveTimePeriod(newTimePeriod);
 
-    analyticsEngine.invalidateCache('categoryBreakdown');
-    analyticsEngine.invalidateCache('incomeVsExpenses');
-    analyticsEngine.invalidateCache('costOfLiving');
+    // Clear cache when time period changes to ensure fresh data
+    const oldCacheKey = getCacheKey(currentTimePeriod);
+    localStorage.removeItem(oldCacheKey);
 
     // If this is a navigation action, only reload data without recreating the header
     if (options.isNavigation) {
@@ -357,45 +409,18 @@ export const ReportsView = () => {
         container.appendChild(content);
       }
 
-      // Generate a stable cache key
-      const startStr =
-        currentTimePeriod.startDate instanceof Date
-          ? currentTimePeriod.startDate.toISOString()
-          : currentTimePeriod.startDate;
-      const endStr =
-        currentTimePeriod.endDate instanceof Date
-          ? currentTimePeriod.endDate.toISOString()
-          : currentTimePeriod.endDate;
-      const cacheKey = `report_data_${startStr}_${endStr}`;
-
-      // NEW: Check for cached data first to enable instant load
-      const cachedData = analyticsEngine.cache.get(cacheKey);
-
-      if (cachedData) {
-        console.log('[ReportsView] Using cached analytics data', {
-          key: cacheKey,
-        });
-
-        // Fetch fresh transactions since they're no longer cached
-        const allTransactions = TransactionService.getAll();
-        if (!Array.isArray(allTransactions)) {
-          throw new Error('Invalid transaction data format - expected array');
-        }
-
-        // Combine fresh transactions with cached derived analytics
+      // Check for cached analytics data for instant loading
+      const cachedAnalytics = getCachedAnalytics(currentTimePeriod);
+      if (cachedAnalytics) {
+        // Use cached data instantly
         currentData = {
-          ...cachedData,
-          transactions: allTransactions,
+          ...cachedAnalytics,
+          transactions: TransactionService.getAll(), // Always get fresh transactions
         };
         renderReports();
         isLoading = false;
         return;
       }
-
-      console.log('[ReportsView] Cache miss', {
-        key: cacheKey,
-        stats: analyticsEngine.getCacheStats(),
-      });
 
       showLoadingState();
 
@@ -532,6 +557,9 @@ export const ReportsView = () => {
 
       currentData = analyticsData;
 
+      // Cache the analytics data for instant loading next time
+      setCachedAnalytics(currentTimePeriod, currentData);
+
       try {
         if (currentData.transactions && currentData.transactions.length > 0) {
           const insights = analyticsEngine.generateSpendingInsights(
@@ -554,18 +582,6 @@ export const ReportsView = () => {
           insightsError
         );
       }
-
-      // NEW: Cache derived analytics only (without raw transactions)
-      const analyticsToCache = {
-        timePeriod: currentData.timePeriod,
-        insights: currentData.insights,
-        categoryBreakdown: currentData.categoryBreakdown,
-        incomeVsExpenses: currentData.incomeVsExpenses,
-        costOfLiving: currentData.costOfLiving,
-        predictions: currentData.predictions,
-      };
-      analyticsEngine.cache.set(cacheKey, analyticsToCache);
-      console.log('[ReportsView] Cached analytics data', { key: cacheKey });
 
       const processingTime = Date.now() - startTime;
       if (processingTime > 2000) {
@@ -1307,7 +1323,9 @@ export const ReportsView = () => {
       e.detail.key === STORAGE_KEYS.TRANSACTIONS ||
       e.detail.key === STORAGE_KEYS.ACCOUNTS
     ) {
-      analyticsEngine.invalidateCacheOnDataUpdate();
+      // Clear cache when data changes to ensure fresh analytics
+      const cacheKey = getCacheKey(currentTimePeriod);
+      localStorage.removeItem(cacheKey);
 
       clearTimeout(container._refreshTimeout);
 
@@ -1332,7 +1350,6 @@ export const ReportsView = () => {
 
   // Auth change handler
   const handleAuthChange = () => {
-    analyticsEngine.clearCache();
     loadReportData();
   };
 
@@ -1380,7 +1397,6 @@ export const ReportsView = () => {
    * Manual refresh function
    */
   function refreshData() {
-    analyticsEngine.clearCache();
     loadReportData();
   }
 

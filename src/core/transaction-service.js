@@ -96,16 +96,13 @@ export const TransactionService = {
     transactions.unshift(sanitizedTransaction);
     this._persist(transactions);
 
-    // Invalidate analytics cache when new transaction is added
-    const analyticsEngine = getAnalyticsEngine();
-    analyticsEngine.invalidateCacheOnDataUpdate();
-
     // Record amount for quick presets (only for expenses)
     if (
       sanitizedTransaction.type === 'expense' &&
       sanitizedTransaction.amount > 0
     ) {
       try {
+        const analyticsEngine = getAnalyticsEngine();
         analyticsEngine.recordAmountPreset(sanitizedTransaction.amount);
       } catch (error) {
         console.warn('Failed to record amount preset:', error);
@@ -159,10 +156,6 @@ export const TransactionService = {
     };
     this._persist(transactions);
 
-    // Invalidate analytics cache when transaction is updated
-    const analyticsEngine = getAnalyticsEngine();
-    analyticsEngine.invalidateCacheOnDataUpdate();
-
     return transactions[index];
   },
 
@@ -182,10 +175,6 @@ export const TransactionService = {
     let transactions = this.getAll();
     transactions = transactions.filter(t => t.id !== id);
     this._persist(transactions);
-
-    // Invalidate analytics cache when transaction is deleted
-    const analyticsEngine = getAnalyticsEngine();
-    analyticsEngine.invalidateCacheOnDataUpdate();
 
     return true;
   },
@@ -237,10 +226,6 @@ export const TransactionService = {
     const transactions = this.getAll();
     const transactionCount = transactions.length;
     localStorage.removeItem(TRANSACTIONS_KEY);
-
-    // Invalidate analytics cache when transactions are bulk deleted
-    const analyticsEngine = getAnalyticsEngine();
-    analyticsEngine.invalidateCacheOnDataUpdate();
 
     this._persist([]);
 
