@@ -39,6 +39,9 @@ export const InsightCard = (insight, _index) => {
   message.style.color = COLORS.TEXT_MAIN;
   message.style.lineHeight = '1.5';
   message.style.marginBottom = insight.recommendation ? SPACING.SM : '0';
+  message.style.wordWrap = 'break-word';
+  message.style.overflowWrap = 'break-word';
+  message.style.minWidth = '0'; // Allow flex item to shrink properly
 
   messageContainer.appendChild(message);
 

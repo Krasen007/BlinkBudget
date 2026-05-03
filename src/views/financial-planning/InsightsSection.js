@@ -19,11 +19,6 @@ import {
 } from '../../utils/financial-planning-helpers.js';
 import { InsightsGenerator } from '../../core/insights-generator.js';
 import { InflationTrends } from '../../components/InflationTrends.js';
-import { getAnalyticsEngine } from '../../core/analytics/AnalyticsInstance.js';
-import { TrendAnalysisSection } from '../../components/TrendAnalysisSection.js';
-import { BudgetRecommendationsSection } from '../../components/BudgetRecommendationsSection.js';
-import { OptimizationInsights } from '../../components/OptimizationInsights.js';
-import { getCurrentMonthPeriod } from '../../utils/reports-utils.js';
 
 /**
  * Helper function to get transaction amount with consistent refund handling
@@ -737,109 +732,6 @@ function createTimelineSection(
 }
 
 /**
- * Render optimization insights with error handling
- */
-function renderOptimizationInsights(section, planningData) {
-  try {
-    const analyticsEngine = getAnalyticsEngine();
-    const currentTimePeriod = getCurrentMonthPeriod();
-
-    const optResult = analyticsEngine.getOptimizationInsights
-      ? analyticsEngine.getOptimizationInsights(
-          planningData.transactions,
-          currentTimePeriod
-        )
-      : { insights: [], incomeVsExpenses: null };
-
-    const optInsights = optResult.insights || [];
-
-    if (optInsights && optInsights.length > 0) {
-      const optSection = OptimizationInsights(optInsights);
-      optSection.style.setProperty(
-        'margin-top',
-        'var(--spacing-md)',
-        'important'
-      );
-      section.appendChild(optSection);
-    }
-  } catch (error) {
-    console.warn(
-      '[InsightsSection] Failed to render optimization insights:',
-      error
-    );
-  }
-}
-
-/**
- * Render trend analysis section with direction indicators, consistency scores, and MoM
- */
-function renderTrendAnalysisSection(section, planningData) {
-  try {
-    const analyticsEngine = getAnalyticsEngine();
-
-    const trends = analyticsEngine.getTrendAnalysis
-      ? analyticsEngine.getTrendAnalysis(null, planningData.transactions)
-      : { trends: [] };
-
-    const consistency = analyticsEngine.getConsistencyScores
-      ? analyticsEngine.getConsistencyScores(planningData.transactions)
-      : {};
-
-    if (trends.trends && trends.trends.length > 0) {
-      const trendSection = TrendAnalysisSection({
-        trends: trends.trends,
-        consistencyScores: consistency,
-        transactions: planningData.transactions,
-      });
-      trendSection.style.setProperty(
-        'margin-top',
-        'var(--spacing-md)',
-        'important'
-      );
-      section.appendChild(trendSection);
-    }
-  } catch (error) {
-    console.warn('[InsightsSection] Failed to render trend analysis:', error);
-  }
-}
-
-/**
- * Render budget recommendations section - Feature 3.3.4 Predictive Budget
- */
-function renderBudgetRecommendationsSection(section, planningData) {
-  try {
-    const analyticsEngine = getAnalyticsEngine();
-    const currentTimePeriod = getCurrentMonthPeriod();
-
-    const recommendationsData = analyticsEngine.getBudgetRecommendations
-      ? analyticsEngine.getBudgetRecommendations(
-          planningData.transactions,
-          currentTimePeriod
-        )
-      : null;
-
-    if (recommendationsData && recommendationsData.length > 0) {
-      const recommendationsSection = BudgetRecommendationsSection(
-        recommendationsData,
-        currentTimePeriod,
-        planningData.transactions
-      );
-      recommendationsSection.style.setProperty(
-        'margin-top',
-        'var(--spacing-md)',
-        'important'
-      );
-      section.appendChild(recommendationsSection);
-    }
-  } catch (recommendationsError) {
-    console.warn(
-      '[InsightsSection] Failed to render budget recommendations section:',
-      recommendationsError
-    );
-  }
-}
-
-/**
  * Insights Section Component
  * @param {Object} planningData - Financial planning data including transactions
  * @param {Object} chartRenderer - Chart renderer service instance
@@ -908,15 +800,6 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
     sharedMonthState
   );
   section.appendChild(inflationTrendsComponent.element);
-
-  // Optimization Insights - cost-saving recommendations
-  renderOptimizationInsights(section, planningData);
-
-  // Trend Analysis - spending direction, consistency scores, MoM
-  renderTrendAnalysisSection(section, planningData);
-
-  // Budget Recommendations - Feature 3.3.4 Predictive Budget
-  renderBudgetRecommendationsSection(section, planningData);
 
   // Set up synchronized navigation - all sections update together
   sharedMonthState.onNavigate = () => {
