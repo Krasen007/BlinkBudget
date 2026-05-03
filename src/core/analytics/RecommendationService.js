@@ -257,12 +257,16 @@ export class RecommendationService {
 
     // Create Map for O(1) budget lookups instead of O(n²) find operations
     const budgetMap = new Map();
-    let budgets = [];
+    let budgets;
     try {
-      budgets = BudgetService.getAll();
+      const result = BudgetService.getAll();
+      budgets = Array.isArray(result) ? result : [];
+      // Only build budgetMap when budgets is a valid array
       budgets.forEach(b => budgetMap.set(b.categoryName, b.amountLimit));
     } catch (err) {
       console.error('[RecommendationService] Failed to load budgets:', err);
+      // Ensure budgets is always an array even on error
+      budgets = [];
     }
 
     const budgetCategories = budgets.map(b => b.categoryName);

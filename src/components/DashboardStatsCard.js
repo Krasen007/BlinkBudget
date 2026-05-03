@@ -28,6 +28,7 @@ export const DashboardStatsCard = ({
   progressPercentage = null,
   showProgressBar = false,
   targetValue = null,
+  positiveIsUp = false, // Configurable color mapping for trend
 }) => {
   const isMobile = window.innerWidth < BREAKPOINTS.MOBILE;
   const card = document.createElement('div');
@@ -92,23 +93,32 @@ export const DashboardStatsCard = ({
     `;
 
     const trendIcon = document.createElement('span');
+    trendIcon.className = 'material-symbols-outlined';
     trendIcon.textContent =
-      trend === 'up' ? ' rise_up' : trend === 'down' ? ' fall_down' : ' right';
-    trendIcon.style.color =
-      trend === 'up'
-        ? COLORS.ERROR
-        : trend === 'down'
+      trend === 'up' ? 'rise_up' : trend === 'down' ? 'fall_down' : 'right';
+    
+    // Configurable color mapping based on positiveIsUp prop
+    if (positiveIsUp) {
+      trendIcon.style.color =
+        trend === 'up'
           ? COLORS.SUCCESS
-          : COLORS.TEXT_MUTED;
+          : trend === 'down'
+            ? COLORS.ERROR
+            : COLORS.TEXT_MUTED;
+    } else {
+      trendIcon.style.color =
+        trend === 'up'
+          ? COLORS.ERROR
+          : trend === 'down'
+            ? COLORS.SUCCESS
+            : COLORS.TEXT_MUTED;
+    }
 
     const trendText = document.createElement('span');
     trendText.textContent = `${Math.abs(trendPercentage).toFixed(1)}%`;
-    trendText.style.color =
-      trend === 'up'
-        ? COLORS.ERROR
-        : trend === 'down'
-          ? COLORS.SUCCESS
-          : COLORS.TEXT_MUTED;
+    
+    // Apply same color mapping as trend icon
+    trendText.style.color = trendIcon.style.color;
 
     trendContainer.appendChild(trendIcon);
     trendContainer.appendChild(trendText);
@@ -131,9 +141,16 @@ export const DashboardStatsCard = ({
       border-radius: 2px;
       overflow: hidden;
     `;
+    
+    // Add accessibility attributes
+    progressBarBg.setAttribute('role', 'progressbar');
+    progressBarBg.setAttribute('aria-valuemin', '0');
+    progressBarBg.setAttribute('aria-valuemax', '100');
+    const progressWidth = Math.min(Math.max(progressPercentage, 0), 100);
+    progressBarBg.setAttribute('aria-valuenow', progressWidth);
+    progressBarBg.setAttribute('aria-label', `${label || 'Progress'}: ${progressWidth}%`);
 
     const progressBarFill = document.createElement('div');
-    const progressWidth = Math.min(Math.max(progressPercentage, 0), 100);
     progressBarFill.style.cssText = `
       height: 100%;
       width: ${progressWidth}%;

@@ -59,10 +59,10 @@ export class SavingsGoalsService {
    */
   static calculateSingleGoalProgress(goal, transactions = []) {
     // Filter transactions that contribute to this goal
-    // This could be based on category, tags, or specific savings transactions
+    // Only include transactions explicitly tied to this goal
     const relevantTransactions = transactions.filter(t => {
-      // For now, assume income transactions and specific "savings" category
-      return t.type === 'income' || t.category === 'Savings';
+      // Check if transaction is explicitly linked to this goal
+      return t.goalId === goal.id || (t.metadata && t.metadata.goalId === goal.id);
     });
 
     const totalSaved = relevantTransactions.reduce((sum, t) => {
@@ -82,10 +82,16 @@ export class SavingsGoalsService {
       return transactionDate >= threeMonthsAgo;
     });
 
-    const monthlySavingRate =
-      recentTransactions.length > 0
-        ? recentTransactions.reduce((sum, t) => sum + (t.amount || 0), 0) / 3
-        : 0;
+    // Fix monthlySavingRate calculation to use actual time span
+    let monthlySavingRate = 0;
+    if (recentTransactions.length > 0) {
+      const earliest = new Date(Math.min(...recentTransactions.map(t => new Date(t.timestamp))));
+      const latest = new Date(Math.max(...recentTransactions.map(t => new Date(t.timestamp))));
+      const timespanDays = Math.max((latest - earliest) / (1000 * 60 * 60 * 24), 1);
+      const months = Math.max(timespanDays / 30, 1);
+      const sumAmounts = recentTransactions.reduce((sum, t) => sum + (t.amount || 0), 0);
+      monthlySavingRate = sumAmounts / months;
+    }
 
     let estimatedMonthsToComplete = null;
     if (monthlySavingRate > 0 && !isCompleted) {
@@ -191,11 +197,11 @@ export class SavingsGoalsService {
     const goalsWithProgress = await this.calculateGoalProgress(transactions);
 
     const totalTarget = goalsWithProgress.reduce(
-      (sum, goal) => sum + goal.targetAmount,
+      (sum, goal) => sum + Number(goal.targetAmount || 0),
       0
     );
     const totalSaved = goalsWithProgress.reduce(
-      (sum, goal) => sum + goal.progress.currentAmount,
+      (sum, goal) => sum + Number((goal.progress && goal.progress.currentAmount) || 0),
       0
     );
     const completedGoals = goalsWithProgress.filter(

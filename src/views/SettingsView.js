@@ -236,9 +236,20 @@ export const SettingsView = () => {
         duration: 2000,
       });
 
-      let updateFound = false;
       try {
-        updateFound = await checkForUpdatesWithFeedback();
+        const updateFound = await checkForUpdatesWithFeedback();
+        
+        if (updateFound) {
+          // Update dialog will be shown by pwa.js onNeedRefresh
+          console.log('[PWA Update] Update found - dialog should appear');
+        } else {
+          ToastNotification({
+            message: 'You have the latest version!',
+            variant: 'success',
+            duration: 3000,
+          });
+          console.log('[PWA Update] No updates available');
+        }
       } catch (error) {
         console.error('[PWA Update] Manual check failed:', error);
         ToastNotification({
@@ -246,18 +257,7 @@ export const SettingsView = () => {
           variant: 'error',
           duration: 3000,
         });
-      }
-
-      if (updateFound) {
-        // Update dialog will be shown by pwa.js onNeedRefresh
-        console.log('[PWA Update] Update found - dialog should appear');
-      } else {
-        ToastNotification({
-          message: 'You have the latest version!',
-          variant: 'success',
-          duration: 3000,
-        });
-        console.log('[PWA Update] No updates available');
+        return; // Stop execution to prevent success message from appearing
       }
     },
   });

@@ -20,18 +20,18 @@ let hasPreloadedFinancialPlanning = false;
 
 // Preload reports data in background when user is on dashboard
 const preloadReportsData = () => {
+  // Skip if already preloaded in this session - check first to avoid expensive operations
+  if (hasPreloadedReports) {
+    console.log('[Dashboard] Reports already preloaded this session');
+    return;
+  }
+
   try {
     console.log('[Dashboard] Pre-loading reports data in background...');
 
     const transactions = TransactionService.getAll();
     const analyticsEngine = getAnalyticsEngine();
     const currentTimePeriod = getCurrentMonthPeriod();
-
-    // Skip if already preloaded in this session
-    if (hasPreloadedReports) {
-      console.log('[Dashboard] Reports already preloaded this session');
-      return;
-    }
 
     // Check if already cached
     const cacheKey = `blinkbudget_reports_cache_${currentTimePeriod.startDate}_${currentTimePeriod.endDate}`;
@@ -71,7 +71,9 @@ const preloadReportsData = () => {
         categoryBreakdown,
         incomeVsExpenses,
         costOfLiving,
-        transactions,
+        meta: {
+          transactionCount: transactions.length,
+        },
       },
       timestamp: Date.now(),
     };
@@ -706,7 +708,8 @@ export const DashboardView = (params = {}) => {
     }
 
     // Recent Transactions
-    const highlightTransactionIds = getTransactionToHighlight() || [];
+    // Create a new array copy instead of mutating the returned reference
+    const highlightTransactionIds = [...(getTransactionToHighlight() || [])];
     // Add highlight transaction ID from params if provided
     if (params.highlightTransactionId) {
       highlightTransactionIds.push(params.highlightTransactionId);

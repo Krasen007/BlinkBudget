@@ -88,10 +88,11 @@ export class UnusualSpendingDetector {
     const analysis = {};
     Object.entries(categoryGroups).forEach(
       ([category, categoryTransactions]) => {
-        if (categoryTransactions.length >= 3) {
-          // Minimum for meaningful analysis
+        if (categoryTransactions.length >= 5) {
+          // Minimum for meaningful analysis - consistent with detectUnusualTransactions default
           const unusual = this.detectUnusualTransactions(categoryTransactions, {
             category,
+            minTransactions: 5, // Explicitly pass minTransactions for consistency
           });
           const amounts = categoryTransactions.map(t => t.amount || 0);
           const mean = amounts.reduce((sum, a) => sum + a, 0) / amounts.length;
@@ -163,6 +164,12 @@ export class UnusualSpendingDetector {
 
       if (amounts.length >= 5) {
         const mean = amounts.reduce((sum, a) => sum + a, 0) / amounts.length;
+        
+        // Guard against division by zero
+        if (mean === 0) {
+          return; // Skip this category if mean is zero
+        }
+        
         const variance =
           amounts.reduce((sum, a) => sum + Math.pow(a - mean, 2), 0) /
           amounts.length;
@@ -213,11 +220,17 @@ export class UnusualSpendingDetector {
         t.id !== transaction.id
     );
 
-    if (categoryTransactions.length < 3) {
+    if (categoryTransactions.length < 5) {
       return null;
     }
 
     const amounts = categoryTransactions.map(t => t.amount || 0);
+    
+    // Guard against empty categoryTransactions
+    if (amounts.length === 0) {
+      return null;
+    }
+    
     const mean = amounts.reduce((sum, a) => sum + a, 0) / amounts.length;
     const variance =
       amounts.reduce((sum, a) => sum + Math.pow(a - mean, 2), 0) /
@@ -226,12 +239,24 @@ export class UnusualSpendingDetector {
     const threshold = mean + 3 * standardDeviation;
 
     if (transaction.amount > threshold) {
+      // Compute safe values to avoid division by zero
+      let multiplier = 'N/A';
+      let deviation = '0.00';
+      
+      if (mean !== 0 && Number.isFinite(mean)) {
+        multiplier = (transaction.amount / mean).toFixed(1);
+      }
+      
+      if (standardDeviation !== 0 && Number.isFinite(standardDeviation)) {
+        deviation = ((transaction.amount - mean) / standardDeviation).toFixed(2);
+      }
+      
       return {
         isUnusual: true,
         averageAmount: mean,
         threshold,
-        multiplier: (transaction.amount / mean).toFixed(1),
-        deviation: ((transaction.amount - mean) / standardDeviation).toFixed(2),
+        multiplier,
+        deviation,
       };
     }
 

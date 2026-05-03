@@ -96,34 +96,39 @@ function showUpdateConfirmation(onConfirm) {
   // Focus management and keyboard accessibility
   const updateNowBtn = dialog.querySelector('.update-now-btn');
   const laterBtn = dialog.querySelector('.update-later-btn');
+  const releasesLink = dialog.querySelector('.update-releases-link');
   const previouslyFocused = document.activeElement;
 
   // Set initial focus to primary action
   updateNowBtn.focus();
 
-  // Simple focus trap for Tab navigation
+  // Simple focus trap for Tab navigation - include all focusable elements
+  const focusableElements = [updateNowBtn, laterBtn, releasesLink];
   const handleKeyDown = e => {
     if (e.key === 'Escape') {
       document.body.removeChild(overlay);
+      if (previouslyFocused && previouslyFocused.focus) {
+        previouslyFocused.focus();
+      }
       return;
     }
 
     if (e.key === 'Tab') {
       e.preventDefault();
+      const currentIndex = focusableElements.indexOf(document.activeElement);
+      let nextIndex;
+      
       if (e.shiftKey) {
         // Shift+Tab: go backwards
-        if (document.activeElement === laterBtn) {
-          updateNowBtn.focus();
-        } else if (document.activeElement === updateNowBtn) {
-          laterBtn.focus();
-        }
+        nextIndex = currentIndex <= 0 ? focusableElements.length - 1 : currentIndex - 1;
       } else {
         // Tab: go forwards
-        if (document.activeElement === laterBtn) {
-          updateNowBtn.focus();
-        } else if (document.activeElement === updateNowBtn) {
-          laterBtn.focus();
-        }
+        nextIndex = currentIndex >= focusableElements.length - 1 ? 0 : currentIndex + 1;
+      }
+      
+      const nextElement = focusableElements[nextIndex];
+      if (nextElement && nextElement.focus) {
+        nextElement.focus();
       }
     }
   };
@@ -216,6 +221,10 @@ const updateSW = registerSW({
 // Check for version change on load
 checkFirstLaunchAfterUpdate();
 
+// Global state for managing concurrent update checks
+const pendingUpdateResolvers = [];
+const pendingUpdateTimeouts = [];
+
 /**
  * Check for updates with feedback
  * Returns a promise that resolves with true if update found, false otherwise
@@ -230,26 +239,42 @@ function checkForUpdatesWithFeedback() {
       return;
     }
 
-    // Set up callback for if update is found
-    updateFoundCallback = found => {
-      console.log('[PWA Update] Update found:', found);
-      resolve(found);
-    };
+    // Early return if there's already a pending update
+    if (pendingUpdate === true) {
+      console.log('[PWA Update] Update already pending, resolving immediately');
+      resolve(true);
+      return;
+    }
 
-    // Timeout - if no update found within 3 seconds, resolve false
-    updateFoundTimeout = setTimeout(() => {
+    // Add this resolver to the pending list
+    pendingUpdateResolvers.push(resolve);
+    
+    // Create timeout for this specific call
+    const timeoutId = setTimeout(() => {
       console.log('[PWA Update] No update detected within timeout');
-      if (updateFoundCallback) {
-        updateFoundCallback(false);
-        updateFoundCallback = null;
+      const index = pendingUpdateResolvers.indexOf(resolve);
+      if (index > -1) {
+        pendingUpdateResolvers.splice(index, 1);
       }
+      const timeoutIndex = pendingUpdateTimeouts.indexOf(timeoutId);
+      if (timeoutIndex > -1) {
+        pendingUpdateTimeouts.splice(timeoutIndex, 1);
+      }
+      resolve(false);
     }, 3000);
+    
+    pendingUpdateTimeouts.push(timeoutId);
 
     // Trigger the check
     navigator.serviceWorker.ready.then(registration => {
       console.log('[PWA Update] Calling registration.update()');
       registration.update().catch(error => {
         console.error('[PWA Update] Failed to check for updates:', error);
+        // Resolve all pending calls with false on error
+        const resolvers = pendingUpdateResolvers.splice(0);
+        const timeouts = pendingUpdateTimeouts.splice(0);
+        timeouts.forEach(timeoutId => clearTimeout(timeoutId));
+        resolvers.forEach(resolver => resolver(false));
       });
     });
   });

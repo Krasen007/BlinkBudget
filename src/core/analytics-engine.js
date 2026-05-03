@@ -391,4 +391,40 @@ export class AnalyticsEngine {
       transactions
     );
   }
+
+  // ========== Backward Compatibility Methods (Deprecated) ==========
+  
+  /**
+   * @deprecated This method has been removed and is now a no-op
+   */
+  clearCache() {
+    console.warn('AnalyticsEngine.clearCache() is deprecated and has been removed. No action taken.');
+  }
+
+  /**
+   * @deprecated This method has been removed and is now a no-op
+   */
+  invalidateCache() {
+    console.warn('AnalyticsEngine.invalidateCache() is deprecated and has been removed. No action taken.');
+  }
+
+  /**
+   * @deprecated This method has been removed
+   */
+  getCacheStats() {
+    console.warn('AnalyticsEngine.getCacheStats() is deprecated and has been removed. Returning empty stats.');
+    return {
+      size: 0,
+      hits: 0,
+      misses: 0,
+      hitRate: 0
+    };
+  }
+
+  /**
+   * @deprecated This method has been removed and is now a no-op
+   */
+  invalidateCacheOnDataUpdate() {
+    console.warn('AnalyticsEngine.invalidateCacheOnDataUpdate() is deprecated and has been removed. No action taken.');
+  }
 }

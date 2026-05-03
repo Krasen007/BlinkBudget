@@ -268,7 +268,13 @@ export const UnusualSpendingCard = (
   averageAmount,
   onViewTransaction
 ) => {
-  const multiplier = (transaction.amount / averageAmount).toFixed(1);
+  // Guard against division by zero
+  let multiplier;
+  if (averageAmount !== 0 && Number.isFinite(Number(averageAmount))) {
+    multiplier = (transaction.amount / averageAmount).toFixed(1);
+  } else {
+    multiplier = '—'; // Safe fallback for zero/invalid average
+  }
 
   return ActionCard({
     title: 'Unusual Spending Detected',
@@ -289,8 +295,18 @@ export const UnusualSpendingCard = (
  * @returns {HTMLElement} Savings goal progress card
  */
 export const SavingsGoalCard = (goal, currentProgress, onViewGoal) => {
-  const percentage = (currentProgress / goal.target) * 100;
-  const remaining = goal.target - currentProgress;
+  // Guard against division by zero in percentage calculation
+  let percentage = 0;
+  let remaining = 0;
+  
+  if (goal.target && goal.target !== 0 && Number.isFinite(Number(goal.target))) {
+    percentage = Math.min(Math.max((currentProgress / goal.target) * 100, 0), 100);
+    remaining = goal.target - currentProgress;
+  } else {
+    // Safe defaults for invalid/zero targets
+    percentage = 0;
+    remaining = 0;
+  }
 
   let type, title;
   if (percentage >= 100) {

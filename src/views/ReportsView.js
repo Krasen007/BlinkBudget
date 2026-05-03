@@ -36,62 +36,11 @@ import {
   checkBrowserSupport,
   validateAnalyticsData,
   sanitizeAnalyticsData,
-  createMinimalAnalyticsData,
   formatTimePeriod,
+  createMinimalAnalyticsData,
 } from '../utils/reports-utils.js';
 
-// Simple cache helpers for instant report loading
-const CACHE_KEY_PREFIX = 'blinkbudget_reports_cache_';
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
-
-function getCacheKey(timePeriod) {
-  const startStr =
-    timePeriod.startDate instanceof Date
-      ? timePeriod.startDate.toISOString()
-      : timePeriod.startDate;
-  const endStr =
-    timePeriod.endDate instanceof Date
-      ? timePeriod.endDate.toISOString()
-      : timePeriod.endDate;
-  return `${CACHE_KEY_PREFIX}${startStr}_${endStr}`;
-}
-
-function getCachedAnalytics(timePeriod) {
-  try {
-    const cacheKey = getCacheKey(timePeriod);
-    const cached = localStorage.getItem(cacheKey);
-    if (!cached) return null;
-
-    const { data, timestamp } = JSON.parse(cached);
-    const now = Date.now();
-
-    // Check if cache is still fresh
-    if (now - timestamp > CACHE_TTL_MS) {
-      localStorage.removeItem(cacheKey);
-      return null;
-    }
-
-    console.log('[ReportsView] Using cached analytics data');
-    return data;
-  } catch (error) {
-    console.warn('[ReportsView] Failed to read cache:', error);
-    return null;
-  }
-}
-
-function setCachedAnalytics(timePeriod, data) {
-  try {
-    const cacheKey = getCacheKey(timePeriod);
-    const cacheEntry = {
-      data,
-      timestamp: Date.now(),
-    };
-    localStorage.setItem(cacheKey, JSON.stringify(cacheEntry));
-  } catch (error) {
-    console.warn('[ReportsView] Failed to write cache:', error);
-  }
-}
-
+// Import utility modules
 import {
   createLoadingState,
   createEmptyState,
@@ -412,10 +361,6 @@ export const ReportsView = (params = {}) => {
 
     NavigationState.saveTimePeriod(newTimePeriod);
 
-    // Clear cache when time period changes to ensure fresh data
-    const oldCacheKey = getCacheKey(currentTimePeriod);
-    localStorage.removeItem(oldCacheKey);
-
     // Navigate with query parameter for period
     const periodParam = getPeriodParamFromTimePeriod(newTimePeriod);
     if (periodParam) {
@@ -439,11 +384,16 @@ export const ReportsView = (params = {}) => {
 
     switch (timePeriod.type) {
       case 'monthly': {
-        // Check if it's current month or last month
+        // Check if it's current month, last month, or other historical month
         const now = new Date();
         const currentMonthStart = new Date(
           now.getFullYear(),
           now.getMonth(),
+          1
+        );
+        const previousMonthStart = new Date(
+          now.getFullYear(),
+          now.getMonth() - 1,
           1
         );
         const periodStart = new Date(timePeriod.startDate);
@@ -453,8 +403,13 @@ export const ReportsView = (params = {}) => {
           periodStart.getMonth() === currentMonthStart.getMonth()
         ) {
           return 'month';
-        } else {
+        } else if (
+          periodStart.getFullYear() === previousMonthStart.getFullYear() &&
+          periodStart.getMonth() === previousMonthStart.getMonth()
+        ) {
           return 'lastMonth';
+        } else {
+          return null; // Other historical months don't have URL parameters
         }
       }
       case 'daily':
@@ -502,19 +457,6 @@ export const ReportsView = (params = {}) => {
         const header = createHeader();
         container.appendChild(header);
         container.appendChild(content);
-      }
-
-      // Check for cached analytics data for instant loading
-      const cachedAnalytics = getCachedAnalytics(currentTimePeriod);
-      if (cachedAnalytics) {
-        // Use cached data instantly
-        currentData = {
-          ...cachedAnalytics,
-          transactions: TransactionService.getAll(), // Always get fresh transactions
-        };
-        renderReports();
-        isLoading = false;
-        return;
       }
 
       showLoadingState();
@@ -651,9 +593,6 @@ export const ReportsView = (params = {}) => {
       }
 
       currentData = analyticsData;
-
-      // Cache the analytics data for instant loading next time
-      setCachedAnalytics(currentTimePeriod, currentData);
 
       try {
         if (currentData.transactions && currentData.transactions.length > 0) {
@@ -1213,13 +1152,17 @@ export const ReportsView = (params = {}) => {
           alertsTitle.textContent = 'Unusual Spending Detected';
           alertsTitle.style.cssText = `
             font-size: ${FONT_SIZES.SM};
-            font-weight: '600';
-            margin: '0 0 ${SPACING.XS} 0';
+            font-weight: 600;
+            margin: 0 0 ${SPACING.XS} 0;
             color: ${COLORS.TEXT_MAIN};
           `;
           alertsSection.appendChild(alertsTitle);
 
           unusualTransactions.slice(0, 3).forEach(transaction => {
+            // Check if transaction has unusualSpending data before accessing
+            if (!transaction.unusualSpending) {
+              return; // Skip transactions without unusualSpending data
+            }
             const unusualData = transaction.unusualSpending;
             const alertCard = UnusualSpendingCard(
               transaction,
@@ -1491,10 +1434,6 @@ export const ReportsView = (params = {}) => {
       e.detail.key === STORAGE_KEYS.TRANSACTIONS ||
       e.detail.key === STORAGE_KEYS.ACCOUNTS
     ) {
-      // Clear cache when data changes to ensure fresh analytics
-      const cacheKey = getCacheKey(currentTimePeriod);
-      localStorage.removeItem(cacheKey);
-
       clearTimeout(container._refreshTimeout);
 
       // Use requestIdleCallback for background updates when available
