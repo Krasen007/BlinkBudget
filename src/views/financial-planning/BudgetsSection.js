@@ -27,7 +27,7 @@ export const BudgetsSection = async planningData => {
   container.style.gap = SPACING.LG;
 
   const currentPeriod = getCurrentMonthPeriod();
-  
+
   // Handle null planningData by loading transactions directly
   let transactions = [];
   if (planningData && planningData.transactions) {

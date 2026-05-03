@@ -1,6 +1,6 @@
 /**
  * Savings Goals Section Component
- * 
+ *
  * Displays savings goals with visual progress indicators and recommendations.
  * Integrates with budget tracking and financial planning.
  */
@@ -62,7 +62,8 @@ export const SavingsGoalsSection = async planningData => {
     container.appendChild(header);
 
     // Get savings summary
-    const savingsSummary = await SavingsGoalsService.getSavingsSummary(transactions);
+    const savingsSummary =
+      await SavingsGoalsService.getSavingsSummary(transactions);
 
     // Summary card
     const summaryCard = createSummaryCard(savingsSummary);
@@ -96,7 +97,8 @@ export const SavingsGoalsSection = async planningData => {
     }
 
     // Goal recommendations
-    const recommendations = await SavingsGoalsService.getGoalRecommendations(transactions);
+    const recommendations =
+      await SavingsGoalsService.getGoalRecommendations(transactions);
     if (recommendations.length > 0) {
       const recommendationsSection = document.createElement('div');
       recommendationsSection.style.display = 'flex';
@@ -118,7 +120,7 @@ export const SavingsGoalsSection = async planningData => {
     }
   };
 
-  const createSummaryCard = (summary) => {
+  const createSummaryCard = summary => {
     const card = document.createElement('div');
     card.style.cssText = `
       background: ${COLORS.SURFACE};
@@ -134,25 +136,34 @@ export const SavingsGoalsSection = async planningData => {
       { label: 'Total Goals', value: summary.totalGoals },
       { label: 'Active', value: summary.activeGoals },
       { label: 'Completed', value: summary.completedGoals },
-      { label: 'Total Saved', value: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(summary.totalSaved) },
-      { label: 'Overall Progress', value: `${Math.round(summary.overallProgress)}%` }
+      {
+        label: 'Total Saved',
+        value: new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'EUR',
+        }).format(summary.totalSaved),
+      },
+      {
+        label: 'Overall Progress',
+        value: `${Math.round(summary.overallProgress)}%`,
+      },
     ];
 
     metrics.forEach(metric => {
       const metricDiv = document.createElement('div');
       metricDiv.style.textAlign = 'center';
-      
+
       const value = document.createElement('div');
       value.textContent = metric.value;
       value.style.fontSize = FONT_SIZES.LG;
       value.style.fontWeight = '600';
       value.style.color = COLORS.PRIMARY;
-      
+
       const label = document.createElement('div');
       label.textContent = metric.label;
       label.style.fontSize = FONT_SIZES.SM;
       label.style.color = COLORS.TEXT_MUTED;
-      
+
       metricDiv.appendChild(value);
       metricDiv.appendChild(label);
       card.appendChild(metricDiv);
@@ -161,7 +172,7 @@ export const SavingsGoalsSection = async planningData => {
     return card;
   };
 
-  const createRecommendationCard = (recommendation) => {
+  const createRecommendationCard = recommendation => {
     const card = document.createElement('div');
     card.style.cssText = `
       background: ${COLORS.SURFACE};
@@ -229,7 +240,7 @@ export const SavingsGoalsSection = async planningData => {
       target: targetAmount,
       category,
       createdDate: new Date().toISOString(),
-      targetDate: null // Could add target date selection
+      targetDate: null, // Could add target date selection
     };
 
     SavingsGoalsService.saveSavingsGoal(newGoal).then(() => {
@@ -237,7 +248,7 @@ export const SavingsGoalsSection = async planningData => {
     });
   };
 
-  const showGoalDetails = (goal) => {
+  const showGoalDetails = goal => {
     // Show detailed goal information
     const details = `
 Goal: ${goal.name}
@@ -249,14 +260,14 @@ Remaining: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR'
     alert(details);
   };
 
-  const createGoalFromRecommendation = (recommendation) => {
+  const createGoalFromRecommendation = recommendation => {
     const newGoal = {
       id: Date.now().toString(),
       name: recommendation.title,
       target: recommendation.target || 1000, // Default target if none specified
       category: recommendation.category || 'General',
       createdDate: new Date().toISOString(),
-      targetDate: null
+      targetDate: null,
     };
 
     SavingsGoalsService.saveSavingsGoal(newGoal).then(() => {

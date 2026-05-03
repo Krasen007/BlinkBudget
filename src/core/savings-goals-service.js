@@ -1,6 +1,6 @@
 /**
  * Savings Goals Service
- * 
+ *
  * Manages savings goals with progress tracking and visual indicators.
  * Integrates with budget tracking and financial planning.
  */
@@ -41,12 +41,12 @@ export class SavingsGoalsService {
    */
   static async calculateGoalProgress(transactions = []) {
     const goals = await this.getSavingsGoals();
-    
+
     return goals.map(goal => {
       const progress = this.calculateSingleGoalProgress(goal, transactions);
       return {
         ...goal,
-        progress
+        progress,
       };
     });
   }
@@ -69,10 +69,11 @@ export class SavingsGoalsService {
       return sum + (t.amount || 0);
     }, 0);
 
-    const percentage = goal.targetAmount > 0 ? (totalSaved / goal.targetAmount) * 100 : 0;
+    const percentage =
+      goal.targetAmount > 0 ? (totalSaved / goal.targetAmount) * 100 : 0;
     const remaining = Math.max(0, goal.targetAmount - totalSaved);
     const isCompleted = percentage >= 100;
-    
+
     // Calculate estimated completion date based on recent saving rate
     const recentTransactions = relevantTransactions.filter(t => {
       const transactionDate = new Date(t.timestamp);
@@ -81,9 +82,10 @@ export class SavingsGoalsService {
       return transactionDate >= threeMonthsAgo;
     });
 
-    const monthlySavingRate = recentTransactions.length > 0 
-      ? recentTransactions.reduce((sum, t) => sum + (t.amount || 0), 0) / 3
-      : 0;
+    const monthlySavingRate =
+      recentTransactions.length > 0
+        ? recentTransactions.reduce((sum, t) => sum + (t.amount || 0), 0) / 3
+        : 0;
 
     let estimatedMonthsToComplete = null;
     if (monthlySavingRate > 0 && !isCompleted) {
@@ -98,7 +100,7 @@ export class SavingsGoalsService {
       isCompleted,
       monthlySavingRate,
       estimatedMonthsToComplete,
-      contributingTransactions: relevantTransactions.length
+      contributingTransactions: relevantTransactions.length,
     };
   }
 
@@ -110,15 +112,17 @@ export class SavingsGoalsService {
    */
   static async getGoalRecommendations(transactions = [], _budgets = []) {
     const recommendations = [];
-    
+
     // Calculate monthly income and expenses
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
-    
+
     const monthlyTransactions = transactions.filter(t => {
       const transactionDate = new Date(t.timestamp);
-      return transactionDate.getMonth() === currentMonth && 
-             transactionDate.getFullYear() === currentYear;
+      return (
+        transactionDate.getMonth() === currentMonth &&
+        transactionDate.getFullYear() === currentYear
+      );
     });
 
     const monthlyIncome = monthlyTransactions
@@ -145,7 +149,7 @@ export class SavingsGoalsService {
         target: emergencyFundTarget,
         current: currentEmergencyFund,
         priority: 'high',
-        category: 'Emergency Fund'
+        category: 'Emergency Fund',
       });
     }
 
@@ -159,7 +163,7 @@ export class SavingsGoalsService {
         target: null, // Ongoing goal
         current: 0,
         priority: 'medium',
-        category: 'Retirement'
+        category: 'Retirement',
       });
     }
 
@@ -172,7 +176,7 @@ export class SavingsGoalsService {
       target: vacationTarget,
       current: 0,
       priority: 'low',
-      category: 'Vacation'
+      category: 'Vacation',
     });
 
     return recommendations;
@@ -185,10 +189,18 @@ export class SavingsGoalsService {
    */
   static async getSavingsSummary(transactions = []) {
     const goalsWithProgress = await this.calculateGoalProgress(transactions);
-    
-    const totalTarget = goalsWithProgress.reduce((sum, goal) => sum + goal.targetAmount, 0);
-    const totalSaved = goalsWithProgress.reduce((sum, goal) => sum + goal.progress.currentAmount, 0);
-    const completedGoals = goalsWithProgress.filter(goal => goal.progress.isCompleted).length;
+
+    const totalTarget = goalsWithProgress.reduce(
+      (sum, goal) => sum + goal.targetAmount,
+      0
+    );
+    const totalSaved = goalsWithProgress.reduce(
+      (sum, goal) => sum + goal.progress.currentAmount,
+      0
+    );
+    const completedGoals = goalsWithProgress.filter(
+      goal => goal.progress.isCompleted
+    ).length;
     const activeGoals = goalsWithProgress.length - completedGoals;
 
     return {
@@ -198,7 +210,7 @@ export class SavingsGoalsService {
       totalTarget,
       totalSaved,
       overallProgress: totalTarget > 0 ? (totalSaved / totalTarget) * 100 : 0,
-      goalsWithProgress
+      goalsWithProgress,
     };
   }
 }

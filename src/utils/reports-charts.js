@@ -9,6 +9,8 @@ import { getChartColors } from '../core/chart-config.js';
 import { TransactionService } from '../core/transaction-service.js';
 import { generateMonthlyTrendData } from './reports-utils.js';
 import { escapeHtml } from './security-utils.js';
+import { Router } from '../core/router.js';
+import { NavigationState } from '../core/navigation-state.js';
 
 /**
  * Create tooltip configuration for category charts
@@ -122,11 +124,15 @@ export async function createCategoryBreakdownChart(
   totalsContainer.style.gap = SPACING.MD;
   totalsContainer.style.textAlign = 'right';
 
-  // Total Income (Left side)
+  // Total Income (Left side) - clickable to filter dashboard by income
   const totalIncomeContainer = document.createElement('div');
   totalIncomeContainer.style.display = 'flex';
   totalIncomeContainer.style.flexDirection = 'column';
   totalIncomeContainer.style.alignItems = 'flex-start';
+  totalIncomeContainer.style.cursor = 'pointer';
+  totalIncomeContainer.style.transition = 'opacity 0.2s ease';
+  totalIncomeContainer.title =
+    'Click to filter dashboard by income transactions';
 
   const totalIncomeLabel = document.createElement('span');
   totalIncomeLabel.textContent = 'Total Income';
@@ -147,11 +153,33 @@ export async function createCategoryBreakdownChart(
   totalIncomeContainer.appendChild(totalIncomeLabel);
   totalIncomeContainer.appendChild(totalIncomeValue);
 
-  // Total Spent (Right side)
+  // Add hover effect
+  totalIncomeContainer.addEventListener('mouseenter', () => {
+    totalIncomeContainer.style.opacity = '0.7';
+  });
+  totalIncomeContainer.addEventListener('mouseleave', () => {
+    totalIncomeContainer.style.opacity = '1';
+  });
+
+  // Add click handler to filter dashboard by income
+  totalIncomeContainer.addEventListener('click', () => {
+    NavigationState.saveDashboardTypeFilter('income');
+    // Also save the current time period to filter by the selected month
+    if (currentData.timePeriod) {
+      NavigationState.saveDashboardTimePeriod(currentData.timePeriod);
+    }
+    Router.navigate('dashboard');
+  });
+
+  // Total Spent (Right side) - clickable to filter dashboard by expenses
   const totalSpentContainer = document.createElement('div');
   totalSpentContainer.style.display = 'flex';
   totalSpentContainer.style.flexDirection = 'column';
   totalSpentContainer.style.alignItems = 'flex-end';
+  totalSpentContainer.style.cursor = 'pointer';
+  totalSpentContainer.style.transition = 'opacity 0.2s ease';
+  totalSpentContainer.title =
+    'Click to filter dashboard by expense transactions';
 
   const totalSpentLabel = document.createElement('span');
   totalSpentLabel.textContent = 'Total Spent';
@@ -174,6 +202,24 @@ export async function createCategoryBreakdownChart(
 
   totalSpentContainer.appendChild(totalSpentLabel);
   totalSpentContainer.appendChild(totalSpentValue);
+
+  // Add hover effect
+  totalSpentContainer.addEventListener('mouseenter', () => {
+    totalSpentContainer.style.opacity = '0.7';
+  });
+  totalSpentContainer.addEventListener('mouseleave', () => {
+    totalSpentContainer.style.opacity = '1';
+  });
+
+  // Add click handler to filter dashboard by expenses
+  totalSpentContainer.addEventListener('click', () => {
+    NavigationState.saveDashboardTypeFilter('expense');
+    // Also save the current time period to filter by the selected month
+    if (currentData.timePeriod) {
+      NavigationState.saveDashboardTimePeriod(currentData.timePeriod);
+    }
+    Router.navigate('dashboard');
+  });
 
   totalsContainer.appendChild(totalIncomeContainer);
   totalsContainer.appendChild(totalSpentContainer);
@@ -366,27 +412,108 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   detailsContent.style.gap = SPACING.XS;
   detailsContent.style.textAlign = 'center';
   detailsContent.style.marginBottom = SPACING.XS;
-  // Security: All dynamic values are from trusted numeric data and formatted by Intl.NumberFormat
-  detailsContent.innerHTML = `
-    <div>
-      <div style="font-size: 0.875rem; color: var(--color-text-muted); margin-bottom: 4px;">Income</div>
-      <div style="font-size: 1.125rem; font-weight: bold; color: ${COLORS.INCOME_COLOR};">
-        ${escapeHtml(formatCurrency(incomeExpenseData.totalIncome))}
-      </div>
-    </div>
-    <div>
-      <div style="font-size: 0.875rem; color: var(--color-text-muted); margin-bottom: 4px;">Expenses</div>
-      <div style="font-size: 1.125rem; font-weight: bold; color: rgba(239, 68, 68, 1);">
-        ${escapeHtml(formatCurrency(incomeExpenseData.totalExpenses))}
-      </div>
-    </div>
-    <div>
-      <div style="font-size: 0.875rem; color: var(--color-text-muted); margin-bottom: 4px;">Net Balance</div>
-      <div style="font-size: 1.125rem; font-weight: bold; color: ${incomeExpenseData.netBalance >= 0 ? COLORS.INCOME_COLOR : 'rgba(239, 68, 68, 1)'};">
-        ${escapeHtml(formatCurrency(incomeExpenseData.netBalance))}
-      </div>
-    </div>
-  `;
+
+  // Income div - clickable to filter dashboard by income
+  const incomeDiv = document.createElement('div');
+  incomeDiv.style.cursor = 'pointer';
+  incomeDiv.style.transition = 'opacity 0.2s ease';
+  incomeDiv.title = 'Click to filter dashboard by income transactions';
+
+  const incomeLabel = document.createElement('div');
+  incomeLabel.textContent = 'Income';
+  incomeLabel.style.fontSize = '0.875rem';
+  incomeLabel.style.color = 'var(--color-text-muted)';
+  incomeLabel.style.marginBottom = '4px';
+  incomeDiv.appendChild(incomeLabel);
+
+  const incomeValue = document.createElement('div');
+  incomeValue.textContent = formatCurrency(incomeExpenseData.totalIncome);
+  incomeValue.style.fontSize = '1.125rem';
+  incomeValue.style.fontWeight = 'bold';
+  incomeValue.style.color = COLORS.INCOME_COLOR;
+  incomeDiv.appendChild(incomeValue);
+
+  // Add hover effect
+  incomeDiv.addEventListener('mouseenter', () => {
+    incomeDiv.style.opacity = '0.7';
+  });
+  incomeDiv.addEventListener('mouseleave', () => {
+    incomeDiv.style.opacity = '1';
+  });
+
+  // Add click handler to filter dashboard by income
+  incomeDiv.addEventListener('click', () => {
+    NavigationState.saveDashboardTypeFilter('income');
+    // Also save the current time period to filter by the selected month
+    if (currentData.timePeriod) {
+      NavigationState.saveDashboardTimePeriod(currentData.timePeriod);
+    }
+    Router.navigate('dashboard');
+  });
+
+  detailsContent.appendChild(incomeDiv);
+
+  // Expenses div - clickable to filter dashboard by expenses
+  const expensesDiv = document.createElement('div');
+  expensesDiv.style.cursor = 'pointer';
+  expensesDiv.style.transition = 'opacity 0.2s ease';
+  expensesDiv.title = 'Click to filter dashboard by expense transactions';
+
+  const expensesLabel = document.createElement('div');
+  expensesLabel.textContent = 'Expenses';
+  expensesLabel.style.fontSize = '0.875rem';
+  expensesLabel.style.color = 'var(--color-text-muted)';
+  expensesLabel.style.marginBottom = '4px';
+  expensesDiv.appendChild(expensesLabel);
+
+  const expensesValue = document.createElement('div');
+  expensesValue.textContent = formatCurrency(incomeExpenseData.totalExpenses);
+  expensesValue.style.fontSize = '1.125rem';
+  expensesValue.style.fontWeight = 'bold';
+  expensesValue.style.color = 'rgba(239, 68, 68, 1)';
+  expensesDiv.appendChild(expensesValue);
+
+  // Add hover effect
+  expensesDiv.addEventListener('mouseenter', () => {
+    expensesDiv.style.opacity = '0.7';
+  });
+  expensesDiv.addEventListener('mouseleave', () => {
+    expensesDiv.style.opacity = '1';
+  });
+
+  // Add click handler to filter dashboard by expenses
+  expensesDiv.addEventListener('click', () => {
+    NavigationState.saveDashboardTypeFilter('expense');
+    // Also save the current time period to filter by the selected month
+    if (currentData.timePeriod) {
+      NavigationState.saveDashboardTimePeriod(currentData.timePeriod);
+    }
+    Router.navigate('dashboard');
+  });
+
+  detailsContent.appendChild(expensesDiv);
+
+  // Net Balance div
+  const netBalanceDiv = document.createElement('div');
+  const netBalanceLabel = document.createElement('div');
+  netBalanceLabel.textContent = 'Net Balance';
+  netBalanceLabel.style.fontSize = '0.875rem';
+  netBalanceLabel.style.color = 'var(--color-text-muted)';
+  netBalanceLabel.style.marginBottom = '4px';
+  netBalanceDiv.appendChild(netBalanceLabel);
+
+  const netBalanceValue = document.createElement('div');
+  netBalanceValue.textContent = formatCurrency(incomeExpenseData.netBalance);
+  netBalanceValue.style.fontSize = '1.125rem';
+  netBalanceValue.style.fontWeight = 'bold';
+  netBalanceValue.style.color =
+    incomeExpenseData.netBalance >= 0
+      ? COLORS.INCOME_COLOR
+      : 'rgba(239, 68, 68, 1)';
+  netBalanceDiv.appendChild(netBalanceValue);
+
+  detailsContent.appendChild(netBalanceDiv);
+
   section.appendChild(detailsContent);
 
   // Chart container

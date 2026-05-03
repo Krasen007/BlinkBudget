@@ -102,12 +102,12 @@ function showUpdateConfirmation(onConfirm) {
   updateNowBtn.focus();
 
   // Simple focus trap for Tab navigation
-  const handleKeyDown = (e) => {
+  const handleKeyDown = e => {
     if (e.key === 'Escape') {
       document.body.removeChild(overlay);
       return;
     }
-    
+
     if (e.key === 'Tab') {
       e.preventDefault();
       if (e.shiftKey) {
@@ -182,7 +182,10 @@ function checkFirstLaunchAfterUpdate() {
     }
     localStorage.setItem('blinkbudget-version', CURRENT_VERSION);
   } catch (error) {
-    console.warn('[PWA] Failed to access localStorage for version check:', error);
+    console.warn(
+      '[PWA] Failed to access localStorage for version check:',
+      error
+    );
   }
 }
 
@@ -245,10 +248,9 @@ function checkForUpdatesWithFeedback() {
     // Trigger the check
     navigator.serviceWorker.ready.then(registration => {
       console.log('[PWA Update] Calling registration.update()');
-      registration.update()
-        .catch(error => {
-          console.error('[PWA Update] Failed to check for updates:', error);
-        });
+      registration.update().catch(error => {
+        console.error('[PWA Update] Failed to check for updates:', error);
+      });
     });
   });
 }

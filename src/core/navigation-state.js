@@ -22,6 +22,7 @@ export const NavigationState = {
     VIEW_HISTORY: 'navigation_view_history',
     DASHBOARD_CATEGORY_FILTER: 'navigation_dashboard_category_filter',
     DASHBOARD_TIME_PERIOD: 'navigation_dashboard_time_period',
+    DASHBOARD_TYPE_FILTER: 'navigation_dashboard_type_filter',
   },
 
   /**
@@ -460,6 +461,7 @@ export const NavigationState = {
     try {
       sessionStorage.removeItem(this.STATE_KEYS.DASHBOARD_CATEGORY_FILTER);
       sessionStorage.removeItem(this.STATE_KEYS.DASHBOARD_TIME_PERIOD);
+      sessionStorage.removeItem(this.STATE_KEYS.DASHBOARD_TYPE_FILTER);
     } catch (error) {
       console.error(
         '[NavigationState] Failed to clear dashboard filter:',
@@ -520,6 +522,62 @@ export const NavigationState = {
     } catch (error) {
       console.error(
         '[NavigationState] Failed to clear reports category filter:',
+        error
+      );
+    }
+  },
+
+  /**
+   * Save dashboard transaction type filter
+   * @param {string} type - Transaction type ('income', 'expense', 'transfer', etc.)
+   */
+  saveDashboardTypeFilter(type) {
+    try {
+      if (!type || typeof type !== 'string' || type.trim() === '') {
+        console.warn('[NavigationState] Invalid type parameter');
+        return;
+      }
+
+      sessionStorage.setItem(
+        this.STATE_KEYS.DASHBOARD_TYPE_FILTER,
+        type.trim()
+      );
+    } catch (error) {
+      console.error(
+        '[NavigationState] Failed to save dashboard type filter:',
+        error
+      );
+    }
+  },
+
+  /**
+   * Restore dashboard transaction type filter
+   * @returns {string|null} Saved transaction type or null if none saved
+   */
+  restoreDashboardTypeFilter() {
+    try {
+      const type = sessionStorage.getItem(
+        this.STATE_KEYS.DASHBOARD_TYPE_FILTER
+      );
+      return type || null;
+    } catch (error) {
+      console.error(
+        '[NavigationState] Failed to restore dashboard type filter:',
+        error
+      );
+      return null;
+    }
+  },
+
+  /**
+   * Clear dashboard transaction type filter
+   */
+  clearDashboardTypeFilter() {
+    try {
+      sessionStorage.removeItem(this.STATE_KEYS.DASHBOARD_TYPE_FILTER);
+    } catch (error) {
+      console.error(
+        '[NavigationState] Failed to clear dashboard type filter:',
         error
       );
     }

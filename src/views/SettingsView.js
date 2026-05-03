@@ -268,7 +268,10 @@ export const SettingsView = () => {
   releaseNotesLink.href = GITHUB_RELEASES_URL;
   releaseNotesLink.target = '_blank';
   releaseNotesLink.rel = 'noopener noreferrer';
-  releaseNotesLink.setAttribute('aria-label', 'View Release Notes (opens in new tab)');
+  releaseNotesLink.setAttribute(
+    'aria-label',
+    'View Release Notes (opens in new tab)'
+  );
   releaseNotesLink.textContent = '📋 View Release Notes';
   releaseNotesLink.style.cssText = `
     display: block;

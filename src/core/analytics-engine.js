@@ -23,9 +23,6 @@ export class AnalyticsEngine {
     // No caching needed - calculations are fast enough
   }
 
-
-
-
   /**
    * Filter transactions by time period
    */
@@ -76,11 +73,7 @@ export class AnalyticsEngine {
    * Identify top spending categories
    */
   identifyTopSpendingCategories(transactions, timePeriod, topN = 5) {
-    return MetricsService.identifyTopCategories(
-      transactions,
-      timePeriod,
-      topN
-    );
+    return MetricsService.identifyTopCategories(transactions, timePeriod, topN);
   }
 
   /**
@@ -207,7 +200,6 @@ export class AnalyticsEngine {
   resetCategoryUsage() {
     CategoryUsageService.resetUsageData();
   }
-
 
   // Legacy/Internal methods - mostly proxied if still needed by other services
   // but many are now static in their respective services.

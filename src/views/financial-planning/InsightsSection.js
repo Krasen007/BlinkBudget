@@ -819,8 +819,11 @@ function renderBudgetRecommendationsSection(section, planningData) {
       : null;
 
     if (recommendationsData && recommendationsData.length > 0) {
-      const recommendationsSection =
-        BudgetRecommendationsSection(recommendationsData, currentTimePeriod, planningData.transactions);
+      const recommendationsSection = BudgetRecommendationsSection(
+        recommendationsData,
+        currentTimePeriod,
+        planningData.transactions
+      );
       recommendationsSection.style.setProperty(
         'margin-top',
         'var(--spacing-md)',
@@ -835,7 +838,6 @@ function renderBudgetRecommendationsSection(section, planningData) {
     );
   }
 }
-
 
 /**
  * Insights Section Component

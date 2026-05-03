@@ -626,10 +626,11 @@ async function createSavingsGoalsSubsection() {
     // Get transactions for progress calculation
     const { StorageService } = await import('../../core/storage.js');
     const transactions = StorageService.getAllTransactions() || [];
-    
+
     // Get savings goals with progress
-    const savingsSummary = await SavingsGoalsService.getSavingsSummary(transactions);
-    
+    const savingsSummary =
+      await SavingsGoalsService.getSavingsSummary(transactions);
+
     if (savingsSummary.goalsWithProgress.length > 0) {
       // Add summary metrics
       const summaryDiv = document.createElement('div');
@@ -643,25 +644,34 @@ async function createSavingsGoalsSubsection() {
       const metrics = [
         { label: 'Active Goals', value: savingsSummary.activeGoals },
         { label: 'Completed', value: savingsSummary.completedGoals },
-        { label: 'Total Saved', value: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(savingsSummary.totalSaved) },
-        { label: 'Progress', value: `${Math.round(savingsSummary.overallProgress)}%` }
+        {
+          label: 'Total Saved',
+          value: new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'EUR',
+          }).format(savingsSummary.totalSaved),
+        },
+        {
+          label: 'Progress',
+          value: `${Math.round(savingsSummary.overallProgress)}%`,
+        },
       ];
 
       metrics.forEach(metric => {
         const metricDiv = document.createElement('div');
         metricDiv.style.textAlign = 'center';
-        
+
         const value = document.createElement('div');
         value.textContent = metric.value;
         value.style.fontSize = '1.1rem';
         value.style.fontWeight = '600';
         value.style.color = COLORS.PRIMARY;
-        
+
         const label = document.createElement('div');
         label.textContent = metric.label;
         label.style.fontSize = '0.75rem';
         label.style.color = COLORS.TEXT_MUTED;
-        
+
         metricDiv.appendChild(value);
         metricDiv.appendChild(label);
         summaryDiv.appendChild(metricDiv);
@@ -683,7 +693,7 @@ Current: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }
 Progress: ${Math.round(goal.progress.percentage)}%
 Remaining: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(goal.progress.remaining)}
             `;
-            
+
             // Import and use toast notification
             import('../../utils/toast-notifications.js')
               .then(({ showInfoToast }) => {
@@ -701,7 +711,8 @@ Remaining: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR'
     } else {
       // No savings goals yet
       const noGoalsMsg = document.createElement('div');
-      noGoalsMsg.textContent = 'No savings goals set yet. Create your first savings goal to track progress!';
+      noGoalsMsg.textContent =
+        'No savings goals set yet. Create your first savings goal to track progress!';
       noGoalsMsg.style.cssText = `
         text-align: center;
         padding: ${SPACING.LG};
@@ -712,7 +723,8 @@ Remaining: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR'
     }
 
     // Add recommendations
-    const recommendations = await SavingsGoalsService.getGoalRecommendations(transactions);
+    const recommendations =
+      await SavingsGoalsService.getGoalRecommendations(transactions);
     if (recommendations.length > 0) {
       const recTitle = document.createElement('h5');
       recTitle.textContent = 'Recommended Goals';
@@ -768,16 +780,16 @@ Remaining: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR'
           const targetAmount = rec.target || 1000;
           const targetDate = new Date();
           targetDate.setMonth(targetDate.getMonth() + 6); // Default to 6 months from now
-          
+
           const newGoal = {
             id: Date.now().toString(),
             name: rec.title,
             targetAmount: targetAmount,
             category: rec.category || 'General',
             createdDate: new Date().toISOString(),
-            targetDate: targetDate
+            targetDate: targetDate,
           };
-          
+
           try {
             await SavingsGoalsService.saveSavingsGoal(newGoal);
             // Remove the recommendation card after successful creation
@@ -792,7 +804,6 @@ Remaining: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR'
         subsection.appendChild(recCard);
       });
     }
-
   } catch (error) {
     console.warn('Error loading savings goals:', error);
     const errorMsg = document.createElement('div');

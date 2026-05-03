@@ -230,7 +230,8 @@ export const ReportsView = (params = {}) => {
   });
 
   // State management
-  let currentTimePeriod = parsePeriodFromParams(params) ||
+  let currentTimePeriod =
+    parsePeriodFromParams(params) ||
     NavigationState.restoreTimePeriod() ||
     getCurrentMonthPeriod();
   let isLoading = false;
@@ -440,7 +441,11 @@ export const ReportsView = (params = {}) => {
       case 'monthly': {
         // Check if it's current month or last month
         const now = new Date();
-        const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const currentMonthStart = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          1
+        );
         const periodStart = new Date(timePeriod.startDate);
 
         if (
@@ -1189,8 +1194,11 @@ export const ReportsView = (params = {}) => {
 
       // Add unusual spending alerts below Financial Insights
       if (currentData.transactions && currentData.transactions.length > 0) {
-        const unusualTransactions = UnusualSpendingDetector.detectUnusualTransactions(currentData.transactions);
-        
+        const unusualTransactions =
+          UnusualSpendingDetector.detectUnusualTransactions(
+            currentData.transactions
+          );
+
         if (unusualTransactions.length > 0) {
           const alertsSection = document.createElement('div');
           alertsSection.className = 'unusual-spending-alerts';
@@ -1219,7 +1227,9 @@ export const ReportsView = (params = {}) => {
               () => {
                 // Navigate to Dashboard with transaction ID for highlighting
                 if (Router && typeof Router.navigate === 'function') {
-                  Router.navigate('dashboard', { highlightTransactionId: transaction.id });
+                  Router.navigate('dashboard', {
+                    highlightTransactionId: transaction.id,
+                  });
                 } else {
                   console.warn('Router.navigate not available');
                 }

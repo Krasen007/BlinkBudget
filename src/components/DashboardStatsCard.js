@@ -92,12 +92,23 @@ export const DashboardStatsCard = ({
     `;
 
     const trendIcon = document.createElement('span');
-    trendIcon.textContent = trend === 'up' ? ' rise_up' : trend === 'down' ? ' fall_down' : ' right';
-    trendIcon.style.color = trend === 'up' ? COLORS.ERROR : trend === 'down' ? COLORS.SUCCESS : COLORS.TEXT_MUTED;
+    trendIcon.textContent =
+      trend === 'up' ? ' rise_up' : trend === 'down' ? ' fall_down' : ' right';
+    trendIcon.style.color =
+      trend === 'up'
+        ? COLORS.ERROR
+        : trend === 'down'
+          ? COLORS.SUCCESS
+          : COLORS.TEXT_MUTED;
 
     const trendText = document.createElement('span');
     trendText.textContent = `${Math.abs(trendPercentage).toFixed(1)}%`;
-    trendText.style.color = trend === 'up' ? COLORS.ERROR : trend === 'down' ? COLORS.SUCCESS : COLORS.TEXT_MUTED;
+    trendText.style.color =
+      trend === 'up'
+        ? COLORS.ERROR
+        : trend === 'down'
+          ? COLORS.SUCCESS
+          : COLORS.TEXT_MUTED;
 
     trendContainer.appendChild(trendIcon);
     trendContainer.appendChild(trendText);

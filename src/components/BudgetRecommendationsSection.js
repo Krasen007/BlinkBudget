@@ -19,7 +19,11 @@ const getCurrencyFormatter = () => {
   });
 };
 
-export const BudgetRecommendationsSection = (recommendations, _timePeriod, transactions = null) => {
+export const BudgetRecommendationsSection = (
+  recommendations,
+  _timePeriod,
+  transactions = null
+) => {
   const container = document.createElement('div');
   container.className = 'budget-recommendations-section';
 
@@ -30,9 +34,11 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod, trans
 
   // Add unusual spending alerts if transactions provided
   if (transactions && transactions.length > 0) {
-    const unusualRecommendations = UnusualSpendingDetector.getBudgetRecommendations(transactions);
-    const unusualAlerts = unusualRecommendations.filter(rec => 
-      rec.type === 'unusual_spending_alert' || rec.type === 'high_variance'
+    const unusualRecommendations =
+      UnusualSpendingDetector.getBudgetRecommendations(transactions);
+    const unusualAlerts = unusualRecommendations.filter(
+      rec =>
+        rec.type === 'unusual_spending_alert' || rec.type === 'high_variance'
     );
 
     if (unusualAlerts.length > 0) {
@@ -62,9 +68,13 @@ export const BudgetRecommendationsSection = (recommendations, _timePeriod, trans
           actionText: 'View Details',
           onAction: () => {
             // Scroll to the category in the recommendations table
-            const categoryRows = container.querySelectorAll('.budget-recommendations-row');
+            const categoryRows = container.querySelectorAll(
+              '.budget-recommendations-row'
+            );
             categoryRows.forEach(row => {
-              const categoryCell = row.querySelector('.budget-recommendations-cell');
+              const categoryCell = row.querySelector(
+                '.budget-recommendations-cell'
+              );
               if (categoryCell && categoryCell.textContent === alert.category) {
                 row.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 row.style.animation = 'pulse 2s ease-in-out';

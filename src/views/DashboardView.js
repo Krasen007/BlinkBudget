@@ -88,11 +88,15 @@ const preloadReportsData = () => {
 // Preload financial planning data in background when user is on dashboard
 const preloadFinancialPlanningData = async () => {
   try {
-    console.log('[Dashboard] Pre-loading financial planning data in background...');
+    console.log(
+      '[Dashboard] Pre-loading financial planning data in background...'
+    );
 
     // Skip if already preloaded in this session
     if (hasPreloadedFinancialPlanning) {
-      console.log('[Dashboard] Financial planning already preloaded this session');
+      console.log(
+        '[Dashboard] Financial planning already preloaded this session'
+      );
       return;
     }
 
@@ -103,14 +107,17 @@ const preloadFinancialPlanningData = async () => {
       const { timestamp } = JSON.parse(cached);
       const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
       if (Date.now() - timestamp < CACHE_TTL_MS) {
-        console.log('[Dashboard] Financial planning data already cached and fresh');
+        console.log(
+          '[Dashboard] Financial planning data already cached and fresh'
+        );
         hasPreloadedFinancialPlanning = true;
         return;
       }
     }
 
     // Import dynamically to avoid circular dependencies
-    const { planningDataManager } = await import('../core/financial-planning/PlanningDataManager.js');
+    const { planningDataManager } =
+      await import('../core/financial-planning/PlanningDataManager.js');
 
     // Load and cache planning data
     const planningData = await planningDataManager.loadData();
@@ -123,7 +130,10 @@ const preloadFinancialPlanningData = async () => {
 
     console.log('[Dashboard] Financial planning data pre-loaded and cached');
   } catch (error) {
-    console.warn('[Dashboard] Failed to pre-load financial planning data:', error);
+    console.warn(
+      '[Dashboard] Failed to pre-load financial planning data:',
+      error
+    );
     // Don't block dashboard if preloading fails
   }
 };
@@ -197,6 +207,7 @@ export const DashboardView = (params = {}) => {
     sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER) || null;
   let currentMonthFilter =
     sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER) || null;
+  let currentTypeFilter = NavigationState.restoreDashboardTypeFilter() || null;
 
   // Track current filter state for display purposes
   let currentDashboardFilter = null;
@@ -232,6 +243,19 @@ export const DashboardView = (params = {}) => {
 
     // Clear the navigation state after applying
     NavigationState.clearDashboardFilter();
+  }
+
+  // Check for time period filter from type filter (e.g., clicking Income in reports)
+  if (currentTypeFilter) {
+    const timePeriod = NavigationState.restoreDashboardTimePeriod();
+    if (timePeriod) {
+      const startDate = ensureDate(timePeriod.startDate);
+      const monthFilter = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-01`;
+      currentMonthFilter = monthFilter;
+      sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER, monthFilter);
+      // Clear the time period after applying
+      NavigationState.clearDashboardFilter();
+    }
   }
 
   // Initialize title after all variables are set
@@ -292,7 +316,7 @@ export const DashboardView = (params = {}) => {
     const allTransactions = TransactionService.getAll();
     const currentAccounts = AccountService.getAccounts();
 
-    // Apply filters (Account, Quick Date, Quick Month, Quick Category)
+    // Apply filters (Account, Quick Date, Quick Month, Quick Category, Type)
     const transactions = allTransactions
       .filter(t => {
         // Account Filter
@@ -327,6 +351,11 @@ export const DashboardView = (params = {}) => {
           }
         }
 
+        // Type Filter (from clicking Income/Expense in reports)
+        if (currentTypeFilter) {
+          if (t.type !== currentTypeFilter) return false;
+        }
+
         return true;
       })
       .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -340,7 +369,8 @@ export const DashboardView = (params = {}) => {
       currentAccountFilter !== 'all' ||
       currentDateFilter !== null ||
       currentCategoryFilter !== null ||
-      currentMonthFilter !== null;
+      currentMonthFilter !== null ||
+      currentTypeFilter !== null;
 
     // Calculate ALL TIME net worth for Total Available
     let allTimeIncome = 0;
@@ -477,11 +507,13 @@ export const DashboardView = (params = {}) => {
           currentDateFilter = null;
           currentCategoryFilter = null;
           currentMonthFilter = null;
+          currentTypeFilter = null;
 
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_FILTER);
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_DATE_FILTER);
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER);
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
+          NavigationState.clearDashboardTypeFilter();
 
           // Reset account select
           accountSelect.value = 'all';
@@ -580,7 +612,10 @@ export const DashboardView = (params = {}) => {
     }
 
     // Add clear filter button if filter is active from Reports
-    if (currentCategoryFilter && currentCategoryFilter !== 'all') {
+    if (
+      (currentCategoryFilter && currentCategoryFilter !== 'all') ||
+      currentTypeFilter
+    ) {
       const clearFilterButton = ButtonComponent({
         text: 'Clear Filter',
         variant: 'primary',
@@ -590,6 +625,8 @@ export const DashboardView = (params = {}) => {
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER);
           currentMonthFilter = null;
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
+          currentTypeFilter = null;
+          NavigationState.clearDashboardTypeFilter();
           currentDashboardFilter = null;
 
           // Update title and re-render
@@ -658,7 +695,9 @@ export const DashboardView = (params = {}) => {
       filterStatus.textContent =
         currentCategoryFilter && currentCategoryFilter !== 'all'
           ? `Currently filtered by: ${currentCategoryFilter}${currentDashboardFilter && currentDashboardFilter.timePeriod ? ` (${currentDashboardFilter.timePeriod.label || 'selected period'})` : ''}`
-          : 'No active filters';
+          : currentTypeFilter
+            ? `Currently filtered by: ${currentTypeFilter === 'income' ? 'Income' : currentTypeFilter === 'expense' ? 'Expenses' : currentTypeFilter} transactions`
+            : 'No active filters';
 
       // Add title attribute for accessibility
       filterStatus.title = 'Click to return to Reports view';
@@ -720,7 +759,9 @@ export const DashboardView = (params = {}) => {
     // Scroll to highlighted transaction if provided
     if (params.highlightTransactionId) {
       setTimeout(() => {
-        const transactionItems = content.querySelectorAll('.transaction-list-item');
+        const transactionItems = content.querySelectorAll(
+          '.transaction-list-item'
+        );
         transactionItems.forEach(item => {
           if (item.dataset.transactionId === params.highlightTransactionId) {
             item.scrollIntoView({ behavior: 'smooth', block: 'center' });

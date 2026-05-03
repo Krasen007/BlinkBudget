@@ -1,6 +1,6 @@
 /**
  * Unusual Spending Detector
- * 
+ *
  * Detects unusual spending patterns and outliers in transactions.
  * Can be used to flag transactions in lists and provide budget recommendations.
  */
@@ -16,11 +16,7 @@ export class UnusualSpendingDetector {
    * @returns {Array} Array of unusual transactions with metadata
    */
   static detectUnusualTransactions(transactions, options = {}) {
-    const {
-      multiplier = 3,
-      minTransactions = 5,
-      category = null
-    } = options;
+    const { multiplier = 3, minTransactions = 5, category = null } = options;
 
     if (!transactions || transactions.length < minTransactions) {
       return [];
@@ -28,7 +24,9 @@ export class UnusualSpendingDetector {
 
     // Filter by category if specified
     const relevantTransactions = category
-      ? transactions.filter(t => t.category === category && t.type === 'expense')
+      ? transactions.filter(
+          t => t.category === category && t.type === 'expense'
+        )
       : transactions.filter(t => t.type === 'expense');
 
     if (relevantTransactions.length < minTransactions) {
@@ -38,14 +36,18 @@ export class UnusualSpendingDetector {
     // Calculate statistics
     const amounts = relevantTransactions.map(t => t.amount || 0);
     const mean = amounts.reduce((sum, a) => sum + a, 0) / amounts.length;
-    const variance = amounts.reduce((sum, a) => sum + Math.pow(a - mean, 2), 0) / amounts.length;
+    const variance =
+      amounts.reduce((sum, a) => sum + Math.pow(a - mean, 2), 0) /
+      amounts.length;
     const standardDeviation = Math.sqrt(variance);
-    
+
     // Calculate threshold (mean + multiplier * standard deviation)
-    const threshold = mean + (multiplier * standardDeviation);
+    const threshold = mean + multiplier * standardDeviation;
 
     // Find outliers
-    const unusualTransactions = relevantTransactions.filter(t => t.amount > threshold);
+    const unusualTransactions = relevantTransactions.filter(
+      t => t.amount > threshold
+    );
 
     // Return with additional metadata
     return unusualTransactions.map(transaction => ({
@@ -55,8 +57,8 @@ export class UnusualSpendingDetector {
         standardDeviation,
         threshold,
         multiplier: (transaction.amount / mean).toFixed(1),
-        deviation: ((transaction.amount - mean) / standardDeviation).toFixed(2)
-      }
+        deviation: ((transaction.amount - mean) / standardDeviation).toFixed(2),
+      },
     }));
   }
 
@@ -84,22 +86,28 @@ export class UnusualSpendingDetector {
 
     // Analyze each category
     const analysis = {};
-    Object.entries(categoryGroups).forEach(([category, categoryTransactions]) => {
-      if (categoryTransactions.length >= 3) { // Minimum for meaningful analysis
-        const unusual = this.detectUnusualTransactions(categoryTransactions, { category });
-        const amounts = categoryTransactions.map(t => t.amount || 0);
-        const mean = amounts.reduce((sum, a) => sum + a, 0) / amounts.length;
-        
-        analysis[category] = {
-          totalTransactions: categoryTransactions.length,
-          unusualTransactions: unusual,
-          unusualCount: unusual.length,
-          averageAmount: mean,
-          totalSpent: amounts.reduce((sum, a) => sum + a, 0),
-          unusualPercentage: (unusual.length / categoryTransactions.length) * 100
-        };
+    Object.entries(categoryGroups).forEach(
+      ([category, categoryTransactions]) => {
+        if (categoryTransactions.length >= 3) {
+          // Minimum for meaningful analysis
+          const unusual = this.detectUnusualTransactions(categoryTransactions, {
+            category,
+          });
+          const amounts = categoryTransactions.map(t => t.amount || 0);
+          const mean = amounts.reduce((sum, a) => sum + a, 0) / amounts.length;
+
+          analysis[category] = {
+            totalTransactions: categoryTransactions.length,
+            unusualTransactions: unusual,
+            unusualCount: unusual.length,
+            averageAmount: mean,
+            totalSpent: amounts.reduce((sum, a) => sum + a, 0),
+            unusualPercentage:
+              (unusual.length / categoryTransactions.length) * 100,
+          };
+        }
       }
-    });
+    );
 
     return analysis;
   }
@@ -123,8 +131,9 @@ export class UnusualSpendingDetector {
           priority: 'high',
           title: `Unusual Spending in ${category}`,
           description: `${analysis.unusualCount} unusual transactions detected (${analysis.unusualPercentage.toFixed(1)}% of spending)`,
-          suggestion: 'Review recent transactions in this category and consider adjusting your budget',
-          data: analysis
+          suggestion:
+            'Review recent transactions in this category and consider adjusting your budget',
+          data: analysis,
         });
       }
 
@@ -142,8 +151,8 @@ export class UnusualSpendingDetector {
           data: {
             ...analysis,
             budgetLimit: budget.amountLimit,
-            overBudget
-          }
+            overBudget,
+          },
         });
       }
 
@@ -151,24 +160,29 @@ export class UnusualSpendingDetector {
       const amounts = transactions
         .filter(t => t.type === 'expense' && t.category === category)
         .map(t => t.amount || 0);
-      
+
       if (amounts.length >= 5) {
         const mean = amounts.reduce((sum, a) => sum + a, 0) / amounts.length;
-        const variance = amounts.reduce((sum, a) => sum + Math.pow(a - mean, 2), 0) / amounts.length;
+        const variance =
+          amounts.reduce((sum, a) => sum + Math.pow(a - mean, 2), 0) /
+          amounts.length;
         const coefficientOfVariation = Math.sqrt(variance) / mean;
 
-        if (coefficientOfVariation > 0.5) { // High variance threshold
+        if (coefficientOfVariation > 0.5) {
+          // High variance threshold
           recommendations.push({
             type: 'high_variance',
             category,
             priority: 'medium',
             title: `Variable Spending in ${category}`,
-            description: 'Spending in this category varies significantly month to month',
-            suggestion: 'Consider building a buffer in your budget for this category',
+            description:
+              'Spending in this category varies significantly month to month',
+            suggestion:
+              'Consider building a buffer in your budget for this category',
             data: {
               ...analysis,
-              coefficientOfVariation: (coefficientOfVariation * 100).toFixed(1)
-            }
+              coefficientOfVariation: (coefficientOfVariation * 100).toFixed(1),
+            },
           });
         }
       }
@@ -193,7 +207,10 @@ export class UnusualSpendingDetector {
     }
 
     const categoryTransactions = allTransactions.filter(
-      t => t.type === 'expense' && t.category === transaction.category && t.id !== transaction.id
+      t =>
+        t.type === 'expense' &&
+        t.category === transaction.category &&
+        t.id !== transaction.id
     );
 
     if (categoryTransactions.length < 3) {
@@ -202,9 +219,11 @@ export class UnusualSpendingDetector {
 
     const amounts = categoryTransactions.map(t => t.amount || 0);
     const mean = amounts.reduce((sum, a) => sum + a, 0) / amounts.length;
-    const variance = amounts.reduce((sum, a) => sum + Math.pow(a - mean, 2), 0) / amounts.length;
+    const variance =
+      amounts.reduce((sum, a) => sum + Math.pow(a - mean, 2), 0) /
+      amounts.length;
     const standardDeviation = Math.sqrt(variance);
-    const threshold = mean + (3 * standardDeviation);
+    const threshold = mean + 3 * standardDeviation;
 
     if (transaction.amount > threshold) {
       return {
@@ -212,7 +231,7 @@ export class UnusualSpendingDetector {
         averageAmount: mean,
         threshold,
         multiplier: (transaction.amount / mean).toFixed(1),
-        deviation: ((transaction.amount - mean) / standardDeviation).toFixed(2)
+        deviation: ((transaction.amount - mean) / standardDeviation).toFixed(2),
       };
     }
 
