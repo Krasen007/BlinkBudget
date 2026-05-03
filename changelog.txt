@@ -1,39 +1,26 @@
-# Changelog
+# Version 1.36 Changes
 
-## Recent Updates
+## 🚀 New Features
+- **Clickable Reports**: Income and Expenses sections in Reports view are now interactive
+- **Enhanced Financial Planning**: Added nested routing and query parameter support for better navigation
+- **Experimental Insights**: New experimental insights feature for deeper financial analysis
+- **Budget Recommendations**: Improved budget recommendations with better calculations
+- **Transaction Split Confirmation**: Added confirmation dialog for transaction split actions
 
-### Authentication & Security
-- **Improved Google sign-in**: Enhanced Google authentication implementation with better error handling
-- **Added auth safety checks**: Implemented additional security validations for authentication flows
-- **Fixed login issues**: Resolved various authentication-related bugs for smoother sign-in experience
+## 🔧 Improvements
+- **Service Architecture**: Created 4 new consolidated services (TrendService, ComparisonService, RecommendationService, InsightsService)
+- **Caching System**: Updated caching system for better performance
+- **Personal Inflation Trends**: Fixed display issues and improved accuracy
+- **PWA Updates**: Attempted to add update dialog for Progressive Web App
 
-### UI & UX Improvements
-- **Removed tutorial**: Simplified the app by removing the tutorial, keeping true to the 3-click principle
-- **Cleaned empty states**: Improved empty state displays for goals and investments sections
-- **Updated animations**: Enhanced advanced settings animations for better visual feedback
-- **Smaller container separation**: Refined spacing between UI containers for cleaner layout
+## 🧹 Cleanup & Fixes
+- **Code Quality**: Removed redundant and dead code including BenchmarkingSection, audit-service, and baseline service
+- **Bug Fixes**: All 13 security findings have been verified and fixed
+- **UI Improvements**: Fixed highlighting, styling, and import issues
+- **Risk Assessment**: Discarded unuseful risk assessment features
 
-### PWA & Performance
-- **Added PWA update notifications**: Users now see a visual toast notification when a new app version is available, with an "Update" button to apply changes
-- **Simplified PWA configuration**: Removed redundant service worker and offline strategies for cleaner implementation
-- **Improved initialization flow**: Streamlined app startup sequence and background service loading
-- **Fixed build warnings**: Converted dynamic imports to static imports in main.js for better stability
-
-### Performance & Loading
-- **Added skeleton loading animations**: ReportsView now shows skeleton screens during incremental rendering for better perceived performance
-- **Implemented background view preloading**: Views load in the background for instant navigation
-- **Fixed redundant preloading**: Eliminated duplicate preloading operations
-- **Fixed ViewPreloader**: Corrected promise return for proper async handling
-
-### Code Quality & Architecture
-- **Refactored mobile utilities**: Consolidated overlapping mobile utility functions
-- **Moved inline styles to CSS**: Improved code maintainability by converting inline styles to CSS classes
-- **Fixed security guidance**: Updated documentation and implemented secure background data preloading
-- **Performance optimizations**: General improvements to error handling and code quality
-
-### Transaction Management
-- **Fixed transaction sorting**: Preserved full timestamps when editing transactions to maintain correct chronological order
-- **Removed smart suggestions from TransactionForm**: Simplified form by removing AI-powered suggestions to focus on core functionality
-
-### Version
-- **Version 1.35**
+## 🔄 Technical Changes
+- **Query Parameters**: Added query parameter support for reports time period selection
+- **Navigation**: Refactored financial-planning section to use query parameters
+- **Code Standards**: Implemented fixes following best practices
+- **Linting**: Applied code formatting and style fixes

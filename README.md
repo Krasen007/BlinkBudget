@@ -49,6 +49,7 @@
 - **Date filtering functionality** tap on the name to show
 - **Integrated category filtering** between Reports and Dashboard views for consistent analysis across all sections
 - **Smart time period navigation** with dynamic labels showing specific months and years
+- **Transaction Split** - Hold transaction to split in two
 
 ### Dashboard & Analytics
 
