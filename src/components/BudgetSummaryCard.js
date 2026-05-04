@@ -30,15 +30,30 @@ export const BudgetSummaryCard = (summary, timePeriod = null) => {
     transition: 'transform 0.2s ease, box-shadow 0.2s ease',
   });
 
-  // Add click handler to navigate to budgets section
-  card.addEventListener('click', () => {
+  // Add accessibility attributes
+  card.setAttribute('role', 'button');
+  card.setAttribute('tabindex', '0');
+  card.setAttribute('aria-label', 'View detailed budget information');
+
+  // Add click and keyboard handlers to navigate to budgets section
+  const navigateToBudgets = () => {
     Router.navigate('financial-planning', { section: 'budgets' });
+  };
+
+  card.addEventListener('click', navigateToBudgets);
+
+  // Add keyboard support for accessibility
+  card.addEventListener('keydown', event => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      navigateToBudgets();
+    }
   });
 
-  // Add hover effect
+  // Add hover effect with safe shadow color
   card.addEventListener('mouseenter', () => {
     card.style.transform = 'translateY(-2px)';
-    card.style.boxShadow = `0 4px 12px ${COLORS.PRIMARY}20`;
+    card.style.boxShadow = '0 4px 12px rgba(0, 123, 255, 0.15)';
   });
 
   card.addEventListener('mouseleave', () => {

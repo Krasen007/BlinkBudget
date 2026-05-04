@@ -30,13 +30,8 @@ export const BudgetsSection = async planningData => {
 
   // Handle null planningData by loading transactions directly
   let transactions = [];
-  // Use explicit presence check to preserve empty arrays
-  if (
-    planningData !== null &&
-    planningData !== undefined &&
-    planningData.transactions !== undefined &&
-    planningData.transactions !== null
-  ) {
+  // Use optional chaining to preserve empty arrays
+  if (planningData?.transactions != null) {
     transactions = planningData.transactions;
   } else {
     // Fallback: load transactions directly from StorageService

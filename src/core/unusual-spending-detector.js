@@ -56,8 +56,14 @@ export class UnusualSpendingDetector {
         averageAmount: mean,
         standardDeviation,
         threshold,
-        multiplier: (transaction.amount / mean).toFixed(1),
-        deviation: ((transaction.amount - mean) / standardDeviation).toFixed(2),
+        multiplier:
+          mean !== 0 && Number.isFinite(mean)
+            ? (transaction.amount / mean).toFixed(1)
+            : 'N/A',
+        deviation:
+          standardDeviation !== 0 && Number.isFinite(standardDeviation)
+            ? ((transaction.amount - mean) / standardDeviation).toFixed(2)
+            : 'N/A',
       },
     }));
   }
@@ -225,11 +231,6 @@ export class UnusualSpendingDetector {
     }
 
     const amounts = categoryTransactions.map(t => t.amount || 0);
-
-    // Guard against empty categoryTransactions
-    if (amounts.length === 0) {
-      return null;
-    }
 
     const mean = amounts.reduce((sum, a) => sum + a, 0) / amounts.length;
     const variance =

@@ -213,8 +213,7 @@ export class SavingsGoalsService {
       0
     );
     const totalSaved = goalsWithProgress.reduce(
-      (sum, goal) =>
-        sum + Number((goal.progress && goal.progress.currentAmount) || 0),
+      (sum, goal) => sum + Number(goal.progress?.currentAmount ?? 0),
       0
     );
     const completedGoals = goalsWithProgress.filter(

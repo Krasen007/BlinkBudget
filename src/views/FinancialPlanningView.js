@@ -22,6 +22,25 @@ import { COLORS, SPACING, TIMING, STORAGE_KEYS } from '../utils/constants.js';
 
 import { debounce } from '../utils/touch-utils.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
+
+// Simple deep equality check for browser compatibility
+const isDeepEqual = (a, b) => {
+  if (a === b) return true;
+  if (a == null || b == null) return a === b;
+  if (typeof a !== 'object' || typeof b !== 'object') return false;
+  
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
+  
+  if (keysA.length !== keysB.length) return false;
+  
+  for (const key of keysA) {
+    if (!keysB.includes(key)) return false;
+    if (a[key] !== b[key]) return false;
+  }
+  
+  return true;
+};
 import { escapeHtml } from '../utils/security-utils.js';
 
 import { OverviewSection } from './financial-planning/OverviewSection.js';
@@ -432,11 +451,12 @@ export const FinancialPlanningView = (params = {}) => {
             }
 
             // Update state if data changed
-            if (JSON.stringify(freshData) !== JSON.stringify(planningData)) {
+            if (!isDeepEqual(freshData, planningData)) {
               console.log(
                 '[FinancialPlanning] Background refresh found new data'
               );
               planningData = freshData;
+              setCachedPlanningData(freshData);
               renderSection(currentSection);
               // Emit storage-updated behavior
               window.dispatchEvent(
