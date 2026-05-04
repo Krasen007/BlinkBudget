@@ -117,15 +117,17 @@ function showUpdateConfirmation(onConfirm) {
       e.preventDefault();
       const currentIndex = focusableElements.indexOf(document.activeElement);
       let nextIndex;
-      
+
       if (e.shiftKey) {
         // Shift+Tab: go backwards
-        nextIndex = currentIndex <= 0 ? focusableElements.length - 1 : currentIndex - 1;
+        nextIndex =
+          currentIndex <= 0 ? focusableElements.length - 1 : currentIndex - 1;
       } else {
         // Tab: go forwards
-        nextIndex = currentIndex >= focusableElements.length - 1 ? 0 : currentIndex + 1;
+        nextIndex =
+          currentIndex >= focusableElements.length - 1 ? 0 : currentIndex + 1;
       }
-      
+
       const nextElement = focusableElements[nextIndex];
       if (nextElement && nextElement.focus) {
         nextElement.focus();
@@ -248,7 +250,7 @@ function checkForUpdatesWithFeedback() {
 
     // Add this resolver to the pending list
     pendingUpdateResolvers.push(resolve);
-    
+
     // Create timeout for this specific call
     const timeoutId = setTimeout(() => {
       console.log('[PWA Update] No update detected within timeout');
@@ -262,7 +264,7 @@ function checkForUpdatesWithFeedback() {
       }
       resolve(false);
     }, 3000);
-    
+
     pendingUpdateTimeouts.push(timeoutId);
 
     // Trigger the check

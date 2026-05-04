@@ -96,7 +96,7 @@ export const DashboardStatsCard = ({
     trendIcon.className = 'material-symbols-outlined';
     trendIcon.textContent =
       trend === 'up' ? 'rise_up' : trend === 'down' ? 'fall_down' : 'right';
-    
+
     // Configurable color mapping based on positiveIsUp prop
     if (positiveIsUp) {
       trendIcon.style.color =
@@ -116,7 +116,7 @@ export const DashboardStatsCard = ({
 
     const trendText = document.createElement('span');
     trendText.textContent = `${Math.abs(trendPercentage).toFixed(1)}%`;
-    
+
     // Apply same color mapping as trend icon
     trendText.style.color = trendIcon.style.color;
 
@@ -141,14 +141,17 @@ export const DashboardStatsCard = ({
       border-radius: 2px;
       overflow: hidden;
     `;
-    
+
     // Add accessibility attributes
     progressBarBg.setAttribute('role', 'progressbar');
     progressBarBg.setAttribute('aria-valuemin', '0');
     progressBarBg.setAttribute('aria-valuemax', '100');
     const progressWidth = Math.min(Math.max(progressPercentage, 0), 100);
     progressBarBg.setAttribute('aria-valuenow', progressWidth);
-    progressBarBg.setAttribute('aria-label', `${label || 'Progress'}: ${progressWidth}%`);
+    progressBarBg.setAttribute(
+      'aria-label',
+      `${label || 'Progress'}: ${progressWidth}%`
+    );
 
     const progressBarFill = document.createElement('div');
     progressBarFill.style.cssText = `

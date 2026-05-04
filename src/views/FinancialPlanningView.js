@@ -413,14 +413,14 @@ export const FinancialPlanningView = (params = {}) => {
         planningData = cachedData;
         renderSection(currentSection);
         isLoading = false;
-        
+
         // Kick off background refresh to fetch latest data
         setTimeout(async () => {
           try {
             console.log('[FinancialPlanning] Background refresh started');
             await ensureDataSynced();
             let freshData = await planningDataManager.loadData();
-            
+
             // Validate we have actual transaction data, if not force sync
             if (
               !freshData ||
@@ -430,24 +430,33 @@ export const FinancialPlanningView = (params = {}) => {
               await forceSyncFromCloud();
               freshData = await planningDataManager.loadData();
             }
-            
+
             // Update state if data changed
             if (JSON.stringify(freshData) !== JSON.stringify(planningData)) {
-              console.log('[FinancialPlanning] Background refresh found new data');
+              console.log(
+                '[FinancialPlanning] Background refresh found new data'
+              );
               planningData = freshData;
               renderSection(currentSection);
               // Emit storage-updated behavior
-              window.dispatchEvent(new CustomEvent('storage-updated', { 
-                detail: { type: 'financial-planning' } 
-              }));
+              window.dispatchEvent(
+                new CustomEvent('storage-updated', {
+                  detail: { type: 'financial-planning' },
+                })
+              );
             } else {
-              console.log('[FinancialPlanning] Background refresh: no new data');
+              console.log(
+                '[FinancialPlanning] Background refresh: no new data'
+              );
             }
           } catch (error) {
-            console.error('[FinancialPlanning] Background refresh failed:', error);
+            console.error(
+              '[FinancialPlanning] Background refresh failed:',
+              error
+            );
           }
         }, 100);
-        
+
         return;
       }
 

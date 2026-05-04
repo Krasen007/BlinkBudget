@@ -298,9 +298,16 @@ export const SavingsGoalCard = (goal, currentProgress, onViewGoal) => {
   // Guard against division by zero in percentage calculation
   let percentage = 0;
   let remaining = 0;
-  
-  if (goal.target && goal.target !== 0 && Number.isFinite(Number(goal.target))) {
-    percentage = Math.min(Math.max((currentProgress / goal.target) * 100, 0), 100);
+
+  if (
+    goal.target &&
+    goal.target !== 0 &&
+    Number.isFinite(Number(goal.target))
+  ) {
+    percentage = Math.min(
+      Math.max((currentProgress / goal.target) * 100, 0),
+      100
+    );
     remaining = goal.target - currentProgress;
   }
   // Variables already initialized to 0 for invalid/zero targets

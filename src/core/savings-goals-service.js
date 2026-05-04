@@ -62,7 +62,9 @@ export class SavingsGoalsService {
     // Only include transactions explicitly tied to this goal
     const relevantTransactions = transactions.filter(t => {
       // Check if transaction is explicitly linked to this goal
-      return t.goalId === goal.id || (t.metadata && t.metadata.goalId === goal.id);
+      return (
+        t.goalId === goal.id || (t.metadata && t.metadata.goalId === goal.id)
+      );
     });
 
     const totalSaved = relevantTransactions.reduce((sum, t) => {
@@ -85,11 +87,21 @@ export class SavingsGoalsService {
     // Fix monthlySavingRate calculation to use actual time span
     let monthlySavingRate = 0;
     if (recentTransactions.length > 0) {
-      const earliest = new Date(Math.min(...recentTransactions.map(t => new Date(t.timestamp))));
-      const latest = new Date(Math.max(...recentTransactions.map(t => new Date(t.timestamp))));
-      const timespanDays = Math.max((latest - earliest) / (1000 * 60 * 60 * 24), 1);
+      const earliest = new Date(
+        Math.min(...recentTransactions.map(t => new Date(t.timestamp)))
+      );
+      const latest = new Date(
+        Math.max(...recentTransactions.map(t => new Date(t.timestamp)))
+      );
+      const timespanDays = Math.max(
+        (latest - earliest) / (1000 * 60 * 60 * 24),
+        1
+      );
       const months = Math.max(timespanDays / 30, 1);
-      const sumAmounts = recentTransactions.reduce((sum, t) => sum + (t.amount || 0), 0);
+      const sumAmounts = recentTransactions.reduce(
+        (sum, t) => sum + (t.amount || 0),
+        0
+      );
       monthlySavingRate = sumAmounts / months;
     }
 
@@ -201,7 +213,8 @@ export class SavingsGoalsService {
       0
     );
     const totalSaved = goalsWithProgress.reduce(
-      (sum, goal) => sum + Number((goal.progress && goal.progress.currentAmount) || 0),
+      (sum, goal) =>
+        sum + Number((goal.progress && goal.progress.currentAmount) || 0),
       0
     );
     const completedGoals = goalsWithProgress.filter(

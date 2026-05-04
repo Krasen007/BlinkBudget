@@ -238,7 +238,7 @@ export const SettingsView = () => {
 
       try {
         const updateFound = await checkForUpdatesWithFeedback();
-        
+
         if (updateFound) {
           // Update dialog will be shown by pwa.js onNeedRefresh
           console.log('[PWA Update] Update found - dialog should appear');

@@ -65,7 +65,8 @@ export const SavingsGoalsSection = async (planningData, userLocale) => {
       container.appendChild(header);
 
       // Get savings summary
-      const savingsSummary = SavingsGoalsService.getSavingsSummary(transactions);
+      const savingsSummary =
+        SavingsGoalsService.getSavingsSummary(transactions);
 
       // Summary card
       const summaryCard = createSummaryCard(savingsSummary);
@@ -99,7 +100,8 @@ export const SavingsGoalsSection = async (planningData, userLocale) => {
       }
 
       // Goal recommendations
-      const recommendations = await SavingsGoalsService.getGoalRecommendations(transactions);
+      const recommendations =
+        await SavingsGoalsService.getGoalRecommendations(transactions);
       if (recommendations.length > 0) {
         const recommendationsSection = document.createElement('div');
         recommendationsSection.style.display = 'flex';
@@ -120,7 +122,10 @@ export const SavingsGoalsSection = async (planningData, userLocale) => {
         container.appendChild(recommendationsSection);
       }
     } catch (error) {
-      console.error('[SavingsGoalsSection] Failed to render savings goals:', error);
+      console.error(
+        '[SavingsGoalsSection] Failed to render savings goals:',
+        error
+      );
       container.innerHTML = `
         <div style="text-align: center; padding: ${SPACING.LG}; color: ${COLORS.TEXT_MUTED};">
           <div style="margin-bottom: ${SPACING.MD};">Unable to load savings goals</div>
@@ -155,10 +160,13 @@ export const SavingsGoalsSection = async (planningData, userLocale) => {
       { label: 'Completed', value: summary.completedGoals },
       {
         label: 'Total Saved',
-        value: new Intl.NumberFormat(userLocale || navigator.language || 'en-GB', {
-          style: 'currency',
-          currency: 'EUR',
-        }).format(summary.totalSaved),
+        value: new Intl.NumberFormat(
+          userLocale || navigator.language || 'en-GB',
+          {
+            style: 'currency',
+            currency: 'EUR',
+          }
+        ).format(summary.totalSaved),
       },
       {
         label: 'Overall Progress',
@@ -235,7 +243,10 @@ export const SavingsGoalsSection = async (planningData, userLocale) => {
       try {
         await createGoalFromRecommendation(recommendation);
       } catch (error) {
-        console.error('[SavingsGoalsSection] Failed to create goal from recommendation:', error);
+        console.error(
+          '[SavingsGoalsSection] Failed to create goal from recommendation:',
+          error
+        );
       }
     });
 
@@ -256,14 +267,14 @@ export const SavingsGoalsSection = async (planningData, userLocale) => {
           title: 'Add Savings Goal',
           message: 'Enter goal name:',
           placeholder: 'e.g., Emergency Fund',
-          onSave: (value) => {
+          onSave: value => {
             goalName = value;
             resolve();
           },
           onCancel: () => {
             goalName = null;
             resolve();
-          }
+          },
         });
       });
 
@@ -276,14 +287,14 @@ export const SavingsGoalsSection = async (planningData, userLocale) => {
           message: 'Enter target amount:',
           placeholder: 'e.g., 1000',
           initialValue: '',
-          onSave: (value) => {
+          onSave: value => {
             targetAmount = parseFloat(value);
             resolve();
           },
           onCancel: () => {
             targetAmount = null;
             resolve();
-          }
+          },
         });
       });
 
@@ -296,14 +307,14 @@ export const SavingsGoalsSection = async (planningData, userLocale) => {
           message: 'Enter category (optional):',
           placeholder: 'e.g., General',
           initialValue: 'General',
-          onSave: (value) => {
+          onSave: value => {
             category = value || 'General';
             resolve();
           },
           onCancel: () => {
             category = 'General';
             resolve();
-          }
+          },
         });
       });
 
@@ -335,7 +346,7 @@ Remaining: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR'
     MobileAlert({
       title: 'Goal Details',
       message: details,
-      buttonText: 'OK'
+      buttonText: 'OK',
     });
   };
 

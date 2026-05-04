@@ -164,12 +164,12 @@ export class UnusualSpendingDetector {
 
       if (amounts.length >= 5) {
         const mean = amounts.reduce((sum, a) => sum + a, 0) / amounts.length;
-        
+
         // Guard against division by zero
         if (mean === 0) {
           return; // Skip this category if mean is zero
         }
-        
+
         const variance =
           amounts.reduce((sum, a) => sum + Math.pow(a - mean, 2), 0) /
           amounts.length;
@@ -225,12 +225,12 @@ export class UnusualSpendingDetector {
     }
 
     const amounts = categoryTransactions.map(t => t.amount || 0);
-    
+
     // Guard against empty categoryTransactions
     if (amounts.length === 0) {
       return null;
     }
-    
+
     const mean = amounts.reduce((sum, a) => sum + a, 0) / amounts.length;
     const variance =
       amounts.reduce((sum, a) => sum + Math.pow(a - mean, 2), 0) /
@@ -242,15 +242,17 @@ export class UnusualSpendingDetector {
       // Compute safe values to avoid division by zero
       let multiplier = 'N/A';
       let deviation = '0.00';
-      
+
       if (mean !== 0 && Number.isFinite(mean)) {
         multiplier = (transaction.amount / mean).toFixed(1);
       }
-      
+
       if (standardDeviation !== 0 && Number.isFinite(standardDeviation)) {
-        deviation = ((transaction.amount - mean) / standardDeviation).toFixed(2);
+        deviation = ((transaction.amount - mean) / standardDeviation).toFixed(
+          2
+        );
       }
-      
+
       return {
         isUnusual: true,
         averageAmount: mean,
