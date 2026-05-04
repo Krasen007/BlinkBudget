@@ -8,6 +8,7 @@
 import { COLORS, SPACING, FONT_SIZES } from '../../utils/constants.js';
 import { SavingsGoalsService } from '../../core/savings-goals-service.js';
 import { SavingsGoalCard } from '../../components/ui/ActionCard.js';
+import { MobilePrompt, MobileAlert } from '../../components/MobileModal.js';
 
 /**
  * Create savings goals section
@@ -64,7 +65,7 @@ export const SavingsGoalsSection = async (planningData, userLocale) => {
       container.appendChild(header);
 
       // Get savings summary
-      const savingsSummary = await SavingsGoalsService.getSavingsSummary(transactions);
+      const savingsSummary = SavingsGoalsService.getSavingsSummary(transactions);
 
       // Summary card
       const summaryCard = createSummaryCard(savingsSummary);
@@ -246,14 +247,65 @@ export const SavingsGoalsSection = async (planningData, userLocale) => {
 
   const showAddGoalDialog = async () => {
     try {
-      // Simple dialog implementation - in a real app this would be a proper modal
-      const goalName = prompt('Enter goal name:');
+      // Use MobilePrompt for better UX
+      let goalName, targetAmount, category;
+
+      // Get goal name
+      await new Promise(resolve => {
+        MobilePrompt({
+          title: 'Add Savings Goal',
+          message: 'Enter goal name:',
+          placeholder: 'e.g., Emergency Fund',
+          onSave: (value) => {
+            goalName = value;
+            resolve();
+          },
+          onCancel: () => {
+            goalName = null;
+            resolve();
+          }
+        });
+      });
+
       if (!goalName) return;
 
-      const targetAmount = parseFloat(prompt('Enter target amount:'));
+      // Get target amount
+      await new Promise(resolve => {
+        MobilePrompt({
+          title: 'Add Savings Goal',
+          message: 'Enter target amount:',
+          placeholder: 'e.g., 1000',
+          initialValue: '',
+          onSave: (value) => {
+            targetAmount = parseFloat(value);
+            resolve();
+          },
+          onCancel: () => {
+            targetAmount = null;
+            resolve();
+          }
+        });
+      });
+
       if (!targetAmount || targetAmount <= 0) return;
 
-      const category = prompt('Enter category (optional):') || 'General';
+      // Get category (optional)
+      await new Promise(resolve => {
+        MobilePrompt({
+          title: 'Add Savings Goal',
+          message: 'Enter category (optional):',
+          placeholder: 'e.g., General',
+          initialValue: 'General',
+          onSave: (value) => {
+            category = value || 'General';
+            resolve();
+          },
+          onCancel: () => {
+            category = 'General';
+            resolve();
+          }
+        });
+      });
 
       const newGoal = {
         id: Date.now().toString(),
@@ -280,7 +332,11 @@ Current: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }
 Progress: ${Math.round(goal.progress.percentage)}%
 Remaining: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(goal.progress.remaining)}
     `;
-    alert(details);
+    MobileAlert({
+      title: 'Goal Details',
+      message: details,
+      buttonText: 'OK'
+    });
   };
 
   const createGoalFromRecommendation = recommendation => {

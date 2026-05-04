@@ -302,11 +302,8 @@ export const SavingsGoalCard = (goal, currentProgress, onViewGoal) => {
   if (goal.target && goal.target !== 0 && Number.isFinite(Number(goal.target))) {
     percentage = Math.min(Math.max((currentProgress / goal.target) * 100, 0), 100);
     remaining = goal.target - currentProgress;
-  } else {
-    // Safe defaults for invalid/zero targets
-    percentage = 0;
-    remaining = 0;
   }
+  // Variables already initialized to 0 for invalid/zero targets
 
   let type, title;
   if (percentage >= 100) {
