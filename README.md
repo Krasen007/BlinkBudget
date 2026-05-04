@@ -308,7 +308,74 @@ yarn run dev        # Start development server
 yarn run build      # Build for production
 yarn run preview    # Preview production build
 yarn test           # Run unit tests
+yarn run fix        # Run linting, formatting, and documentation validation
+yarn run validate-docs    # Validate README references against codebase
+yarn run validate-docs:stats    # Show documentation statistics
 ```
+
+## Documentation Validation System
+
+BlinkBudget includes an automated documentation validation system that prevents README drift as the codebase evolves.
+
+### How It Works
+
+When you run `yarn fix`, the system automatically:
+
+1. **Scans README.md** for all file and method references
+2. **Validates each reference** against the actual codebase
+3. **Reports issues** with specific line numbers and suggestions
+
+### Reference Format
+
+References in README must follow this pattern:
+```
+| src/components/TransactionForm.js:TransactionForm() | src/core/click-tracking-service.js:recordClick()
+```
+
+### What Happens When Code Changes
+
+**Development Workflow:**
+```bash
+# Make code changes
+yarn dev          # Test locally
+yarn fix          # Includes documentation validation
+```
+
+**If validation fails:**
+```
+❌ INVALID: | src/core/missing-service.js:deprecatedMethod() (line 142)
+   → File not found: src/core/missing-service.js
+
+💡 Suggestions:
+   1. Update README references to match current codebase
+   2. Check for typos in file paths or method names
+```
+
+**Successful validation:**
+```
+🎉 All references are valid!
+   Total references: 242
+   Valid: 236
+   Ignored: 6 (external services/configurations)
+```
+
+### Smart Filtering
+
+The system automatically ignores:
+- External services (Firebase, GitHub)
+- Configuration files (package.json, vite.config.js)
+- External processes (deployment, monitoring)
+- Concepts and strategies
+
+### CI/CD Integration
+
+Add to your build pipeline:
+```yaml
+- name: Validate Documentation
+  run: yarn validate-docs
+```
+
+This ensures README documentation stays perfectly synchronized with the actual implementation as the project evolves.
 
 ## Usage
 

@@ -64,6 +64,11 @@ const config = {
     'Automated dependency management', // External service
     'Development standards', // Process
     'Feature development guidelines', // Process
+  'missing-service', // Example reference
+  'path/to/file', // Example reference
+  'another/file', // Example reference
+  'nonexistent-service', // Example reference
+  'deprecatedMethod', // Example method
   ],
 };
 
