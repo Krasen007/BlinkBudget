@@ -7,6 +7,7 @@
 import { COLORS, SPACING, FONT_SIZES } from '../utils/constants.js';
 import { formatCurrency } from '../utils/financial-planning-helpers.js';
 import { BudgetProgress } from './BudgetProgress.js';
+import { Router } from '../core/router.js';
 
 /**
  * Create a budget summary card
@@ -25,6 +26,24 @@ export const BudgetSummaryCard = (summary, timePeriod = null) => {
     flexDirection: 'column',
     gap: SPACING.MD,
     width: '100%',
+    cursor: 'pointer',
+    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+  });
+
+  // Add click handler to navigate to budgets section
+  card.addEventListener('click', () => {
+    Router.navigate('financial-planning', { section: 'budgets' });
+  });
+
+  // Add hover effect
+  card.addEventListener('mouseenter', () => {
+    card.style.transform = 'translateY(-2px)';
+    card.style.boxShadow = `0 4px 12px ${COLORS.PRIMARY}20`;
+  });
+
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = 'translateY(0)';
+    card.style.boxShadow = 'none';
   });
 
   const header = document.createElement('div');
