@@ -328,6 +328,7 @@ When you run `yarn fix`, the system automatically:
 ### Reference Format
 
 References in README must follow this pattern:
+
 ```
 | src/components/TransactionForm.js:TransactionForm() | src/core/click-tracking-service.js:recordClick()
 ```
@@ -335,6 +336,7 @@ References in README must follow this pattern:
 ### What Happens When Code Changes
 
 **Development Workflow:**
+
 ```bash
 # Make code changes
 yarn dev          # Test locally
@@ -342,6 +344,7 @@ yarn fix          # Includes documentation validation
 ```
 
 **If validation fails:**
+
 ```
 ❌ INVALID: | src/core/missing-service.js:deprecatedMethod() (line 142)
    → File not found: src/core/missing-service.js
@@ -352,6 +355,7 @@ yarn fix          # Includes documentation validation
 ```
 
 **Successful validation:**
+
 ```
 🎉 All references are valid!
    Total references: 242
@@ -362,6 +366,7 @@ yarn fix          # Includes documentation validation
 ### Smart Filtering
 
 The system automatically ignores:
+
 - External services (Firebase, GitHub)
 - Configuration files (package.json, vite.config.js)
 - External processes (deployment, monitoring)
@@ -370,6 +375,7 @@ The system automatically ignores:
 ### CI/CD Integration
 
 Add to your build pipeline:
+
 ```yaml
 - name: Validate Documentation
   run: yarn validate-docs

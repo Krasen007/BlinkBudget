@@ -11,10 +11,6 @@ import { LoadingView } from './components/LoadingView.js';
 import { InstallService } from './core/install.js';
 import { CacheInvalidator } from './core/cache-invalidator.js';
 import { PrivacyService } from './core/privacy-service.js';
-import { TransactionService } from './core/transaction-service.js';
-import { getAnalyticsEngine } from './core/analytics/AnalyticsInstance.js';
-import { getCurrentMonthPeriod } from './utils/reports-utils.js';
-import { preloadChartJS } from './core/chart-loader.js';
 import './core/mobile-utils.js'; // Initialize consolidated mobile utilities
 import './pwa.js'; // Register PWA service worker
 
@@ -23,61 +19,6 @@ try {
 } catch (error) {
   console.warn('[Main] Failed to initialize InstallService:', error);
 }
-
-/**
- * Pre-load ReportsView data for instant navigation
- */
-const preloadReportsData = async () => {
-  try {
-    console.log('[Main] Pre-loading ReportsView data...');
-
-    // Pre-load Chart.js
-    await preloadChartJS();
-
-    // Get transactions and analytics engine
-    const transactions = TransactionService.getAll();
-    const analyticsEngine = getAnalyticsEngine();
-
-    // Pre-calculate analytics for current month (warm up the calculations)
-    const currentTimePeriod = getCurrentMonthPeriod();
-    const insights = analyticsEngine.generateSpendingInsights(
-      transactions,
-      currentTimePeriod
-    );
-    const categoryBreakdown = analyticsEngine.calculateCategoryBreakdown(
-      transactions,
-      currentTimePeriod
-    );
-    const incomeVsExpenses = analyticsEngine.calculateIncomeVsExpenses(
-      transactions,
-      currentTimePeriod
-    );
-    const costOfLiving = analyticsEngine.calculateCostOfLiving(
-      transactions,
-      currentTimePeriod
-    );
-
-    // Cache the preloaded data for instant report loading
-    const cacheKey = `blinkbudget_reports_cache_${currentTimePeriod.startDate}_${currentTimePeriod.endDate}`;
-    const cacheEntry = {
-      data: {
-        timePeriod: currentTimePeriod,
-        insights,
-        categoryBreakdown,
-        incomeVsExpenses,
-        costOfLiving,
-        transactions,
-      },
-      timestamp: Date.now(),
-    };
-    localStorage.setItem(cacheKey, JSON.stringify(cacheEntry));
-
-    console.log('[Main] ReportsView data pre-loaded and cached successfully');
-  } catch (error) {
-    console.warn('[Main] Failed to pre-load ReportsView data:', error);
-    // Don't block app initialization if pre-loading fails
-  }
-};
 
 const initApp = () => {
   const app = document.querySelector('#app');
@@ -140,9 +81,6 @@ const initApp = () => {
       import('./core/backup-service.js').then(({ BackupService }) => {
         BackupService.init();
       });
-
-      // Pre-load ReportsView data for instant navigation
-      preloadReportsData();
 
       if (currentRoute === 'login' || currentRoute === 'landing') {
         Router.navigate('dashboard');
