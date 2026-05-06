@@ -223,20 +223,30 @@ export const SettingsView = () => {
   `;
   updatesSection.appendChild(versionInfo);
 
+  let isChecking = false;
+
   const checkUpdatesBtn = ButtonComponent({
     text: 'Check for Updates',
     variant: 'secondary',
     onClick: async () => {
+      if (isChecking) {
+        return; // Prevent concurrent calls
+      }
+
+      isChecking = true;
+      checkUpdatesBtn.disabled = true;
+      checkUpdatesBtn.textContent = 'Checking...';
+
       console.log('[PWA Update] Manual check triggered');
 
-      // Show checking toast
-      ToastNotification({
-        message: 'Checking for updates...',
-        variant: 'info',
-        duration: 2000,
-      });
-
       try {
+        // Show checking toast
+        ToastNotification({
+          message: 'Checking for updates...',
+          variant: 'info',
+          duration: 2000,
+        });
+
         const updateFound = await checkForUpdatesWithFeedback();
 
         if (updateFound) {
@@ -257,7 +267,10 @@ export const SettingsView = () => {
           variant: 'error',
           duration: 3000,
         });
-        return; // Stop execution to prevent success message from appearing
+      } finally {
+        isChecking = false;
+        checkUpdatesBtn.disabled = false;
+        checkUpdatesBtn.textContent = 'Check for Updates';
       }
     },
   });

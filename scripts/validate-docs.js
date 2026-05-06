@@ -58,12 +58,6 @@ const config = {
     'Push notification system', // Concept
     'TWA configuration', // Concept
     'Firebase HTTPS enforcement', // External service
-    'SSL/TLS configuration', // External service
-    'Privacy policy enforcement', // External service
-    'Security monitoring', // External service
-    'Automated dependency management', // External service
-    'Development standards', // Process
-    'Feature development guidelines', // Process
     'missing-service', // Example reference
     'path/to/file', // Example reference
     'another/file', // Example reference
@@ -126,13 +120,20 @@ function methodExists(filePath, methodOrDescription) {
   try {
     const content = fs.readFileSync(fullPath, 'utf8');
 
+    // Helper to escape regex metacharacters
+    const escapeRegExp = string => {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    };
+
+    const escaped = escapeRegExp(methodOrDescription);
+
     // Handle different method patterns
     const patterns = [
-      new RegExp(`(?:function|const|let|var)\\s+${methodOrDescription}\\s*\\(`), // function declaration
-      new RegExp(`${methodOrDescription}\\s*\\(`), // method call
-      new RegExp(`${methodOrDescription}\\s*:`), // object property
-      new RegExp(`['"]${methodOrDescription}['"]`), // string literal
-      new RegExp(`\\b${methodOrDescription}\\b`), // general word match
+      new RegExp(`(?:function|const|let|var)\\s+${escaped}\\s*\\(`), // function declaration
+      new RegExp(`${escaped}\\s*\\(`), // method call
+      new RegExp(`${escaped}\\s*:`), // object property
+      new RegExp(`['"]${escaped}['"]`), // string literal
+      new RegExp(`\\b${escaped}\\b`), // general word match
     ];
 
     return patterns.some(pattern => pattern.test(content));
@@ -177,7 +178,17 @@ function shouldIgnore(filePath, methodOrDescription) {
 function validateReferences() {
   console.log('🔍 Validating README documentation references...\n');
 
-  const readmeContent = fs.readFileSync(config.readmePath, 'utf8');
+  let readmeContent;
+  try {
+    readmeContent = fs.readFileSync(config.readmePath, 'utf8');
+  } catch (error) {
+    console.error(
+      `Error reading README file at ${config.readmePath}:`,
+      error.message
+    );
+    process.exit(1);
+  }
+
   const references = extractReferences(readmeContent);
 
   let validCount = 0;
@@ -269,6 +280,18 @@ function validateReferences() {
  * Generate statistics about the documentation
  */
 function generateStats() {
+  if (!config.readmePath || !fs.existsSync(config.readmePath)) {
+    console.warn(
+      'Warning: README file not found, skipping statistics generation'
+    );
+    console.log('\n📈 Documentation Statistics:');
+    console.log('   Total references: 0');
+    console.log('   Unique files: 0');
+    console.log('\n📁 Most referenced files:');
+    console.log('   No files found');
+    return;
+  }
+
   const readmeContent = fs.readFileSync(config.readmePath, 'utf8');
   const references = extractReferences(readmeContent);
 

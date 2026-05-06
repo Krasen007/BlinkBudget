@@ -94,6 +94,7 @@ export const DashboardStatsCard = ({
 
     const trendIcon = document.createElement('span');
     trendIcon.className = 'material-symbols-outlined';
+    trendIcon.setAttribute('aria-hidden', 'true');
     trendIcon.textContent =
       trend === 'up' ? 'rise_up' : trend === 'down' ? 'fall_down' : 'right';
 
@@ -119,6 +120,23 @@ export const DashboardStatsCard = ({
 
     // Apply same color mapping as trend icon
     trendText.style.color = trendIcon.style.color;
+
+    // Create accessible label for screen readers
+    const trendDirection = positiveIsUp
+      ? trend === 'up'
+        ? 'increase'
+        : trend === 'down'
+          ? 'decrease'
+          : 'no change'
+      : trend === 'up'
+        ? 'decrease'
+        : trend === 'down'
+          ? 'increase'
+          : 'no change';
+
+    const accessibleLabel = `${Math.abs(trendPercentage).toFixed(1)}% ${trendDirection}`;
+    trendContainer.setAttribute('aria-label', accessibleLabel);
+    trendContainer.setAttribute('title', accessibleLabel);
 
     trendContainer.appendChild(trendIcon);
     trendContainer.appendChild(trendText);

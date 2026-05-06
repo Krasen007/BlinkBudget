@@ -87,22 +87,32 @@ export class SavingsGoalsService {
     // Fix monthlySavingRate calculation to use actual time span
     let monthlySavingRate = 0;
     if (recentTransactions.length > 0) {
-      const earliest = new Date(
-        Math.min(...recentTransactions.map(t => new Date(t.timestamp)))
+      const result = recentTransactions.reduce(
+        (acc, t) => {
+          const timestamp = new Date(t.timestamp).getTime();
+          const amount = t.amount || 0;
+
+          return {
+            minTimestamp: Math.min(acc.minTimestamp, timestamp),
+            maxTimestamp: Math.max(acc.maxTimestamp, timestamp),
+            sumAmounts: acc.sumAmounts + amount,
+          };
+        },
+        {
+          minTimestamp: Infinity,
+          maxTimestamp: -Infinity,
+          sumAmounts: 0,
+        }
       );
-      const latest = new Date(
-        Math.max(...recentTransactions.map(t => new Date(t.timestamp)))
-      );
+
+      const earliest = new Date(result.minTimestamp);
+      const latest = new Date(result.maxTimestamp);
       const timespanDays = Math.max(
         (latest - earliest) / (1000 * 60 * 60 * 24),
         1
       );
       const months = Math.max(timespanDays / 30, 1);
-      const sumAmounts = recentTransactions.reduce(
-        (sum, t) => sum + (t.amount || 0),
-        0
-      );
-      monthlySavingRate = sumAmounts / months;
+      monthlySavingRate = result.sumAmounts / months;
     }
 
     let estimatedMonthsToComplete = null;

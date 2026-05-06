@@ -597,6 +597,81 @@ function createGoalsList(chartRenderer, activeCharts, section) {
 }
 
 /**
+ * Create summary card with aggregate metrics
+ * @param {Array} goals - Array of goal objects
+ * @returns {HTMLElement} Summary card element
+ */
+function createGoalsSummaryCard(goals) {
+  const card = document.createElement('div');
+  card.style.cssText = `
+    background: ${COLORS.SURFACE};
+    border: 1px solid ${COLORS.BORDER};
+    border-radius: var(--radius-md);
+    padding: ${SPACING.MD};
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: ${SPACING.MD};
+    margin-bottom: ${SPACING.MD};
+  `;
+
+  const totalTarget = goals.reduce(
+    (sum, g) => sum + Number(g.targetAmount || 0),
+    0
+  );
+  const totalSaved = goals.reduce(
+    (sum, g) => sum + Number(g.currentSavings || 0),
+    0
+  );
+  const completedGoals = goals.filter(g => {
+    const progress =
+      g.targetAmount > 0 ? (g.currentSavings / g.targetAmount) * 100 : 0;
+    return progress >= 100;
+  }).length;
+  const activeGoals = goals.length - completedGoals;
+  const overallProgress =
+    totalTarget > 0 ? (totalSaved / totalTarget) * 100 : 0;
+
+  const metrics = [
+    { label: 'Total Goals', value: goals.length },
+    { label: 'Active', value: activeGoals },
+    { label: 'Completed', value: completedGoals },
+    {
+      label: 'Total Saved',
+      value: new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'EUR',
+      }).format(totalSaved),
+    },
+    {
+      label: 'Overall Progress',
+      value: `${Math.round(overallProgress)}%`,
+    },
+  ];
+
+  metrics.forEach(metric => {
+    const metricDiv = document.createElement('div');
+    metricDiv.style.textAlign = 'center';
+
+    const value = document.createElement('div');
+    value.textContent = metric.value;
+    value.style.fontSize = '1.5rem';
+    value.style.fontWeight = '600';
+    value.style.color = COLORS.PRIMARY;
+
+    const label = document.createElement('div');
+    label.textContent = metric.label;
+    label.style.fontSize = '0.85rem';
+    label.style.color = COLORS.TEXT_MUTED;
+
+    metricDiv.appendChild(value);
+    metricDiv.appendChild(label);
+    card.appendChild(metricDiv);
+  });
+
+  return card;
+}
+
+/**
  * Goals Section Component
  * @param {Object} chartRenderer - Chart renderer service instance
  * @param {Map} activeCharts - Map to track active chart instances
@@ -668,6 +743,10 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
     console.error('Error creating goal progress chart:', error);
   }
 
+  // Add summary card with aggregate metrics
+  const summaryCard = createGoalsSummaryCard(goalsToRender);
+  section.appendChild(summaryCard);
+
   // Add goal form controls
   const goalControls = createGoalFormControls(
     chartRenderer,
@@ -733,6 +812,108 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
   insights.appendChild(h4);
   insights.appendChild(p);
   section.appendChild(insights);
+
+  // Add goal recommendations based on spending patterns
+  try {
+    const { StorageService } = await import('../../core/storage.js');
+    const transactions = StorageService.getTransactions() || [];
+    const { SavingsGoalsService } =
+      await import('../../core/savings-goals-service.js');
+    const recommendations =
+      await SavingsGoalsService.getGoalRecommendations(transactions);
+
+    if (recommendations.length > 0) {
+      const recommendationsSection = document.createElement('div');
+      recommendationsSection.className = 'goal-recommendations';
+      recommendationsSection.style.marginTop = SPACING.MD;
+      recommendationsSection.style.padding = SPACING.MD;
+      recommendationsSection.style.background = COLORS.SURFACE;
+      recommendationsSection.style.borderRadius = 'var(--radius-md)';
+      recommendationsSection.style.border = `1px solid ${COLORS.BORDER}`;
+
+      const recTitle = document.createElement('h4');
+      recTitle.textContent = 'Recommended Goals';
+      recTitle.style.marginTop = '0';
+      recTitle.style.marginBottom = SPACING.SM;
+      recommendationsSection.appendChild(recTitle);
+
+      recommendations.slice(0, 3).forEach(rec => {
+        const recCard = document.createElement('div');
+        recCard.style.cssText = `
+          background: ${COLORS.SURFACE};
+          border: 1px solid ${COLORS.BORDER};
+          border-radius: var(--radius-sm);
+          padding: ${SPACING.SM};
+          margin-bottom: ${SPACING.SM};
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: ${SPACING.SM};
+        `;
+
+        const content = document.createElement('div');
+        content.style.flex = '1';
+
+        const recTitleText = document.createElement('div');
+        recTitleText.textContent = rec.title;
+        recTitleText.style.fontWeight = '600';
+        recTitleText.style.color = COLORS.TEXT_MAIN;
+        content.appendChild(recTitleText);
+
+        const recDesc = document.createElement('div');
+        recDesc.textContent = rec.description;
+        recDesc.style.fontSize = '0.85rem';
+        recDesc.style.color = COLORS.TEXT_MUTED;
+        recDesc.style.marginTop = '2px';
+        content.appendChild(recDesc);
+
+        const createBtn = document.createElement('button');
+        createBtn.textContent = 'Create Goal';
+        createBtn.className = 'btn btn-primary';
+        createBtn.style.padding = `${SPACING.XS} ${SPACING.SM}`;
+        createBtn.style.fontSize = '0.85rem';
+
+        createBtn.addEventListener('click', async () => {
+          try {
+            const targetDate = new Date();
+            targetDate.setFullYear(targetDate.getFullYear() + 1); // Default 1 year
+
+            const { StorageService: SS } =
+              await import('../../core/storage.js');
+            SS.createGoal(rec.title, rec.target || 1000, targetDate, 0, {
+              category: rec.category || 'General',
+            });
+
+            // Refresh the section
+            const updatedGoals = SS.getGoals();
+            await refreshChart({
+              createChartFn: createGoalProgressChart,
+              chartRenderer,
+              data: updatedGoals,
+              section,
+              chartType: 'goal-progress',
+              activeCharts,
+            });
+            refreshGoalsList();
+
+            // Update summary card
+            const newSummaryCard = createGoalsSummaryCard(updatedGoals);
+            section.replaceChild(newSummaryCard, summaryCard);
+          } catch (err) {
+            console.error('Failed to create goal from recommendation:', err);
+          }
+        });
+
+        recCard.appendChild(content);
+        recCard.appendChild(createBtn);
+        recommendationsSection.appendChild(recCard);
+      });
+
+      section.appendChild(recommendationsSection);
+    }
+  } catch (error) {
+    console.warn('Failed to load goal recommendations:', error);
+  }
 
   // Initial population of the list
   await refreshGoalsList();

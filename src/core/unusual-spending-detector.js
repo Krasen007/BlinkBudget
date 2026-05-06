@@ -242,7 +242,7 @@ export class UnusualSpendingDetector {
     if (transaction.amount > threshold) {
       // Compute safe values to avoid division by zero
       let multiplier = 'N/A';
-      let deviation = '0.00';
+      let deviation = 'N/A';
 
       if (mean !== 0 && Number.isFinite(mean)) {
         multiplier = (transaction.amount / mean).toFixed(1);

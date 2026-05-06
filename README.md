@@ -210,8 +210,8 @@ BlinkBudget employs enterprise-grade security measures to protect your sensitive
 
 #### **Security Best Practices**
 
-- **Regular Security Audits** - Continuous monitoring and vulnerability assessment | Planned (securityAudits() function not yet implemented)
-- **Dependency Updates** - Automated security patch management | Implemented (npm update workflow with automated dependency management)
+- **Planned: Regular Security Audits** - Continuous monitoring and vulnerability assessment (securityAudits() function not yet implemented)
+- **Dependency Updates** - Automated security patch management | Implemented (Yarn update workflow with automated dependency management)
 - **Secure Coding Standards** - Input validation, output encoding, and secure defaults | src/utils/security-utils.js:secure coding | Development standards
 - **Privacy by Design** - Privacy considerations built into every feature | src/core/privacy-service.js:privacyByDesign() | Feature development guidelines
 

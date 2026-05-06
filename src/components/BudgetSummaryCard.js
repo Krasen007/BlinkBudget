@@ -50,10 +50,11 @@ export const BudgetSummaryCard = (summary, timePeriod = null) => {
     }
   });
 
-  // Add hover effect with safe shadow color
+  // Add hover effect with consistent shadow color
   card.addEventListener('mouseenter', () => {
     card.style.transform = 'translateY(-2px)';
-    card.style.boxShadow = '0 4px 12px rgba(0, 123, 255, 0.15)';
+    card.style.boxShadow =
+      '0 4px 12px var(--color-primary-light, rgba(0, 123, 255, 0.15))';
   });
 
   card.addEventListener('mouseleave', () => {
