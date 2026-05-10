@@ -215,6 +215,10 @@ export class DataIntegrityService {
 
   /**
    * Check settings integrity
+   * 
+   * NOTE: This method explicitly excludes category-related settings to prevent
+   * unintended mutations. Categories are managed by CustomCategoryService and
+   * CategoryUsageService, which have their own validation logic.
    */
   async checkSettingsIntegrity(results) {
     const check = {
@@ -697,6 +701,19 @@ export class DataIntegrityService {
       issues.push('Setting value is undefined');
     }
 
+    // Skip validation for category-related settings to prevent mutation
+    const CATEGORY_RELATED_KEYS = [
+      'custom_categories',
+      'category_usage',
+      'categories',
+      'categoriesCore',
+    ];
+
+    if (CATEGORY_RELATED_KEYS.some(catKey => key.includes(catKey))) {
+      // Don't validate category settings - they have their own validation
+      return [];
+    }
+
     return issues;
   }
 
@@ -845,15 +862,26 @@ export class DataIntegrityService {
    */
   getAllSettings() {
     const settings = {};
+    const EXCLUDED_KEYS = [
+      'custom_categories', // Exclude custom categories - managed by CustomCategoryService
+      'category_usage', // Exclude category usage - managed by CategoryUsageService
+    ];
+
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && key.startsWith('blinkbudget_setting_')) {
+        const settingKey = key.replace('blinkbudget_setting_', '');
+
+        // Skip excluded keys to prevent mutation of category data
+        if (EXCLUDED_KEYS.includes(settingKey)) {
+          continue;
+        }
+
         try {
           const value = localStorage.getItem(key);
-          settings[key.replace('blinkbudget_setting_', '')] = JSON.parse(value);
+          settings[settingKey] = JSON.parse(value);
         } catch {
-          settings[key.replace('blinkbudget_setting_', '')] =
-            localStorage.getItem(key);
+          settings[settingKey] = localStorage.getItem(key);
         }
       }
     }
