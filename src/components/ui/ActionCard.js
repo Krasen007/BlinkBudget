@@ -207,9 +207,8 @@ export const ActionCard = options => {
   }
 
   // Action button if provided
-  let actionBtn = null;
   if (actionText && onAction) {
-    actionBtn = document.createElement('button');
+    const actionBtn = document.createElement('button');
     actionBtn.textContent = actionText;
     actionBtn.style.cssText = `
       background: ${colors.accent};
