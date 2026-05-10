@@ -122,17 +122,8 @@ export const DashboardStatsCard = ({
     trendText.style.color = trendIcon.style.color;
 
     // Create accessible label for screen readers
-    const trendDirection = positiveIsUp
-      ? trend === 'up'
-        ? 'increase'
-        : trend === 'down'
-          ? 'decrease'
-          : 'no change'
-      : trend === 'up'
-        ? 'decrease'
-        : trend === 'down'
-          ? 'increase'
-          : 'no change';
+    const trendDirection =
+      trend === 'up' ? 'increase' : trend === 'down' ? 'decrease' : 'no change';
 
     const accessibleLabel = `${Math.abs(trendPercentage).toFixed(1)}% ${trendDirection}`;
     trendContainer.setAttribute('aria-label', accessibleLabel);

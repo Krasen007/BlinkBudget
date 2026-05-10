@@ -1,6 +1,6 @@
 /**
  * Data Integrity Service - Category Protection Tests
- * 
+ *
  * Ensures that the data integrity service does not mutate or add unexpected
  * properties to category data structures.
  */
@@ -206,10 +206,7 @@ describe('DataIntegrityService - Category Protection', () => {
 
   it('should validate non-category settings normally', async () => {
     // Setup: Add a regular setting
-    localStorage.setItem(
-      'blinkbudget_setting_theme',
-      JSON.stringify('dark')
-    );
+    localStorage.setItem('blinkbudget_setting_theme', JSON.stringify('dark'));
 
     // Run integrity check
     const result = await dataIntegrityService.performIntegrityCheck();
@@ -260,10 +257,7 @@ describe('DataIntegrityService - Category Protection', () => {
       'blinkbudget_setting_category_usage',
       JSON.stringify({ categories: {} })
     );
-    localStorage.setItem(
-      'blinkbudget_setting_theme',
-      JSON.stringify('dark')
-    );
+    localStorage.setItem('blinkbudget_setting_theme', JSON.stringify('dark'));
 
     // Get all settings
     const settings = dataIntegrityService.getAllSettings();

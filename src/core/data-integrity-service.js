@@ -5,6 +5,13 @@
 
 import { StorageService } from './storage.js';
 
+const SETTINGS_EXCLUDED_KEYS = [
+  'custom_categories',
+  'category_usage',
+  'categories',
+  'categoriesCore',
+];
+
 export class DataIntegrityService {
   constructor() {
     this.integrityChecks = new Map();
@@ -215,7 +222,7 @@ export class DataIntegrityService {
 
   /**
    * Check settings integrity
-   * 
+   *
    * NOTE: This method explicitly excludes category-related settings to prevent
    * unintended mutations. Categories are managed by CustomCategoryService and
    * CategoryUsageService, which have their own validation logic.
@@ -702,14 +709,7 @@ export class DataIntegrityService {
     }
 
     // Skip validation for category-related settings to prevent mutation
-    const CATEGORY_RELATED_KEYS = [
-      'custom_categories',
-      'category_usage',
-      'categories',
-      'categoriesCore',
-    ];
-
-    if (CATEGORY_RELATED_KEYS.some(catKey => key.includes(catKey))) {
+    if (SETTINGS_EXCLUDED_KEYS.some(catKey => key === catKey)) {
       // Don't validate category settings - they have their own validation
       return [];
     }
@@ -862,10 +862,6 @@ export class DataIntegrityService {
    */
   getAllSettings() {
     const settings = {};
-    const EXCLUDED_KEYS = [
-      'custom_categories', // Exclude custom categories - managed by CustomCategoryService
-      'category_usage', // Exclude category usage - managed by CategoryUsageService
-    ];
 
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
@@ -873,7 +869,7 @@ export class DataIntegrityService {
         const settingKey = key.replace('blinkbudget_setting_', '');
 
         // Skip excluded keys to prevent mutation of category data
-        if (EXCLUDED_KEYS.includes(settingKey)) {
+        if (SETTINGS_EXCLUDED_KEYS.includes(settingKey)) {
           continue;
         }
 

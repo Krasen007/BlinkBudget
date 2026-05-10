@@ -44,23 +44,22 @@ export const BudgetSummaryCard = (summary, timePeriod = null) => {
 
   // Add keyboard support for accessibility
   card.addEventListener('keydown', event => {
-    if (event.key === 'Enter' || event.key === ' ') {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      navigateToBudgets();
+    } else if (event.key === ' ') {
+      event.preventDefault();
+    }
+  });
+
+  card.addEventListener('keyup', event => {
+    if (event.key === ' ') {
       event.preventDefault();
       navigateToBudgets();
     }
   });
 
-  // Add hover effect with consistent shadow color
-  card.addEventListener('mouseenter', () => {
-    card.style.transform = 'translateY(-2px)';
-    card.style.boxShadow =
-      '0 4px 12px var(--color-primary-light, rgba(0, 123, 255, 0.15))';
-  });
-
-  card.addEventListener('mouseleave', () => {
-    card.style.transform = 'translateY(0)';
-    card.style.boxShadow = 'none';
-  });
+  // Hover effect removed per user request
 
   const header = document.createElement('div');
   header.style.display = 'flex';

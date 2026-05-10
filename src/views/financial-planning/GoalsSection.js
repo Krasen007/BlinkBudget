@@ -894,11 +894,20 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
               chartType: 'goal-progress',
               activeCharts,
             });
-            refreshGoalsList();
+            await refreshGoalsList();
 
             // Update summary card
+            const currentSummary =
+              section.querySelector('.goals-summary-card') || summaryCard;
             const newSummaryCard = createGoalsSummaryCard(updatedGoals);
-            section.replaceChild(newSummaryCard, summaryCard);
+            if (currentSummary && currentSummary.parentNode) {
+              currentSummary.parentNode.replaceChild(
+                newSummaryCard,
+                currentSummary
+              );
+            } else {
+              section.replaceChild(newSummaryCard, currentSummary);
+            }
           } catch (err) {
             console.error('Failed to create goal from recommendation:', err);
           }

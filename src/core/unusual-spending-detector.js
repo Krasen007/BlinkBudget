@@ -34,7 +34,7 @@ export class UnusualSpendingDetector {
     }
 
     // Calculate statistics
-    const amounts = relevantTransactions.map(t => t.amount || 0);
+    const amounts = relevantTransactions.map(t => t.amount ?? 0);
     const mean = amounts.reduce((sum, a) => sum + a, 0) / amounts.length;
     const variance =
       amounts.reduce((sum, a) => sum + Math.pow(a - mean, 2), 0) /
@@ -100,7 +100,7 @@ export class UnusualSpendingDetector {
             category,
             minTransactions: 5, // Explicitly pass minTransactions for consistency
           });
-          const amounts = categoryTransactions.map(t => t.amount || 0);
+          const amounts = categoryTransactions.map(t => t.amount ?? 0);
           const mean = amounts.reduce((sum, a) => sum + a, 0) / amounts.length;
 
           analysis[category] = {
@@ -166,7 +166,7 @@ export class UnusualSpendingDetector {
       // High variance recommendation
       const amounts = transactions
         .filter(t => t.type === 'expense' && t.category === category)
-        .map(t => t.amount || 0);
+        .map(t => t.amount ?? 0);
 
       if (amounts.length >= 5) {
         const mean = amounts.reduce((sum, a) => sum + a, 0) / amounts.length;
@@ -230,7 +230,7 @@ export class UnusualSpendingDetector {
       return null;
     }
 
-    const amounts = categoryTransactions.map(t => t.amount || 0);
+    const amounts = categoryTransactions.map(t => t.amount ?? 0);
 
     const mean = amounts.reduce((sum, a) => sum + a, 0) / amounts.length;
     const variance =

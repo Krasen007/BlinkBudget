@@ -7,7 +7,7 @@ These items directly support the "Extremely fast," "3-click interaction," and "i
 Optimizes the first 10 seconds. Effortless and directly serves the single core problem (logging expenses fast).
 Currently, src/core/router.js explicitly defaults to dashboard (e.g., const rawHash = window.location.hash.slice(1) || 'dashboard';), and main.js routes to the dashboard upon successful login. We can easily change this to add-expense.
 
-[ ] when deleting a transaction create animation of the row dissapearing / when splitting a transaction create animation of the row duplicating
+[ ] when deleting a transaction create animation of the row disappearing / when splitting a transaction create animation of the row duplicating
 "Make the design invisible when well-executed." Subtle animations improve the feel and user confidence without adding complexity.
 Currently, rows are just instantly removed from the DOM when deleted. We will need to add a simple CSS @keyframes animation and apply a class right before removing the DOM element.
 
@@ -29,13 +29,13 @@ The src/core/data-integrity-service.js exists and is running, but we'll need to 
 
 [ ] Convert to TWA (Trusted Web Activity)... and [ ] release as windows store app...
 Lightweight distribution methods that leverage the existing web app without adding heavy framework dependencies.
-TWA is actually already done all we need is to relase as windows store app.
+TWA is actually already done. All we need is to release as a Windows Store app.
 
 ⚠️ Implement with Restraint (Needs "Tasteful" Adjustments)
 These solve real problems but the proposed solutions introduce too much UI surface area. We should use smart defaults instead of adding settings.
 
-[ ] add option to reorder categories or auto sort them...
-Tasteful Approach: Auto-sort by frequency invisibly. Do not add a drag-and-drop manual reordering UI. "Treat every default as a deliberate taste decision." Manual sorting adds cognitive load.
+[ ] Auto-sort categories by frequency invisibly
+Tasteful Approach: Implement automatic sorting by usage frequency without adding manual reordering UI. "Treat every default as a deliberate taste decision." Manual sorting adds cognitive load.
 
 [ ] fix tutorial
 Tasteful Approach: Instead of fixing a multi-step tutorial, ask: Can the app be simplified so a tutorial isn't needed? Optimize the empty state to be welcoming. If a tutorial is kept, it must be instantly dismissible.

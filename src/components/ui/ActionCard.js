@@ -234,24 +234,7 @@ export const ActionCard = options => {
   card.appendChild(iconContainer);
   card.appendChild(content);
 
-  // Hover effects
-  card.addEventListener('mouseenter', () => {
-    card.style.transform = 'translateY(-2px)';
-    card.style.boxShadow = `0 4px 16px ${colors.accent}20`;
-    if (actionBtn) {
-      actionBtn.style.transform = 'scale(1.05)';
-      actionBtn.style.boxShadow = `0 2px 8px ${colors.accent}40`;
-    }
-  });
-
-  card.addEventListener('mouseleave', () => {
-    card.style.transform = 'translateY(0)';
-    card.style.boxShadow = 'none';
-    if (actionBtn) {
-      actionBtn.style.transform = 'scale(1)';
-      actionBtn.style.boxShadow = 'none';
-    }
-  });
+  // Hover effects removed per user request
 
   return card;
 };
@@ -268,10 +251,13 @@ export const UnusualSpendingCard = (
   averageAmount,
   onViewTransaction
 ) => {
+  const sanitizedAmount = Number.isFinite(Number(transaction.amount))
+    ? Number(transaction.amount)
+    : 0;
   // Guard against division by zero
   let multiplier;
   if (averageAmount !== 0 && Number.isFinite(Number(averageAmount))) {
-    multiplier = (transaction.amount / averageAmount).toFixed(1);
+    multiplier = (sanitizedAmount / averageAmount).toFixed(1);
   } else {
     multiplier = '—'; // Safe fallback for zero/invalid average
   }
@@ -280,7 +266,7 @@ export const UnusualSpendingCard = (
     title: 'Unusual Spending Detected',
     description: `This expense is ${multiplier}x your normal ${transaction.category} spending`,
     type: 'warning',
-    amount: transaction.amount,
+    amount: sanitizedAmount,
     actionText: 'View Transaction',
     onAction: onViewTransaction,
     icon: '!',
@@ -311,28 +297,32 @@ export const SavingsGoalCard = (goal, currentProgress, onViewGoal) => {
       Math.max((sanitizedCurrentProgress / target) * 100, 0),
       100
     );
-    remaining = target - sanitizedCurrentProgress;
+    remaining = Math.max(target - sanitizedCurrentProgress, 0);
   }
   // Variables already initialized to 0 for invalid/zero targets
 
-  let type, title;
+  let type, title, descriptionText;
   if (percentage >= 100) {
     type = 'success';
     title = 'Goal Achieved!';
+    descriptionText = `${goal.name}: Goal completed!`;
   } else if (percentage >= 75) {
     type = 'info';
     title = 'Almost There!';
+    descriptionText = `${goal.name}: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(remaining)} to go`;
   } else if (percentage >= 50) {
     type = 'default';
     title = 'Good Progress';
+    descriptionText = `${goal.name}: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(remaining)} to go`;
   } else {
     type = 'default';
     title = 'Keep Going';
+    descriptionText = `${goal.name}: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(remaining)} to go`;
   }
 
   return ActionCard({
     title,
-    description: `${goal.name}: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(remaining)} to go`,
+    description: descriptionText,
     type,
     amount: currentProgress,
     percentage,

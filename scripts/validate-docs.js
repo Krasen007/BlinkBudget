@@ -80,6 +80,10 @@ function extractReferences(readmeContent) {
     const filePath = match[1].trim();
     const methodOrDescription = match[2].trim();
 
+    if (!methodOrDescription) {
+      continue;
+    }
+
     references.push({
       filePath,
       methodOrDescription,
@@ -103,7 +107,11 @@ function getLineNumber(content, index) {
  * Check if a file exists in the codebase
  */
 function fileExists(filePath) {
-  const fullPath = path.join(projectRoot, filePath);
+  const fullPath = path.resolve(projectRoot, filePath);
+  const resolvedProjectRoot = path.resolve(projectRoot);
+  if (!fullPath.startsWith(resolvedProjectRoot)) {
+    return false;
+  }
   return fs.existsSync(fullPath);
 }
 

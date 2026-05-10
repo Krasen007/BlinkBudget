@@ -199,8 +199,7 @@ export const getChartOptions = (chartType = 'line') => {
             const dataset = context.dataset;
             const value = context.parsed.y;
             const inflationRate =
-              dataset.inflationRate !== undefined &&
-              dataset.inflationRate !== null
+              dataset.inflationRate != null
                 ? (dataset.inflationRate * 100).toFixed(1)
                 : null;
 
