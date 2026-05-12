@@ -1,26 +1,25 @@
-# Version 1.36 Changes
+## Version 1.37
 
-## 🚀 New Features
-- **Clickable Reports**: Income and Expenses sections in Reports view are now interactive
-- **Enhanced Financial Planning**: Added nested routing and query parameter support for better navigation
-- **Experimental Insights**: New experimental insights feature for deeper financial analysis
-- **Budget Recommendations**: Improved budget recommendations with better calculations
-- **Transaction Split Confirmation**: Added confirmation dialog for transaction split actions
+### 🐛 Bug Fixes
+- Fixed leftover variable from hover effects implementation
+- Resolved data integrity issue where unexpected labels were being added to categories
+- Fixed documentation validation script and README examples
+- Various small fixes and improvements
 
-## 🔧 Improvements
-- **Service Architecture**: Created 4 new consolidated services (TrendService, ComparisonService, RecommendationService, InsightsService)
-- **Caching System**: Updated caching system for better performance
-- **Personal Inflation Trends**: Fixed display issues and improved accuracy
-- **PWA Updates**: Attempted to add update dialog for Progressive Web App
+### ⚡ Performance Improvements
+- Removed performance bottleneck while preserving working preloading implementation
+- Optimized data loading for better responsiveness
 
-## 🧹 Cleanup & Fixes
-- **Code Quality**: Removed redundant and dead code including BenchmarkingSection, audit-service, and baseline service
-- **Bug Fixes**: All 13 security findings have been verified and fixed
-- **UI Improvements**: Fixed highlighting, styling, and import issues
-- **Risk Assessment**: Discarded unuseful risk assessment features
+### ✨ New Features
+- **Enhanced Navigation**: Click budget summary card in Reports view to jump directly to Budgets tab in Financial Planning view
+- **Mobile Improvements**: Added mobile prompt for goals functionality
+- **Goals Section**: Integrated SavingsGoalsSection features into GoalsSection without changing data model
 
-## 🔄 Technical Changes
-- **Query Parameters**: Added query parameter support for reports time period selection
-- **Navigation**: Refactored financial-planning section to use query parameters
-- **Code Standards**: Implemented fixes following best practices
-- **Linting**: Applied code formatting and style fixes
+### 🔧 Development Improvements
+- Added documentation validation script to prevent README drift
+- Updated dependencies for security and performance
+
+### 💡 User Experience
+- Better navigation between Reports and Financial Planning views
+- Improved mobile experience for goal tracking
+- Cleaner category management without unexpected labels

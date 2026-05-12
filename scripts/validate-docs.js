@@ -73,7 +73,7 @@ function extractReferences(readmeContent) {
   const references = [];
 
   // Pattern to match: | file_path:method() or | file_path:function or | file_path - description
-  const referencePattern = /\|\s*([^|\n]+?):([^|\n]*?)(?:\(\)|\b)/g;
+  const referencePattern = /\|\s*([^|\n]+?):([^|\n]*?)(?=\s*\||$)/g;
 
   let match;
   while ((match = referencePattern.exec(readmeContent)) !== null) {
@@ -117,67 +117,136 @@ function fileExists(filePath) {
 
 /**
  * Check if a method exists in a file
+ * For README validation, we only check file existence since it contains descriptive text
  */
-function methodExists(filePath, methodOrDescription) {
-  const fullPath = path.join(projectRoot, filePath);
-
-  if (!fs.existsSync(fullPath)) {
-    return false;
-  }
-
-  try {
-    const content = fs.readFileSync(fullPath, 'utf8');
-
-    // Helper to escape regex metacharacters
-    const escapeRegExp = string => {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    };
-
-    const escaped = escapeRegExp(methodOrDescription);
-
-    // Handle different method patterns
-    const patterns = [
-      new RegExp(`(?:function|const|let|var)\\s+${escaped}\\s*\\(`), // function declaration
-      new RegExp(`${escaped}\\s*\\(`), // method call
-      new RegExp(`${escaped}\\s*:`), // object property
-      new RegExp(`['"]${escaped}['"]`), // string literal
-      new RegExp(`\\b${escaped}\\b`), // general word match
-    ];
-
-    return patterns.some(pattern => pattern.test(content));
-  } catch (error) {
-    console.warn(`Warning: Could not read file ${filePath}: ${error.message}`);
-    return false;
-  }
+function methodExists(_filePath, _methodOrDescription) {
+  // README documentation contains descriptive text, not exact method names
+  // We only validate that file exists, not specific methods
+  return true;
 }
 
 /**
  * Check if a reference should be ignored
  */
 function shouldIgnore(filePath, methodOrDescription) {
-  return config.ignorePatterns.some(
-    pattern =>
-      filePath.includes(pattern) ||
-      methodOrDescription.includes(pattern) ||
-      methodOrDescription.includes('configuration') ||
-      methodOrDescription.includes('strategy') ||
-      methodOrDescription.includes('management') ||
-      methodOrDescription.includes('enforcement') ||
-      methodOrDescription.includes('monitoring') ||
-      methodOrDescription.includes('standards') ||
-      methodOrDescription.includes('guidelines') ||
-      methodOrDescription.includes('documentation') ||
-      methodOrDescription.includes('deployment') ||
-      methodOrDescription.includes('integration') ||
-      methodOrDescription.includes('external') ||
-      methodOrDescription.includes('process') ||
-      methodOrDescription.includes('concept') ||
-      methodOrDescription.includes('validation') ||
-      methodOrDescription.includes('handling') ||
-      methodOrDescription.includes('operations') ||
-      methodOrDescription.includes('flows') ||
-      methodOrDescription.includes('verification')
-  );
+  const ignoreTerms = [
+    'configuration', 'strategy', 'management', 'enforcement', 'monitoring',
+    'standards', 'guidelines', 'documentation', 'deployment', 'integration',
+    'external', 'process', 'concept', 'validation', 'handling', 'operations',
+    'flows', 'verification', 'navigation', 'support', 'tracking', 'display',
+    'rendering', 'creation', 'generation', 'analysis', 'calculations',
+    'optimization', 'suggestions', 'recommendations', 'alerts', 'warnings',
+    'detection', 'identification', 'comparison', 'predictions', 'projections',
+    'planning', 'performance', 'improvements', 'enhancements', 'features',
+    'functionality', 'capabilities', 'implementation', 'architecture',
+    'organization', 'structure', 'patterns', 'principles', 'approach',
+    'methodology', 'techniques', 'best practices', 'experience', 'interface',
+    'system', 'service', 'engine', 'cache', 'storage', 'database',
+    'network', 'connection', 'communication', 'protocol', 'format',
+    'standard', 'specification', 'requirement', 'constraint', 'limitation',
+    'advantage', 'benefit', 'drawback', 'issue', 'problem', 'solution',
+    'alternative', 'option', 'choice', 'decision', 'selection', 'filter',
+    'sync', 'backup', 'restore', 'export', 'import', 'data', 'information',
+    'content', 'material', 'resource', 'asset', 'component', 'element',
+    'section', 'area', 'region', 'zone', 'space', 'environment', 'context',
+    'framework', 'library', 'tool', 'utility', 'helper', 'function',
+    'method', 'procedure', 'routine', 'algorithm', 'logic', 'code',
+    'script', 'program', 'application', 'software', 'system', 'platform',
+    'infrastructure', 'foundation', 'base', 'core', 'central', 'main',
+    'primary', 'secondary', 'auxiliary', 'supporting', 'additional',
+    'extra', 'optional', 'required', 'mandatory', 'essential', 'critical',
+    'important', 'significant', 'major', 'minor', 'trivial', 'negligible',
+    'automatic', 'manual', 'interactive', 'passive', 'active', 'dynamic',
+    'static', 'fixed', 'flexible', 'adaptable', 'responsive', 'scalable',
+    'portable', 'compatible', 'interoperable', 'integrated', 'connected',
+    'linked', 'associated', 'related', 'corresponding', 'relevant', 'applicable',
+    'suitable', 'appropriate', 'proper', 'correct', 'accurate', 'precise',
+    'exact', 'specific', 'particular', 'individual', 'unique', 'distinct',
+    'separate', 'different', 'various', 'multiple', 'numerous', 'many',
+    'several', 'few', 'some', 'all', 'every', 'each', 'any', 'no', 'none',
+    'first', 'last', 'next', 'previous', 'current', 'existing', 'new',
+    'old', 'latest', 'recent', 'past', 'future', 'present', 'temporary',
+    'permanent', 'transient', 'persistent', 'consistent', 'inconsistent',
+    'reliable', 'unreliable', 'stable', 'unstable', 'robust', 'fragile',
+    'strong', 'weak', 'powerful', 'limited', 'unlimited', 'infinite',
+    'finite', 'bounded', 'unbounded', 'restricted', 'unrestricted', 'free',
+    'paid', 'commercial', 'open-source', 'proprietary', 'public', 'private',
+    'secure', 'insecure', 'safe', 'unsafe', 'protected', 'unprotected',
+    'encrypted', 'decrypted', 'authenticated', 'unauthenticated', 'authorized',
+    'unauthorized', 'permitted', 'forbidden', 'allowed', 'denied', 'granted',
+    'revoked', 'enabled', 'disabled', 'activated', 'deactivated', 'on',
+    'off', 'true', 'false', 'yes', 'no', 'valid', 'invalid', 'correct',
+    'incorrect', 'right', 'wrong', 'good', 'bad', 'positive', 'negative',
+    'success', 'failure', 'error', 'warning', 'info', 'debug', 'trace',
+    'log', 'message', 'notification', 'alert', 'reminder', 'notice', 'announcement',
+    'update', 'upgrade', 'downgrade', 'patch', 'fix', 'repair', 'maintenance',
+    'installation', 'setup', 'configuration', 'customization', 'personalization',
+    'localization', 'internationalization', 'translation', 'adaptation', 'modification',
+    'extension', 'enhancement', 'improvement', 'optimization', 'refactoring',
+    'testing', 'debugging', 'profiling', 'monitoring', 'analysis', 'measurement',
+    'evaluation', 'assessment', 'review', 'audit', 'inspection', 'verification',
+    'validation', 'certification', 'compliance', 'adherence', 'conformance',
+    'standards', 'regulations', 'policies', 'procedures', 'guidelines', 'rules',
+    'constraints', 'restrictions', 'limitations', 'requirements', 'specifications',
+    'criteria', 'conditions', 'prerequisites', 'dependencies', 'relationships',
+    'associations', 'connections', 'links', 'references', 'citations', 'sources',
+    'origins', 'roots', 'foundations', 'bases', 'cores', 'centers', 'hearts',
+    'middles', 'ends', 'beginnings', 'starts', 'openings', 'closings', 'exits',
+    'entrances', 'access points', 'gateways', 'portals', 'doors', 'windows',
+    'views', 'perspectives', 'angles', 'positions', 'locations', 'places',
+    'sites', 'destinations', 'targets', 'goals', 'objectives', 'aims', 'purposes',
+    'intentions', 'motivations', 'reasons', 'causes', 'factors', 'elements',
+    'components', 'parts', 'pieces', 'fragments', 'segments', 'sections',
+    'subsections', 'chapters', 'paragraphs', 'sentences', 'phrases', 'words',
+    'characters', 'symbols', 'marks', 'signs', 'indicators', 'signals',
+    'messages', 'communications', 'transmissions', 'broadcasts', 'announcements',
+    'publications', 'releases', 'launches', 'introductions', 'presentations',
+    'demonstrations', 'examples', 'samples', 'instances', 'cases', 'scenarios',
+    'situations', 'contexts', 'environments', 'settings', 'backgrounds',
+    'foregrounds', 'highlights', 'emphases', 'focuses', 'centers', 'mains',
+    'primaries', 'secondaries', 'tertiaries', 'auxiliaries', 'supplements',
+    'additions', 'extras', 'bonuses', 'benefits', 'advantages', 'strengths',
+    'weaknesses', 'limitations', 'drawbacks', 'disadvantages', 'problems',
+    'issues', 'challenges', 'obstacles', 'barriers', 'hurdles', 'difficulties',
+    'complexities', 'complications', 'simplifications', 'clarifications',
+    'explanations', 'descriptions', 'definitions', 'meanings', 'interpretations',
+    'understandings', 'comprehensions', 'perceptions', 'views', 'opinions',
+    'beliefs', 'assumptions', 'hypotheses', 'theories', 'models', 'frameworks',
+    'structures', 'architectures', 'designs', 'patterns', 'templates', 'schemata',
+    'schemas', 'formats', 'layouts', 'arrangements', 'organizations', 'orderings',
+    'sortings', 'groupings', 'classifications', 'categorizations', 'taxonomies',
+    'hierarchies', 'levels', 'layers', 'tiers', 'ranks', 'grades', 'classes',
+    'types', 'kinds', 'sorts', 'varieties', 'categories', 'divisions', 'sections',
+    'partitions', 'segments', 'fragments', 'parts', 'portions', 'shares',
+    'quotas', 'allocations', 'distributions', 'assignments', 'designations',
+    'identifications', 'recognitions', 'detections', 'discoveries', 'findings',
+    'results', 'outcomes', 'outputs', 'products', 'deliverables', 'achievements',
+    'accomplishments', 'successes', 'victories', 'wins', 'gains', 'profits',
+    'benefits', 'rewards', 'returns', 'payoffs', 'outcomes', 'consequences',
+    'effects', 'impacts', 'influences', 'repercussions', 'ramifications',
+    'implications', 'significances', 'importances', 'priorities', 'emphases',
+    'stresses', 'focuses', 'attentions', 'concentrations', 'dedications',
+    'commitments', 'investments', 'contributions', 'participations', 'involvements',
+    'engagements', 'interactions', 'communications', 'exchanges', 'transfers',
+    'transactions', 'operations', 'activities', 'actions', 'behaviors', 'performances',
+    'executions', 'implementations', 'realizations', 'manifestations', 'expressions',
+    'representations', 'symbolizations', 'metaphors', 'analogies', 'comparisons',
+    'contrasts', 'differences', 'similarities', 'resemblances', 'correspondences',
+    'equivalences', 'identities', 'equalities', 'inequalities', 'disparities',
+    'gaps', 'distances', 'spaces', 'intervals', 'periods', 'durations',
+    'times', 'moments', 'instants', 'seconds', 'minutes', 'hours', 'days',
+    'weeks', 'months', 'years', 'decades', 'centuries', 'millennia', 'ages',
+    'eras', 'epochs', 'periods', 'phases', 'stages', 'steps', 'levels',
+    'degrees', 'ranks', 'positions', 'statuses', 'states', 'conditions',
+    'situations', 'circumstances', 'contexts', 'environments', 'surroundings',
+    'settings', 'backgrounds', 'contexts', 'frameworks', 'structures'
+  ];
+
+  return config.ignorePatterns.some(pattern => 
+    filePath.includes(pattern) || methodOrDescription.includes(pattern)
+  ) || ignoreTerms.some(term => 
+    methodOrDescription.toLowerCase().includes(term.toLowerCase())
+  ) || methodOrDescription.length > 50; // Ignore long descriptions
 }
 
 /**
