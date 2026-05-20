@@ -905,7 +905,10 @@ export const DashboardView = (params = {}) => {
     currentTagFilter = value === 'all' ? null : value;
 
     if (currentTagFilter) {
-      sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_TAG_FILTER, currentTagFilter);
+      sessionStorage.setItem(
+        STORAGE_KEYS.DASHBOARD_TAG_FILTER,
+        currentTagFilter
+      );
     } else {
       sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_TAG_FILTER);
     }

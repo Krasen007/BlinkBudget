@@ -337,7 +337,8 @@ export const TransactionForm = ({
         toAccountId: categorySelector.selectedToAccount(),
         externalDateInput,
         description: noteField.value || initialValues.description || '',
-        tagName: isEditMode && tagSelector ? tagSelector.getSelectedTag() : null,
+        tagName:
+          isEditMode && tagSelector ? tagSelector.getSelectedTag() : null,
       });
 
       handleFormSubmit(transactionData, onSubmit);

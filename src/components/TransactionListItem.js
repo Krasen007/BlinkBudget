@@ -229,12 +229,8 @@ export const TransactionListItem = ({
     Object.assign(tagBadge.style, {
       color: tagColor,
       background: `${tagColor}22`,
-      borderColor:
-        currentTagFilter === tagName ? tagColor : 'transparent',
-      outline:
-        currentTagFilter === tagName
-          ? `1px solid ${tagColor}`
-          : 'none',
+      borderColor: currentTagFilter === tagName ? tagColor : 'transparent',
+      outline: currentTagFilter === tagName ? `1px solid ${tagColor}` : 'none',
     });
 
     tagBadge.addEventListener('click', e => {

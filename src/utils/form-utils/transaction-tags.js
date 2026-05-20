@@ -103,7 +103,10 @@ export const createTransactionTagSelector = ({ initialTag = null } = {}) => {
 
       const mark = document.createElement('span');
       mark.className = 'transaction-tag-option__mark';
-      mark.style.setProperty('--tag-color', category.color || 'var(--color-primary)');
+      mark.style.setProperty(
+        '--tag-color',
+        category.color || 'var(--color-primary)'
+      );
 
       const text = document.createElement('span');
       text.className = 'transaction-tag-option__label';

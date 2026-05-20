@@ -309,9 +309,7 @@ export const CustomCategoryService = {
       isSystem: false,
       isActive: true,
       showAsCheckbox:
-        categoryData.type === 'income'
-          ? false
-          : !!categoryData.showAsCheckbox,
+        categoryData.type === 'income' ? false : !!categoryData.showAsCheckbox,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       userId: AuthService.getUserId(),
@@ -384,9 +382,11 @@ export const CustomCategoryService = {
 
     if (wasLabelFlag && !updatedCategory.showAsCheckbox) {
       TransactionService.removeTagFromAllTransactions(previousName);
-    }
-
-    if (sanitizedUpdates.name && sanitizedUpdates.name !== previousName) {
+    } else if (
+      sanitizedUpdates.name &&
+      sanitizedUpdates.name !== previousName
+    ) {
+      // Only rename if tags weren't removed by the showAsCheckbox toggle
       TransactionService.renameTagOnAllTransactions(
         previousName,
         sanitizedUpdates.name
