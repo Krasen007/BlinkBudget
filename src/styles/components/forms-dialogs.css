@@ -360,7 +360,7 @@ select.input-select:focus {
 }
 
 .transaction-item-tag {
-  font-size: var(--tag-font-size, 0.65rem);
+  font-size: var(--tag-font-size, 0.55rem);
   font-weight: 700;
   letter-spacing: var(--tag-letter-spacing, 0.04em);
   text-transform: uppercase;

@@ -209,6 +209,7 @@ export const DashboardView = (params = {}) => {
   tagSelect.className = 'view-select';
   tagSelect.style.marginTop = '0';
   tagSelect.style.marginBottom = '0';
+  tagSelect.style.display = 'none';
 
   // Account Options Logic
   let currentAccountFilter =

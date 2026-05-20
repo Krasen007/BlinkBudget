@@ -81,11 +81,6 @@ export const createTransactionTagSelector = ({ initialTag = null } = {}) => {
 
     container.hidden = false;
 
-    const title = document.createElement('p');
-    title.className = 'transaction-tag-selector__title';
-    title.textContent = 'Labels (optional)';
-    container.appendChild(title);
-
     flagCategories.forEach(category => {
       const option = document.createElement('label');
       option.className = 'transaction-tag-option';

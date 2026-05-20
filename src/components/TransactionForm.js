@@ -245,12 +245,13 @@ export const TransactionForm = ({
   form.appendChild(catLabel);
   categorySelector.container.setAttribute('aria-labelledby', catLabelId);
   form.appendChild(categorySelector.container);
-  if (isEditMode && tagSelector) {
-    form.appendChild(tagSelector.container);
-  }
 
   // Type Toggle (Label handled by fieldset/legend in utility later)
   form.appendChild(typeToggle.container);
+
+  if (isEditMode && tagSelector) {
+    form.appendChild(tagSelector.container);
+  }
 
   // Add note field directly
   form.appendChild(noteField);
