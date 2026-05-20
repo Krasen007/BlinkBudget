@@ -887,6 +887,7 @@ export const DashboardView = (params = {}) => {
 
   const handleAuthChange = e => {
     updateTitle(e.detail.user);
+    renderDashboard();
   };
 
   window.addEventListener('storage-updated', handleStorageUpdate);
