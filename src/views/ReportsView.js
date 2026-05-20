@@ -1136,7 +1136,14 @@ export const ReportsView = (params = {}) => {
         const unusualTransactions =
           UnusualSpendingDetector.detectUnusualTransactions(
             currentData.transactions
-          );
+          ).filter(transaction => {
+            const transactionDate = new Date(
+              transaction.date || transaction.timestamp
+            );
+            const startDate = new Date(currentTimePeriod.startDate);
+            const endDate = new Date(currentTimePeriod.endDate);
+            return transactionDate >= startDate && transactionDate <= endDate;
+          });
 
         if (unusualTransactions.length > 0) {
           const alertsSection = document.createElement('div');

@@ -198,6 +198,7 @@ export const TransactionForm = ({
 
   // 7. Note Field
   const noteField = document.createElement('textarea');
+  noteField.id = 'transaction-note-input';
   noteField.className = 'form-input transaction-note-field';
   noteField.placeholder =
     getCopyString('transaction.notes') || 'Notes (optional)';
@@ -354,7 +355,7 @@ export const TransactionForm = ({
   form.addEventListener('submit', e => e.preventDefault());
 
   // 10. Keyboard handling
-  setupFormKeyboardHandling(form, [amountInput, accSelect]);
+  setupFormKeyboardHandling(form, [amountInput, accSelect, noteField]);
 
   // 11. Initial focus strategy for mobile keyboard
   const focusInput = () => {
