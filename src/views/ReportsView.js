@@ -452,8 +452,8 @@ export const ReportsView = (params = {}) => {
 
       // Add header (which now includes time period selector) to container (outside scrollable content)
       if (!skipHeaderRecreation) {
-        // Security: Clearing container content, no user input involved
-        container.innerHTML = '';
+        // Security: Clearing container content safely
+        container.replaceChildren();
         const header = createHeader();
         container.appendChild(header);
         container.appendChild(content);
@@ -961,7 +961,7 @@ export const ReportsView = (params = {}) => {
       }
 
       // Clear existing content
-      section.innerHTML = '';
+      section.replaceChildren();
 
       const budgetsSummary = BudgetPlanner.getSummary(
         currentData.transactions,
@@ -1008,7 +1008,7 @@ export const ReportsView = (params = {}) => {
       }
 
       // Clear existing content and destroy old chart
-      section.innerHTML = '';
+      section.replaceChildren();
       const oldChart = activeCharts.get('category-breakdown');
       if (oldChart && typeof oldChart.destroy === 'function') {
         oldChart.destroy();
@@ -1062,7 +1062,7 @@ export const ReportsView = (params = {}) => {
       }
 
       // Clear existing content
-      section.innerHTML = '';
+      section.replaceChildren();
 
       // Generate frequency analysis data
       const frequencyData = analyticsEngine.analyzeFrequencyPatterns(
@@ -1123,7 +1123,7 @@ export const ReportsView = (params = {}) => {
       }
 
       // Clear existing content
-      section.innerHTML = '';
+      section.replaceChildren();
 
       if (currentData.insights && currentData.insights.length > 0) {
         const insightsSection = InsightsSection(currentData);
@@ -1226,7 +1226,7 @@ export const ReportsView = (params = {}) => {
       }
 
       // Clear existing content and destroy old chart
-      section.innerHTML = '';
+      section.replaceChildren();
       const oldChart = activeCharts.get('income-expense');
       if (oldChart && typeof oldChart.destroy === 'function') {
         oldChart.destroy();
