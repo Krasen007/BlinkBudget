@@ -5,6 +5,8 @@
 
 import { Router } from '../core/router.js';
 import { TransactionService } from '../core/transaction-service.js';
+import { CustomCategoryService } from '../core/custom-category-service.js';
+import { getTransactionTagName } from '../utils/form-utils/transaction-tags.js';
 import { formatDateForDisplay } from '../utils/date-utils.js';
 import {
   COLORS,
@@ -25,6 +27,8 @@ export const TransactionListItem = ({
   onDateClick = () => {},
   currentCategoryFilter = null,
   onCategoryClick = () => {},
+  currentTagFilter = null,
+  onTagClick = () => {},
 }) => {
   const item = document.createElement('li');
   item.className = 'transaction-item transaction-list-item';
@@ -166,7 +170,10 @@ export const TransactionListItem = ({
     minWidth: '0',
   });
 
-  const cat = document.createElement('div');
+  const catRow = document.createElement('div');
+  catRow.className = 'transaction-item-category-row';
+
+  const cat = document.createElement('span');
 
   // Special Display for Transfers
   if (transaction.type === 'transfer') {
@@ -201,6 +208,44 @@ export const TransactionListItem = ({
       onCategoryClick(transaction.category);
     });
   }
+
+  catRow.appendChild(cat);
+
+  const tagName = getTransactionTagName(transaction);
+  const flagCategory =
+    tagName && transaction.type === 'expense'
+      ? CustomCategoryService.getCheckboxCategories().find(
+          c => c.name === tagName
+        )
+      : null;
+
+  if (flagCategory) {
+    const tagColor = flagCategory.color || COLORS.PRIMARY;
+
+    const tagBadge = document.createElement('span');
+    tagBadge.className = 'transaction-item-tag';
+    tagBadge.textContent = tagName.toUpperCase();
+    tagBadge.title = `Filter by ${tagName}`;
+    Object.assign(tagBadge.style, {
+      color: tagColor,
+      background: `${tagColor}22`,
+      borderColor:
+        currentTagFilter === tagName ? tagColor : 'transparent',
+      outline:
+        currentTagFilter === tagName
+          ? `1px solid ${tagColor}`
+          : 'none',
+    });
+
+    tagBadge.addEventListener('click', e => {
+      e.stopPropagation();
+      onTagClick(tagName);
+    });
+
+    catRow.appendChild(tagBadge);
+  }
+
+  const catContainer = catRow;
 
   const date = document.createElement('div');
   date.textContent = formatDateForDisplay(transaction.timestamp);
@@ -250,7 +295,7 @@ export const TransactionListItem = ({
     date.appendChild(originalSpan);
   }
 
-  info.appendChild(cat);
+  info.appendChild(catContainer);
   info.appendChild(date);
 
   // Add description/notes if available (hidden by default)

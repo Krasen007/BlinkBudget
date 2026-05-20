@@ -475,7 +475,7 @@ export const CustomCategoryManager = ({
 
     // Create modal overlay
     const overlay = document.createElement('div');
-    overlay.className = 'modal-overlay';
+    overlay.className = 'modal-overlay active';
     overlay.style.cssText = `
       position: fixed;
       top: 0;
@@ -487,6 +487,7 @@ export const CustomCategoryManager = ({
       align-items: center;
       justify-content: center;
       z-index: 1000;
+      opacity: 1;
     `;
 
     // Create form modal
@@ -588,6 +589,72 @@ export const CustomCategoryManager = ({
       3
     );
 
+    const checkboxFlagGroup = document.createElement('label');
+    checkboxFlagGroup.className = 'category-flag-toggle';
+    checkboxFlagGroup.setAttribute('for', 'category-show-as-checkbox');
+
+    const showAsCheckboxInput = document.createElement('input');
+    showAsCheckboxInput.type = 'checkbox';
+    showAsCheckboxInput.id = 'category-show-as-checkbox';
+    showAsCheckboxInput.className = 'category-flag-toggle__input';
+    showAsCheckboxInput.checked = !!category?.showAsCheckbox;
+
+    const copy = document.createElement('div');
+    copy.className = 'category-flag-toggle__copy';
+
+    const toggleLabel = document.createElement('span');
+    toggleLabel.className = 'category-flag-toggle__label';
+    toggleLabel.textContent = 'Show as label when editing expenses';
+
+    const toggleHint = document.createElement('span');
+    toggleHint.className = 'category-flag-toggle__hint';
+    toggleHint.textContent =
+      'Appears as an optional flag on the edit transaction screen, not when adding.';
+
+    copy.appendChild(toggleLabel);
+    copy.appendChild(toggleHint);
+
+    const switchWrap = document.createElement('div');
+    switchWrap.className = 'category-flag-toggle__switch';
+
+    const track = document.createElement('span');
+    track.className = 'category-flag-toggle__track';
+    track.setAttribute('aria-hidden', 'true');
+    const thumb = document.createElement('span');
+    thumb.className = 'category-flag-toggle__thumb';
+    track.appendChild(thumb);
+
+    const stateText = document.createElement('span');
+    stateText.className = 'category-flag-toggle__state';
+
+    const syncToggleVisual = () => {
+      const isOn = showAsCheckboxInput.checked;
+      checkboxFlagGroup.classList.toggle('category-flag-toggle--on', isOn);
+      stateText.textContent = isOn ? 'On' : 'Off';
+    };
+
+    showAsCheckboxInput.addEventListener('change', syncToggleVisual);
+
+    const syncCheckboxFlagVisibility = () => {
+      const isExpense = typeSelect.value === 'expense';
+      checkboxFlagGroup.style.display = isExpense ? 'flex' : 'none';
+      if (!isExpense) {
+        showAsCheckboxInput.checked = false;
+        syncToggleVisual();
+      }
+    };
+
+    typeSelect.addEventListener('change', syncCheckboxFlagVisibility);
+    syncCheckboxFlagVisibility();
+    syncToggleVisual();
+
+    switchWrap.appendChild(track);
+    switchWrap.appendChild(stateText);
+
+    checkboxFlagGroup.appendChild(showAsCheckboxInput);
+    checkboxFlagGroup.appendChild(copy);
+    checkboxFlagGroup.appendChild(switchWrap);
+
     // Form buttons
     const buttonGroup = document.createElement('div');
     buttonGroup.style.cssText = `
@@ -621,6 +688,7 @@ export const CustomCategoryManager = ({
     form.appendChild(typeGroup);
     form.appendChild(colorGroup.field);
     form.appendChild(descriptionGroup.field);
+    form.appendChild(checkboxFlagGroup);
     form.appendChild(buttonGroup);
 
     // Assemble modal
@@ -665,6 +733,8 @@ export const CustomCategoryManager = ({
         description: descriptionGroup.field
           .querySelector('textarea')
           .value.trim(),
+        showAsCheckbox:
+          typeSelect.value === 'expense' && showAsCheckboxInput.checked,
       };
 
       const validation = CustomCategoryService.validate(formData);

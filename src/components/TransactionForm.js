@@ -24,6 +24,11 @@ import {
   prepareTransactionData,
   handleFormSubmit,
 } from '../utils/form-utils/submission.js';
+import {
+  createTransactionTagSelector,
+  applyExpenseTagToTransactionData,
+  getTransactionTagName,
+} from '../utils/form-utils/transaction-tags.js';
 
 export const TransactionForm = ({
   onSubmit,
@@ -127,6 +132,27 @@ export const TransactionForm = ({
   amountAccountRow.appendChild(accountGroup);
   amountAccountRow.style.marginBottom = 'var(--spacing-xs)';
 
+  const isEditMode = !!initialValues.id;
+  const tagSelector = isEditMode
+    ? createTransactionTagSelector({
+        initialTag: getTransactionTagName(initialValues),
+      })
+    : null;
+
+  const submitTransactionData = data => {
+    const payload = { ...data, description: noteField.value || '' };
+    handleFormSubmit(
+      isEditMode
+        ? applyExpenseTagToTransactionData(
+            payload,
+            tagSelector.getSelectedTag(),
+            true
+          )
+        : payload,
+      onSubmit
+    );
+  };
+
   // 6. Category Selector
   const categorySelector = createCategorySelector({
     type: typeToggle.currentType(),
@@ -136,21 +162,21 @@ export const TransactionForm = ({
     initialToAccount: initialValues.toAccountId || null,
     amountInput,
     externalDateInput,
-    onSubmit: data => {
-      // Include note field in the data for Add mode
-      const completeData = {
-        ...data,
-        description: noteField.value || '',
-      };
-      handleFormSubmit(completeData, onSubmit);
-    },
+    onSubmit: submitTransactionData,
   });
+
+  if (isEditMode) {
+    tagSelector.setTransactionType(typeToggle.currentType());
+  }
 
   // Setup type toggle change handler (after categorySelector is created)
   const originalSetType = typeToggle.setType;
   typeToggle.setType = type => {
     originalSetType(type);
     categorySelector.setType(type);
+    if (isEditMode && tagSelector) {
+      tagSelector.setTransactionType(type);
+    }
     // Maintain focus on amount field when switching types
     if (amountInput) {
       amountInput.focus({ preventScroll: true });
@@ -219,6 +245,9 @@ export const TransactionForm = ({
   form.appendChild(catLabel);
   categorySelector.container.setAttribute('aria-labelledby', catLabelId);
   form.appendChild(categorySelector.container);
+  if (isEditMode && tagSelector) {
+    form.appendChild(tagSelector.container);
+  }
 
   // Type Toggle (Label handled by fieldset/legend in utility later)
   form.appendChild(typeToggle.container);
@@ -308,6 +337,7 @@ export const TransactionForm = ({
         toAccountId: categorySelector.selectedToAccount(),
         externalDateInput,
         description: noteField.value || initialValues.description || '',
+        tagName: isEditMode && tagSelector ? tagSelector.getSelectedTag() : null,
       });
 
       handleFormSubmit(transactionData, onSubmit);

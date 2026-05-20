@@ -9,6 +9,7 @@ import { SyncService } from './sync-service.js';
 import { AuthService } from './auth-service.js';
 import { generateId } from '../utils/id-utils.js';
 import { safeJsonParse } from '../utils/security-utils.js';
+import { TransactionService } from './transaction-service.js';
 
 const CUSTOM_CATEGORIES_KEY =
   STORAGE_KEYS.CUSTOM_CATEGORIES || 'custom_categories';
@@ -307,6 +308,10 @@ export const CustomCategoryService = {
       isCustom: true,
       isSystem: false,
       isActive: true,
+      showAsCheckbox:
+        categoryData.type === 'income'
+          ? false
+          : !!categoryData.showAsCheckbox,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       userId: AuthService.getUserId(),
@@ -351,10 +356,21 @@ export const CustomCategoryService = {
       'icon',
       'description',
       'isActive',
+      'showAsCheckbox',
     ];
     const sanitizedUpdates = Object.fromEntries(
       Object.entries(updates).filter(([key]) => allowedFields.includes(key))
     );
+
+    if (sanitizedUpdates.type === 'income') {
+      sanitizedUpdates.showAsCheckbox = false;
+    } else if (sanitizedUpdates.showAsCheckbox !== undefined) {
+      sanitizedUpdates.showAsCheckbox = !!sanitizedUpdates.showAsCheckbox;
+    }
+
+    const previousCategory = categories[index];
+    const previousName = previousCategory.name;
+    const wasLabelFlag = previousCategory.showAsCheckbox === true;
 
     categories[index] = {
       ...categories[index],
@@ -364,7 +380,20 @@ export const CustomCategoryService = {
 
     this._persist(categories);
 
-    return categories[index];
+    const updatedCategory = categories[index];
+
+    if (wasLabelFlag && !updatedCategory.showAsCheckbox) {
+      TransactionService.removeTagFromAllTransactions(previousName);
+    }
+
+    if (sanitizedUpdates.name && sanitizedUpdates.name !== previousName) {
+      TransactionService.renameTagOnAllTransactions(
+        previousName,
+        sanitizedUpdates.name
+      );
+    }
+
+    return updatedCategory;
   },
 
   /**
@@ -383,7 +412,19 @@ export const CustomCategoryService = {
     const filteredCategories = categories.filter(cat => cat.id !== id);
     this._persist(filteredCategories);
 
+    if (category.showAsCheckbox) {
+      TransactionService.removeTagFromAllTransactions(category.name);
+    }
+
     return true;
+  },
+
+  /**
+   * Expense categories shown as optional flags on the transaction form
+   * @returns {Array} Checkbox-flag categories
+   */
+  getCheckboxCategories() {
+    return this.getByType('expense').filter(cat => cat.showAsCheckbox === true);
   },
 
   /**

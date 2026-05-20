@@ -5,6 +5,7 @@
 
 import { getTodayISO } from '../date-utils.js';
 import { sanitizeInput } from '../security-utils.js';
+import { applyExpenseTagToTransactionData } from './transaction-tags.js';
 
 /**
  * Get date source for transaction timestamp
@@ -44,6 +45,7 @@ export const getDateSource = (externalDateInput = null) => {
  *   @property {string} formState.accountId - Source account ID
  *   @property {string|null} formState.toAccountId - Destination account ID (for transfers)
  *   @property {string} [formState.description] - Transaction description/notes (optional)
+ *   @property {string|null} [formState.tagName] - Optional expense flag name (optional)
  *   @property {HTMLInputElement|null} [formState.externalDateInput] - External date input element (optional)
  * @returns {Object} Prepared transaction data
  */
@@ -55,6 +57,7 @@ export const prepareTransactionData = formState => {
     accountId,
     toAccountId = null,
     description = '',
+    tagName = null,
     externalDateInput = null,
   } = formState;
 
@@ -151,7 +154,15 @@ export const prepareTransactionData = formState => {
     transactionData.description = sanitizeInput(description.trim());
   }
 
-  return transactionData;
+  const includeTagField = Object.prototype.hasOwnProperty.call(
+    formState,
+    'tagName'
+  );
+  return applyExpenseTagToTransactionData(
+    transactionData,
+    tagName,
+    includeTagField
+  );
 };
 
 /**

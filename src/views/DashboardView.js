@@ -4,6 +4,7 @@ import { TransactionList } from '../components/TransactionList.js';
 import { createQuickAmountPresets } from '../components/QuickAmountPresets.js';
 import { AccountService } from '../core/Account/account-service.js';
 import { TransactionService } from '../core/transaction-service.js';
+import { CustomCategoryService } from '../core/custom-category-service.js';
 import { AuthService } from '../core/auth-service.js';
 import { Router } from '../core/router.js';
 import { NavigationState } from '../core/navigation-state.js';
@@ -189,16 +190,25 @@ export const DashboardView = (params = {}) => {
 
   header.appendChild(topRow);
 
-  // Account Selector
+  // Account + tag filters
   const leftHeader = document.createElement('div');
+  const filterRow = document.createElement('div');
+  filterRow.className = 'dashboard-filter-row';
+  filterRow.style.marginBottom = SPACING.XS;
 
   const accountSelect = document.createElement('select');
   accountSelect.id = 'account-filter-select';
   accountSelect.name = 'account-filter';
   accountSelect.className = 'view-select';
   accountSelect.style.marginTop = '0';
-  accountSelect.style.marginBottom = SPACING.XS;
-  accountSelect.style.width = '100%';
+  accountSelect.style.marginBottom = '0';
+
+  const tagSelect = document.createElement('select');
+  tagSelect.id = 'tag-filter-select';
+  tagSelect.name = 'tag-filter';
+  tagSelect.className = 'view-select';
+  tagSelect.style.marginTop = '0';
+  tagSelect.style.marginBottom = '0';
 
   // Account Options Logic
   let currentAccountFilter =
@@ -207,6 +217,8 @@ export const DashboardView = (params = {}) => {
     sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_DATE_FILTER) || null;
   let currentCategoryFilter =
     sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER) || null;
+  let currentTagFilter =
+    sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_TAG_FILTER) || null;
   let currentMonthFilter =
     sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER) || null;
   let currentTypeFilter = NavigationState.restoreDashboardTypeFilter() || null;
@@ -263,6 +275,36 @@ export const DashboardView = (params = {}) => {
   // Initialize title after all variables are set
   updateTitle();
 
+  const refreshTagOptions = () => {
+    const currentVal = tagSelect.value;
+    tagSelect.innerHTML = '';
+
+    const allTagsOption = document.createElement('option');
+    allTagsOption.value = 'all';
+    allTagsOption.textContent = 'All Labels';
+    tagSelect.appendChild(allTagsOption);
+
+    CustomCategoryService.getCheckboxCategories().forEach(cat => {
+      const opt = document.createElement('option');
+      opt.value = cat.name;
+      opt.textContent = cat.name;
+      tagSelect.appendChild(opt);
+    });
+
+    if (
+      currentVal &&
+      Array.from(tagSelect.options).some(o => o.value === currentVal)
+    ) {
+      tagSelect.value = currentVal;
+    } else if (currentTagFilter) {
+      tagSelect.value = currentTagFilter;
+    } else {
+      tagSelect.value = 'all';
+    }
+  };
+
+  refreshTagOptions();
+
   const accounts = AccountService.getAccounts();
 
   const allOption = document.createElement('option');
@@ -279,7 +321,9 @@ export const DashboardView = (params = {}) => {
     accountSelect.appendChild(opt);
   });
 
-  leftHeader.appendChild(accountSelect);
+  filterRow.appendChild(accountSelect);
+  filterRow.appendChild(tagSelect);
+  leftHeader.appendChild(filterRow);
   header.appendChild(leftHeader);
   container.appendChild(header);
 
@@ -313,6 +357,7 @@ export const DashboardView = (params = {}) => {
   const renderDashboard = () => {
     // Security: Clearing content, no user input involved
     content.innerHTML = '';
+    refreshTagOptions();
 
     // Always get fresh data
     const allTransactions = TransactionService.getAll();
@@ -339,6 +384,11 @@ export const DashboardView = (params = {}) => {
         // Quick Category Filter (from clicking category in list)
         if (currentCategoryFilter) {
           if (t.category !== currentCategoryFilter) return false;
+        }
+
+        // Tag / label filter
+        if (currentTagFilter) {
+          if (!t.tags?.includes(currentTagFilter)) return false;
         }
 
         // Quick Month Filter (from clicking arrows in category bar)
@@ -371,6 +421,7 @@ export const DashboardView = (params = {}) => {
       currentAccountFilter !== 'all' ||
       currentDateFilter !== null ||
       currentCategoryFilter !== null ||
+      currentTagFilter !== null ||
       currentMonthFilter !== null ||
       currentTypeFilter !== null;
 
@@ -508,17 +559,20 @@ export const DashboardView = (params = {}) => {
           currentAccountFilter = 'all';
           currentDateFilter = null;
           currentCategoryFilter = null;
+          currentTagFilter = null;
           currentMonthFilter = null;
           currentTypeFilter = null;
 
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_FILTER);
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_DATE_FILTER);
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER);
+          sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_TAG_FILTER);
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
           NavigationState.clearDashboardTypeFilter();
 
           // Reset account select
           accountSelect.value = 'all';
+          tagSelect.value = 'all';
 
           renderDashboard();
         },
@@ -616,6 +670,7 @@ export const DashboardView = (params = {}) => {
     // Add clear filter button if filter is active from Reports
     if (
       (currentCategoryFilter && currentCategoryFilter !== 'all') ||
+      currentTagFilter ||
       currentTypeFilter
     ) {
       const clearFilterButton = ButtonComponent({
@@ -625,6 +680,9 @@ export const DashboardView = (params = {}) => {
           // Clear all filters
           currentCategoryFilter = null;
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER);
+          currentTagFilter = null;
+          sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_TAG_FILTER);
+          tagSelect.value = 'all';
           currentMonthFilter = null;
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
           currentTypeFilter = null;
@@ -697,9 +755,11 @@ export const DashboardView = (params = {}) => {
       filterStatus.textContent =
         currentCategoryFilter && currentCategoryFilter !== 'all'
           ? `Currently filtered by: ${currentCategoryFilter}${currentDashboardFilter && currentDashboardFilter.timePeriod ? ` (${currentDashboardFilter.timePeriod.label || 'selected period'})` : ''}`
-          : currentTypeFilter
-            ? `Currently filtered by: ${currentTypeFilter === 'income' ? 'Income' : currentTypeFilter === 'expense' ? 'Expenses' : currentTypeFilter} transactions`
-            : 'No active filters';
+          : currentTagFilter
+            ? `Currently filtered by label: ${currentTagFilter}`
+            : currentTypeFilter
+              ? `Currently filtered by: ${currentTypeFilter === 'income' ? 'Income' : currentTypeFilter === 'expense' ? 'Expenses' : currentTypeFilter} transactions`
+              : 'No active filters';
 
       // Add title attribute for accessibility
       filterStatus.title = 'Click to return to Reports view';
@@ -756,6 +816,38 @@ export const DashboardView = (params = {}) => {
 
         renderDashboard();
       },
+      currentTagFilter,
+      onTagClick: tag => {
+        const newTag = currentTagFilter === tag ? null : tag;
+        currentTagFilter = newTag;
+
+        if (newTag) {
+          sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_TAG_FILTER, newTag);
+          tagSelect.value = newTag;
+        } else {
+          sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_TAG_FILTER);
+          tagSelect.value = 'all';
+        }
+
+        renderDashboard();
+      },
+      onFilterClear: () => {
+        currentAccountFilter = 'all';
+        currentDateFilter = null;
+        currentCategoryFilter = null;
+        currentTagFilter = null;
+        currentMonthFilter = null;
+        currentTypeFilter = null;
+        sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_FILTER);
+        sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_DATE_FILTER);
+        sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER);
+        sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_TAG_FILTER);
+        sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
+        NavigationState.clearDashboardTypeFilter();
+        accountSelect.value = 'all';
+        tagSelect.value = 'all';
+        renderDashboard();
+      },
     });
     content.appendChild(transactionList);
 
@@ -804,6 +896,20 @@ export const DashboardView = (params = {}) => {
     // Use localStorage directly to avoid syncing this preference
     sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, currentAccountFilter);
     // Remove focus from select to eliminate persistent border
+    e.target.blur();
+    renderDashboard();
+  });
+
+  tagSelect.addEventListener('change', e => {
+    const value = e.target.value;
+    currentTagFilter = value === 'all' ? null : value;
+
+    if (currentTagFilter) {
+      sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_TAG_FILTER, currentTagFilter);
+    } else {
+      sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_TAG_FILTER);
+    }
+
     e.target.blur();
     renderDashboard();
   });

@@ -26,6 +26,8 @@ export const TransactionList = ({
   onDateClick = () => {},
   currentCategoryFilter = null,
   onCategoryClick = () => {},
+  currentTagFilter = null,
+  onTagClick = () => {},
   onFilterClear = () => {}, // New callback for clearing general filter
 }) => {
   const listContainer = document.createElement('div');
@@ -107,7 +109,12 @@ export const TransactionList = ({
   if (transactions.length === 0) {
     // Determine empty state scenario
     let scenario = EMPTY_STATE_SCENARIOS.NO_TRANSACTIONS;
-    if (currentDateFilter || currentCategoryFilter || currentFilter) {
+    if (
+      currentDateFilter ||
+      currentCategoryFilter ||
+      currentTagFilter ||
+      currentFilter
+    ) {
       scenario = EMPTY_STATE_SCENARIOS.FILTER_NO_RESULTS;
     }
 
@@ -132,6 +139,9 @@ export const TransactionList = ({
             }
             if (typeof onCategoryClick === 'function') {
               onCategoryClick(null);
+            }
+            if (typeof onTagClick === 'function') {
+              onTagClick(null);
             }
             break;
         }
@@ -168,6 +178,8 @@ export const TransactionList = ({
         onDateClick,
         currentCategoryFilter,
         onCategoryClick,
+        currentTagFilter,
+        onTagClick,
       });
       list.appendChild(item);
     });

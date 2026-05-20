@@ -145,7 +145,7 @@ export const TransactionService = {
     const index = transactions.findIndex(t => t.id === id);
     if (index === -1) return null;
 
-    transactions[index] = {
+    const merged = {
       ...transactions[index],
       ...updates,
       timestamp:
@@ -154,6 +154,15 @@ export const TransactionService = {
           : transactions[index].timestamp,
       updatedAt: new Date().toISOString(),
     };
+
+    // Explicit empty tags removes the label (omit would keep the old value)
+    if (Object.prototype.hasOwnProperty.call(updates, 'tags')) {
+      if (!Array.isArray(updates.tags) || updates.tags.length === 0) {
+        delete merged.tags;
+      }
+    }
+
+    transactions[index] = merged;
     this._persist(transactions);
 
     return transactions[index];
@@ -217,6 +226,63 @@ export const TransactionService = {
     this.remove(id);
 
     return { first: addedFirst, second: addedSecond };
+  },
+
+  /**
+   * Remove a tag name from all transactions (e.g. when flag category is deleted)
+   * @param {string} tagName - Tag category name to remove
+   */
+  removeTagFromAllTransactions(tagName) {
+    if (!tagName) return;
+
+    const transactions = this.getAll();
+    let changed = false;
+
+    const updated = transactions.map(t => {
+      if (!Array.isArray(t.tags) || !t.tags.includes(tagName)) {
+        return t;
+      }
+      changed = true;
+      const next = { ...t };
+      const remaining = t.tags.filter(tag => tag !== tagName);
+      if (remaining.length === 0) {
+        delete next.tags;
+      } else {
+        next.tags = remaining;
+      }
+      return next;
+    });
+
+    if (changed) {
+      this._persist(updated);
+    }
+  },
+
+  /**
+   * Rename a tag on all transactions (when flag category is renamed)
+   * @param {string} oldName - Previous tag name
+   * @param {string} newName - New tag name
+   */
+  renameTagOnAllTransactions(oldName, newName) {
+    if (!oldName || !newName || oldName === newName) return;
+
+    const transactions = this.getAll();
+    let changed = false;
+
+    const updated = transactions.map(t => {
+      if (!Array.isArray(t.tags) || !t.tags.includes(oldName)) {
+        return t;
+      }
+      changed = true;
+      return {
+        ...t,
+        tags: t.tags.map(tag => (tag === oldName ? newName : tag)),
+      };
+    });
+
+    if (changed) {
+      this._persist(updated);
+    }
   },
 
   /**

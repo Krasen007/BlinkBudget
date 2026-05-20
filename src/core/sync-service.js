@@ -205,6 +205,7 @@ export const SyncService = {
     const keys = [
       STORAGE_KEYS.TRANSACTIONS,
       STORAGE_KEYS.ACCOUNTS,
+      STORAGE_KEYS.CUSTOM_CATEGORIES,
       STORAGE_KEYS.SETTINGS,
       STORAGE_KEYS.INVESTMENTS,
       STORAGE_KEYS.GOALS,
@@ -247,6 +248,7 @@ export const SyncService = {
     const keys = [
       STORAGE_KEYS.TRANSACTIONS,
       STORAGE_KEYS.ACCOUNTS,
+      STORAGE_KEYS.CUSTOM_CATEGORIES,
       STORAGE_KEYS.SETTINGS,
       STORAGE_KEYS.INVESTMENTS,
       STORAGE_KEYS.GOALS,
@@ -519,12 +521,13 @@ export const SyncService = {
   triggerBackgroundSync() {
     // Sync all data types that might have pending changes
     const dataTypes = [
-      'transactions',
-      'accounts',
-      'settings',
-      'goals',
-      'investments',
-      'budgets',
+      STORAGE_KEYS.TRANSACTIONS,
+      STORAGE_KEYS.ACCOUNTS,
+      STORAGE_KEYS.CUSTOM_CATEGORIES,
+      STORAGE_KEYS.SETTINGS,
+      STORAGE_KEYS.GOALS,
+      STORAGE_KEYS.INVESTMENTS,
+      STORAGE_KEYS.BUDGETS,
     ];
 
     dataTypes.forEach(dataType => {

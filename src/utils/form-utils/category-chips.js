@@ -64,7 +64,7 @@ const createCategoryChip = options => {
       ? 'var(--color-primary-light)'
       : 'transparent';
     chip.style.color = selectedState
-      ? 'var(--color-background)'
+      ? 'var(--color-text-main)'
       : 'var(--color-text-muted)';
     chip.style.border = selectedState
       ? '1px solid var(--color-primary)'
@@ -320,9 +320,13 @@ export const createCategorySelector = (options = {}) => {
         container.appendChild(chip);
       });
     } else {
-      // Standard Categories
-      let rawCats =
-        CustomCategoryService.getAllCategoryNames(currentType) || [];
+      // Standard Categories (exclude expense flags shown as checkboxes)
+      const checkboxCategoryNames = new Set(
+        CustomCategoryService.getCheckboxCategories().map(c => c.name)
+      );
+      let rawCats = (
+        CustomCategoryService.getAllCategoryNames(currentType) || []
+      ).filter(name => !checkboxCategoryNames.has(name));
 
       // REFINEMENT: If we have a prioritized category, move it to the front
       if (prioritizedCategory && rawCats.includes(prioritizedCategory)) {

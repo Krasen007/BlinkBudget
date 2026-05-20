@@ -89,6 +89,16 @@ el.style.padding = '10px';
   toAccountId: null, // if transfer
   timestamp: '2026-02-21T10:00:00.000Z',
   note: 'Lunch',
+  tags: ['Work'], // optional; at most one expense flag name
+}
+
+// custom categories (flag categories use showAsCheckbox: true, expense only)
+{
+  id: 'uuid-v4',
+  name: 'Work',
+  type: 'expense',
+  color: '#3B82F6',
+  showAsCheckbox: true,
 }
 
 // accounts array
