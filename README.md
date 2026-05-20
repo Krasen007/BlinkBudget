@@ -35,6 +35,7 @@
 - **Optional transaction descriptions**: Add notes to transactions or leave them blank, as you prefer | src/components/TransactionForm.js:noteField creation | src/utils/form-utils/submission.js:prepareTransactionData()
 - **Custom Category Management**: Create, edit, and manage your own expense categories for personalized tracking | src/components/CustomCategoryManager.js:CustomCategoryManager() | src/core/custom-category-service.js:CustomCategoryService
 - **Category Reordering**: Organize your expense categories in a way that works best for you | src/core/custom-category-service.js:reorderCategories() | src/components/CustomCategoryManager.js:drag and drop handlers
+- **Tags System**: Add custom tags to transactions for flexible organization and analysis beyond categories | accessible from Settings → Categories | improved filtering and organization
 - **Streamlined transaction indicators**: Simplified notifications and indicators for different transaction types:
   - **Refunds** are marked with an ↑ arrow to indicate money coming back | src/components/TransactionListItem.js:sign assignment for refund type
   - **Transfers** are marked with a ⇆ arrow to indicate money moving between accounts | src/components/TransactionListItem.js:sign assignment for transfer type
@@ -119,6 +120,7 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 #### **Goals Section**
 
 - **Long-term Goal Planning** - Set and track financial objectives (retirement, house, etc.) | src/views/financial-planning/GoalsSection.js:GoalsSection() | src/core/goal-planner.js:planGoals()
+- **Mobile Goal Setup** - Optimized mobile prompts for easy goal creation on your phone | src/core/mobile-utils.js:mobile optimization | improved mobile UX
 - **Savings Targets** - Monthly savings requirements to reach goals | src/core/goal-planner.js:calculateSavingsTargets() | src/views/financial-planning/GoalsSection.js:targets display
 - **Progress Visualization** - Charts showing goal completion status | src/views/financial-planning/GoalsSection.js:progress charts | src/utils/financial-planning-charts.js:goal progress
 - **Milestone Tracking** - Celebrate achievements along the journey | src/core/goal-planner.js:trackMilestones() | src/views/financial-planning/GoalsSection.js:milestone display

@@ -1,25 +1,23 @@
-## Version 1.37
-
-### 🐛 Bug Fixes
-- Fixed leftover variable from hover effects implementation
-- Resolved data integrity issue where unexpected labels were being added to categories
-- Fixed documentation validation script and README examples
-- Various small fixes and improvements
-
-### ⚡ Performance Improvements
-- Removed performance bottleneck while preserving working preloading implementation
-- Optimized data loading for better responsiveness
+## v1.38.0
 
 ### ✨ New Features
-- **Enhanced Navigation**: Click budget summary card in Reports view to jump directly to Budgets tab in Financial Planning view
-- **Mobile Improvements**: Added mobile prompt for goals functionality
-- **Goals Section**: Integrated SavingsGoalsSection features into GoalsSection without changing data model
+- **Tags System** - Organize transactions with custom tags accessible from Settings → Categories for better organization and filtering
+- **Enhanced Mobile UX** - Added mobile prompts for financial goals to improve goal setup experience on mobile devices
+- **Budget Navigation** - Clicking budget summary card in Reports now takes you directly to the Budgets section in Financial Planning
 
-### 🔧 Development Improvements
+### 🐛 Bug Fixes
+- Fixed tags not displaying instantly after creation
+- Fixed tags positioning and sizing in transaction display
+- Fixed "Unusual Spending Detected" bug that was incorrectly showing flagged transactions outside the selected month/time period
+- Fixed data integrity issue where unexpected labels were being added to categories
+- Removed deprecated hover effect variables
+
+### 🚀 Improvements
+- Integrated enhanced features into GoalsSection for seamless goal management
+- Removed performance bottleneck in data preloading implementation
 - Added documentation validation script to prevent README drift
-- Updated dependencies for security and performance
+- Updated dependencies to latest versions
 
-### 💡 User Experience
-- Better navigation between Reports and Financial Planning views
-- Improved mobile experience for goal tracking
-- Cleaner category management without unexpected labels
+### 📚 Documentation
+- Fixed documentation validation script
+- Updated README examples for accuracy

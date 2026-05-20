@@ -20,4 +20,4 @@ org.gradle.jvmargs=-Xmx1024m -Xms512m
 
 #18171F
 
-Netlify free usage: 135/300 / 165.4 credits from Apr 19 to May 18
+Free plan available credits 285 credits Effective from May 19
