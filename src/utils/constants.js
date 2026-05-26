@@ -227,7 +227,7 @@ export const DATE_FORMATS = {
   US: 'US',
   ISO: 'ISO',
   EU: 'EU',
-  DEFAULT: 'US',
+  DEFAULT: 'ISO',
 };
 
 // Account types
