@@ -12,7 +12,7 @@ import {
   TOUCH_TARGETS,
   FONT_SIZES,
 } from '../utils/constants.js';
-import { getFirstDayOfMonthISO, getTodayISO } from '../utils/date-utils.js';
+import { getFirstDayOfMonthISO, getTodayISO, formatDateForDisplay } from '../utils/date-utils.js';
 import { showWarningToast } from '../utils/toast-notifications.js';
 
 export const DataManagementSection = () => {
@@ -109,7 +109,7 @@ export const DataManagementSection = () => {
       // Generate CSV
       const headers = ['Date', 'Type', 'Category', 'Amount'];
       const rows = transactions.map(t => [
-        new Date(t.timestamp).toLocaleDateString(),
+        formatDateForDisplay(t.timestamp),
         t.type.charAt(0).toUpperCase() + t.type.slice(1),
         t.category,
         (t.type === 'expense' ? -t.amount : t.amount).toFixed(2),

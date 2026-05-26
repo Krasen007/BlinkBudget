@@ -3,6 +3,8 @@
  * Handles transaction filtering logic for analytics.
  */
 
+import { formatDateForDisplay } from '../../utils/date-utils.js';
+
 export class FilteringService {
   /**
    * Filter transactions by time period
@@ -290,7 +292,7 @@ export class FilteringService {
       const endDate = new Date(filters.dateRange.endDate);
       if (!isNaN(startDate) && !isNaN(endDate)) {
         summary.descriptions.push(
-          `Date: ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`
+          `Date: ${formatDateForDisplay(filters.dateRange.startDate)} - ${formatDateForDisplay(filters.dateRange.endDate)}`
         );
         summary.hasFilters = true;
       }

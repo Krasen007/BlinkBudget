@@ -9,6 +9,7 @@
 import { COLORS, SPACING } from './constants.js';
 import { getChartColors } from '../core/chart-config.js';
 import { escapeHtml } from './security-utils.js';
+import { formatDateForDisplay } from './date-utils.js';
 
 /**
  * Create projected balance line chart showing future account balances
@@ -772,7 +773,7 @@ function createGoalDetails(goals) {
     goalName.style.marginBottom = '2px';
 
     const targetDate = document.createElement('div');
-    targetDate.textContent = `Target: ${new Date(goal.targetDate).toLocaleDateString()}`;
+    targetDate.textContent = `Target: ${formatDateForDisplay(goal.targetDate)}`;
     targetDate.style.fontSize = '0.75rem';
     targetDate.style.color = COLORS.TEXT_MUTED;
 
