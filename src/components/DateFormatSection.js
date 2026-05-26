@@ -93,6 +93,14 @@ export const DateFormatSection = ({
       'Date format is automatically detected from your device settings for a seamless experience.';
     note.className = 'date-format-note';
     section.appendChild(note);
+
+    // Browser date picker note
+    const browserNote = document.createElement('p');
+    browserNote.textContent =
+      'Note: The date picker in the transaction form follows your browser or OS date format, not this setting. To change how it appears there, update your browser or device language settings.';
+    browserNote.className = 'date-format-note';
+    browserNote.style.marginTop = SPACING.SM;
+    section.appendChild(browserNote);
   }
 
   // Add manual selection option
@@ -122,9 +130,9 @@ export const DateFormatSection = ({
     });
 
     const formats = [
-      { value: DATE_FORMATS.US, label: 'MM/DD/YYYY (US)' },
-      { value: DATE_FORMATS.EU, label: 'DD/MM/YYYY (European)' },
-      { value: DATE_FORMATS.ISO, label: 'YYYY-MM-DD (ISO)' },
+      { value: DATE_FORMATS.US, label: 'MM/DD/YYYY' },
+      { value: DATE_FORMATS.EU, label: 'DD/MM/YYYY' },
+      { value: DATE_FORMATS.ISO, label: 'YYYY-MM-DD' },
     ];
 
     formats.forEach(format => {
