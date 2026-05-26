@@ -82,6 +82,7 @@ export const TransactionService = {
     const newTransaction = {
       id: generateId(),
       timestamp: transaction.timestamp || new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       userId: AuthService.getUserId(),
       ...transaction,

@@ -100,11 +100,25 @@ export const EditView = ({ id }) => {
       const newDate = data.timestamp.split('T')[0];
 
       if (originalDate !== newDate) {
-        // REVERSION: If moving back to the VERY FIRST original date, just clear the metadata
-        if (
+        const createdAt = transaction.createdAt
+          ? new Date(transaction.createdAt)
+          : null;
+        const isRecent =
+          createdAt && new Date() - createdAt < TIMING.RECENT_TRANSACTION_LIMIT;
+
+        if (isRecent) {
+          // Skip creating/updating ghost transactions for recent edits (mistake correction).
+          // If there is an existing ghost, remove it and clear metadata.
+          if (transaction.ghostId) {
+            TransactionService.remove(transaction.ghostId);
+          }
+          data.originalDate = null;
+          data.ghostId = null;
+        } else if (
           transaction.originalDate &&
           newDate === transaction.originalDate.split('T')[0]
         ) {
+          // REVERSION: If moving back to the VERY FIRST original date, just clear the metadata
           if (transaction.ghostId) {
             TransactionService.remove(transaction.ghostId);
           }
