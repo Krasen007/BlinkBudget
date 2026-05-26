@@ -548,7 +548,7 @@ export const DashboardView = (params = {}) => {
 
     statsContainer.appendChild(
       DashboardStatsCard({
-        label: 'Total Available',
+        label: hasActiveFilters ? 'Total Filtered' : 'Total Available',
         value: hasActiveFilters
           ? filteredAvailableBalance
           : totalAvailableBalance,

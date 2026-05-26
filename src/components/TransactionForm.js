@@ -107,6 +107,10 @@ export const TransactionForm = ({
   const amountState = createAmountInput({
     initialValue: initialValues.amount || '',
     externalDateInput,
+    onMinusSign: () => {
+      // Auto-switch to refund when user types a minus sign
+      typeToggle.setType('refund');
+    },
   });
   const amountInput = amountState.input;
   amountInput.id = 'transaction-amount-input';

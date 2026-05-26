@@ -11,10 +11,15 @@ import { ClickTracker } from '../../core/click-tracking-service.js';
  * @param {Object} options - Input configuration
  * @param {string|number} options.initialValue - Initial amount value
  * @param {HTMLInputElement} options.externalDateInput - External date input for submission
+ * @param {Function} options.onMinusSign - Callback fired when user types a minus sign (for auto-switching to refund)
  * @returns {Object} Input element and utility methods
  */
 export const createAmountInput = (options = {}) => {
-  const { initialValue = '', externalDateInput = null } = options;
+  const {
+    initialValue = '',
+    externalDateInput = null,
+    onMinusSign = null,
+  } = options;
 
   const input = document.createElement('input');
   input.id = 'transaction-amount-input';
@@ -37,6 +42,22 @@ export const createAmountInput = (options = {}) => {
 
   // Prevent non-numeric input
   input.addEventListener('keydown', e => {
+    // Minus sign: allow it to appear in the field and switch type to refund.
+    // The minus is stripped on getValue()/validate() since refund amounts are positive.
+    if (e.key === '-' || e.key === 'Subtract') {
+      // Only allow minus as the first character (prefix indicator)
+      if (input.selectionStart === 0 && !input.value.startsWith('-')) {
+        if (onMinusSign) {
+          // Let the character through, then fire the callback
+          setTimeout(() => onMinusSign(), 0);
+        }
+      } else {
+        // Prevent additional minus signs mid-value
+        e.preventDefault();
+      }
+      return;
+    }
+
     // Allow: backspace, delete, tab, escape, enter, decimal point, numbers, comma
     const allowedKeys = [
       'Backspace',
@@ -82,16 +103,15 @@ export const createAmountInput = (options = {}) => {
     e.preventDefault();
     const text = (e.clipboardData || window.clipboardData).getData('text');
 
-    // Allow digits, dots, and commas
+    // Allow digits, dots, commas, and a leading minus sign
     if (!text) return;
 
-    // Replace comma with dot for consistency if needed, or keep as is
-    // Just sanitize to allowed characters
-    const sanitized = text.replace(/[^0-9.,]/g, '');
+    const sanitized = text.replace(/[^0-9.,-]/g, '');
 
-    // Insert at cursor position (basic implementation)
-    // or just set value if acceptable. For amount input, appending or replacing selection is safer.
-    // Here we'll take the simple approach of inserting at cursor or replacing selection.
+    // Only allow minus as a leading character
+    const hasLeadingMinus = sanitized.startsWith('-');
+    const digits = sanitized.replace(/-/g, '');
+    const finalValue = hasLeadingMinus ? `-${digits}` : digits;
 
     const start = input.selectionStart;
     const end = input.selectionEnd;
@@ -99,17 +119,18 @@ export const createAmountInput = (options = {}) => {
 
     const newValue =
       currentValue.substring(0, start) +
-      sanitized +
+      finalValue +
       currentValue.substring(end);
-
-    // Validate format (e.g. max one dot/comma) logic could go here,
-    // but the input type="text" allows loose input.
-    // We just ensure chars are valid.
 
     input.value = newValue;
 
+    // If pasted value starts with minus, trigger the refund switch
+    if (hasLeadingMinus && onMinusSign) {
+      setTimeout(() => onMinusSign(), 0);
+    }
+
     // Restore cursor
-    const newCursorPos = start + sanitized.length;
+    const newCursorPos = start + finalValue.length;
     input.setSelectionRange(newCursorPos, newCursorPos);
   });
 
@@ -136,8 +157,8 @@ export const createAmountInput = (options = {}) => {
    * @returns {number|null} Parsed amount or null if invalid
    */
   const getValue = () => {
-    // Support both comma and dot
-    const normalized = input.value.replace(/,/g, '.');
+    // Support both comma and dot; strip leading minus (used as refund indicator)
+    const normalized = input.value.replace(/^-/, '').replace(/,/g, '.');
     const value = parseFloat(normalized);
     return isNaN(value) ? null : value;
   };

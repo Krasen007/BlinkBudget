@@ -68,6 +68,18 @@ const initApp = () => {
   // Network status
   document.body.appendChild(NetworkStatus());
 
+  // For returning users, render mobile nav immediately without waiting for Firebase auth
+  // This eliminates the visible delay on first load when the user is already signed in
+  if (
+    localStorage.getItem('auth_hint') === 'true' &&
+    window.mobileUtils?.isMobile()
+  ) {
+    const earlyNav = MobileNavigation({
+      currentRoute: Router.getCurrentRoute(),
+    });
+    document.body.appendChild(earlyNav);
+  }
+
   // Auth Initialization
   AuthService.init(async user => {
     const currentRoute = Router.getCurrentRoute();
