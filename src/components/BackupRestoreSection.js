@@ -86,7 +86,8 @@ export const BackupRestoreSection = () => {
         dataAsOfEl.style.marginBottom = SPACING.XS;
 
         const [asOfYear, asOfMonth, asOfDay] = lastBackupDataAsOf.split('-');
-        const isValidAsOf = asOfYear && asOfMonth && asOfDay && !isNaN(Number(asOfYear));
+        const isValidAsOf =
+          asOfYear && asOfMonth && asOfDay && !isNaN(Number(asOfYear));
         dataAsOfEl.textContent = isValidAsOf
           ? `Data as of: ${asOfMonth}/${asOfDay}/${asOfYear}`
           : 'Data as of: unknown';

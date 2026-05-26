@@ -24,14 +24,14 @@
 
 - **3-click expense logging** - Amount -> Category -> Done | src/core/click-tracking-service.js:startTransactionFlow() | src/core/click-tracking-service.js:recordClick() | src/core/click-tracking-service.js:completeTransactionFlow()
 - **Auto-submit on category selection** - No save buttons needed | src/utils/form-utils/category-chips.js:createCategorySelector() - onSubmit callback | src/utils/form-utils/submission.js:handleFormSubmit()
-- **Mobile-optimized interface** focused on speed and simplicity | src/core/mobile-utils.js:MobileUtils - mobile detection and optimization | src/components/TransactionForm.js:TransactionForm() - mobile-optimized class
+- **Mobile-optimized interface** focused on speed and simplicity. Bottom navigation loads instantly for returning users without waiting for cloud sign-in | src/core/mobile-utils.js:MobileUtils - mobile detection and optimization | src/components/TransactionForm.js:TransactionForm() - mobile-optimized class
 - **Offline-capable** with localStorage and Service Worker persistence | src/pwa.js:registerSW() - Service Worker registration | src/core/transaction-service.js:localStorage operations
-- **Ghost Transactions** - See historical transaction data when dates are modified | src/views/EditView.js:ghost transaction rendering | src/core/transaction-service.js:getTransactionsByDate()
-- **Dynamic quick amount presets** - Buttons automatically update based on your most frequently used transaction amounts with usage counters and reset functionality | src/components/QuickAmountPresets.js:QuickAmountPresets() | src/core/amount-preset-service.js:recordAmount() | src/core/amount-preset-service.js:getPresets()
+- **Ghost Transactions** - See historical transaction data when dates are modified. Ghost entries are only created for older edits, not immediate corrections | src/views/EditView.js:ghost transaction rendering | src/core/transaction-service.js:getTransactionsByDate()
+- **Dynamic quick amount presets** - Buttons automatically update based on your most frequently used transaction amounts with usage counters and reset functionality. Can be shown or hidden from Settings → Advanced | src/components/QuickAmountPresets.js:QuickAmountPresets() | src/core/amount-preset-service.js:recordAmount() | src/core/amount-preset-service.js:getPresets()
 
 ### Transaction Management
 
-- **Multiple transaction types**: Support for Expenses, Income, Transfers, and Refunds, with enhanced validation and error reporting | src/utils/form-utils/type-toggle.js:createTypeToggleGroup() | src/utils/form-utils/validation.js:validateAmount() | src/utils/form-utils/validation.js:validateCategory()
+- **Multiple transaction types**: Support for Expenses, Income, Transfers, and Refunds, with enhanced validation and error reporting. Typing `-` in the amount field automatically switches to Refund | src/utils/form-utils/type-toggle.js:createTypeToggleGroup() | src/utils/form-utils/validation.js:validateAmount() | src/utils/form-utils/validation.js:validateCategory()
 - **Optional transaction descriptions**: Add notes to transactions or leave them blank, as you prefer | src/components/TransactionForm.js:noteField creation | src/utils/form-utils/submission.js:prepareTransactionData()
 - **Custom Category Management**: Create, edit, and manage your own expense categories for personalized tracking | src/components/CustomCategoryManager.js:CustomCategoryManager() | src/core/custom-category-service.js:CustomCategoryService
 - **Category Reordering**: Organize your expense categories in a way that works best for you | src/core/custom-category-service.js:reorderCategories() | src/components/CustomCategoryManager.js:drag and drop handlers
@@ -54,7 +54,7 @@
 
 ### Dashboard & Analytics
 
-- **Real-time balance calculations** across all accounts | src/core/Account/account-service.js:calculateBalances() | src/views/DashboardView.js:balance display
+- **Real-time balance calculations** across all accounts. Dashboard label changes to "Total Filtered" when a filter is active so it's clear the number shown is not your full balance | src/core/Account/account-service.js:calculateBalances() | src/views/DashboardView.js:balance display
 - **Transaction history** with edit/delete capabilities | src/components/TransactionList.js:TransactionList() | src/views/DashboardView.js:transaction rendering
 - **Visual feedback** for recently added transactions | src/utils/success-feedback.js:highlightTransactionSuccess() | src/components/TransactionListItem.js:highlight animation
 - **Enhanced data visualization** with consistent colors for transactions | src/utils/reports-charts.js:chart rendering | src/utils/constants.js:COLOR definitions
@@ -154,7 +154,7 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 
 ### Backup & Restore
 
-- **Automatic daily backup** stored in Firebase, representing yesterday's state. | src/core/backup-service.js:automaticDailyBackup() | src/core/sync-service.js:Firebase sync
+- **Automatic daily backup** stored in Firebase, representing yesterday's state. Backup information shows the date only — no misleading time component | src/core/backup-service.js:automaticDailyBackup() | src/core/sync-service.js:Firebase sync
 - **Single backup** overwritten each day to keep storage simple. | src/core/backup-service.js:overwriteDailyBackup() | Firebase storage strategy
 - **Restore from last backup** replaces current data with the backup (warning shown). | src/core/backup-service.js:restoreFromBackup() | src/components/BackupRestoreSection.js:restore confirmation
 - **Offline safe**: backup skips when offline; restore requires internet. | src/core/backup-service.js:offlineDetection() | src/components/NetworkStatus.js:connection status
@@ -257,7 +257,7 @@ BlinkBudget delivers exceptional performance with modern web technologies:
 
 - **General Settings section** - Unified Refresh App, Install App, and Logout actions | src/components/GeneralSection.js:GeneralSection() | src/views/SettingsView.js:settings management
 - **Account management** - Add, edit, delete accounts | src/components/AccountSection.js:AccountSection() | src/core/Account/account-service.js:account operations
-- **Date format preferences** (US, ISO, EU formats) | src/core/settings-service.js:setDateFormat() | src/utils/date-utils.js:date formatting
+- **Date format preferences** (US, ISO, EU formats) applied consistently across transaction lists, CSV exports, goal dates, and filter summaries. A note in Settings explains that the date picker itself follows the browser/OS locale | src/core/settings-service.js:setDateFormat() | src/utils/date-utils.js:date formatting
 - **Data export/import** capabilities | src/components/DataManagementSection.js:DataManagementSection() | src/core/emergency-export-service.js:export/import functions
 - **Transaction editing** with validation | src/views/EditView.js:EditView() | src/utils/form-utils/validation.js:edit validation
 - **Simplified feedback system** - Direct GitHub issues link for bug reports and suggestions | src/views/SettingsView.js:feedback system | GitHub integration

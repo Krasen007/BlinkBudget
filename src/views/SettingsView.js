@@ -214,7 +214,8 @@ export const SettingsView = () => {
 
   const presetsHintSpan = document.createElement('span');
   presetsHintSpan.className = 'category-flag-toggle__hint';
-  presetsHintSpan.textContent = 'Show quick amount presets on dashboard based on recent transactions for quick entry';
+  presetsHintSpan.textContent =
+    'Show quick amount presets on dashboard based on recent transactions for quick entry';
 
   presetsCopyContainer.appendChild(presetsLabelSpan);
   presetsCopyContainer.appendChild(presetsHintSpan);
@@ -249,7 +250,10 @@ export const SettingsView = () => {
 
   presetsCheckboxInput.addEventListener('change', () => {
     syncPresetsToggleVisual();
-    SettingsService.saveSetting('showQuickPresets', presetsCheckboxInput.checked);
+    SettingsService.saveSetting(
+      'showQuickPresets',
+      presetsCheckboxInput.checked
+    );
     ToastNotification({
       message: presetsCheckboxInput.checked
         ? 'Quick amount presets enabled'
