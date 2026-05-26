@@ -11,6 +11,7 @@ import { SecuritySection } from '../components/SecuritySection.js';
 import { FeedbackLink } from '../components/FeedbackLink.js';
 import { SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
 import { DateFormatSection } from '../components/DateFormatSection.js';
+import { SettingsService } from '../core/settings-service.js';
 import {
   CURRENT_VERSION,
   GITHUB_RELEASES_URL,
@@ -175,6 +176,101 @@ export const SettingsView = () => {
   });
 
   // Advanced Settings Sections (hidden by default)
+  // Advanced Features Section
+  const advancedFeaturesSection = document.createElement('div');
+  advancedFeaturesSection.className = 'card mobile-settings-card';
+  advancedFeaturesSection.style.marginBottom = SPACING.LG;
+
+  const advTitle = document.createElement('h3');
+  advTitle.textContent = 'Advanced Features';
+  advTitle.className = 'mobile-settings-title';
+  Object.assign(advTitle.style, {
+    marginBottom: SPACING.MD,
+    fontSize: FONT_SIZES.XL,
+  });
+  advancedFeaturesSection.appendChild(advTitle);
+
+  // Toggle for Quick Amount Presets
+  const isPresetsEnabled = SettingsService.getSetting('showQuickPresets');
+
+  const presetsToggleGroup = document.createElement('label');
+  presetsToggleGroup.className = `category-flag-toggle ${isPresetsEnabled ? 'category-flag-toggle--on' : ''}`;
+  presetsToggleGroup.setAttribute('for', 'settings-show-quick-presets');
+  presetsToggleGroup.style.width = '100%';
+  presetsToggleGroup.style.boxSizing = 'border-box';
+
+  const presetsCheckboxInput = document.createElement('input');
+  presetsCheckboxInput.type = 'checkbox';
+  presetsCheckboxInput.id = 'settings-show-quick-presets';
+  presetsCheckboxInput.className = 'category-flag-toggle__input';
+  presetsCheckboxInput.checked = isPresetsEnabled;
+
+  const presetsCopyContainer = document.createElement('div');
+  presetsCopyContainer.className = 'category-flag-toggle__copy';
+
+  const presetsLabelSpan = document.createElement('span');
+  presetsLabelSpan.className = 'category-flag-toggle__label';
+  presetsLabelSpan.textContent = 'Show Quick Amount Presets';
+
+  const presetsHintSpan = document.createElement('span');
+  presetsHintSpan.className = 'category-flag-toggle__hint';
+  presetsHintSpan.textContent = 'Show quick amount presets on dashboard based on recent transactions for quick entry';
+
+  presetsCopyContainer.appendChild(presetsLabelSpan);
+  presetsCopyContainer.appendChild(presetsHintSpan);
+
+  const presetsSwitchContainer = document.createElement('div');
+  presetsSwitchContainer.className = 'category-flag-toggle__switch';
+
+  const presetsTrackDiv = document.createElement('div');
+  presetsTrackDiv.className = 'category-flag-toggle__track';
+
+  const presetsThumbDiv = document.createElement('div');
+  presetsThumbDiv.className = 'category-flag-toggle__thumb';
+
+  presetsTrackDiv.appendChild(presetsThumbDiv);
+
+  const presetsStateSpan = document.createElement('span');
+  presetsStateSpan.className = 'category-flag-toggle__state';
+  presetsStateSpan.textContent = isPresetsEnabled ? 'ON' : 'OFF';
+
+  presetsSwitchContainer.appendChild(presetsTrackDiv);
+  presetsSwitchContainer.appendChild(presetsStateSpan);
+
+  presetsToggleGroup.appendChild(presetsCheckboxInput);
+  presetsToggleGroup.appendChild(presetsCopyContainer);
+  presetsToggleGroup.appendChild(presetsSwitchContainer);
+
+  const syncPresetsToggleVisual = () => {
+    const checked = presetsCheckboxInput.checked;
+    presetsToggleGroup.classList.toggle('category-flag-toggle--on', checked);
+    presetsStateSpan.textContent = checked ? 'ON' : 'OFF';
+  };
+
+  presetsCheckboxInput.addEventListener('change', () => {
+    syncPresetsToggleVisual();
+    SettingsService.saveSetting('showQuickPresets', presetsCheckboxInput.checked);
+    ToastNotification({
+      message: presetsCheckboxInput.checked
+        ? 'Quick amount presets enabled'
+        : 'Quick amount presets disabled',
+      variant: 'success',
+      duration: 2000,
+    });
+  });
+
+  // Support click interaction for label wrapping in custom toggles
+  presetsToggleGroup.addEventListener('click', e => {
+    // Avoid double trigger if clicking directly on input
+    if (e.target !== presetsCheckboxInput) {
+      presetsCheckboxInput.checked = !presetsCheckboxInput.checked;
+      presetsCheckboxInput.dispatchEvent(new Event('change'));
+    }
+  });
+
+  advancedFeaturesSection.appendChild(presetsToggleGroup);
+  advancedSettingsSection.appendChild(advancedFeaturesSection);
+
   // Data Management Section
   const dataSection = DataManagementSection();
   advancedSettingsSection.appendChild(dataSection);

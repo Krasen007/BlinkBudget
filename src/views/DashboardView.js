@@ -8,6 +8,7 @@ import { CustomCategoryService } from '../core/custom-category-service.js';
 import { AuthService } from '../core/auth-service.js';
 import { Router } from '../core/router.js';
 import { NavigationState } from '../core/navigation-state.js';
+import { SettingsService } from '../core/settings-service.js';
 import { COLORS, SPACING, STORAGE_KEYS } from '../utils/constants.js';
 import { getAnalyticsEngine } from '../core/analytics/AnalyticsInstance.js';
 import { getCurrentMonthPeriod } from '../utils/reports-utils.js';
@@ -606,29 +607,31 @@ export const DashboardView = (params = {}) => {
     content.appendChild(statsContainer);
 
     // Quick Amount Presets (Feature 3.4.1)
-    const {
-      container: quickAmountPresetsContainer,
-      destroy: destroyQuickPresets,
-    } = createQuickAmountPresets(amount => {
-      const params =
-        currentAccountFilter !== 'all'
-          ? { accountId: currentAccountFilter, amount: amount.toString() }
-          : { amount: amount.toString() };
-      Router.navigate('add-expense', params);
-    });
+    if (SettingsService.getSetting('showQuickPresets')) {
+      const {
+        container: quickAmountPresetsContainer,
+        destroy: destroyQuickPresets,
+      } = createQuickAmountPresets(amount => {
+        const params =
+          currentAccountFilter !== 'all'
+            ? { accountId: currentAccountFilter, amount: amount.toString() }
+            : { amount: amount.toString() };
+        Router.navigate('add-expense', params);
+      });
 
-    // Add a small container for quick amount presets with no spacing
-    const quickPresetsWrapper = document.createElement('div');
-    quickPresetsWrapper.style.margin = '0';
-    quickPresetsWrapper.style.padding = '0';
-    quickPresetsWrapper.appendChild(quickAmountPresetsContainer);
-    content.appendChild(quickPresetsWrapper);
+      // Add a small container for quick amount presets with no spacing
+      const quickPresetsWrapper = document.createElement('div');
+      quickPresetsWrapper.style.margin = '0';
+      quickPresetsWrapper.style.padding = '0';
+      quickPresetsWrapper.appendChild(quickAmountPresetsContainer);
+      content.appendChild(quickPresetsWrapper);
 
-    // Store destroy function for cleanup when view is destroyed
-    if (!content._cleanupFunctions) {
-      content._cleanupFunctions = [];
+      // Store destroy function for cleanup when view is destroyed
+      if (!content._cleanupFunctions) {
+        content._cleanupFunctions = [];
+      }
+      content._cleanupFunctions.push(destroyQuickPresets);
     }
-    content._cleanupFunctions.push(destroyQuickPresets);
 
     // Action Button
     const addBtn = ButtonComponent({

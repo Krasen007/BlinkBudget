@@ -17,7 +17,7 @@ export const SettingsService = {
    * @returns {*} Setting value
    */
   getSetting(key) {
-    const settings = safeJsonParse(localStorage.getItem(SETTINGS_KEY) || '{}');
+    const settings = this.getAllSettings();
     return settings[key];
   },
 
@@ -46,6 +46,7 @@ export const SettingsService = {
     const defaults = {
       lastBackupDate: null,
       lastBackupDataAsOf: null,
+      showQuickPresets: false,
     };
     const stored = safeJsonParse(localStorage.getItem(SETTINGS_KEY) || '{}');
     return { ...defaults, ...stored };
