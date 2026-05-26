@@ -68,14 +68,14 @@ export const BackupRestoreSection = () => {
       backupDateEl.style.color = 'var(--color-text-muted)';
       backupDateEl.style.marginBottom = SPACING.XS;
 
-      const backupDate = new Date(lastBackupDate);
-
-      // Validate date before displaying
-      if (isNaN(backupDate.getTime())) {
-        backupDateEl.textContent = 'Last backup: unknown';
-      } else {
-        backupDateEl.textContent = `Last backup: ${backupDate.toLocaleDateString()} ${backupDate.toLocaleTimeString()}`;
-      }
+      // lastBackupDate is a date-only ISO string (YYYY-MM-DD), not a timestamp.
+      // Avoid new Date() which would interpret it as UTC midnight and shift it
+      // to the wrong local date/time. Display it directly.
+      const [year, month, day] = lastBackupDate.split('-');
+      const isValidDate = year && month && day && !isNaN(Number(year));
+      backupDateEl.textContent = isValidDate
+        ? `Last backup: ${month}/${day}/${year}`
+        : 'Last backup: unknown';
 
       metadataContainer.appendChild(backupDateEl);
 
@@ -85,14 +85,12 @@ export const BackupRestoreSection = () => {
         dataAsOfEl.style.color = 'var(--color-text-muted)';
         dataAsOfEl.style.marginBottom = SPACING.XS;
 
-        const dataAsOfDate = new Date(lastBackupDataAsOf);
+        const [asOfYear, asOfMonth, asOfDay] = lastBackupDataAsOf.split('-');
+        const isValidAsOf = asOfYear && asOfMonth && asOfDay && !isNaN(Number(asOfYear));
+        dataAsOfEl.textContent = isValidAsOf
+          ? `Data as of: ${asOfMonth}/${asOfDay}/${asOfYear}`
+          : 'Data as of: unknown';
 
-        // Validate dataAsOf date before displaying
-        if (isNaN(dataAsOfDate.getTime())) {
-          dataAsOfEl.textContent = 'Data as of: unknown';
-        } else {
-          dataAsOfEl.textContent = `Data as of: ${dataAsOfDate.toLocaleDateString()}`;
-        }
         metadataContainer.appendChild(dataAsOfEl);
       }
     } else {
