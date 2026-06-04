@@ -40,6 +40,9 @@ export const createAmountInput = (options = {}) => {
   input.pattern = '[0-9]*'; // Fallback for older devices to trigger numpad
   input.setAttribute('autofocus', 'true'); // Hint to browser related to focus
 
+  let lastHadMinus =
+    (initialValue && String(initialValue).startsWith('-')) || false;
+
   // Prevent non-numeric input
   input.addEventListener('keydown', e => {
     // Minus sign: allow it to appear in the field and switch type to refund.
@@ -47,10 +50,7 @@ export const createAmountInput = (options = {}) => {
     if (e.key === '-' || e.key === 'Subtract') {
       // Only allow minus as the first character (prefix indicator)
       if (input.selectionStart === 0 && !input.value.startsWith('-')) {
-        if (onMinusSign) {
-          // Let the character through, then fire the callback
-          setTimeout(() => onMinusSign(), 0);
-        }
+        // Let the character through. The input event listener below will handle triggering onMinusSign.
       } else {
         // Prevent additional minus signs mid-value
         e.preventDefault();
@@ -98,6 +98,33 @@ export const createAmountInput = (options = {}) => {
     }
   });
 
+  // Handle mobile-friendly input and minus detection
+  input.addEventListener('input', () => {
+    const val = input.value;
+
+    // Check if there are any minus signs (and sanitize mid-value minus if any got through)
+    if (val.includes('-')) {
+      const hasLeadingMinus = val.startsWith('-');
+      const cleanDigits = val.replace(/-/g, '');
+      const cleanedVal = hasLeadingMinus ? `-${cleanDigits}` : cleanDigits;
+
+      if (val !== cleanedVal) {
+        const start = input.selectionStart;
+        const end = input.selectionEnd;
+        input.value = cleanedVal;
+        input.setSelectionRange(start, end);
+      }
+    }
+
+    const hasMinus = input.value.startsWith('-');
+    if (hasMinus && !lastHadMinus) {
+      if (onMinusSign) {
+        onMinusSign();
+      }
+    }
+    lastHadMinus = hasMinus;
+  });
+
   // Sanitize paste input
   input.addEventListener('paste', e => {
     e.preventDefault();
@@ -123,6 +150,7 @@ export const createAmountInput = (options = {}) => {
       currentValue.substring(end);
 
     input.value = newValue;
+    lastHadMinus = newValue.startsWith('-');
 
     // If pasted value starts with minus, trigger the refund switch
     if (hasLeadingMinus && onMinusSign) {
@@ -169,6 +197,7 @@ export const createAmountInput = (options = {}) => {
    */
   const setValue = value => {
     input.value = value || '';
+    lastHadMinus = (value && String(value).startsWith('-')) || false;
   };
 
   /**

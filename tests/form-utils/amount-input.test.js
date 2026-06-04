@@ -21,6 +21,12 @@ global.document = {
       addEventListener: vi.fn(),
       setAttribute: vi.fn(),
       focus: vi.fn(),
+      selectionStart: 0,
+      selectionEnd: 0,
+      setSelectionRange: vi.fn(function (start, end) {
+        this.selectionStart = start;
+        this.selectionEnd = end;
+      }),
       _value: '', // Internal value storage
       get value() {
         return this._value;
@@ -295,6 +301,111 @@ describe('Amount Input Factory', () => {
 
       const validation = result.validate();
       expect(validation.valid).toBe(true);
+    });
+  });
+
+  describe('minus sign and refund detection', () => {
+    test('triggers onMinusSign callback when minus sign is typed at the start', () => {
+      const onMinusSignMock = vi.fn();
+      const result = createAmountInput({ onMinusSign: onMinusSignMock });
+
+      const inputHandler = result.input.addEventListener.mock.calls.find(
+        ([event]) => event === 'input'
+      )[1];
+
+      // Simulate typing a leading minus
+      result.input.value = '-';
+      inputHandler();
+
+      expect(onMinusSignMock).toHaveBeenCalledTimes(1);
+    });
+
+    test('prevents repeated callback calls on subsequent inputs', () => {
+      const onMinusSignMock = vi.fn();
+      const result = createAmountInput({ onMinusSign: onMinusSignMock });
+
+      const inputHandler = result.input.addEventListener.mock.calls.find(
+        ([event]) => event === 'input'
+      )[1];
+
+      // Type leading minus
+      result.input.value = '-';
+      inputHandler();
+
+      // Type digit after minus
+      result.input.value = '-5';
+      inputHandler();
+
+      // Type another digit
+      result.input.value = '-50';
+      inputHandler();
+
+      expect(onMinusSignMock).toHaveBeenCalledTimes(1);
+    });
+
+    test('sanitizes mid-value minus signs while allowing leading minus sign', () => {
+      const onMinusSignMock = vi.fn();
+      const result = createAmountInput({ onMinusSign: onMinusSignMock });
+
+      const inputHandler = result.input.addEventListener.mock.calls.find(
+        ([event]) => event === 'input'
+      )[1];
+
+      // Simulate entering mid-value minus sign (e.g. 5-0)
+      result.input.value = '5-0';
+      inputHandler();
+
+      expect(result.input.value).toBe('50');
+      expect(onMinusSignMock).not.toHaveBeenCalled();
+
+      // Simulate entering leading minus and mid-value minus (e.g. -5-0)
+      result.input.value = '-5-0';
+      inputHandler();
+
+      expect(result.input.value).toBe('-50');
+      expect(onMinusSignMock).toHaveBeenCalledTimes(1);
+    });
+
+    test('triggers onMinusSign on paste of value starting with minus sign', () => {
+      vi.useFakeTimers();
+      const onMinusSignMock = vi.fn();
+      const result = createAmountInput({ onMinusSign: onMinusSignMock });
+
+      const pasteHandler = result.input.addEventListener.mock.calls.find(
+        ([event]) => event === 'paste'
+      )[1];
+
+      const mockEvent = {
+        preventDefault: vi.fn(),
+        clipboardData: {
+          getData: vi.fn(() => '-25.50'),
+        },
+      };
+
+      pasteHandler(mockEvent);
+
+      expect(result.input.value).toBe('-25.50');
+      vi.runAllTimers(); // If there is any timeout
+      expect(onMinusSignMock).toHaveBeenCalled();
+      vi.useRealTimers();
+    });
+
+    test('updates minus sign state on setValue programmatically', () => {
+      const onMinusSignMock = vi.fn();
+      const result = createAmountInput({ onMinusSign: onMinusSignMock });
+
+      const inputHandler = result.input.addEventListener.mock.calls.find(
+        ([event]) => event === 'input'
+      )[1];
+
+      // Set value with minus programmatically (like on page load or transaction edit)
+      result.setValue('-100');
+
+      // Typing an additional character shouldn't trigger the callback again
+      result.input.value = '-1005';
+      inputHandler();
+
+      expect(onMinusSignMock).not.toHaveBeenCalled();
     });
   });
 });

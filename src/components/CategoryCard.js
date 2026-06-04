@@ -159,9 +159,19 @@ export const CategoryCard = (
 
   // Insights snippet
   if (insights && insights.length > 0) {
-    const relevantInsight = insights.find(
-      i => i.category === category.name || i.message.includes(category.name)
-    );
+    const redundantInsightIds = [
+      'top_category',
+      'budget_exceeded',
+      'budget_warning',
+    ];
+    const relevantInsight = insights.find(i => {
+      // Must match this category
+      if (i.category !== category.name) return false;
+      // Exclude redundant insights (e.g. top_category, budget_exceeded, budget_warning)
+      if (i.id && redundantInsightIds.some(id => i.id.startsWith(id)))
+        return false;
+      return true;
+    });
     if (relevantInsight) {
       const insightEl = document.createElement('div');
       insightEl.style.fontSize = '0.75rem';
