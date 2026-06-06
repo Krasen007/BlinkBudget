@@ -298,7 +298,7 @@ export const DashboardView = (params = {}) => {
       Array.from(tagSelect.options).some(o => o.value === currentVal)
     ) {
       tagSelect.value = currentVal;
-    } else if (currentTagFilter) {
+    } else if (currentTagFilter && !currentTagFilter.startsWith('exclude:')) {
       tagSelect.value = currentTagFilter;
     } else {
       tagSelect.value = 'all';
@@ -390,7 +390,12 @@ export const DashboardView = (params = {}) => {
 
         // Tag / label filter
         if (currentTagFilter) {
-          if (!t.tags?.includes(currentTagFilter)) return false;
+          if (currentTagFilter.startsWith('exclude:')) {
+            const excludedTag = currentTagFilter.substring(8);
+            if (t.tags?.includes(excludedTag)) return false;
+          } else {
+            if (!t.tags?.includes(currentTagFilter)) return false;
+          }
         }
 
         // Quick Month Filter (from clicking arrows in category bar)
@@ -760,7 +765,9 @@ export const DashboardView = (params = {}) => {
         currentCategoryFilter && currentCategoryFilter !== 'all'
           ? `Currently filtered by: ${currentCategoryFilter}${currentDashboardFilter && currentDashboardFilter.timePeriod ? ` (${currentDashboardFilter.timePeriod.label || 'selected period'})` : ''}`
           : currentTagFilter
-            ? `Currently filtered by label: ${currentTagFilter}`
+            ? currentTagFilter.startsWith('exclude:')
+              ? `Currently filtered by excluding label: ${currentTagFilter.substring(8)}`
+              : `Currently filtered by label: ${currentTagFilter}`
             : currentTypeFilter
               ? `Currently filtered by: ${currentTypeFilter === 'income' ? 'Income' : currentTypeFilter === 'expense' ? 'Expenses' : currentTypeFilter} transactions`
               : 'No active filters';
@@ -822,12 +829,19 @@ export const DashboardView = (params = {}) => {
       },
       currentTagFilter,
       onTagClick: tag => {
-        const newTag = currentTagFilter === tag ? null : tag;
+        let newTag;
+        if (currentTagFilter === tag) {
+          newTag = `exclude:${tag}`;
+        } else if (currentTagFilter === `exclude:${tag}`) {
+          newTag = null;
+        } else {
+          newTag = tag;
+        }
         currentTagFilter = newTag;
 
         if (newTag) {
           sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_TAG_FILTER, newTag);
-          tagSelect.value = newTag;
+          tagSelect.value = newTag.startsWith('exclude:') ? 'all' : newTag;
         } else {
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_TAG_FILTER);
           tagSelect.value = 'all';

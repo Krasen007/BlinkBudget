@@ -225,12 +225,25 @@ export const TransactionListItem = ({
     const tagBadge = document.createElement('span');
     tagBadge.className = 'transaction-item-tag';
     tagBadge.textContent = tagName.toUpperCase();
-    tagBadge.title = `Filter by ${tagName}`;
+
+    const isIncluded = currentTagFilter === tagName;
+    const isExcluded = currentTagFilter === `exclude:${tagName}`;
+
+    if (isExcluded) {
+      tagBadge.classList.add('transaction-item-tag--excluded');
+      tagBadge.title = `Clear filter for ${tagName}`;
+    } else if (isIncluded) {
+      tagBadge.title = `Exclude ${tagName}`;
+    } else {
+      tagBadge.title = `Filter by ${tagName}`;
+    }
+
     Object.assign(tagBadge.style, {
       color: tagColor,
-      background: `${tagColor}22`,
-      borderColor: currentTagFilter === tagName ? tagColor : 'transparent',
-      outline: currentTagFilter === tagName ? `1px solid ${tagColor}` : 'none',
+      background: isExcluded ? `${tagColor}11` : `${tagColor}22`,
+      borderColor: isIncluded || isExcluded ? tagColor : 'transparent',
+      outline: isIncluded ? `1px solid ${tagColor}` : 'none',
+      textDecoration: isExcluded ? 'line-through' : 'none',
     });
 
     tagBadge.addEventListener('click', e => {

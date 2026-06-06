@@ -16,6 +16,7 @@ import {
   EMPTY_STATE_SCENARIOS,
 } from '../utils/enhanced-empty-states.js';
 import { Router } from '../core/router.js';
+import { CustomCategoryService } from '../core/custom-category-service.js';
 
 export const TransactionList = ({
   transactions,
@@ -105,6 +106,70 @@ export const TransactionList = ({
   titleContainer.appendChild(listTitle);
   titleContainer.appendChild(metricsDisplay);
   listContainer.appendChild(titleContainer);
+
+  // Active tag filter chip
+  if (currentTagFilter) {
+    const activeFiltersContainer = document.createElement('div');
+    activeFiltersContainer.className = 'active-filters-row';
+    Object.assign(activeFiltersContainer.style, {
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: SPACING.SM,
+      marginBottom: SPACING.SM,
+      flexShrink: '0',
+    });
+
+    const tagName = currentTagFilter.startsWith('exclude:')
+      ? currentTagFilter.substring(8)
+      : currentTagFilter;
+    const flagCategory = CustomCategoryService.getCheckboxCategories().find(
+      c => c.name === tagName
+    );
+    const tagColor = flagCategory?.color || COLORS.PRIMARY || '#3b82f6';
+
+    const filterChip = document.createElement('span');
+    filterChip.className = 'transaction-item-tag';
+    
+    const isExcluded = currentTagFilter.startsWith('exclude:');
+    filterChip.textContent = `${isExcluded ? 'EXCLUDE: ' : 'INCLUDE: '}${tagName.toUpperCase()}`;
+
+    if (isExcluded) {
+      filterChip.classList.add('transaction-item-tag--excluded');
+      filterChip.title = `Clear filter for ${tagName} (Click to restore)`;
+    } else {
+      filterChip.title = `Exclude ${tagName} (Click to toggle)`;
+    }
+
+    Object.assign(filterChip.style, {
+      color: tagColor,
+      background: isExcluded ? `${tagColor}11` : `${tagColor}22`,
+      borderColor: tagColor,
+      outline: isExcluded ? 'none' : `1px solid ${tagColor}`,
+      textDecoration: isExcluded ? 'line-through' : 'none',
+      opacity: isExcluded ? '0.6' : '1',
+      fontSize: '0.65rem',
+      padding: '4px 8px',
+      borderRadius: 'var(--radius-sm)',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '4px',
+      cursor: 'pointer',
+    });
+
+    const icon = document.createElement('span');
+    icon.innerHTML = ' &times;';
+    icon.style.fontWeight = 'bold';
+    icon.style.fontSize = '0.8rem';
+    filterChip.appendChild(icon);
+
+    filterChip.addEventListener('click', e => {
+      e.stopPropagation();
+      onTagClick(tagName);
+    });
+
+    activeFiltersContainer.appendChild(filterChip);
+    listContainer.appendChild(activeFiltersContainer);
+  }
 
   if (transactions.length === 0) {
     // Determine empty state scenario

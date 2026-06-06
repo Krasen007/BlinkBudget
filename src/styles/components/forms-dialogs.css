@@ -372,6 +372,10 @@ select.input-select:focus {
   flex-shrink: 0;
 }
 
+.transaction-item-tag--excluded {
+  text-decoration: line-through;
+}
+
 .category-flag-toggle {
   display: flex;
   align-items: center;
