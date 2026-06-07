@@ -46,30 +46,38 @@ export class MetricsService {
       categoryTotals[category].transactionCount += 1;
     });
 
-    // Filter out categories with negative or zero amounts (refunds exceeded expenses)
-    const validCategories = Object.values(categoryTotals).filter(
-      category => category.amount > 0
-    );
+    // Include all categories, even those with zero or negative net amounts
+    // (e.g. a category that has only refunds, or where refunds exceeded expenses).
+    // This ensures they appear in Explore Categories and their negative amounts
+    // correctly reduce the Total Spent figure.
+    const allCategories = Object.values(categoryTotals);
 
-    // Recalculate total from valid categories only
-    const validTotal = validCategories.reduce(
-      (sum, cat) => sum + cat.amount,
-      0
-    );
+    // Total is the net of all category amounts (refunds reduce it)
+    const validTotal = allCategories.reduce((sum, cat) => sum + cat.amount, 0);
 
     // Recalculate transaction count from all categories to match calculateIncomeVsExpenses
-    const validTransactionCount = Object.values(categoryTotals).reduce(
+    const validTransactionCount = allCategories.reduce(
       (sum, cat) => sum + cat.transactionCount,
       0
     );
 
+    // Gross positive total used for percentage calculation so each expense
+    // category's share is relative to actual spending (not net of refunds).
+    const grossExpenseTotal = allCategories.reduce(
+      (sum, cat) => sum + Math.max(0, cat.amount),
+      0
+    );
+
     // Convert to array and calculate percentages
-    const categories = validCategories.map(category => ({
+    const categories = allCategories.map(category => ({
       ...category,
-      percentage: validTotal > 0 ? (category.amount / validTotal) * 100 : 0,
+      percentage:
+        grossExpenseTotal > 0
+          ? (Math.max(0, category.amount) / grossExpenseTotal) * 100
+          : 0,
     }));
 
-    // Sort by amount (highest first)
+    // Sort by amount descending; refund-only categories (negative) go to bottom
     categories.sort((a, b) => b.amount - a.amount);
 
     return {

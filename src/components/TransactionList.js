@@ -129,7 +129,7 @@ export const TransactionList = ({
 
     const filterChip = document.createElement('span');
     filterChip.className = 'transaction-item-tag';
-    
+
     const isExcluded = currentTagFilter.startsWith('exclude:');
     filterChip.textContent = `${isExcluded ? 'EXCLUDE: ' : 'INCLUDE: '}${tagName.toUpperCase()}`;
 

@@ -711,7 +711,10 @@ export class LazyLoader {
           // Remove dangerous data: URLs on URL-like attributes.
           // Allow only safe raster image data URIs; reject everything else (including SVG).
           const urlAttributes = ['href', 'src', 'action', 'formaction'];
-          if (urlAttributes.includes(attr.name) && trimmedLower.startsWith('data:')) {
+          if (
+            urlAttributes.includes(attr.name) &&
+            trimmedLower.startsWith('data:')
+          ) {
             const isSafeImage =
               trimmedLower.startsWith('data:image/') &&
               !trimmedLower.startsWith('data:image/svg');
