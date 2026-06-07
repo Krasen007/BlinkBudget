@@ -1,15 +1,9 @@
-## v1.38
+v1.38 → v1.39
 
-### ✨ New Features
-- **Quick Amount Presets toggle** — You can now show or hide the recent amount buttons on the Dashboard from Settings → Advanced. They're hidden by default for a cleaner look.
-- **Minus sign auto-switches to Refund** — Typing `-` in the amount field instantly switches the transaction type to Refund, so logging a refund takes no extra steps.
-
-### 🐛 Bug Fixes
-- **Backup showed a fake time** (e.g. "3:00:00 AM") — the backup card now shows only the date, since no time is recorded.
-- **Date format setting was ignored** in CSV exports, goal target dates, and filter summaries — all now follow your chosen format (US / EU / ISO).
-- **Editing a transaction right after adding it no longer creates a ghost entry** — ghost transactions are only created for older edits, not immediate corrections.
-
-### 🚀 Improvements
-- **Mobile nav loads instantly** — returning users see the bottom navigation bar right away instead of waiting for the cloud sign-in check.
-- **Dashboard balance label** changes to "Total Filtered" when a filter is active, so it's clear the number isn't your full balance.
-- **Settings date format note** — a short note now explains that the date picker in the transaction form follows your browser/OS locale, not this setting.
+- Reports: Fixed button filtering logic to properly toggle between expense, income, and all transactions.
+- Reports: Corrected category breakdown calculation — removed the hard filter that was silently dropping zero and negative amounts in CategoryCard insights.
+- Forecast: Fixed inaccurate projection calculations for more reliable spending predictions.
+- Security: Fixed inverted sanitization logic in sanitizeHtml() that could allow dangerous content through.
+- Tags: Introduced a 3-state tag filter — tap once to include transactions with the tag, tap twice to exclude them, tap a third time to restore the default state.
+- Mobile: Fixed minus-sign detection on mobile devices for proper negative number input.
+- General: Code cleanup and minor calculation fixes throughout the app.

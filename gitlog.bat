@@ -1,10 +1,10 @@
 @echo off
-git rev-parse v1.38 >nul 2>&1
+git rev-parse v1.39 >nul 2>&1
 if %errorlevel% neq 0 (
-    echo Error: Tag v1.38 not found in this repository >&2
+    echo Error: Tag v1.39 not found in this repository >&2
     exit /b 1
 )
-git log v1.38..HEAD --oneline > changelog.txt
+git log v1.39..HEAD --oneline > changelog.txt
 if %errorlevel% neq 0 (
     echo Error: Failed to generate changelog >&2
     exit /b 1
