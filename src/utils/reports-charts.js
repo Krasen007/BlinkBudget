@@ -27,6 +27,7 @@ function createCategoryTooltipConfig(detailsContainer) {
       if (tooltip.opacity === 0) {
         const actionText = window.innerWidth < 768 ? 'Tap' : 'Hover';
         // deepcode ignore DOMXSS: actionText is a static string and escapeHtml() sanitizes any dynamic content
+        // snyk:disable-next-line javascript/DomBasedXss
         detailsContainer.innerHTML = `
                     <div style="text-align: center; color: var(--color-text-muted); font-size: 0.9em;">
                         ${escapeHtml(actionText)} on a category slice to see details
@@ -55,6 +56,7 @@ function createCategoryTooltipConfig(detailsContainer) {
         // Create structured HTML for the details container
         // Security: All dynamic values are escaped using escapeHtml()
         // deepcode ignore DOMXSS: All dynamic values (label, formattedValue, percentage) are escaped using escapeHtml()
+        // snyk:disable-next-line javascript/DomBasedXss
         detailsContainer.innerHTML = `
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <span style="font-weight: 600; color: var(--color-text-main);">${escapeHtml(label)}</span>
@@ -258,6 +260,7 @@ export async function createCategoryBreakdownChart(
   const initialAction = window.innerWidth < 768 ? 'Tap' : 'Hover';
   // Security: initialAction is a static string, not user input
   // deepcode ignore DOMXSS: initialAction is a static string and escapeHtml() sanitizes any dynamic content
+  // snyk:disable-next-line javascript/DomBasedXss
   detailsContainer.innerHTML = `
         <div style="text-align: center; color: var(--color-text-muted); font-size: 0.9em;">
             ${escapeHtml(initialAction)} on a category slice to see details
@@ -340,6 +343,7 @@ export async function createCategoryBreakdownChart(
     const text = document.createElement('span');
     // Security: All dynamic values are escaped using escapeHtml()
     // deepcode ignore DOMXSS: All dynamic values (label, percentage) are escaped using escapeHtml()
+    // snyk:disable-next-line javascript/DomBasedXss
     text.innerHTML = `<span style="color: var(--color-text-main); font-weight: 500;">${escapeHtml(label)}</span> <span style="color: var(--color-text-muted); opacity: 0.8;">${escapeHtml(String(percentage))}%</span>`;
 
     item.appendChild(colorBox);
