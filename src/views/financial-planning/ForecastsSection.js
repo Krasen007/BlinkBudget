@@ -62,11 +62,8 @@ function generateHistoricalData(transactions, months = 3) {
         categoryTotals[cat] = (categoryTotals[cat] || 0) - Math.abs(t.amount || 0);
       }
     });
-    // Sum all net category amounts (negative = net refund), then floor total at 0
-    const expenses = Math.max(
-      0,
-      Object.values(categoryTotals).reduce((sum, net) => sum + net, 0)
-    );
+    // Sum all net category amounts (can be negative if refunds exceed expenses)
+    const expenses = Object.values(categoryTotals).reduce((sum, net) => sum + net, 0);
 
     monthlyData.push({
       period: monthDate,

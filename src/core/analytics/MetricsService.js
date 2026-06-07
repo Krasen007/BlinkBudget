@@ -143,9 +143,9 @@ export class MetricsService {
       }
     });
 
-    // Sum only positive per-category net amounts — identical to calculateCategoryBreakdown
+    // Sum all per-category net amounts (can be negative if refunds exceed expenses)
     const totalExpenses = Object.values(categoryTotals).reduce(
-      (sum, net) => sum + Math.max(0, net),
+      (sum, net) => sum + net,
       0
     );
 
