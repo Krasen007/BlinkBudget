@@ -261,17 +261,16 @@ export const DashboardView = (params = {}) => {
     NavigationState.clearDashboardFilter();
   }
 
-  // Check for time period filter from type filter (e.g., clicking Income in reports)
-  if (currentTypeFilter) {
-    const timePeriod = NavigationState.restoreDashboardTimePeriod();
-    if (timePeriod) {
-      const startDate = ensureDate(timePeriod.startDate);
-      const monthFilter = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-01`;
-      currentMonthFilter = monthFilter;
-      sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER, monthFilter);
-      // Clear the time period after applying
-      NavigationState.clearDashboardFilter();
-    }
+  // Check for time period filter from reports (with or without type filter)
+  // This applies the month filter when navigating from reports, regardless of type filter
+  const timePeriod = NavigationState.restoreDashboardTimePeriod();
+  if (timePeriod) {
+    const startDate = ensureDate(timePeriod.startDate);
+    const monthFilter = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-01`;
+    currentMonthFilter = monthFilter;
+    sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER, monthFilter);
+    // Clear the time period after applying
+    NavigationState.clearDashboardFilter();
   }
 
   // Initialize title after all variables are set
@@ -680,7 +679,8 @@ export const DashboardView = (params = {}) => {
     if (
       (currentCategoryFilter && currentCategoryFilter !== 'all') ||
       currentTagFilter ||
-      currentTypeFilter
+      currentTypeFilter ||
+      currentMonthFilter
     ) {
       const clearFilterButton = ButtonComponent({
         text: 'Clear Filter',
@@ -761,16 +761,26 @@ export const DashboardView = (params = {}) => {
         Router.navigate('reports');
       });
 
-      filterStatus.textContent =
-        currentCategoryFilter && currentCategoryFilter !== 'all'
-          ? `Currently filtered by: ${currentCategoryFilter}${currentDashboardFilter && currentDashboardFilter.timePeriod ? ` (${currentDashboardFilter.timePeriod.label || 'selected period'})` : ''}`
-          : currentTagFilter
-            ? currentTagFilter.startsWith('exclude:')
-              ? `Currently filtered by excluding label: ${currentTagFilter.substring(8)}`
-              : `Currently filtered by label: ${currentTagFilter}`
-            : currentTypeFilter
-              ? `Currently filtered by: ${currentTypeFilter === 'income' ? 'Income' : currentTypeFilter === 'expense' ? 'Expenses' : currentTypeFilter} transactions`
-              : 'No active filters';
+      // Determine filter message based on active filters
+      let filterMessage = '';
+      const monthDate = currentMonthFilter ? new Date(currentMonthFilter) : null;
+      const monthLabel = monthDate ? monthDate.toLocaleString('en-US', { month: 'long', year: 'numeric' }) : '';
+      
+      if (currentMonthFilter && !currentTypeFilter && !currentCategoryFilter && !currentTagFilter) {
+        filterMessage = `Currently filtered by: ${monthLabel}`;
+      } else if (currentCategoryFilter && currentCategoryFilter !== 'all') {
+        filterMessage = `Currently filtered by: ${currentCategoryFilter}${currentDashboardFilter && currentDashboardFilter.timePeriod ? ` (${currentDashboardFilter.timePeriod.label || 'selected period'})` : ''}`;
+      } else if (currentTagFilter) {
+        filterMessage = currentTagFilter.startsWith('exclude:')
+          ? `Currently filtered by excluding label: ${currentTagFilter.substring(8)}`
+          : `Currently filtered by label: ${currentTagFilter}`;
+      } else if (currentTypeFilter) {
+        filterMessage = `Currently filtered by: ${currentTypeFilter === 'income' ? 'Income' : currentTypeFilter === 'expense' ? 'Expenses' : currentTypeFilter} transactions`;
+      } else {
+        filterMessage = 'No active filters';
+      }
+      
+      filterStatus.textContent = filterMessage;
 
       // Add title attribute for accessibility
       filterStatus.title = 'Click to return to Reports view';

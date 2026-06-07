@@ -215,9 +215,11 @@ export async function createCategoryBreakdownChart(
     totalSpentContainer.style.opacity = '1';
   });
 
-  // Add click handler to filter dashboard by expenses
+  // Add click handler to filter dashboard by expenses and refunds
   totalSpentContainer.addEventListener('click', () => {
-    NavigationState.saveDashboardTypeFilter('expense');
+    // Don't set a type filter - the total spent includes both expenses and refunds
+    // Setting type='expense' would exclude refunds, making the dashboard inconsistent
+    // with the "Total Spent" calculation which includes refunds as negative amounts
     // Also save the current time period to filter by the selected month
     if (currentData.timePeriod) {
       NavigationState.saveDashboardTimePeriod(currentData.timePeriod);
@@ -489,9 +491,11 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
     expensesDiv.style.opacity = '1';
   });
 
-  // Add click handler to filter dashboard by expenses
+  // Add click handler to filter dashboard by expenses and refunds
   expensesDiv.addEventListener('click', () => {
-    NavigationState.saveDashboardTypeFilter('expense');
+    // Don't set a type filter - the total expenses includes both expenses and refunds
+    // Setting type='expense' would exclude refunds, making the dashboard inconsistent
+    // with the "Expenses" calculation which includes refunds as negative amounts
     // Also save the current time period to filter by the selected month
     if (currentData.timePeriod) {
       NavigationState.saveDashboardTimePeriod(currentData.timePeriod);
