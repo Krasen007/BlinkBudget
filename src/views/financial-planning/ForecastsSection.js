@@ -48,9 +48,10 @@ function generateHistoricalData(transactions, months = 3) {
       .filter(t => t.type === 'income')
       .reduce((sum, t) => sum + (t.amount || 0), 0);
 
-    // Compute expenses per-category with refunds subtracted per category,
-    // then floor each category at 0 before summing — identical to
-    // MetricsService.calculateCategoryBreakdown / calculateIncomeVsExpenses.
+    // Compute net expenses: sum all expense amounts, subtract all refund amounts.
+    // Refund-only categories produce a negative net that reduces the total —
+    // identical to MetricsService.calculateCategoryBreakdown after the fix
+    // (no per-category floor; the total is floored at 0 at the end).
     const categoryTotals = Object.create(null);
     monthTransactions.forEach(t => {
       if (t.type === 'expense') {
@@ -61,9 +62,10 @@ function generateHistoricalData(transactions, months = 3) {
         categoryTotals[cat] = (categoryTotals[cat] || 0) - Math.abs(t.amount || 0);
       }
     });
-    const expenses = Object.values(categoryTotals).reduce(
-      (sum, net) => sum + Math.max(0, net),
-      0
+    // Sum all net category amounts (negative = net refund), then floor total at 0
+    const expenses = Math.max(
+      0,
+      Object.values(categoryTotals).reduce((sum, net) => sum + net, 0)
     );
 
     monthlyData.push({
