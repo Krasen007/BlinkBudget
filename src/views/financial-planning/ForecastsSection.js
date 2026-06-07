@@ -48,9 +48,23 @@ function generateHistoricalData(transactions, months = 3) {
       .filter(t => t.type === 'income')
       .reduce((sum, t) => sum + (t.amount || 0), 0);
 
-    const expenses = monthTransactions
-      .filter(t => t.type === 'expense')
-      .reduce((sum, t) => sum + (t.amount || 0), 0);
+    // Compute expenses per-category with refunds subtracted per category,
+    // then floor each category at 0 before summing — identical to
+    // MetricsService.calculateCategoryBreakdown / calculateIncomeVsExpenses.
+    const categoryTotals = Object.create(null);
+    monthTransactions.forEach(t => {
+      if (t.type === 'expense') {
+        const cat = t.category || 'Uncategorized';
+        categoryTotals[cat] = (categoryTotals[cat] || 0) + Math.abs(t.amount || 0);
+      } else if (t.type === 'refund') {
+        const cat = t.category || 'Uncategorized';
+        categoryTotals[cat] = (categoryTotals[cat] || 0) - Math.abs(t.amount || 0);
+      }
+    });
+    const expenses = Object.values(categoryTotals).reduce(
+      (sum, net) => sum + Math.max(0, net),
+      0
+    );
 
     monthlyData.push({
       period: monthDate,

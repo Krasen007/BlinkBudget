@@ -97,9 +97,12 @@ export class MetricsService {
     ).filter(t => !t.isGhost);
 
     let totalIncome = 0;
-    let totalExpenses = 0;
     let incomeCount = 0;
     let expenseCount = 0;
+
+    // Build per-category expense totals (same logic as calculateCategoryBreakdown)
+    // so that totalExpenses is always identical to the sum shown in the pie chart.
+    const categoryTotals = Object.create(null);
 
     filteredTransactions.forEach(transaction => {
       const amount = Math.abs(transaction.amount || 0);
@@ -109,26 +112,34 @@ export class MetricsService {
           totalIncome += amount;
           incomeCount += 1;
           break;
-        case TRANSACTION_TYPES.EXPENSE:
-          totalExpenses += amount;
+        case TRANSACTION_TYPES.EXPENSE: {
           expenseCount += 1;
+          const cat = transaction.category || 'Uncategorized';
+          categoryTotals[cat] = (categoryTotals[cat] || 0) + amount;
           break;
-        case TRANSACTION_TYPES.REFUND:
-          // Refunds reduce expenses but do not increment expenseCount (see counting rule)
-          totalExpenses -= amount;
+        }
+        case TRANSACTION_TYPES.REFUND: {
+          // Subtract per-category — mirrors calculateCategoryBreakdown exactly.
+          const cat = transaction.category || 'Uncategorized';
+          categoryTotals[cat] = (categoryTotals[cat] || 0) - amount;
           break;
+        }
         case TRANSACTION_TYPES.TRANSFER:
           // Transfers don't affect income/expense calculation
           break;
         default:
           // Handle unknown transaction types as expenses
-          totalExpenses += amount;
           expenseCount += 1;
+          categoryTotals['Uncategorized'] =
+            (categoryTotals['Uncategorized'] || 0) + amount;
       }
     });
 
-    // Ensure no negative values
-    totalExpenses = Math.max(0, totalExpenses);
+    // Sum only positive per-category net amounts — identical to calculateCategoryBreakdown
+    const totalExpenses = Object.values(categoryTotals).reduce(
+      (sum, net) => sum + Math.max(0, net),
+      0
+    );
 
     const netBalance = totalIncome - totalExpenses;
 

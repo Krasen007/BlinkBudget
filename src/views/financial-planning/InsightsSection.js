@@ -65,21 +65,8 @@ function createTopMoversSection(
       return ts >= startOfMonth && ts < endOfMonth;
     });
 
-    // Pre-process transactions to handle refunds before passing to InsightsGenerator
-    const processedTransactions = monthTransactions.map(t => {
-      if (t.type === TRANSACTION_TYPES.REFUND) {
-        // Convert refund to negative expense for proper calculation
-        return {
-          ...t,
-          type: TRANSACTION_TYPES.EXPENSE,
-          amount: -Math.abs(t.amount || 0),
-        };
-      }
-      return t;
-    });
-
     return {
-      transactions: processedTransactions,
+      transactions: monthTransactions,
       startOfMonth,
       endOfMonth,
       displayMonth: targetDate,

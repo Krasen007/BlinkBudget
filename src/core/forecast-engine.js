@@ -115,15 +115,27 @@ export class ForecastEngine {
         return this._generateBasicForecast('expense', 0, months);
       }
 
-      const expenseTransactions = transactions.filter(
-        t =>
-          t &&
-          t.type === 'expense' &&
-          typeof t.amount === 'number' &&
-          t.timestamp &&
-          !t.isGhost &&
-          !this._isProblematicTransaction(t)
-      );
+      // Include refunds as negative-amount entries so the training data
+      // reflects net spending — consistent with MetricsService.calculateCategoryBreakdown.
+      // Note: refunds are mapped to negative amounts AFTER _isProblematicTransaction
+      // so the amount-<=0 guard doesn't discard them.
+      const expenseTransactions = transactions
+        .filter(
+          t =>
+            t &&
+            (t.type === 'expense' || t.type === 'refund') &&
+            typeof t.amount === 'number' &&
+            t.timestamp &&
+            !t.isGhost &&
+            // Only apply the problematic-transaction guard to actual expenses;
+            // refunds legitimately have amounts that would fail those checks.
+            (t.type === 'refund' || !this._isProblematicTransaction(t))
+        )
+        .map(t =>
+          t.type === 'refund'
+            ? { ...t, amount: -Math.abs(t.amount) } // refund reduces spend
+            : t
+        );
 
       if (expenseTransactions.length < this.minDataPoints) {
         return this._generateBasicForecast('expense', 0, months);
