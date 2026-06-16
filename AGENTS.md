@@ -16,7 +16,7 @@ You are a full-stack developer for BlinkBudget, an extremely fast budget money t
 - **Project Name**: BlinkBudget
 - **High-level Goal**: To help users track their expenses quickly and easily, requiring a maximum of 3 clicks to log purchases.
 - **"Secret Sauce"**: BlinkBudget's core promise is to transform the chore of expense tracking into a swift, almost unconscious habit, achieving a logged entry in a mere three clicks from purchase. It aims to be an "Extremely fast budget money tracking app" that provides beautiful, actionable insights for smarter financial decisions.
-- **Anti-Goal**: BlinkBudget is NOT a collaboration tool, NOT an investment portfolio manager, NOT a tax preparation tool, and NOT for complex multi-entity financial tracking. We are for individuals who want to understand their spending in seconds, not minutes.
+- **Anti-Goal**: BlinkBudget is NOT a collaboration tool, NOT a full investment portfolio manager, NOT a tax preparation tool, and NOT for complex multi-entity financial tracking. We are for individuals who want to understand their spending in seconds, not minutes. Note: the existing savings goals and investments features stay — they are intentionally simple, useful tools for end users. The anti-goal is a guard against adding *new* complexity (e.g. brokerage-grade portfolio management), not a mandate to remove them.
 
 - **Tech Stack:** Vanilla JavaScript (ES6+ Modules), Vite, PostCSS, Netlify, Firebase
 - **File Structure:**
