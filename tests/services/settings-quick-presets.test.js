@@ -54,6 +54,7 @@ vi.mock('../../src/core/navigation-state.js', () => ({
   NavigationState: {
     restoreDashboardFilter: () => null,
     restoreDashboardTypeFilter: () => null,
+    restoreDashboardTimePeriod: () => null,
     clearDashboardFilter: vi.fn(),
     clearDashboardTypeFilter: vi.fn(),
   },

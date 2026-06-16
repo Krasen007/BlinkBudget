@@ -762,7 +762,7 @@ export const DashboardView = (params = {}) => {
       });
 
       // Determine filter message based on active filters
-      let filterMessage = '';
+      let filterMessage;
       const monthDate = currentMonthFilter ? new Date(currentMonthFilter) : null;
       const monthLabel = monthDate ? monthDate.toLocaleString('en-US', { month: 'long', year: 'numeric' }) : '';
       
