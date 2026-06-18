@@ -763,10 +763,19 @@ export const DashboardView = (params = {}) => {
 
       // Determine filter message based on active filters
       let filterMessage;
-      const monthDate = currentMonthFilter ? new Date(currentMonthFilter) : null;
-      const monthLabel = monthDate ? monthDate.toLocaleString('en-US', { month: 'long', year: 'numeric' }) : '';
-      
-      if (currentMonthFilter && !currentTypeFilter && !currentCategoryFilter && !currentTagFilter) {
+      const monthDate = currentMonthFilter
+        ? new Date(currentMonthFilter)
+        : null;
+      const monthLabel = monthDate
+        ? monthDate.toLocaleString('en-US', { month: 'long', year: 'numeric' })
+        : '';
+
+      if (
+        currentMonthFilter &&
+        !currentTypeFilter &&
+        !currentCategoryFilter &&
+        !currentTagFilter
+      ) {
         filterMessage = `Currently filtered by: ${monthLabel}`;
       } else if (currentCategoryFilter && currentCategoryFilter !== 'all') {
         filterMessage = `Currently filtered by: ${currentCategoryFilter}${currentDashboardFilter && currentDashboardFilter.timePeriod ? ` (${currentDashboardFilter.timePeriod.label || 'selected period'})` : ''}`;
@@ -779,7 +788,7 @@ export const DashboardView = (params = {}) => {
       } else {
         filterMessage = 'No active filters';
       }
-      
+
       filterStatus.textContent = filterMessage;
 
       // Add title attribute for accessibility

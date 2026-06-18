@@ -56,14 +56,19 @@ function generateHistoricalData(transactions, months = 3) {
     monthTransactions.forEach(t => {
       if (t.type === 'expense') {
         const cat = t.category || 'Uncategorized';
-        categoryTotals[cat] = (categoryTotals[cat] || 0) + Math.abs(t.amount || 0);
+        categoryTotals[cat] =
+          (categoryTotals[cat] || 0) + Math.abs(t.amount || 0);
       } else if (t.type === 'refund') {
         const cat = t.category || 'Uncategorized';
-        categoryTotals[cat] = (categoryTotals[cat] || 0) - Math.abs(t.amount || 0);
+        categoryTotals[cat] =
+          (categoryTotals[cat] || 0) - Math.abs(t.amount || 0);
       }
     });
     // Sum all net category amounts (can be negative if refunds exceed expenses)
-    const expenses = Object.values(categoryTotals).reduce((sum, net) => sum + net, 0);
+    const expenses = Object.values(categoryTotals).reduce(
+      (sum, net) => sum + net,
+      0
+    );
 
     monthlyData.push({
       period: monthDate,
