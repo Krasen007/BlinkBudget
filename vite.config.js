@@ -86,23 +86,16 @@ export default defineConfig({
   ],
   build: {
     outDir: 'dist',
-    minify: 'esbuild',
+    minify: 'oxc',
     cssCodeSplit: true,
     rolldownOptions: {
       output: {
-        manualChunks: id => {
-          if (
-            id.includes('node_modules/firebase') ||
-            id.includes('node_modules/@firebase')
-          ) {
-            return 'firebase';
-          }
-          if (id.includes('node_modules/chart.js')) {
-            return 'charts';
-          }
-          if (id.includes('node_modules')) {
-            return 'vendor';
-          }
+        codeSplitting: {
+          groups: [
+            { name: 'firebase', test: /[\\/]node_modules[\\/](@?firebase)[\\/]/ },
+            { name: 'charts', test: /[\\/]node_modules[\\/]chart\.js[\\/]/ },
+            { name: 'vendor', test: /[\\/]node_modules[\\/]/ },
+          ],
         },
         assetFileNames: assetInfo => {
           if (
@@ -136,9 +129,9 @@ export default defineConfig({
     host: true,
     port: 4173,
   },
-  css: {
-    minify: 'esbuild',
-    postcss: {
+    css: {
+      minify: 'lightningcss',
+      postcss: {
       plugins: [
         postcssImport,
         postcssNested,
