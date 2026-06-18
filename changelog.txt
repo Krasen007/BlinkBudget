@@ -7,3 +7,11 @@ v1.38 → v1.39
 - Tags: Introduced a 3-state tag filter — tap once to include transactions with the tag, tap twice to exclude them, tap a third time to restore the default state.
 - Mobile: Fixed minus-sign detection on mobile devices for proper negative number input.
 - General: Code cleanup and minor calculation fixes throughout the app.
+
+---
+v1.39 → v1.40
+
+- Updated stylelint to version 17 with the latest standard ruleset, keeping the project's linting in sync with current best practices.
+- Bumped the Node.js engine requirement to 26 and refreshed major and minor dependencies across the board for improved stability and security.
+- Fixed a COOP header misconfiguration that was preventing Firebase signInWithPopup from working. Cross-Origin-Opener-Policy now correctly allows popups so sign-in flows behave as expected.
+- Cleaned up lint and code-quality issues: removed dead test framework code and fixed a no-useless-assignment error. Also clarified the project's anti-goal rules in AGENTS.md so contributors understand what not to build.

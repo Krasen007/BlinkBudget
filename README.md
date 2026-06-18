@@ -191,7 +191,7 @@ BlinkBudget employs enterprise-grade security measures to protect your sensitive
 
 #### **Authentication & Access Control**
 
-- **Firebase Authentication** - Secure sign-in with email/password providers | src/core/auth-service.js:AuthService | Firebase auth configuration
+- **Firebase Authentication** - Secure sign-in with email/password providers, including browser popup flows for sign-in, sign-up, and password reset | src/core/auth-service.js:AuthService | Firebase auth configuration
 - **Session Management** - Automatic session timeout and renewal | src/core/auth-service.js:sessionManagement() | Firebase session handling
 - **Multi-Device Security** - Secure sync across all your devices | src/core/sync-service.js:secureSync() | src/core/auth-service.js:multiDeviceAuth
 - **Account Recovery** - Safe password reset and account recovery options | src/core/auth-service.js:passwordReset() | Firebase recovery flows
@@ -286,7 +286,7 @@ Download and install the [BlinkBudget APK](https://github.com/Krasen007/BlinkBud
 
 ### Prerequisites from source
 
-- Node.js (v22 or higher)
+- Node.js (v26 or higher)
 - yarn (v4 or higher)
 
 ### Installation
