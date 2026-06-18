@@ -87,17 +87,7 @@ export default defineConfig({
   ],
   build: {
     outDir: 'dist',
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info', 'console.debug'],
-      },
-      mangle: {
-        safari10: true,
-      },
-    },
+    minify: 'esbuild',
     cssCodeSplit: true,
     rolldownOptions: {
       output: {
@@ -130,6 +120,7 @@ export default defineConfig({
       treeshake: true,
     },
     sourcemap: false,
+    chunkSizeWarningLimit: 1000,
   },
   resolve: {
     alias: {},
