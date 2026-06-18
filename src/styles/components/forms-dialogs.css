@@ -233,7 +233,7 @@ select.input-select:focus {
   width: 100%;
 }
 
-@media (width <=767px) {
+@media --sm {
   .transaction-form.mobile-optimized {
     min-height: calc(
       100vh - 120px
@@ -470,7 +470,7 @@ select.input-select:focus {
   color: var(--color-text-main);
 }
 
-@media (min-width: var(--breakpoint-md)) {
+@media --md {
   .mobile-date-range-form {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -483,7 +483,7 @@ select.input-select:focus {
   }
 }
 
-@media (width <=calc(var(--breakpoint-md) - 1px)) {
+@media --sm {
   input:focus {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
@@ -548,7 +548,7 @@ select.input-select:focus {
   margin-bottom: var(--spacing-xs);
 }
 
-@media (width <= 480px) {
+@media --sm {
   .type-toggle-group {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -678,7 +678,7 @@ select.input-select:focus {
   gap: var(--spacing-xs);
 }
 
-@media (width <= 480px) {
+@media --sm {
   .quick-amount-presets {
     gap: var(--spacing-xs);
   }

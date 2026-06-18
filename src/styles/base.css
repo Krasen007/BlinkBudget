@@ -83,7 +83,7 @@ input[type='number'] {
   width: var(--spacing-xs);
 }
 
-@media (min-width: var(--breakpoint-md)) {
+@media --md {
   ::-webkit-scrollbar {
     width: var(--spacing-sm);
   }
@@ -146,7 +146,7 @@ p {
   margin-bottom: var(--spacing-md);
 }
 
-@media (min-width: var(--breakpoint-md)) {
+@media --md {
   h1 {
     font-size: var(--font-size-4xl);
   }

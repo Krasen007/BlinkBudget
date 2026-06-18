@@ -309,7 +309,7 @@
   font-family: var(--font-body);
 }
 
-@media (min-width: var(--breakpoint-md)) {
+@media --md {
   .mobile-back-btn {
     display: none;
   }
