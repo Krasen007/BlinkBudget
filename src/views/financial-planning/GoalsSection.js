@@ -816,7 +816,7 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
   // Add goal recommendations based on spending patterns
   try {
     const { StorageService } = await import('../../core/storage.js');
-    const transactions = StorageService.getTransactions() || [];
+    const transactions = StorageService.getAllTransactions() || [];
     const { SavingsGoalsService } =
       await import('../../core/savings-goals-service.js');
     const recommendations =
