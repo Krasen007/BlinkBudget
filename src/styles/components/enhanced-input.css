@@ -45,7 +45,7 @@
   padding: var(--spacing-sm) var(--spacing-md);
   transition: var(--transition-normal);
   box-sizing: border-box;
-  -webkit-appearance: none;
+  appearance: none;
   appearance: none;
 }
 
@@ -211,13 +211,13 @@
 }
 
 .input-field[type='number'] {
-  -moz-appearance: textfield;
+  appearance: textfield;
   appearance: textfield;
 }
 
 .input-field[type='number']::-webkit-inner-spin-button,
 .input-field[type='number']::-webkit-outer-spin-button {
-  -webkit-appearance: none;
+  appearance: none;
   appearance: none;
   margin: 0;
 }

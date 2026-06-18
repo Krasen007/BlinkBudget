@@ -135,7 +135,7 @@ body {
 
 .btn:focus {
   outline: none;
-  box-shadow: 0 0 0 2px hsla(250, 84%, 60%, 0.3);
+  box-shadow: 0 0 0 2px hsl(250, 84%, 60%, 0.3);
 }
 
 .btn:focus-visible {
@@ -169,7 +169,7 @@ body {
 .view-select:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px hsla(250, 84%, 60%, 0.3);
+  box-shadow: 0 0 0 2px hsl(250, 84%, 60%, 0.3);
 }
 
 .view-select:focus-visible {
@@ -207,7 +207,7 @@ body {
 .mobile-nav-item:focus {
   outline: none;
   border-radius: 8px;
-  box-shadow: 0 0 0 2px hsla(250, 84%, 60%, 0.3);
+  box-shadow: 0 0 0 2px hsl(250, 84%, 60%, 0.3);
 }
 
 .mobile-nav-item:focus-visible {

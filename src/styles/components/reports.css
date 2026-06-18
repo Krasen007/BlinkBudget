@@ -69,7 +69,7 @@
   font-size: 0.85rem; /* Slightly smaller text */
   position: relative;
   z-index: 2; /* Higher than canvas but same as section */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Subtle depth */
+  box-shadow: 0 4px 12px rgb(0, 0, 0, 0.1); /* Subtle depth */
 }
 
 /* Scroll affordance for better UX */
@@ -145,7 +145,7 @@
   font-size: 0.875rem !important;
   padding: 8px 12px !important;
   border-radius: 6px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 0 4px 12px rgb(0, 0, 0, 0.15) !important;
   z-index: 1000 !important;
   position: absolute;
   pointer-events: none;

@@ -341,7 +341,7 @@
   background: linear-gradient(
     135deg,
     var(--color-surface) 0%,
-    rgba(59, 130, 246, 0.1) 100%
+    rgb(59, 130, 246, 0.1) 100%
   );
 }
 
@@ -350,7 +350,7 @@
   background: linear-gradient(
     135deg,
     var(--color-surface) 0%,
-    rgba(34, 197, 94, 0.1) 100%
+    rgb(34, 197, 94, 0.1) 100%
   );
 }
 
@@ -359,7 +359,7 @@
   background: linear-gradient(
     135deg,
     var(--color-surface) 0%,
-    rgba(234, 179, 8, 0.1) 100%
+    rgb(234, 179, 8, 0.1) 100%
   );
 }
 
@@ -368,7 +368,7 @@
   background: linear-gradient(
     135deg,
     var(--color-surface) 0%,
-    rgba(239, 68, 68, 0.1) 100%
+    rgb(239, 68, 68, 0.1) 100%
   );
 }
 

@@ -72,7 +72,7 @@
 
   /* Success colors */
   --color-success: hsl(150, 100%, 35%);
-  --color-success-light: hsla(150, 100%, 35%, 0.1);
+  --color-success-light: hsl(150, 100%, 35%, 0.1);
   --color-success-dark: hsl(150, 100%, 25%);
 
   /* Semantic colors - Missing tokens from audit */
@@ -303,7 +303,7 @@
   --color-muted: hsl(240, 5%, 25%);
   --color-muted-dark: hsl(240, 5%, 15%);
   --color-accent: hsl(280, 100%, 60%);
-  --color-accent-light: hsla(280, 100%, 60%, 0.1);
+  --color-accent-light: hsl(280, 100%, 60%, 0.1);
   --color-accent-dark: hsl(280, 100%, 50%);
 }
 

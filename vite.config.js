@@ -8,7 +8,6 @@ import postcssCustomMedia from 'postcss-custom-media';
 import postcssPresetEnv from 'postcss-preset-env';
 import postcssCalc from 'postcss-calc';
 import postcssSorting from 'postcss-sorting';
-import postcssLogicalProperties from 'postcss-logical-properties';
 import postcssColorFunctionalNotation from 'postcss-color-functional-notation';
 import autoprefixer from 'autoprefixer';
 import purgecss from '@fullhuman/postcss-purgecss';
@@ -155,7 +154,6 @@ export default defineConfig({
           },
         }),
         postcssCalc({ preserve: false }),
-        postcssLogicalProperties(),
         postcssColorFunctionalNotation(),
         ...(process.env.NODE_ENV !== 'production'
           ? [
