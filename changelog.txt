@@ -1,14 +1,3 @@
-v1.38 → v1.39
-
-- Reports: Fixed button filtering logic to properly toggle between expense, income, and all transactions.
-- Reports: Corrected category breakdown calculation — removed the hard filter that was silently dropping zero and negative amounts in CategoryCard insights.
-- Forecast: Fixed inaccurate projection calculations for more reliable spending predictions.
-- Security: Fixed inverted sanitization logic in sanitizeHtml() that could allow dangerous content through.
-- Tags: Introduced a 3-state tag filter — tap once to include transactions with the tag, tap twice to exclude them, tap a third time to restore the default state.
-- Mobile: Fixed minus-sign detection on mobile devices for proper negative number input.
-- General: Code cleanup and minor calculation fixes throughout the app.
-
----
 v1.39 → v1.40
 
 - Updated stylelint to version 17 with the latest standard ruleset, keeping the project's linting in sync with current best practices.

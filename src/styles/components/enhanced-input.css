@@ -46,7 +46,6 @@
   transition: var(--transition-normal);
   box-sizing: border-box;
   appearance: none;
-  appearance: none;
 }
 
 .input-field:focus {
@@ -212,189 +211,191 @@
 
 .input-field[type='number'] {
   appearance: textfield;
-  appearance: textfield;
-}
 
-.input-field[type='number']::-webkit-inner-spin-button,
-.input-field[type='number']::-webkit-outer-spin-button {
-  appearance: none;
-  appearance: none;
-  margin: 0;
-}
-
-/* Input Validation States */
-.input-field:focus:valid,
-.input-field.user-valid {
-  border-color: var(--color-success);
-}
-
-.input-field:focus:invalid,
-.input-field.user-invalid {
-  border-color: var(--color-error);
-}
-
-/* Responsive Input Adjustments */
-@media (--md) {
-  .input-small .input-field {
-    min-height: var(--touch-target-min);
-    padding: var(--spacing-sm) var(--spacing-md);
+  .input-field[type='number'] {
+    appearance: textfield;
   }
 
-  .input-medium .input-field {
-    min-height: var(--touch-target-standard);
-    padding: var(--spacing-md) var(--spacing-lg);
+  .input-field[type='number']::-webkit-inner-spin-button,
+  .input-field[type='number']::-webkit-outer-spin-button {
+    appearance: none;
+    margin: 0;
   }
 
-  .input-large .input-field {
-    min-height: 48px;
-    padding: var(--spacing-lg) var(--spacing-xl);
+  /* Input Validation States */
+  .input-field:focus:valid,
+  .input-field.user-valid {
+    border-color: var(--color-success);
   }
-}
 
-/* Performance Optimizations */
-.input-field {
-  will-change: border-color, background-color, box-shadow;
-}
+  .input-field:focus:invalid,
+  .input-field.user-invalid {
+    border-color: var(--color-error);
+  }
 
-.input-field:focus {
-  will-change: border-color, background-color, box-shadow;
-}
+  /* Responsive Input Adjustments */
+  @media (--md) {
+    .input-small .input-field {
+      min-height: var(--touch-target-min);
+      padding: var(--spacing-sm) var(--spacing-md);
+    }
 
-/* Reduced Motion Support */
-@media (prefers-reduced-motion: reduce) {
+    .input-medium .input-field {
+      min-height: var(--touch-target-standard);
+      padding: var(--spacing-md) var(--spacing-lg);
+    }
+
+    .input-large .input-field {
+      min-height: 48px;
+      padding: var(--spacing-lg) var(--spacing-xl);
+    }
+  }
+
+  /* Performance Optimizations */
   .input-field {
-    transition: none;
+    will-change: border-color, background-color, box-shadow;
   }
 
   .input-field:focus {
-    transition: none;
-  }
-}
-
-/* High Contrast Mode Support */
-@media (prefers-contrast: high) {
-  .input-field {
-    border-width: 2px;
-    border-color: var(--color-text-main);
+    will-change: border-color, background-color, box-shadow;
   }
 
-  .input-field:focus {
-    border-width: 3px;
-  }
-}
+  /* Reduced Motion Support */
+  @media (prefers-reduced-motion: reduce) {
+    .input-field {
+      transition: none;
+    }
 
-/* Light Mode Support (if implemented) */
-@media (prefers-color-scheme: light) {
-  .input-field {
-    background-color: var(--color-background);
-    color: var(--color-text-main);
-    border-color: var(--color-border-strong);
+    .input-field:focus {
+      transition: none;
+    }
   }
 
-  .input-field::placeholder {
-    color: var(--color-muted);
+  /* High Contrast Mode Support */
+  @media (prefers-contrast: high) {
+    .input-field {
+      border-width: 2px;
+      border-color: var(--color-text-main);
+    }
+
+    .input-field:focus {
+      border-width: 3px;
+    }
   }
-}
 
-/* Input Groups */
-.input-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-}
+  /* Light Mode Support (if implemented) */
+  @media (prefers-color-scheme: light) {
+    .input-field {
+      background-color: var(--color-background);
+      color: var(--color-text-main);
+      border-color: var(--color-border-strong);
+    }
 
-.input-group-horizontal {
-  flex-direction: row;
-  align-items: flex-end;
-  gap: var(--spacing-md);
-}
+    .input-field::placeholder {
+      color: var(--color-muted);
+    }
+  }
 
-.input-group-horizontal .enhanced-input {
-  flex: 1;
-}
+  /* Input Groups */
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
 
-/* Input with Actions */
-.input-with-action {
-  display: flex;
-  gap: var(--spacing-sm);
-}
+  .input-group-horizontal {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: var(--spacing-md);
+  }
 
-.input-with-action .input-field {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
+  .input-group-horizontal .enhanced-input {
+    flex: 1;
+  }
 
-.input-with-action .btn {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
+  /* Input with Actions */
+  .input-with-action {
+    display: flex;
+    gap: var(--spacing-sm);
+  }
 
-/* Loading State */
-.input-loading .input-field {
-  background-image: linear-gradient(
-    90deg,
-    var(--color-surface) 0%,
-    var(--color-surface-hover) 50%,
-    var(--color-surface) 100%
-  );
-  background-size: 200% 100%;
-  animation: input-shimmer 1.5s linear infinite;
-}
+  .input-with-action .input-field {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
 
-@media (prefers-reduced-motion: reduce) {
+  .input-with-action .btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  /* Loading State */
   .input-loading .input-field {
-    animation: none;
-    background-position: 0 0;
+    background-image: linear-gradient(
+      90deg,
+      var(--color-surface) 0%,
+      var(--color-surface-hover) 50%,
+      var(--color-surface) 100%
+    );
+    background-size: 200% 100%;
+    animation: input-shimmer 1.5s linear infinite;
   }
-}
 
-@keyframes input-shimmer {
-  0% {
-    background-position: -200% 0;
+  @media (prefers-reduced-motion: reduce) {
+    .input-loading .input-field {
+      animation: none;
+      background-position: 0 0;
+    }
   }
 
-  100% {
-    background-position: 200% 0;
+  @keyframes input-shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+
+    100% {
+      background-position: 200% 0;
+    }
   }
-}
 
-/* Character Counter */
-.input-character-counter {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-  text-align: right;
-  margin-top: var(--spacing-xs);
-}
+  /* Character Counter */
+  .input-character-counter {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    text-align: right;
+    margin-top: var(--spacing-xs);
+  }
 
-.input-character-counter.warning {
-  color: var(--color-warning);
-}
+  .input-character-counter.warning {
+    color: var(--color-warning);
+  }
 
-.input-character-counter.error {
-  color: var(--color-error);
-}
+  .input-character-counter.error {
+    color: var(--color-error);
+  }
 
-/* Clear Button for Search Inputs */
-.input-clear {
-  position: absolute;
-  right: var(--spacing-sm);
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  padding: var(--spacing-xs);
-  border-radius: var(--radius-full);
-  opacity: 0;
-  transition: var(--transition-fast);
-}
+  /* Clear Button for Search Inputs */
+  .input-clear {
+    position: absolute;
+    right: var(--spacing-sm);
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-full);
+    opacity: 0;
+    transition: var(--transition-fast);
+  }
 
-.input-clear:hover {
-  color: var(--color-text-main);
-  background-color: var(--color-surface-hover);
-}
+  .input-clear:hover {
+    color: var(--color-text-main);
+    background-color: var(--color-surface-hover);
+  }
 
-.input-wrapper:not(.input-empty) .input-clear {
-  opacity: 1;
+  .input-wrapper:not(.input-empty) .input-clear {
+    opacity: 1;
+  }
 }
