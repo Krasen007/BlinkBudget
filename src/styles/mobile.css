@@ -90,7 +90,9 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .mobile-modal-close:hover {
@@ -133,7 +135,9 @@
   font-size: var(--font-size-base);
   font-weight: 500;
   border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .mobile-confirm-btn.touch-active {

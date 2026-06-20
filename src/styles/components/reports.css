@@ -560,9 +560,9 @@
 }
 
 /* Responsive animation adjustments */
-@media (width <= 768px) {
+@media (hover: none) {
   .charts-section canvas:hover {
-    transform: none; /* Disable hover transforms on mobile */
+    transform: none; /* Disable hover transforms on touch devices */
     box-shadow: 0 4px 12px rgb(0, 0, 0, 0.15);
   }
 
@@ -630,7 +630,9 @@
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    color 0.2s var(--ease-out),
+    background-color 0.2s var(--ease-out);
   text-align: left;
   width: 100%;
   position: relative;

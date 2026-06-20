@@ -639,7 +639,9 @@ select.input-select:focus {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
   outline: none;
   display: flex;
   align-items: center;

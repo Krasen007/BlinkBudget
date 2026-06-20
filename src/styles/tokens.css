@@ -103,8 +103,8 @@
   --focus-shadow-subtle: 0 0 0 2px hsl(250, 84%, 60%, 0.15);
 
   /* Focus transitions */
-  --focus-transition: all 150ms ease;
-  --focus-transition-fast: all 100ms ease;
+  --focus-transition: box-shadow 150ms ease, outline 150ms ease;
+  --focus-transition-fast: box-shadow 100ms ease, outline 100ms ease;
 }
 
 /* spacing.css */
@@ -218,10 +218,12 @@
   --duration-slow: 350ms;
 
   /* Animation properties */
-  --animation-interactive: var(--duration-fast) var(--ease-in-out);
+  --animation-interactive:
+    transform var(--duration-fast) var(--ease-in-out),
+    box-shadow var(--duration-fast) var(--ease-in-out);
   --animation-smooth: var(--duration-normal) var(--ease-out);
   --animation-entrance: var(--duration-normal) var(--ease-out);
-  --animation-exit: var(--duration-fast) var(--ease-in);
+  --animation-exit: var(--duration-fast) var(--ease-out);
 
   /* WebApp.md Additional Design Tokens */
 
@@ -259,9 +261,13 @@
 
   /* Interactive element animations */
   --hover-scale: scale(0.98);
+  --hover-lift: translateY(-1px);
+  --hover-lift-shadow: var(--shadow-md);
   --active-scale: scale(0.96);
-  --transition-hover: var(--duration-fast) var(--ease-out);
-  --transition-active: var(--duration-fast) var(--ease-in);
+  --transition-hover:
+    transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+  --transition-active: transform var(--duration-fast) var(--ease-out);
 
   /* Page transition animations */
   --page-transition-translate-y: 8px;

@@ -119,14 +119,16 @@ body {
   font-weight: 500;
   text-decoration: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    transform 0.2s var(--ease-out),
+    box-shadow 0.2s var(--ease-out);
   min-height: 44px;
   min-width: 44px;
 }
 
 .btn-primary {
   background-color: var(--color-primary);
-  color: white;
+  color: var(--color-text-main);
 }
 
 .btn-primary:hover {
@@ -234,7 +236,7 @@ body {
   top: -40px;
   left: 6px;
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text-main);
   padding: 8px;
   text-decoration: none;
   border-radius: 4px;

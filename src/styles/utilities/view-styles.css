@@ -308,7 +308,9 @@
   background: var(--color-surface);
   color: var(--color-text-main);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    transform 0.2s var(--ease-out),
+    box-shadow 0.2s var(--ease-out);
   min-height: 44px; /* Strict touch target */
   min-width: 60px;
   font-weight: 600;
@@ -446,7 +448,9 @@
   white-space: normal;
   text-align: center;
   line-height: 1.2;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.2s var(--ease-out),
+    color 0.2s var(--ease-out);
   min-width: 0;
   width: 100%;
   min-height: 44px;
@@ -462,7 +466,7 @@
 
 .view-tab[aria-selected='true'] {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text-main);
 }
 
 .view-tab:hover:not([aria-selected='true']) {
@@ -777,22 +781,22 @@
 
 .view-bg-primary {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text-main);
 }
 
 .view-bg-success {
   background: var(--color-success);
-  color: white;
+  color: var(--color-text-main);
 }
 
 .view-bg-error {
   background: var(--color-error);
-  color: white;
+  color: var(--color-text-main);
 }
 
 .view-bg-warning {
   background: var(--color-warning);
-  color: white;
+  color: var(--color-text-main);
 }
 
 /* Text utilities */
@@ -857,15 +861,21 @@
 
 /* Transition utilities */
 .view-transition {
-  transition: all 0.2s ease;
+  transition:
+    transform 0.2s var(--ease-out),
+    box-shadow 0.2s var(--ease-out);
 }
 
 .view-transition-fast {
-  transition: all 0.1s ease;
+  transition:
+    transform 0.1s var(--ease-out),
+    box-shadow 0.1s var(--ease-out);
 }
 
 .view-transition-slow {
-  transition: all 0.3s ease;
+  transition:
+    transform 0.3s var(--ease-out),
+    box-shadow 0.3s var(--ease-out);
 }
 
 .view-transition-none {
@@ -874,7 +884,7 @@
 
 /* Animation utilities */
 .view-fade-in {
-  animation: fadeIn 0.3s ease-in;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .view-fade-out {

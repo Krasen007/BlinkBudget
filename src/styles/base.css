@@ -60,6 +60,12 @@ input[type='number'] {
   appearance: textfield;
 }
 
+/* Tabular numerals for monetary/numeric consistency */
+.amount,
+[data-numeric] {
+  font-variant-numeric: tabular-nums;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -115,6 +121,7 @@ h6 {
   font-weight: 700;
   color: var(--color-text-main);
   margin-bottom: var(--spacing-md);
+  text-wrap: balance;
 }
 
 h1 {
@@ -144,6 +151,7 @@ p {
   color: var(--color-text-muted);
   line-height: var(--line-height-relaxed);
   margin-bottom: var(--spacing-md);
+  text-wrap: pretty;
 }
 
 @media --md {
@@ -180,7 +188,7 @@ p {
   padding: var(--spacing-xl);
   text-align: center;
   background: var(--color-background);
-  animation: fadeIn 0.5s ease-in;
+  animation: fadeIn 0.5s ease-out;
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -229,7 +237,9 @@ p {
   border-radius: var(--radius-md);
   font-size: 0.875rem;
   color: var(--color-text-main);
-  transition: all 0.2s ease;
+  transition:
+    transform 0.2s var(--ease-out),
+    box-shadow 0.2s var(--ease-out);
 }
 
 .feature-item:hover {

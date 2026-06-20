@@ -32,11 +32,15 @@
   box-shadow: var(--focus-shadow);
 }
 
-.btn:hover {
-  transform: var(--hover-scale);
-  box-shadow: var(--shadow-button);
+/* Hover lift only on devices that support hover */
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover {
+    transform: var(--hover-lift);
+    box-shadow: var(--hover-lift-shadow);
+  }
 }
 
+/* Active press works on all devices (touch + mouse) */
 .btn:active {
   transform: var(--active-scale);
 }
@@ -55,17 +59,17 @@
 
 .btn-success {
   background-color: var(--color-success);
-  color: white;
+  color: var(--color-text-main);
 }
 
 .btn-warning {
   background-color: var(--color-warning);
-  color: white;
+  color: var(--color-text-main);
 }
 
 .btn-error {
   background-color: var(--color-error);
-  color: white;
+  color: var(--color-text-main);
 }
 
 /* Button Sizes */

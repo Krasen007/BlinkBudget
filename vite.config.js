@@ -92,7 +92,10 @@ export default defineConfig({
       output: {
         codeSplitting: {
           groups: [
-            { name: 'firebase', test: /[\\/]node_modules[\\/](@?firebase)[\\/]/ },
+            {
+              name: 'firebase',
+              test: /[\\/]node_modules[\\/](@?firebase)[\\/]/,
+            },
             { name: 'charts', test: /[\\/]node_modules[\\/]chart\.js[\\/]/ },
             { name: 'vendor', test: /[\\/]node_modules[\\/]/ },
           ],
@@ -129,9 +132,9 @@ export default defineConfig({
     host: true,
     port: 4173,
   },
-    css: {
-      minify: 'lightningcss',
-      postcss: {
+  css: {
+    minify: 'lightningcss',
+    postcss: {
       plugins: [
         postcssImport,
         postcssNested,

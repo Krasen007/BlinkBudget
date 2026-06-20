@@ -78,12 +78,3 @@ Creeping towards complex financial tracking. Adding limits, thresholds, and warn
 
 [ ] Add basic client-side security monitoring for failed login attempts...
 Over-engineering. Not necessary for this type of lightweight app.
-
-update dependencies
-Package Current Latest Notes
-// cssnano ^7.x 8.x API changes
-// jsdom ^28.x 29.x Vitest dep — upgrade together
-// postcss-sorting ^9.x 10.x Config format may change
-stylelint ^16.x 17.x Rule changes likely
-stylelint-config-standard ^36.x 40.x Must align with stylelint major
-vite ^7.x 8.x Node 18 dropped, config changes
