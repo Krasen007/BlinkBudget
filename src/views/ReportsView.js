@@ -248,9 +248,7 @@ export const ReportsView = (params = {}) => {
 
     // Left side with back button and title
     const leftSide = document.createElement('div');
-    leftSide.style.display = 'flex';
-    leftSide.style.alignItems = 'center';
-    leftSide.style.gap = SPACING.XS;
+    leftSide.className = 'reports-header-left';
 
     // Back button (always visible)
     const backButton = document.createElement('button');
@@ -1052,11 +1050,7 @@ export const ReportsView = (params = {}) => {
         section = document.createElement('div');
         section.className = 'category-selector-section';
         section.id = 'category-selector-section';
-        section.style.clear = 'both';
-        section.style.position = 'relative';
-        section.style.zIndex = '2';
-        section.style.marginTop = SPACING.XS;
-        section.style.marginBottom = SPACING.XS;
+        section.className = 'reports-section-spacer reports-section-spacer--top';
         chartContainer.appendChild(section);
         sectionContainers.categorySelector = section;
       }
@@ -1216,11 +1210,7 @@ export const ReportsView = (params = {}) => {
         section = document.createElement('div');
         section.className = 'income-expense-section';
         section.id = 'income-expense-section';
-        section.style.position = 'relative';
-        section.style.zIndex = '1';
-        section.style.clear = 'both';
-        section.style.marginTop = SPACING.XS;
-        section.style.marginBottom = SPACING.XS;
+        section.className = 'reports-section-spacer';
         chartContainer.appendChild(section);
         sectionContainers.incomeExpense = section;
       }

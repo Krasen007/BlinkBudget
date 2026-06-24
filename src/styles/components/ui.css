@@ -218,6 +218,7 @@
 .toast-container {
   position: fixed;
   top: var(--spacing-md);
+  left: var(--spacing-md);
   right: var(--spacing-md);
   z-index: 10000;
   pointer-events: none;

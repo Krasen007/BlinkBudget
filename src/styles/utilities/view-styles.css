@@ -198,6 +198,130 @@
   }
 }
 
+/* ReportsView layout utilities (migrated from inline styles) */
+.reports-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+.reports-filter-row {
+  margin-bottom: var(--spacing-xs);
+}
+
+.reports-select {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.reports-select-hidden {
+  display: none;
+}
+
+.reports-presets-wrapper {
+  margin: 0;
+  padding: 0;
+}
+
+.reports-full-button {
+  width: 100%;
+  margin: 0;
+  margin-bottom: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+.reports-filter-status {
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.reports-filter-status:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: var(--color-surface-elevated);
+}
+
+.reports-section-spacer {
+  position: relative;
+  z-index: 1;
+  clear: both;
+  margin-top: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
+}
+
+.reports-section-spacer--top {
+  z-index: 2;
+  margin-top: var(--spacing-xs);
+}
+
+.reports-section-spacer--insights {
+  margin-top: 0;
+}
+
+.reports-section-spacer--charts-bottom {
+  clear: both;
+  position: relative;
+  z-index: 1;
+  margin-top: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
+}
+
+.reports-alerts-section {
+  margin-top: var(--spacing-lg);
+}
+
+.reports-content-box {
+  display: flex;
+  max-width: 100%;
+  box-sizing: border-box;
+  gap: var(--spacing-xs);
+}
+
+.reports-chart-section {
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.reports-title-responsive {
+  font-size: 2rem;
+}
+
+@media (--sm) {
+  .reports-title-responsive {
+    font-size: 1.5rem;
+  }
+}
+
+@media (--md) {
+  .reports-title-responsive {
+    font-size: 1.75rem;
+  }
+}
+
+@media (--lg) {
+  .reports-title-responsive {
+    font-size: 2rem;
+  }
+}
+
+.reports-category-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+}
+
 /* Desktop-specific adjustments */
 @media (--lg) {
   .view-container {

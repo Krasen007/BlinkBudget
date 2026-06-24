@@ -173,11 +173,7 @@ export const FinancialPlanningView = (params = {}) => {
 
     // Left side with back button and title
     const leftSide = document.createElement('div');
-    leftSide.style.display = 'flex';
-    leftSide.style.alignItems = 'center';
-    leftSide.style.gap = SPACING.MD;
-    leftSide.style.minWidth = '0';
-    leftSide.style.flexShrink = '1';
+    leftSide.className = 'reports-header-left';
 
     // Back button (always visible)
     const backButton = document.createElement('button');
