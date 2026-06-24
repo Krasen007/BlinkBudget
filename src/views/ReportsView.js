@@ -1307,13 +1307,7 @@ export const ReportsView = (params = {}) => {
 
     const title = content.querySelector('h2');
     if (title) {
-      if (isMobile) {
-        title.style.fontSize = '1.5rem';
-      } else if (isTablet) {
-        title.style.fontSize = '1.75rem';
-      } else {
-        title.style.fontSize = '2rem';
-      }
+      title.className = 'view-title reports-title-responsive';
     }
 
     // Layout updates for mobile

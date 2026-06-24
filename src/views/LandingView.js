@@ -2,6 +2,14 @@ import { Router } from '../core/router.js';
 import { ButtonComponent } from '../components/Button.js';
 
 export const LandingView = () => {
+  // Inject hero.css only when landing page is rendered
+  if (!document.querySelector('link[href="/src/styles/hero.css"]')) {
+    const heroStyles = document.createElement('link');
+    heroStyles.rel = 'stylesheet';
+    heroStyles.href = '/src/styles/hero.css';
+    document.head.appendChild(heroStyles);
+  }
+
   const container = document.createElement('div');
   container.className = 'view-landing';
   // Remove height/overflow constraints to allow document-level scrolling

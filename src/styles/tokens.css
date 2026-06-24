@@ -62,6 +62,9 @@
     65%
   ); /* Brightened from 25% to 65% for better readability */
 
+  /* Alias for compatibility with JS references */
+  --color-text-secondary: var(--color-text-muted);
+
   --color-text-inverse: hsl(240, 10%, 95%);
 
   /* Border colors */

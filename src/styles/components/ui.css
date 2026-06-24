@@ -71,8 +71,12 @@
   border-radius: inherit;
   background: rgb(255, 255, 255, 0.1);
   opacity: 0;
-  /* Remove transition animation */
+  will-change: opacity;
   pointer-events: none;
+}
+
+.btn:not(:active)::before {
+  will-change: auto;
 }
 
 .btn:active::before,
@@ -229,6 +233,15 @@
   width: 100%;
 }
 
+@media (width <= 360px) {
+  .toast-container {
+    left: var(--spacing-sm);
+    right: var(--spacing-sm);
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
 .toast {
   color: var(--color-text-main);
   padding: var(--spacing-sm) var(--spacing-md);
@@ -329,6 +342,15 @@
     transform 0.3s ease-out,
     opacity 0.3s ease-out;
   will-change: transform, opacity;
+}
+
+@media (width <= 360px) {
+  .toast-notification {
+    left: var(--spacing-sm);
+    right: var(--spacing-sm);
+    min-width: 0;
+    max-width: 100%;
+  }
 }
 
 .toast-notification.toast-visible {

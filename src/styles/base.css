@@ -46,6 +46,14 @@ body {
   height: 100%; /* Force height to fill parent */
 }
 
+/* Enforce minimum font size to prevent iOS Safari zoom on focus (WCAG 1.4.4) */
+input,
+select,
+textarea,
+button {
+  font-size: var(--font-size-prevent-zoom);
+}
+
 input {
   appearance: none;
 }
@@ -178,168 +186,7 @@ p {
   }
 }
 
-/* hero.css */
-.hero-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  padding: var(--spacing-xl);
-  text-align: center;
-  background: var(--color-background);
-  animation: fadeIn 0.5s ease-out;
-  overflow: hidden;
-  box-sizing: border-box;
-}
-
-.hero-icon {
-  margin-bottom: var(--spacing-lg);
-}
-
-.hero-icon img {
-  width: 80px;
-  height: 80px;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-}
-
-.hero-placeholder h2 {
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: var(--color-text-main);
-  margin: 0 0 var(--spacing-sm) 0;
-}
-
-.hero-tagline {
-  font-size: 1.25rem;
-  color: var(--color-primary);
-  font-weight: 600;
-  margin: 0 0 var(--spacing-xl) 0;
-}
-
-.hero-features {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-xl);
-  max-width: 600px;
-  width: 100%;
-}
-
-.feature-item {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  color: var(--color-text-main);
-  transition:
-    transform 0.2s var(--ease-out),
-    box-shadow 0.2s var(--ease-out);
-}
-
-.feature-item:hover {
-  border-color: var(--color-primary);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.feature-icon {
-  font-size: 1.5rem;
-  line-height: 1;
-}
-
-.hero-description {
-  font-size: 1rem;
-  color: var(--color-text-muted);
-  max-width: 600px;
-  line-height: 1.6;
-  margin: 0 0 var(--spacing-xl) 0;
-}
-
-@media (--sm) {
-  .hero-placeholder {
-    padding: var(--spacing-md);
-  }
-
-  .hero-icon img {
-    width: 64px;
-    height: 64px;
-  }
-
-  .hero-placeholder h2 {
-    font-size: 2rem;
-  }
-
-  .hero-tagline {
-    font-size: 1.125rem;
-  }
-
-  .hero-features {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-sm);
-  }
-
-  .feature-item {
-    padding: var(--spacing-sm);
-    font-size: 0.8125rem;
-  }
-
-  .hero-description {
-    font-size: 0.9375rem;
-  }
-}
-
-@media (--md) {
-  .hero-features {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (--lg) {
-  .hero-placeholder h2 {
-    font-size: 3rem;
-  }
-
-  .hero-tagline {
-    font-size: 1.5rem;
-  }
-
-  .hero-description {
-    font-size: 1.125rem;
-  }
-}
-
-/* Landing View - Allow scrolling */
-.view-landing {
-  overflow-y: auto;
-  height: auto;
-  min-height: 100vh;
-}
-
-.view-landing .hero-placeholder {
-  height: auto;
-  min-height: 100vh;
-  overflow: visible;
-  padding: var(--spacing-xl) var(--spacing-md) var(--spacing-xl)
-    var(--spacing-md);
-}
-
-/* Hide mobile navigation on landing page */
-.view-landing ~ .mobile-nav,
-body:has(.view-landing) .mobile-nav {
-  display: none !important;
-}
-
-/* Hide network status on landing page */
-.view-landing ~ .network-status,
-body:has(.view-landing) .network-status {
-  display: none !important;
-}
+/* Hero styles moved to hero.css for conditional loading on landing page only */
 
 /* Accessibility */
 .visually-hidden {
