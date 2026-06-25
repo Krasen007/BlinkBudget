@@ -13,13 +13,14 @@ export const BREAKPOINTS = {
 // Global colors and Currency
 export const CURRENCY_SYMBOL = '€';
 export const COLORS = {
-  // Semantic colors
-  ERROR: '#ef4444',
-  SUCCESS: '#10b981',
-  SUCCESS_LIGHT: 'rgba(16, 185, 129, 0.1)',
-  WARNING: '#f97316',
-  INFO: '#06b6d4',
-  INCOME_COLOR: 'rgba(34, 197, 94, 1)',
+  // Semantic colors — now all CSS variable references for full theming support
+  ERROR: 'var(--color-error)',
+  SUCCESS: 'var(--color-success)',
+  SUCCESS_LIGHT: 'var(--color-success-light)',
+  WARNING: 'var(--color-warning)',
+  INFO: 'var(--color-info)',
+  INCOME_COLOR: 'var(--color-success)',
+  INCOME_COLOR_RGB: 'var(--color-success-rgb)',
 
   // CSS variable references (for consistency)
   PRIMARY: 'var(--color-primary)',

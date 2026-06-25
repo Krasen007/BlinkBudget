@@ -119,6 +119,7 @@
 
 @media (--md) {
   .hero-features {
+    display: grid;
     grid-template-columns: repeat(2, 1fr);
   }
 }

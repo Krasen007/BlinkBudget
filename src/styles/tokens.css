@@ -64,7 +64,6 @@
 
   /* Alias for compatibility with JS references */
   --color-text-secondary: var(--color-text-muted);
-
   --color-text-inverse: hsl(240, 10%, 95%);
 
   /* Border colors */
@@ -75,17 +74,22 @@
 
   /* Success colors */
   --color-success: hsl(150, 100%, 35%);
+  --color-success-rgb:
+    34, 197, 94; /* RGB equivalent for rgba() usage in charts */
   --color-success-light: hsl(150, 100%, 35%, 0.1);
   --color-success-dark: hsl(150, 100%, 25%);
 
   /* Semantic colors - Missing tokens from audit */
   --color-warning: hsl(45, 100%, 50%);
+  --color-warning-rgb: 249, 115, 22;
   --color-warning-light: hsl(45, 100%, 95%);
   --color-warning-dark: hsl(45, 100%, 40%);
   --color-error: hsl(0, 85%, 60%);
+  --color-error-rgb: 239, 68, 68;
   --color-error-light: hsl(0, 85%, 95%);
   --color-error-dark: hsl(0, 85%, 40%);
   --color-info: hsl(190, 85%, 55%);
+  --color-info-rgb: 6, 182, 212;
   --color-info-light: hsl(190, 85%, 95%);
   --color-info-dark: hsl(190, 85%, 40%);
 

@@ -130,6 +130,12 @@ export async function createCategoryBreakdownChart(
 
   // Total Income (Left side) - clickable to filter dashboard by income
   const totalIncomeContainer = document.createElement('div');
+  totalIncomeContainer.setAttribute('role', 'button');
+  totalIncomeContainer.setAttribute('tabindex', '0');
+  totalIncomeContainer.setAttribute(
+    'aria-label',
+    'Filter dashboard by income transactions'
+  );
   totalIncomeContainer.style.display = 'flex';
   totalIncomeContainer.style.flexDirection = 'column';
   totalIncomeContainer.style.alignItems = 'flex-start';
@@ -137,6 +143,14 @@ export async function createCategoryBreakdownChart(
   totalIncomeContainer.style.transition = 'opacity 0.2s ease';
   totalIncomeContainer.title =
     'Click to filter dashboard by income transactions';
+
+  // Add keyboard handler for accessibility
+  totalIncomeContainer.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      totalIncomeContainer.click();
+    }
+  });
 
   const totalIncomeLabel = document.createElement('span');
   totalIncomeLabel.textContent = 'Total Income';
@@ -177,6 +191,12 @@ export async function createCategoryBreakdownChart(
 
   // Total Spent (Right side) - clickable to filter dashboard by expenses
   const totalSpentContainer = document.createElement('div');
+  totalSpentContainer.setAttribute('role', 'button');
+  totalSpentContainer.setAttribute('tabindex', '0');
+  totalSpentContainer.setAttribute(
+    'aria-label',
+    'Filter dashboard by expense transactions'
+  );
   totalSpentContainer.style.display = 'flex';
   totalSpentContainer.style.flexDirection = 'column';
   totalSpentContainer.style.alignItems = 'flex-end';
@@ -213,6 +233,14 @@ export async function createCategoryBreakdownChart(
   });
   totalSpentContainer.addEventListener('mouseleave', () => {
     totalSpentContainer.style.opacity = '1';
+  });
+
+  // Add keyboard handler for accessibility
+  totalSpentContainer.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      totalSpentContainer.click();
+    }
   });
 
   // Add click handler to filter dashboard by expenses and refunds
@@ -425,6 +453,12 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
 
   // Income div - clickable to filter dashboard by income
   const incomeDiv = document.createElement('div');
+  incomeDiv.setAttribute('role', 'button');
+  incomeDiv.setAttribute('tabindex', '0');
+  incomeDiv.setAttribute(
+    'aria-label',
+    'Filter dashboard by income transactions'
+  );
   incomeDiv.style.cursor = 'pointer';
   incomeDiv.style.transition = 'opacity 0.2s ease';
   incomeDiv.title = 'Click to filter dashboard by income transactions';
@@ -451,6 +485,14 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
     incomeDiv.style.opacity = '1';
   });
 
+  // Add keyboard handler for accessibility
+  incomeDiv.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      incomeDiv.click();
+    }
+  });
+
   // Add click handler to filter dashboard by income
   incomeDiv.addEventListener('click', () => {
     NavigationState.saveDashboardTypeFilter('income');
@@ -465,6 +507,12 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
 
   // Expenses div - clickable to filter dashboard by expenses
   const expensesDiv = document.createElement('div');
+  expensesDiv.setAttribute('role', 'button');
+  expensesDiv.setAttribute('tabindex', '0');
+  expensesDiv.setAttribute(
+    'aria-label',
+    'Filter dashboard by expense transactions'
+  );
   expensesDiv.style.cursor = 'pointer';
   expensesDiv.style.transition = 'opacity 0.2s ease';
   expensesDiv.title = 'Click to filter dashboard by expense transactions';
@@ -480,7 +528,7 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   expensesValue.textContent = formatCurrency(incomeExpenseData.totalExpenses);
   expensesValue.style.fontSize = '1.125rem';
   expensesValue.style.fontWeight = 'bold';
-  expensesValue.style.color = 'rgba(239, 68, 68, 1)';
+  expensesValue.style.color = 'var(--color-error)';
   expensesDiv.appendChild(expensesValue);
 
   // Add hover effect
@@ -489,6 +537,14 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   });
   expensesDiv.addEventListener('mouseleave', () => {
     expensesDiv.style.opacity = '1';
+  });
+
+  // Add keyboard handler for accessibility
+  expensesDiv.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      expensesDiv.click();
+    }
   });
 
   // Add click handler to filter dashboard by expenses and refunds
@@ -521,7 +577,7 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   netBalanceValue.style.color =
     incomeExpenseData.netBalance >= 0
       ? COLORS.INCOME_COLOR
-      : 'rgba(239, 68, 68, 1)';
+      : 'var(--color-error)';
   netBalanceDiv.appendChild(netBalanceValue);
 
   detailsContent.appendChild(netBalanceDiv);
@@ -557,18 +613,18 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
           incomeExpenseData.netBalance,
         ],
         backgroundColor: [
-          'rgba(34, 197, 94, 0.8)',
-          'rgba(239, 68, 68, 0.8)',
+          'rgba(var(--color-success-rgb), 0.8)',
+          'rgba(var(--color-error-rgb), 0.8)',
           incomeExpenseData.netBalance >= 0
-            ? 'rgba(34, 197, 94, 0.6)'
-            : 'rgba(239, 68, 68, 0.6)',
+            ? 'rgba(var(--color-success-rgb), 0.6)'
+            : 'rgba(var(--color-error-rgb), 0.6)',
         ],
         borderColor: [
-          COLORS.INCOME_COLOR,
-          'rgba(239, 68, 68, 1)',
+          'var(--color-success)',
+          'var(--color-error)',
           incomeExpenseData.netBalance >= 0
-            ? COLORS.INCOME_COLOR
-            : 'rgba(239, 68, 68, 1)',
+            ? 'var(--color-success)'
+            : 'var(--color-error)',
         ],
         borderWidth: 1,
       },

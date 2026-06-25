@@ -1050,7 +1050,8 @@ export const ReportsView = (params = {}) => {
         section = document.createElement('div');
         section.className = 'category-selector-section';
         section.id = 'category-selector-section';
-        section.className = 'reports-section-spacer reports-section-spacer--top';
+        section.className =
+          'reports-section-spacer reports-section-spacer--top';
         chartContainer.appendChild(section);
         sectionContainers.categorySelector = section;
       }

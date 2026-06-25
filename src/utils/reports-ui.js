@@ -415,7 +415,7 @@ export function showBrowserWarning(container, limitedFeatures) {
   warning.style.padding = SPACING.MD;
   warning.style.margin = `${SPACING.XS} 0`;
   warning.style.fontSize = '0.875rem';
-  warning.style.color = '#92400e';
+  warning.style.color = 'var(--color-warning-dark)';
 
   warning.innerHTML = `
         ⚠️ <strong>Limited Browser Support:</strong> 
@@ -431,7 +431,7 @@ export function showBrowserWarning(container, limitedFeatures) {
   closeBtn.style.border = 'none';
   closeBtn.style.fontSize = '1.2rem';
   closeBtn.style.cursor = 'pointer';
-  closeBtn.style.color = '#92400e';
+  closeBtn.style.color = 'var(--color-warning-dark)';
   closeBtn.addEventListener('click', () => warning.remove());
 
   warning.appendChild(closeBtn);
@@ -448,9 +448,9 @@ export function showPerformanceWarning(container, processingTime) {
       float: 'right',
       background: 'none',
       border: 'none',
-      fontSize: '1.2rem',
+      fontSize: '1.5rem',
       cursor: 'pointer',
-      color: '#92400e',
+      color: 'var(--color-warning-dark)',
     },
   });
 
@@ -462,7 +462,7 @@ export function showPerformanceWarning(container, processingTime) {
       padding: SPACING.MD,
       margin: `${SPACING.XS} 0`,
       fontSize: '0.875rem',
-      color: '#92400e',
+      color: 'var(--color-warning-dark)',
     },
     innerHTML: `
             ⏱️ <strong>Performance Notice:</strong> 
@@ -502,7 +502,7 @@ export function showChartRenderingWarning(container, failedCharts) {
       border: 'none',
       fontSize: '1.2rem',
       cursor: 'pointer',
-      color: '#dc2626',
+      color: 'var(--color-error)',
     },
   });
 
@@ -515,7 +515,7 @@ export function showChartRenderingWarning(container, failedCharts) {
       padding: SPACING.MD,
       margin: `${SPACING.XS} 0`,
       fontSize: '0.875rem',
-      color: '#dc2626',
+      color: 'var(--color-error)',
     },
     innerHTML: `
             ⚠️ <strong>Chart Rendering Issues:</strong> 
