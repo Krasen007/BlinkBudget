@@ -1050,8 +1050,8 @@ export const ReportsView = (params = {}) => {
         section = document.createElement('div');
         section.className = 'category-selector-section';
         section.id = 'category-selector-section';
-        section.className =
-          'reports-section-spacer reports-section-spacer--top';
+        // Preserve the section's semantic class and add spacer utilities
+        section.classList.add('reports-section-spacer', 'reports-section-spacer--top');
         chartContainer.appendChild(section);
         sectionContainers.categorySelector = section;
       }
@@ -1306,9 +1306,10 @@ export const ReportsView = (params = {}) => {
     const isLandscape = window.innerHeight < window.innerWidth;
     const isShortLandscape = isLandscape && window.innerHeight < 500;
 
-    const title = content.querySelector('h2');
+    // Target the Reports page heading directly to avoid selecting the first H2 inside content
+    const title = document.querySelector('#reports-title');
     if (title) {
-      title.className = 'view-title reports-title-responsive';
+      title.classList.add('reports-title-responsive');
     }
 
     // Layout updates for mobile

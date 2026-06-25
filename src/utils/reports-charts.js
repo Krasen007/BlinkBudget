@@ -12,6 +12,37 @@ import { escapeHtml } from './security-utils.js';
 import { Router } from '../core/router.js';
 import { NavigationState } from '../core/navigation-state.js';
 
+// Resolve CSS custom properties to computed color strings usable by Canvas/Chart.js
+function resolveCssVarColor(varName, alpha) {
+  try {
+    const root = getComputedStyle(document.documentElement);
+    const raw = root.getPropertyValue(varName).trim();
+    if (!raw) return null;
+
+    // If token is stored as 'r, g, b' components
+    if (/^\d+\s*,\s*\d+\s*,\s*\d+/.test(raw)) {
+      return `rgba(${raw}, ${alpha ?? 1})`;
+    }
+
+    // rgb(...) -> rgba(..., alpha)
+    if (raw.startsWith('rgb(')) {
+      if (alpha === undefined) return raw;
+      return raw.replace(/^rgb\(/, 'rgba(').replace(/\)$/, `, ${alpha})`);
+    }
+
+    // hsl(...) -> hsla(..., alpha)
+    if (raw.startsWith('hsl(')) {
+      if (alpha === undefined) return raw;
+      return raw.replace(/^hsl\(/, 'hsla(').replace(/\)$/, `, ${alpha})`);
+    }
+
+    // Already a hex or named color
+    return raw;
+  } catch (e) {
+    return null;
+  }
+}
+
 /**
  * Create tooltip configuration for category charts
  */
@@ -195,15 +226,14 @@ export async function createCategoryBreakdownChart(
   totalSpentContainer.setAttribute('tabindex', '0');
   totalSpentContainer.setAttribute(
     'aria-label',
-    'Filter dashboard by expense transactions'
+    'Filter dashboard to the selected period (includes refunds)'
   );
   totalSpentContainer.style.display = 'flex';
   totalSpentContainer.style.flexDirection = 'column';
   totalSpentContainer.style.alignItems = 'flex-end';
   totalSpentContainer.style.cursor = 'pointer';
   totalSpentContainer.style.transition = 'opacity 0.2s ease';
-  totalSpentContainer.title =
-    'Click to filter dashboard by expense transactions';
+  totalSpentContainer.title = 'Click to filter dashboard to this period (includes refunds)';
 
   const totalSpentLabel = document.createElement('span');
   totalSpentLabel.textContent = 'Total Spent';
@@ -511,11 +541,11 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   expensesDiv.setAttribute('tabindex', '0');
   expensesDiv.setAttribute(
     'aria-label',
-    'Filter dashboard by expense transactions'
+    'Filter dashboard to the selected period (includes refunds)'
   );
   expensesDiv.style.cursor = 'pointer';
   expensesDiv.style.transition = 'opacity 0.2s ease';
-  expensesDiv.title = 'Click to filter dashboard by expense transactions';
+  expensesDiv.title = 'Click to filter dashboard to this period (includes refunds)';
 
   const expensesLabel = document.createElement('div');
   expensesLabel.textContent = 'Expenses';
@@ -602,6 +632,19 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   chartDiv.appendChild(canvas);
   section.appendChild(chartDiv);
 
+  // Resolve theme variables to concrete colors for Canvas rendering
+  const incomeBg =
+    resolveCssVarColor('--color-success-rgb', 0.8) || 'rgba(0,179,89,0.8)';
+  const expensesBg =
+    resolveCssVarColor('--color-error-rgb', 0.8) || 'rgba(255,0,0,0.8)';
+  const netBg = incomeExpenseData.netBalance >= 0
+    ? resolveCssVarColor('--color-success-rgb', 0.6) || 'rgba(0,179,89,0.6)'
+    : resolveCssVarColor('--color-error-rgb', 0.6) || 'rgba(255,0,0,0.6)';
+
+  const incomeBorder = resolveCssVarColor('--color-success', 1) || 'hsl(150, 100%, 35%)';
+  const expensesBorder = resolveCssVarColor('--color-error', 1) || 'hsl(0, 85%, 60%)';
+  const netBorder = incomeExpenseData.netBalance >= 0 ? incomeBorder : expensesBorder;
+
   const chartData = {
     labels: ['Income', 'Expenses', 'Net Balance'],
     datasets: [
@@ -612,20 +655,8 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
           incomeExpenseData.totalExpenses,
           incomeExpenseData.netBalance,
         ],
-        backgroundColor: [
-          'rgba(var(--color-success-rgb), 0.8)',
-          'rgba(var(--color-error-rgb), 0.8)',
-          incomeExpenseData.netBalance >= 0
-            ? 'rgba(var(--color-success-rgb), 0.6)'
-            : 'rgba(var(--color-error-rgb), 0.6)',
-        ],
-        borderColor: [
-          'var(--color-success)',
-          'var(--color-error)',
-          incomeExpenseData.netBalance >= 0
-            ? 'var(--color-success)'
-            : 'var(--color-error)',
-        ],
+        backgroundColor: [incomeBg, expensesBg, netBg],
+        borderColor: [incomeBorder, expensesBorder, netBorder],
         borderWidth: 1,
       },
     ],

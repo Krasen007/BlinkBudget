@@ -1,14 +1,9 @@
 import { Router } from '../core/router.js';
 import { ButtonComponent } from '../components/Button.js';
+import '../styles/hero.css';
 
 export const LandingView = () => {
-  // Inject hero.css only when landing page is rendered
-  if (!document.querySelector('link[href="/src/styles/hero.css"]')) {
-    const heroStyles = document.createElement('link');
-    heroStyles.rel = 'stylesheet';
-    heroStyles.href = '/src/styles/hero.css';
-    document.head.appendChild(heroStyles);
-  }
+  // hero.css is loaded via the module graph (Vite) to ensure stable asset inclusion
 
   const container = document.createElement('div');
   container.className = 'view-landing';

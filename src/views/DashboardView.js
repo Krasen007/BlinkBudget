@@ -355,9 +355,15 @@ export const DashboardView = (params = {}) => {
   content.id = 'dashboard-content';
   container.appendChild(content);
 
-  const renderDashboard = () => {
-    // Security: Clearing content, no user input involved
-    content.innerHTML = '';
+  // Reference container for stats cards
+  let statsContainer = null;
+
+  const renderDashboard = (initialRender = false) => {
+    // On initial render we clear everything, on updates we only replace dynamic sections
+    if (initialRender) {
+      // Security: Clearing content, no user input involved
+      content.innerHTML = '';
+    }
     refreshTagOptions();
 
     // Always get fresh data
@@ -531,8 +537,8 @@ export const DashboardView = (params = {}) => {
     });
 
     // Statistics Cards Container
-    const statsContainer = document.createElement('div');
-    statsContainer.className = 'view-stats-container';
+    const newStatsContainer = document.createElement('div');
+    newStatsContainer.className = 'view-stats-container';
 
     // Get selected month name for the label
     const monthNames = [
@@ -551,7 +557,7 @@ export const DashboardView = (params = {}) => {
     ];
     const selectedMonthName = monthNames[filterMonth];
 
-    statsContainer.appendChild(
+    newStatsContainer.appendChild(
       DashboardStatsCard({
         label: hasActiveFilters ? 'Total Filtered' : 'Total Available',
         value: hasActiveFilters
@@ -580,11 +586,11 @@ export const DashboardView = (params = {}) => {
           accountSelect.value = 'all';
           tagSelect.value = 'all';
 
-          renderDashboard();
+          renderDashboard(true);
         },
       })
     );
-    statsContainer.appendChild(
+    newStatsContainer.appendChild(
       DashboardStatsCard({
         label: `${selectedMonthName} Spent`,
         value: totalExpense,
@@ -608,7 +614,12 @@ export const DashboardView = (params = {}) => {
       })
     );
 
-    content.appendChild(statsContainer);
+    if (statsContainer && statsContainer.parentNode) {
+      statsContainer.parentNode.replaceChild(newStatsContainer, statsContainer);
+    } else {
+      content.appendChild(newStatsContainer);
+    }
+    statsContainer = newStatsContainer;
 
     // Quick Amount Presets (Feature 3.4.1)
     if (SettingsService.getSetting('showQuickPresets')) {
@@ -628,7 +639,9 @@ export const DashboardView = (params = {}) => {
       quickPresetsWrapper.style.margin = '0';
       quickPresetsWrapper.style.padding = '0';
       quickPresetsWrapper.appendChild(quickAmountPresetsContainer);
-      content.appendChild(quickPresetsWrapper);
+      if (!content.contains(quickPresetsWrapper)) {
+        content.appendChild(quickPresetsWrapper);
+      }
 
       // Store destroy function for cleanup when view is destroyed
       if (!content._cleanupFunctions) {
