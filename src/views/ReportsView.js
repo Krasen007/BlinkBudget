@@ -1051,7 +1051,10 @@ export const ReportsView = (params = {}) => {
         section.className = 'category-selector-section';
         section.id = 'category-selector-section';
         // Preserve the section's semantic class and add spacer utilities
-        section.classList.add('reports-section-spacer', 'reports-section-spacer--top');
+        section.classList.add(
+          'reports-section-spacer',
+          'reports-section-spacer--top'
+        );
         chartContainer.appendChild(section);
         sectionContainers.categorySelector = section;
       }

@@ -74,17 +74,17 @@
 /* High Contrast Mode */
 .high-contrast {
   /* Pin explicit, accessible defaults for high-contrast mode */
-  --color-background: #ffffff;
-  --color-surface: #ffffff;
-  --color-text-main: #000000;
-  --color-text-muted: #333333;
-  --color-border: #000000;
-  --color-primary: #0000ff;
+  --color-background: #fff;
+  --color-surface: #fff;
+  --color-text-main: #000;
+  --color-text-muted: #333;
+  --color-border: #000;
+  --color-primary: #00f;
   --color-success: #008000;
   --color-warning: #ff8c00;
-  --color-error: #ff0000;
-  --focus-color: #ff0000;
-  --focus-shadow: 0 0 0 3px rgba(255, 0, 0, 0.25);
+  --color-error: #f00;
+  --focus-color: #f00;
+  --focus-shadow: 0 0 0 3px rgb(255, 0, 0, 0.25);
 }
 
 .high-contrast img {

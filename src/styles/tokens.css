@@ -74,7 +74,8 @@
 
   /* Success colors */
   --color-success: hsl(150, 100%, 35%);
-  --color-success-rgb: 0, 179, 89; /* RGB equivalent for rgba() usage in charts */
+  --color-success-rgb:
+    0, 179, 89; /* RGB equivalent for rgba() usage in charts */
   --color-success-light: hsl(150, 100%, 35%, 0.1);
   --color-success-dark: hsl(150, 100%, 25%);
 

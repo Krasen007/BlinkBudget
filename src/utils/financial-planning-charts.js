@@ -6,6 +6,7 @@
  * Includes projected balance charts, portfolio composition charts, and goal progress charts.
  */
 
+// Chart.js renders on HTML Canvas, which doesn't understand CSS variables like `var(--color-success)`. When these variables were passed as chart colors, Canvas couldn't resolve them and defaulted to black.
 import { COLORS, SPACING } from './constants.js';
 import { getChartColors } from '../core/chart-config.js';
 import { escapeHtml } from './security-utils.js';
@@ -80,17 +81,14 @@ export async function createProjectedBalanceChart(
     {
       label: 'Projected Balance',
       data: balanceData,
-      borderColor: COLORS.PRIMARY,
-      backgroundColor: COLORS.PRIMARY.replace(')', ', 0.1)').replace(
-        'hsl',
-        'hsla'
-      ),
+      borderColor: 'hsl(250, 84%, 60%)',
+      backgroundColor: 'hsla(250, 84%, 60%, 0.1)',
       borderWidth: 3,
       fill: true,
       tension: 0.4,
       pointRadius: 4,
       pointHoverRadius: 6,
-      pointBackgroundColor: COLORS.PRIMARY,
+      pointBackgroundColor: 'hsl(250, 84%, 60%)',
       pointBorderColor: '#ffffff',
       pointBorderWidth: 2,
     },
@@ -102,7 +100,7 @@ export async function createProjectedBalanceChart(
     datasets.push({
       label: 'Zero Line',
       data: new Array(labels.length).fill(0),
-      borderColor: COLORS.ERROR,
+      borderColor: 'hsl(0, 75%, 60%)',
       backgroundColor: 'transparent',
       borderWidth: 2,
       borderDash: [5, 5],
@@ -257,7 +255,7 @@ export async function createPortfolioCompositionChart(
         borderColor: '#ffffff',
         borderWidth: 3,
         hoverBorderWidth: 4,
-        hoverBorderColor: COLORS.PRIMARY,
+        hoverBorderColor: 'hsl(250, 84%, 60%)',
       },
     ],
   };
@@ -417,9 +415,9 @@ export async function createGoalProgressChart(
   });
 
   const colors = progressPercentages.map(progress => {
-    if (progress >= 80) return COLORS.SUCCESS;
-    if (progress >= 50) return COLORS.WARNING;
-    return COLORS.ERROR;
+    if (progress >= 80) return 'hsl(150, 70%, 45%)'; // Success green
+    if (progress >= 50) return 'hsl(250, 84%, 60%)'; // Primary purple
+    return 'hsl(0, 75%, 60%)'; // Error red
   });
 
   const chartData = {
@@ -429,9 +427,13 @@ export async function createGoalProgressChart(
         label: 'Progress (%)',
         data: progressPercentages,
         backgroundColor: colors,
-        borderColor: colors.map(color =>
-          color.replace(')', ', 0.8)').replace('hsl', 'hsla')
-        ),
+        borderColor: colors.map(color => {
+          // Create semi-transparent border color
+          if (color.startsWith('hsl(')) {
+            return color.replace('hsl(', 'hsla(').replace(')', ', 0.8)');
+          }
+          return color;
+        }),
         borderWidth: 2,
         borderRadius: 6,
         borderSkipped: false,
@@ -577,11 +579,8 @@ export async function createForecastComparisonChart(
       {
         label: 'Forecasted Income',
         data: incomeForecasts.map(f => f.predictedAmount),
-        borderColor: COLORS.SUCCESS,
-        backgroundColor: COLORS.SUCCESS.replace(')', ', 0.1)').replace(
-          'hsl',
-          'hsla'
-        ),
+        borderColor: 'hsl(150, 70%, 45%)',
+        backgroundColor: 'hsla(150, 70%, 45%, 0.1)',
         borderWidth: 3,
         fill: false,
         tension: 0.4,
@@ -591,11 +590,8 @@ export async function createForecastComparisonChart(
       {
         label: 'Forecasted Expenses',
         data: expenseForecasts.map(f => f.predictedAmount),
-        borderColor: COLORS.ERROR,
-        backgroundColor: COLORS.ERROR.replace(')', ', 0.1)').replace(
-          'hsl',
-          'hsla'
-        ),
+        borderColor: 'hsl(0, 75%, 60%)',
+        backgroundColor: 'hsla(0, 75%, 60%, 0.1)',
         borderWidth: 3,
         fill: false,
         tension: 0.4,
@@ -695,7 +691,7 @@ function createBalanceSummary(balanceProjections) {
         style: 'currency',
         currency: 'EUR',
       }).format(currentBalance),
-      color: currentBalance >= 0 ? COLORS.SUCCESS : COLORS.ERROR,
+      color: currentBalance >= 0 ? 'hsl(150, 70%, 45%)' : 'hsl(0, 75%, 60%)',
     },
     {
       label: 'Projected Change',
@@ -703,7 +699,7 @@ function createBalanceSummary(balanceProjections) {
         style: 'currency',
         currency: 'EUR',
       }).format(change),
-      color: change >= 0 ? COLORS.SUCCESS : COLORS.ERROR,
+      color: change >= 0 ? 'hsl(150, 70%, 45%)' : 'hsl(0, 75%, 60%)',
     },
     {
       label: 'Lowest Point',
@@ -711,7 +707,7 @@ function createBalanceSummary(balanceProjections) {
         style: 'currency',
         currency: 'EUR',
       }).format(lowestBalance),
-      color: lowestBalance >= 0 ? COLORS.SUCCESS : COLORS.ERROR,
+      color: lowestBalance >= 0 ? 'hsl(150, 70%, 45%)' : 'hsl(0, 75%, 60%)',
     },
   ];
 
@@ -722,7 +718,7 @@ function createBalanceSummary(balanceProjections) {
     const label = document.createElement('div');
     label.textContent = stat.label;
     label.style.fontSize = '0.75rem';
-    label.style.color = COLORS.TEXT_MUTED;
+    label.style.color = 'hsl(220, 10%, 75%)';
     label.style.marginBottom = SPACING.XS;
 
     const value = document.createElement('div');
@@ -761,7 +757,7 @@ function createGoalDetails(goals) {
     goalDiv.style.justifyContent = 'space-between';
     goalDiv.style.alignItems = 'center';
     goalDiv.style.padding = SPACING.SM;
-    goalDiv.style.background = COLORS.SURFACE;
+    goalDiv.style.background = 'hsl(240, 10%, 10%)';
     goalDiv.style.borderRadius = 'var(--radius-sm)';
 
     const leftSide = document.createElement('div');
@@ -769,13 +765,13 @@ function createGoalDetails(goals) {
     const goalName = document.createElement('div');
     goalName.textContent = goal.name;
     goalName.style.fontWeight = '600';
-    goalName.style.color = COLORS.TEXT_MAIN;
+    goalName.style.color = 'hsl(0, 0%, 100%)';
     goalName.style.marginBottom = '2px';
 
     const targetDate = document.createElement('div');
     targetDate.textContent = `Target: ${formatDateForDisplay(goal.targetDate)}`;
     targetDate.style.fontSize = '0.75rem';
-    targetDate.style.color = COLORS.TEXT_MUTED;
+    targetDate.style.color = 'hsl(220, 10%, 75%)';
 
     leftSide.appendChild(goalName);
     leftSide.appendChild(targetDate);
@@ -792,10 +788,10 @@ function createGoalDetails(goals) {
     progressText.style.fontWeight = '600';
     progressText.style.color =
       progress >= 80
-        ? COLORS.SUCCESS
+        ? 'hsl(150, 70%, 45%)'
         : progress >= 50
-          ? COLORS.WARNING
-          : COLORS.ERROR;
+          ? 'hsl(250, 84%, 60%)'
+          : 'hsl(0, 75%, 60%)';
     progressText.style.marginBottom = '2px';
 
     const amounts = document.createElement('div');
@@ -809,7 +805,7 @@ function createGoalDetails(goals) {
     }).format(goal.targetAmount);
     amounts.textContent = `${currentFormatted} / ${targetFormatted}`;
     amounts.style.fontSize = '0.75rem';
-    amounts.style.color = COLORS.TEXT_MUTED;
+    amounts.style.color = 'hsl(220, 10%, 75%)';
 
     rightSide.appendChild(progressText);
     rightSide.appendChild(amounts);

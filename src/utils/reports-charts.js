@@ -38,7 +38,7 @@ function resolveCssVarColor(varName, alpha) {
 
     // Already a hex or named color
     return raw;
-  } catch (e) {
+  } catch {
     return null;
   }
 }
@@ -176,7 +176,7 @@ export async function createCategoryBreakdownChart(
     'Click to filter dashboard by income transactions';
 
   // Add keyboard handler for accessibility
-  totalIncomeContainer.addEventListener('keydown', (e) => {
+  totalIncomeContainer.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       totalIncomeContainer.click();
@@ -233,7 +233,8 @@ export async function createCategoryBreakdownChart(
   totalSpentContainer.style.alignItems = 'flex-end';
   totalSpentContainer.style.cursor = 'pointer';
   totalSpentContainer.style.transition = 'opacity 0.2s ease';
-  totalSpentContainer.title = 'Click to filter dashboard to this period (includes refunds)';
+  totalSpentContainer.title =
+    'Click to filter dashboard to this period (includes refunds)';
 
   const totalSpentLabel = document.createElement('span');
   totalSpentLabel.textContent = 'Total Spent';
@@ -266,7 +267,7 @@ export async function createCategoryBreakdownChart(
   });
 
   // Add keyboard handler for accessibility
-  totalSpentContainer.addEventListener('keydown', (e) => {
+  totalSpentContainer.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       totalSpentContainer.click();
@@ -516,7 +517,7 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   });
 
   // Add keyboard handler for accessibility
-  incomeDiv.addEventListener('keydown', (e) => {
+  incomeDiv.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       incomeDiv.click();
@@ -545,7 +546,8 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   );
   expensesDiv.style.cursor = 'pointer';
   expensesDiv.style.transition = 'opacity 0.2s ease';
-  expensesDiv.title = 'Click to filter dashboard to this period (includes refunds)';
+  expensesDiv.title =
+    'Click to filter dashboard to this period (includes refunds)';
 
   const expensesLabel = document.createElement('div');
   expensesLabel.textContent = 'Expenses';
@@ -570,7 +572,7 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   });
 
   // Add keyboard handler for accessibility
-  expensesDiv.addEventListener('keydown', (e) => {
+  expensesDiv.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       expensesDiv.click();
@@ -637,13 +639,17 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
     resolveCssVarColor('--color-success-rgb', 0.8) || 'rgba(0,179,89,0.8)';
   const expensesBg =
     resolveCssVarColor('--color-error-rgb', 0.8) || 'rgba(255,0,0,0.8)';
-  const netBg = incomeExpenseData.netBalance >= 0
-    ? resolveCssVarColor('--color-success-rgb', 0.6) || 'rgba(0,179,89,0.6)'
-    : resolveCssVarColor('--color-error-rgb', 0.6) || 'rgba(255,0,0,0.6)';
+  const netBg =
+    incomeExpenseData.netBalance >= 0
+      ? resolveCssVarColor('--color-success-rgb', 0.6) || 'rgba(0,179,89,0.6)'
+      : resolveCssVarColor('--color-error-rgb', 0.6) || 'rgba(255,0,0,0.6)';
 
-  const incomeBorder = resolveCssVarColor('--color-success', 1) || 'hsl(150, 100%, 35%)';
-  const expensesBorder = resolveCssVarColor('--color-error', 1) || 'hsl(0, 85%, 60%)';
-  const netBorder = incomeExpenseData.netBalance >= 0 ? incomeBorder : expensesBorder;
+  const incomeBorder =
+    resolveCssVarColor('--color-success', 1) || 'hsl(150, 100%, 35%)';
+  const expensesBorder =
+    resolveCssVarColor('--color-error', 1) || 'hsl(0, 85%, 60%)';
+  const netBorder =
+    incomeExpenseData.netBalance >= 0 ? incomeBorder : expensesBorder;
 
   const chartData = {
     labels: ['Income', 'Expenses', 'Net Balance'],
