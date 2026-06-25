@@ -281,7 +281,7 @@ describe('Form Validation Utilities', () => {
 
       showFieldError(mockElement);
 
-      expect(mockElement.style.border).toBe('1px solid #ef4444');
+      expect(mockElement.style.border).toBe('1px solid var(--color-error)');
       expect(mockElement.focus).toHaveBeenCalled();
     });
 
@@ -310,7 +310,7 @@ describe('Form Validation Utilities', () => {
 
       showContainerError(mockContainer);
 
-      expect(mockContainer.style.border).toBe('1px solid #ef4444');
+      expect(mockContainer.style.border).toBe('1px solid var(--color-error)');
     });
 
     test('clears container error styling after timeout', async () => {
