@@ -52,18 +52,91 @@ try {
   if (import.meta.env.DEV) {
     if (typeof document !== 'undefined' && document.body) {
       const errorDiv = document.createElement('div');
-      errorDiv.style.cssText =
-        'padding: 20px; font-family: monospace; background: #ffebee; color: #c62828;';
+      errorDiv.className = 'config-error-container';
+      errorDiv.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--spacing-xl, 24px);
+        background: var(--color-background, #0a0a0c);
+        font-family: var(--font-body, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+        z-index: 99999;
+      `;
+
+      const errorCard = document.createElement('div');
+      errorCard.style.cssText = `
+        max-width: 600px;
+        width: 100%;
+        padding: var(--spacing-2xl, 32px);
+        background: var(--color-surface, #16161a);
+        border: 1px solid var(--color-error, #ff4d4d);
+        border-radius: var(--radius-lg, 12px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--color-error, #ff4d4d) inset;
+      `;
+
+      const icon = document.createElement('div');
+      icon.style.cssText = `
+        width: 48px;
+        height: 48px;
+        margin-bottom: var(--spacing-lg, 16px);
+        background: var(--color-error-light, rgba(255, 77, 77, 0.1));
+        border-radius: var(--radius-full, 9999px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: var(--color-error, #ff4d4d);
+        font-weight: bold;
+      `;
+      icon.textContent = '!';
+
       const heading = document.createElement('h2');
       heading.textContent = 'Configuration Error';
+      heading.style.cssText = `
+        font-size: var(--font-size-2xl, 24px);
+        font-weight: 700;
+        color: var(--color-text-main, #ffffff);
+        margin: 0 0 var(--spacing-md, 12px) 0;
+        font-family: var(--font-heading, inherit);
+        letter-spacing: -0.02em;
+      `;
+
       const msgPara = document.createElement('p');
       msgPara.textContent = error.message;
+      msgPara.style.cssText = `
+        font-size: var(--font-size-base, 16px);
+        line-height: var(--line-height-relaxed, 1.75);
+        color: var(--color-text-main, #ffffff);
+        margin: 0 0 var(--spacing-lg, 16px) 0;
+        padding: var(--spacing-md, 12px);
+        background: #8b0000;
+        border-left: 4px solid var(--color-error, #ff4d4d);
+        border-radius: var(--radius-sm, 6px);
+        font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+        font-size: var(--font-size-sm, 14px);
+        word-break: break-word;
+      `;
+
       const helpPara = document.createElement('p');
       helpPara.textContent =
         'Please check your .env file and restart the development server.';
-      errorDiv.appendChild(heading);
-      errorDiv.appendChild(msgPara);
-      errorDiv.appendChild(helpPara);
+      helpPara.style.cssText = `
+        font-size: var(--font-size-sm, 14px);
+        line-height: var(--line-height-normal, 1.5);
+        color: var(--color-text-muted, #b4b4b4);
+        margin: 0;
+      `;
+
+      errorCard.appendChild(icon);
+      errorCard.appendChild(heading);
+      errorCard.appendChild(msgPara);
+      errorCard.appendChild(helpPara);
+      errorDiv.appendChild(errorCard);
       document.body.innerHTML = '';
       document.body.appendChild(errorDiv);
     }
