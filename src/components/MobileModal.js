@@ -280,6 +280,9 @@ export const MobileConfirmDialog = ({
   onConfirm,
   onCancel,
   variant = 'default', // 'default', 'danger'
+  showSecondary = false,
+  secondaryText = 'Secondary',
+  onSecondary = null,
 }) => {
   const content = document.createElement('div');
   content.className = 'mobile-confirm-content';
@@ -337,6 +340,23 @@ export const MobileConfirmDialog = ({
       modal.closeModal();
     }
   });
+
+  if (showSecondary && typeof onSecondary === 'function') {
+    const secondaryBtn = document.createElement('button');
+    secondaryBtn.className = 'btn btn-ghost mobile-confirm-btn';
+    secondaryBtn.textContent = secondaryText;
+
+    secondaryBtn.addEventListener('click', e => {
+      e.preventDefault();
+      onSecondary();
+      const modal = secondaryBtn.closest('.mobile-modal-overlay');
+      if (modal && modal.closeModal) {
+        modal.closeModal();
+      }
+    });
+
+    actions.appendChild(secondaryBtn);
+  }
 
   // Confirm button
   const confirmBtn = document.createElement('button');

@@ -186,8 +186,9 @@ export class MetricsService {
     // Calculate time period duration in days
     const startDate = new Date(timePeriod.startDate);
     const endDate = new Date(timePeriod.endDate);
-    const durationDays =
-      Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+    const durationDays = Math.ceil(
+      (endDate - startDate) / (1000 * 60 * 60 * 24)
+    );
 
     // Calculate daily averages
     const dailySpending =

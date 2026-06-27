@@ -152,7 +152,9 @@ export const TransactionListItem = ({
     multiBtn.style.width = '100%';
     multiBtn.addEventListener('click', () => {
       document.body.removeChild(overlay);
-      if (typeof onSelectMultiple === 'function') onSelectMultiple();
+      if (typeof onSelectMultiple === 'function') {
+        onSelectMultiple(transaction.id);
+      }
     });
     btnGroup.appendChild(multiBtn);
 
@@ -270,7 +272,11 @@ export const TransactionListItem = ({
   if (transaction.type !== 'transfer') {
     cat.addEventListener('click', e => {
       e.stopPropagation();
-      onCategoryClick(transaction.category);
+      if (selectionMode && typeof onToggleSelect === 'function') {
+        onToggleSelect(transaction.id);
+      } else {
+        onCategoryClick(transaction.category);
+      }
     });
   }
 
@@ -313,7 +319,11 @@ export const TransactionListItem = ({
 
     tagBadge.addEventListener('click', e => {
       e.stopPropagation();
-      onTagClick(tagName);
+      if (selectionMode && typeof onToggleSelect === 'function') {
+        onToggleSelect(transaction.id);
+      } else {
+        onTagClick(tagName);
+      }
     });
 
     catRow.appendChild(tagBadge);
@@ -341,8 +351,12 @@ export const TransactionListItem = ({
   // Date click handler
   date.addEventListener('click', e => {
     e.stopPropagation(); // Prevent item click
-    const dateStr = transaction.timestamp.split('T')[0];
-    onDateClick(dateStr);
+    if (selectionMode && typeof onToggleSelect === 'function') {
+      onToggleSelect(transaction.id);
+    } else {
+      const dateStr = transaction.timestamp.split('T')[0];
+      onDateClick(dateStr);
+    }
   });
 
   // Show Account Name if not transfer

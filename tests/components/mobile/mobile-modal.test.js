@@ -4,6 +4,7 @@ import {
   MobileConfirmDialog,
   MobileBottomSheet,
 } from '../../../src/components/MobileModal.js';
+import { ConfirmDialog } from '../../../src/components/ConfirmDialog.js';
 
 // Mock mobile utils
 global.window.mobileUtils = {
@@ -103,6 +104,28 @@ describe('MobileConfirmDialog', () => {
     expect(buttons.length).toBe(2);
     expect(buttons[0].textContent).toBe('No'); // Cancel button
     expect(buttons[1].textContent).toBe('Yes'); // Confirm button
+  });
+
+  it('should pass secondary action props through the mobile confirm dialog', () => {
+    window.mobileUtils.isMobile = () => true;
+    const onSecondary = vi.fn();
+
+    const dialog = ConfirmDialog({
+      title: 'Confirm Action',
+      message: 'Are you sure?',
+      showSecondary: true,
+      secondaryText: 'Skip',
+      onSecondary,
+    });
+
+    const buttons = Array.from(dialog.querySelectorAll('.mobile-confirm-btn'));
+    const secondaryButton = buttons.find(button => button.textContent === 'Skip');
+
+    expect(buttons.length).toBe(3);
+    expect(secondaryButton).toBeTruthy();
+
+    secondaryButton.click();
+    expect(onSecondary).toHaveBeenCalledTimes(1);
   });
 
   it('should handle danger variant', () => {

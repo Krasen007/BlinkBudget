@@ -230,9 +230,9 @@ export const DashboardView = (params = {}) => {
   let isSelectionMode = false;
   let selectedTransactionIds = new Set();
 
-  const enterSelectionMode = () => {
+  const enterSelectionMode = txId => {
     isSelectionMode = true;
-    selectedTransactionIds = new Set();
+    selectedTransactionIds = new Set(txId ? [txId] : []);
     renderDashboard();
   };
 
@@ -469,6 +469,11 @@ export const DashboardView = (params = {}) => {
         return true;
       })
       .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    const visibleTransactionIds = new Set(transactions.map(t => t.id));
+    selectedTransactionIds = new Set(
+      [...selectedTransactionIds].filter(id => visibleTransactionIds.has(id))
+    );
 
     // Filter out ghost transactions for totals calculation
     // We want them in the list but not affecting the balance/stats
@@ -864,7 +869,7 @@ export const DashboardView = (params = {}) => {
       selectionMode: isSelectionMode,
       selectedIds: selectedTransactionIds,
       onToggleSelect: toggleSelection,
-      onSelectMultiple: enterSelectionMode,
+      onSelectMultiple: () => enterSelectionMode(params.highlightTransactionId),
       // Pass date filter props
       currentDateFilter,
       onDateClick: date => {

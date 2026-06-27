@@ -56,9 +56,19 @@ export const CategorySelector = (
 
   // Only show categories with positive net amount — zero (expense = refund)
   // or negative (refund-only) categories clutter the view.
-  currentData.categoryBreakdown.categories
-    .filter(category => category.amount > 0)
-    .forEach((category, index) => {
+  const visibleCategories = currentData.categoryBreakdown.categories.filter(
+    category => category.amount > 0
+  );
+
+  if (visibleCategories.length === 0) {
+    const emptyState = document.createElement('div');
+    emptyState.textContent = 'No positive-net categories available for this period.';
+    emptyState.style.color = COLORS.TEXT_MUTED;
+    emptyState.style.fontStyle = 'italic';
+    emptyState.style.padding = `${SPACING.SM} 0`;
+    categoryGrid.appendChild(emptyState);
+  } else {
+    visibleCategories.forEach((category, index) => {
       const card = CategoryCard(
         category,
         index,
@@ -70,6 +80,7 @@ export const CategorySelector = (
       );
       categoryGrid.appendChild(card);
     });
+  }
 
   section.appendChild(categoryGrid);
 

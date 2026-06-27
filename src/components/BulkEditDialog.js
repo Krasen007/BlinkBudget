@@ -96,10 +96,7 @@ export const BulkEditDialog = ({ selectedIds, onClose }) => {
   const cancelBtn = ButtonComponent({
     text: 'Cancel',
     variant: 'secondary',
-    onClick: () => {
-      document.body.removeChild(overlay);
-      if (typeof onClose === 'function') onClose();
-    },
+    onClick: close,
   });
   cancelBtn.style.flex = '1';
   btnGroup.appendChild(cancelBtn);
@@ -125,8 +122,7 @@ export const BulkEditDialog = ({ selectedIds, onClose }) => {
           TransactionService.update(id, updates);
       });
 
-      document.body.removeChild(overlay);
-      if (typeof onClose === 'function') onClose();
+      close();
     },
   });
   applyBtn.style.flex = '1';
@@ -136,7 +132,10 @@ export const BulkEditDialog = ({ selectedIds, onClose }) => {
   overlay.appendChild(card);
 
   const close = () => {
-    document.body.removeChild(overlay);
+    document.body.removeEventListener('keydown', onKey);
+    if (document.body.contains(overlay)) {
+      document.body.removeChild(overlay);
+    }
     if (typeof onClose === 'function') onClose();
   };
 
@@ -146,7 +145,6 @@ export const BulkEditDialog = ({ selectedIds, onClose }) => {
 
   const onKey = e => {
     if (e.key === 'Escape') {
-      document.body.removeEventListener('keydown', onKey);
       close();
     }
   };

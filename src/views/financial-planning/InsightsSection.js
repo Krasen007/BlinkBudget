@@ -824,12 +824,14 @@ function createFinancialSnapshotSection(transactions) {
   const filledMonths = Object.values(monthBuckets).filter(
     m => m.income > 0 || m.expenses > 0
   );
+  const incomeMonths = filledMonths.filter(m => m.income > 0);
   const monthCount = Math.max(filledMonths.length, 1);
+  const incomeMonthCount = Math.max(incomeMonths.length, 1);
 
-  const totalIncome = filledMonths.reduce((s, m) => s + m.income, 0);
+  const totalIncome = incomeMonths.reduce((s, m) => s + m.income, 0);
   const totalExpenses = filledMonths.reduce((s, m) => s + m.expenses, 0);
 
-  const monthlySalary = totalIncome / monthCount;
+  const monthlySalary = totalIncome / incomeMonthCount;
   const monthlyExpenses = totalExpenses / monthCount;
   const monthlySavings = monthlySalary - monthlyExpenses;
 

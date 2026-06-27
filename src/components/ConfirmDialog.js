@@ -30,6 +30,9 @@ export const ConfirmDialog = ({
       onConfirm,
       onCancel,
       variant,
+      showSecondary,
+      secondaryText,
+      onSecondary,
     });
   }
 

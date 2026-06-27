@@ -45,7 +45,7 @@ export class UnusualSpendingDetector {
     // Calculate statistics — refunds contribute negative amounts so they
     // lower the mean and threshold, making the baseline reflect net spending.
     const amounts = baselineTransactions.map(t => {
-      const raw = t.amount ?? 0;
+      const raw = Math.abs(t.amount ?? 0);
       return t.type === 'refund' ? -raw : raw;
     });
     const mean = amounts.reduce((sum, a) => sum + a, 0) / amounts.length;
@@ -68,7 +68,7 @@ export class UnusualSpendingDetector {
         other => other.category === tx.category
       );
       const netExpenseSum = sameCategory.reduce((sum, t) => {
-        const raw = t.amount ?? 0;
+        const raw = Math.abs(t.amount ?? 0);
         return sum + (t.type === 'refund' ? -raw : raw);
       }, 0);
       const expenseCount = sameCategory.filter(
@@ -131,9 +131,12 @@ export class UnusualSpendingDetector {
             category,
             minTransactions: 5, // Explicitly pass minTransactions for consistency
           });
+          const expenseTransactions = categoryTransactions.filter(
+            t => t.type === 'expense'
+          );
           // Refunds contribute negative amounts for net spending calculation
           const netAmounts = categoryTransactions.map(t => {
-            const raw = t.amount ?? 0;
+            const raw = Math.abs(t.amount ?? 0);
             return t.type === 'refund' ? -raw : raw;
           });
           const mean =
@@ -146,7 +149,7 @@ export class UnusualSpendingDetector {
             averageAmount: mean,
             totalSpent: netAmounts.reduce((sum, a) => sum + a, 0),
             unusualPercentage:
-              (unusual.length / categoryTransactions.length) * 100,
+              (unusual.length / Math.max(expenseTransactions.length, 1)) * 100,
           };
         }
       }
@@ -274,7 +277,7 @@ export class UnusualSpendingDetector {
 
     // Refunds are treated as negative amounts since they reduce net spending
     const amounts = categoryTransactions.map(t => {
-      const raw = t.amount ?? 0;
+      const raw = Math.abs(t.amount ?? 0);
       return t.type === 'refund' ? -raw : raw;
     });
 
