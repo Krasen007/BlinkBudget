@@ -831,9 +831,9 @@ function createFinancialSnapshotSection(transactions) {
   const totalIncome = incomeMonths.reduce((s, m) => s + m.income, 0);
   const totalExpenses = filledMonths.reduce((s, m) => s + m.expenses, 0);
 
-  const monthlySalary = totalIncome / incomeMonthCount;
+  const monthlyIncome = totalIncome / incomeMonthCount;
   const monthlyExpenses = totalExpenses / monthCount;
-  const monthlySavings = monthlySalary - monthlyExpenses;
+  const monthlySavings = monthlyIncome - monthlyExpenses;
 
   // --- Manual debt input (persisted to localStorage) ---
   const DEBT_STORAGE_KEY = 'blinkbudget_financial_snapshot_debt';
@@ -867,10 +867,10 @@ function createFinancialSnapshotSection(transactions) {
   `;
 
   // Build the sentence with styled spans for each value
-  sentence.appendChild(document.createTextNode('My monthly salary is '));
+  sentence.appendChild(document.createTextNode('Your monthly income is '));
 
   const salSpan = document.createElement('strong');
-  salSpan.textContent = fmtUSD(monthlySalary);
+  salSpan.textContent = fmtUSD(monthlyIncome);
   salSpan.style.color = '#22c55e';
   sentence.appendChild(salSpan);
 
@@ -1029,9 +1029,9 @@ function createFinancialSnapshotSection(transactions) {
   detail.appendChild(periodSpan);
 
   // Savings rate
-  if (monthlySalary > 0) {
+  if (monthlyIncome > 0) {
     const rateSpan = document.createElement('span');
-    const savingsRate = (monthlySavings / monthlySalary) * 100;
+    const savingsRate = (monthlySavings / monthlyIncome) * 100;
     rateSpan.textContent = `Savings rate: ${savingsRate.toFixed(1)}%`;
     detail.appendChild(rateSpan);
   }

@@ -966,6 +966,7 @@ export const DashboardView = (params = {}) => {
       selectionInfo.style.color = COLORS.TEXT_MAIN;
       selectionInfo.style.fontSize = 'var(--font-size-sm)';
       selectionInfo.style.letterSpacing = '0.02em';
+      selectionInfo.style.marginLeft = SPACING.MD;
       bulkToolbar.appendChild(selectionInfo);
 
       const btnGroup = document.createElement('div');
