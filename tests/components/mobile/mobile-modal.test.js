@@ -119,7 +119,9 @@ describe('MobileConfirmDialog', () => {
     });
 
     const buttons = Array.from(dialog.querySelectorAll('.mobile-confirm-btn'));
-    const secondaryButton = buttons.find(button => button.textContent === 'Skip');
+    const secondaryButton = buttons.find(
+      button => button.textContent === 'Skip'
+    );
 
     expect(buttons.length).toBe(3);
     expect(secondaryButton).toBeTruthy();

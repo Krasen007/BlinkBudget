@@ -131,23 +131,24 @@ export const BulkEditDialog = ({ selectedIds, onClose }) => {
   card.appendChild(btnGroup);
   overlay.appendChild(card);
 
-  const close = () => {
+  function close() {
     document.body.removeEventListener('keydown', onKey);
     if (document.body.contains(overlay)) {
       document.body.removeChild(overlay);
     }
     if (typeof onClose === 'function') onClose();
-  };
+  }
+
+  function onKey(e) {
+    if (e.key === 'Escape') {
+      close();
+    }
+  }
 
   overlay.addEventListener('click', e => {
     if (e.target === overlay) close();
   });
 
-  const onKey = e => {
-    if (e.key === 'Escape') {
-      close();
-    }
-  };
   document.body.addEventListener('keydown', onKey);
 
   document.body.appendChild(overlay);

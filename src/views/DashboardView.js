@@ -869,7 +869,7 @@ export const DashboardView = (params = {}) => {
       selectionMode: isSelectionMode,
       selectedIds: selectedTransactionIds,
       onToggleSelect: toggleSelection,
-      onSelectMultiple: () => enterSelectionMode(params.highlightTransactionId),
+      onSelectMultiple: txId => enterSelectionMode(txId),
       // Pass date filter props
       currentDateFilter,
       onDateClick: date => {
@@ -977,16 +977,20 @@ export const DashboardView = (params = {}) => {
         variant: 'primary',
         onClick: handleBulkEdit,
       });
-      editBtn.disabled = selectedTransactionIds.size === 0;
-      btnGroup.appendChild(editBtn);
+      if (editBtn) {
+        editBtn.disabled = selectedTransactionIds.size === 0;
+        btnGroup.appendChild(editBtn);
+      }
 
       const deleteBtn = ButtonComponent({
         text: 'Delete',
         variant: 'danger',
         onClick: handleBulkDelete,
       });
-      deleteBtn.disabled = selectedTransactionIds.size === 0;
-      btnGroup.appendChild(deleteBtn);
+      if (deleteBtn) {
+        deleteBtn.disabled = selectedTransactionIds.size === 0;
+        btnGroup.appendChild(deleteBtn);
+      }
 
       const cancelBtn = ButtonComponent({
         text: 'Cancel',

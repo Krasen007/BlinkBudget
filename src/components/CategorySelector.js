@@ -62,7 +62,8 @@ export const CategorySelector = (
 
   if (visibleCategories.length === 0) {
     const emptyState = document.createElement('div');
-    emptyState.textContent = 'No positive-net categories available for this period.';
+    emptyState.textContent =
+      'No positive-net categories available for this period.';
     emptyState.style.color = COLORS.TEXT_MUTED;
     emptyState.style.fontStyle = 'italic';
     emptyState.style.padding = `${SPACING.SM} 0`;
