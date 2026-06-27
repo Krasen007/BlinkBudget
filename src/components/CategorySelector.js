@@ -54,18 +54,22 @@ export const CategorySelector = (
   categoryGrid.style.gap = SPACING.MD;
   categoryGrid.style.marginTop = SPACING.MD;
 
-  currentData.categoryBreakdown.categories.forEach((category, index) => {
-    const card = CategoryCard(
-      category,
-      index,
-      categoryColorMap,
-      onCategoryClick,
-      frequencyData,
-      currentData.insights,
-      budgetStatus // Pass budget status to CategoryCard
-    );
-    categoryGrid.appendChild(card);
-  });
+  // Only show categories with positive net amount — zero (expense = refund)
+  // or negative (refund-only) categories clutter the view.
+  currentData.categoryBreakdown.categories
+    .filter(category => category.amount > 0)
+    .forEach((category, index) => {
+      const card = CategoryCard(
+        category,
+        index,
+        categoryColorMap,
+        onCategoryClick,
+        frequencyData,
+        currentData.insights,
+        budgetStatus // Pass budget status to CategoryCard
+      );
+      categoryGrid.appendChild(card);
+    });
 
   section.appendChild(categoryGrid);
 

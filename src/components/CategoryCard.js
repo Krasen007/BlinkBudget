@@ -113,19 +113,11 @@ export const CategoryCard = (
   freq.style.fontSize = '0.75rem';
   freq.style.color = COLORS.TEXT_MUTED;
   freq.style.textAlign = 'center';
-  const transactionCount = category.count ?? 1;
-  freq.textContent = `${transactionCount} transaction${transactionCount > 1 ? 's' : ''}`;
-  card.appendChild(freq);
-
-  // Add average per visit if available
-  if (category.amount && transactionCount > 0) {
-    const avg = document.createElement('div');
-    avg.style.fontSize = '0.75rem';
-    avg.style.color = COLORS.TEXT_MUTED;
-    avg.style.textAlign = 'center';
-    avg.textContent = `Avg: ${formatCurrency(category.amount / transactionCount)}`;
-    card.appendChild(avg);
+  const transactionCount = category.transactionCount ?? 0;
+  if (transactionCount > 0) {
+    freq.textContent = `${transactionCount} transaction${transactionCount > 1 ? 's' : ''}`;
   }
+  card.appendChild(freq);
 
   // Add frequency if available
   if (frequencyData && frequencyData[category.name]) {

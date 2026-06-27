@@ -43,7 +43,11 @@ export class MetricsService {
       }
 
       categoryTotals[category].amount += amount;
-      categoryTotals[category].transactionCount += 1;
+      // Only count expense transactions — refunds reduce the net but are not
+      // spending events, matching calculateIncomeVsExpenses behaviour.
+      if (!isRefund) {
+        categoryTotals[category].transactionCount += 1;
+      }
     });
 
     // Include all categories, even those with zero or negative net amounts
