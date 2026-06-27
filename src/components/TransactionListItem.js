@@ -145,7 +145,6 @@ export const TransactionListItem = ({
     });
     btnGroup.appendChild(splitBtn);
 
-
     const multiBtn = document.createElement('button');
     multiBtn.textContent = 'Select Multiple Transactions';
     multiBtn.type = 'button';

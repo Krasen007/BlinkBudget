@@ -116,10 +116,13 @@ export const BulkEditDialog = ({ selectedIds, onClose }) => {
         const tx = TransactionService.get(id);
         if (!tx) return;
         const updates = {};
-        if (newAccount && tx.accountId !== newAccount) updates.accountId = newAccount;
-        if (newCategory && tx.category !== newCategory) updates.category = newCategory;
+        if (newAccount && tx.accountId !== newAccount)
+          updates.accountId = newAccount;
+        if (newCategory && tx.category !== newCategory)
+          updates.category = newCategory;
         if (newTag !== null) updates.tags = newTag ? [newTag] : [];
-        if (Object.keys(updates).length > 0) TransactionService.update(id, updates);
+        if (Object.keys(updates).length > 0)
+          TransactionService.update(id, updates);
       });
 
       document.body.removeChild(overlay);

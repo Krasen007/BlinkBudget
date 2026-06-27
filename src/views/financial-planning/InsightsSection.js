@@ -784,7 +784,11 @@ function createFinancialSnapshotSection(transactions) {
   // --- Calculations ---
   const now = new Date();
   const monthsLookback = 6;
-  const rangeStart = new Date(now.getFullYear(), now.getMonth() - monthsLookback, 1);
+  const rangeStart = new Date(
+    now.getFullYear(),
+    now.getMonth() - monthsLookback,
+    1
+  );
   const rangeEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
   // Group by month to calculate averages
@@ -806,7 +810,8 @@ function createFinancialSnapshotSection(transactions) {
     const key = `${ts.getFullYear()}-${ts.getMonth()}`;
     if (!monthBuckets[key]) return;
 
-    const amount = typeof t.amount === 'number' ? t.amount : Number(t.amount) || 0;
+    const amount =
+      typeof t.amount === 'number' ? t.amount : Number(t.amount) || 0;
     if (t.type === TRANSACTION_TYPES.INCOME) {
       monthBuckets[key].income += amount;
     } else if (t.type === TRANSACTION_TYPES.EXPENSE) {
@@ -816,7 +821,9 @@ function createFinancialSnapshotSection(transactions) {
     }
   });
 
-  const filledMonths = Object.values(monthBuckets).filter(m => m.income > 0 || m.expenses > 0);
+  const filledMonths = Object.values(monthBuckets).filter(
+    m => m.income > 0 || m.expenses > 0
+  );
   const monthCount = Math.max(filledMonths.length, 1);
 
   const totalIncome = filledMonths.reduce((s, m) => s + m.income, 0);
@@ -835,13 +842,18 @@ function createFinancialSnapshotSection(transactions) {
       const parsed = JSON.parse(saved);
       totalDebt = typeof parsed === 'number' && parsed >= 0 ? parsed : 0;
     }
-  } catch (e) {
+  } catch {
     // storage unavailable or corrupt — treat as zero
   }
 
   // --- Format helpers ---
   const fmtUSD = value =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
+    new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
 
   // --- Render the sentence ---
   const sentence = document.createElement('p');
@@ -902,7 +914,8 @@ function createFinancialSnapshotSection(transactions) {
   infoIcon.style.fontSize = '0.75rem';
   infoIcon.style.opacity = '0.4';
   infoIcon.style.cursor = 'help';
-  infoIcon.title = 'Your total outstanding debt (mortgage, car loans, credit cards, student loans, etc.). Click the amount or edit icon to set your total debt.';
+  infoIcon.title =
+    'Your total outstanding debt (mortgage, car loans, credit cards, student loans, etc.). Click the amount or edit icon to set your total debt.';
   debtContainer.appendChild(infoIcon);
 
   // Input field (hidden by default)
@@ -942,7 +955,9 @@ function createFinancialSnapshotSection(transactions) {
       totalDebt = newDebt;
       try {
         localStorage.setItem(DEBT_STORAGE_KEY, JSON.stringify(totalDebt));
-      } catch (e) { /* storage unavailable */ }
+      } catch {
+        /* storage unavailable */
+      }
     }
 
     debtValueSpan.textContent = fmtUSD(totalDebt);
@@ -954,14 +969,14 @@ function createFinancialSnapshotSection(transactions) {
     debtInput.value = totalDebt;
   }
 
-  debtContainer.addEventListener('click', function (e) {
+  debtContainer.addEventListener('click', e => {
     if (e.target === infoIcon) return;
     if (debtInput.style.display === 'none') {
       enterEditMode();
     }
   });
 
-  debtInput.addEventListener('keydown', function (e) {
+  debtInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       e.preventDefault();
       exitEditMode(true);
@@ -971,14 +986,14 @@ function createFinancialSnapshotSection(transactions) {
     }
   });
 
-  debtInput.addEventListener('blur', function () {
+  debtInput.addEventListener('blur', () => {
     exitEditMode(true);
   });
 
-  debtContainer.addEventListener('mouseenter', function () {
+  debtContainer.addEventListener('mouseenter', () => {
     editIcon.style.opacity = '1';
   });
-  debtContainer.addEventListener('mouseleave', function () {
+  debtContainer.addEventListener('mouseleave', () => {
     if (debtInput.style.display === 'none') {
       editIcon.style.opacity = '0.5';
     }
@@ -1002,15 +1017,19 @@ function createFinancialSnapshotSection(transactions) {
   `;
 
   const periodSpan = document.createElement('span');
-  const firstMonth = filledMonths.length > 0 ? filledMonths[0].label : monthBuckets[Object.keys(monthBuckets)[0]]?.label || '';
-  const lastMonth = filledMonths.length > 0 ? filledMonths[filledMonths.length - 1].label : '';
+  const firstMonth =
+    filledMonths.length > 0
+      ? filledMonths[0].label
+      : monthBuckets[Object.keys(monthBuckets)[0]]?.label || '';
+  const lastMonth =
+    filledMonths.length > 0 ? filledMonths[filledMonths.length - 1].label : '';
   periodSpan.textContent = `Based on ${monthCount} month${monthCount !== 1 ? 's' : ''} (${firstMonth}${lastMonth && lastMonth !== firstMonth ? ` \u2013 ${lastMonth}` : ''})`;
   detail.appendChild(periodSpan);
 
   // Savings rate
   if (monthlySalary > 0) {
     const rateSpan = document.createElement('span');
-    const savingsRate = ((monthlySavings / monthlySalary) * 100);
+    const savingsRate = (monthlySavings / monthlySalary) * 100;
     rateSpan.textContent = `Savings rate: ${savingsRate.toFixed(1)}%`;
     detail.appendChild(rateSpan);
   }
@@ -1019,9 +1038,6 @@ function createFinancialSnapshotSection(transactions) {
 
   return snapshot;
 }
-
-
-
 
 /**
  * Insights Section Component

@@ -31,9 +31,7 @@ export class UnusualSpendingDetector {
             t.category === category &&
             (t.type === 'expense' || t.type === 'refund')
         )
-      : transactions.filter(
-          t => t.type === 'expense' || t.type === 'refund'
-        );
+      : transactions.filter(t => t.type === 'expense' || t.type === 'refund');
 
     // Only expense transactions can be flagged as unusual (refunds are never unusual)
     const expenseTransactions = baselineTransactions.filter(
@@ -60,9 +58,7 @@ export class UnusualSpendingDetector {
     const threshold = mean + multiplier * standardDeviation;
 
     // Find outliers — only check expense transactions (never flag refunds)
-    const rawUnusual = expenseTransactions.filter(
-      t => t.amount > threshold
-    );
+    const rawUnusual = expenseTransactions.filter(t => t.amount > threshold);
 
     // Final guard: if refunds in the same category bring the net spending per
     // transaction back below the threshold, suppress the alert — the expense
@@ -140,7 +136,8 @@ export class UnusualSpendingDetector {
             const raw = t.amount ?? 0;
             return t.type === 'refund' ? -raw : raw;
           });
-          const mean = netAmounts.reduce((sum, a) => sum + a, 0) / netAmounts.length;
+          const mean =
+            netAmounts.reduce((sum, a) => sum + a, 0) / netAmounts.length;
 
           analysis[category] = {
             totalTransactions: categoryTransactions.length,
