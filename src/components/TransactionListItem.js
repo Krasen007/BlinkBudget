@@ -29,6 +29,11 @@ export const TransactionListItem = ({
   onCategoryClick = () => {},
   currentTagFilter = null,
   onTagClick = () => {},
+  // Multi-select support
+  selectionMode = false,
+  isSelected = false,
+  onToggleSelect = null,
+  onSelectMultiple = null,
 }) => {
   const item = document.createElement('li');
   item.className = 'transaction-item transaction-list-item';
@@ -46,9 +51,32 @@ export const TransactionListItem = ({
     opacity: transaction.isGhost ? '0.6' : '1',
   });
 
-  // Long press to split, instant click to edit
+  // Long press shows action menu; instant click navigates to edit or toggles selection
   let pressTimer = null;
   let longPressed = false;
+
+  // --- Checkbox for selection mode ---
+  if (selectionMode && typeof onToggleSelect === 'function') {
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = isSelected;
+    checkbox.style.marginRight = SPACING.SM;
+    checkbox.style.flexShrink = '0';
+    checkbox.style.width = '20px';
+    checkbox.style.height = '20px';
+    checkbox.style.accentColor = 'var(--color-primary)';
+    checkbox.addEventListener('click', e => {
+      e.stopPropagation();
+      onToggleSelect(transaction.id);
+    });
+    item.insertBefore(checkbox, item.firstChild);
+  }
+
+  // Apply selected visual styling
+  if (isSelected) {
+    item.style.background = 'var(--color-primary-light)';
+    item.style.borderLeft = '3px solid var(--color-primary)';
+  }
 
   const handleSplitTransaction = () => {
     // Import ConfirmDialog dynamically
@@ -126,11 +154,91 @@ export const TransactionListItem = ({
       });
   };
 
+  const showActionMenu = () => {
+    // Create a simple action menu overlay
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4); z-index: 1000;
+      display: flex; align-items: flex-end; justify-content: center;
+    `;
+
+    const menu = document.createElement('div');
+    menu.style.cssText = `
+      background: var(--color-surface);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      padding: ${SPACING.MD};
+      width: 100%; max-width: 400px;
+      box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
+    `;
+
+    const menuTitle = document.createElement('div');
+    menuTitle.textContent = `${transaction.category} — ${CURRENCY_SYMBOL}${Math.abs(transaction.amount).toFixed(2)}`;
+    menuTitle.style.cssText = `
+      font-weight: 600; margin-bottom: ${SPACING.MD};
+      color: var(--color-text-main); text-align: center;
+    `;
+    menu.appendChild(menuTitle);
+
+    // Split Transaction button
+    const splitBtn = document.createElement('button');
+    splitBtn.textContent = '✂️ Split Transaction';
+    splitBtn.style.cssText = `
+      display: block; width: 100%; padding: ${SPACING.MD};
+      background: var(--color-surface-hover); border: none;
+      border-radius: var(--radius-md); margin-bottom: ${SPACING.SM};
+      font-size: 1rem; cursor: pointer; color: var(--color-text-main);
+    `;
+    splitBtn.addEventListener('click', () => {
+      document.body.removeChild(overlay);
+      handleSplitTransaction();
+    });
+    menu.appendChild(splitBtn);
+
+    // Select Multiple Transactions button
+    const multiBtn = document.createElement('button');
+    multiBtn.textContent = '☑️ Select Multiple Transactions';
+    multiBtn.style.cssText = `
+      display: block; width: 100%; padding: ${SPACING.MD};
+      background: var(--color-surface-hover); border: none;
+      border-radius: var(--radius-md); margin-bottom: ${SPACING.MD};
+      font-size: 1rem; cursor: pointer; color: var(--color-text-main);
+    `;
+    multiBtn.addEventListener('click', () => {
+      document.body.removeChild(overlay);
+      if (typeof onSelectMultiple === 'function') {
+        onSelectMultiple();
+      }
+    });
+    menu.appendChild(multiBtn);
+
+    // Cancel button
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.style.cssText = `
+      display: block; width: 100%; padding: ${SPACING.SM};
+      background: transparent; border: 1px solid var(--color-border);
+      border-radius: var(--radius-md); font-size: 0.9rem;
+      cursor: pointer; color: var(--color-text-muted);
+    `;
+    cancelBtn.addEventListener('click', () => {
+      document.body.removeChild(overlay);
+    });
+    menu.appendChild(cancelBtn);
+
+    overlay.appendChild(menu);
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) document.body.removeChild(overlay);
+    });
+    document.body.appendChild(overlay);
+  };
+
   const startPress = () => {
+    if (selectionMode) return; // No long-press in selection mode
     longPressed = false;
     pressTimer = setTimeout(() => {
       longPressed = true;
-      handleSplitTransaction();
+      showActionMenu();
     }, 500); // 500ms for long press
   };
 
@@ -326,11 +434,14 @@ export const TransactionListItem = ({
     info.appendChild(description);
   }
 
-  // Instant click for navigation with note toggle
+  // Click — in selection mode toggle selection, otherwise navigate to edit
   item.addEventListener('click', _e => {
     if (!longPressed) {
-      // Navigate to edit immediately
-      Router.navigate('edit-expense', { id: transaction.id });
+      if (selectionMode && typeof onToggleSelect === 'function') {
+        onToggleSelect(transaction.id);
+      } else {
+        Router.navigate('edit-expense', { id: transaction.id });
+      }
     }
   });
 

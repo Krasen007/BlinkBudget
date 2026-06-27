@@ -30,6 +30,11 @@ export const TransactionList = ({
   currentTagFilter = null,
   onTagClick = () => {},
   onFilterClear = () => {}, // New callback for clearing general filter
+  // Multi-select support
+  selectionMode = false,
+  selectedIds = new Set(),
+  onToggleSelect = null,
+  onSelectMultiple = null,
 }) => {
   const listContainer = document.createElement('div');
   listContainer.className = 'dashboard-transactions-container';
@@ -245,6 +250,10 @@ export const TransactionList = ({
         onCategoryClick,
         currentTagFilter,
         onTagClick,
+        selectionMode,
+        isSelected: selectedIds.has(transaction.id),
+        onToggleSelect,
+        onSelectMultiple,
       });
       list.appendChild(item);
     });

@@ -15,6 +15,7 @@ import { getCurrentMonthPeriod } from '../utils/reports-utils.js';
 
 import { getTransactionToHighlight } from '../utils/success-feedback.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
+import { BulkEditDialog } from '../components/BulkEditDialog.js';
 
 // Track if we've already preloaded reports in this session
 let hasPreloadedReports = false;
@@ -224,6 +225,39 @@ export const DashboardView = (params = {}) => {
   let currentMonthFilter =
     sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER) || null;
   let currentTypeFilter = NavigationState.restoreDashboardTypeFilter() || null;
+
+  // Multi-select state
+  let isSelectionMode = false;
+  let selectedTransactionIds = new Set();
+
+  const enterSelectionMode = txId => {
+    isSelectionMode = true;
+    selectedTransactionIds = new Set([txId]);
+    renderDashboard();
+  };
+
+  const exitSelectionMode = () => {
+    isSelectionMode = false;
+    selectedTransactionIds = new Set();
+    renderDashboard();
+  };
+
+  const toggleSelection = txId => {
+    if (selectedTransactionIds.has(txId)) {
+      selectedTransactionIds.delete(txId);
+    } else {
+      selectedTransactionIds.add(txId);
+    }
+    renderDashboard();
+  };
+
+  const handleBulkEdit = () => {
+    if (selectedTransactionIds.size === 0) return;
+    BulkEditDialog({
+      selectedIds: selectedTransactionIds,
+      onClose: () => exitSelectionMode(),
+    });
+  };
 
   // Track current filter state for display purposes
   let currentDashboardFilter = null;
@@ -809,6 +843,10 @@ export const DashboardView = (params = {}) => {
       currentAccountFilter,
       accounts: currentAccounts,
       highlightTransactionIds,
+      selectionMode: isSelectionMode,
+      selectedIds: selectedTransactionIds,
+      onToggleSelect: toggleSelection,
+      onSelectMultiple: enterSelectionMode,
       // Pass date filter props
       currentDateFilter,
       onDateClick: date => {
@@ -886,6 +924,47 @@ export const DashboardView = (params = {}) => {
         renderDashboard();
       },
     });
+
+    // Bulk actions toolbar (selection mode)
+    if (isSelectionMode) {
+      const bulkToolbar = document.createElement('div');
+      bulkToolbar.style.display = 'flex';
+      bulkToolbar.style.justifyContent = 'space-between';
+      bulkToolbar.style.alignItems = 'center';
+      bulkToolbar.style.gap = SPACING.SM;
+      bulkToolbar.style.padding = `${SPACING.SM} 0`;
+      bulkToolbar.style.borderBottom = `1px solid ${COLORS.SURFACE_HOVER}`;
+      bulkToolbar.style.marginBottom = SPACING.SM;
+
+      const selectionInfo = document.createElement('span');
+      selectionInfo.textContent = `${selectedTransactionIds.size} selected`;
+      selectionInfo.style.fontWeight = '500';
+      selectionInfo.style.color = COLORS.TEXT_MAIN;
+      bulkToolbar.appendChild(selectionInfo);
+
+      const btnGroup = document.createElement('div');
+      btnGroup.style.display = 'flex';
+      btnGroup.style.gap = SPACING.SM;
+
+      const editBtn = ButtonComponent({
+        text: 'Edit Selected',
+        variant: 'primary',
+        onClick: handleBulkEdit,
+      });
+      editBtn.disabled = selectedTransactionIds.size === 0;
+      btnGroup.appendChild(editBtn);
+
+      const cancelBtn = ButtonComponent({
+        text: 'Cancel',
+        variant: 'secondary',
+        onClick: exitSelectionMode,
+      });
+      btnGroup.appendChild(cancelBtn);
+
+      bulkToolbar.appendChild(btnGroup);
+      content.appendChild(bulkToolbar);
+    }
+
     content.appendChild(transactionList);
 
     // Scroll to highlighted transaction if provided
