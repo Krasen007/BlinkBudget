@@ -1,6 +1,18 @@
-v1.39 → v1.40
+v1.40 -> v1.41
 
-- Updated stylelint to version 17 with the latest standard ruleset, keeping the project's linting in sync with current best practices.
-- Bumped the Node.js engine requirement to 26 and refreshed major and minor dependencies across the board for improved stability and security.
-- Fixed a COOP header misconfiguration that was preventing Firebase signInWithPopup from working. Cross-Origin-Opener-Policy now correctly allows popups so sign-in flows behave as expected.
-- Cleaned up lint and code-quality issues: removed dead test framework code and fixed a no-useless-assignment error. Also clarified the project's anti-goal rules in AGENTS.md so contributors understand what not to build.
+What's new
+
+- Bulk transaction editing: you can now long-press any transaction to enter multi-select mode, tap multiple items, and apply category, account, or tag changes in one go.
+- More reliable reports: fixed transaction count and date-range calculations that were skewing totals and percentages.
+- Goal colors restored: missing accent colours in the Goals section are back.
+- Dashboard performance: full-page re-renders are now more efficient, keeping the UI snappy when filters change.
+- Visual polish: updated styles for the select-multiple experience and improved toast notification positioning.
+- Accessibility: all interactive divs now have proper button semantics and keyboard support.
+
+Under the hood
+
+- Migrated build tooling to rolldown-vite for Vite 8.
+- Tightened CSS with tabular numbers, text wrapping, transition tweaks, and a new red accent for destructive actions.
+- 5-dimension audit fixes and conditional hero CSS.
+- Lint and test cleanup; fixed an error-message regression in app config.
+- Replaced broken hooks that were restoring or calling the wrong functions in several views.

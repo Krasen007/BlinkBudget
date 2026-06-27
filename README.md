@@ -51,6 +51,8 @@
 - **Integrated category filtering** between Reports and Dashboard views for consistent analysis across all sections | src/views/ReportsView.js:category filter sync | src/views/DashboardView.js:category filter sync
 - **Smart time period navigation** with dynamic labels showing specific months and years | src/views/DashboardView.js:time navigation | src/utils/date-utils.js:date formatting
 - **Transaction Split** - Hold transaction to split in two | src/components/TransactionListItem.js:handleSplitTransaction() | src/core/transaction-service.js:split()
+ - **Bulk transaction editing** - Long-press to enter multi-select mode, select multiple transactions, and edit or delete them in bulk | src/views/DashboardView.js:multi-select | src/components/TransactionListItem.js:long-press selection
+ - **Multi-select visual feedback** - Clear selection indicators and count display when selecting transactions | src/views/DashboardView.js:selection mode | src/styles/main.css:bulk-actions styles
 
 ### Dashboard & Analytics
 
@@ -147,7 +149,7 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 - **Keyboard shortcut (Escape key)** to exit Settings and return to dashboard | src/core/mobile-utils.js:handleKeyDown() - Escape key handling | src/views/SettingsView.js:keyboard navigation
 - **Helpful tips on each section** | src/utils/tooltip-config.js:tooltip configuration
 - **Top-tier Security** - Advanced XSS protection, strict URL validation, comprehensive privacy compliance, and regular security patches | src/utils/security-utils.js:safeJsonParse() | src/core/privacy-service.js:privacy controls
-- **Improved accessibility** with "Skip to Content" links, ARIA roles, and proper form label associations | src/core/accessibility-service.js:accessibility helpers | src/components/TransactionForm.js:ARIA labels
+- **Improved accessibility** with "Skip to Content" links, ARIA roles, proper form label associations, and keyboard support for all interactive elements | src/core/accessibility-service.js:accessibility helpers | src/components/TransactionForm.js:ARIA labels
 - **Modern component foundation** - BaseComponent building blocks and an Enhanced Button component for consistent UI behavior | src/components/Button.js:ButtonComponent | src/components/BaseComponent.js:BaseComponent foundation
 - **Enhanced color schemes** with improved text contrast for better readability | src/utils/constants.js:COLOR definitions | src/styles/base.css:color scheme variables
 - **Improved Reports navigation** with filter preservation and breadcrumb indicators for quick category return | src/views/ReportsView.js:navigation state | src/utils/navigation-helper.js:breadcrumb navigation
@@ -268,7 +270,7 @@ BlinkBudget delivers exceptional performance with modern web technologies:
 - **Styling**: Vanilla CSS with CSS Custom Properties
 - **Storage**: Firebase (Sync) + localStorage for offline-capable data persistence
 - **Testing**: Vitest with jsdom environment
-- **Build**: Vite with PostCSS optimization
+- **Build**: Vite with PostCSS optimization and rolldown-vite for faster builds
 - **Performance**: Built-in performance monitoring and optimization utilities
 - **PWA**: vite-plugin-pwa for service worker and manifest management
 - **Package Manager**: Yarn for improved dependency management
