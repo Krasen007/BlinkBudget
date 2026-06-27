@@ -16,6 +16,9 @@ export const ConfirmDialog = ({
   confirmText = 'Delete',
   title = 'Confirm Action',
   variant = 'danger',
+  showSecondary = false,
+  secondaryText = 'Secondary',
+  onSecondary = null,
 }) => {
   // Use mobile modal on mobile devices
   if (window.mobileUtils?.isMobile()) {
@@ -51,6 +54,7 @@ export const ConfirmDialog = ({
   btnGroup.style.display = 'flex';
   btnGroup.style.gap = 'var(--spacing-md)';
   btnGroup.style.justifyContent = 'center';
+  btnGroup.style.flexWrap = 'wrap';
 
   const cancelBtn = ButtonComponent({
     text: 'Cancel',
@@ -77,6 +81,19 @@ export const ConfirmDialog = ({
   }
 
   btnGroup.appendChild(cancelBtn);
+
+  if (showSecondary && typeof onSecondary === 'function') {
+    const secondaryBtn = ButtonComponent({
+      text: secondaryText,
+      variant: 'secondary',
+      onClick: () => {
+        document.body.removeChild(overlay);
+        onSecondary();
+      },
+    });
+    btnGroup.appendChild(secondaryBtn);
+  }
+
   btnGroup.appendChild(confirmBtn);
 
   card.appendChild(titleEl);

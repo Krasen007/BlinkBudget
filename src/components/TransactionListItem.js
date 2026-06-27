@@ -55,181 +55,139 @@ export const TransactionListItem = ({
   let pressTimer = null;
   let longPressed = false;
 
-  // --- Checkbox for selection mode ---
-  if (selectionMode && typeof onToggleSelect === 'function') {
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.checked = isSelected;
-    checkbox.style.marginRight = SPACING.SM;
-    checkbox.style.flexShrink = '0';
-    checkbox.style.width = '20px';
-    checkbox.style.height = '20px';
-    checkbox.style.accentColor = 'var(--color-primary)';
-    checkbox.addEventListener('click', e => {
-      e.stopPropagation();
-      onToggleSelect(transaction.id);
-    });
-    item.insertBefore(checkbox, item.firstChild);
-  }
-
   // Apply selected visual styling
   if (isSelected) {
-    item.style.background = 'var(--color-primary-light)';
+    item.style.background = 'rgba(59, 130, 246, 0.12)';
     item.style.borderLeft = '3px solid var(--color-primary)';
   }
 
-  const handleSplitTransaction = () => {
-    // Import ConfirmDialog dynamically
-    import('./ConfirmDialog.js')
-      .then(({ ConfirmDialog }) => {
-        ConfirmDialog({
-          title: 'Split Transaction',
-          message: `Split this transaction of ${CURRENCY_SYMBOL}${(Number(transaction.amount) || 0).toFixed(2)}?`,
-          confirmText: 'Split',
-          variant: 'primary',
-          onConfirm: () => {
-            let result;
-            try {
-              result = TransactionService.split(transaction.id);
-              if (!result) {
-                import('../utils/toast-notifications.js')
-                  .then(({ showErrorToast }) => {
-                    showErrorToast('Failed to split transaction');
-                  })
-                  .catch(() => {
-                    console.error(
-                      'Failed to split transaction and toast system unavailable'
-                    );
-                  });
-                return;
-              }
-            } catch (error) {
-              import('../utils/toast-notifications.js')
-                .then(({ showErrorToast }) => {
-                  showErrorToast(
-                    `Failed to split transaction: ${error.message}`
-                  );
-                })
-                .catch(() => {
-                  console.error(
-                    'Failed to split transaction and toast system unavailable'
-                  );
-                });
-              return;
-            }
-
-            const { first, second } = result;
-
-            // Mark both transactions for highlighting
-            // Store both IDs as comma-separated string
-            sessionStorage.setItem(
-              'highlightTransactionId',
-              `${first.id},${second.id}`
-            );
-
-            // Trigger UI update
-            window.dispatchEvent(
-              new CustomEvent('storage-updated', {
-                detail: { key: 'transactions' },
-              })
-            );
-          },
-        });
-      })
-      .catch(error => {
-        console.error('Failed to load ConfirmDialog:', error);
-        import('../utils/toast-notifications.js')
-          .then(({ showErrorToast }) => {
-            showErrorToast(
-              'Could not open confirmation dialog. Please try again.'
-            );
-          })
-          .catch(() => {
-            // Fallback if toast system fails to load
-            // At this point both ConfirmDialog and toast failed, log and accept failure
-            console.error(
-              'Toast system also failed to load - cannot show error to user'
-            );
-          });
-      });
-  };
-
-  const showActionMenu = () => {
-    // Create a simple action menu overlay
+  const showSplitDialog = () => {
     const overlay = document.createElement('div');
-    overlay.style.cssText = `
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.4); z-index: 1000;
-      display: flex; align-items: flex-end; justify-content: center;
-    `;
+    overlay.className = 'dialog-overlay';
 
-    const menu = document.createElement('div');
-    menu.style.cssText = `
-      background: var(--color-surface);
-      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-      padding: ${SPACING.MD};
-      width: 100%; max-width: 400px;
-      box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
-    `;
+    const card = document.createElement('div');
+    card.className = 'dialog-card';
+    card.style.maxWidth = 'var(--modal-max-width)';
+    card.style.width = '92%';
 
-    const menuTitle = document.createElement('div');
-    menuTitle.textContent = `${transaction.category} — ${CURRENCY_SYMBOL}${Math.abs(transaction.amount).toFixed(2)}`;
-    menuTitle.style.cssText = `
-      font-weight: 600; margin-bottom: ${SPACING.MD};
-      color: var(--color-text-main); text-align: center;
-    `;
-    menu.appendChild(menuTitle);
+    const title = document.createElement('h3');
+    title.textContent = 'Split Transaction';
+    title.id = 'split-dialog-title';
+    title.style.margin = '0 0 var(--spacing-xs) 0';
+    title.style.textAlign = 'center';
+    title.style.fontFamily = 'var(--font-heading)';
+    title.style.fontSize = 'var(--font-size-lg)';
+    title.style.lineHeight = 'var(--line-height-tight)';
+    title.style.color = 'var(--color-text-main)';
+    card.appendChild(title);
 
-    // Split Transaction button
+    const message = document.createElement('p');
+    message.textContent = `Split this transaction of ${CURRENCY_SYMBOL}${(Number(transaction.amount) || 0).toFixed(2)}?`;
+    message.style.margin = '0 0 var(--spacing-md) 0';
+    message.style.textAlign = 'center';
+    message.style.color = 'var(--color-text-muted)';
+    message.style.fontSize = 'var(--font-size-base)';
+    card.appendChild(message);
+
+    const btnGroup = document.createElement('div');
+    btnGroup.style.display = 'flex';
+    btnGroup.style.flexDirection = 'column';
+    btnGroup.style.gap = 'var(--spacing-sm)';
+
     const splitBtn = document.createElement('button');
-    splitBtn.textContent = '✂️ Split Transaction';
-    splitBtn.style.cssText = `
-      display: block; width: 100%; padding: ${SPACING.MD};
-      background: var(--color-surface-hover); border: none;
-      border-radius: var(--radius-md); margin-bottom: ${SPACING.SM};
-      font-size: 1rem; cursor: pointer; color: var(--color-text-main);
-    `;
+    splitBtn.textContent = 'Split';
+    splitBtn.type = 'button';
+    splitBtn.className = 'btn btn-primary';
+    splitBtn.style.width = '100%';
     splitBtn.addEventListener('click', () => {
       document.body.removeChild(overlay);
-      handleSplitTransaction();
-    });
-    menu.appendChild(splitBtn);
+      let result;
+      try {
+        result = TransactionService.split(transaction.id);
+        if (!result) {
+          import('../utils/toast-notifications.js')
+            .then(({ showErrorToast }) => {
+              showErrorToast('Failed to split transaction');
+            })
+            .catch(() => {
+              console.error(
+                'Failed to split transaction and toast system unavailable'
+              );
+            });
+          return;
+        }
+      } catch (error) {
+        import('../utils/toast-notifications.js')
+          .then(({ showErrorToast }) => {
+            showErrorToast(`Failed to split transaction: ${error.message}`);
+          })
+          .catch(() => {
+            console.error(
+              'Failed to split transaction and toast system unavailable'
+            );
+          });
+        return;
+      }
 
-    // Select Multiple Transactions button
+      const { first, second } = result;
+
+      // Mark both transactions for highlighting
+      sessionStorage.setItem(
+        'highlightTransactionId',
+        `${first.id},${second.id}`
+      );
+
+      window.dispatchEvent(
+        new CustomEvent('storage-updated', {
+          detail: { key: 'transactions' },
+        })
+      );
+    });
+    btnGroup.appendChild(splitBtn);
+
+
     const multiBtn = document.createElement('button');
-    multiBtn.textContent = '☑️ Select Multiple Transactions';
-    multiBtn.style.cssText = `
-      display: block; width: 100%; padding: ${SPACING.MD};
-      background: var(--color-surface-hover); border: none;
-      border-radius: var(--radius-md); margin-bottom: ${SPACING.MD};
-      font-size: 1rem; cursor: pointer; color: var(--color-text-main);
-    `;
+    multiBtn.textContent = 'Select Multiple Transactions';
+    multiBtn.type = 'button';
+    multiBtn.className = 'btn btn-secondary';
+    multiBtn.style.width = '100%';
     multiBtn.addEventListener('click', () => {
       document.body.removeChild(overlay);
-      if (typeof onSelectMultiple === 'function') {
-        onSelectMultiple();
-      }
+      if (typeof onSelectMultiple === 'function') onSelectMultiple();
     });
-    menu.appendChild(multiBtn);
+    btnGroup.appendChild(multiBtn);
 
-    // Cancel button
     const cancelBtn = document.createElement('button');
     cancelBtn.textContent = 'Cancel';
-    cancelBtn.style.cssText = `
-      display: block; width: 100%; padding: ${SPACING.SM};
-      background: transparent; border: 1px solid var(--color-border);
-      border-radius: var(--radius-md); font-size: 0.9rem;
-      cursor: pointer; color: var(--color-text-muted);
-    `;
+    cancelBtn.type = 'button';
+    cancelBtn.className = 'btn btn-secondary';
+    cancelBtn.style.width = '100%';
     cancelBtn.addEventListener('click', () => {
       document.body.removeChild(overlay);
     });
-    menu.appendChild(cancelBtn);
+    btnGroup.appendChild(cancelBtn);
 
-    overlay.appendChild(menu);
+    card.appendChild(btnGroup);
+    card.setAttribute('role', 'dialog');
+    card.setAttribute('aria-modal', 'true');
+    card.setAttribute('aria-labelledby', 'split-dialog-title');
+    overlay.appendChild(card);
+
+    const close = () => {
+      if (document.body.contains(overlay)) {
+        document.body.removeChild(overlay);
+      }
+    };
     overlay.addEventListener('click', e => {
-      if (e.target === overlay) document.body.removeChild(overlay);
+      if (e.target === overlay) close();
     });
+    const onKey = e => {
+      if (e.key === 'Escape') {
+        document.body.removeEventListener('keydown', onKey);
+        close();
+      }
+    };
+    document.body.addEventListener('keydown', onKey);
     document.body.appendChild(overlay);
   };
 
@@ -238,7 +196,7 @@ export const TransactionListItem = ({
     longPressed = false;
     pressTimer = setTimeout(() => {
       longPressed = true;
-      showActionMenu();
+      showSplitDialog();
     }, 500); // 500ms for long press
   };
 

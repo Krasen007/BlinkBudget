@@ -230,9 +230,9 @@ export const DashboardView = (params = {}) => {
   let isSelectionMode = false;
   let selectedTransactionIds = new Set();
 
-  const enterSelectionMode = txId => {
+  const enterSelectionMode = () => {
     isSelectionMode = true;
-    selectedTransactionIds = new Set([txId]);
+    selectedTransactionIds = new Set();
     renderDashboard();
   };
 
@@ -256,6 +256,24 @@ export const DashboardView = (params = {}) => {
     BulkEditDialog({
       selectedIds: selectedTransactionIds,
       onClose: () => exitSelectionMode(),
+    });
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedTransactionIds.size === 0) return;
+    import('../components/ConfirmDialog.js').then(({ ConfirmDialog }) => {
+      ConfirmDialog({
+        title: 'Delete Transactions',
+        message: `Delete ${selectedTransactionIds.size} selected transaction${selectedTransactionIds.size > 1 ? 's' : ''}? This cannot be undone.`,
+        confirmText: 'Delete',
+        variant: 'danger',
+        onConfirm: () => {
+          selectedTransactionIds.forEach(id => {
+            TransactionService.remove(id);
+          });
+          exitSelectionMode();
+        },
+      });
     });
   };
 
@@ -928,18 +946,21 @@ export const DashboardView = (params = {}) => {
     // Bulk actions toolbar (selection mode)
     if (isSelectionMode) {
       const bulkToolbar = document.createElement('div');
+      bulkToolbar.className = 'bulk-actions-toolbar';
       bulkToolbar.style.display = 'flex';
       bulkToolbar.style.justifyContent = 'space-between';
       bulkToolbar.style.alignItems = 'center';
       bulkToolbar.style.gap = SPACING.SM;
-      bulkToolbar.style.padding = `${SPACING.SM} 0`;
+      bulkToolbar.style.padding = `${SPACING.SM} 0 ${SPACING.SM} 0`;
       bulkToolbar.style.borderBottom = `1px solid ${COLORS.SURFACE_HOVER}`;
       bulkToolbar.style.marginBottom = SPACING.SM;
 
       const selectionInfo = document.createElement('span');
       selectionInfo.textContent = `${selectedTransactionIds.size} selected`;
-      selectionInfo.style.fontWeight = '500';
+      selectionInfo.style.fontWeight = '600';
       selectionInfo.style.color = COLORS.TEXT_MAIN;
+      selectionInfo.style.fontSize = 'var(--font-size-sm)';
+      selectionInfo.style.letterSpacing = '0.02em';
       bulkToolbar.appendChild(selectionInfo);
 
       const btnGroup = document.createElement('div');
@@ -953,6 +974,14 @@ export const DashboardView = (params = {}) => {
       });
       editBtn.disabled = selectedTransactionIds.size === 0;
       btnGroup.appendChild(editBtn);
+
+      const deleteBtn = ButtonComponent({
+        text: 'Delete',
+        variant: 'danger',
+        onClick: handleBulkDelete,
+      });
+      deleteBtn.disabled = selectedTransactionIds.size === 0;
+      btnGroup.appendChild(deleteBtn);
 
       const cancelBtn = ButtonComponent({
         text: 'Cancel',

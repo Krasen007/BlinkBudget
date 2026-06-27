@@ -2,47 +2,52 @@ import { ButtonComponent } from './Button.js';
 import { CustomCategoryService } from '../core/custom-category-service.js';
 import { AccountService } from '../core/Account/account-service.js';
 import { TransactionService } from '../core/transaction-service.js';
-import { SPACING, COLORS, FONT_SIZES } from '../utils/constants.js';
+import { SPACING, COLORS } from '../utils/constants.js';
 
 export const BulkEditDialog = ({ selectedIds, onClose }) => {
   const overlay = document.createElement('div');
   overlay.className = 'dialog-overlay';
   const card = document.createElement('div');
   card.className = 'dialog-card';
-  card.style.maxWidth = '520px';
-  card.style.width = '92%';
+  card.style.maxWidth = 'var(--modal-max-width)';
+  card.style.width = '90%';
 
   const title = document.createElement('h3');
   title.textContent = `Edit ${selectedIds.size} Selected Transaction${selectedIds.size > 1 ? 's' : ''}`;
   title.style.marginBottom = SPACING.MD;
   title.style.textAlign = 'center';
   title.style.color = COLORS.TEXT_MAIN;
+  title.style.fontFamily = 'var(--font-heading)';
+  title.style.fontSize = 'var(--font-size-lg)';
+  title.style.lineHeight = 'var(--line-height-tight)';
+  title.id = 'bulk-edit-dialog-title';
   card.appendChild(title);
+
+  card.setAttribute('role', 'dialog');
+  card.setAttribute('aria-modal', 'true');
+  card.setAttribute('aria-labelledby', 'bulk-edit-dialog-title');
 
   const form = document.createElement('div');
   form.style.display = 'flex';
   form.style.flexDirection = 'column';
   form.style.gap = SPACING.MD;
 
-  const mkLabel = (text) => {
+  const mkLabel = (text, htmlFor) => {
     const l = document.createElement('label');
     l.textContent = text;
+    l.htmlFor = htmlFor;
     l.style.fontWeight = '500';
-    l.style.fontSize = FONT_SIZES.SM;
+    l.style.fontSize = 'var(--font-size-sm)';
     l.style.color = COLORS.TEXT_MUTED;
+    l.style.display = 'block';
+    l.style.marginBottom = `${SPACING.XS}`;
     return l;
   };
 
-  const mkSelect = (placeholder) => {
+  const mkSelect = (placeholder, id) => {
     const s = document.createElement('select');
     s.className = 'mobile-form-select';
-    s.style.width = '100%';
-    s.style.padding = `${SPACING.SM} ${SPACING.MD}`;
-    s.style.fontSize = FONT_SIZES.BASE;
-    s.style.borderRadius = 'var(--radius-md)';
-    s.style.border = `1px solid ${COLORS.BORDER}`;
-    s.style.background = COLORS.SURFACE;
-    s.style.color = COLORS.TEXT_MAIN;
+    s.id = id;
     const opt = document.createElement('option');
     opt.value = '';
     opt.textContent = placeholder;
@@ -50,8 +55,8 @@ export const BulkEditDialog = ({ selectedIds, onClose }) => {
     return s;
   };
 
-  form.appendChild(mkLabel('Wallet (Account)'));
-  const accountSelect = mkSelect('Keep current wallet...');
+  form.appendChild(mkLabel('Wallet (Account)', 'bulk-account'));
+  const accountSelect = mkSelect('Keep current wallet...', 'bulk-account');
   AccountService.getAccounts().forEach(a => {
     const o = document.createElement('option');
     o.value = a.id;
@@ -60,8 +65,8 @@ export const BulkEditDialog = ({ selectedIds, onClose }) => {
   });
   form.appendChild(accountSelect);
 
-  form.appendChild(mkLabel('Category'));
-  const categorySelect = mkSelect('Keep current category...');
+  form.appendChild(mkLabel('Category', 'bulk-category'));
+  const categorySelect = mkSelect('Keep current category...', 'bulk-category');
   CustomCategoryService.getByType('all').forEach(c => {
     const o = document.createElement('option');
     o.value = c.name;
@@ -70,8 +75,8 @@ export const BulkEditDialog = ({ selectedIds, onClose }) => {
   });
   form.appendChild(categorySelect);
 
-  form.appendChild(mkLabel('Tags (Labels)'));
-  const tagSelect = mkSelect('Keep current tags...');
+  form.appendChild(mkLabel('Tags (Labels)', 'bulk-tag'));
+  const tagSelect = mkSelect('Keep current tags...', 'bulk-tag');
   CustomCategoryService.getCheckboxCategories().forEach(c => {
     const o = document.createElement('option');
     o.value = c.name;
@@ -127,12 +132,22 @@ export const BulkEditDialog = ({ selectedIds, onClose }) => {
   card.appendChild(btnGroup);
   overlay.appendChild(card);
 
+  const close = () => {
+    document.body.removeChild(overlay);
+    if (typeof onClose === 'function') onClose();
+  };
+
   overlay.addEventListener('click', e => {
-    if (e.target === overlay) {
-      document.body.removeChild(overlay);
-      if (typeof onClose === 'function') onClose();
-    }
+    if (e.target === overlay) close();
   });
+
+  const onKey = e => {
+    if (e.key === 'Escape') {
+      document.body.removeEventListener('keydown', onKey);
+      close();
+    }
+  };
+  document.body.addEventListener('keydown', onKey);
 
   document.body.appendChild(overlay);
   return overlay;
