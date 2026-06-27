@@ -719,6 +719,311 @@ function createTimelineSection(
 }
 
 /**
+ * Create Financial Snapshot - Experimental Feature
+ * Shows a monthly summary: "My monthly salary is $X, expenses are $Y, savings are $Z, and debts are $W"
+ * Debt is manually entered by the user and persisted to localStorage.
+ *
+ * @param {Array} transactions - Array of transaction objects
+ * @returns {HTMLElement} Financial snapshot card element
+ */
+function createFinancialSnapshotSection(transactions) {
+  const snapshot = document.createElement('div');
+  snapshot.className = 'insights-financial-snapshot';
+  snapshot.style.cssText = `
+    display: flex;
+    flex-direction: column;
+    gap: ${SPACING.SM};
+    padding: ${SPACING.MD};
+    background: linear-gradient(135deg, var(--color-surface, ${COLORS.SURFACE}), var(--color-surface-hover, ${COLORS.SURFACE_HOVER}));
+    border: 2px dashed var(--color-accent, ${COLORS.PRIMARY}33);
+    border-radius: 14px;
+    position: relative;
+  `;
+
+  // --- Experimental badge ---
+  const badge = document.createElement('span');
+  badge.textContent = 'Experimental';
+  badge.style.cssText = `
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    background: ${COLORS.PRIMARY};
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 2px 10px;
+    border-radius: 20px;
+  `;
+  snapshot.appendChild(badge);
+
+  // --- Header ---
+  const header = document.createElement('div');
+  header.style.cssText = `
+    display: flex;
+    align-items: center;
+    gap: ${SPACING.SM};
+    margin-bottom: ${SPACING.XS};
+  `;
+  const icon = document.createElement('span');
+  icon.textContent = '🧪';
+  icon.style.fontSize = '1.4rem';
+  const title = document.createElement('h3');
+  title.textContent = 'Financial Snapshot';
+  title.style.cssText = `
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: ${COLORS.TEXT_MAIN};
+  `;
+  header.appendChild(icon);
+  header.appendChild(title);
+  snapshot.appendChild(header);
+
+  // --- Calculations ---
+  const now = new Date();
+  const monthsLookback = 6;
+  const rangeStart = new Date(now.getFullYear(), now.getMonth() - monthsLookback, 1);
+  const rangeEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+  // Group by month to calculate averages
+  const monthBuckets = {};
+  for (let i = -monthsLookback + 1; i <= 0; i++) {
+    const m = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    const key = `${m.getFullYear()}-${m.getMonth()}`;
+    monthBuckets[key] = {
+      label: m.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+      income: 0,
+      expenses: 0,
+    };
+  }
+
+  transactions.forEach(t => {
+    if (t.isGhost) return;
+    const ts = new Date(t.timestamp);
+    if (ts < rangeStart || ts >= rangeEnd) return;
+    const key = `${ts.getFullYear()}-${ts.getMonth()}`;
+    if (!monthBuckets[key]) return;
+
+    const amount = typeof t.amount === 'number' ? t.amount : Number(t.amount) || 0;
+    if (t.type === TRANSACTION_TYPES.INCOME) {
+      monthBuckets[key].income += amount;
+    } else if (t.type === TRANSACTION_TYPES.EXPENSE) {
+      monthBuckets[key].expenses += amount;
+    } else if (t.type === TRANSACTION_TYPES.REFUND) {
+      monthBuckets[key].expenses -= amount;
+    }
+  });
+
+  const filledMonths = Object.values(monthBuckets).filter(m => m.income > 0 || m.expenses > 0);
+  const monthCount = Math.max(filledMonths.length, 1);
+
+  const totalIncome = filledMonths.reduce((s, m) => s + m.income, 0);
+  const totalExpenses = filledMonths.reduce((s, m) => s + m.expenses, 0);
+
+  const monthlySalary = totalIncome / monthCount;
+  const monthlyExpenses = totalExpenses / monthCount;
+  const monthlySavings = monthlySalary - monthlyExpenses;
+
+  // --- Manual debt input (persisted to localStorage) ---
+  const DEBT_STORAGE_KEY = 'blinkbudget_financial_snapshot_debt';
+  let totalDebt = 0;
+  try {
+    const saved = localStorage.getItem(DEBT_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      totalDebt = typeof parsed === 'number' && parsed >= 0 ? parsed : 0;
+    }
+  } catch (e) {
+    // storage unavailable or corrupt — treat as zero
+  }
+
+  // --- Format helpers ---
+  const fmtUSD = value =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
+
+  // --- Render the sentence ---
+  const sentence = document.createElement('p');
+  sentence.style.cssText = `
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.7;
+    color: ${COLORS.TEXT_MAIN};
+  `;
+
+  // Build the sentence with styled spans for each value
+  sentence.appendChild(document.createTextNode('My monthly salary is '));
+
+  const salSpan = document.createElement('strong');
+  salSpan.textContent = fmtUSD(monthlySalary);
+  salSpan.style.color = '#22c55e';
+  sentence.appendChild(salSpan);
+
+  sentence.appendChild(document.createTextNode(', expenses are '));
+
+  const expSpan = document.createElement('strong');
+  expSpan.textContent = fmtUSD(monthlyExpenses);
+  expSpan.style.color = '#ef4444';
+  sentence.appendChild(expSpan);
+
+  sentence.appendChild(document.createTextNode(', savings are '));
+
+  const savSpan = document.createElement('strong');
+  savSpan.textContent = fmtUSD(monthlySavings);
+  savSpan.style.color = monthlySavings >= 0 ? '#22c55e' : '#ef4444';
+  sentence.appendChild(savSpan);
+
+  sentence.appendChild(document.createTextNode(', and debts are '));
+
+  // --- Editable debt amount ---
+  const debtContainer = document.createElement('span');
+  debtContainer.style.display = 'inline-flex';
+  debtContainer.style.alignItems = 'center';
+  debtContainer.style.gap = '4px';
+  debtContainer.style.cursor = 'pointer';
+
+  const debtValueSpan = document.createElement('strong');
+  debtValueSpan.textContent = fmtUSD(totalDebt);
+  debtValueSpan.style.color = totalDebt > 0 ? '#ef4444' : '#22c55e';
+  debtContainer.appendChild(debtValueSpan);
+
+  // Edit icon (pencil)
+  const editIcon = document.createElement('span');
+  editIcon.textContent = '\u270F\uFE0F';
+  editIcon.style.fontSize = '0.75rem';
+  editIcon.style.opacity = '0.5';
+  editIcon.style.transition = 'opacity 0.2s';
+  debtContainer.appendChild(editIcon);
+
+  // Info tooltip
+  const infoIcon = document.createElement('span');
+  infoIcon.textContent = '\u24D8';
+  infoIcon.style.fontSize = '0.75rem';
+  infoIcon.style.opacity = '0.4';
+  infoIcon.style.cursor = 'help';
+  infoIcon.title = 'Your total outstanding debt (mortgage, car loans, credit cards, student loans, etc.). Click the amount or edit icon to set your total debt.';
+  debtContainer.appendChild(infoIcon);
+
+  // Input field (hidden by default)
+  const debtInput = document.createElement('input');
+  debtInput.type = 'number';
+  debtInput.min = '0';
+  debtInput.step = '100';
+  debtInput.value = totalDebt;
+  debtInput.style.cssText = `
+    display: none;
+    width: 140px;
+    padding: 2px 8px;
+    font-size: 0.9rem;
+    border: 1px solid ${COLORS.PRIMARY};
+    border-radius: 4px;
+    background: var(--color-surface, ${COLORS.SURFACE});
+    color: ${COLORS.TEXT_MAIN};
+    outline: none;
+  `;
+  debtContainer.appendChild(debtInput);
+
+  function enterEditMode() {
+    debtValueSpan.style.display = 'none';
+    editIcon.style.display = 'none';
+    infoIcon.style.display = 'none';
+    debtInput.style.display = 'inline-block';
+    debtInput.focus();
+    debtInput.select();
+  }
+
+  function exitEditMode(save) {
+    const rawVal = debtInput.value.trim();
+    const parsed = rawVal === '' ? 0 : Number(rawVal);
+    const newDebt = !isNaN(parsed) && parsed >= 0 ? parsed : totalDebt;
+
+    if (save !== false && newDebt !== totalDebt) {
+      totalDebt = newDebt;
+      try {
+        localStorage.setItem(DEBT_STORAGE_KEY, JSON.stringify(totalDebt));
+      } catch (e) { /* storage unavailable */ }
+    }
+
+    debtValueSpan.textContent = fmtUSD(totalDebt);
+    debtValueSpan.style.color = totalDebt > 0 ? '#ef4444' : '#22c55e';
+    debtValueSpan.style.display = 'inline';
+    editIcon.style.display = 'inline';
+    infoIcon.style.display = 'inline';
+    debtInput.style.display = 'none';
+    debtInput.value = totalDebt;
+  }
+
+  debtContainer.addEventListener('click', function (e) {
+    if (e.target === infoIcon) return;
+    if (debtInput.style.display === 'none') {
+      enterEditMode();
+    }
+  });
+
+  debtInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      exitEditMode(true);
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      exitEditMode(false);
+    }
+  });
+
+  debtInput.addEventListener('blur', function () {
+    exitEditMode(true);
+  });
+
+  debtContainer.addEventListener('mouseenter', function () {
+    editIcon.style.opacity = '1';
+  });
+  debtContainer.addEventListener('mouseleave', function () {
+    if (debtInput.style.display === 'none') {
+      editIcon.style.opacity = '0.5';
+    }
+  });
+
+  sentence.appendChild(debtContainer);
+
+  sentence.appendChild(document.createTextNode('.'));
+
+  snapshot.appendChild(sentence);
+
+  // --- Detail row (smaller, muted) ---
+  const detail = document.createElement('div');
+  detail.style.cssText = `
+    display: flex;
+    gap: ${SPACING.MD};
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+    color: ${COLORS.TEXT_MUTED};
+    margin-top: ${SPACING.XS};
+  `;
+
+  const periodSpan = document.createElement('span');
+  const firstMonth = filledMonths.length > 0 ? filledMonths[0].label : monthBuckets[Object.keys(monthBuckets)[0]]?.label || '';
+  const lastMonth = filledMonths.length > 0 ? filledMonths[filledMonths.length - 1].label : '';
+  periodSpan.textContent = `Based on ${monthCount} month${monthCount !== 1 ? 's' : ''} (${firstMonth}${lastMonth && lastMonth !== firstMonth ? ` \u2013 ${lastMonth}` : ''})`;
+  detail.appendChild(periodSpan);
+
+  // Savings rate
+  if (monthlySalary > 0) {
+    const rateSpan = document.createElement('span');
+    const savingsRate = ((monthlySavings / monthlySalary) * 100);
+    rateSpan.textContent = `Savings rate: ${savingsRate.toFixed(1)}%`;
+    detail.appendChild(rateSpan);
+  }
+
+  snapshot.appendChild(detail);
+
+  return snapshot;
+}
+
+
+
+
+/**
  * Insights Section Component
  * @param {Object} planningData - Financial planning data including transactions
  * @param {Object} chartRenderer - Chart renderer service instance
@@ -759,6 +1064,10 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
   }
 
   const transactions = planningData.transactions;
+
+  // Financial Snapshot - Experimental feature
+  const snapshotSection = createFinancialSnapshotSection(transactions);
+  section.appendChild(snapshotSection);
 
   // Top Movers (by absolute spend/amount per category)
   const { topContainer, renderTopMovers } = createTopMoversSection(
