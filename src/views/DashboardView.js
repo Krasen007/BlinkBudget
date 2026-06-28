@@ -768,33 +768,11 @@ export const DashboardView = (params = {}) => {
 
       // Add filter status indicator
       const filterStatus = document.createElement('div');
-      filterStatus.style.cssText = `
-        text-align: center;
-        color: var(--color-text-muted);
-        font-size: var(--font-size-sm);
-        margin-top: ${SPACING.XS};
-        margin-bottom: ${SPACING.XS};
-        padding: ${SPACING.SM};
-        background: var(--color-surface);
-        border-radius: var(--radius-md);
-        border: 1px solid var(--color-border);
-        cursor: pointer;
-        transition: all 0.2s ease;
-        user-select: none;
-      `;
-
-      // Add hover effect
-      filterStatus.addEventListener('mouseenter', () => {
-        filterStatus.style.color = 'var(--color-primary)';
-        filterStatus.style.borderColor = 'var(--color-primary)';
-        filterStatus.style.background = 'var(--color-surface-elevated)';
-      });
-
-      filterStatus.addEventListener('mouseleave', () => {
-        filterStatus.style.color = 'var(--color-text-muted)';
-        filterStatus.style.borderColor = 'var(--color-border)';
-        filterStatus.style.background = 'var(--color-surface)';
-      });
+      filterStatus.className = 'reports-filter-status';
+      filterStatus.style.marginTop = SPACING.XS;
+      filterStatus.style.marginBottom = SPACING.XS;
+      filterStatus.style.padding = SPACING.SM;
+      filterStatus.style.fontSize = 'var(--font-size-sm)';
 
       // Add click handler to navigate back to reports
       filterStatus.addEventListener('click', () => {

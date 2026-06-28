@@ -20,4 +20,4 @@ org.gradle.jvmargs=-Xmx1024m -Xms512m
 
 #18171F
 
-Free plan available credits 224.5 credits Effective from May 19
+Free plan available credits 195 credits Effective from May 19

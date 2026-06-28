@@ -365,11 +365,7 @@
 
 .toast-notification.toast-info {
   border-color: var(--color-info);
-  background: linear-gradient(
-    135deg,
-    var(--color-surface) 0%,
-    rgb(59, 130, 246, 0.1) 100%
-  );
+  background: var(--color-surface);
 }
 
 .toast-notification.toast-success {
