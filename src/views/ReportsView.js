@@ -749,10 +749,7 @@ export const ReportsView = (params = {}) => {
         return;
       }
 
-      if (
-        !currentData.transactions ||
-        currentData.transactions.length === 0
-      ) {
+      if (!currentData.transactions || currentData.transactions.length === 0) {
         showEmptyState(
           emptyState,
           'no-data-for-period',
@@ -775,9 +772,7 @@ export const ReportsView = (params = {}) => {
       }
 
       // Create or get chart container
-      let chartContainer = content.querySelector(
-        '.reports-chart-container'
-      );
+      let chartContainer = content.querySelector('.reports-chart-container');
       if (!chartContainer) {
         chartContainer = createChartContainer();
         chartContainer.className = 'reports-chart-container';
@@ -801,10 +796,7 @@ export const ReportsView = (params = {}) => {
         // Security: Static string, not user input
         fallbackWarning.textContent =
           '⚠️ Using simplified calculations due to data processing issues. Some advanced insights may not be available.';
-        chartContainer.insertBefore(
-          fallbackWarning,
-          chartContainer.firstChild
-        );
+        chartContainer.insertBefore(fallbackWarning, chartContainer.firstChild);
       }
 
       // Show skeleton loaders initially
@@ -847,10 +839,7 @@ export const ReportsView = (params = {}) => {
             });
 
             // Highlight effect
-            const highlightTimeoutId = highlightCategoryCard(
-              targetCard,
-              1500
-            );
+            const highlightTimeoutId = highlightCategoryCard(targetCard, 1500);
 
             // Store timeout ID for cleanup
             if (container.cleanupTimeouts) {

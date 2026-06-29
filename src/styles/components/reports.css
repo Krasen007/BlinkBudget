@@ -567,7 +567,8 @@
   }
 
   .data-summary-card:hover {
-    transform: translateY(-3px) scale(1.01);
+    transform: none; /* Remove hover transform on touch devices to avoid repaint */
+    box-shadow: 0 4px 12px rgb(0, 0, 0, 0.15);
   }
 }
 
@@ -858,13 +859,19 @@
   0% {
     background-position: 200% 0;
   }
+
   100% {
     background-position: -200% 0;
   }
 }
 
 .skeleton-loader {
-  background: linear-gradient(90deg, var(--color-surface) 25%, var(--color-border) 50%, var(--color-surface) 75%);
+  background: linear-gradient(
+    90deg,
+    var(--color-surface) 25%,
+    var(--color-border) 50%,
+    var(--color-surface) 75%
+  );
   background-size: 200% 100%;
   animation: skeleton-loading 1.5s ease-in-out infinite;
   border-radius: var(--radius-md);

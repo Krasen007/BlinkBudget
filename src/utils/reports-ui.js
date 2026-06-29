@@ -191,17 +191,27 @@ export function showEmptyState(
   addButton.style.marginTop = SPACING.XS;
 
   if (scenario === 'no-transactions') {
-    icon.innerHTML = '📊';
-    message.innerHTML = `
-            <h3 style="margin: 0 0 ${SPACING.XS} 0; color: ${COLORS.TEXT_MAIN};">No Transactions Yet</h3>
-            <p style="margin: 0; max-width: 300px; line-height: 1.5;">
-                Start tracking your expenses to see beautiful insights about your spending patterns.
-            </p>
-        `;
+    icon.textContent = '📊';
+
+    const title = document.createElement('h3');
+    title.style.margin = `0 0 ${SPACING.XS} 0`;
+    title.style.color = COLORS.TEXT_MAIN;
+    title.textContent = 'No Transactions Yet';
+
+    const p = document.createElement('p');
+    p.style.margin = '0';
+    p.style.maxWidth = '300px';
+    p.style.lineHeight = '1.5';
+    p.textContent =
+      'Start tracking your expenses to see beautiful insights about your spending patterns.';
+
+    message.appendChild(title);
+    message.appendChild(p);
+
     addButton.textContent = '+ Add Your First Transaction';
     addButton.addEventListener('click', () => Router.navigate('add-expense'));
   } else if (scenario === 'no-data-for-period') {
-    icon.innerHTML = '📅';
+    icon.textContent = '📅';
 
     const title = document.createElement('h3');
     title.style.margin = `0 0 ${SPACING.XS} 0`;
@@ -223,13 +233,22 @@ export function showEmptyState(
     addButton.textContent = '+ Add Transaction';
     addButton.addEventListener('click', () => Router.navigate('add-expense'));
   } else {
-    icon.innerHTML = '📊';
-    message.innerHTML = `
-            <h3 style="margin: 0 0 ${SPACING.XS} 0; color: ${COLORS.TEXT_MAIN};">No Data Available</h3>
-            <p style="margin: 0; max-width: 300px; line-height: 1.5;">
-                No data to display at this time.
-            </p>
-        `;
+    icon.textContent = '📊';
+
+    const title = document.createElement('h3');
+    title.style.margin = `0 0 ${SPACING.XS} 0`;
+    title.style.color = COLORS.TEXT_MAIN;
+    title.textContent = 'No Data Available';
+
+    const p = document.createElement('p');
+    p.style.margin = '0';
+    p.style.maxWidth = '300px';
+    p.style.lineHeight = '1.5';
+    p.textContent = 'No data to display at this time.';
+
+    message.appendChild(title);
+    message.appendChild(p);
+
     addButton.textContent = 'Back to Dashboard';
     addButton.addEventListener('click', () => Router.navigate('dashboard'));
   }
@@ -366,12 +385,6 @@ export function showUnsupportedBrowserError(container, missingFeatures) {
   message.style.lineHeight = '1.6';
   message.style.marginBottom = SPACING.XS;
 
-  function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
   const featuresList = document.createElement('div');
   featuresList.innerHTML = `
         <strong>Missing features:</strong><br>
@@ -402,12 +415,6 @@ export function showUnsupportedBrowserError(container, missingFeatures) {
  * Show browser compatibility warning to user
  */
 export function showBrowserWarning(container, limitedFeatures) {
-  function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
   const warning = document.createElement('div');
   warning.style.background = 'rgba(251, 191, 36, 0.1)';
   warning.style.border = '1px solid rgba(251, 191, 36, 0.3)';

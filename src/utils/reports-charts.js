@@ -385,6 +385,9 @@ export async function createCategoryBreakdownChart(
 
     const item = document.createElement('div');
     item.className = 'legend-item';
+    item.setAttribute('role', 'button');
+    item.setAttribute('tabindex', '0');
+    item.setAttribute('aria-label', `Toggle visibility for ${label}`);
     item.style.display = 'flex';
     item.style.alignItems = 'center';
     item.style.gap = '8px';
@@ -410,13 +413,21 @@ export async function createCategoryBreakdownChart(
     item.appendChild(colorBox);
     item.appendChild(text);
 
-    item.onclick = () => {
+    const toggleVisibility = () => {
       const isVisible = currentChart.getDataVisibility(i);
       currentChart.toggleDataVisibility(i);
       currentChart.update();
       item.style.opacity = isVisible ? '0.4' : '1';
       item.style.textDecoration = isVisible ? 'line-through' : 'none';
     };
+
+    item.addEventListener('click', toggleVisibility);
+    item.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleVisibility();
+      }
+    });
 
     legendContainer.appendChild(item);
   });

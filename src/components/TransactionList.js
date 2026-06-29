@@ -74,6 +74,8 @@ export const TransactionList = ({
   metricsDisplay.style.fontSize = isMobile ? FONT_SIZES.SM : FONT_SIZES.BASE;
   metricsDisplay.style.color = COLORS.TEXT_MUTED || '#6b7280';
   metricsDisplay.style.textAlign = 'right';
+  metricsDisplay.setAttribute('role', 'button');
+  metricsDisplay.setAttribute('tabindex', '0');
   metricsDisplay.style.cursor = 'pointer';
   metricsDisplay.title = 'Click to clear tracking history';
 
@@ -106,6 +108,15 @@ export const TransactionList = ({
     setTimeout(() => {
       metricsDisplay.style.color = COLORS.TEXT_MUTED || '#6b7280';
     }, 1000);
+  });
+
+  // Add keyboard handler for accessibility
+  metricsDisplay.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      e.stopPropagation();
+      metricsDisplay.click();
+    }
   });
 
   titleContainer.appendChild(listTitle);

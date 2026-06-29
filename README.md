@@ -51,8 +51,8 @@
 - **Integrated category filtering** between Reports and Dashboard views for consistent analysis across all sections | src/views/ReportsView.js:category filter sync | src/views/DashboardView.js:category filter sync
 - **Smart time period navigation** with dynamic labels showing specific months and years | src/views/DashboardView.js:time navigation | src/utils/date-utils.js:date formatting
 - **Transaction Split** - Hold transaction to split in two | src/components/TransactionListItem.js:handleSplitTransaction() | src/core/transaction-service.js:split()
- - **Bulk transaction editing** - Long-press to enter multi-select mode, select multiple transactions, and edit or delete them in bulk | src/views/DashboardView.js:multi-select | src/components/TransactionListItem.js:long-press selection
- - **Multi-select visual feedback** - Clear selection indicators and count display when selecting transactions | src/views/DashboardView.js:selection mode | src/styles/main.css:bulk-actions styles
+- **Bulk transaction editing** - Long-press to enter multi-select mode, select multiple transactions, and edit or delete them in bulk | src/views/DashboardView.js:multi-select | src/components/TransactionListItem.js:long-press selection
+- **Multi-select visual feedback** - Clear selection indicators and count display when selecting transactions | src/views/DashboardView.js:selection mode | src/styles/main.css:bulk-actions styles
 
 ### Dashboard & Analytics
 

@@ -386,12 +386,12 @@ export const TransactionListItem = ({
   info.appendChild(catContainer);
   info.appendChild(date);
 
-  // Add description/notes if available (hidden by default)
+  // Add description/notes if available (shown by default, truncated)
   if (transaction.description && transaction.description.trim()) {
     const description = document.createElement('div');
     description.textContent = transaction.description;
     description.className = 'transaction-item-description';
-    description.style.display = 'none'; // Hidden by default
+    description.title = transaction.description; // Reveal full text on hover/touch
     Object.assign(description.style, {
       fontSize: isMobile ? FONT_SIZES.XS : '0.7rem',
       color: COLORS.TEXT_MUTED,
