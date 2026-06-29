@@ -679,49 +679,33 @@ export const ReportsView = (params = {}) => {
   }
 
   /**
+   * Remove an existing skeleton loader from the DOM if present.
+   */
+  function clearSkeletonLoader(sectionName) {
+    const existingSkeleton = skeletonStates[sectionName];
+    if (existingSkeleton && existingSkeleton.parentNode) {
+      existingSkeleton.parentNode.removeChild(existingSkeleton);
+    }
+    skeletonStates[sectionName] = null;
+  }
+
+  /**
    * Show skeleton loaders for all sections
    */
   function showSkeletonLoaders(chartContainer) {
+    const createAndAppendSkeleton = (sectionName, className, height) => {
+      clearSkeletonLoader(sectionName);
+      const skeleton = createSkeletonLoader(className, height);
+      skeletonStates[sectionName] = skeleton;
+      chartContainer.appendChild(skeleton);
+    };
+
     // Create skeleton for each section
-    if (!skeletonStates.budgetSummary) {
-      skeletonStates.budgetSummary = createSkeletonLoader(
-        'budget-summary',
-        '120px'
-      );
-      chartContainer.appendChild(skeletonStates.budgetSummary);
-    }
-
-    if (!skeletonStates.categoryBreakdown) {
-      skeletonStates.categoryBreakdown = createSkeletonLoader(
-        'category-breakdown',
-        '300px'
-      );
-      chartContainer.appendChild(skeletonStates.categoryBreakdown);
-    }
-
-    if (!skeletonStates.categorySelector) {
-      skeletonStates.categorySelector = createSkeletonLoader(
-        'category-selector',
-        '400px'
-      );
-      chartContainer.appendChild(skeletonStates.categorySelector);
-    }
-
-    if (!skeletonStates.financialInsights) {
-      skeletonStates.financialInsights = createSkeletonLoader(
-        'financial-insights',
-        '150px'
-      );
-      chartContainer.appendChild(skeletonStates.financialInsights);
-    }
-
-    if (!skeletonStates.incomeExpense) {
-      skeletonStates.incomeExpense = createSkeletonLoader(
-        'income-expense',
-        '250px'
-      );
-      chartContainer.appendChild(skeletonStates.incomeExpense);
-    }
+    createAndAppendSkeleton('budgetSummary', 'budget-summary', '120px');
+    createAndAppendSkeleton('categoryBreakdown', 'category-breakdown', '300px');
+    createAndAppendSkeleton('categorySelector', 'category-selector', '400px');
+    createAndAppendSkeleton('financialInsights', 'financial-insights', '150px');
+    createAndAppendSkeleton('incomeExpense', 'income-expense', '250px');
   }
 
   /**
@@ -1215,8 +1199,12 @@ export const ReportsView = (params = {}) => {
     }
     loadingState.style.display = 'flex';
 
-    // Reset skeleton states for new load
+    // Reset skeleton states for new load and remove prior DOM nodes
     Object.keys(skeletonStates).forEach(key => {
+      const skeleton = skeletonStates[key];
+      if (skeleton && skeleton.parentNode) {
+        skeleton.parentNode.removeChild(skeleton);
+      }
       skeletonStates[key] = null;
     });
   }

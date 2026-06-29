@@ -19,6 +19,7 @@ import {
 } from '../../utils/financial-planning-helpers.js';
 import { InsightsGenerator } from '../../core/insights-generator.js';
 import { InflationTrends } from '../../components/InflationTrends.js';
+import { createNetBalanceChart } from '../../components/NetBalanceChart.js';
 
 /**
  * Helper function to get transaction amount with consistent refund handling
@@ -1115,6 +1116,11 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
   );
   section.appendChild(inflationTrendsComponent.element);
 
+  // Net Balance Over Time chart — appended async after the rest of the section
+  createNetBalanceChart().then(netBalanceChart => {
+    section.appendChild(netBalanceChart);
+  });
+  
   // Set up synchronized navigation - all sections update together
   sharedMonthState.onNavigate = () => {
     renderTopMovers();
