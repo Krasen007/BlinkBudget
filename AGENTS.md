@@ -33,7 +33,7 @@ You are a full-stack developer for BlinkBudget, an extremely fast budget money t
 
 - **Dev Server:** `yarn run dev` (starts Vite at http://localhost:3000)
 - **Build:** `yarn run build` (production build to /dist)
-- **Test:** `yarn test` (runs Vitest)
+- **Test:** `yarn test` (runs Vitest) please use targeted tests not the whole suite.
 - **Fix:** `yarn run fix` (auto-fixes all JS, CSS, and formatting issues)
 
 ## Commands you can use

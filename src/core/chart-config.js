@@ -168,10 +168,6 @@ export function defaultChartOptions() {
           return true;
         },
         callbacks: {
-          // Enhanced tooltip formatting for screen readers
-          beforeTitle: function (_tooltipItems) {
-            return 'Chart data:';
-          },
           afterBody: function (_tooltipItems) {
             const item = _tooltipItems[0];
             if (item.dataset.data && item.dataset.data.length > 1) {

@@ -15,6 +15,10 @@ const mockTransactions = [
 const mockAnalyticsEngine = {
   generateSpendingInsights: vi.fn(() => ({})),
   calculateCategoryBreakdown: vi.fn(() => ({ categories: [] })),
+  calculateIncomeVsExpenses: vi.fn(() => ({ income: 0, expenses: 0, net: 0 })),
+  calculateCostOfLiving: vi.fn(() => ({})),
+  analyzeFrequencyPatterns: vi.fn(() => ({ categories: [] })),
+  predictFutureSpending: vi.fn(() => ({ hasEnoughData: false })),
 };
 
 vi.mock('../../src/core/analytics/AnalyticsInstance.js', () => ({
@@ -186,6 +190,9 @@ describe('ReportsView skeleton loading', () => {
     const view = ReportsView();
     document.body.appendChild(view);
 
+    await Promise.resolve();
+    await Promise.resolve();
+    vi.advanceTimersByTime(500);
     await Promise.resolve();
     await Promise.resolve();
 

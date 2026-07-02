@@ -169,7 +169,7 @@ export async function createNetBalanceChart() {
 
   const subtitle = document.createElement('p');
   subtitle.textContent =
-    'Last 6 months — Net balance earned vs net worth accumulated by month end';
+    'Last 5 completed months — Net balance earned vs net worth accumulated by month end';
   subtitle.style.margin = '0';
   subtitle.style.fontSize = '0.8125rem';
   subtitle.style.color = COLORS.TEXT_MUTED;
@@ -202,7 +202,8 @@ export async function createNetBalanceChart() {
   const netWorthData = [];
   const labels = [];
 
-  for (let i = 5; i >= 0; i--) {
+  // Start from i=5 to i=1 (exclude current month — data is incomplete)
+  for (let i = 5; i >= 1; i--) {
     const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const monthStart = getMonthStart(monthDate);
     const monthEnd = getMonthEnd(monthDate);
