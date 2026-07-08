@@ -285,26 +285,8 @@ export const TransactionForm = ({
   if (initialValues.id) {
     const isMobile = window.mobileUtils && window.mobileUtils.isMobile();
 
-    const okBtn = document.createElement('button');
-    okBtn.textContent = 'OK';
-    okBtn.className = 'btn btn-primary';
-    okBtn.style.width = '100%';
-    okBtn.style.marginTop = 'var(--spacing-sm)';
-    okBtn.style.padding = 'var(--spacing-md)';
-    okBtn.style.fontSize = FONT_SIZES.BUTTON_LARGE;
-    okBtn.style.fontWeight = '600';
-    okBtn.style.borderRadius = 'var(--radius-md)';
-
-    // Adjust OK button for mobile devices
-    if (isMobile) {
-      okBtn.style.marginTop = 'var(--spacing-xs)';
-      okBtn.style.padding = 'var(--spacing-sm)';
-      okBtn.style.fontSize = FONT_SIZES.BASE;
-      okBtn.style.height = 'auto';
-      okBtn.style.minHeight = '44px'; // Accessible touch target
-    }
-
-    okBtn.addEventListener('click', () => {
+    // Shared submit logic for OK button and date change auto-save
+    const submitForm = () => {
       // Validate amount
       const amountValidation = validateAmount(amountInput.value);
       if (!amountValidation.valid) {
@@ -347,7 +329,33 @@ export const TransactionForm = ({
       });
 
       handleFormSubmit(transactionData, onSubmit);
-    });
+    };
+
+    const okBtn = document.createElement('button');
+    okBtn.textContent = 'OK';
+    okBtn.className = 'btn btn-primary';
+    okBtn.style.width = '100%';
+    okBtn.style.marginTop = 'var(--spacing-sm)';
+    okBtn.style.padding = 'var(--spacing-md)';
+    okBtn.style.fontSize = FONT_SIZES.BUTTON_LARGE;
+    okBtn.style.fontWeight = '600';
+    okBtn.style.borderRadius = 'var(--radius-md)';
+
+    // Adjust OK button for mobile devices
+    if (isMobile) {
+      okBtn.style.marginTop = 'var(--spacing-xs)';
+      okBtn.style.padding = 'var(--spacing-sm)';
+      okBtn.style.fontSize = FONT_SIZES.BASE;
+      okBtn.style.height = 'auto';
+      okBtn.style.minHeight = '44px'; // Accessible touch target
+    }
+
+    okBtn.addEventListener('click', submitForm);
+
+    // Auto-save when date changes in edit mode
+    if (externalDateInput) {
+      externalDateInput.addEventListener('change', submitForm);
+    }
 
     // Remove mobile-specific classes to match other buttons
     okBtn.classList.remove('mobile-btn-primary', 'touch-target-primary');
