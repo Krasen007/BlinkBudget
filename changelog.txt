@@ -1,18 +1,20 @@
-v1.40 -> v1.41
+v1.42 - Highlights
 
-What's new
+- Local-first: added a local-only mode so the app works fully offline without Firebase configured.
+- Financial planning: added a Net Balance chart (net worth / net balance over time) for clearer portfolio insight.
+- Edit flow improvements: selecting a new date in edit mode now auto-saves; fixed missing edit options for investments.
+- UX cleanup: removed redundant success toast when editing accounts; resolved various layout and chart rendering issues.
+- Stability: test fixes and minor accessibility/text alignment fixes.
 
-- Bulk transaction editing: you can now long-press any transaction to enter multi-select mode, tap multiple items, and apply category, account, or tag changes in one go.
-- More reliable reports: fixed transaction count and date-range calculations that were skewing totals and percentages.
-- Goal colors restored: missing accent colours in the Goals section are back.
-- Dashboard performance: full-page re-renders are now more efficient, keeping the UI snappy when filters change.
-- Visual polish: updated styles for the select-multiple experience and improved toast notification positioning.
-- Accessibility: all interactive divs now have proper button semantics and keyboard support.
-
-Under the hood
-
-- Migrated build tooling to rolldown-vite for Vite 8.
-- Tightened CSS with tabular numbers, text wrapping, transition tweaks, and a new red accent for destructive actions.
-- 5-dimension audit fixes and conditional hero CSS.
-- Lint and test cleanup; fixed an error-message regression in app config.
-- Replaced broken hooks that were restoring or calling the wrong functions in several views.
+Commit details:
+50af550 minor fixes
+71e688e remove unneeded text
+333d10e fix missing options when editing investments
+0b74b0a Removed the success notification (checkmark toast) that appeared when adding or editing an account in the Settings view.
+9925e88 in edit mode, simply selecting a new date triggers an immediate save — no need to also tap the OK button.
+6d22a18 fix keyboard-hidden
+ad4d2f5 add local only mode
+66aeb23 fix tests and fix chart last month  data in net balance chart
+44e86b7 add net balance chart showing net worth and net balance over time
+78fc927 minor fixes
+287563c fix minor issues with text aligment

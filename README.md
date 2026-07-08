@@ -26,6 +26,7 @@
 - **Auto-submit on category selection** - No save buttons needed | src/utils/form-utils/category-chips.js:createCategorySelector() - onSubmit callback | src/utils/form-utils/submission.js:handleFormSubmit()
 - **Mobile-optimized interface** focused on speed and simplicity. Bottom navigation loads instantly for returning users without waiting for cloud sign-in | src/core/mobile-utils.js:MobileUtils - mobile detection and optimization | src/components/TransactionForm.js:TransactionForm() - mobile-optimized class
 - **Offline-capable** with localStorage and Service Worker persistence | src/pwa.js:registerSW() - Service Worker registration | src/core/transaction-service.js:localStorage operations
+- **Local-first operation**: the app can run without cloud configuration using a `local-only` mode, keeping all data in localStorage for offline use and faster startup on mobile.
 - **Ghost Transactions** - See historical transaction data when dates are modified. Ghost entries are only created for older edits, not immediate corrections | src/views/EditView.js:ghost transaction rendering | src/core/transaction-service.js:getTransactionsByDate()
 - **Dynamic quick amount presets** - Buttons automatically update based on your most frequently used transaction amounts with usage counters and reset functionality. Can be shown or hidden from Settings → Advanced | src/components/QuickAmountPresets.js:QuickAmountPresets() | src/core/amount-preset-service.js:recordAmount() | src/core/amount-preset-service.js:getPresets()
 
@@ -102,6 +103,7 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 
 - **Financial Health Summary** - Complete picture of your current financial position | src/views/financial-planning/OverviewSection.js:OverviewSection() | src/core/analytics/MetricsService.js:financial health calculations
 - **Net Worth Tracking** - Assets vs liabilities visualization | src/views/financial-planning/OverviewSection.js:netWorth calculation | src/core/analytics/MetricsService.js:net worth tracking
+- **Net Balance Chart** - Visualize net worth and net balance over time for clearer portfolio trends | src/views/financial-planning/InvestmentsSection.js:InvestmentsSection() | src/core/investment-tracker.js:portfolio management
 - **Savings Rate Analysis** - Monthly and yearly savings performance | src/core/savings-goals-service.js:analyzeSavingsRate() | src/views/financial-planning/OverviewSection.js:savings display
 - **Key Financial Metrics** - Income-to-expense ratio, average daily spending | src/core/analytics/MetricsService.js:calculateKeyMetrics() | src/views/financial-planning/OverviewSection.js:metrics display
 
