@@ -868,15 +868,6 @@ function createInvestmentsList(chartRenderer, activeCharts) {
 
         meta.textContent = `${inv.shares} ${priceText} @ ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(currentPrice)}`;
 
-        // Add last updated indicator if price was manually updated
-        if (inv.metadata?.lastPriceUpdate) {
-          const updateIndicator = document.createElement('span');
-          updateIndicator.textContent = ' • Updated';
-          updateIndicator.style.color = COLORS.SUCCESS;
-          updateIndicator.style.fontSize = '0.8rem';
-          meta.appendChild(updateIndicator);
-        }
-
         left.appendChild(title);
         left.appendChild(meta);
 
@@ -1096,7 +1087,9 @@ function createInvestmentsList(chartRenderer, activeCharts) {
           currentPriceFld.style.minWidth = '90px';
 
           row2.appendChild(createFieldGroup(qtyLabel, qtyFld));
-          row2.appendChild(createFieldGroup('Purchase Price', purchasePriceFld));
+          row2.appendChild(
+            createFieldGroup('Purchase Price', purchasePriceFld)
+          );
           row2.appendChild(createFieldGroup('Current Price', currentPriceFld));
 
           // Row 3: Exchange (for crypto) + Date
@@ -1120,7 +1113,8 @@ function createInvestmentsList(chartRenderer, activeCharts) {
             const opt = document.createElement('option');
             opt.value = ex.toLowerCase();
             opt.textContent = ex;
-            if (ex.toLowerCase() === currentExchange.toLowerCase()) opt.selected = true;
+            if (ex.toLowerCase() === currentExchange.toLowerCase())
+              opt.selected = true;
             exchangeFld.appendChild(opt);
           });
 
@@ -1145,7 +1139,7 @@ function createInvestmentsList(chartRenderer, activeCharts) {
           const notesTextarea = document.createElement('textarea');
           notesTextarea.placeholder = 'Optional notes...';
           notesTextarea.value = inv.notes || inv.metadata?.notes || '';
-          notesTextarea.style.cssText = inputStyle + `
+          notesTextarea.style.cssText = `${inputStyle}
             resize: vertical;
             min-height: 48px;
           `;
@@ -1195,9 +1189,12 @@ function createInvestmentsList(chartRenderer, activeCharts) {
             const newName = nameFld.value.trim() || newSymbol;
             const newQty = Number(qtyFld.value) || 0;
             const newPurchasePrice = Number(purchasePriceFld.value) || 0;
-            const newCurrentPrice = Number(currentPriceFld.value) || newPurchasePrice;
+            const newCurrentPrice =
+              Number(currentPriceFld.value) || newPurchasePrice;
             const newExchange = exchangeFld.value;
-            const newDate = dateFld.value ? new Date(dateFld.value) : inv.purchaseDate;
+            const newDate = dateFld.value
+              ? new Date(dateFld.value)
+              : inv.purchaseDate;
             const newNotes = notesTextarea.value.trim();
 
             if (!newSymbol) {
@@ -1226,7 +1223,10 @@ function createInvestmentsList(chartRenderer, activeCharts) {
                 notes: newNotes,
               });
               // Update metadata for exchange and notes
-              const updatedMetadata = { ...(inv.metadata || {}), notes: newNotes };
+              const updatedMetadata = {
+                ...(inv.metadata || {}),
+                notes: newNotes,
+              };
               if (newExchange) {
                 updatedMetadata.exchange = newExchange;
               }

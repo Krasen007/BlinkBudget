@@ -115,7 +115,10 @@ const initApp = () => {
     }
 
     // Navigate to dashboard if on login/landing (authenticated or local mode)
-    if ((user || config.localMode) && (currentRoute === 'login' || currentRoute === 'landing')) {
+    if (
+      (user || config.localMode) &&
+      (currentRoute === 'login' || currentRoute === 'landing')
+    ) {
       Router.navigate('dashboard');
     }
 
