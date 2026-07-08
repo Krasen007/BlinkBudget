@@ -5,8 +5,14 @@
 
 import { AuthService } from '../core/auth-service.js';
 import { Router } from '../core/router.js';
+import { config } from '../../config/app.config.js';
 
 export const routeGuard = route => {
+  // Local mode: allow all routes without auth
+  if (config.localMode) {
+    return true;
+  }
+
   // Landing page - redirect to dashboard if authenticated
   if (route === 'landing') {
     if (AuthService.isAuthenticated()) {

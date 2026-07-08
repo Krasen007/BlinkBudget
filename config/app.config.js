@@ -38,9 +38,28 @@ function validateEnvironmentVariables() {
 
 // Validate environment variables on import
 let validationPassed = false;
+let localMode = false;
 try {
-  // Skip validation in test environment
-  if (import.meta.env.MODE === 'test') {
+  // Check if any Firebase env vars exist at all
+  const hasAnyFirebaseVars = [
+    'VITE_FIREBASE_API_KEY',
+    'VITE_FIREBASE_AUTH_DOMAIN',
+    'VITE_FIREBASE_PROJECT_ID',
+  ].some(key => import.meta.env[key]);
+
+  if (!hasAnyFirebaseVars) {
+    // No Firebase env vars at all → local-only mode
+    localMode = true;
+    validationPassed = true;
+    if (import.meta.env.DEV) {
+      console.info(`
+⚡ BlinkBudget running in LOCAL MODE
+No Firebase configuration detected. Sync & auth are disabled.
+All data will be stored in localStorage only.
+To enable cloud features, create a .env file with your Firebase credentials.
+      `);
+    }
+  } else if (import.meta.env.MODE === 'test') {
     validationPassed = true;
   } else {
     validateEnvironmentVariables();
@@ -149,10 +168,11 @@ export const config = {
   isDev: import.meta.env.DEV,
   isProd: import.meta.env.PROD,
   validationPassed,
+  localMode,
 
   // Firebase configuration (validated)
   firebase:
-    validationPassed && import.meta.env.MODE !== 'test'
+    validationPassed && import.meta.env.MODE !== 'test' && !localMode
       ? {
           apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
           authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,

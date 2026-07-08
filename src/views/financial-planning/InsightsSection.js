@@ -1120,7 +1120,7 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
   createNetBalanceChart().then(netBalanceChart => {
     section.appendChild(netBalanceChart);
   });
-  
+
   // Set up synchronized navigation - all sections update together
   sharedMonthState.onNavigate = () => {
     renderTopMovers();

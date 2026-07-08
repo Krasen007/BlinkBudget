@@ -11,6 +11,7 @@ import { LoadingView } from './components/LoadingView.js';
 import { InstallService } from './core/install.js';
 import { CacheInvalidator } from './core/cache-invalidator.js';
 import { PrivacyService } from './core/privacy-service.js';
+import { config } from '../config/app.config.js';
 import './core/mobile-utils.js'; // Initialize consolidated mobile utilities
 import './pwa.js'; // Register PWA service worker
 
@@ -94,6 +95,12 @@ const initApp = () => {
         BackupService.init();
       });
 
+      if (currentRoute === 'login' || currentRoute === 'landing') {
+        Router.navigate('dashboard');
+      }
+    } else if (config.localMode) {
+      // Local mode: auto-navigate to dashboard, skip sync
+      console.log('[Main] Local mode — navigating to dashboard directly.');
       if (currentRoute === 'login' || currentRoute === 'landing') {
         Router.navigate('dashboard');
       }

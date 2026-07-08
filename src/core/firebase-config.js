@@ -13,26 +13,32 @@ let app = null;
 let auth = null;
 let initializationError = null;
 
-try {
-  // Check if Firebase configuration is properly validated
-  if (!config.validationPassed || !config.firebase) {
-    throw new Error(
-      'Firebase configuration is not properly validated. Check environment variables.'
-    );
-  }
+// Skip Firebase entirely in local mode
+if (config.localMode) {
+  console.info(
+    '[Firebase] Local mode active — skipping Firebase initialization.'
+  );
+} else {
+  try {
+    // Check if Firebase configuration is properly validated
+    if (!config.validationPassed || !config.firebase) {
+      throw new Error(
+        'Firebase configuration is not properly validated. Check environment variables.'
+      );
+    }
 
-  // Initialize Firebase with validated configuration
-  app = initializeApp(config.firebase);
-  auth = getAuth(app);
+    // Initialize Firebase with validated configuration
+    app = initializeApp(config.firebase);
+    auth = getAuth(app);
 
-  console.log('Firebase initialized successfully');
-} catch (error) {
-  initializationError = error;
-  console.error('Firebase initialization failed:', error.message);
+    console.log('Firebase initialized successfully');
+  } catch (error) {
+    initializationError = error;
+    console.error('Firebase initialization failed:', error.message);
 
-  // In development, show a helpful error message
-  if (config.isDev) {
-    console.warn(`
+    // In development, show a helpful error message
+    if (config.isDev) {
+      console.warn(`
 🔥 Firebase Initialization Failed 🔥
 
 Error: ${error.message}
@@ -43,7 +49,8 @@ To fix this issue:
 3. Restart the development server
 
 The app will continue to run in local-only mode.
-    `);
+      `);
+    }
   }
 }
 
