@@ -50,8 +50,12 @@ try {
     'VITE_FIREBASE_APP_ID',
     'VITE_FIREBASE_MEASUREMENT_ID',
   ].some(key => import.meta.env[key]);
-
-  if (!hasAnyFirebaseVars) {
+  // Ensure test mode is handled before falling back to local-only when no
+  // Firebase variables are present. Otherwise test runs without Firebase
+  // env vars may be forced into localMode which changes downstream behavior.
+  if (import.meta.env.MODE === 'test') {
+    validationPassed = true;
+  } else if (!hasAnyFirebaseVars) {
     // No Firebase env vars at all → local-only mode
     localMode = true;
     validationPassed = true;
@@ -63,8 +67,6 @@ All data will be stored in localStorage only.
 To enable cloud features, create a .env file with your Firebase credentials.
       `);
     }
-  } else if (import.meta.env.MODE === 'test') {
-    validationPassed = true;
   } else {
     validateEnvironmentVariables();
     validationPassed = true;

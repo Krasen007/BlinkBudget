@@ -53,15 +53,15 @@ const initApp = () => {
   if (window.mobileUtils) {
     if (typeof window.mobileUtils.onResponsiveChange === 'function') {
       window.mobileUtils.onResponsiveChange(() => {
-        // Only initialize mobile navigation if user is authenticated
-        if (AuthService.user) {
+        // Initialize mobile navigation if user is authenticated or running in localMode
+        if (AuthService.user || config.localMode) {
           initMobileNav();
         }
       });
     }
   } else {
-    // Only initialize mobile navigation if user is authenticated
-    if (AuthService.user) {
+    // Initialize mobile navigation if user is authenticated or running in localMode
+    if (AuthService.user || config.localMode) {
       initMobileNav();
     }
   }
@@ -122,8 +122,8 @@ const initApp = () => {
       Router.navigate('dashboard');
     }
 
-    // Only initialize mobile navigation if user is authenticated
-    if (user) {
+    // Initialize mobile navigation for authenticated users or when running in localMode
+    if (user || config.localMode) {
       initMobileNav();
     }
     window.dispatchEvent(

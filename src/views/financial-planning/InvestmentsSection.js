@@ -836,8 +836,10 @@ function createInvestmentsList(chartRenderer, activeCharts) {
         title.style.gap = SPACING.SM;
 
         const titleText = document.createElement('span');
+        const assetClassRaw =
+          inv.assetClass || inv.metadata?.investmentType || 'stocks';
         const assetClassName =
-          inv.assetClass.charAt(0).toUpperCase() + inv.assetClass.slice(1);
+          assetClassRaw.charAt(0).toUpperCase() + assetClassRaw.slice(1);
         titleText.textContent = `${assetClassName} — ${inv.symbol}`;
         titleText.style.fontWeight = '600';
 
@@ -865,8 +867,9 @@ function createInvestmentsList(chartRenderer, activeCharts) {
           inv.assetClass || inv.metadata?.investmentType || 'stocks';
         const currentPrice = inv.currentPrice || inv.purchasePrice;
         const priceText = assetClass === 'crypto' ? 'units' : 'shares';
+        const currency = inv.currency || inv.metadata?.currency || 'EUR';
 
-        meta.textContent = `${inv.shares} ${priceText} @ ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(currentPrice)}`;
+        meta.textContent = `${inv.shares} ${priceText} @ ${new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(currentPrice)}`;
 
         left.appendChild(title);
         left.appendChild(meta);
@@ -1036,6 +1039,7 @@ function createInvestmentsList(chartRenderer, activeCharts) {
           symbolFld.type = 'text';
           symbolFld.placeholder = 'e.g. BTC';
           symbolFld.value = inv.symbol;
+          symbolFld.id = `inv-edit-${inv.id}-symbol`;
           symbolFld.style.cssText = inputStyle;
           symbolFld.style.flex = '1';
           symbolFld.style.minWidth = '100px';
@@ -1044,6 +1048,7 @@ function createInvestmentsList(chartRenderer, activeCharts) {
           nameFld.type = 'text';
           nameFld.placeholder = 'e.g. Bitcoin';
           nameFld.value = inv.name || '';
+          nameFld.id = `inv-edit-${inv.id}-name`;
           nameFld.style.cssText = inputStyle;
           nameFld.style.flex = '2';
           nameFld.style.minWidth = '120px';
@@ -1064,6 +1069,7 @@ function createInvestmentsList(chartRenderer, activeCharts) {
           qtyFld.placeholder = qtyLabel;
           qtyFld.step = inv.assetClass === 'crypto' ? '0.0001' : '1';
           qtyFld.value = inv.shares;
+          qtyFld.id = `inv-edit-${inv.id}-qty`;
           qtyFld.style.cssText = inputStyle;
           qtyFld.style.flex = '1';
           qtyFld.style.minWidth = '80px';
@@ -1073,6 +1079,7 @@ function createInvestmentsList(chartRenderer, activeCharts) {
           purchasePriceFld.placeholder = '0.00';
           purchasePriceFld.step = '0.01';
           purchasePriceFld.value = inv.purchasePrice || 0;
+          purchasePriceFld.id = `inv-edit-${inv.id}-purchasePrice`;
           purchasePriceFld.style.cssText = inputStyle;
           purchasePriceFld.style.flex = '1';
           purchasePriceFld.style.minWidth = '90px';
@@ -1082,6 +1089,7 @@ function createInvestmentsList(chartRenderer, activeCharts) {
           currentPriceFld.placeholder = '0.00';
           currentPriceFld.step = '0.01';
           currentPriceFld.value = inv.currentPrice || inv.purchasePrice || 0;
+          currentPriceFld.id = `inv-edit-${inv.id}-currentPrice`;
           currentPriceFld.style.cssText = inputStyle;
           currentPriceFld.style.flex = '1';
           currentPriceFld.style.minWidth = '90px';
@@ -1101,6 +1109,7 @@ function createInvestmentsList(chartRenderer, activeCharts) {
 
           const exchangeFld = document.createElement('select');
           exchangeFld.style.cssText = inputStyle;
+          exchangeFld.id = `inv-edit-${inv.id}-exchange`;
           exchangeFld.style.flex = '1';
           exchangeFld.style.minWidth = '120px';
           const exchanges = ['Binance', 'Coinbase', 'Kraken', 'Other'];
@@ -1123,6 +1132,7 @@ function createInvestmentsList(chartRenderer, activeCharts) {
           dateFld.value = inv.purchaseDate
             ? new Date(inv.purchaseDate).toISOString().split('T')[0]
             : '';
+          dateFld.id = `inv-edit-${inv.id}-date`;
           dateFld.style.cssText = inputStyle;
           dateFld.style.flex = '1';
           dateFld.style.minWidth = '120px';
@@ -1139,6 +1149,7 @@ function createInvestmentsList(chartRenderer, activeCharts) {
           const notesTextarea = document.createElement('textarea');
           notesTextarea.placeholder = 'Optional notes...';
           notesTextarea.value = inv.notes || inv.metadata?.notes || '';
+          notesTextarea.id = `inv-edit-${inv.id}-notes`;
           notesTextarea.style.cssText = `${inputStyle}
             resize: vertical;
             min-height: 48px;
@@ -1198,15 +1209,36 @@ function createInvestmentsList(chartRenderer, activeCharts) {
             const newNotes = notesTextarea.value.trim();
 
             if (!newSymbol) {
-              console.error('Symbol is required.');
+              import('../../components/ConfirmDialog.js')
+                .then(({ AlertDialog }) => {
+                  AlertDialog({
+                    title: 'Invalid input',
+                    message: 'Symbol is required.',
+                  });
+                })
+                .catch(err => console.error('Failed to show alert:', err));
               return;
             }
             if (!(newQty > 0)) {
-              console.error('Quantity must be greater than 0.');
+              import('../../components/ConfirmDialog.js')
+                .then(({ AlertDialog }) => {
+                  AlertDialog({
+                    title: 'Invalid input',
+                    message: 'Quantity must be greater than 0.',
+                  });
+                })
+                .catch(err => console.error('Failed to show alert:', err));
               return;
             }
             if (!(newPurchasePrice > 0)) {
-              console.error('Purchase price must be greater than 0.');
+              import('../../components/ConfirmDialog.js')
+                .then(({ AlertDialog }) => {
+                  AlertDialog({
+                    title: 'Invalid input',
+                    message: 'Purchase price must be greater than 0.',
+                  });
+                })
+                .catch(err => console.error('Failed to show alert:', err));
               return;
             }
 

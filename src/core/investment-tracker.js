@@ -53,7 +53,7 @@ export class InvestmentTracker {
         purchasePrice: Math.round(purchasePrice * 100) / 100, // Round to 2 decimal places
         currentPrice: metadata.currentPrice || purchasePrice, // Use currentPrice from metadata or default to purchase price
         purchaseDate: new Date(purchaseDate),
-        assetClass: metadata.investmentType || metadata.assetClass || 'stock',
+        assetClass: metadata.investmentType || metadata.assetClass || 'stocks',
         sector: metadata.sector || 'Unknown',
         region: metadata.region || 'Unknown',
         currency: metadata.currency || 'EUR',
@@ -155,6 +155,7 @@ export class InvestmentTracker {
         'region',
         'currency',
         'notes',
+        'metadata',
       ];
       allowed.forEach(key => {
         if (updates[key] !== undefined) {
