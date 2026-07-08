@@ -475,7 +475,6 @@ export class MobileUtils {
 
     // Update keyboard visibility classes
     body.classList.toggle('keyboard-visible', this.keyboardState.visible);
-    body.classList.toggle('keyboard-hidden', !this.keyboardState.visible);
 
     // Trigger keyboard change event
     window.dispatchEvent(

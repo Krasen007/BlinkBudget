@@ -94,16 +94,9 @@ const initApp = () => {
       import('./core/backup-service.js').then(({ BackupService }) => {
         BackupService.init();
       });
-
-      if (currentRoute === 'login' || currentRoute === 'landing') {
-        Router.navigate('dashboard');
-      }
     } else if (config.localMode) {
       // Local mode: auto-navigate to dashboard, skip sync
       console.log('[Main] Local mode — navigating to dashboard directly.');
-      if (currentRoute === 'login' || currentRoute === 'landing') {
-        Router.navigate('dashboard');
-      }
     } else {
       console.log('[Main] No user, stopping sync.');
 
@@ -119,6 +112,11 @@ const initApp = () => {
       if (currentRoute !== 'login' && currentRoute !== 'landing') {
         Router.navigate('landing');
       }
+    }
+
+    // Navigate to dashboard if on login/landing (authenticated or local mode)
+    if ((user || config.localMode) && (currentRoute === 'login' || currentRoute === 'landing')) {
+      Router.navigate('dashboard');
     }
 
     // Only initialize mobile navigation if user is authenticated
