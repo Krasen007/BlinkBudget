@@ -836,7 +836,9 @@ function createInvestmentsList(chartRenderer, activeCharts) {
         title.style.gap = SPACING.SM;
 
         const titleText = document.createElement('span');
-        titleText.textContent = `${inv.symbol} · ${inv.name}`;
+        const assetClassName =
+          inv.assetClass.charAt(0).toUpperCase() + inv.assetClass.slice(1);
+        titleText.textContent = `${assetClassName} — ${inv.symbol}`;
         titleText.style.fontWeight = '600';
 
         const investmentType =
@@ -861,12 +863,10 @@ function createInvestmentsList(chartRenderer, activeCharts) {
 
         const assetClass =
           inv.assetClass || inv.metadata?.investmentType || 'stocks';
-        const assetClassLabel =
-          assetClass.charAt(0).toUpperCase() + assetClass.slice(1);
         const currentPrice = inv.currentPrice || inv.purchasePrice;
         const priceText = assetClass === 'crypto' ? 'units' : 'shares';
 
-        meta.textContent = `${assetClassLabel} · ${inv.shares} ${priceText} @ ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(currentPrice)}`;
+        meta.textContent = `${inv.shares} ${priceText} @ ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(currentPrice)}`;
 
         // Add last updated indicator if price was manually updated
         if (inv.metadata?.lastPriceUpdate) {
@@ -879,6 +879,20 @@ function createInvestmentsList(chartRenderer, activeCharts) {
 
         left.appendChild(title);
         left.appendChild(meta);
+
+        // Show notes if present
+        const notes = inv.notes || inv.metadata?.notes;
+        if (notes) {
+          const notesEl = document.createElement('div');
+          notesEl.textContent = `${notes}`;
+          notesEl.style.cssText = `
+            font-size: 0.85rem;
+            color: ${COLORS.TEXT_MUTED};
+            margin-top: 4px;
+            font-style: italic;
+          `;
+          left.appendChild(notesEl);
+        }
 
         const actions = document.createElement('div');
         actions.style.display = 'flex';
@@ -947,41 +961,222 @@ function createInvestmentsList(chartRenderer, activeCharts) {
 
           const form = document.createElement('div');
           form.style.display = 'flex';
+          form.style.flexDirection = 'column';
           form.style.gap = SPACING.SM;
-          form.style.flexWrap = 'wrap';
-          form.style.alignItems = 'center';
           form.style.width = '100%';
           form.style.boxSizing = 'border-box';
 
-          const nameDisplay = document.createElement('div');
-          nameDisplay.textContent = `${inv.symbol} · ${inv.name}`;
-          nameDisplay.style.fontWeight = '600';
-          nameDisplay.style.width = '100%';
-          nameDisplay.style.marginBottom = '4px';
+          // Shared input styles
+          const inputStyle = `
+            width: 100%;
+            padding: var(--spacing-sm);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-sm);
+            background: var(--color-background);
+            color: var(--color-text-main);
+            box-sizing: border-box;
+          `;
 
-          const sharesFld = document.createElement('input');
-          sharesFld.type = 'number';
-          sharesFld.value = inv.shares;
-          sharesFld.style.width = '80px';
+          const labelStyle = `
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: ${COLORS.TEXT_MUTED};
+            margin-bottom: 2px;
+          `;
 
-          const priceFld = document.createElement('input');
-          priceFld.type = 'number';
-          priceFld.value = inv.purchasePrice || inv.currentPrice || 0;
-          priceFld.style.width = '120px';
+          // Helper to create a labeled field group
+          const createFieldGroup = (label, element) => {
+            const group = document.createElement('div');
+            group.style.display = 'flex';
+            group.style.flexDirection = 'column';
+            group.style.flex = element.style.flex || '1';
+            group.style.minWidth = element.style.minWidth || '0';
+
+            const labelEl = document.createElement('label');
+            labelEl.textContent = label;
+            labelEl.style.cssText = labelStyle;
+            labelEl.htmlFor = element.id || '';
+
+            group.appendChild(labelEl);
+            group.appendChild(element);
+            return group;
+          };
+
+          // Asset Type selector
+          const typeGroup = document.createElement('div');
+          typeGroup.style.width = '100%';
+
+          const typeLabel = document.createElement('label');
+          typeLabel.textContent = 'Asset Type';
+          typeLabel.style.cssText = labelStyle;
+
+          const typeSelect = document.createElement('select');
+          typeSelect.style.cssText = inputStyle;
+          const assetTypes = [
+            { value: 'stocks', label: 'Stocks' },
+            { value: 'bonds', label: 'Bonds' },
+            { value: 'etf', label: 'ETFs' },
+            { value: 'realestate', label: 'Real Estate' },
+            { value: 'crypto', label: 'Cryptocurrency' },
+            { value: 'cash', label: 'Cash' },
+            { value: 'commodities', label: 'Commodities' },
+            { value: 'other', label: 'Other' },
+          ];
+          assetTypes.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t.value;
+            opt.textContent = t.label;
+            if (t.value === (inv.assetClass || 'stocks')) opt.selected = true;
+            typeSelect.appendChild(opt);
+          });
+
+          typeGroup.appendChild(typeLabel);
+          typeGroup.appendChild(typeSelect);
+
+          // Row 1: Symbol + Name
+          const row1 = document.createElement('div');
+          row1.style.display = 'flex';
+          row1.style.gap = SPACING.SM;
+          row1.style.width = '100%';
+          row1.style.flexWrap = 'wrap';
+
+          const symbolFld = document.createElement('input');
+          symbolFld.type = 'text';
+          symbolFld.placeholder = 'e.g. BTC';
+          symbolFld.value = inv.symbol;
+          symbolFld.style.cssText = inputStyle;
+          symbolFld.style.flex = '1';
+          symbolFld.style.minWidth = '100px';
+
+          const nameFld = document.createElement('input');
+          nameFld.type = 'text';
+          nameFld.placeholder = 'e.g. Bitcoin';
+          nameFld.value = inv.name || '';
+          nameFld.style.cssText = inputStyle;
+          nameFld.style.flex = '2';
+          nameFld.style.minWidth = '120px';
+
+          row1.appendChild(createFieldGroup('Symbol', symbolFld));
+          row1.appendChild(createFieldGroup('Name', nameFld));
+
+          // Row 2: Amount + Purchase Price + Current Price
+          const row2 = document.createElement('div');
+          row2.style.display = 'flex';
+          row2.style.gap = SPACING.SM;
+          row2.style.width = '100%';
+          row2.style.flexWrap = 'wrap';
+
+          const qtyLabel = inv.assetClass === 'crypto' ? 'Units' : 'Shares';
+          const qtyFld = document.createElement('input');
+          qtyFld.type = 'number';
+          qtyFld.placeholder = qtyLabel;
+          qtyFld.step = inv.assetClass === 'crypto' ? '0.0001' : '1';
+          qtyFld.value = inv.shares;
+          qtyFld.style.cssText = inputStyle;
+          qtyFld.style.flex = '1';
+          qtyFld.style.minWidth = '80px';
+
+          const purchasePriceFld = document.createElement('input');
+          purchasePriceFld.type = 'number';
+          purchasePriceFld.placeholder = '0.00';
+          purchasePriceFld.step = '0.01';
+          purchasePriceFld.value = inv.purchasePrice || 0;
+          purchasePriceFld.style.cssText = inputStyle;
+          purchasePriceFld.style.flex = '1';
+          purchasePriceFld.style.minWidth = '90px';
+
+          const currentPriceFld = document.createElement('input');
+          currentPriceFld.type = 'number';
+          currentPriceFld.placeholder = '0.00';
+          currentPriceFld.step = '0.01';
+          currentPriceFld.value = inv.currentPrice || inv.purchasePrice || 0;
+          currentPriceFld.style.cssText = inputStyle;
+          currentPriceFld.style.flex = '1';
+          currentPriceFld.style.minWidth = '90px';
+
+          row2.appendChild(createFieldGroup(qtyLabel, qtyFld));
+          row2.appendChild(createFieldGroup('Purchase Price', purchasePriceFld));
+          row2.appendChild(createFieldGroup('Current Price', currentPriceFld));
+
+          // Row 3: Exchange (for crypto) + Date
+          const row3 = document.createElement('div');
+          row3.style.display = 'flex';
+          row3.style.gap = SPACING.SM;
+          row3.style.width = '100%';
+          row3.style.flexWrap = 'wrap';
+
+          const exchangeFld = document.createElement('select');
+          exchangeFld.style.cssText = inputStyle;
+          exchangeFld.style.flex = '1';
+          exchangeFld.style.minWidth = '120px';
+          const exchanges = ['Binance', 'Coinbase', 'Kraken', 'Other'];
+          const currentExchange = inv.metadata?.exchange || '';
+          const defaultOpt = document.createElement('option');
+          defaultOpt.value = '';
+          defaultOpt.textContent = 'No exchange';
+          exchangeFld.appendChild(defaultOpt);
+          exchanges.forEach(ex => {
+            const opt = document.createElement('option');
+            opt.value = ex.toLowerCase();
+            opt.textContent = ex;
+            if (ex.toLowerCase() === currentExchange.toLowerCase()) opt.selected = true;
+            exchangeFld.appendChild(opt);
+          });
+
+          const dateFld = document.createElement('input');
+          dateFld.type = 'date';
+          dateFld.value = inv.purchaseDate
+            ? new Date(inv.purchaseDate).toISOString().split('T')[0]
+            : '';
+          dateFld.style.cssText = inputStyle;
+          dateFld.style.flex = '1';
+          dateFld.style.minWidth = '120px';
+
+          row3.appendChild(createFieldGroup('Exchange', exchangeFld));
+          row3.appendChild(createFieldGroup('Purchase Date', dateFld));
+
+          // Notes
+          const notesGroup = document.createElement('div');
+          notesGroup.style.width = '100%';
+          const notesLabel = document.createElement('label');
+          notesLabel.textContent = 'Notes';
+          notesLabel.style.cssText = labelStyle;
+          const notesTextarea = document.createElement('textarea');
+          notesTextarea.placeholder = 'Optional notes...';
+          notesTextarea.value = inv.notes || inv.metadata?.notes || '';
+          notesTextarea.style.cssText = inputStyle + `
+            resize: vertical;
+            min-height: 48px;
+          `;
+          notesGroup.appendChild(notesLabel);
+          notesGroup.appendChild(notesTextarea);
+
+          // Buttons
+          const btnRow = document.createElement('div');
+          btnRow.style.display = 'flex';
+          btnRow.style.gap = SPACING.SM;
+          btnRow.style.width = '100%';
 
           const saveBtn = document.createElement('button');
           saveBtn.textContent = 'Save';
           saveBtn.className = 'btn btn-primary';
+          saveBtn.style.flex = '1';
 
           const cancelBtn = document.createElement('button');
           cancelBtn.textContent = 'Cancel';
           cancelBtn.className = 'btn btn-ghost';
+          cancelBtn.style.flex = '1';
 
-          form.appendChild(nameDisplay);
-          form.appendChild(sharesFld);
-          form.appendChild(priceFld);
-          form.appendChild(saveBtn);
-          form.appendChild(cancelBtn);
+          btnRow.appendChild(saveBtn);
+          btnRow.appendChild(cancelBtn);
+
+          form.appendChild(typeGroup);
+          form.appendChild(row1);
+          form.appendChild(row2);
+          form.appendChild(row3);
+          form.appendChild(notesGroup);
+          form.appendChild(btnRow);
 
           li.appendChild(form);
 
@@ -995,31 +1190,48 @@ function createInvestmentsList(chartRenderer, activeCharts) {
           cancelBtn.addEventListener('click', cleanupEdit);
 
           saveBtn.addEventListener('click', async () => {
-            const newShares = Number(sharesFld.value) || 0;
-            const newPrice = Number(priceFld.value) || 0;
+            const newType = typeSelect.value;
+            const newSymbol = symbolFld.value.trim().toUpperCase();
+            const newName = nameFld.value.trim() || newSymbol;
+            const newQty = Number(qtyFld.value) || 0;
+            const newPurchasePrice = Number(purchasePriceFld.value) || 0;
+            const newCurrentPrice = Number(currentPriceFld.value) || newPurchasePrice;
+            const newExchange = exchangeFld.value;
+            const newDate = dateFld.value ? new Date(dateFld.value) : inv.purchaseDate;
+            const newNotes = notesTextarea.value.trim();
 
-            // Basic validation
-            let isValid = true;
-            if (!inv.symbol) {
-              // Assuming inv.symbol is the 'name' for existing items
-              // This error display would need to be added to the edit form if needed
-              console.error('Symbol/Name is required for existing investment.');
-              isValid = false;
+            if (!newSymbol) {
+              console.error('Symbol is required.');
+              return;
             }
-            if (!(newShares > 0 && newPrice > 0)) {
-              // This error display would need to be added to the edit form if needed
-              console.error('Shares and price must be greater than 0.');
-              isValid = false;
+            if (!(newQty > 0)) {
+              console.error('Quantity must be greater than 0.');
+              return;
             }
-
-            if (!isValid) return;
+            if (!(newPurchasePrice > 0)) {
+              console.error('Purchase price must be greater than 0.');
+              return;
+            }
 
             try {
               const { StorageService } = await import('../../core/storage.js');
               StorageService.updateInvestment(inv.id, {
-                shares: newShares,
-                purchasePrice: newPrice,
-                currentPrice: newPrice,
+                symbol: newSymbol,
+                name: newName,
+                shares: newQty,
+                purchasePrice: newPurchasePrice,
+                currentPrice: newCurrentPrice,
+                assetClass: newType,
+                purchaseDate: newDate,
+                notes: newNotes,
+              });
+              // Update metadata for exchange and notes
+              const updatedMetadata = { ...(inv.metadata || {}), notes: newNotes };
+              if (newExchange) {
+                updatedMetadata.exchange = newExchange;
+              }
+              StorageService.updateInvestment(inv.id, {
+                metadata: updatedMetadata,
               });
 
               // Refresh chart and list using helper

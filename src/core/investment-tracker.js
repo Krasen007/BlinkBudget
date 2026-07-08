@@ -57,12 +57,14 @@ export class InvestmentTracker {
         sector: metadata.sector || 'Unknown',
         region: metadata.region || 'Unknown',
         currency: metadata.currency || 'EUR',
+        notes: metadata.notes || '',
         lastPriceUpdate:
           metadata.currentPrice && metadata.currentPrice !== purchasePrice
             ? new Date()
             : null,
         createdAt: new Date(),
         updatedAt: new Date(),
+        metadata: { ...metadata },
       };
 
       this.investments.push(investment);
@@ -142,14 +144,17 @@ export class InvestmentTracker {
       if (!investment) return null;
 
       const allowed = [
+        'symbol',
         'shares',
         'purchasePrice',
         'currentPrice',
+        'purchaseDate',
         'name',
         'assetClass',
         'sector',
         'region',
         'currency',
+        'notes',
       ];
       allowed.forEach(key => {
         if (updates[key] !== undefined) {
