@@ -88,9 +88,8 @@ export const CategorySelector = (
 
   // --- Explore Tags ---
   // 1. Get transactions for the current period
-  const ensureDate = value => (value instanceof Date ? value : new Date(value));
-  const startDate = ensureDate(currentData.timePeriod.startDate);
-  const endDate = ensureDate(currentData.timePeriod.endDate);
+  const startDate = new Date(currentData.timePeriod.startDate);
+  const endDate = new Date(currentData.timePeriod.endDate);
   startDate.setHours(0, 0, 0, 0);
   endDate.setHours(23, 59, 59, 999);
 
@@ -134,8 +133,6 @@ export const CategorySelector = (
           tagBreakdown[tag].amount += t.amount;
         } else if (t.type === 'refund') {
           tagBreakdown[tag].amount -= t.amount;
-        } else if (t.type === 'income') {
-          tagBreakdown[tag].amount += t.amount;
         }
         tagBreakdown[tag].transactionCount += 1;
       });
@@ -153,7 +150,6 @@ export const CategorySelector = (
             : 0,
       };
     });
-
   if (visibleTags.length > 0) {
     // Add tag section divider/title
     const divider = document.createElement('hr');
