@@ -335,10 +335,15 @@ export const ReportsView = (params = {}) => {
 
     // Save filter state for dashboard
     const filterData = {
-      category: category.name,
       timePeriod: currentTimePeriod,
       source: 'reports',
     };
+
+    if (category.isTag) {
+      filterData.tag = category.name;
+    } else {
+      filterData.category = category.name;
+    }
 
     NavigationState.saveDashboardFilter(filterData);
 

@@ -296,14 +296,19 @@ export const NavigationState = {
         return;
       }
 
-      // Validate that required category field exists and is valid
-      if (
-        !filterData.category ||
-        typeof filterData.category !== 'string' ||
-        filterData.category.trim() === ''
-      ) {
+      // Validate that either category or tag field exists and is valid
+      const hasCategory =
+        filterData.category &&
+        typeof filterData.category === 'string' &&
+        filterData.category.trim() !== '';
+      const hasTag =
+        filterData.tag &&
+        typeof filterData.tag === 'string' &&
+        filterData.tag.trim() !== '';
+
+      if (!hasCategory && !hasTag) {
         console.warn(
-          '[NavigationState] Invalid or missing category field in filterData'
+          '[NavigationState] Invalid or missing category or tag field in filterData'
         );
         return;
       }
@@ -344,7 +349,7 @@ export const NavigationState = {
       const filterData = safeJsonParse(savedData);
 
       // Validate saved data
-      if (!filterData || !filterData.category) {
+      if (!filterData || (!filterData.category && !filterData.tag)) {
         console.warn('[NavigationState] Invalid saved dashboard filter data');
         return null;
       }
