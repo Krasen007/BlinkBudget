@@ -155,15 +155,11 @@ export const DashboardView = (params = {}) => {
 
   // Left side with title and category manager button
   const leftSide = document.createElement('div');
-  leftSide.style.display = 'flex';
-  leftSide.style.alignItems = 'center';
-  leftSide.style.gap = SPACING.XS;
+  leftSide.className = 'flex-center flex-gap-xs';
 
   // Title and filter status container
   const titleContainer = document.createElement('div');
-  titleContainer.style.display = 'flex';
-  titleContainer.style.alignItems = 'center';
-  titleContainer.style.gap = SPACING.XS;
+  titleContainer.className = 'flex-center flex-gap-xs';
 
   const title = document.createElement('h2');
   const updateTitle = userObj => {
@@ -194,15 +190,12 @@ export const DashboardView = (params = {}) => {
   // Account filter
   const leftHeader = document.createElement('div');
   const filterRow = document.createElement('div');
-  filterRow.className = 'dashboard-filter-row';
-  filterRow.style.marginBottom = SPACING.XS;
+  filterRow.className = 'dashboard-filter-row mb-xs';
 
   const accountSelect = document.createElement('select');
   accountSelect.id = 'account-filter-select';
   accountSelect.name = 'account-filter';
-  accountSelect.className = 'view-select';
-  accountSelect.style.marginTop = '0';
-  accountSelect.style.marginBottom = '0';
+  accountSelect.className = 'view-select mt-0 mb-0';
 
   // Account Options Logic
   let currentAccountFilter =
@@ -700,8 +693,7 @@ export const DashboardView = (params = {}) => {
 
       // Add a small container for quick amount presets with no spacing
       const quickPresetsWrapper = document.createElement('div');
-      quickPresetsWrapper.style.margin = '0';
-      quickPresetsWrapper.style.padding = '0';
+      quickPresetsWrapper.className = 'm-0 p-0';
       quickPresetsWrapper.appendChild(quickAmountPresetsContainer);
       content.appendChild(quickPresetsWrapper);
 
@@ -727,10 +719,7 @@ export const DashboardView = (params = {}) => {
     });
 
     if (addBtn) {
-      addBtn.style.width = '100%';
-      addBtn.style.margin = '0';
-      addBtn.style.marginBottom = SPACING.XS;
-      addBtn.style.flexShrink = '0'; // Prevent button from shrinking
+      addBtn.className = `${addBtn.className || ''} w-full m-0 mb-xs flex-shrink-0`.trim();
       content.appendChild(addBtn);
     } else {
       console.warn('Add Transaction button failed to render', {
@@ -742,11 +731,7 @@ export const DashboardView = (params = {}) => {
       const fallbackBtn = document.createElement('button');
       fallbackBtn.textContent = '+ Add Transaction';
       fallbackBtn.disabled = true;
-      fallbackBtn.className = 'btn btn-primary btn-disabled';
-      fallbackBtn.style.width = '100%';
-      fallbackBtn.style.margin = '0';
-      fallbackBtn.style.marginBottom = SPACING.XS;
-      fallbackBtn.style.flexShrink = '0';
+      fallbackBtn.className = 'btn btn-primary btn-disabled w-full m-0 mb-xs flex-shrink-0';
       content.appendChild(fallbackBtn);
     }
 
@@ -780,19 +765,12 @@ export const DashboardView = (params = {}) => {
           renderDashboard();
         },
       });
-      clearFilterButton.style.width = '100%';
-      clearFilterButton.style.margin = '0';
-      clearFilterButton.style.marginBottom = SPACING.XS;
-      clearFilterButton.style.flexShrink = '0'; // Prevent button from shrinking
+      clearFilterButton.className = `${clearFilterButton.className || ''} w-full m-0 mb-xs flex-shrink-0`.trim();
       content.appendChild(clearFilterButton);
 
       // Add filter status indicator
       const filterStatus = document.createElement('div');
-      filterStatus.className = 'reports-filter-status';
-      filterStatus.style.marginTop = SPACING.XS;
-      filterStatus.style.marginBottom = SPACING.XS;
-      filterStatus.style.padding = SPACING.SM;
-      filterStatus.style.fontSize = 'var(--font-size-sm)';
+      filterStatus.className = 'reports-filter-status mt-0 mb-xs p-sm text-sm';
 
       // Add click handler to navigate back to reports
       filterStatus.addEventListener('click', () => {
@@ -970,11 +948,7 @@ export const DashboardView = (params = {}) => {
     // Bulk actions toolbar (selection mode)
     if (isSelectionMode) {
       const bulkToolbar = document.createElement('div');
-      bulkToolbar.className = 'bulk-actions-toolbar';
-      bulkToolbar.style.display = 'flex';
-      bulkToolbar.style.justifyContent = 'space-between';
-      bulkToolbar.style.alignItems = 'center';
-      bulkToolbar.style.gap = SPACING.SM;
+      bulkToolbar.className = 'bulk-actions-toolbar flex-between flex-gap-sm';
       bulkToolbar.style.padding = `${SPACING.SM} 0 ${SPACING.SM} 0`;
       bulkToolbar.style.borderBottom = `1px solid ${COLORS.SURFACE_HOVER}`;
       bulkToolbar.style.marginBottom = SPACING.SM;
@@ -989,8 +963,7 @@ export const DashboardView = (params = {}) => {
       bulkToolbar.appendChild(selectionInfo);
 
       const btnGroup = document.createElement('div');
-      btnGroup.style.display = 'flex';
-      btnGroup.style.gap = SPACING.SM;
+      btnGroup.className = 'flex-row flex-gap-sm';
 
       const editBtn = ButtonComponent({
         text: 'Edit Selected',
