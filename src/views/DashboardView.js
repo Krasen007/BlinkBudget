@@ -719,7 +719,8 @@ export const DashboardView = (params = {}) => {
     });
 
     if (addBtn) {
-      addBtn.className = `${addBtn.className || ''} w-full m-0 mb-xs flex-shrink-0`.trim();
+      addBtn.className =
+        `${addBtn.className || ''} w-full m-0 mb-xs flex-shrink-0`.trim();
       content.appendChild(addBtn);
     } else {
       console.warn('Add Transaction button failed to render', {
@@ -731,7 +732,8 @@ export const DashboardView = (params = {}) => {
       const fallbackBtn = document.createElement('button');
       fallbackBtn.textContent = '+ Add Transaction';
       fallbackBtn.disabled = true;
-      fallbackBtn.className = 'btn btn-primary btn-disabled w-full m-0 mb-xs flex-shrink-0';
+      fallbackBtn.className =
+        'btn btn-primary btn-disabled w-full m-0 mb-xs flex-shrink-0';
       content.appendChild(fallbackBtn);
     }
 
@@ -765,7 +767,8 @@ export const DashboardView = (params = {}) => {
           renderDashboard();
         },
       });
-      clearFilterButton.className = `${clearFilterButton.className || ''} w-full m-0 mb-xs flex-shrink-0`.trim();
+      clearFilterButton.className =
+        `${clearFilterButton.className || ''} w-full m-0 mb-xs flex-shrink-0`.trim();
       content.appendChild(clearFilterButton);
 
       // Add filter status indicator
