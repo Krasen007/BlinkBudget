@@ -46,17 +46,17 @@ export class ForecastEngine {
 
       const monthlyData = this._aggregateByMonth(incomeTransactions);
       const seasonalPatterns = this.detectSeasonalPatterns(incomeTransactions);
-      const recurringTransactions =
-        this.identifyRecurringTransactions(incomeTransactions);
+
+      // Weighted baseline: use all complete months, with linearly increasing
+      // weights so recent months count more but older history still anchors the estimate.
+      const allValues = monthlyData.values;
+      const baseline = this._weightedBaseline(allValues);
+      const rawTrend = this._calculateTrend(allValues);
+      // Clamp so the trend can't push the 6-month forecast below 40% of baseline
+      const maxDownTrend = -(baseline * 0.6) / 6;
+      const trend = Math.max(rawTrend, maxDownTrend);
 
       const forecasts = [];
-      const baseForecasts = this.exponentialSmoothing(
-        monthlyData.values,
-        this.defaultAlpha
-      );
-
-      // Continue exponential smoothing trend into the future
-      const lastSmoothedValue = baseForecasts[baseForecasts.length - 1] || 0;
 
       for (let i = 0; i < months; i++) {
         const futureDate = new Date();
@@ -64,18 +64,10 @@ export class ForecastEngine {
 
         const monthIndex = futureDate.getMonth();
         const seasonalMultiplier = seasonalPatterns.income?.[monthIndex] || 1;
-        const recurringAmount = this._getRecurringAmountForMonth(
-          recurringTransactions,
-          futureDate
-        );
 
-        // Continue exponential smoothing for future values
-        // Use the trend from the last few values to project forward
-        const trend = this._calculateTrend(baseForecasts.slice(-3));
-        const projectedBase = lastSmoothedValue + trend * (i + 1) * 0.5; // Dampen trend over time
-
-        const baseAmount = projectedBase * seasonalMultiplier;
-        const predictedAmount = Math.max(0, baseAmount + recurringAmount);
+        // Project: baseline + trend * steps ahead, then apply seasonal factor
+        const projectedBase = baseline + trend * (i + 1);
+        const predictedAmount = Math.max(0, projectedBase * seasonalMultiplier);
 
         const confidence = this._calculateConfidence(monthlyData.values, i);
         const confidenceInterval = this._calculateConfidenceInterval(
@@ -89,9 +81,9 @@ export class ForecastEngine {
           predictedAmount: Math.round(predictedAmount * 100) / 100,
           confidenceInterval,
           confidence,
-          method: recurringAmount > 0 ? 'recurring' : 'exponential_smoothing',
+          method: 'weighted_moving_average',
           seasonalFactor: seasonalMultiplier,
-          trend: trend,
+          trend,
         });
       }
 
@@ -143,17 +135,17 @@ export class ForecastEngine {
 
       const monthlyData = this._aggregateByMonth(expenseTransactions);
       const seasonalPatterns = this.detectSeasonalPatterns(expenseTransactions);
-      const recurringTransactions =
-        this.identifyRecurringTransactions(expenseTransactions);
+
+      // Weighted baseline: use all complete months, with linearly increasing
+      // weights so recent months count more but older history still anchors the estimate.
+      const allValues = monthlyData.values;
+      const baseline = this._weightedBaseline(allValues);
+      const rawTrend = this._calculateTrend(allValues);
+      // Clamp so the trend can't push the 6-month forecast below 40% of baseline
+      const maxDownTrend = -(baseline * 0.6) / 6; // at most -60% over 6 months
+      const trend = Math.max(rawTrend, maxDownTrend);
 
       const forecasts = [];
-      const baseForecasts = this.exponentialSmoothing(
-        monthlyData.values,
-        this.defaultAlpha
-      );
-
-      // Continue exponential smoothing trend into the future
-      const lastSmoothedValue = baseForecasts[baseForecasts.length - 1] || 0;
 
       for (let i = 0; i < months; i++) {
         const futureDate = new Date();
@@ -161,18 +153,10 @@ export class ForecastEngine {
 
         const monthIndex = futureDate.getMonth();
         const seasonalMultiplier = seasonalPatterns.expense?.[monthIndex] || 1;
-        const recurringAmount = this._getRecurringAmountForMonth(
-          recurringTransactions,
-          futureDate
-        );
 
-        // Continue exponential smoothing for future values
-        // Use trend from last few values to project forward
-        const trend = this._calculateTrend(baseForecasts.slice(-3));
-        const projectedBase = lastSmoothedValue + trend * (i + 1) * 0.5; // Dampen trend over time
-
-        const baseAmount = projectedBase * seasonalMultiplier;
-        const predictedAmount = Math.max(0, baseAmount + recurringAmount);
+        // Project: baseline + trend * steps ahead, then apply seasonal factor
+        const projectedBase = baseline + trend * (i + 1);
+        const predictedAmount = Math.max(0, projectedBase * seasonalMultiplier);
 
         const confidence = this._calculateConfidence(monthlyData.values, i);
         const confidenceInterval = this._calculateConfidenceInterval(
@@ -186,9 +170,9 @@ export class ForecastEngine {
           predictedAmount: Math.round(predictedAmount * 100) / 100,
           confidenceInterval,
           confidence,
-          method: recurringAmount > 0 ? 'recurring' : 'exponential_smoothing',
+          method: 'weighted_moving_average',
           seasonalFactor: seasonalMultiplier,
-          trend: trend,
+          trend,
         });
       }
 
@@ -211,11 +195,13 @@ export class ForecastEngine {
         expense: new Array(12).fill(1),
       };
 
-      // Filter valid transactions
+      // Filter valid transactions — exclude negatives (mapped refunds) so they
+      // don't distort the seasonal multipliers
       const validTransactions = transactions.filter(
         transaction =>
           transaction &&
           typeof transaction.amount === 'number' &&
+          transaction.amount > 0 &&
           transaction.timestamp &&
           transaction.type &&
           !transaction.isGhost
@@ -420,14 +406,17 @@ export class ForecastEngine {
   }
 
   /**
-   * Aggregate transactions by month
+   * Aggregate transactions by month, sorted chronologically.
+   * Excludes the current (incomplete) month so it doesn't drag down the baseline.
    * @param {Array} transactions - Transaction data
-   * @returns {Object} Monthly aggregated data
+   * @returns {Object} Monthly aggregated data { values, mean, variance, monthKeys }
    */
   _aggregateByMonth(transactions) {
     const monthlyTotals = new Map();
 
-    // Filter out invalid transactions
+    const now = new Date();
+    const currentMonthKey = `${now.getFullYear()}-${now.getMonth()}`;
+
     const validTransactions = transactions.filter(
       transaction =>
         transaction &&
@@ -439,13 +428,12 @@ export class ForecastEngine {
     validTransactions.forEach(transaction => {
       try {
         const date = new Date(transaction.timestamp);
-        // Check if date is valid
-        if (isNaN(date.getTime())) {
-          console.warn('Invalid timestamp in transaction:', transaction);
-          return;
-        }
+        if (isNaN(date.getTime())) return;
 
         const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+
+        // Exclude current incomplete month from training data
+        if (monthKey === currentMonthKey) return;
 
         if (!monthlyTotals.has(monthKey)) {
           monthlyTotals.set(monthKey, 0);
@@ -455,18 +443,20 @@ export class ForecastEngine {
           monthlyTotals.get(monthKey) + transaction.amount
         );
       } catch (error) {
-        console.warn(
-          'Error processing transaction for aggregation:',
-          transaction,
-          error
-        );
+        console.warn('Error processing transaction for aggregation:', transaction, error);
       }
     });
 
-    const values = Array.from(monthlyTotals.values());
+    // Sort chronologically — Map insertion order is not guaranteed to be sorted
+    const sorted = Array.from(monthlyTotals.entries()).sort(([a], [b]) =>
+      a.localeCompare(b)
+    );
+
+    const values = sorted.map(([, v]) => v);
+    const monthKeys = sorted.map(([k]) => k);
 
     if (values.length === 0) {
-      return { values: [0], mean: 0, variance: 0 };
+      return { values: [0], mean: 0, variance: 0, monthKeys: [] };
     }
 
     const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
@@ -474,7 +464,7 @@ export class ForecastEngine {
       values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
       values.length;
 
-    return { values, mean, variance };
+    return { values, mean, variance, monthKeys };
   }
 
   /**
@@ -502,6 +492,21 @@ export class ForecastEngine {
     }
 
     return forecasts;
+  }
+
+  /**
+   * Weighted baseline from all available monthly values.
+   * Assigns linearly increasing weights (1, 2, 3, … n) so the most recent
+   * month has the highest influence while all history still contributes.
+   * @param {Array<number>} values - Chronologically sorted monthly totals
+   * @returns {number} Weighted baseline amount
+   */
+  _weightedBaseline(values) {
+    if (!values || values.length === 0) return 0;
+    const n = values.length;
+    const weights = values.map((_, i) => i + 1); // 1, 2, 3, … n
+    const weightSum = weights.reduce((s, w) => s + w, 0);
+    return values.reduce((s, v, i) => s + v * weights[i], 0) / weightSum;
   }
 
   /**
