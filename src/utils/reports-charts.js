@@ -149,6 +149,9 @@ export async function createCategoryBreakdownChart(
 
   // Prepare chart data first
   const categoryData = currentData.categoryBreakdown;
+  const sortedCategories = [...(categoryData?.categories || [])].sort(
+    (a, b) => b.amount - a.amount
+  );
 
   // Total amounts display
   const totalsContainer = document.createElement('div');
@@ -243,10 +246,7 @@ export async function createCategoryBreakdownChart(
   totalSpentLabel.style.marginBottom = '2px';
 
   const totalSpentValue = document.createElement('span');
-  const totalSpent = (categoryData?.categories || []).reduce(
-    (sum, cat) => sum + cat.amount,
-    0
-  );
+  const totalSpent = sortedCategories.reduce((sum, cat) => sum + cat.amount, 0);
   totalSpentValue.textContent = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'EUR',
@@ -329,16 +329,13 @@ export async function createCategoryBreakdownChart(
     `;
 
   // Get consistent colors for all categories
-  const categoryColors = getCategoryColors(
-    categoryData.categories,
-    categoryColorMap
-  );
+  const categoryColors = getCategoryColors(sortedCategories, categoryColorMap);
 
   const chartData = {
-    labels: categoryData.categories.map(cat => cat.name),
+    labels: sortedCategories.map(cat => cat.name),
     datasets: [
       {
-        data: categoryData.categories.map(cat => cat.amount),
+        data: sortedCategories.map(cat => cat.amount),
         backgroundColor: categoryColors,
         borderColor: COLORS.SURFACE,
         borderWidth: 0,

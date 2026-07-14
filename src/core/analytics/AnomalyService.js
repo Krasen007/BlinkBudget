@@ -126,11 +126,15 @@ export class AnomalyService {
       for (const [category, { spikes: catSpikes, netAmount }] of Object.entries(
         effectiveCategorySpikes
       )) {
-        const catTotalAmount = expenseTransactions
-          .filter(t => (t.category || 'Uncategorized') === category)
-          .reduce((sum, t) => sum + Math.abs(t.amount || 0), 0);
+        const categoryTransactions = (allTransactions || expenseTransactions).filter(
+          t => (t.category || 'Uncategorized') === category
+        );
+        const catTotalAmount = categoryTransactions.reduce((sum, t) => {
+          const amount = Math.abs(t.amount || 0);
+          return sum + (t.type === TRANSACTION_TYPES.REFUND ? -amount : amount);
+        }, 0);
         const catSpikePercentage =
-          catTotalAmount > 0 ? (netAmount / catTotalAmount) * 100 : 0;
+          catTotalAmount !== 0 ? (netAmount / catTotalAmount) * 100 : 0;
 
         insights.push({
           id: `spending_spike_${category.toLowerCase().replace(/\s+/g, '_')}`,

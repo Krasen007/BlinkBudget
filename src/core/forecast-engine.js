@@ -53,7 +53,7 @@ export class ForecastEngine {
       const baseline = this._weightedBaseline(allValues);
       const rawTrend = this._calculateTrend(allValues);
       // Clamp so the trend can't push the 6-month forecast below 40% of baseline
-      const maxDownTrend = -(baseline * 0.6) / 6;
+      const maxDownTrend = -(Math.abs(baseline) * 0.6) / 6;
       const trend = Math.max(rawTrend, maxDownTrend);
 
       const forecasts = [];
@@ -142,7 +142,7 @@ export class ForecastEngine {
       const baseline = this._weightedBaseline(allValues);
       const rawTrend = this._calculateTrend(allValues);
       // Clamp so the trend can't push the 6-month forecast below 40% of baseline
-      const maxDownTrend = -(baseline * 0.6) / 6; // at most -60% over 6 months
+      const maxDownTrend = -(Math.abs(baseline) * 0.6) / 6; // at most -60% over 6 months
       const trend = Math.max(rawTrend, maxDownTrend);
 
       const forecasts = [];
@@ -415,7 +415,7 @@ export class ForecastEngine {
     const monthlyTotals = new Map();
 
     const now = new Date();
-    const currentMonthKey = `${now.getFullYear()}-${now.getMonth()}`;
+    const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth()).padStart(2, '0')}`;
 
     const validTransactions = transactions.filter(
       transaction =>
@@ -430,7 +430,7 @@ export class ForecastEngine {
         const date = new Date(transaction.timestamp);
         if (isNaN(date.getTime())) return;
 
-        const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth()).padStart(2, '0')}`;
 
         // Exclude current incomplete month from training data
         if (monthKey === currentMonthKey) return;

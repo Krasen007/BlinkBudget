@@ -270,19 +270,26 @@ export class TrendService {
     // "personal inflation" rate that uses all data points rather than
     // just comparing two endpoints.
     const n = monthlyData.length;
-    const xs = monthlyData.map((_, i) => i); // 0, 1, 2, …
+    const xs = monthlyData.map(entry => {
+      const [year, month] = entry.month.split('-').map(Number);
+      return year * 12 + month;
+    });
+    const normalizedXs = xs.map(x => x - xs[0]);
     const ys = monthlyData.map(d => d.amount);
 
-    const meanX = xs.reduce((s, x) => s + x, 0) / n;
+    const meanX = normalizedXs.reduce((s, x) => s + x, 0) / n;
     const meanY = ys.reduce((s, y) => s + y, 0) / n;
 
     if (meanY === 0) return 0;
 
-    const numerator = xs.reduce(
+    const numerator = normalizedXs.reduce(
       (s, x, i) => s + (x - meanX) * (ys[i] - meanY),
       0
     );
-    const denominator = xs.reduce((s, x) => s + (x - meanX) ** 2, 0);
+    const denominator = normalizedXs.reduce(
+      (s, x) => s + (x - meanX) ** 2,
+      0
+    );
 
     if (denominator === 0) return 0;
 
@@ -450,6 +457,8 @@ export class TrendService {
     cutoff.setHours(0, 0, 0, 0);
 
     const endWindow = new Date(referenceDate);
+    endWindow.setDate(1);
+    endWindow.setHours(0, 0, 0, 0);
 
     const monthlySpending = {};
 

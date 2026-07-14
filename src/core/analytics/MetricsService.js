@@ -215,11 +215,11 @@ export class MetricsService {
     const monthlySpending = dailySpending * 30;
     const monthlyIncome = dailyIncome * 30;
 
-    // Identify top spending category
-    const topCategory =
-      categoryBreakdown.categories.length > 0
-        ? categoryBreakdown.categories[0]
-        : null;
+    // Identify top spending category by largest net spending amount
+    const rankedCategories = [...categoryBreakdown.categories].sort(
+      (a, b) => b.amount - a.amount
+    );
+    const topCategory = rankedCategories.length > 0 ? rankedCategories[0] : null;
 
     return {
       totalExpenditure: incomeVsExpenses.totalExpenses,
@@ -252,8 +252,11 @@ export class MetricsService {
       timePeriod
     );
 
-    // Get top N categories
-    const topCategories = categoryBreakdown.categories.slice(0, topN);
+    // Get the top N categories by largest net spending amount
+    const rankedCategories = [...categoryBreakdown.categories].sort(
+      (a, b) => b.amount - a.amount
+    );
+    const topCategories = rankedCategories.slice(0, topN);
 
     // Calculate additional metrics for top categories
     const enrichedCategories = topCategories.map(category => {

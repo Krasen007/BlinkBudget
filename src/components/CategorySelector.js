@@ -57,9 +57,9 @@ export const CategorySelector = (
 
   // Only show categories with positive net amount — zero (expense = refund)
   // or negative (refund-only) categories clutter the view.
-  const visibleCategories = currentData.categoryBreakdown.categories.filter(
-    category => category.amount > 0
-  );
+  const visibleCategories = [...currentData.categoryBreakdown.categories]
+    .filter(category => category.amount > 0)
+    .sort((a, b) => b.amount - a.amount);
 
   if (visibleCategories.length === 0) {
     const emptyState = document.createElement('div');
