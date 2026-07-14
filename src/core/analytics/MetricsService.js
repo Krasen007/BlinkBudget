@@ -5,6 +5,7 @@
 
 import { TRANSACTION_TYPES } from '../../utils/constants.js';
 import { FilteringService } from './FilteringService.js';
+import { CustomCategoryService } from '../custom-category-service.js';
 
 export class MetricsService {
   /**
@@ -81,8 +82,23 @@ export class MetricsService {
           : 0,
     }));
 
-    // Sort by amount descending; refund-only categories (negative) go to bottom
-    categories.sort((a, b) => b.amount - a.amount);
+    // Sort by user-defined sortOrder first (respecting the order set in
+    // Category Manager), falling back to amount descending as a tiebreaker
+    // for categories that have no explicit order set.
+    const userCategories = CustomCategoryService.getAll();
+    const sortOrderMap = new Map(
+      userCategories.map((cat, i) => [
+        cat.name,
+        cat.sortOrder ?? Number.MAX_SAFE_INTEGER,
+      ])
+    );
+    categories.sort((a, b) => {
+      const orderA = sortOrderMap.get(a.name) ?? Number.MAX_SAFE_INTEGER;
+      const orderB = sortOrderMap.get(b.name) ?? Number.MAX_SAFE_INTEGER;
+      if (orderA !== orderB) return orderA - orderB;
+      // Same sort order (or both unknown) → fall back to amount descending
+      return b.amount - a.amount;
+    });
 
     return {
       categories,

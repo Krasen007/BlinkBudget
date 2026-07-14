@@ -181,18 +181,57 @@ export const CustomCategoryService = {
     }
 
     const data = localStorage.getItem(CUSTOM_CATEGORIES_KEY);
-    const categories = data ? safeJsonParse(data) : [];
+    const allCategories = data ? safeJsonParse(data) : [];
+
+    const userCategories = allCategories.filter(
+      cat => !cat.userId || cat.userId === currentUserId
+    );
+
+    // One-time fix: assign stable sortOrder to any category that is missing it.
+    // This covers existing users whose categories were migrated without sortOrder.
+    // Categories that already have a sortOrder are left untouched.
+    const needsNormalization = userCategories.some(
+      cat => cat.sortOrder === undefined || cat.sortOrder === null
+    );
+    if (needsNormalization) {
+      // Sort unsorted cats by createdAt so they get a deterministic order;
+      // cats with an existing sortOrder keep their value.
+      const withOrder = userCategories
+        .filter(cat => cat.sortOrder !== undefined && cat.sortOrder !== null)
+        .sort((a, b) => a.sortOrder - b.sortOrder);
+      const withoutOrder = userCategories
+        .filter(cat => cat.sortOrder === undefined || cat.sortOrder === null)
+        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+      // Place unsorted cats after the already-ordered ones
+      const startIndex = withOrder.length > 0
+        ? Math.max(...withOrder.map(c => c.sortOrder)) + 1
+        : 0;
+
+      const normalizedMap = new Map(allCategories.map(c => [c.id, c]));
+      withoutOrder.forEach((cat, i) => {
+        normalizedMap.set(cat.id, {
+          ...cat,
+          sortOrder: startIndex + i,
+        });
+      });
+
+      const normalized = Array.from(normalizedMap.values());
+      this._persist(normalized, false);
+
+      return normalized
+        .filter(cat => !cat.userId || cat.userId === currentUserId)
+        .sort((a, b) => a.sortOrder - b.sortOrder);
+    }
 
     // Filter categories for current user and sort by sortOrder
-    return categories
-      .filter(cat => !cat.userId || cat.userId === currentUserId)
-      .sort((a, b) => {
-        const orderA = a.sortOrder ?? Number.MAX_SAFE_INTEGER;
-        const orderB = b.sortOrder ?? Number.MAX_SAFE_INTEGER;
-        if (orderA !== orderB) return orderA - orderB;
-        // Fallback to creation date if sortOrder is the same
-        return new Date(a.createdAt) - new Date(b.createdAt);
-      });
+    return userCategories.sort((a, b) => {
+      const orderA = a.sortOrder ?? Number.MAX_SAFE_INTEGER;
+      const orderB = b.sortOrder ?? Number.MAX_SAFE_INTEGER;
+      if (orderA !== orderB) return orderA - orderB;
+      // Fallback to creation date if sortOrder is the same
+      return new Date(a.createdAt) - new Date(b.createdAt);
+    });
   },
 
   /**
@@ -214,7 +253,7 @@ export const CustomCategoryService = {
       c => !c.userId || c.userId === currentUserId
     );
 
-    systemCategories.forEach(systemCat => {
+    systemCategories.forEach((systemCat, systemIndex) => {
       // Avoid duplication by name FOR CURRENT USER
       const exists = currentUserCategories.find(
         c => c.name.toLowerCase() === systemCat.name.toLowerCase()
@@ -227,6 +266,7 @@ export const CustomCategoryService = {
           isSystem: false, // Now editable
           isCustom: true,
           userId: currentUserId,
+          sortOrder: existingCategories.length + systemIndex, // Stable initial order
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         });
