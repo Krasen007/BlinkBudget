@@ -325,6 +325,10 @@ export const DashboardView = (params = {}) => {
       sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
     }
 
+    // Always reset account filter to "all" when navigating from Reports
+    currentAccountFilter = 'all';
+    sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, 'all');
+
     // Clear the navigation state after applying
     NavigationState.clearDashboardFilter();
   }
