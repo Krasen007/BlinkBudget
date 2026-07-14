@@ -254,73 +254,37 @@ export class TrendService {
     method = 'average',
     referenceDate = new Date()
   ) {
-    const categoryTransactions = transactions
-      .filter(
-        t =>
-          t.category === category &&
-          !t.isGhost &&
-          t.type === TRANSACTION_TYPES.EXPENSE
-      )
-      .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    // Use net monthly spending data (expenses minus refunds) — same source as the chart
+    const monthlyData = this.getMonthlySpendingData(
+      transactions,
+      category,
+      monthsBack,
+      referenceDate
+    );
 
-    if (categoryTransactions.length < 2) return 0;
+    if (monthlyData.length < 2) return 0;
 
-    const cutoff = new Date(referenceDate);
-    cutoff.setMonth(cutoff.getMonth() - monthsBack);
-    cutoff.setDate(1);
-    cutoff.setHours(0, 0, 0, 0);
+    // Linear regression over net monthly totals.
+    // The slope represents the average month-over-month change in spending.
+    // Expressed as a fraction of the mean spending, it gives a stable
+    // "personal inflation" rate that uses all data points rather than
+    // just comparing two endpoints.
+    const n = monthlyData.length;
+    const xs = monthlyData.map((_, i) => i); // 0, 1, 2, …
+    const ys = monthlyData.map(d => d.amount);
 
-    const endWindow = new Date(referenceDate);
+    const meanX = xs.reduce((s, x) => s + x, 0) / n;
+    const meanY = ys.reduce((s, y) => s + y, 0) / n;
 
-    const monthlyGroups = {};
-    categoryTransactions
-      .filter(t => {
-        const d = new Date(t.timestamp);
-        return d >= cutoff && d <= endWindow;
-      })
-      .forEach(t => {
-        const d = new Date(t.timestamp);
-        const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-        if (!monthlyGroups[month]) monthlyGroups[month] = [];
-        if (!isNaN(t.amount)) {
-          monthlyGroups[month].push(t.amount);
-        }
-      });
+    if (meanY === 0) return 0;
 
-    const months = Object.keys(monthlyGroups).sort();
-    if (months.length < 2) return 0;
+    const numerator = xs.reduce((s, x, i) => s + (x - meanX) * (ys[i] - meanY), 0);
+    const denominator = xs.reduce((s, x) => s + (x - meanX) ** 2, 0);
 
-    const oldestMonth = months[0];
-    const newestMonth = months[months.length - 1];
+    if (denominator === 0) return 0;
 
-    let oldVal, recentVal;
-
-    if (method === 'median') {
-      const getMedian = arr => {
-        const validAmounts = arr.filter(a => !isNaN(a));
-        const sorted = [...validAmounts].sort((a, b) => a - b);
-        const mid = Math.floor(sorted.length / 2);
-        return sorted.length === 0
-          ? 0
-          : sorted.length % 2 !== 0
-            ? sorted[mid]
-            : (sorted[mid - 1] + sorted[mid]) / 2;
-      };
-      oldVal = getMedian(monthlyGroups[oldestMonth]);
-      recentVal = getMedian(monthlyGroups[newestMonth]);
-    } else {
-      const getAvg = arr => {
-        const validAmounts = arr.filter(a => !isNaN(a));
-        return validAmounts.length === 0
-          ? 0
-          : validAmounts.reduce((sum, a) => sum + a, 0) / validAmounts.length;
-      };
-      oldVal = getAvg(monthlyGroups[oldestMonth]);
-      recentVal = getAvg(monthlyGroups[newestMonth]);
-    }
-
-    if (oldVal === 0) return 0;
-    return (recentVal - oldVal) / oldVal;
+    const slope = numerator / denominator; // € change per month
+    return slope / meanY; // fraction of mean — e.g. 0.05 = 5% per month
   }
 
   /**
@@ -476,7 +440,11 @@ export class TrendService {
     referenceDate = new Date()
   ) {
     const cutoff = new Date(referenceDate);
-    cutoff.setMonth(cutoff.getMonth() - monthsBack);
+    // +1 then setDate(1) snaps to the first of the month that is monthsBack ago,
+    // so exactly monthsBack complete months are included (no partial extra month).
+    cutoff.setMonth(cutoff.getMonth() - monthsBack + 1);
+    cutoff.setDate(1);
+    cutoff.setHours(0, 0, 0, 0);
 
     const endWindow = new Date(referenceDate);
 
@@ -487,7 +455,8 @@ export class TrendService {
         const d = new Date(t.timestamp);
         return (
           t.category === category &&
-          t.type === TRANSACTION_TYPES.EXPENSE &&
+          (t.type === TRANSACTION_TYPES.EXPENSE ||
+            t.type === TRANSACTION_TYPES.REFUND) &&
           d >= cutoff &&
           d <= endWindow
         );
@@ -497,11 +466,15 @@ export class TrendService {
         const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         if (!monthlySpending[month]) monthlySpending[month] = 0;
         if (!isNaN(t.amount)) {
-          monthlySpending[month] += t.amount;
+          // Refunds reduce the net spending for the month
+          monthlySpending[month] +=
+            t.type === TRANSACTION_TYPES.REFUND ? -t.amount : t.amount;
         }
       });
 
     return Object.entries(monthlySpending)
+      // Drop months where refunds fully cancelled out expenses (net <= 0)
+      .filter(([, amount]) => amount > 0)
       .map(([month, amount]) => ({
         month,
         amount,

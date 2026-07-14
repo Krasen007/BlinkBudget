@@ -59,23 +59,35 @@ export const prepareChartData = (
     return [];
   }
 
-  // Use sequential colors to match Top Movers chart style
-  const categoryColors = getChartColors(topCategories.length, false, 'solid');
+  const datasets = topCategories
+    .map(category => {
+      const monthlyData = trendService.getMonthlySpendingData(
+        transactions,
+        category.category,
+        period,
+        referenceDate
+      );
 
-  return topCategories.map((category, index) => {
-    const monthlyData = trendService.getMonthlySpendingData(
-      transactions,
-      category.category,
-      period,
-      referenceDate
-    );
+      // Skip categories with no historical data in the selected period
+      if (monthlyData.length === 0) return null;
 
+      return {
+        monthlyData,
+        category,
+      };
+    })
+    .filter(Boolean); // Remove categories with no data in the period
+
+  // Re-generate colors based on actual count after filtering
+  const filteredColors = getChartColors(datasets.length, false, 'solid');
+
+  return datasets.map(({ monthlyData, category }, index) => {
     const chartData = monthlyData.map(month => ({
       x: month.month,
       y: month.amount,
     }));
 
-    const color = categoryColors[index % categoryColors.length];
+    const color = filteredColors[index % filteredColors.length];
 
     return {
       label: `${category.category} (${(category.inflationRate * 100).toFixed(1)}% personal inflation)`,
