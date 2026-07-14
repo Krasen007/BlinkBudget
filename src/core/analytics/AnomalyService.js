@@ -28,8 +28,10 @@ export class AnomalyService {
       return insights; // Need sufficient data for anomaly detection
     }
 
-    // Detect spending spikes
-    insights.push(...this.detectSpendingSpikes(expenseTransactions));
+    // Detect spending spikes (pass all filtered transactions so refunds can offset expenses)
+    insights.push(
+      ...this.detectSpendingSpikes(expenseTransactions, filteredTransactions)
+    );
 
     // Detect unusual category concentrations
     insights.push(...this.detectCategoryConcentration(expenseTransactions));
@@ -43,15 +45,25 @@ export class AnomalyService {
   /**
    * Detect spending spikes using statistical analysis
    * @param {Array} expenseTransactions - Expense transactions
+   * @param {Array} allTransactions - All transactions in the period (used to net out refunds)
    * @returns {Array} Spike detection insights
    */
-  static detectSpendingSpikes(expenseTransactions) {
+  static detectSpendingSpikes(expenseTransactions, allTransactions = []) {
     const insights = [];
     const amounts = expenseTransactions.map(t => Math.abs(t.amount || 0));
 
     if (amounts.length < 5) {
       return insights;
     }
+
+    // Build a map of refund amounts per category so we can net them out
+    const refundsByCategory = Object.create(null);
+    allTransactions
+      .filter(t => t.type === TRANSACTION_TYPES.REFUND)
+      .forEach(t => {
+        const cat = t.category || 'Uncategorized';
+        refundsByCategory[cat] = (refundsByCategory[cat] || 0) + Math.abs(t.amount || 0);
+      });
 
     const mean =
       amounts.reduce((sum, amount) => sum + amount, 0) / amounts.length;
@@ -66,14 +78,7 @@ export class AnomalyService {
     );
 
     if (spikes.length > 0) {
-      const totalSpikeAmount = spikes.reduce(
-        (sum, t) => sum + Math.abs(t.amount || 0),
-        0
-      );
-      const totalAmount = amounts.reduce((sum, amount) => sum + amount, 0);
-      const spikePercentage = (totalSpikeAmount / totalAmount) * 100;
-
-      // Group spikes by category for more specific insights
+      // Group spikes by category so we can apply per-category refund netting
       const categorySpikes = Object.create(null);
       spikes.forEach(t => {
         const cat = t.category || 'Uncategorized';
@@ -81,23 +86,56 @@ export class AnomalyService {
         categorySpikes[cat].push(t);
       });
 
-      // Add category-specific spike insights
+      // Filter out categories where refunds fully offset the spike amount
+      const effectiveCategorySpikes = Object.create(null);
       for (const [category, catSpikes] of Object.entries(categorySpikes)) {
         const catSpikeAmount = catSpikes.reduce(
           (sum, t) => sum + Math.abs(t.amount || 0),
           0
         );
+        const refundAmount = refundsByCategory[category] || 0;
+        const netSpikeAmount = catSpikeAmount - refundAmount;
+
+        // Only flag if the net amount after refunds still exceeds the threshold
+        if (netSpikeAmount > spikeThreshold) {
+          effectiveCategorySpikes[category] = {
+            spikes: catSpikes,
+            netAmount: netSpikeAmount,
+          };
+        }
+      }
+
+      if (Object.keys(effectiveCategorySpikes).length === 0) {
+        return insights; // All spikes were offset by refunds
+      }
+
+      // Rebuild a flat list of effective spikes for the global summary
+      const effectiveSpikes = Object.values(effectiveCategorySpikes).flatMap(
+        v => v.spikes
+      );
+
+      const totalSpikeAmount = effectiveSpikes.reduce(
+        (sum, t) => sum + Math.abs(t.amount || 0),
+        0
+      );
+      const totalAmount = amounts.reduce((sum, amount) => sum + amount, 0);
+      const spikePercentage = (totalSpikeAmount / totalAmount) * 100;
+
+      // Add category-specific spike insights
+      for (const [category, { spikes: catSpikes, netAmount }] of Object.entries(
+        effectiveCategorySpikes
+      )) {
         const catTotalAmount = expenseTransactions
           .filter(t => (t.category || 'Uncategorized') === category)
           .reduce((sum, t) => sum + Math.abs(t.amount || 0), 0);
         const catSpikePercentage =
-          catTotalAmount > 0 ? (catSpikeAmount / catTotalAmount) * 100 : 0;
+          catTotalAmount > 0 ? (netAmount / catTotalAmount) * 100 : 0;
 
         insights.push({
           id: `spending_spike_${category.toLowerCase().replace(/\s+/g, '_')}`,
           type: 'anomaly',
           category: category,
-          message: `Detected ${catSpikes.length} unusually large transaction${catSpikes.length > 1 ? 's' : ''} in "${category}" totaling ${formatCurrency(catSpikeAmount)} (${catSpikePercentage.toFixed(1)}% of category spending).`,
+          message: `Detected ${catSpikes.length} unusually large transaction${catSpikes.length > 1 ? 's' : ''} in "${category}" totaling ${formatCurrency(netAmount)} (${catSpikePercentage.toFixed(1)}% of category spending).`,
           severity: catSpikePercentage > 50 ? 'high' : 'medium',
           actionable: true,
           recommendation: `Review these large "${category}" purchases to ensure they align with your financial goals.`,
@@ -114,9 +152,9 @@ export class AnomalyService {
       }
 
       // Add a global summary insight if there are multiple categories involved
-      if (Object.keys(categorySpikes).length > 1) {
+      if (Object.keys(effectiveCategorySpikes).length > 1) {
         const MAX_DISPLAY_TRANSACTIONS = 5;
-        const sortedSpikes = [...spikes].sort(
+        const sortedSpikes = [...effectiveSpikes].sort(
           (a, b) => Math.abs(b.amount || 0) - Math.abs(a.amount || 0)
         );
         const displaySpikes = sortedSpikes.slice(0, MAX_DISPLAY_TRANSACTIONS);
@@ -127,7 +165,7 @@ export class AnomalyService {
           )
           .join(', ');
 
-        const remainingCount = spikes.length - MAX_DISPLAY_TRANSACTIONS;
+        const remainingCount = effectiveSpikes.length - MAX_DISPLAY_TRANSACTIONS;
         const detailsText =
           remainingCount > 0
             ? `${transactionDetails}, and ${remainingCount} more...`
@@ -136,13 +174,13 @@ export class AnomalyService {
         insights.push({
           id: 'spending_spikes_summary',
           type: 'anomaly',
-          message: `Detected ${spikes.length} unusually large transactions across ${Object.keys(categorySpikes).length} categories: ${detailsText}. Total: ${formatCurrency(totalSpikeAmount)} (${spikePercentage.toFixed(1)}% of total spending).`,
+          message: `Detected ${effectiveSpikes.length} unusually large transactions across ${Object.keys(effectiveCategorySpikes).length} categories: ${detailsText}. Total: ${formatCurrency(totalSpikeAmount)} (${spikePercentage.toFixed(1)}% of total spending).`,
           severity: spikePercentage > 30 ? 'high' : 'medium',
           actionable: true,
           recommendation:
             'Review these large transactions to ensure they align with your budget and financial goals.',
           metadata: {
-            spikeTransactions: spikes.map(t => ({
+            spikeTransactions: effectiveSpikes.map(t => ({
               amount: t.amount,
               category: t.category,
               description: t.description,
