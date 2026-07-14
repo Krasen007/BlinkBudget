@@ -204,9 +204,10 @@ export const CustomCategoryService = {
         .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
       // Place unsorted cats after the already-ordered ones
-      const startIndex = withOrder.length > 0
-        ? Math.max(...withOrder.map(c => c.sortOrder)) + 1
-        : 0;
+      const startIndex =
+        withOrder.length > 0
+          ? Math.max(...withOrder.map(c => c.sortOrder)) + 1
+          : 0;
 
       const normalizedMap = new Map(allCategories.map(c => [c.id, c]));
       withoutOrder.forEach((cat, i) => {

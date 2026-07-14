@@ -443,7 +443,11 @@ export class ForecastEngine {
           monthlyTotals.get(monthKey) + transaction.amount
         );
       } catch (error) {
-        console.warn('Error processing transaction for aggregation:', transaction, error);
+        console.warn(
+          'Error processing transaction for aggregation:',
+          transaction,
+          error
+        );
       }
     });
 
@@ -503,7 +507,6 @@ export class ForecastEngine {
    */
   _weightedBaseline(values) {
     if (!values || values.length === 0) return 0;
-    const n = values.length;
     const weights = values.map((_, i) => i + 1); // 1, 2, 3, … n
     const weightSum = weights.reduce((s, w) => s + w, 0);
     return values.reduce((s, v, i) => s + v * weights[i], 0) / weightSum;

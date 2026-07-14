@@ -251,7 +251,7 @@ export class TrendService {
     transactions,
     category,
     monthsBack = 12,
-    method = 'average',
+    _method = 'average',
     referenceDate = new Date()
   ) {
     // Use net monthly spending data (expenses minus refunds) — same source as the chart
@@ -278,7 +278,10 @@ export class TrendService {
 
     if (meanY === 0) return 0;
 
-    const numerator = xs.reduce((s, x, i) => s + (x - meanX) * (ys[i] - meanY), 0);
+    const numerator = xs.reduce(
+      (s, x, i) => s + (x - meanX) * (ys[i] - meanY),
+      0
+    );
     const denominator = xs.reduce((s, x) => s + (x - meanX) ** 2, 0);
 
     if (denominator === 0) return 0;
@@ -472,14 +475,16 @@ export class TrendService {
         }
       });
 
-    return Object.entries(monthlySpending)
-      // Drop months where refunds fully cancelled out expenses (net <= 0)
-      .filter(([, amount]) => amount > 0)
-      .map(([month, amount]) => ({
-        month,
-        amount,
-      }))
-      .sort((a, b) => a.month.localeCompare(b.month));
+    return (
+      Object.entries(monthlySpending)
+        // Drop months where refunds fully cancelled out expenses (net <= 0)
+        .filter(([, amount]) => amount > 0)
+        .map(([month, amount]) => ({
+          month,
+          amount,
+        }))
+        .sort((a, b) => a.month.localeCompare(b.month))
+    );
   }
 
   /**

@@ -87,10 +87,9 @@ export class MetricsService {
     // for categories that have no explicit order set.
     const userCategories = CustomCategoryService.getAll();
     const sortOrderMap = new Map(
-      userCategories.map((cat, i) => [
-        cat.name,
-        cat.sortOrder ?? Number.MAX_SAFE_INTEGER,
-      ])
+      userCategories
+        .filter(cat => cat.type === 'expense' || cat.type === 'refund')
+        .map(cat => [cat.name, cat.sortOrder ?? Number.MAX_SAFE_INTEGER])
     );
     categories.sort((a, b) => {
       const orderA = sortOrderMap.get(a.name) ?? Number.MAX_SAFE_INTEGER;

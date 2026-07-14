@@ -8,7 +8,12 @@ import { AuthService } from '../core/auth-service.js';
 import { Router } from '../core/router.js';
 import { NavigationState } from '../core/navigation-state.js';
 import { SettingsService } from '../core/settings-service.js';
-import { COLORS, CURRENCY_SYMBOL, SPACING, STORAGE_KEYS } from '../utils/constants.js';
+import {
+  COLORS,
+  CURRENCY_SYMBOL,
+  SPACING,
+  STORAGE_KEYS,
+} from '../utils/constants.js';
 import { getAnalyticsEngine } from '../core/analytics/AnalyticsInstance.js';
 import { getCurrentMonthPeriod } from '../utils/reports-utils.js';
 
@@ -985,7 +990,8 @@ export const DashboardView = (params = {}) => {
           return sum; // transfers don't contribute to the net
         }, 0);
         const sumLabel = document.createElement('span');
-        const sign = selectedSum > 0 ? '+' : '';
+        const sign =
+          selectedSum > 0 ? '+' : selectedSum < 0 ? '-' : '';
         sumLabel.textContent = `${sign}${CURRENCY_SYMBOL}${Math.abs(selectedSum).toFixed(2)}`;
         sumLabel.style.fontSize = 'var(--font-size-xs, 0.75rem)';
         sumLabel.style.color =

@@ -62,7 +62,8 @@ export class AnomalyService {
       .filter(t => t.type === TRANSACTION_TYPES.REFUND)
       .forEach(t => {
         const cat = t.category || 'Uncategorized';
-        refundsByCategory[cat] = (refundsByCategory[cat] || 0) + Math.abs(t.amount || 0);
+        refundsByCategory[cat] =
+          (refundsByCategory[cat] || 0) + Math.abs(t.amount || 0);
       });
 
     const mean =
@@ -165,7 +166,8 @@ export class AnomalyService {
           )
           .join(', ');
 
-        const remainingCount = effectiveSpikes.length - MAX_DISPLAY_TRANSACTIONS;
+        const remainingCount =
+          effectiveSpikes.length - MAX_DISPLAY_TRANSACTIONS;
         const detailsText =
           remainingCount > 0
             ? `${transactionDetails}, and ${remainingCount} more...`
