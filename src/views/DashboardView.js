@@ -8,7 +8,7 @@ import { AuthService } from '../core/auth-service.js';
 import { Router } from '../core/router.js';
 import { NavigationState } from '../core/navigation-state.js';
 import { SettingsService } from '../core/settings-service.js';
-import { COLORS, SPACING, STORAGE_KEYS } from '../utils/constants.js';
+import { COLORS, CURRENCY_SYMBOL, SPACING, STORAGE_KEYS } from '../utils/constants.js';
 import { getAnalyticsEngine } from '../core/analytics/AnalyticsInstance.js';
 import { getCurrentMonthPeriod } from '../utils/reports-utils.js';
 
@@ -956,13 +956,44 @@ export const DashboardView = (params = {}) => {
       bulkToolbar.style.borderBottom = `1px solid ${COLORS.SURFACE_HOVER}`;
       bulkToolbar.style.marginBottom = SPACING.SM;
 
-      const selectionInfo = document.createElement('span');
-      selectionInfo.textContent = `${selectedTransactionIds.size} selected`;
-      selectionInfo.style.fontWeight = '600';
-      selectionInfo.style.color = COLORS.TEXT_MAIN;
-      selectionInfo.style.fontSize = 'var(--font-size-sm)';
-      selectionInfo.style.letterSpacing = '0.02em';
+      const selectionInfo = document.createElement('div');
+      selectionInfo.style.display = 'flex';
+      selectionInfo.style.flexDirection = 'column';
       selectionInfo.style.marginLeft = SPACING.MD;
+
+      const countLabel = document.createElement('span');
+      countLabel.textContent = `${selectedTransactionIds.size} selected`;
+      countLabel.style.fontWeight = '600';
+      countLabel.style.color = COLORS.TEXT_MAIN;
+      countLabel.style.fontSize = 'var(--font-size-sm)';
+      countLabel.style.letterSpacing = '0.02em';
+      selectionInfo.appendChild(countLabel);
+
+      if (selectedTransactionIds.size > 0) {
+        const selectedTxs = transactions.filter(t =>
+          selectedTransactionIds.has(t.id)
+        );
+        const selectedSum = selectedTxs.reduce((sum, t) => {
+          const amount = Number(t.amount) || 0;
+          if (t.type === 'expense') return sum - amount;
+          if (t.type === 'refund') return sum + amount;
+          if (t.type === 'income') return sum + amount;
+          return sum; // transfers don't contribute to the net
+        }, 0);
+        const sumLabel = document.createElement('span');
+        const sign = selectedSum > 0 ? '+' : '';
+        sumLabel.textContent = `${sign}${CURRENCY_SYMBOL}${Math.abs(selectedSum).toFixed(2)}`;
+        sumLabel.style.fontSize = 'var(--font-size-xs, 0.75rem)';
+        sumLabel.style.color =
+          selectedSum < 0
+            ? 'var(--color-primary)'
+            : selectedSum > 0
+              ? 'var(--color-success)'
+              : COLORS.TEXT_MUTED;
+        sumLabel.style.fontVariantNumeric = 'tabular-nums';
+        selectionInfo.appendChild(sumLabel);
+      }
+
       bulkToolbar.appendChild(selectionInfo);
 
       const btnGroup = document.createElement('div');
