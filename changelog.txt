@@ -1,20 +1,17 @@
-v1.42 - Highlights
+## Performance Improvements
+- Fixed unnecessary data sync operations that were causing full Firestore pulls even when data hadn't changed
+- Optimized ReportsView navigation to avoid recalculating analytics when returning from other views
+- Consolidated CSS for better loading performance
 
-- Local-first: added a local-only mode so the app works fully offline without Firebase configured.
-- Financial planning: added a Net Balance chart (net worth / net balance over time) for clearer portfolio insight.
-- Edit flow improvements: selecting a new date in edit mode now auto-saves; fixed missing edit options for investments.
-- UX cleanup: removed redundant success toast when editing accounts; resolved various layout and chart rendering issues.
-- Stability: test fixes and minor accessibility/text alignment fixes.
+## Bug Fixes
+- Fixed multi-select functionality in Dashboard view
+- Resolved account selector resetting to "All Accounts" when navigating from Reports to Dashboard
+- Fixed category ordering to display categories in the correct sequence
+- Corrected personal inflation calculations - now properly shows spending trends (positive = increasing, negative = decreasing)
+- Improved anomaly detection to properly account for refunds before flagging unusual spending
+- Fixed forecast engine calculations for more accurate predictions
 
-Commit details:
-50af550 minor fixes
-71e688e remove unneeded text
-333d10e fix missing options when editing investments
-0b74b0a Removed the success notification (checkmark toast) that appeared when adding or editing an account in the Settings view.
-9925e88 in edit mode, simply selecting a new date triggers an immediate save — no need to also tap the OK button.
-6d22a18 fix keyboard-hidden
-ad4d2f5 add local only mode
-66aeb23 fix tests and fix chart last month  data in net balance chart
-44e86b7 add net balance chart showing net worth and net balance over time
-78fc927 minor fixes
-287563c fix minor issues with text aligment
+## New Features
+- Added sum display when selecting multiple transactions in bulk edit mode
+- Enhanced tag analytics with period filtering in both Reports and Dashboard views
+- Improved category ordering controls for better organization

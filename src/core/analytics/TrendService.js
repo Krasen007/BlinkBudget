@@ -286,10 +286,7 @@ export class TrendService {
       (s, x, i) => s + (x - meanX) * (ys[i] - meanY),
       0
     );
-    const denominator = normalizedXs.reduce(
-      (s, x) => s + (x - meanX) ** 2,
-      0
-    );
+    const denominator = normalizedXs.reduce((s, x) => s + (x - meanX) ** 2, 0);
 
     if (denominator === 0) return 0;
 

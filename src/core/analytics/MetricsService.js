@@ -219,7 +219,8 @@ export class MetricsService {
     const rankedCategories = [...categoryBreakdown.categories].sort(
       (a, b) => b.amount - a.amount
     );
-    const topCategory = rankedCategories.length > 0 ? rankedCategories[0] : null;
+    const topCategory =
+      rankedCategories.length > 0 ? rankedCategories[0] : null;
 
     return {
       totalExpenditure: incomeVsExpenses.totalExpenses,

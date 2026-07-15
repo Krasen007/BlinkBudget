@@ -103,15 +103,45 @@ describe('analytics and forecast regressions', () => {
 
   it('uses refund-adjusted category totals for spike percentage messaging', () => {
     const expenseTransactions = [
-      { type: 'expense', category: 'Food', amount: 100, timestamp: '2024-01-01T00:00:00.000Z' },
-      { type: 'expense', category: 'Food', amount: 100, timestamp: '2024-01-02T00:00:00.000Z' },
-      { type: 'expense', category: 'Food', amount: 100, timestamp: '2024-01-03T00:00:00.000Z' },
-      { type: 'expense', category: 'Food', amount: 100, timestamp: '2024-01-04T00:00:00.000Z' },
-      { type: 'expense', category: 'Food', amount: 1500, timestamp: '2024-01-05T00:00:00.000Z' },
+      {
+        type: 'expense',
+        category: 'Food',
+        amount: 100,
+        timestamp: '2024-01-01T00:00:00.000Z',
+      },
+      {
+        type: 'expense',
+        category: 'Food',
+        amount: 100,
+        timestamp: '2024-01-02T00:00:00.000Z',
+      },
+      {
+        type: 'expense',
+        category: 'Food',
+        amount: 100,
+        timestamp: '2024-01-03T00:00:00.000Z',
+      },
+      {
+        type: 'expense',
+        category: 'Food',
+        amount: 100,
+        timestamp: '2024-01-04T00:00:00.000Z',
+      },
+      {
+        type: 'expense',
+        category: 'Food',
+        amount: 1500,
+        timestamp: '2024-01-05T00:00:00.000Z',
+      },
     ];
     const allTransactions = [
       ...expenseTransactions,
-      { type: 'refund', category: 'Food', amount: 500, timestamp: '2024-01-06T00:00:00.000Z' },
+      {
+        type: 'refund',
+        category: 'Food',
+        amount: 500,
+        timestamp: '2024-01-06T00:00:00.000Z',
+      },
     ];
 
     const insights = AnomalyService.detectSpendingSpikes(

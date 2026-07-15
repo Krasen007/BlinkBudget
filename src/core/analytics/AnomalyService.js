@@ -126,9 +126,9 @@ export class AnomalyService {
       for (const [category, { spikes: catSpikes, netAmount }] of Object.entries(
         effectiveCategorySpikes
       )) {
-        const categoryTransactions = (allTransactions || expenseTransactions).filter(
-          t => (t.category || 'Uncategorized') === category
-        );
+        const categoryTransactions = (
+          allTransactions || expenseTransactions
+        ).filter(t => (t.category || 'Uncategorized') === category);
         const catTotalAmount = categoryTransactions.reduce((sum, t) => {
           const amount = Math.abs(t.amount || 0);
           return sum + (t.type === TRANSACTION_TYPES.REFUND ? -amount : amount);

@@ -1088,7 +1088,8 @@ export const DashboardView = (params = {}) => {
         onClick: handleBulkDelete,
       });
       if (deleteBtn) {
-        deleteBtn.className = `${deleteBtn.className || ''} bulk-delete-btn`.trim();
+        deleteBtn.className =
+          `${deleteBtn.className || ''} bulk-delete-btn`.trim();
         deleteBtn.disabled = selectedTransactionIds.size === 0;
         btnGroup.appendChild(deleteBtn);
       }
@@ -1126,7 +1127,7 @@ export const DashboardView = (params = {}) => {
   // Preload data in background once the browser is idle — no fixed delay needed
   const schedulePreload = (fn, fallbackDelay) => {
     if ('requestIdleCallback' in window) {
-      requestIdleCallback(fn, { timeout: fallbackDelay });
+      window.requestIdleCallback(fn, { timeout: fallbackDelay });
     } else {
       setTimeout(fn, fallbackDelay);
     }

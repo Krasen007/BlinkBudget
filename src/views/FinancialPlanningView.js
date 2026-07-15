@@ -456,9 +456,12 @@ export const FinancialPlanningView = (params = {}) => {
         };
 
         if ('requestIdleCallback' in window) {
-          backgroundRefreshTimeout = requestIdleCallback(runBackgroundRefresh, {
-            timeout: 2000,
-          });
+          backgroundRefreshTimeout = window.requestIdleCallback(
+            runBackgroundRefresh,
+            {
+              timeout: 2000,
+            }
+          );
         } else {
           backgroundRefreshTimeout = setTimeout(runBackgroundRefresh, 200);
         }
@@ -586,7 +589,7 @@ export const FinancialPlanningView = (params = {}) => {
 
     if (backgroundRefreshTimeout) {
       if ('requestIdleCallback' in window) {
-        cancelIdleCallback(backgroundRefreshTimeout);
+        window.cancelIdleCallback(backgroundRefreshTimeout);
       } else {
         clearTimeout(backgroundRefreshTimeout);
       }
