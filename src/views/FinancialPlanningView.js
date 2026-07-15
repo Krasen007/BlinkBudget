@@ -62,50 +62,22 @@ const isDeepEqual = (a, b) => {
   return true;
 };
 
-// Simple cache helpers for instant financial planning loading
-const CACHE_KEY = 'blinkbudget_financial_planning_cache';
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+// Use in-memory CacheService for instant planning data access (no JSON overhead)
+import { CacheService } from '../core/cache-service.js';
+
+const PLANNING_CACHE_KEY = 'financial_planning_data';
+const PLANNING_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 function getCachedPlanningData() {
-  try {
-    const cached = localStorage.getItem(CACHE_KEY);
-    if (!cached) return null;
-
-    const { data, timestamp } = JSON.parse(cached);
-    const now = Date.now();
-
-    // Check if cache is still fresh
-    if (now - timestamp > CACHE_TTL_MS) {
-      localStorage.removeItem(CACHE_KEY);
-      return null;
-    }
-
-    console.log('[FinancialPlanning] Using cached planning data');
-    return data;
-  } catch (error) {
-    console.warn('[FinancialPlanning] Failed to read cache:', error);
-    return null;
-  }
+  return CacheService.get(PLANNING_CACHE_KEY);
 }
 
 function setCachedPlanningData(data) {
-  try {
-    const cacheEntry = {
-      data,
-      timestamp: Date.now(),
-    };
-    localStorage.setItem(CACHE_KEY, JSON.stringify(cacheEntry));
-  } catch (error) {
-    console.warn('[FinancialPlanning] Failed to write cache:', error);
-  }
+  CacheService.put(PLANNING_CACHE_KEY, data, PLANNING_CACHE_TTL_MS);
 }
 
 function clearPlanningCache() {
-  try {
-    localStorage.removeItem(CACHE_KEY);
-  } catch (error) {
-    console.warn('[FinancialPlanning] Failed to clear cache:', error);
-  }
+  CacheService.del(PLANNING_CACHE_KEY);
 }
 
 export const FinancialPlanningView = (params = {}) => {
@@ -444,13 +416,15 @@ export const FinancialPlanningView = (params = {}) => {
         renderSection(currentSection);
         isLoading = false;
 
-        // Kick off background refresh to fetch latest data
-        backgroundRefreshTimeout = setTimeout(async () => {
+        // Kick off background refresh to fetch latest data — only when browser is idle
+        const runBackgroundRefresh = async () => {
           try {
             if (isCancelled) return;
 
-            console.log('[FinancialPlanning] Background refresh started');
-            await ensureDataSynced();
+            // Only hit the network when data is actually stale
+            if (planningDataManager.needsRefresh()) {
+              await ensureDataSynced();
+            }
 
             if (isCancelled) return;
 
@@ -470,21 +444,13 @@ export const FinancialPlanningView = (params = {}) => {
 
             // Update state if data changed
             if (!isDeepEqual(freshData, planningData)) {
-              console.log(
-                '[FinancialPlanning] Background refresh found new data'
-              );
               planningData = freshData;
               setCachedPlanningData(freshData);
               renderSection(currentSection);
-              // Emit storage-updated behavior
               window.dispatchEvent(
                 new CustomEvent('storage-updated', {
                   detail: { type: 'financial-planning' },
                 })
-              );
-            } else {
-              console.log(
-                '[FinancialPlanning] Background refresh: no new data'
               );
             }
           } catch (error) {
@@ -493,7 +459,15 @@ export const FinancialPlanningView = (params = {}) => {
               error
             );
           }
-        }, 100);
+        };
+
+        if ('requestIdleCallback' in window) {
+          backgroundRefreshTimeout = requestIdleCallback(runBackgroundRefresh, {
+            timeout: 2000,
+          });
+        } else {
+          backgroundRefreshTimeout = setTimeout(runBackgroundRefresh, 200);
+        }
 
         return;
       }
@@ -617,7 +591,11 @@ export const FinancialPlanningView = (params = {}) => {
     isCancelled = true;
 
     if (backgroundRefreshTimeout) {
-      clearTimeout(backgroundRefreshTimeout);
+      if ('requestIdleCallback' in window) {
+        cancelIdleCallback(backgroundRefreshTimeout);
+      } else {
+        clearTimeout(backgroundRefreshTimeout);
+      }
       backgroundRefreshTimeout = null;
     }
 

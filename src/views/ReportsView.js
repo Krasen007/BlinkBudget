@@ -1341,15 +1341,13 @@ export const ReportsView = (params = {}) => {
    * Handle orientation changes
    */
   const handleOrientationChange = debounce(() => {
-    setTimeout(() => {
-      updateResponsiveLayout();
+    updateResponsiveLayout();
 
-      activeCharts.forEach(chart => {
-        if (chart && typeof chart.resize === 'function') {
-          chart.resize();
-        }
-      });
-    }, 100);
+    activeCharts.forEach(chart => {
+      if (chart && typeof chart.resize === 'function') {
+        chart.resize();
+      }
+    });
   }, TIMING.DEBOUNCE_ORIENTATION);
 
   // Event listeners

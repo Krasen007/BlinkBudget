@@ -333,17 +333,18 @@ export class TouchGestures {
       }
     };
 
-    // Throttle scroll events to improve performance
-    let scrollTimeout;
+    // Throttle scroll events to improve performance using rAF (reliable frame-rate independent)
+    let rafScheduled = false;
     const throttledOnScroll = () => {
-      if (scrollTimeout) return;
-      scrollTimeout = setTimeout(() => {
+      if (rafScheduled) return;
+      rafScheduled = true;
+      requestAnimationFrame(() => {
         onScroll();
-        scrollTimeout = null;
-      }, 16); // ~60fps
+        rafScheduled = false;
+      });
     };
 
-    window.addEventListener('scroll', throttledOnScroll);
+    window.addEventListener('scroll', throttledOnScroll, { passive: true });
 
     container.appendChild(navBar);
 

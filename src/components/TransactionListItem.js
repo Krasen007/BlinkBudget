@@ -465,10 +465,10 @@ export const TransactionListItem = ({
     // Add new transaction animation class
     item.classList.add('transaction-item-new');
 
-    // Use a small delay to ensure the item is rendered before highlighting
-    setTimeout(() => {
+    // Use rAF to ensure the item is painted before the highlight runs
+    requestAnimationFrame(() => {
       highlightTransactionSuccess(item, 1500);
-    }, 100);
+    });
   }
 
   return item;

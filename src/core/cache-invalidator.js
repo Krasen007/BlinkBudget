@@ -37,6 +37,7 @@ export const CacheInvalidator = {
       if (key === STORAGE_KEYS.TRANSACTIONS) {
         CacheService.del('analytics_*');
         CacheService.del('forecast_*');
+        CacheService.del('financial_planning_data');
         // Notify instances to clear their in-memory caches
         window.dispatchEvent(
           new CustomEvent('forecast-invalidate', {

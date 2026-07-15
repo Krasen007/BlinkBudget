@@ -236,6 +236,9 @@ export const DashboardView = (params = {}) => {
   // Multi-select state
   let isSelectionMode = false;
   let selectedTransactionIds = new Set();
+  // Tracks the current filtered+sorted list so updateSelectionUI can access it
+  // without triggering a re-render.
+  let currentVisibleTransactions = [];
 
   const enterSelectionMode = txId => {
     isSelectionMode = true;
@@ -249,13 +252,66 @@ export const DashboardView = (params = {}) => {
     renderDashboard();
   };
 
+  /**
+   * Update only the selection-related DOM without a full re-render.
+   * Updates item highlight styles, the count label, and the sum label in-place.
+   */
+  const updateSelectionUI = () => {
+    // Update each transaction item's selected style
+    const items = content.querySelectorAll('.transaction-list-item');
+    items.forEach(item => {
+      const txId = item.dataset.transactionId;
+      if (selectedTransactionIds.has(txId)) {
+        item.style.background = 'rgba(59, 130, 246, 0.12)';
+        item.style.borderLeft = '3px solid var(--color-primary)';
+      } else {
+        item.style.background = '';
+        item.style.borderLeft = '';
+      }
+    });
+
+    // Update count and sum in the bulk toolbar (if already rendered)
+    const countLabel = content.querySelector('.bulk-count-label');
+    const sumLabel = content.querySelector('.bulk-sum-label');
+    if (countLabel) {
+      countLabel.textContent = `${selectedTransactionIds.size} selected`;
+    }
+    if (sumLabel) {
+      const selectedTxs = currentVisibleTransactions.filter(t =>
+        selectedTransactionIds.has(t.id)
+      );
+      const selectedSum = selectedTxs.reduce((sum, t) => {
+        const amount = Number(t.amount) || 0;
+        if (t.type === 'expense') return sum - amount;
+        if (t.type === 'refund') return sum + amount;
+        if (t.type === 'income') return sum + amount;
+        return sum;
+      }, 0);
+      const sign = selectedSum > 0 ? '+' : selectedSum < 0 ? '-' : '';
+      sumLabel.textContent = `${sign}${CURRENCY_SYMBOL}${Math.abs(selectedSum).toFixed(2)}`;
+      sumLabel.style.color =
+        selectedSum < 0
+          ? 'var(--color-primary)'
+          : selectedSum > 0
+            ? 'var(--color-success)'
+            : COLORS.TEXT_MUTED;
+    }
+
+    // Update button disabled states
+    const editBtn = content.querySelector('.bulk-edit-btn');
+    const deleteBtn = content.querySelector('.bulk-delete-btn');
+    if (editBtn) editBtn.disabled = selectedTransactionIds.size === 0;
+    if (deleteBtn) deleteBtn.disabled = selectedTransactionIds.size === 0;
+  };
+
   const toggleSelection = txId => {
     if (selectedTransactionIds.has(txId)) {
       selectedTransactionIds.delete(txId);
     } else {
       selectedTransactionIds.add(txId);
     }
-    renderDashboard();
+    // In-place update — no full re-render needed
+    updateSelectionUI();
   };
 
   const handleBulkEdit = () => {
@@ -478,6 +534,8 @@ export const DashboardView = (params = {}) => {
     selectedTransactionIds = new Set(
       [...selectedTransactionIds].filter(id => visibleTransactionIds.has(id))
     );
+    // Keep an up-to-date reference for updateSelectionUI (defined outside renderDashboard)
+    currentVisibleTransactions = transactions;
 
     // Filter out ghost transactions for totals calculation
     // We want them in the list but not affecting the balance/stats
@@ -971,6 +1029,7 @@ export const DashboardView = (params = {}) => {
       selectionInfo.style.marginLeft = SPACING.MD;
 
       const countLabel = document.createElement('span');
+      countLabel.className = 'bulk-count-label';
       countLabel.textContent = `${selectedTransactionIds.size} selected`;
       countLabel.style.fontWeight = '600';
       countLabel.style.color = COLORS.TEXT_MAIN;
@@ -978,7 +1037,7 @@ export const DashboardView = (params = {}) => {
       countLabel.style.letterSpacing = '0.02em';
       selectionInfo.appendChild(countLabel);
 
-      if (selectedTransactionIds.size > 0) {
+      {
         const selectedTxs = transactions.filter(t =>
           selectedTransactionIds.has(t.id)
         );
@@ -990,9 +1049,12 @@ export const DashboardView = (params = {}) => {
           return sum; // transfers don't contribute to the net
         }, 0);
         const sumLabel = document.createElement('span');
-        const sign =
-          selectedSum > 0 ? '+' : selectedSum < 0 ? '-' : '';
-        sumLabel.textContent = `${sign}${CURRENCY_SYMBOL}${Math.abs(selectedSum).toFixed(2)}`;
+        const sign = selectedSum > 0 ? '+' : selectedSum < 0 ? '-' : '';
+        sumLabel.className = 'bulk-sum-label';
+        sumLabel.textContent =
+          selectedTransactionIds.size > 0
+            ? `${sign}${CURRENCY_SYMBOL}${Math.abs(selectedSum).toFixed(2)}`
+            : '';
         sumLabel.style.fontSize = 'var(--font-size-xs, 0.75rem)';
         sumLabel.style.color =
           selectedSum < 0
@@ -1015,6 +1077,7 @@ export const DashboardView = (params = {}) => {
         onClick: handleBulkEdit,
       });
       if (editBtn) {
+        editBtn.className = `${editBtn.className || ''} bulk-edit-btn`.trim();
         editBtn.disabled = selectedTransactionIds.size === 0;
         btnGroup.appendChild(editBtn);
       }
@@ -1025,6 +1088,7 @@ export const DashboardView = (params = {}) => {
         onClick: handleBulkDelete,
       });
       if (deleteBtn) {
+        deleteBtn.className = `${deleteBtn.className || ''} bulk-delete-btn`.trim();
         deleteBtn.disabled = selectedTransactionIds.size === 0;
         btnGroup.appendChild(deleteBtn);
       }
@@ -1044,7 +1108,7 @@ export const DashboardView = (params = {}) => {
 
     // Scroll to highlighted transaction if provided
     if (params.highlightTransactionId) {
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         const transactionItems = content.querySelectorAll(
           '.transaction-list-item'
         );
@@ -1053,20 +1117,23 @@ export const DashboardView = (params = {}) => {
             item.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
         });
-      }, 100); // Small delay to ensure DOM is ready
+      });
     }
   };
 
   renderDashboard();
 
-  // Preload data in background after dashboard renders
-  setTimeout(() => {
-    preloadReportsData();
-  }, 1000); // Delay to avoid blocking dashboard render
+  // Preload data in background once the browser is idle — no fixed delay needed
+  const schedulePreload = (fn, fallbackDelay) => {
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(fn, { timeout: fallbackDelay });
+    } else {
+      setTimeout(fn, fallbackDelay);
+    }
+  };
 
-  setTimeout(() => {
-    preloadFinancialPlanningData();
-  }, 2000); // Delay to avoid blocking dashboard render, staggered after reports
+  schedulePreload(preloadReportsData, 1000);
+  schedulePreload(preloadFinancialPlanningData, 2000);
 
   const handleStorageUpdate = e => {
     if (e.detail.key === STORAGE_KEYS.ACCOUNTS) {
