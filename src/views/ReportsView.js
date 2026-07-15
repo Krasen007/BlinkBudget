@@ -40,6 +40,8 @@ import {
   createMinimalAnalyticsData,
 } from '../utils/reports-utils.js';
 
+import { CacheService } from '../core/cache-service.js';
+
 // Import utility modules
 import {
   createLoadingState,
@@ -62,6 +64,16 @@ import { CategorySelector } from '../components/CategorySelector.js';
 import { InsightsSection } from '../components/BudgetInsightsSection.js';
 import { BudgetSummaryCard } from '../components/BudgetSummaryCard.js';
 import { BudgetPlanner } from '../core/budget-planner.js';
+
+/**
+ * Build a stable cache key for a given time period.
+ * Uses ISO date strings so the key is deterministic across navigations.
+ */
+function buildAnalyticsCacheKey(timePeriod) {
+  const start = new Date(timePeriod.startDate).toISOString();
+  const end = new Date(timePeriod.endDate).toISOString();
+  return `analytics_reports_${start}_${end}`;
+}
 
 /**
  * Parse period from URL params and return corresponding time period
@@ -466,6 +478,17 @@ export const ReportsView = (params = {}) => {
 
       const startTime = Date.now();
 
+      // --- Cache check: skip recalculation if data hasn't changed ---
+      const cacheKey = buildAnalyticsCacheKey(currentTimePeriod);
+      const cachedAnalytics = CacheService.get(cacheKey);
+      if (cachedAnalytics) {
+        currentData = cachedAnalytics;
+        renderReports();
+        isLoading = false;
+        return;
+      }
+      // --- End cache check ---
+
       let transactions;
       try {
         const allTransactions = TransactionService.getAll();
@@ -620,6 +643,10 @@ export const ReportsView = (params = {}) => {
         );
       }
 
+      // Store enriched data in cache so re-visits don't recalculate.
+      // CacheInvalidator clears 'analytics_*' keys when transactions change.
+      CacheService.put(cacheKey, currentData);
+
       const processingTime = Date.now() - startTime;
       if (processingTime > 2000) {
         console.warn(
@@ -628,16 +655,8 @@ export const ReportsView = (params = {}) => {
         showPerformanceWarning(container, processingTime);
       }
 
-      const elapsedTime = Date.now() - startTime;
-      const remainingTime = Math.max(
-        0,
-        Math.min(500 - elapsedTime, 2000 - elapsedTime)
-      );
-
-      setTimeout(() => {
-        renderReports();
-        isLoading = false;
-      }, remainingTime);
+      renderReports();
+      isLoading = false;
     } catch (error) {
       console.error('Error loading report data:', error);
 
