@@ -385,15 +385,9 @@ export const FinancialPlanningView = (params = {}) => {
       }
 
       await SyncService.pullFromCloud(userId);
-
-      // Trigger a storage update event to refresh UI (deferred until after load completes)
-      setTimeout(() => {
-        window.dispatchEvent(
-          new CustomEvent('storage-updated', {
-            detail: { key: STORAGE_KEYS.TRANSACTIONS },
-          })
-        );
-      }, 0);
+      // pullFromCloud merges cloud data into localStorage; the caller will
+      // immediately call planningDataManager.loadData() after this returns,
+      // so there is no need to dispatch a redundant storage-updated event here.
     } catch (error) {
       console.error('[Planning] Force sync failed:', error);
     }
@@ -529,11 +523,11 @@ export const FinancialPlanningView = (params = {}) => {
       e.detail.key === STORAGE_KEYS.GOALS ||
       e.detail.key === STORAGE_KEYS.BUDGETS
     ) {
-      // Clear cache when data changes to ensure fresh analytics
+      // Clear the in-memory cache so next load picks up fresh data.
+      // Do NOT call planningDataManager.refresh() — that nulls out lastUpdated
+      // and causes needsRefresh() to return true, which triggers a cloud sync
+      // on the very next visibility change even when nothing has changed.
       clearPlanningCache();
-
-      // Refresh the PlanningDataManager cache to ensure fresh data
-      planningDataManager.refresh();
       loadPlanningData();
     }
   };
