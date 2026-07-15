@@ -492,6 +492,7 @@ export class ForecastEngine {
         confidence: 0.1, // Very low confidence
         method: 'insufficient_data',
         seasonalFactor: 1,
+        trend: 0, // No trend for basic forecasts
       });
     }
 
