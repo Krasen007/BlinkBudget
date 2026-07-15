@@ -17,6 +17,7 @@ import {
   CURRENCY_SYMBOL,
 } from '../utils/constants.js';
 import { highlightTransactionSuccess } from '../utils/success-feedback.js';
+import { setSelectedStyle } from '../views/DashboardView.js';
 
 export const TransactionListItem = ({
   transaction,
@@ -56,10 +57,7 @@ export const TransactionListItem = ({
   let longPressed = false;
 
   // Apply selected visual styling
-  if (isSelected) {
-    item.style.background = 'rgba(59, 130, 246, 0.12)';
-    item.style.borderLeft = '3px solid var(--color-primary)';
-  }
+  setSelectedStyle(item, isSelected);
 
   const showSplitDialog = () => {
     const overlay = document.createElement('div');

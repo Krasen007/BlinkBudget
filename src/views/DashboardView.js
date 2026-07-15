@@ -18,6 +18,20 @@ import { getAnalyticsEngine } from '../core/analytics/AnalyticsInstance.js';
 import { getCurrentMonthPeriod } from '../utils/reports-utils.js';
 
 import { getTransactionToHighlight } from '../utils/success-feedback.js';
+
+/**
+ * Apply or remove selected styling to a transaction item
+ * Shared helper used by both TransactionListItem and DashboardView
+ */
+export const setSelectedStyle = (item, isSelected) => {
+  if (isSelected) {
+    item.style.background = 'rgba(59, 130, 246, 0.12)';
+    item.style.borderLeft = '3px solid var(--color-primary)';
+  } else {
+    item.style.background = '';
+    item.style.borderLeft = '';
+  }
+};
 import { createNavigationButtons } from '../utils/navigation-helper.js';
 import { BulkEditDialog } from '../components/BulkEditDialog.js';
 
@@ -261,13 +275,7 @@ export const DashboardView = (params = {}) => {
     const items = content.querySelectorAll('.transaction-list-item');
     items.forEach(item => {
       const txId = item.dataset.transactionId;
-      if (selectedTransactionIds.has(txId)) {
-        item.style.background = 'rgba(59, 130, 246, 0.12)';
-        item.style.borderLeft = '3px solid var(--color-primary)';
-      } else {
-        item.style.background = '';
-        item.style.borderLeft = '';
-      }
+      setSelectedStyle(item, selectedTransactionIds.has(txId));
     });
 
     // Update count and sum in the bulk toolbar (if already rendered)
@@ -288,7 +296,10 @@ export const DashboardView = (params = {}) => {
         return sum;
       }, 0);
       const sign = selectedSum > 0 ? '+' : selectedSum < 0 ? '-' : '';
-      sumLabel.textContent = `${sign}${CURRENCY_SYMBOL}${Math.abs(selectedSum).toFixed(2)}`;
+      sumLabel.textContent =
+        selectedTransactionIds.size > 0
+          ? `${sign}${CURRENCY_SYMBOL}${Math.abs(selectedSum).toFixed(2)}`
+          : '';
       sumLabel.style.color =
         selectedSum < 0
           ? 'var(--color-primary)'

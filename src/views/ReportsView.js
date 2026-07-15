@@ -42,6 +42,8 @@ import {
 
 import { CacheService } from '../core/cache-service.js';
 
+const REPORTS_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
 // Import utility modules
 import {
   createLoadingState,
@@ -483,7 +485,7 @@ export const ReportsView = (params = {}) => {
       const cachedAnalytics = CacheService.get(cacheKey);
       if (cachedAnalytics) {
         currentData = cachedAnalytics;
-        renderReports();
+        await renderReports();
         isLoading = false;
         return;
       }
@@ -645,7 +647,7 @@ export const ReportsView = (params = {}) => {
 
       // Store enriched data in cache so re-visits don't recalculate.
       // CacheInvalidator clears 'analytics_*' keys when transactions change.
-      CacheService.put(cacheKey, currentData);
+      CacheService.put(cacheKey, currentData, REPORTS_CACHE_TTL_MS);
 
       const processingTime = Date.now() - startTime;
       if (processingTime > 2000) {
@@ -655,7 +657,7 @@ export const ReportsView = (params = {}) => {
         showPerformanceWarning(container, processingTime);
       }
 
-      renderReports();
+      await renderReports();
       isLoading = false;
     } catch (error) {
       console.error('Error loading report data:', error);
