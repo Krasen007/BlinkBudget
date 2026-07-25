@@ -157,6 +157,7 @@
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
+  --radius-xl: 1.25rem;
   --radius-full: 9999px;
 
   /* Shadow system - For consistent elevation and visual hierarchy */

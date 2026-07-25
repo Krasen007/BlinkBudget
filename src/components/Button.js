@@ -9,6 +9,7 @@ export class Button extends BaseComponent {
   constructor(element, options = {}) {
     super(element, {
       text: '',
+      ariaLabel: null, // explicit aria-label override
       variant: 'primary', // primary, secondary, success, warning, error
       size: 'medium', // small, medium, large
       type: 'button',
@@ -28,6 +29,7 @@ export class Button extends BaseComponent {
   getDefaultOptions() {
     return {
       text: '',
+      ariaLabel: null,
       variant: 'primary',
       size: 'medium',
       type: 'button',
@@ -90,6 +92,20 @@ export class Button extends BaseComponent {
       this.element.setAttribute('aria-label', ariaLabel);
     } else {
       this.element.removeAttribute('aria-label');
+    }
+
+    // Set aria-disabled for disabled/loading states
+    if (this.options.disabled || this.options.loading) {
+      this.element.setAttribute('aria-disabled', 'true');
+    } else {
+      this.element.removeAttribute('aria-disabled');
+    }
+
+    // Set aria-busy for loading state
+    if (this.options.loading) {
+      this.element.setAttribute('aria-busy', 'true');
+    } else {
+      this.element.removeAttribute('aria-busy');
     }
   }
 
@@ -251,9 +267,10 @@ export class Button extends BaseComponent {
   }
 
   getAriaLabel() {
-    if (this.options.loading) return 'Loading';
-    if (this.options.disabled) return 'Disabled button';
-    return this.options.text || null;
+    if (this.options.loading) return this.options.ariaLabel || 'Loading';
+    if (this.options.disabled)
+      return this.options.ariaLabel || 'Disabled button';
+    return this.options.ariaLabel || this.options.text || null;
   }
 
   // Utility method to create text nodes

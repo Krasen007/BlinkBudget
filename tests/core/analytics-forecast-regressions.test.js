@@ -54,7 +54,10 @@ describe('analytics and forecast regressions', () => {
       variance: 100,
     });
     vi.spyOn(engine, '_calculateConfidence').mockReturnValue(0.8);
-    vi.spyOn(engine, '_calculateConfidenceInterval').mockReturnValue({ lower: 0, upper: 200 });
+    vi.spyOn(engine, '_calculateConfidenceInterval').mockReturnValue({
+      lower: 0,
+      upper: 200,
+    });
     vi.spyOn(engine, '_isProblematicTransaction').mockReturnValue(false);
 
     const transactions = [

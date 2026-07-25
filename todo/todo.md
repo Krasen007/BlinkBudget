@@ -37,9 +37,6 @@ These solve real problems but the proposed solutions introduce too much UI surfa
 [ ] Auto-sort categories by frequency invisibly
 Tasteful Approach: Implement automatic sorting by usage frequency without adding manual reordering UI. "Treat every default as a deliberate taste decision." Manual sorting adds cognitive load.
 
-[ ] fix tutorial
-Tasteful Approach: Instead of fixing a multi-step tutorial, ask: Can the app be simplified so a tutorial isn't needed? Optimize the empty state to be welcoming. If a tutorial is kept, it must be instantly dismissible.
-
 [ ] Implement ability to disable the Currency sign in the app... auto detected?
 Tasteful Approach: Auto-detect only. Use the browser's Intl.NumberFormat().resolvedOptions().currency to show the correct format automatically. Prioritize the invisible "just works" default over adding another dropdown to the settings page.
 

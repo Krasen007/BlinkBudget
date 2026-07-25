@@ -72,6 +72,18 @@
   color: var(--color-text-surface);
 }
 
+.btn-ghost {
+  background-color: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+
+.btn-ghost:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-main);
+  border-color: var(--color-border-strong);
+}
+
 /* Button Sizes */
 .btn-small {
   min-height: 36px;
