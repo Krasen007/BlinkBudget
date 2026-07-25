@@ -304,7 +304,11 @@ export const TimePeriodSelector = (options = {}) => {
     }
 
     // Add arrow for Last Month, Quarter, and Year buttons
-    if (period.key === 'lastMonth' || period.key === 'quarter' || period.key === 'year') {
+    if (
+      period.key === 'lastMonth' ||
+      period.key === 'quarter' ||
+      period.key === 'year'
+    ) {
       // Add relative position to the parent button so the absolute arrow docks cleanly to the button's bounds
       button.style.position = 'relative';
 
@@ -321,9 +325,12 @@ export const TimePeriodSelector = (options = {}) => {
       const initialMonthOffset = period.key === 'lastMonth' ? -1 : 0;
       const initialQuarterOffset = 0;
       const initialYearOffset = 0;
-      const initialOffset = period.key === 'lastMonth' ? initialMonthOffset : 
-                           period.key === 'quarter' ? initialQuarterOffset : 
-                           initialYearOffset;
+      const initialOffset =
+        period.key === 'lastMonth'
+          ? initialMonthOffset
+          : period.key === 'quarter'
+            ? initialQuarterOffset
+            : initialYearOffset;
       updateRightArrowVisibility(rightArrow, initialOffset, period.key);
 
       // Left arrow click — go further back
@@ -721,7 +728,11 @@ export const TimePeriodSelector = (options = {}) => {
       hideCustomRangeSelector();
 
       // Update button label if it's a navigatable period (Last Month, Quarter, or This Year)
-      if (period.key === 'lastMonth' || period.key === 'quarter' || period.key === 'year') {
+      if (
+        period.key === 'lastMonth' ||
+        period.key === 'quarter' ||
+        period.key === 'year'
+      ) {
         const labelSpan = button.querySelector('.tab-label');
         if (labelSpan) {
           labelSpan.textContent = newPeriod.label;
@@ -1046,7 +1057,11 @@ export const TimePeriodSelector = (options = {}) => {
             // Update arrow visibility
             const rightArrow = lastMonthButton.querySelector('.arrow-right');
             if (rightArrow) {
-              updateRightArrowVisibility(rightArrow, totalMonthOffset, 'lastMonth');
+              updateRightArrowVisibility(
+                rightArrow,
+                totalMonthOffset,
+                'lastMonth'
+              );
             }
           }
         } else if (period.type === 'quarterly') {
@@ -1055,7 +1070,7 @@ export const TimePeriodSelector = (options = {}) => {
           const currentQuarter = Math.floor(now.getMonth() / 3);
           const periodStart = new Date(period.startDate);
           const periodQuarter = Math.floor(periodStart.getMonth() / 3);
-          
+
           // Calculate quarter offset from current quarter
           const yearDiff = periodStart.getFullYear() - now.getFullYear();
           const quarterDiff = periodQuarter - currentQuarter;
@@ -1077,7 +1092,11 @@ export const TimePeriodSelector = (options = {}) => {
           // Update arrow visibility
           const rightArrow = quarterButton.querySelector('.arrow-right');
           if (rightArrow) {
-            updateRightArrowVisibility(rightArrow, totalQuarterOffset, 'quarter');
+            updateRightArrowVisibility(
+              rightArrow,
+              totalQuarterOffset,
+              'quarter'
+            );
           }
         }
       }

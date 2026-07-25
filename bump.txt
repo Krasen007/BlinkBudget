@@ -20,4 +20,5 @@ org.gradle.jvmargs=-Xmx1024m -Xms512m
 
 #18171F
 
-Free plan available credits 195 credits Effective from May 19
+270 / 300 credits remaining
+Expires August 19, 2026
