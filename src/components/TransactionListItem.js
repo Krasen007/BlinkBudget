@@ -69,7 +69,7 @@ export const TransactionListItem = ({
     card.style.width = '92%';
 
     const title = document.createElement('h3');
-    title.textContent = 'Split Transaction';
+    title.textContent = 'Transaction Options';
     title.id = 'split-dialog-title';
     title.style.margin = '0 0 var(--spacing-xs) 0';
     title.style.textAlign = 'center';
@@ -142,6 +142,51 @@ export const TransactionListItem = ({
       );
     });
     btnGroup.appendChild(splitBtn);
+
+    const copyBtn = document.createElement('button');
+    copyBtn.textContent = 'Copy Transaction';
+    copyBtn.type = 'button';
+    copyBtn.className = 'btn btn-secondary';
+    copyBtn.style.width = '100%';
+    copyBtn.addEventListener('click', () => {
+      document.body.removeChild(overlay);
+      let copied;
+      try {
+        copied = TransactionService.copy(transaction.id);
+        if (!copied) {
+          import('../utils/toast-notifications.js')
+            .then(({ showErrorToast }) => {
+              showErrorToast('Failed to copy transaction');
+            })
+            .catch(() => {
+              console.error(
+                'Failed to copy transaction and toast system unavailable'
+              );
+            });
+          return;
+        }
+      } catch (error) {
+        import('../utils/toast-notifications.js')
+          .then(({ showErrorToast }) => {
+            showErrorToast(`Failed to copy transaction: ${error.message}`);
+          })
+          .catch(() => {
+            console.error(
+              'Failed to copy transaction and toast system unavailable'
+            );
+          });
+        return;
+      }
+
+      sessionStorage.setItem('highlightTransactionId', copied.id);
+
+      window.dispatchEvent(
+        new CustomEvent('storage-updated', {
+          detail: { key: 'transactions' },
+        })
+      );
+    });
+    btnGroup.appendChild(copyBtn);
 
     const multiBtn = document.createElement('button');
     multiBtn.textContent = 'Select Multiple Transactions';

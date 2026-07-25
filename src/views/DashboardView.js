@@ -38,6 +38,8 @@ import { BulkEditDialog } from '../components/BulkEditDialog.js';
 // Track if we've already preloaded reports in this session
 let hasPreloadedReports = false;
 let hasPreloadedFinancialPlanning = false;
+let hasScheduledDashboardPreloads = false;
+let financialPlanningPreloadPromise = null;
 
 // Preload reports data in background when user is on dashboard
 const preloadReportsData = () => {
@@ -110,55 +112,66 @@ const preloadReportsData = () => {
 
 // Preload financial planning data in background when user is on dashboard
 const preloadFinancialPlanningData = async () => {
-  try {
+  // Skip if already preloaded in this session
+  if (hasPreloadedFinancialPlanning) {
     console.log(
-      '[Dashboard] Pre-loading financial planning data in background...'
+      '[Dashboard] Financial planning already preloaded this session'
     );
-
-    // Skip if already preloaded in this session
-    if (hasPreloadedFinancialPlanning) {
-      console.log(
-        '[Dashboard] Financial planning already preloaded this session'
-      );
-      return;
-    }
-
-    // Check if already cached
-    const cacheKey = 'blinkbudget_financial_planning_cache';
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-      const { timestamp } = JSON.parse(cached);
-      const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
-      if (Date.now() - timestamp < CACHE_TTL_MS) {
-        console.log(
-          '[Dashboard] Financial planning data already cached and fresh'
-        );
-        hasPreloadedFinancialPlanning = true;
-        return;
-      }
-    }
-
-    // Import dynamically to avoid circular dependencies
-    const { planningDataManager } =
-      await import('../core/financial-planning/PlanningDataManager.js');
-
-    // Load and cache planning data
-    const planningData = await planningDataManager.loadData();
-    const cacheEntry = {
-      data: planningData,
-      timestamp: Date.now(),
-    };
-    localStorage.setItem(cacheKey, JSON.stringify(cacheEntry));
-    hasPreloadedFinancialPlanning = true;
-
-    console.log('[Dashboard] Financial planning data pre-loaded and cached');
-  } catch (error) {
-    console.warn(
-      '[Dashboard] Failed to pre-load financial planning data:',
-      error
-    );
-    // Don't block dashboard if preloading fails
+    return;
   }
+
+  // Return existing promise if preload is already in flight
+  if (financialPlanningPreloadPromise) {
+    return financialPlanningPreloadPromise;
+  }
+
+  financialPlanningPreloadPromise = (async () => {
+    try {
+      console.log(
+        '[Dashboard] Pre-loading financial planning data in background...'
+      );
+
+      // Check if already cached
+      const cacheKey = 'blinkbudget_financial_planning_cache';
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const { timestamp } = JSON.parse(cached);
+        const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+        if (Date.now() - timestamp < CACHE_TTL_MS) {
+          console.log(
+            '[Dashboard] Financial planning data already cached and fresh'
+          );
+          hasPreloadedFinancialPlanning = true;
+          return;
+        }
+      }
+
+      // Import dynamically to avoid circular dependencies
+      const { planningDataManager } =
+        await import('../core/financial-planning/PlanningDataManager.js');
+
+      // Load and cache planning data
+      const planningData = await planningDataManager.loadData();
+      const cacheEntry = {
+        data: planningData,
+        timestamp: Date.now(),
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(cacheEntry));
+      hasPreloadedFinancialPlanning = true;
+
+      console.log('[Dashboard] Financial planning data pre-loaded and cached');
+    } catch (error) {
+      console.warn(
+        '[Dashboard] Failed to pre-load financial planning data:',
+        error
+      );
+      // Don't block dashboard if preloading fails
+    } finally {
+      financialPlanningPreloadPromise = null;
+    }
+  })();
+
+  return financialPlanningPreloadPromise;
 };
 
 export const DashboardView = (params = {}) => {
@@ -1155,8 +1168,11 @@ export const DashboardView = (params = {}) => {
     }, fallbackDelay);
   };
 
-  schedulePreload(preloadReportsData, 1000);
-  schedulePreload(preloadFinancialPlanningData, 2000);
+  if (!hasScheduledDashboardPreloads) {
+    hasScheduledDashboardPreloads = true;
+    schedulePreload(preloadReportsData, 1000);
+    schedulePreload(preloadFinancialPlanningData, 2000);
+  }
 
   const handleStorageUpdate = e => {
     if (e.detail.key === STORAGE_KEYS.ACCOUNTS) {

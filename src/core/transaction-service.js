@@ -230,6 +230,28 @@ export const TransactionService = {
   },
 
   /**
+   * Copy a transaction as a new entry with a fresh id and current timestamp
+   * @param {string} id - Source transaction ID
+   * @returns {Object|null} Copied transaction
+   */
+  copy(id) {
+    const original = this.get(id);
+    if (!original) return null;
+
+    const copyData = { ...original };
+    delete copyData.id;
+    delete copyData.createdAt;
+    delete copyData.updatedAt;
+    delete copyData.isGhost;
+    delete copyData.movedToDate;
+    delete copyData.originalDate;
+    delete copyData.ghostId;
+    copyData.timestamp = new Date().toISOString();
+
+    return this.add(copyData);
+  },
+
+  /**
    * Remove a tag name from all transactions (e.g. when flag category is deleted)
    * @param {string} tagName - Tag category name to remove
    */
