@@ -351,50 +351,8 @@ export const FinancialPlanningView = (params = {}) => {
   // createPlaceholder is now imported from financial-planning-helpers.js
 
   /**
-   * Ensure data is synced from cloud before generating forecasts
-   * Only syncs if data is stale (older than 5 minutes) or not yet loaded
-   */
-  async function ensureDataSynced() {
-    try {
-      const userId = AuthService.getUserId();
-      if (!userId) return;
-
-      // Only sync if data is stale or not yet loaded
-      if (planningDataManager.needsRefresh()) {
-        console.log('[Planning] Data is stale, syncing from cloud...');
-        await SyncService.pullFromCloud(userId);
-      } else {
-        console.log('[Planning] Using cached data (fresh)');
-      }
-    } catch (error) {
-      console.warn('[Planning] Could not ensure data sync:', error);
-    }
-  }
-
-  /**
-   * Force sync from cloud when no local data is found
-   */
-  async function forceSyncFromCloud() {
-    try {
-      const userId = AuthService.getUserId();
-      if (!userId) {
-        console.warn(
-          '[Planning] User not authenticated, cannot sync from cloud'
-        );
-        return;
-      }
-
-      await SyncService.pullFromCloud(userId);
-      // pullFromCloud merges cloud data into localStorage; the caller will
-      // immediately call planningDataManager.loadData() after this returns,
-      // so there is no need to dispatch a redundant storage-updated event here.
-    } catch (error) {
-      console.error('[Planning] Force sync failed:', error);
-    }
-  }
-
-  /**
-   * Load planning data using PlanningDataManager with caching
+   * Load local data first (instant), then optionally sync from cloud in background.
+   * This ensures the view renders immediately without blocking on network calls.
    */
   async function loadPlanningData() {
     if (isLoading) return;
@@ -402,7 +360,7 @@ export const FinancialPlanningView = (params = {}) => {
     try {
       isLoading = true;
 
-      // Check for cached planning data for instant loading
+      // 1. Check in-memory cache first (fastest path)
       const cachedData = getCachedPlanningData();
       if (cachedData) {
         console.log('[FinancialPlanning] Using cached data instantly');
@@ -410,34 +368,36 @@ export const FinancialPlanningView = (params = {}) => {
         renderSection(currentSection);
         isLoading = false;
 
-        // Kick off background refresh to fetch latest data — only when browser is idle
+        // Set lastUpdated on the manager so needsRefresh() reflects real state
+        if (cachedData.lastUpdated) {
+          planningDataManager.lastUpdated = new Date(cachedData.lastUpdated);
+        }
+
+        // Background refresh via idle callback (non-blocking)
         const runBackgroundRefresh = async () => {
           try {
             if (isCancelled) return;
 
-            // Only hit the network when data is actually stale
-            if (planningDataManager.needsRefresh()) {
-              await ensureDataSynced();
-            }
+            // Load fresh local data first
+            let freshData = await planningDataManager.loadData();
 
             if (isCancelled) return;
 
-            let freshData = await planningDataManager.loadData();
-
-            // Validate we have actual transaction data, if not force sync
+            // If no transactions locally, try cloud sync (non-blocking)
             if (
               !freshData ||
               !freshData.transactions ||
               freshData.transactions.length === 0
             ) {
-              await forceSyncFromCloud();
+              await backgroundSyncFromCloud();
+              if (isCancelled) return;
               freshData = await planningDataManager.loadData();
             }
 
             if (isCancelled) return;
 
             // Update state if data changed
-            if (!isDeepEqual(freshData, planningData)) {
+            if (planningData && !isDeepEqual(freshData, planningData)) {
               planningData = freshData;
               setCachedPlanningData(freshData);
               renderSection(currentSection);
@@ -446,6 +406,11 @@ export const FinancialPlanningView = (params = {}) => {
                   detail: { type: 'financial-planning' },
                 })
               );
+            } else if (!planningData) {
+              // First-time load with data (shouldn't happen since we cache, but handle gracefully)
+              planningData = freshData;
+              setCachedPlanningData(freshData);
+              renderSection(currentSection);
             }
           } catch (error) {
             console.error(
@@ -458,9 +423,7 @@ export const FinancialPlanningView = (params = {}) => {
         if ('requestIdleCallback' in window) {
           backgroundRefreshTimeout = window.requestIdleCallback(
             runBackgroundRefresh,
-            {
-              timeout: 2000,
-            }
+            { timeout: 2000 }
           );
         } else {
           backgroundRefreshTimeout = setTimeout(runBackgroundRefresh, 200);
@@ -469,33 +432,62 @@ export const FinancialPlanningView = (params = {}) => {
         return;
       }
 
-      // Ensure data is synced only if stale
-      await ensureDataSynced();
-
-      // Use PlanningDataManager to load data with caching
+      // 2. No cache — load local data instantly (no cloud blocking)
       planningData = await planningDataManager.loadData();
 
-      // Validate we have actual transaction data, if not force sync
+      // Cache it for next time
+      setCachedPlanningData(planningData);
+
+      // Render immediately with local data
+      renderSection(currentSection);
+
+      // 3. If no transactions locally, background-sync from cloud (non-blocking)
       if (
         !planningData ||
         !planningData.transactions ||
         planningData.transactions.length === 0
       ) {
-        await forceSyncFromCloud();
-        planningData = await planningDataManager.loadData();
+        // Fire-and-forget background sync — don't await it
+        backgroundSyncFromCloud().then(async () => {
+          if (isCancelled) return;
+          const freshData = await planningDataManager.loadData();
+          if (freshData && !isDeepEqual(freshData, planningData)) {
+            planningData = freshData;
+            setCachedPlanningData(freshData);
+            renderSection(currentSection);
+          }
+        }).catch(err => {
+          console.warn('[FinancialPlanning] Background cloud sync failed:', err);
+        });
       }
-
-      // Cache the planning data for instant loading next time
-      setCachedPlanningData(planningData);
-
-      // Re-render current section with new data
-      renderSection(currentSection);
     } catch (error) {
       console.error('Error loading planning data:', error);
     } finally {
       isLoading = false;
     }
   }
+
+  /**
+   * Background sync from cloud — does NOT block rendering.
+   * Only syncs if data is stale (older than 5 minutes) or if no local data exists.
+   */
+  async function backgroundSyncFromCloud() {
+    try {
+      const userId = AuthService.getUserId();
+      if (!userId) return;
+
+      // Only sync from cloud if data is actually stale
+      if (planningDataManager.needsRefresh()) {
+        console.log('[Planning] Background sync from cloud (data stale)...');
+        await SyncService.pullFromCloud(userId);
+      } else {
+        console.log('[Planning] Local data is fresh, skipping cloud sync');
+      }
+    } catch (error) {
+      console.warn('[Planning] Background cloud sync failed:', error);
+    }
+  }
+
   const updateResponsiveLayout = debounce(() => {
     // Shared title update etc
   }, TIMING.DEBOUNCE_RESIZE);
