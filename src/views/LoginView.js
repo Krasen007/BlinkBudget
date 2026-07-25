@@ -208,6 +208,144 @@ export const LoginView = () => {
   passwordInput.autocomplete = 'current-password';
   applyInputStyles(passwordInput);
 
+  // Password field wrapper (for eye toggle)
+  const passwordWrapper = document.createElement('div');
+  Object.assign(passwordWrapper.style, {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    width: '100%',
+  });
+
+  const eyeBtn = document.createElement('button');
+  eyeBtn.type = 'button';
+  eyeBtn.setAttribute('aria-label', 'Toggle password visibility');
+  Object.assign(eyeBtn.style, {
+    border: 'none',
+    background: 'transparent',
+    cursor: 'pointer',
+    position: 'absolute',
+    right: '12px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    height: '28px',
+    width: '28px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '0',
+    color: COLORS.TEXT_MUTED,
+    zIndex: 2,
+  });
+
+  // Eye SVG (closed by default)
+  const eyeSvg = document.createElement('span');
+  eyeSvg.innerHTML = `
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+      <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z" />
+      <circle cx="12" cy="12" r="2.5" />
+    </svg>
+  `;
+  eyeBtn.appendChild(eyeSvg);
+
+  let passwordVisible = false;
+  eyeBtn.addEventListener('click', () => {
+    passwordVisible = !passwordVisible;
+    passwordInput.type = passwordVisible ? 'text' : 'password';
+    // update aria and icon (swap to a simple slash overlay when hidden)
+    eyeBtn.setAttribute('aria-pressed', String(passwordVisible));
+    if (passwordVisible) {
+      eyeSvg.innerHTML = `
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+          <path d="M12 6a9.77 9.77 0 0 1 8.94 5A9.77 9.77 0 0 1 12 16a9.77 9.77 0 0 1-8.94-5A9.77 9.77 0 0 1 12 6m0-2C7 4 2.73 7.11 1 11c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7z"/>
+          <path d="M2 2l20 20" stroke="#fff" stroke-width="2"/>
+        </svg>
+      `;
+    } else {
+      eyeSvg.innerHTML = `
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+          <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z" />
+          <circle cx="12" cy="12" r="2.5" />
+        </svg>
+      `;
+    }
+  });
+
+  passwordWrapper.appendChild(passwordInput);
+  passwordWrapper.appendChild(eyeBtn);
+
+  // Ensure the input leaves space for the eye icon inside the field
+  Object.assign(passwordInput.style, {
+    paddingRight: `40px`,
+    width: '100%',
+    boxSizing: 'border-box',
+  });
+
+  // Password requirements box (shown on signup)
+  const pwRequirements = document.createElement('div');
+  Object.assign(pwRequirements.style, {
+    marginTop: SPACING.SM,
+    fontSize: FONT_SIZES.XS || '0.85rem',
+    color: COLORS.TEXT_MUTED,
+    display: 'none',
+    lineHeight: '1.4',
+  });
+
+  const reqList = document.createElement('ul');
+  Object.assign(reqList.style, { paddingLeft: '18px', margin: '4px 0 0 0' });
+
+  const makeReq = text => {
+    const li = document.createElement('li');
+    li.textContent = text;
+    Object.assign(li.style, { marginBottom: '4px' });
+    const indicator = document.createElement('span');
+    Object.assign(indicator.style, {
+      display: 'inline-block',
+      width: '10px',
+      height: '10px',
+      borderRadius: '50%',
+      marginRight: '8px',
+      verticalAlign: 'middle',
+      background: COLORS.BORDER,
+    });
+    li.prepend(indicator);
+    li._indicator = indicator;
+    return li;
+  };
+
+  const reqMinLen = makeReq('At least 8 characters');
+  const reqLetter = makeReq('At least one letter (A-Z)');
+  const reqNumber = makeReq('At least one number (0-9)');
+
+  reqList.appendChild(reqMinLen);
+  reqList.appendChild(reqLetter);
+  reqList.appendChild(reqNumber);
+  pwRequirements.appendChild(reqList);
+
+  // Live validation for signup mode
+  const updatePasswordRequirements = pwd => {
+    const lenOk = pwd.length >= 8;
+    const letterOk = /[a-zA-Z]/.test(pwd);
+    const numberOk = /[0-9]/.test(pwd);
+
+    reqMinLen._indicator.style.background = lenOk ? COLORS.SUCCESS : COLORS.BORDER;
+    reqLetter._indicator.style.background = letterOk ? COLORS.SUCCESS : COLORS.BORDER;
+    reqNumber._indicator.style.background = numberOk ? COLORS.SUCCESS : COLORS.BORDER;
+  };
+
+  passwordInput.addEventListener('input', e => {
+    if (isSignup) {
+      pwRequirements.style.display = 'block';
+      updatePasswordRequirements(e.target.value);
+      const result = validatePasswordStrength(e.target.value);
+      if (!result.isValid) {
+        errorMsg.textContent = '';
+      } else {
+        errorMsg.textContent = '';
+      }
+    }
+  });
+
   const errorMsg = document.createElement('div');
   Object.assign(errorMsg.style, {
     color: COLORS.ERROR,
@@ -360,6 +498,12 @@ export const LoginView = () => {
       ? 'Already have an account? Login'
       : "Don't have an account? Sign Up";
     passwordInput.autocomplete = isSignup ? 'new-password' : 'current-password';
+    // Show password requirements when signing up
+    pwRequirements.style.display = isSignup ? 'block' : 'none';
+    if (!isSignup) {
+      // reset requirement indicators when leaving signup mode
+      updatePasswordRequirements('');
+    }
     errorMsg.textContent = '';
   });
 
@@ -384,7 +528,8 @@ export const LoginView = () => {
   });
 
   form.appendChild(emailInput);
-  form.appendChild(passwordInput);
+  form.appendChild(passwordWrapper);
+  form.appendChild(pwRequirements);
   form.appendChild(forgotPasswordLink);
   form.appendChild(errorMsg);
   form.appendChild(submitBtn);

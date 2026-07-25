@@ -1135,13 +1135,24 @@ export const DashboardView = (params = {}) => {
 
   renderDashboard();
 
-  // Preload data in background once the browser is idle — no fixed delay needed
+  // Preload data in background once the browser is idle.
+  // Use requestIdleCallback when available, otherwise defer the heavy work
+  // beyond the setTimeout handler to avoid long-task violations on older browsers.
   const schedulePreload = (fn, fallbackDelay) => {
     if ('requestIdleCallback' in window) {
       window.requestIdleCallback(fn, { timeout: fallbackDelay });
-    } else {
-      setTimeout(fn, fallbackDelay);
+      return;
     }
+
+    setTimeout(() => {
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(fn, { timeout: fallbackDelay });
+      } else if ('requestAnimationFrame' in window) {
+        window.requestAnimationFrame(fn);
+      } else {
+        fn();
+      }
+    }, fallbackDelay);
   };
 
   schedulePreload(preloadReportsData, 1000);
