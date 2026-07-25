@@ -25,23 +25,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://blinkbudget-sync.firebaseapp.com" />
 
-    <!-- Preload critical font files to avoid FOUT -->
-    <link
-      rel="preload"
-      href="https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      href="https://fonts.gstatic.com/s/outfit/v11/QGYyz_MVcBeNP4NjuGObqx1XmO1I4TC1C4G-EiAou6Y.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-
-    <!-- Critical CSS for above-the-fold content -->
+    <!-- Load Google Fonts non-render-blocking. Explicit font preloads removed to avoid unused preload warnings. -->
     <link rel="stylesheet" href="/src/styles/critical.css" />
 
     <!-- Google Fonts loaded non-render-blocking -->

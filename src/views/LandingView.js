@@ -41,7 +41,27 @@ const initScrollReveal = (container, observers) => {
   observers.push(observer);
 };
 
-const createHeroSection = () => {
+/**
+ * Shared helper to create the primary CTA button with timer cleanup tracking
+ */
+const createGetStartedButton = (extraClass, timers) => {
+  const getStartedBtn = ButtonComponent({
+    text: 'Get Started Free',
+    variant: 'primary',
+    onClick: () => {
+      const instance = getStartedBtn.buttonInstance;
+      if (instance) instance.setLoading(true);
+      const timerId = setTimeout(() => Router.navigate('login'), 300);
+      if (timers) timers.push(timerId);
+    },
+  });
+  if (extraClass) {
+    getStartedBtn.classList.add(extraClass);
+  }
+  return getStartedBtn;
+};
+
+const createHeroSection = timers => {
   const section = document.createElement('section');
   section.className = 'hero-section';
   section.setAttribute('aria-label', 'Hero');
@@ -72,7 +92,8 @@ const createHeroSection = () => {
   description.textContent =
     'Transform expense tracking into a swift, almost unconscious habit. ' +
     'BlinkBudget gives you beautiful, actionable insights for smarter financial decisions — ' +
-    'all without the bloat of traditional budgeting apps.';
+    'all without the bloat of traditional budgeting apps. ' +
+    'Fully open source and free forever.';
 
   // Feature pills
   const features = document.createElement('div');
@@ -89,6 +110,7 @@ const createHeroSection = () => {
     const featureItem = document.createElement('div');
     featureItem.className = 'feature-item';
     featureItem.setAttribute('role', 'listitem');
+    featureItem.setAttribute('tabindex', '0');
     const iconSpan = document.createElement('span');
     iconSpan.className = 'feature-icon';
     iconSpan.textContent = icon;
@@ -105,17 +127,7 @@ const createHeroSection = () => {
   const buttonContainer = document.createElement('div');
   buttonContainer.className = 'hero-button-container';
 
-  const getStartedBtn = ButtonComponent({
-    text: 'Get Started Free',
-    variant: 'primary',
-    onClick: () => {
-      const instance = getStartedBtn.buttonInstance;
-      if (instance) instance.setLoading(true);
-      // Brief visual feedback before navigation
-      setTimeout(() => Router.navigate('login'), 300);
-    },
-  });
-  getStartedBtn.classList.add('hero-button--large');
+  const getStartedBtn = createGetStartedButton('hero-button--large', timers);
 
   const learnMoreLink = document.createElement('a');
   learnMoreLink.className = 'hero-learn-more';
@@ -419,7 +431,7 @@ const createFeaturesSection = () => {
   return section;
 };
 
-const createCTASection = () => {
+const createCTASection = timers => {
   const section = document.createElement('section');
   section.className = 'cta-section landing-section';
   section.setAttribute('aria-label', 'Call to Action');
@@ -443,31 +455,9 @@ const createCTASection = () => {
   const buttonContainer = document.createElement('div');
   buttonContainer.className = 'cta-button-container';
 
-  const ctaBtn = ButtonComponent({
-    text: 'Get Started Free',
-    variant: 'primary',
-    onClick: () => {
-      const instance = ctaBtn.buttonInstance;
-      if (instance) instance.setLoading(true);
-      // Brief visual feedback before navigation
-      setTimeout(() => Router.navigate('login'), 300);
-    },
-  });
-  ctaBtn.classList.add('cta-button--large');
-
-  const secondaryBtn = ButtonComponent({
-    text: 'Learn More',
-    variant: 'ghost',
-    onClick: () => {
-      document
-        .querySelector('.features-section')
-        ?.scrollIntoView({ behavior: 'smooth' });
-    },
-  });
-  secondaryBtn.classList.add('cta-button--secondary');
+  const ctaBtn = createGetStartedButton('cta-button--large', timers);
 
   buttonContainer.appendChild(ctaBtn);
-  buttonContainer.appendChild(secondaryBtn);
 
   content.appendChild(heading);
   content.appendChild(description);
@@ -505,8 +495,8 @@ const createFooter = () => {
   links.className = 'footer-links';
 
   const linkData = [
-    { text: 'Privacy Policy', href: '/docs/privacy-policy.md' },
-    { text: 'Terms of Service', href: '/docs/terms-of-service.md' },
+    { text: 'Privacy Policy', href: '/privacy-policy.md' },
+    { text: 'Terms of Service', href: '/terms-of-service.md' },
     { text: 'GitHub', href: 'https://github.com/Krasen007/BlinkBudget' },
   ];
 
@@ -522,7 +512,7 @@ const createFooter = () => {
 
   const copyright = document.createElement('div');
   copyright.className = 'footer-copyright';
-  copyright.textContent = `© ${new Date().getFullYear()} BlinkBudget. All rights reserved.`;
+  copyright.textContent = `© ${new Date().getFullYear()} BlinkBudget. Open source (GPL-3.0).`;
 
   container.appendChild(brand);
   container.appendChild(links);
@@ -537,22 +527,26 @@ export const LandingView = () => {
 
   /** Per-instance observer tracking for proper cleanup */
   const observers = [];
+  /** Per-instance timer tracking for proper cleanup */
+  const timers = [];
 
-  container.appendChild(createHeroSection());
+  container.appendChild(createHeroSection(timers));
   container.appendChild(createHowItWorksSection());
   container.appendChild(createScreenshotsSection());
   container.appendChild(createFeaturesSection());
-  container.appendChild(createCTASection());
+  container.appendChild(createCTASection(timers));
   container.appendChild(createFooter());
 
   // Initialize scroll-reveal after elements are in the DOM tree
   // Use rAF to ensure layout is complete before measuring
   requestAnimationFrame(() => initScrollReveal(container, observers));
 
-  /** Cleanup: disconnect all IntersectionObservers */
+  /** Cleanup: disconnect all IntersectionObservers and clear pending timers */
   container.cleanup = () => {
     observers.forEach(obs => obs.disconnect());
     observers.length = 0;
+    timers.forEach(t => clearTimeout(t));
+    timers.length = 0;
   };
 
   return container;

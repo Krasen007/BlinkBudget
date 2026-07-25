@@ -127,7 +127,8 @@
 
 .hero-learn-more {
   color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
+  font-size: 1.125rem;
+  font-weight: 500;
   text-decoration: none;
   cursor: pointer;
   transition: color var(--transition-fast);
@@ -135,7 +136,7 @@
   align-items: center;
   justify-content: center;
   min-height: var(--touch-target-min);
-  padding: var(--spacing-xs) var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-md);
 }
 
 .hero-learn-more:hover {
@@ -289,7 +290,7 @@
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-md);
-  background: rgb(255, 255, 255, 0.03);
+  background: var(--color-surface-elevated);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   padding: var(--spacing-lg);
@@ -301,8 +302,8 @@
 
 .mockup:hover {
   transform: translateY(-4px);
-  border-color: rgb(99, 102, 241, 0.4);
-  box-shadow: 0 12px 30px rgb(0, 0, 0, 0.4);
+  border-color: var(--color-primary-400);
+  box-shadow: var(--shadow-xl);
 }
 
 .mockup-frame {
