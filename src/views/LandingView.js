@@ -242,54 +242,72 @@ const createScreenshotsSection = () => {
 
   const heading = document.createElement('h2');
   heading.className = 'section-heading';
-  heading.textContent = 'See It in Action';
+  heading.textContent = 'Explore Every View';
 
   const subtitle = document.createElement('p');
   subtitle.className = 'section-subtitle';
   subtitle.textContent =
-    'A clean, dark-themed interface designed for speed and clarity.';
+    'Designed for extreme speed, powerful insights, and total control over your money.';
 
   const mockups = document.createElement('div');
   mockups.className = 'screenshots-mockups';
 
-  // Mobile screenshot
-  const mobileMockup = document.createElement('div');
-  mobileMockup.className = 'mockup mockup-mobile';
-  const mobileFrame = document.createElement('div');
-  mobileFrame.className = 'mockup-frame';
-  const mobileImg = document.createElement('img');
-  mobileImg.src = '/screenshot-mobile.png';
-  mobileImg.alt = 'BlinkBudget mobile interface';
-  mobileImg.loading = 'lazy';
-  mobileImg.width = 300;
-  mobileImg.height = 600;
-  mobileFrame.appendChild(mobileImg);
-  const mobileLabel = document.createElement('p');
-  mobileLabel.className = 'mockup-label';
-  mobileLabel.textContent = 'Mobile App';
-  mobileMockup.appendChild(mobileFrame);
-  mobileMockup.appendChild(mobileLabel);
+  const viewsData = [
+    {
+      src: '/screenshots/dashboard.png',
+      alt: 'BlinkBudget Main Dashboard View',
+      title: 'Main Dashboard',
+      desc: 'Instant 3-click expense logging, account balance summaries, and recent activity.',
+    },
+    {
+      src: '/screenshots/reports.png',
+      alt: 'BlinkBudget Reports View',
+      title: 'Visual Reports & Analytics',
+      desc: 'Category breakdowns, spending trends, and clear visual charts to understand your money.',
+    },
+    {
+      src: '/screenshots/financial-planning.png',
+      alt: 'BlinkBudget Financial Planning View',
+      title: 'Financial Planning',
+      desc: 'Track savings rates, emergency fund coverage, forecasts, and long-term goals.',
+    },
+    {
+      src: '/screenshots/settings.png',
+      alt: 'BlinkBudget Settings View',
+      title: 'Settings & Customization',
+      desc: 'Manage accounts, custom transaction categories, offline storage, and app preferences.',
+    },
+  ];
 
-  // Desktop screenshot
-  const desktopMockup = document.createElement('div');
-  desktopMockup.className = 'mockup mockup-desktop';
-  const desktopFrame = document.createElement('div');
-  desktopFrame.className = 'mockup-frame';
-  const desktopImg = document.createElement('img');
-  desktopImg.src = '/screenshot-desktop.png';
-  desktopImg.alt = 'BlinkBudget desktop interface';
-  desktopImg.loading = 'lazy';
-  desktopImg.width = 600;
-  desktopImg.height = 400;
-  desktopFrame.appendChild(desktopImg);
-  const desktopLabel = document.createElement('p');
-  desktopLabel.className = 'mockup-label';
-  desktopLabel.textContent = 'Desktop Dashboard';
-  desktopMockup.appendChild(desktopFrame);
-  desktopMockup.appendChild(desktopLabel);
+  viewsData.forEach(({ src, alt, title, desc }) => {
+    const mockup = document.createElement('div');
+    mockup.className = 'mockup';
 
-  mockups.appendChild(mobileMockup);
-  mockups.appendChild(desktopMockup);
+    const frame = document.createElement('div');
+    frame.className = 'mockup-frame';
+
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = alt;
+    img.loading = 'lazy';
+    img.width = 600;
+    img.height = 400;
+
+    frame.appendChild(img);
+
+    const label = document.createElement('p');
+    label.className = 'mockup-label';
+    label.textContent = title;
+
+    const description = document.createElement('p');
+    description.className = 'mockup-desc';
+    description.textContent = desc;
+
+    mockup.appendChild(frame);
+    mockup.appendChild(label);
+    mockup.appendChild(description);
+    mockups.appendChild(mockup);
+  });
 
   container.appendChild(heading);
   container.appendChild(subtitle);

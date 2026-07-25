@@ -374,15 +374,21 @@ function createEmergencyFundCard(assessment) {
   const detailItems = [
     {
       label: 'Current Amount',
-      value: `€${assessment.currentAmount.toFixed(2)}`,
+      value: `€${(assessment.currentAmount || 0).toFixed(2)}`,
     },
-    { label: 'Target Amount', value: `€${assessment.targetAmount.toFixed(2)}` },
-    { label: 'Months Covered', value: assessment.monthsCovered.toFixed(1) },
+    {
+      label: 'Target Amount',
+      value: `€${(assessment.targetAmount || 0).toFixed(2)}`,
+    },
+    {
+      label: 'Months Covered',
+      value: (assessment.monthsCovered || 0).toFixed(1),
+    },
     {
       label: 'Shortfall',
       value:
-        assessment.shortfall > 0
-          ? `€${assessment.shortfall.toFixed(2)}`
+        (assessment.shortfall || 0) > 0
+          ? `€${(assessment.shortfall || 0).toFixed(2)}`
           : 'None',
     },
   ];
