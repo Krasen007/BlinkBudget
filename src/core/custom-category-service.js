@@ -100,6 +100,8 @@ export const CustomCategoryService = {
    * @returns {boolean} True if successful
    */
   move(id, direction) {
+    console.log(`[CustomCategoryService] move requested id=${id} direction=${direction}`);
+
     if (!['up', 'down'].includes(direction)) {
       throw new Error('Direction must be "up" or "down"');
     }
@@ -115,6 +117,12 @@ export const CustomCategoryService = {
       cat => !cat.userId || cat.userId === currentUserId
     );
 
+    const before = userCategories
+      .slice()
+      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+      .map(c => c.id);
+    console.log('[CustomCategoryService] before user order', before);
+
     // Sort by current sortOrder (or by creation date if no sortOrder)
     const sorted = userCategories.sort((a, b) => {
       const orderA = a.sortOrder ?? Number.MAX_SAFE_INTEGER;
@@ -125,7 +133,8 @@ export const CustomCategoryService = {
 
     const currentIndex = sorted.findIndex(cat => cat.id === id);
     if (currentIndex === -1) {
-      throw new Error('Category not found');
+      console.warn('[CustomCategoryService] move: Category not found', id);
+      return false;
     }
 
     // Calculate new index
@@ -133,6 +142,7 @@ export const CustomCategoryService = {
 
     // Check bounds
     if (newIndex < 0 || newIndex >= sorted.length) {
+      console.warn('[CustomCategoryService] move: new index out of bounds', newIndex);
       return false; // Already at the edge
     }
 
@@ -155,6 +165,9 @@ export const CustomCategoryService = {
       return cat;
     });
 
+    const after = reordered.map(c => c.id);
+    console.log('[CustomCategoryService] after user order', after);
+
     // Merge back with other users' categories
     const otherUsersCategories = allCategories.filter(
       cat => cat.userId && cat.userId !== currentUserId
@@ -163,6 +176,13 @@ export const CustomCategoryService = {
     const mergedCategories = [...otherUsersCategories, ...reordered];
 
     this._persist(mergedCategories);
+
+    try {
+      const storageDump = localStorage.getItem(CUSTOM_CATEGORIES_KEY);
+      console.log('[CustomCategoryService] persisted storage length', storageDump ? storageDump.length : 0);
+    } catch (e) {
+      console.warn('[CustomCategoryService] could not read back storage after persist', e);
+    }
 
     return true;
   },
@@ -836,6 +856,26 @@ export const CustomCategoryService = {
     localStorage.setItem(CUSTOM_CATEGORIES_KEY, JSON.stringify(categories));
     if (sync) {
       SyncService.pushToCloud(CUSTOM_CATEGORIES_KEY, categories);
+    }
+    // Notify the app that categories changed so views can refresh
+    try {
+      window.dispatchEvent(
+        new CustomEvent('storage-updated', { detail: { key: CUSTOM_CATEGORIES_KEY } })
+      );
+    } catch (e) {
+      // Ignore if running in non-DOM test environment
+    }
+    try {
+      window.dispatchEvent(new CustomEvent('categories-updated'));
+    } catch (e) {}
+    // Record a short-lived local update marker so sync can prefer local edits
+    try {
+      localStorage.setItem(
+        `${CUSTOM_CATEGORIES_KEY}_lastLocalUpdate`,
+        String(Date.now())
+      );
+    } catch (e) {
+      // ignore storage errors
     }
   },
 };

@@ -875,16 +875,38 @@ export const CustomCategoryManager = ({
 
   function moveCategory(categoryId, direction) {
     try {
-      const success = CustomCategoryService.move(categoryId, direction);
+      // Reorder within the currently visible list (filtered by type)
+      const visibleIds = categories.map(c => c.id);
+      const idx = visibleIds.indexOf(categoryId);
+      if (idx === -1) {
+        // Fallback to global move if not found in visible list
+        console.warn('moveCategory: id not found in visible list, falling back to global move', categoryId);
+        const success = CustomCategoryService.move(categoryId, direction);
+        if (success) {
+          renderCategories();
+          onCategoryChange && onCategoryChange();
+        }
+        return;
+      }
+
+      const newIdx = direction === 'up' ? idx - 1 : idx + 1;
+      if (newIdx < 0 || newIdx >= visibleIds.length) {
+        // Already at edge
+        return;
+      }
+
+      // Swap in the visible ordering and persist as the new order for those categories
+      [visibleIds[idx], visibleIds[newIdx]] = [visibleIds[newIdx], visibleIds[idx]];
+
+      const success = CustomCategoryService.reorder(visibleIds);
       if (success) {
         renderCategories();
         onCategoryChange && onCategoryChange();
       } else {
-        console.warn('Move operation returned false for category:', categoryId);
+        console.warn('reorder returned false for visibleIds', visibleIds);
       }
     } catch (error) {
       console.error('Error moving category:', error);
-      // Show generic error message (error details logged to console)
       const errorDiv = document.createElement('div');
       errorDiv.style.cssText = `
         position: fixed;

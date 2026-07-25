@@ -509,6 +509,17 @@ export const createCategorySelector = (options = {}) => {
   // Initial render
   render();
 
+  // Listen for category updates elsewhere in the app and re-render
+  const _onCategoriesUpdated = () => {
+    try {
+      render();
+    } catch (e) {
+      console.error('Failed to re-render category selector:', e);
+    }
+  };
+
+  window.addEventListener('categories-updated', _onCategoriesUpdated);
+
   return {
     container: categoryGroup,
     chipContainer: container,
@@ -525,5 +536,8 @@ export const createCategorySelector = (options = {}) => {
     setType,
     setSourceAccount,
     render,
+    cleanup: () => {
+      window.removeEventListener('categories-updated', _onCategoriesUpdated);
+    },
   };
 };
