@@ -125,6 +125,12 @@ export const SyncService = {
     this.lastPushTimes.set(dataType, now);
 
     try {
+      // Mark locally that a push is pending for this dataType so merge logic can prefer local edits
+      try {
+        localStorage.setItem(`${dataType}_lastLocalUpdate`, 'pending');
+      } catch {
+        /* ignore storage errors */
+      }
       // Mark that we're writing to this dataType to prevent race conditions
       const writeId = Date.now();
       this.pendingWrites.set(dataType, writeId);
@@ -158,6 +164,12 @@ export const SyncService = {
         if (this.pendingWrites.get(dataType) === writeId) {
           this.pendingWrites.delete(dataType);
           console.log(`[Sync] Write lock released for ${dataType}`);
+          try {
+            // Mark that the pending push completed by recording a timestamp
+            localStorage.setItem(`${dataType}_lastLocalUpdate`, String(Date.now()));
+          } catch {
+            // ignore storage errors
+          }
         }
       }, 1000); // 1 second should be enough for Firebase to process
     } catch (error) {
@@ -190,6 +202,12 @@ export const SyncService = {
         })
       );
       this.pendingWrites.delete(dataType);
+      try {
+        // Clear the pending marker so merges can proceed after an error
+        localStorage.removeItem(`${dataType}_lastLocalUpdate`);
+      } catch {
+        // ignore storage errors
+      }
     }
   },
 
@@ -295,11 +313,17 @@ export const SyncService = {
 
     // If there was a very recent local update to this key, prefer the local state
     try {
-      const lastLocal = Number(
-        localStorage.getItem(`${key}_lastLocalUpdate`) || '0'
-      );
+      const raw = localStorage.getItem(`${key}_lastLocalUpdate`);
       const now = Date.now();
-      // If local update within last 5 seconds, skip merging to avoid overwriting user's immediate edits
+      // If a pending marker exists (set when a local update is awaiting cloud push), skip merge
+      if (raw === 'pending') {
+        console.log(
+          `[Sync] Local update for ${key} is pending cloud push, skipping cloud merge`
+        );
+        return;
+      }
+      const lastLocal = Number(raw || '0');
+      // If local update timestamp within last 5 seconds, skip merging to avoid overwriting user's immediate edits
       if (lastLocal && now - lastLocal < 5000) {
         console.log(
           `[Sync] Recent local update for ${key} (within 5s), skipping cloud merge`

@@ -512,6 +512,13 @@ export const createCategorySelector = (options = {}) => {
   // Listen for category updates elsewhere in the app and re-render
   const _onCategoriesUpdated = () => {
     try {
+      // Reconcile selectedCategory against current categories
+      const available = CustomCategoryService.getAllCategoryNames(currentType) || [];
+      if (selectedCategory && !available.includes(selectedCategory)) {
+        // Selected category was deleted or renamed; clear selection to avoid stale references
+        selectedCategory = null;
+        prioritizedCategory = null;
+      }
       render();
     } catch (e) {
       console.error('Failed to re-render category selector:', e);

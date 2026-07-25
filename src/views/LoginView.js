@@ -219,7 +219,8 @@ export const LoginView = () => {
 
   const eyeBtn = document.createElement('button');
   eyeBtn.type = 'button';
-  eyeBtn.setAttribute('aria-label', 'Toggle password visibility');
+  eyeBtn.setAttribute('aria-label', 'Show password');
+  eyeBtn.setAttribute('aria-pressed', 'false');
   Object.assign(eyeBtn.style, {
     border: 'none',
     background: 'transparent',
@@ -254,6 +255,10 @@ export const LoginView = () => {
     passwordInput.type = passwordVisible ? 'text' : 'password';
     // update aria and icon (swap to a simple slash overlay when hidden)
     eyeBtn.setAttribute('aria-pressed', String(passwordVisible));
+    eyeBtn.setAttribute(
+      'aria-label',
+      passwordVisible ? 'Hide password' : 'Show password'
+    );
     if (passwordVisible) {
       eyeSvg.innerHTML = `
         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">

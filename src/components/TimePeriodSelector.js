@@ -341,14 +341,14 @@ export const TimePeriodSelector = (options = {}) => {
           const newOffset = currentOffset - 1;
           button.dataset.monthOffset = newOffset.toString();
           const newPeriod = getSpecificMonthPeriod(newOffset);
-          updateRightArrowVisibility(rightArrow, newOffset);
+          updateRightArrowVisibility(rightArrow, newOffset, period.key);
           handleMonthNavigation(newPeriod);
         } else if (period.key === 'quarter') {
           const currentOffset = parseInt(button.dataset.quarterOffset || '0');
           const newOffset = currentOffset - 1;
           button.dataset.quarterOffset = newOffset.toString();
           const newPeriod = getSpecificQuarterPeriod(newOffset);
-          updateRightArrowVisibility(rightArrow, newOffset);
+          updateRightArrowVisibility(rightArrow, newOffset, period.key);
           handleQuarterNavigation(newPeriod);
         } else if (period.key === 'year') {
           const currentOffset = parseInt(button.dataset.yearOffset || '0');

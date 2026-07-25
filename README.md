@@ -51,10 +51,10 @@
 - **Date filtering functionality** tap on the name to show | src/components/TransactionListItem.js:onDateClick handler | src/views/DashboardView.js:date filtering
 - **Integrated category filtering** between Reports and Dashboard views for consistent analysis across all sections | src/views/ReportsView.js:category filter sync | src/views/DashboardView.js:category filter sync
 - **Smart time period navigation** with dynamic labels showing specific months and years | src/views/DashboardView.js:time navigation | src/utils/date-utils.js:date formatting
-- **Quarter-based navigation** for reports — Quickly jump between Q1, Q2, Q3, and Q4 periods when viewing reports for faster period switching | src/views/ReportsView.js:quarter navigation | src/utils/date-utils.js:quarter formatting
-- **Transaction Split** - Hold transaction to split in two | src/components/TransactionListItem.js:handleSplitTransaction() | src/core/transaction-service.js:split()
-- **Duplicate transactions** - Long-press any transaction in the dashboard to duplicate it instantly | src/components/TransactionListItem.js:handleDuplicateTransaction() | src/core/transaction-service.js:duplicate()
-- **Enter to save in edit mode** - Pressing Enter while editing a transaction now automatically saves it, matching the behavior in reports | src/views/EditView.js:Enter key handler | src/utils/form-utils/submission.js:handleFormSubmit()
+- **Quarter-based navigation** for reports — Quickly jump between Q1, Q2, Q3, and Q4 periods when viewing reports for faster period switching | src/components/TimePeriodSelector.js:handleQuarterNavigation | src/utils/reports-utils.js:quarter helpers
+- **Transaction Split** - Hold transaction to split in two | src/core/transaction-service.js:split()
+- **Duplicate transactions** - Long-press any transaction in the dashboard to duplicate it instantly | src/core/transaction-service.js:copy()
+- **Enter to save in edit mode** - Pressing Enter while editing a transaction now automatically saves it, matching the behavior in reports | src/components/TransactionForm.js:TransactionForm | src/components/TransactionForm.js:Enter key handler
 - **Bulk transaction editing** - Long-press to enter multi-select mode, select multiple transactions, and edit or delete them in bulk | src/views/DashboardView.js:multi-select | src/components/TransactionListItem.js:long-press selection
 - **Multi-select visual feedback** - Clear selection indicators and count display when selecting transactions | src/views/DashboardView.js:selection mode | src/styles/main.css:bulk-actions styles
 
@@ -153,7 +153,7 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 - **Android TWA support** - Trusted Web Activity for native Android app experience with Play Store deployment | src/pwa.js:TWA support configuration | public/.well-known/assetlinks.json - TWA verification
 - **Keyboard shortcut (Escape key)** to exit Settings and return to dashboard | src/core/mobile-utils.js:handleKeyDown() - Escape key handling | src/views/SettingsView.js:keyboard navigation
 - **Helpful tips on each section** | src/utils/tooltip-config.js:tooltip configuration
-- **Password visibility toggle** - An eye icon in password fields lets you reveal or hide the text as you type | src/components/PasswordToggle.js:PasswordToggle() | src/utils/password-utils.js:togglePasswordVisibility()
+- **Password visibility toggle** - An eye icon in password fields lets you reveal or hide the text as you type | src/views/LoginView.js:eye button with toggle logic | src/views/LoginView.js:password visibility toggle
 - **Top-tier Security** - Advanced XSS protection, strict URL validation, comprehensive privacy compliance, and regular security patches | src/utils/security-utils.js:safeJsonParse() | src/core/privacy-service.js:privacy controls
 - **Improved accessibility** with "Skip to Content" links, ARIA roles, proper form label associations, and keyboard support for all interactive elements | src/core/accessibility-service.js:accessibility helpers | src/components/TransactionForm.js:ARIA labels
 - **Modern component foundation** - BaseComponent building blocks and an Enhanced Button component for consistent UI behavior | src/components/Button.js:ButtonComponent | src/components/BaseComponent.js:BaseComponent foundation

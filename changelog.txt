@@ -1,4 +1,4 @@
-### Summary v1.43
+### Summary v1.44
 
 - Quarter-based navigation added to reports for faster period switching
 - Transactions can now be saved with Enter and duplicated with a long-press

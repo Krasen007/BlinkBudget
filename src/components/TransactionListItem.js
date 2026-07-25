@@ -98,7 +98,7 @@ export const TransactionListItem = ({
     splitBtn.className = 'btn btn-primary';
     splitBtn.style.width = '100%';
     splitBtn.addEventListener('click', () => {
-      document.body.removeChild(overlay);
+      close();
       let result;
       try {
         result = TransactionService.split(transaction.id);
@@ -149,7 +149,7 @@ export const TransactionListItem = ({
     copyBtn.className = 'btn btn-secondary';
     copyBtn.style.width = '100%';
     copyBtn.addEventListener('click', () => {
-      document.body.removeChild(overlay);
+      close();
       let copied;
       try {
         copied = TransactionService.copy(transaction.id);
@@ -194,7 +194,7 @@ export const TransactionListItem = ({
     multiBtn.className = 'btn btn-secondary';
     multiBtn.style.width = '100%';
     multiBtn.addEventListener('click', () => {
-      document.body.removeChild(overlay);
+      close();
       if (typeof onSelectMultiple === 'function') {
         onSelectMultiple(transaction.id);
       }
@@ -207,7 +207,7 @@ export const TransactionListItem = ({
     cancelBtn.className = 'btn btn-secondary';
     cancelBtn.style.width = '100%';
     cancelBtn.addEventListener('click', () => {
-      document.body.removeChild(overlay);
+      close();
     });
     btnGroup.appendChild(cancelBtn);
 
@@ -217,17 +217,17 @@ export const TransactionListItem = ({
     card.setAttribute('aria-labelledby', 'split-dialog-title');
     overlay.appendChild(card);
 
-    const close = () => {
+    function close() {
+      document.body.removeEventListener('keydown', onKey);
       if (document.body.contains(overlay)) {
         document.body.removeChild(overlay);
       }
-    };
+    }
     overlay.addEventListener('click', e => {
       if (e.target === overlay) close();
     });
     const onKey = e => {
       if (e.key === 'Escape') {
-        document.body.removeEventListener('keydown', onKey);
         close();
       }
     };

@@ -76,16 +76,15 @@ BlinkBudget uses a hybrid local-cloud architecture designed for privacy and perf
 
 ### 4.1 No Third-Party Sharing
 
-- We do not sell, rent, or share your personal financial data with third parties
+- We do not sell, rent, or share your personal financial transaction data with third parties for advertising or marketing by default
 - Your transaction data is not used for advertising or marketing purposes
-- The app does not transmit financial data to unrelated analytics companies by default
+- Financial transaction data is not transmitted to unrelated analytics companies when running in local-only mode; optional telemetry and error reporting may be transmitted if you enable those features
 
 ### 4.2 Service Providers
 
-- **Firebase (Google):** Used for authentication and optional cloud storage when configured
-- **Netlify:** Used for application hosting in many deployments
+- **Firebase (Google):** Used for authentication and optional cloud storage when configured; acts as a cloud processor when cloud sync is enabled
+- **Netlify:** Used for application hosting in many deployments and may process deployment analytics when enabled
 - These providers are used only to support the app's functionality and sync features
-- If analytics are enabled through the deployment, this is limited to optional usage data and not general marketing tracking
 
 ### 4.3 Legal Requirements
 
@@ -127,7 +126,7 @@ When you delete your account, the app attempts to:
 ### 6.2 Local-Only Usage
 
 - You can use BlinkBudget offline without creating an account
-- No data is transmitted to external servers when running locally
+- No financial transaction data is transmitted to external servers when running locally; optional telemetry and error logs may still be transmitted if you enable those features. When cloud features are used, providers such as Firebase and Netlify act as cloud processors.
 - All features are available except cloud sync and account-based features
 
 ### 6.3 Opt-Out Choices
@@ -158,7 +157,7 @@ When you delete your account, the app attempts to:
 
 ## 8. Children's Privacy
 
-BlinkBudget is not intended for children under the applicable age limit in their jurisdiction (typically 13 in the US under COPPA, or 13-16 in the EU under GDPR). We do not knowingly collect personal information from children under the applicable age limit. If we become aware that we have collected such information, we will delete it promptly.
+BlinkBudget is not intended for children below the applicable age of digital consent in their jurisdiction. In the United States this is generally under 13 years old under COPPA. Under GDPR Article 8 the default age of digital consent is 16, although EU Member States may lawfully lower that age to 13. We do not knowingly collect personal information from children below the applicable age in their jurisdiction. If we become aware that we have collected such information, we will delete it promptly.
 
 ## 9. International Data Transfers
 
@@ -188,7 +187,9 @@ A change is material if it affects:
 ### Public Channels (General Inquiries)
 
 - **GitHub Issues:** [Create an issue in our repository](https://github.com/Krasen007/BlinkBudget/issues)
-- **Documentation:** Available in the project README and docs folder
+
+- **Documentation:** Available in the project's published documentation (served from the `public/` folder) and on the hosted site at the published documentation URLs
+
 
 **Important:** Do not submit sensitive personal information through public GitHub issues.
 
@@ -202,6 +203,7 @@ If you are located in the EU, you have the following rights under GDPR:
 - **Right to Portability:** Transfer your data to another service
 - **Right to Object:** Object to certain data processing
 - **Right to Restrict:** Limit processing of your data
+ - **Right to Lodge a Complaint:** You have the right to lodge a complaint with a competent supervisory authority if you believe your rights under GDPR have been violated
 
 ## 13. California Privacy Rights (CCPA)
 

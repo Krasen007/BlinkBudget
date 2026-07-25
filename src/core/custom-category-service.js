@@ -883,12 +883,9 @@ export const CustomCategoryService = {
     } catch {
       // Ignore if running in non-DOM test environment
     }
-    // Record a short-lived local update marker so sync can prefer local edits
+    // Record a local update marker indicating a pending push so sync can prefer local edits
     try {
-      localStorage.setItem(
-        `${CUSTOM_CATEGORIES_KEY}_lastLocalUpdate`,
-        String(Date.now())
-      );
+      localStorage.setItem(`${CUSTOM_CATEGORIES_KEY}_lastLocalUpdate`, 'pending');
     } catch {
       // ignore storage errors
     }

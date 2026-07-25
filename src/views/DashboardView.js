@@ -1183,6 +1183,15 @@ export const DashboardView = (params = {}) => {
 
   const handleAuthChange = e => {
     updateTitle(e.detail.user);
+    // Reset preload state so the next authenticated user schedules fresh preloads
+    hasScheduledDashboardPreloads = false;
+    hasPreloadedFinancialPlanning = false;
+    financialPlanningPreloadPromise = null;
+    try {
+      localStorage.removeItem('blinkbudget_financial_planning_cache');
+    } catch (err) {
+      // ignore storage errors
+    }
     renderDashboard();
   };
 
