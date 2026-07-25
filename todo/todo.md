@@ -1,3 +1,6 @@
+fix yarn fix
+fix when pressing enter when editing a transaction to save it automatically
+
 # BlinkBudget To-Do List
 
 ✅ Implement (Strongly Aligned with Vision)

@@ -357,6 +357,14 @@ export const TransactionForm = ({
       externalDateInput.addEventListener('change', submitForm);
     }
 
+    // Enter key auto-save for edit mode
+    form.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && document.activeElement !== noteField) {
+        e.preventDefault();
+        submitForm();
+      }
+    });
+
     // Remove mobile-specific classes to match other buttons
     okBtn.classList.remove('mobile-btn-primary', 'touch-target-primary');
 

@@ -328,9 +328,15 @@ export const LoginView = () => {
     const letterOk = /[a-zA-Z]/.test(pwd);
     const numberOk = /[0-9]/.test(pwd);
 
-    reqMinLen._indicator.style.background = lenOk ? COLORS.SUCCESS : COLORS.BORDER;
-    reqLetter._indicator.style.background = letterOk ? COLORS.SUCCESS : COLORS.BORDER;
-    reqNumber._indicator.style.background = numberOk ? COLORS.SUCCESS : COLORS.BORDER;
+    reqMinLen._indicator.style.background = lenOk
+      ? COLORS.SUCCESS
+      : COLORS.BORDER;
+    reqLetter._indicator.style.background = letterOk
+      ? COLORS.SUCCESS
+      : COLORS.BORDER;
+    reqNumber._indicator.style.background = numberOk
+      ? COLORS.SUCCESS
+      : COLORS.BORDER;
   };
 
   passwordInput.addEventListener('input', e => {

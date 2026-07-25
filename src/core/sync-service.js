@@ -295,14 +295,18 @@ export const SyncService = {
 
     // If there was a very recent local update to this key, prefer the local state
     try {
-      const lastLocal = Number(localStorage.getItem(`${key}_lastLocalUpdate`) || '0');
+      const lastLocal = Number(
+        localStorage.getItem(`${key}_lastLocalUpdate`) || '0'
+      );
       const now = Date.now();
       // If local update within last 5 seconds, skip merging to avoid overwriting user's immediate edits
       if (lastLocal && now - lastLocal < 5000) {
-        console.log(`[Sync] Recent local update for ${key} (within 5s), skipping cloud merge`);
+        console.log(
+          `[Sync] Recent local update for ${key} (within 5s), skipping cloud merge`
+        );
         return;
       }
-    } catch (e) {
+    } catch {
       // ignore storage access errors
     }
 

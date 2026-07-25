@@ -448,17 +448,22 @@ export const FinancialPlanningView = (params = {}) => {
         planningData.transactions.length === 0
       ) {
         // Fire-and-forget background sync — don't await it
-        backgroundSyncFromCloud().then(async () => {
-          if (isCancelled) return;
-          const freshData = await planningDataManager.loadData();
-          if (freshData && !isDeepEqual(freshData, planningData)) {
-            planningData = freshData;
-            setCachedPlanningData(freshData);
-            renderSection(currentSection);
-          }
-        }).catch(err => {
-          console.warn('[FinancialPlanning] Background cloud sync failed:', err);
-        });
+        backgroundSyncFromCloud()
+          .then(async () => {
+            if (isCancelled) return;
+            const freshData = await planningDataManager.loadData();
+            if (freshData && !isDeepEqual(freshData, planningData)) {
+              planningData = freshData;
+              setCachedPlanningData(freshData);
+              renderSection(currentSection);
+            }
+          })
+          .catch(err => {
+            console.warn(
+              '[FinancialPlanning] Background cloud sync failed:',
+              err
+            );
+          });
       }
     } catch (error) {
       console.error('Error loading planning data:', error);

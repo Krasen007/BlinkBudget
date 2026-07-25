@@ -100,7 +100,9 @@ export const CustomCategoryService = {
    * @returns {boolean} True if successful
    */
   move(id, direction) {
-    console.log(`[CustomCategoryService] move requested id=${id} direction=${direction}`);
+    console.log(
+      `[CustomCategoryService] move requested id=${id} direction=${direction}`
+    );
 
     if (!['up', 'down'].includes(direction)) {
       throw new Error('Direction must be "up" or "down"');
@@ -142,7 +144,10 @@ export const CustomCategoryService = {
 
     // Check bounds
     if (newIndex < 0 || newIndex >= sorted.length) {
-      console.warn('[CustomCategoryService] move: new index out of bounds', newIndex);
+      console.warn(
+        '[CustomCategoryService] move: new index out of bounds',
+        newIndex
+      );
       return false; // Already at the edge
     }
 
@@ -179,9 +184,15 @@ export const CustomCategoryService = {
 
     try {
       const storageDump = localStorage.getItem(CUSTOM_CATEGORIES_KEY);
-      console.log('[CustomCategoryService] persisted storage length', storageDump ? storageDump.length : 0);
+      console.log(
+        '[CustomCategoryService] persisted storage length',
+        storageDump ? storageDump.length : 0
+      );
     } catch (e) {
-      console.warn('[CustomCategoryService] could not read back storage after persist', e);
+      console.warn(
+        '[CustomCategoryService] could not read back storage after persist',
+        e
+      );
     }
 
     return true;
@@ -860,21 +871,25 @@ export const CustomCategoryService = {
     // Notify the app that categories changed so views can refresh
     try {
       window.dispatchEvent(
-        new CustomEvent('storage-updated', { detail: { key: CUSTOM_CATEGORIES_KEY } })
+        new CustomEvent('storage-updated', {
+          detail: { key: CUSTOM_CATEGORIES_KEY },
+        })
       );
-    } catch (e) {
+    } catch {
       // Ignore if running in non-DOM test environment
     }
     try {
       window.dispatchEvent(new CustomEvent('categories-updated'));
-    } catch (e) {}
+    } catch {
+      // Ignore if running in non-DOM test environment
+    }
     // Record a short-lived local update marker so sync can prefer local edits
     try {
       localStorage.setItem(
         `${CUSTOM_CATEGORIES_KEY}_lastLocalUpdate`,
         String(Date.now())
       );
-    } catch (e) {
+    } catch {
       // ignore storage errors
     }
   },

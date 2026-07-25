@@ -880,7 +880,10 @@ export const CustomCategoryManager = ({
       const idx = visibleIds.indexOf(categoryId);
       if (idx === -1) {
         // Fallback to global move if not found in visible list
-        console.warn('moveCategory: id not found in visible list, falling back to global move', categoryId);
+        console.warn(
+          'moveCategory: id not found in visible list, falling back to global move',
+          categoryId
+        );
         const success = CustomCategoryService.move(categoryId, direction);
         if (success) {
           renderCategories();
@@ -896,7 +899,10 @@ export const CustomCategoryManager = ({
       }
 
       // Swap in the visible ordering and persist as the new order for those categories
-      [visibleIds[idx], visibleIds[newIdx]] = [visibleIds[newIdx], visibleIds[idx]];
+      [visibleIds[idx], visibleIds[newIdx]] = [
+        visibleIds[newIdx],
+        visibleIds[idx],
+      ];
 
       const success = CustomCategoryService.reorder(visibleIds);
       if (success) {
