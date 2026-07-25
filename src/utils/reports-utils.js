@@ -125,6 +125,32 @@ export function getCurrentYearPeriod() {
 }
 
 /**
+ * Get a specific quarter period (for navigation)
+ */
+export function getSpecificQuarterPeriod(quartersOffset = 0) {
+  const now = new Date();
+  const currentQuarter = Math.floor(now.getMonth() / 3);
+  const targetQuarter = currentQuarter + quartersOffset;
+  
+  // Calculate the year and quarter
+  const targetYear = now.getFullYear() + Math.floor(targetQuarter / 4);
+  const quarterInYear = ((targetQuarter % 4) + 4) % 4; // Handle negative quarters
+  
+  const startOfQuarter = new Date(targetYear, quarterInYear * 3, 1);
+  const endOfQuarter = new Date(targetYear, quarterInYear * 3 + 3, 0);
+  endOfQuarter.setHours(23, 59, 59, 999);
+
+  const quarterLabels = ['Q1', 'Q2', 'Q3', 'Q4'];
+
+  return {
+    type: 'quarterly',
+    startDate: startOfQuarter,
+    endDate: endOfQuarter,
+    label: `${quarterLabels[quarterInYear]} ${targetYear}`,
+  };
+}
+
+/**
  * Format time period for display
  */
 export function formatTimePeriod(timePeriod) {

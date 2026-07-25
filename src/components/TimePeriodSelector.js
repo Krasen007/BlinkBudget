@@ -4,7 +4,6 @@
  * Provides a comprehensive time period selection interface with daily, weekly,
  * monthly, and custom period options. Includes date range validation and selection.
  *
- * Requirements: 1.2, 2.5
  */
 
 import { COLORS, SPACING, FONT_SIZES } from '../utils/constants.js';
@@ -14,6 +13,7 @@ import {
   getCurrentMonthPeriod,
   getCurrentQuarterPeriod,
   getTodayPeriod,
+  getSpecificQuarterPeriod,
 } from '../utils/reports-utils.js';
 
 /**
@@ -192,9 +192,14 @@ export const TimePeriodSelector = (options = {}) => {
     return arrow;
   }
 
-  function updateRightArrowVisibility(rightArrow, currentOffset) {
-    // Only show right arrow if we're in the past (offset < 0 for months, < 0 for years)
-    rightArrow.style.display = currentOffset < 0 ? 'flex' : 'none';
+  function updateRightArrowVisibility(rightArrow, currentOffset, periodKey) {
+    // For quarters, show right arrow if offset is not 0 (not current quarter)
+    // For months and years, show right arrow only if we're in the past (offset < 0)
+    if (periodKey === 'quarter') {
+      rightArrow.style.display = currentOffset !== 0 ? 'flex' : 'none';
+    } else {
+      rightArrow.style.display = currentOffset < 0 ? 'flex' : 'none';
+    }
   }
 
   // Add custom period option if enabled
@@ -259,9 +264,11 @@ export const TimePeriodSelector = (options = {}) => {
     button.className = 'view-tab'; // Standardized class
     button.dataset.period = period.key;
 
-    // Initialize month offset for last month button and year offset for year button
+    // Initialize offsets for navigatable buttons
     if (period.key === 'lastMonth') {
       button.dataset.monthOffset = '-1';
+    } else if (period.key === 'quarter') {
+      button.dataset.quarterOffset = '0';
     } else if (period.key === 'year') {
       button.dataset.yearOffset = '0';
     }
@@ -277,10 +284,18 @@ export const TimePeriodSelector = (options = {}) => {
     const labelSpan = document.createElement('span');
     labelSpan.className = 'tab-label';
 
-    // Set initial label for Last Month and Year buttons
+    // Set initial label for Last Month, Quarter, and Year buttons
     if (period.key === 'lastMonth') {
       labelSpan.textContent =
         period.key === initialKey ? initialPeriod.label : 'Last Month';
+    } else if (period.key === 'quarter') {
+      // Get current quarter label
+      const now = new Date();
+      const currentQuarter = Math.floor(now.getMonth() / 3);
+      const quarterLabels = ['Q1', 'Q2', 'Q3', 'Q4'];
+      const currentQuarterLabel = `${quarterLabels[currentQuarter]} ${now.getFullYear()}`;
+      labelSpan.textContent =
+        period.key === initialKey ? initialPeriod.label : currentQuarterLabel;
     } else if (period.key === 'year') {
       labelSpan.textContent =
         period.key === initialKey ? initialPeriod.label : 'This Year';
@@ -288,8 +303,8 @@ export const TimePeriodSelector = (options = {}) => {
       labelSpan.textContent = period.label;
     }
 
-    // Add arrow for Last Month and Year buttons
-    if (period.key === 'lastMonth' || period.key === 'year') {
+    // Add arrow for Last Month, Quarter, and Year buttons
+    if (period.key === 'lastMonth' || period.key === 'quarter' || period.key === 'year') {
       // Add relative position to the parent button so the absolute arrow docks cleanly to the button's bounds
       button.style.position = 'relative';
 
@@ -302,13 +317,14 @@ export const TimePeriodSelector = (options = {}) => {
       const leftArrow = createArrow('left');
       const rightArrow = createArrow('right');
 
-      // Right arrow starts hidden (we start at offset -1 for month, 0 for year)
+      // Right arrow starts hidden (we start at offset -1 for month, 0 for year/quarter)
       const initialMonthOffset = period.key === 'lastMonth' ? -1 : 0;
+      const initialQuarterOffset = 0;
       const initialYearOffset = 0;
-      updateRightArrowVisibility(
-        rightArrow,
-        period.key === 'lastMonth' ? initialMonthOffset : initialYearOffset
-      );
+      const initialOffset = period.key === 'lastMonth' ? initialMonthOffset : 
+                           period.key === 'quarter' ? initialQuarterOffset : 
+                           initialYearOffset;
+      updateRightArrowVisibility(rightArrow, initialOffset, period.key);
 
       // Left arrow click — go further back
       leftArrow.addEventListener('click', e => {
@@ -320,6 +336,13 @@ export const TimePeriodSelector = (options = {}) => {
           const newPeriod = getSpecificMonthPeriod(newOffset);
           updateRightArrowVisibility(rightArrow, newOffset);
           handleMonthNavigation(newPeriod);
+        } else if (period.key === 'quarter') {
+          const currentOffset = parseInt(button.dataset.quarterOffset || '0');
+          const newOffset = currentOffset - 1;
+          button.dataset.quarterOffset = newOffset.toString();
+          const newPeriod = getSpecificQuarterPeriod(newOffset);
+          updateRightArrowVisibility(rightArrow, newOffset);
+          handleQuarterNavigation(newPeriod);
         } else if (period.key === 'year') {
           const currentOffset = parseInt(button.dataset.yearOffset || '0');
           const newOffset = currentOffset - 1;
@@ -340,6 +363,13 @@ export const TimePeriodSelector = (options = {}) => {
           const newPeriod = getSpecificMonthPeriod(newOffset);
           updateRightArrowVisibility(rightArrow, newOffset);
           handleMonthNavigation(newPeriod);
+        } else if (period.key === 'quarter') {
+          const currentOffset = parseInt(button.dataset.quarterOffset || '0');
+          const newOffset = currentOffset + 1;
+          button.dataset.quarterOffset = newOffset.toString();
+          const newPeriod = getSpecificQuarterPeriod(newOffset);
+          updateRightArrowVisibility(rightArrow, newOffset);
+          handleQuarterNavigation(newPeriod);
         } else if (period.key === 'year') {
           const currentOffset = parseInt(button.dataset.yearOffset || '0');
           const newOffset = currentOffset + 1;
@@ -592,6 +622,41 @@ export const TimePeriodSelector = (options = {}) => {
   }
 
   /**
+   * Handle quarter navigation
+   */
+  function handleQuarterNavigation(newPeriod) {
+    try {
+      // Validate the period
+      if (!validateTimePeriod(newPeriod)) {
+        showValidationError('Invalid time period selected');
+        return;
+      }
+
+      // Update state
+      currentPeriod = newPeriod;
+
+      // Update UI - set Quarter button as active
+      setActiveButton(periodButtons.get('quarter'));
+      hideCustomRangeSelector();
+
+      // Update the Quarter button label to show the actual quarter
+      const quarterButton = periodButtons.get('quarter');
+      const labelSpan = quarterButton.querySelector('.tab-label');
+      if (labelSpan) {
+        labelSpan.textContent = newPeriod.label;
+      }
+
+      // Notify parent component but with a flag to prevent full recreation
+      if (onChange) {
+        onChange(currentPeriod, { isNavigation: true });
+      }
+    } catch (error) {
+      console.error('Error navigating to quarter:', error);
+      showValidationError('Error navigating to quarter');
+    }
+  }
+
+  /**
    * Handle year navigation
    */
   function handleYearNavigation(newPeriod) {
@@ -655,8 +720,8 @@ export const TimePeriodSelector = (options = {}) => {
       setActiveButton(button);
       hideCustomRangeSelector();
 
-      // Update button label if it's a navigatable period (Last Month or This Year)
-      if (period.key === 'lastMonth' || period.key === 'year') {
+      // Update button label if it's a navigatable period (Last Month, Quarter, or This Year)
+      if (period.key === 'lastMonth' || period.key === 'quarter' || period.key === 'year') {
         const labelSpan = button.querySelector('.tab-label');
         if (labelSpan) {
           labelSpan.textContent = newPeriod.label;
@@ -981,8 +1046,38 @@ export const TimePeriodSelector = (options = {}) => {
             // Update arrow visibility
             const rightArrow = lastMonthButton.querySelector('.arrow-right');
             if (rightArrow) {
-              updateRightArrowVisibility(rightArrow, totalMonthOffset);
+              updateRightArrowVisibility(rightArrow, totalMonthOffset, 'lastMonth');
             }
+          }
+        } else if (period.type === 'quarterly') {
+          // Handle custom quarterly periods
+          const now = new Date();
+          const currentQuarter = Math.floor(now.getMonth() / 3);
+          const periodStart = new Date(period.startDate);
+          const periodQuarter = Math.floor(periodStart.getMonth() / 3);
+          
+          // Calculate quarter offset from current quarter
+          const yearDiff = periodStart.getFullYear() - now.getFullYear();
+          const quarterDiff = periodQuarter - currentQuarter;
+          const totalQuarterOffset = yearDiff * 4 + quarterDiff;
+
+          // Activate the Quarter button
+          setActiveButton(periodButtons.get('quarter'));
+
+          // Update the Quarter button label
+          const quarterButton = periodButtons.get('quarter');
+          const labelSpan = quarterButton.querySelector('.tab-label');
+          if (labelSpan) {
+            labelSpan.textContent = period.label;
+          }
+
+          // Update the quarter offset
+          quarterButton.dataset.quarterOffset = totalQuarterOffset.toString();
+
+          // Update arrow visibility
+          const rightArrow = quarterButton.querySelector('.arrow-right');
+          if (rightArrow) {
+            updateRightArrowVisibility(rightArrow, totalQuarterOffset, 'quarter');
           }
         }
       }
