@@ -166,7 +166,10 @@ export const SyncService = {
           console.log(`[Sync] Write lock released for ${dataType}`);
           try {
             // Mark that the pending push completed by recording a timestamp
-            localStorage.setItem(`${dataType}_lastLocalUpdate`, String(Date.now()));
+            localStorage.setItem(
+              `${dataType}_lastLocalUpdate`,
+              String(Date.now())
+            );
           } catch {
             // ignore storage errors
           }

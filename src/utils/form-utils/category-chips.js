@@ -513,7 +513,8 @@ export const createCategorySelector = (options = {}) => {
   const _onCategoriesUpdated = () => {
     try {
       // Reconcile selectedCategory against current categories
-      const available = CustomCategoryService.getAllCategoryNames(currentType) || [];
+      const available =
+        CustomCategoryService.getAllCategoryNames(currentType) || [];
       if (selectedCategory && !available.includes(selectedCategory)) {
         // Selected category was deleted or renamed; clear selection to avoid stale references
         selectedCategory = null;
@@ -525,7 +526,12 @@ export const createCategorySelector = (options = {}) => {
     }
   };
 
-  window.addEventListener('categories-updated', _onCategoriesUpdated);
+  if (
+    typeof window !== 'undefined' &&
+    typeof window.addEventListener === 'function'
+  ) {
+    window.addEventListener('categories-updated', _onCategoriesUpdated);
+  }
 
   return {
     container: categoryGroup,
@@ -544,7 +550,12 @@ export const createCategorySelector = (options = {}) => {
     setSourceAccount,
     render,
     cleanup: () => {
-      window.removeEventListener('categories-updated', _onCategoriesUpdated);
+      if (
+        typeof window !== 'undefined' &&
+        typeof window.removeEventListener === 'function'
+      ) {
+        window.removeEventListener('categories-updated', _onCategoriesUpdated);
+      }
     },
   };
 };

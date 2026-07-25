@@ -359,7 +359,7 @@ export const TransactionForm = ({
 
     // Enter key auto-save for edit mode
     form.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && e.target instanceof HTMLInputElement) {
+      if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
         e.preventDefault();
         submitForm();
       }

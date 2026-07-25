@@ -190,7 +190,6 @@ A change is material if it affects:
 
 - **Documentation:** Available in the project's published documentation (served from the `public/` folder) and on the hosted site at the published documentation URLs
 
-
 **Important:** Do not submit sensitive personal information through public GitHub issues.
 
 ## 12. Data Subject Rights (GDPR)
@@ -203,7 +202,7 @@ If you are located in the EU, you have the following rights under GDPR:
 - **Right to Portability:** Transfer your data to another service
 - **Right to Object:** Object to certain data processing
 - **Right to Restrict:** Limit processing of your data
- - **Right to Lodge a Complaint:** You have the right to lodge a complaint with a competent supervisory authority if you believe your rights under GDPR have been violated
+- **Right to Lodge a Complaint:** You have the right to lodge a complaint with a competent supervisory authority if you believe your rights under GDPR have been violated
 
 ## 13. California Privacy Rights (CCPA)
 

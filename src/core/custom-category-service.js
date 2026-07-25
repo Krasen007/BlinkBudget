@@ -885,7 +885,10 @@ export const CustomCategoryService = {
     }
     // Record a local update marker indicating a pending push so sync can prefer local edits
     try {
-      localStorage.setItem(`${CUSTOM_CATEGORIES_KEY}_lastLocalUpdate`, 'pending');
+      localStorage.setItem(
+        `${CUSTOM_CATEGORIES_KEY}_lastLocalUpdate`,
+        'pending'
+      );
     } catch {
       // ignore storage errors
     }

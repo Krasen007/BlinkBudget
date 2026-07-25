@@ -1189,7 +1189,7 @@ export const DashboardView = (params = {}) => {
     financialPlanningPreloadPromise = null;
     try {
       localStorage.removeItem('blinkbudget_financial_planning_cache');
-    } catch (err) {
+    } catch {
       // ignore storage errors
     }
     renderDashboard();

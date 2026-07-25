@@ -1,8 +1,44 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { TransactionForm } from '../../src/components/TransactionForm.js';
+
+// Mock Firebase-dependent services BEFORE importing TransactionForm
+vi.mock('../../src/core/auth-service.js', () => ({
+  AuthService: {
+    getUserId: () => 'test-user',
+    isAuthenticated: () => false,
+    onAuthStateChanged: vi.fn(),
+  },
+}));
+
+vi.mock('../../src/core/sync-service.js', () => ({
+  SyncService: {
+    pushToCloud: vi.fn(),
+    pullFromCloud: vi.fn(),
+  },
+}));
+
+vi.mock('../../src/core/custom-category-service.js', () => ({
+  CustomCategoryService: {
+    getAll: () => [],
+    getByType: () => [],
+    getCheckboxCategories: () => [],
+    getSystemCategories: () => [],
+    getAllCategoryNames: () => [],
+  },
+}));
+
+vi.mock('../../src/core/transaction-service.js', () => ({
+  TransactionService: {
+    getAll: () => [],
+    add: vi.fn(),
+    update: vi.fn(),
+    remove: vi.fn(),
+    removeTagFromAllTransactions: vi.fn(),
+    renameTagOnAllTransactions: vi.fn(),
+  },
+}));
 
 // Mock AccountService
-vi.mock('../../src/core/account-service.js', () => ({
+vi.mock('../../src/core/Account/account-service.js', () => ({
   AccountService: {
     getAccounts: () => [
       { id: 'main', name: 'Main Account' },
@@ -11,6 +47,8 @@ vi.mock('../../src/core/account-service.js', () => ({
     getDefaultAccount: () => ({ id: 'main', name: 'Main Account' }),
   },
 }));
+
+import { TransactionForm } from '../../src/components/TransactionForm.js';
 
 // Mock mobile utils
 global.window.mobileUtils = {

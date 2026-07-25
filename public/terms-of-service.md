@@ -89,8 +89,8 @@ You may not use BlinkBudget to:
 
 ### 6.2 Support
 
- - **Documentation:** Documentation is available from the project's published documentation site (served from the `public/` folder) and the hosted documentation URLs
- - **No Guaranteed Support:** We do not provide guaranteed individual support
+- **Documentation:** Documentation is available from the project's published documentation site (served from the `public/` folder) and the hosted documentation URLs
+- **No Guaranteed Support:** We do not provide guaranteed individual support
 
 ## 7. Limitations and Disclaimers
 
