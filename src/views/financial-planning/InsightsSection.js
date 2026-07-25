@@ -1079,7 +1079,8 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
       '💡'
     );
     section.appendChild(placeholder);
-    return section;
+    // Ensure a consistent return shape so callers can always use `.element`.
+    return { element: section, cleanup: () => {} };
   }
 
   const transactions = planningData.transactions;
