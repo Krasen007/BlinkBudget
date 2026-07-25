@@ -225,9 +225,9 @@
 
 .step-number {
   position: absolute;
-  top: -12px;
+  top: 0;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -238,6 +238,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1;
 }
 
 .step-icon {
