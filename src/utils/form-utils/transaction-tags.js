@@ -28,7 +28,7 @@ export const applyExpenseTagToTransactionData = (
 ) => {
   const next = { ...data };
 
-  if (data.type !== 'expense') {
+  if (data.type !== 'expense' && data.type !== 'refund') {
     delete next.tags;
     return next;
   }
@@ -132,7 +132,7 @@ export const createTransactionTagSelector = ({ initialTag = null } = {}) => {
   };
 
   const setTransactionType = type => {
-    if (type !== 'expense') {
+    if (type !== 'expense' && type !== 'refund') {
       selectedTag = null;
       container.hidden = true;
       return;

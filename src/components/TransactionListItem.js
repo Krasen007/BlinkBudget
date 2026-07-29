@@ -327,7 +327,7 @@ export const TransactionListItem = ({
 
   const tagName = getTransactionTagName(transaction);
   const flagCategory =
-    tagName && transaction.type === 'expense'
+    tagName && (transaction.type === 'expense' || transaction.type === 'refund')
       ? CustomCategoryService.getCheckboxCategories().find(
           c => c.name === tagName
         )
