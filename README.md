@@ -72,17 +72,17 @@ BlinkBudget goes beyond basic tracking with sophisticated analytics powered by A
 
 #### **Spending Intelligence**
 
-- **Category Usage Frequency Analysis** - Track how often you use each category | src/core/analytics/category-usage-service.js:getUsageStatistics() | src/core/analytics-engine.js:generateSpendingInsights()
-- **Spending Pattern Recognition** - Identify recurring habits and seasonal trends | src/core/analytics/TrendService.js:analyzeSpendingPatterns() | src/core/analytics-engine.js:pattern recognition
-- **Top Movers Analysis** - Discover your biggest spending changes month-over-month | src/core/analytics/ComparisonService.js:getTopMovers() | src/core/analytics/InsightsService.js:topMoversAnalysis
-- **Historical Timeline Comparisons** - Compare current spending to previous periods | src/core/analytics/ComparisonService.js:comparePeriods() | src/core/analytics-engine.js:historical comparisons
+- **Category Usage Frequency Analysis** - Track how often you use each category | src/core/custom-category-service.js:getStatistics() | src/core/analytics-engine.js:generateSpendingInsights()
+- **Spending Pattern Recognition** - Identify recurring habits and seasonal trends | src/core/analytics/TrendService.js:detectSeasonalPatterns() | src/core/analytics-engine.js:pattern recognition
+- **Top Movers Analysis** - Discover your biggest spending changes month-over-month | src/core/analytics/ComparisonService.js:getPersonalBenchmarking() | src/core/analytics/InsightsService.js:topMoversAnalysis
+- **Historical Timeline Comparisons** - Compare current spending to previous periods | src/core/analytics/ComparisonService.js:comparePeriodsSpending() | src/core/analytics-engine.js:historical comparisons
 
 #### **Budget Optimization**
 
-- **Smart Budget Recommendations** - AI-powered suggestions based on your spending patterns | src/core/analytics/RecommendationService.js:generateBudgetRecommendations() | src/core/analytics-engine.js:budget optimization
-- **Category Optimization** - Recommendations to switch categories for better tracking | src/core/analytics/RecommendationService.js:categoryOptimization() | src/core/custom-category-service.js:category suggestions
-- **Spending Reduction Suggestions** - Tailored advice to meet savings goals | src/core/analytics/RecommendationService.js:spendingReductionAdvice() | src/core/savings-goals-service.js:goal tracking
-- **Budget Health Monitoring** - Real-time status of all budget limits | src/core/budget-service.js:monitorBudgetHealth() | src/core/analytics/InsightsService.js:budget status
+- **Smart Budget Recommendations** - AI-powered suggestions based on your spending patterns | src/core/analytics/RecommendationService.js:getBudgetRecommendations() | src/core/analytics-engine.js:budget optimization
+- **Category Optimization** - Recommendations to switch categories for better tracking | src/core/analytics/RecommendationService.js:getRecommendedAmount() | src/core/custom-category-service.js:category suggestions
+- **Spending Reduction Suggestions** - Tailored advice to meet savings goals | src/core/analytics/RecommendationService.js:getSeasonalAdjustments() | src/core/savings-goals-service.js:goal tracking
+- **Budget Health Monitoring** - Real-time status of all budget limits | src/core/budget-service.js:getByCategory() | src/core/analytics/InsightsService.js:budget status
 
 #### **Anomaly Detection**
 
@@ -94,8 +94,8 @@ BlinkBudget goes beyond basic tracking with sophisticated analytics powered by A
 
 - **Personal Inflation Rate** - Track how inflation affects your specific spending | src/components/InflationTrends.js:InflationTrends() | src/utils/inflation-chart-utils.js:calculatePersonalInflation()
 - **Cost of Living Analysis** - Personal cost-of-living calculations | src/core/analytics/MetricsService.js:calculateCostOfLiving() | src/core/analytics-engine.js:cost analysis
-- **Savings Rate Tracking** - Monitor your savings performance over time | src/core/savings-goals-service.js:trackSavingsRate() | src/core/analytics/MetricsService.js:savings calculations
-- **Financial Health Score** - Overall assessment of your financial well-being | src/core/analytics/MetricsService.js:calculateFinancialHealthScore() | src/views/financial-planning/OverviewSection.js:health score display
+- **Savings Rate Tracking** - Monitor your savings performance over time | src/core/savings-goals-service.js:calculateSingleGoalProgress() | src/core/analytics/MetricsService.js:savings calculations
+- **Financial Health Score** - Overall assessment of your financial well-being | src/core/analytics/MetricsService.js:calculateIncomeVsExpenses() | src/views/financial-planning/OverviewSection.js:health score display
 
 ### Financial Planning & Insights
 
@@ -106,15 +106,15 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 - **Financial Health Summary** - Complete picture of your current financial position | src/views/financial-planning/OverviewSection.js:OverviewSection() | src/core/analytics/MetricsService.js:financial health calculations
 - **Net Worth Tracking** - Assets vs liabilities visualization | src/views/financial-planning/OverviewSection.js:netWorth calculation | src/core/analytics/MetricsService.js:net worth tracking
 - **Net Balance Chart** - Visualize net worth and net balance over time for clearer portfolio trends | src/views/financial-planning/InvestmentsSection.js:InvestmentsSection() | src/core/investment-tracker.js:portfolio management
-- **Savings Rate Analysis** - Monthly and yearly savings performance | src/core/savings-goals-service.js:analyzeSavingsRate() | src/views/financial-planning/OverviewSection.js:savings display
-- **Key Financial Metrics** - Income-to-expense ratio, average daily spending | src/core/analytics/MetricsService.js:calculateKeyMetrics() | src/views/financial-planning/OverviewSection.js:metrics display
+- **Savings Rate Analysis** - Monthly and yearly savings performance | src/core/savings-goals-service.js:calculateSingleGoalProgress() | src/views/financial-planning/OverviewSection.js:savings display
+- **Key Financial Metrics** - Income-to-expense ratio, average daily spending | src/core/analytics/MetricsService.js:calculateIncomeVsExpenses() | src/views/financial-planning/OverviewSection.js:metrics display
 
 #### **Forecasts Section**
 
 - **Income/Expense Predictions** - Forecasting based on historical patterns | src/views/financial-planning/ForecastsSection.js:ForecastsSection() | src/core/analytics/PredictionService.js:generatePredictions()
-- **Account Balance Projections** - Future balances for all accounts up to 12 months | src/core/Account/account-balance-predictor.js:predictBalances() | src/views/financial-planning/ForecastsSection.js:balance projections
-- **Cash Flow Analysis** - Predicted cash inflows and outflows | src/core/forecast-engine.js:analyzeCashFlow() | src/views/financial-planning/ForecastsSection.js:cash flow display
-- **Scenario Planning** - "What-if" analysis for major financial decisions | src/core/forecast-engine.js:scenarioAnalysis() | src/views/financial-planning/ForecastsSection.js:scenario planning
+- **Account Balance Projections** - Future balances for all accounts up to 12 months | src/core/Account/account-balance-predictor.js:projectBalances() | src/views/financial-planning/ForecastsSection.js:balance projections
+- **Cash Flow Analysis** - Predicted cash inflows and outflows | src/core/forecast-engine.js:generateIncomeForecasts() | src/views/financial-planning/ForecastsSection.js:cash flow display
+- **Scenario Planning** - "What-if" analysis for major financial decisions | src/core/forecast-engine.js:generateExpenseForecasts() | src/views/financial-planning/ForecastsSection.js:scenario planning
 
 #### **Investments Section**
 
@@ -127,23 +127,23 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 
 - **Long-term Goal Planning** - Set and track financial objectives (retirement, house, etc.) | src/views/financial-planning/GoalsSection.js:GoalsSection() | src/core/goal-planner.js:planGoals()
 - **Mobile Goal Setup** - Optimized mobile prompts for easy goal creation on your phone | src/core/mobile-utils.js:MobileUtils.isMobile() | src/views/financial-planning/GoalsSection.js:GoalsSection()
-- **Savings Targets** - Monthly savings requirements to reach goals | src/core/goal-planner.js:calculateSavingsTargets() | src/views/financial-planning/GoalsSection.js:targets display
+- **Savings Targets** - Monthly savings requirements to reach goals | src/core/goal-planner.js:calculateRequiredMonthlySavings() | src/views/financial-planning/GoalsSection.js:targets display
 - **Progress Visualization** - Charts showing goal completion status | src/views/financial-planning/GoalsSection.js:progress charts | src/utils/financial-planning-charts.js:goal progress
-- **Milestone Tracking** - Celebrate achievements along the journey | src/core/goal-planner.js:trackMilestones() | src/views/financial-planning/GoalsSection.js:milestone display
+- **Milestone Tracking** - Celebrate achievements along the journey | src/core/goal-planner.js:calculateGoalProgress() | src/views/financial-planning/GoalsSection.js:milestone display
 
 #### **Insights Section**
 
 - **Spending Pattern Analysis** - Identify trends and anomalies in your habits | src/views/financial-planning/InsightsSection.js:InsightsSection() | src/core/analytics/TrendService.js:spending patterns
-- **Budget Recommendations** - AI-powered suggestions for optimization | src/core/analytics/RecommendationService.js:budgetRecommendations() | src/views/financial-planning/InsightsSection.js:recommendations display
+- **Budget Recommendations** - AI-powered suggestions for optimization | src/core/analytics/RecommendationService.js:getBudgetRecommendations() | src/views/financial-planning/InsightsSection.js:recommendations display
 - **Personal Inflation Trends** - Track how inflation affects your personal finances | src/components/InflationTrends.js:InflationTrends() | src/views/financial-planning/InsightsSection.js:inflation trends
 - **Unusual Spending Detection** - Automatic alerts for atypical transactions | src/core/analytics/AnomalyService.js:detectAnomalies() | src/views/financial-planning/InsightsSection.js:anomaly alerts
 
 #### **Budgets Section**
 
-- **Category Budget Limits** - Set and monitor spending limits per category | src/core/budget-service.js:setCategoryBudgets() | src/views/financial-planning/BudgetsSection.js:BudgetsSection()
-- **Budget Health Tracking** - Real-time status (on track, at risk, exceeded) | src/core/budget-service.js:trackBudgetHealth() | src/views/financial-planning/BudgetsSection.js:health status
-- **Overspending Alerts** - Notifications when approaching limits | src/core/budget-service.js:checkOverspending() | src/views/financial-planning/BudgetsSection.js:alerts
-- **Budget Performance Reports** - Historical budget adherence analysis | src/core/budget-service.js:generatePerformanceReports() | src/views/financial-planning/BudgetsSection.js:performance reports
+- **Category Budget Limits** - Set and monitor spending limits per category | src/core/budget-service.js:save() | src/views/financial-planning/BudgetsSection.js:BudgetsSection()
+- **Budget Health Tracking** - Real-time status (on track, at risk, exceeded) | src/core/budget-service.js:getByCategory() | src/views/financial-planning/BudgetsSection.js:health status
+- **Overspending Alerts** - Notifications when approaching limits | src/core/budget-service.js:getByCategory() | src/views/financial-planning/BudgetsSection.js:alerts
+- **Budget Performance Reports** - Historical budget adherence analysis | src/core/budget-service.js:getAll() | src/views/financial-planning/BudgetsSection.js:performance reports
 
 ### User Experience & UI
 
@@ -161,11 +161,11 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 
 ### Backup & Restore
 
-- **Automatic daily backup** stored in Firebase, representing yesterday's state. Backup information shows the date only — no misleading time component | src/core/backup-service.js:automaticDailyBackup() | src/core/sync-service.js:Firebase sync
-- **Single backup** overwritten each day to keep storage simple. | src/core/backup-service.js:overwriteDailyBackup() | Firebase storage strategy
-- **Restore from last backup** replaces current data with the backup (warning shown). | src/core/backup-service.js:restoreFromBackup() | src/components/BackupRestoreSection.js:restore confirmation
-- **Offline safe**: backup skips when offline; restore requires internet. | src/core/backup-service.js:offlineDetection() | src/components/NetworkStatus.js:connection status
-- **User feedback** via custom events showing start, success, and failure. | src/core/backup-service.js:emitBackupEvents() | src/utils/toast-notifications.js:backup feedback
+- **Automatic daily backup** stored in Firebase, representing yesterday's state. Backup information shows the date only — no misleading time component | src/core/backup-service.js:createBackup() | src/core/sync-service.js:Firebase sync
+- **Single backup** overwritten each day to keep storage simple. | src/core/backup-service.js:createBackup() | Firebase storage strategy
+- **Restore from last backup** replaces current data with the backup (warning shown). | src/core/backup-service.js:restoreBackup() | src/components/BackupRestoreSection.js:restore confirmation
+- **Offline safe**: backup skips when offline; restore requires internet. | src/core/backup-service.js:offline safety check | src/components/NetworkStatus.js:connection status
+- **User feedback** via custom events showing start, success, and failure. | src/core/backup-service.js:backup event dispatch | src/utils/toast-notifications.js:backup feedback
 
 ### Data Management & Sync
 
@@ -174,23 +174,23 @@ BlinkBudget provides robust data management with cloud synchronization and local
 #### **Cloud Synchronization**
 
 - **Firebase Integration** - Real-time sync across all your devices | src/core/sync-service.js:SyncService | src/core/auth-service.js:Firebase auth
-- **Automatic Conflict Resolution** - Smart merging when data changes on multiple devices | src/core/sync-service.js:resolveConflicts() | src/core/data-integrity-service.js:conflict resolution
-- **Offline-First Architecture** - Works perfectly offline, syncs when connection restored | src/core/sync-service.js:offlineFirstSync() | src/components/NetworkStatus.js:connection monitoring
-- **Incremental Sync** - Only syncs changed data to minimize bandwidth usage | src/core/sync-service.js:incrementalSync() | src/core/transaction-service.js:change tracking
+- **Automatic Conflict Resolution** - Smart merging when data changes on multiple devices | src/core/sync-service.js:handleConflictResolution() | src/core/data-integrity-service.js:conflict resolution
+- **Offline-First Architecture** - Works perfectly offline, syncs when connection restored | src/core/sync-service.js:pullFromCloud() | src/components/NetworkStatus.js:connection monitoring
+- **Incremental Sync** - Only syncs changed data to minimize bandwidth usage | src/core/sync-service.js:pushToCloud() | src/core/transaction-service.js:change tracking
 
 #### **Data Export & Import**
 
-- **JSON Export** - Complete data export in human-readable format | src/components/DataManagementSection.js:exportJSON() | src/core/emergency-export-service.js:exportData()
-- **CSV Export** - Spreadsheet-compatible export for analysis | src/components/DataManagementSection.js:exportCSV() | src/core/emergency-export-service.js:CSV generation
-- **Selective Export** - Export specific date ranges or categories | src/components/DataManagementSection.js:selectiveExport() | src/core/emergency-export-service.js:filtered export
-- **Import Validation** - Safe import with data integrity checks | src/components/DataManagementSection.js:importValidation() | src/core/data-integrity-service.js:import validation
+- **JSON Export** - Complete data export in human-readable format | src/components/DataManagementSection.js:JSON export handler | src/core/emergency-export-service.js:exportData()
+- **CSV Export** - Spreadsheet-compatible export for analysis | src/components/DataManagementSection.js:CSV export handler | src/core/emergency-export-service.js:CSV generation
+- **Selective Export** - Export specific date ranges or categories | src/components/DataManagementSection.js:date-range export handler | src/core/emergency-export-service.js:filtered export
+- **Import Validation** - Safe import with data integrity checks | src/components/DataManagementSection.js:import handler | src/core/data-integrity-service.js:import validation
 
 #### **Account Management**
 
 - **Account Deletion** - Complete account removal with data cleanup | src/core/Account/account-deletion-service.js:deleteAccount() | src/components/AccountDeletionSection.js:deletion UI
-- **Data Portability** - Full control over your financial data | src/components/DataManagementSection.js:dataPortability() | src/core/privacy-service.js:data export
+- **Data Portability** - Full control over your financial data | src/components/DataManagementSection.js:data portability handler | src/core/privacy-service.js:data export
 - **Privacy Controls** - Granular control over data sharing | src/components/PrivacyControls.js:PrivacyControls | src/core/privacy-service.js:privacy management
-- **GDPR Compliance** - Right to data deletion and export | src/core/privacy-service.js:gdprCompliance() | src/components/PrivacyControls.js:GDPR controls
+- **GDPR Compliance** - Right to data deletion and export | src/core/privacy-service.js:exportUserData() | src/components/PrivacyControls.js:GDPR controls
 
 ### Security & Privacy
 
@@ -199,30 +199,30 @@ BlinkBudget employs enterprise-grade security measures to protect your sensitive
 #### **Authentication & Access Control**
 
 - **Firebase Authentication** - Secure sign-in with email/password providers, including browser popup flows for sign-in, sign-up, and password reset | src/core/auth-service.js:AuthService | Firebase auth configuration
-- **Session Management** - Automatic session timeout and renewal | src/core/auth-service.js:sessionManagement() | Firebase session handling
-- **Multi-Device Security** - Secure sync across all your devices | src/core/sync-service.js:secureSync() | src/core/auth-service.js:multiDeviceAuth
-- **Account Recovery** - Safe password reset and account recovery options | src/core/auth-service.js:passwordReset() | Firebase recovery flows
+- **Session Management** - Automatic session timeout and renewal | src/core/auth-service.js:init() | Firebase session handling
+- **Multi-Device Security** - Secure sync across all your devices | src/core/sync-service.js:startRealtimeSync() | src/core/auth-service.js:multiDeviceAuth
+- **Account Recovery** - Safe password reset and account recovery options | src/core/auth-service.js:resetPassword() | Firebase recovery flows
 
 #### **Data Protection**
 
 - **Firestore Security Rules** - Server-side access controls preventing unauthorized data access | firestore.rules:security rules | Firebase security configuration
-- **User Data Isolation** - Complete separation of user data with strict ownership verification | src/core/auth-service.js:userIsolation() | firestore.rules:user data rules
+- **User Data Isolation** - Complete separation of user data with strict ownership verification | src/core/auth-service.js:getUserId() | firestore.rules:user data rules
 - **Encryption in Transit** - All data transmitted over HTTPS/TLS | Firebase HTTPS enforcement | SSL/TLS configuration
 - **Input Sanitization** - Comprehensive XSS protection and input validation | src/utils/security-utils.js:safeJsonParse() | src/utils/form-utils/validation.js:input sanitization
 
 #### **Privacy Features**
 
 - **Local-First Storage** - Primary data stored on your device | src/core/transaction-service.js:localStorage operations | src/core/Account/account-service.js:local storage
-- **Minimal Data Collection** - Only essential data stored in the cloud | src/core/privacy-service.js:minimalDataCollection() | Firebase data minimization
-- **No Third-Party Analytics** - Your data never shared with external services | src/core/privacy-service.js:noThirdPartyAnalytics() | Privacy policy enforcement
-- **Transparent Data Usage** - Clear explanation of all data processing | src/core/privacy-service.js:transparentUsage() | Privacy documentation
+- **Minimal Data Collection** - Only essential data stored in the cloud | src/core/privacy-service.js:isDataMinimizationEnabled() | Firebase data minimization
+- **No Third-Party Analytics** - Your data never shared with external services | src/core/privacy-service.js:getPrivacySettings() | Privacy policy enforcement
+- **Transparent Data Usage** - Clear explanation of all data processing | src/core/privacy-service.js:getPrivacyDashboard() | Privacy documentation
 
 #### **Security Best Practices**
 
 - **Planned: Regular Security Audits** - Continuous monitoring and vulnerability assessment (securityAudits() function not yet implemented)
 - **Dependency Updates** - Automated security patch management | Implemented (Yarn update workflow with automated dependency management)
 - **Secure Coding Standards** - Input validation, output encoding, and secure defaults | src/utils/security-utils.js:secure coding | Development standards
-- **Privacy by Design** - Privacy considerations built into every feature | src/core/privacy-service.js:privacyByDesign() | Feature development guidelines
+- **Privacy by Design** - Privacy considerations built into every feature | src/core/privacy-service.js:sanitizeDataForStorage() | Feature development guidelines
 
 ### Performance & Progressive Web App
 
@@ -231,9 +231,9 @@ BlinkBudget delivers exceptional performance with modern web technologies:
 #### **Performance Optimization**
 
 - **Instant Loading** - Background data preloading and intelligent caching | src/views/DashboardView.js:preloadReportsData() | src/core/analytics/AnalyticsCache.js:cache management
-- **5-Minute Cache System** - Fresh data with instant app startup | src/core/analytics/AnalyticsCache.js:5MinuteCache() | Cache TTL management
-- **Incremental Rendering** - Progressive content loading for smooth UX | src/views/DashboardView.js:incrementalRendering() | src/components/TransactionList.js:progressive loading
-- **Background Data Refresh** - Automatic updates without blocking the UI | src/core/sync-service.js:backgroundSync() | src/views/DashboardView.js:background refresh
+- **5-Minute Cache System** - Fresh data with instant app startup | src/core/analytics/AnalyticsCache.js:setToPersistentStorage() | Cache TTL management
+- **Incremental Rendering** - Progressive content loading for smooth UX | src/views/DashboardView.js:preloadReportsData() | src/components/TransactionList.js:progressive loading
+- **Background Data Refresh** - Automatic updates without blocking the UI | src/core/sync-service.js:triggerBackgroundSync() | src/views/DashboardView.js:background refresh
 - **Performance Monitoring** - Built-in performance tracking and optimization | src/core/analytics-engine.js:performance tracking | Performance metrics collection
 
 #### **Progressive Web App Features**
