@@ -35,7 +35,7 @@
 - **Multiple transaction types**: Support for Expenses, Income, Transfers, and Refunds, with enhanced validation and error reporting. Typing `-` in the amount field automatically switches to Refund | src/utils/form-utils/type-toggle.js:createTypeToggleGroup() | src/utils/form-utils/validation.js:validateAmount() | src/utils/form-utils/validation.js:validateCategory()
 - **Optional transaction descriptions**: Add notes to transactions or leave them blank, as you prefer | src/components/TransactionForm.js:noteField creation | src/utils/form-utils/submission.js:prepareTransactionData()
 - **Custom Category Management**: Create, edit, and manage your own expense categories for personalized tracking | src/components/CustomCategoryManager.js:CustomCategoryManager() | src/core/custom-category-service.js:CustomCategoryService
-- **Category Reordering**: Organize your expense categories in a way that works best for you. Reordering now respects filtered views — arrow-move reorders only the currently visible categories and persists that order. Previously it reordered across all categories (including hidden types), so moves inside a filtered view often had no visible effect | src/core/custom-category-service.js:reorderCategories() | src/components/CustomCategoryManager.js:arrow-move handlers
+- **Category Reordering**: Organize your expense categories in a way that works best for you. Reordering now respects filtered views — arrow-move reorders only the currently visible categories and persists that order. Previously it reordered across all categories (including hidden types), so moves inside a filtered view often had no visible effect | src/core/custom-category-service.js:reorder() | src/components/CustomCategoryManager.js:arrow-move handlers
 - **Tags System**: Add custom tags to transactions for flexible organization and analysis beyond categories. Features a 3-state filter — tap once to include transactions with the tag, tap twice to exclude them (shows the tag crossed out), tap a third time to restore the default state | src/utils/form-utils/transaction-tags.js:createTransactionTagSelector() | src/utils/form-utils/transaction-tags.js:applyExpenseTagToTransactionData() | src/views/DashboardView.js:tag filtering
 - **Streamlined transaction indicators**: Simplified notifications and indicators for different transaction types:
   - **Refunds** are marked with an ↑ arrow to indicate money coming back | src/components/TransactionListItem.js:sign assignment for refund type
@@ -46,7 +46,7 @@
   - Plus your custom categories for complete control | src/utils/form-utils/category-chips.js:createCategoryChip() | src/core/custom-category-service.js:getAllCategoryNames()
 - **Multi-account support** (Checking, Savings, Credit Card, Cash) | src/core/Account/account-service.js:getAccounts() | src/components/TransactionForm.js:account selection
 - **Account-to-account transfers** with automatic balance updates | src/utils/form-utils/category-chips.js:transfer account rendering | src/core/transaction-service.js:updateAccountBalances()
-- **Data integrity validation** - Smart checks that recognize all transaction types without false warnings | src/core/data-integrity-service.js:validateTransactionData() | src/utils/form-utils/validation.js:validation functions
+- **Data integrity validation** - Smart checks that recognize all transaction types without false warnings | src/core/data-integrity-service.js:validateTransaction() | src/utils/form-utils/validation.js:validation functions
 - **Filter transactions by category** tap on the name to show | src/components/TransactionListItem.js:onCategoryClick handler | src/views/DashboardView.js:category filtering
 - **Date filtering functionality** tap on the name to show | src/components/TransactionListItem.js:onDateClick handler | src/views/DashboardView.js:date filtering
 - **Integrated category filtering** between Reports and Dashboard views for consistent analysis across all sections | src/views/ReportsView.js:category filter sync | src/views/DashboardView.js:category filter sync
@@ -60,7 +60,7 @@
 
 ### Dashboard & Analytics
 
-- **Real-time balance calculations** across all accounts. Dashboard label changes to "Total Filtered" when a filter is active so it's clear the number shown is not your full balance | src/core/Account/account-service.js:calculateBalances() | src/views/DashboardView.js:balance display
+- **Real-time balance calculations** across all accounts. Dashboard label changes to "Total Filtered" when a filter is active so it's clear the number shown is not your full balance | src/core/Account/account-service.js:getAccounts() | src/views/DashboardView.js:balance display
 - **Transaction history** with edit/delete capabilities | src/components/TransactionList.js:TransactionList() | src/views/DashboardView.js:transaction rendering
 - **Visual feedback** for recently added transactions | src/utils/success-feedback.js:highlightTransactionSuccess() | src/components/TransactionListItem.js:highlight animation
 - **Enhanced data visualization** with consistent colors for transactions | src/utils/reports-charts.js:chart rendering | src/utils/constants.js:COLOR definitions
@@ -238,11 +238,11 @@ BlinkBudget delivers exceptional performance with modern web technologies:
 
 #### **Progressive Web App Features**
 
-- **Offline-First Architecture** - Full functionality without internet connection | src/pwa.js:offlineFirstSupport() | src/core/sync-service.js:offline operations
+- **Offline-First Architecture** - Full functionality without internet connection | src/pwa.js:registerSW() | src/core/sync-service.js:offline operations
 - **Service Worker** - Intelligent caching and background sync | src/pwa.js:registerSW() | Service Worker caching strategies
 - **App Installation** - Install as standalone app on desktop and mobile | src/pwa.js:PWA installation | manifest.webmanifest:PWA configuration
 - **Push Notifications** - Update notifications and important alerts | src/pwa.js:update notifications | Push notification system
-- **Background Sync** - Automatic data synchronization when connection restored | src/core/sync-service.js:backgroundSync() | Service Worker sync API
+- **Background Sync** - Automatic data synchronization when connection restored | src/core/sync-service.js:triggerBackgroundSync() | Service Worker sync API
 
 #### **Mobile Optimization**
 
@@ -254,8 +254,8 @@ BlinkBudget delivers exceptional performance with modern web technologies:
 
 #### **Caching Strategy**
 
-- **Multi-Level Caching** - Browser, service worker, and application caching | src/core/analytics/AnalyticsCache.js:multiLevelCache() | Cache hierarchy
-- **Smart Invalidation** - Cache updates only when data changes | src/core/analytics/AnalyticsCache.js:smartInvalidation() | Cache invalidation logic
+- **Multi-Level Caching** - Browser, service worker, and application caching | src/core/analytics/AnalyticsCache.js:set() | Cache hierarchy
+- **Smart Invalidation** - Cache updates only when data changes | src/core/analytics/AnalyticsCache.js:invalidate() | Cache invalidation logic
 - **Compression Optimization** - Minified assets and gzip compression | vite.config.js:compression | Build optimization
 - **Asset Optimization** - Image optimization and lazy loading | vite.config.js:asset optimization | Lazy loading strategies
 - **Network-Aware Loading** - Adaptive loading based on connection quality | src/components/NetworkStatus.js:network awareness | Adaptive loading strategies
@@ -264,7 +264,7 @@ BlinkBudget delivers exceptional performance with modern web technologies:
 
 - **General Settings section** - Unified Refresh App, Install App, and Logout actions | src/components/GeneralSection.js:GeneralSection() | src/views/SettingsView.js:settings management
 - **Account management** - Add, edit, delete accounts | src/components/AccountSection.js:AccountSection() | src/core/Account/account-service.js:account operations
-- **Date format preferences** (US, ISO, EU formats) applied consistently across transaction lists, CSV exports, goal dates, and filter summaries. A note in Settings explains that the date picker itself follows the browser/OS locale | src/core/settings-service.js:setDateFormat() | src/utils/date-utils.js:date formatting
+- **Date format preferences** (US, ISO, EU formats) applied consistently across transaction lists, CSV exports, goal dates, and filter summaries. A note in Settings explains that the date picker itself follows the browser/OS locale | src/core/settings-service.js:saveSetting() | src/utils/date-utils.js:date formatting
 - **Data export/import** capabilities | src/components/DataManagementSection.js:DataManagementSection() | src/core/emergency-export-service.js:export/import functions
 - **Transaction editing** with validation | src/views/EditView.js:EditView() | src/utils/form-utils/validation.js:edit validation
 - **Simplified feedback system** - Direct GitHub issues link for bug reports and suggestions | src/views/SettingsView.js:feedback system | GitHub integration
