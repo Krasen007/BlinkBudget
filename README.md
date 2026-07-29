@@ -86,10 +86,9 @@ BlinkBudget goes beyond basic tracking with sophisticated analytics powered by A
 
 #### **Anomaly Detection**
 
-- **Unusual Spending Alerts** - Automatic detection of atypical transactions | src/core/analytics/AnomalyService.js:detectUnusualSpending() | src/core/unusual-spending-detector.js:anomaly detection
-- **Large Transaction Warnings** - Notifications for purchases outside your normal range | src/core/analytics/AnomalyService.js:largeTransactionDetection() | src/core/analytics-engine.js:transaction validation
-- **Irregular Pattern Identification** - Spot changes in your spending behavior | src/core/analytics/AnomalyService.js:patternAnomalyDetection() | src/core/analytics/TrendService.js:irregular patterns
-- **Fraud Prevention** - Early warning system for potential unauthorized charges | src/core/analytics/AnomalyService.js:fraudDetection() | src/core/data-integrity-service.js:security validation
+- **Unusual Spending Alerts** - Automatic detection of atypical transactions | src/core/analytics/AnomalyService.js:detectAnomalies() | src/core/unusual-spending-detector.js:UnusualSpendingDetector.detectUnusualTransactions()
+- **Large Transaction Warnings** - Notifications for purchases outside your normal range | src/core/analytics/AnomalyService.js:detectSpendingSpikes() | src/core/analytics-engine.js:transaction validation
+- **Irregular Pattern Identification** - Spot changes in your spending behavior | src/core/analytics/AnomalyService.js:detectTimingAnomalies() | src/core/analytics/TrendService.js:detectSeasonalPatterns()
 
 #### **Personal Finance Metrics**
 
@@ -137,7 +136,7 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 - **Spending Pattern Analysis** - Identify trends and anomalies in your habits | src/views/financial-planning/InsightsSection.js:InsightsSection() | src/core/analytics/TrendService.js:spending patterns
 - **Budget Recommendations** - AI-powered suggestions for optimization | src/core/analytics/RecommendationService.js:budgetRecommendations() | src/views/financial-planning/InsightsSection.js:recommendations display
 - **Personal Inflation Trends** - Track how inflation affects your personal finances | src/components/InflationTrends.js:InflationTrends() | src/views/financial-planning/InsightsSection.js:inflation trends
-- **Unusual Spending Detection** - Automatic alerts for atypical transactions | src/core/analytics/AnomalyService.js:detectUnusualSpending() | src/views/financial-planning/InsightsSection.js:anomaly alerts
+- **Unusual Spending Detection** - Automatic alerts for atypical transactions | src/core/analytics/AnomalyService.js:detectAnomalies() | src/views/financial-planning/InsightsSection.js:anomaly alerts
 
 #### **Budgets Section**
 

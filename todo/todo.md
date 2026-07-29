@@ -75,3 +75,14 @@ Creeping towards complex financial tracking. Adding limits, thresholds, and warn
 
 [ ] Add basic client-side security monitoring for failed login attempts...
 Over-engineering. Not necessary for this type of lightweight app.
+
+***
+
+Decide explicitly: is the investment tracker "intentionally simple" or brokerage-grade? AGENTS.md says the former; investment-tracker.js (631 lines, 8 asset classes, sector/region allocation) is the latter. Either:
+Subtract: Reduce to a simple holdings list (symbol, shares, cost basis, current value) — the "intentionally simple" version the anti-goal permits. Remove sector/geographic allocation, annualized returns, top-performer ranking.
+We should apply those suggestions and improve and optimize the investment tracker.
+
+
+Apply the Omission test to each analytics feature. For every one of the ~20 "Advanced Analytics & Intelligence" features, ask: what core-polish work was not done because this was built? The Guide: "What are we choosing NOT to build by building this?"
+Cut or consolidate features that produce outputs without decisions. "Personal Inflation Rate" and "Financial Health Score" are numbers without a next action. The Guide: "DON'T build features that don't serve the core problem." If a feature doesn't change a user's behavior, it's decoration.
+We should iterate over those features, what we can do to improve them to serve better the user.

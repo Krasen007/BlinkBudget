@@ -115,14 +115,67 @@ function fileExists(filePath) {
   return fs.existsSync(fullPath);
 }
 
+// Cache for file contents to avoid repeated reads during validation
+const fileContentCache = new Map();
+
+/**
+ * Get file content with caching
+ * @param {string} filePath - Relative path to the file
+ * @returns {string|null} File content or null if file doesn't exist
+ */
+function getFileContent(filePath) {
+  if (fileContentCache.has(filePath)) {
+    return fileContentCache.get(filePath);
+  }
+  const fullPath = path.resolve(projectRoot, filePath);
+  const resolvedProjectRoot = path.resolve(projectRoot);
+  if (!fullPath.startsWith(resolvedProjectRoot) || !fs.existsSync(fullPath)) {
+    fileContentCache.set(filePath, null);
+    return null;
+  }
+  const content = fs.readFileSync(fullPath, 'utf8');
+  fileContentCache.set(filePath, content);
+  return content;
+}
+
 /**
  * Check if a method exists in a file
- * For README validation, we only check file existence since it contains descriptive text
+ *
+ * Validates method-call references (e.g., methodName() or Class.methodName())
+ * against the actual file contents. Descriptive-prose references that don't
+ * use call syntax (no parentheses) are not checked, since they describe
+ * behavior rather than naming a specific callable symbol.
+ *
+ * @param {string} filePath - Relative path to the file
+ * @param {string} methodOrDescription - Method name or descriptive text from README
+ * @returns {boolean} True if the method exists or the reference is descriptive prose
  */
-function methodExists(_filePath, _methodOrDescription) {
-  // README documentation contains descriptive text, not exact method names
-  // We only validate that file exists, not specific methods
-  return true;
+function methodExists(filePath, methodOrDescription) {
+  // Extract method names that use call syntax: methodName() or Class.methodName()
+  const methodPattern = /(\w+)\(\)/g;
+  const methodNames = [];
+  let match;
+  while ((match = methodPattern.exec(methodOrDescription)) !== null) {
+    methodNames.push(match[1]);
+  }
+
+  // No method() pattern found — it's descriptive prose, can't validate
+  if (methodNames.length === 0) {
+    return true;
+  }
+
+  // If file doesn't exist, let fileExists handle the error
+  const content = getFileContent(filePath);
+  if (content === null) {
+    return true;
+  }
+
+  // Check each method name exists as an identifier in the file content
+  return methodNames.every(methodName => {
+    const escaped = methodName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const identifierRegex = new RegExp(`\\b${escaped}\\b`);
+    return identifierRegex.test(content);
+  });
 }
 
 /**
