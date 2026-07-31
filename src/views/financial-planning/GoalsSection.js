@@ -77,6 +77,20 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
   saveGoalBtn.textContent = 'Save Goal';
   saveGoalBtn.className = 'btn btn-primary btn-save';
 
+  const cancelGoalBtn = document.createElement('button');
+  cancelGoalBtn.textContent = 'Cancel';
+  cancelGoalBtn.className = 'btn btn-ghost btn-cancel';
+  cancelGoalBtn.addEventListener('click', () => {
+    goalForm.style.display = 'none';
+    goalName.value = '';
+    goalTarget.value = '';
+    goalDate.value = '';
+    goalCurrent.value = '';
+    nameError.style.display = 'none';
+    dateError.style.display = 'none';
+    currentError.style.display = 'none';
+  });
+
   const nameError = document.createElement('div');
   nameError.className = 'error';
   nameError.setAttribute('name', 'name');
@@ -106,6 +120,7 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
   goalForm.appendChild(goalCurrent);
   goalForm.appendChild(currentError);
   goalForm.appendChild(saveGoalBtn);
+  goalForm.appendChild(cancelGoalBtn);
 
   addGoalBtn.addEventListener('click', () => {
     goalForm.style.display =
