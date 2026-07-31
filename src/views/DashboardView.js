@@ -964,7 +964,8 @@ export const DashboardView = (params = {}) => {
         .filter(Boolean);
       highlightTransactionIds.push(...anomalyIds);
     } catch {
-      // Anomaly highlighting is non-critical — silently fail
+      // Anomaly highlighting is non-critical
+      console.warn('[DashboardView] Anomaly highlighting failed:', error);
     }
     const transactionList = TransactionList({
       transactions,

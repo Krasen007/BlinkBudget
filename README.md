@@ -46,7 +46,7 @@
   - Plus your custom categories for complete control | src/utils/form-utils/category-chips.js:createCategoryChip() | src/core/custom-category-service.js:getAllCategoryNames()
 - **Multi-account support** (Checking, Savings, Credit Card, Cash) | src/core/Account/account-service.js:getAccounts() | src/components/TransactionForm.js:account selection
 - **Account-to-account transfers** with automatic balance updates | src/utils/form-utils/category-chips.js:transfer account rendering | src/core/transaction-service.js:updateAccountBalances()
-- **Data integrity validation** - Smart checks that recognize all transaction types without false warnings | src/core/data-integrity-service.js:validateTransaction() | src/utils/form-utils/validation.js:validation functions
+- **Data integrity validation** - Smart checks that recognize all transaction types while minimizing false warnings | src/core/data-integrity-service.js:validateTransaction() | src/utils/form-utils/validation.js:validation functions
 - **Filter transactions by category** tap on the name to show | src/components/TransactionListItem.js:onCategoryClick handler | src/views/DashboardView.js:category filtering
 - **Date filtering functionality** tap on the name to show | src/components/TransactionListItem.js:onDateClick handler | src/views/DashboardView.js:date filtering
 - **Integrated category filtering** between Reports and Dashboard views for consistent analysis across all sections | src/views/ReportsView.js:category filter sync | src/views/DashboardView.js:category filter sync
@@ -73,7 +73,7 @@ BlinkBudget turns your 3-click data into actionable insights using statistical h
 #### **Spending Intelligence**
 
 - **Category Usage Frequency Analysis** - Track how often you use each category | src/core/custom-category-service.js:getStatistics() | src/core/analytics-engine.js:generateSpendingInsights()
-- **Spending Pattern Recognition** - Identify recurring habits and seasonal trends | src/core/analytics/TrendService.js:detectSeasonalPatterns() | src/core/analytics-engine.js:pattern recognition
+- **Spending Pattern Recognition** - Planned support for recurring habits and seasonal trends | src/core/analytics/TrendService.js:detectSeasonalPatterns() | src/core/analytics-engine.js:pattern recognition
 - **Top Movers Analysis** - Discover your biggest spending changes month-over-month | src/core/analytics/ComparisonService.js:getPersonalBenchmarking() | src/core/analytics/InsightsService.js:topMoversAnalysis
 - **Historical Timeline Comparisons** - Compare current spending to previous periods | src/core/analytics/ComparisonService.js:comparePeriodsSpending() | src/core/analytics-engine.js:historical comparisons
 
@@ -88,12 +88,11 @@ BlinkBudget turns your 3-click data into actionable insights using statistical h
 
 - **Unusual Spending Alerts** - Automatic detection of atypical transactions | src/core/analytics/AnomalyService.js:detectAnomalies() | src/core/unusual-spending-detector.js:UnusualSpendingDetector.detectUnusualTransactions()
 - **Large Transaction Warnings** - Notifications for purchases outside your normal range | src/core/analytics/AnomalyService.js:detectSpendingSpikes() | src/core/analytics-engine.js:transaction validation
-- **Irregular Pattern Identification** - Spot changes in your spending behavior | src/core/analytics/AnomalyService.js:detectTimingAnomalies() | src/core/analytics/TrendService.js:detectSeasonalPatterns()
+- **Irregular Pattern Identification** - Planned pattern detection support for changes in your spending behavior | src/core/analytics/AnomalyService.js:detectTimingAnomalies() | src/core/analytics/TrendService.js:detectSeasonalPatterns()
 
 #### **Personal Finance Metrics**
 
 - **Personal Inflation Rate** - Track how inflation affects your specific spending | src/components/InflationTrends.js:InflationTrends() | src/utils/inflation-chart-utils.js:calculatePersonalInflation()
-- **Cost of Living Analysis** - Personal cost-of-living calculations | src/core/analytics/MetricsService.js:calculateCostOfLiving() | src/core/analytics-engine.js:cost analysis
 - **Savings Rate Tracking** - Monitor your savings performance over time | src/core/savings-goals-service.js:calculateSingleGoalProgress() | src/core/analytics/MetricsService.js:savings calculations
 
 ### Financial Planning & Insights
@@ -104,7 +103,7 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 
 - **Financial Health Summary** - Complete picture of your current financial position | src/views/financial-planning/OverviewSection.js:OverviewSection() | src/core/analytics/MetricsService.js:financial health calculations
 - **Net Worth Tracking** - Assets vs liabilities visualization | src/views/financial-planning/OverviewSection.js:netWorth calculation | src/core/analytics/MetricsService.js:net worth tracking
-- **Net Balance Chart** - Visualize net worth and net balance over time for clearer portfolio trends | src/views/financial-planning/InvestmentsSection.js:InvestmentsSection() | src/core/investment-tracker.js:portfolio management
+- **Net Balance Chart** - Planned visualization of net worth and net balance over time for clearer portfolio trends | src/views/financial-planning/InvestmentsSection.js:InvestmentsSection() | src/core/investment-tracker.js:portfolio management
 - **Savings Rate Analysis** - Monthly and yearly savings performance | src/core/savings-goals-service.js:calculateSingleGoalProgress() | src/views/financial-planning/OverviewSection.js:savings display
 - **Key Financial Metrics** - Income-to-expense ratio, average daily spending | src/core/analytics/MetricsService.js:calculateIncomeVsExpenses() | src/views/financial-planning/OverviewSection.js:metrics display
 
@@ -113,11 +112,11 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 - **Income/Expense Predictions** - Forecasting based on historical patterns | src/views/financial-planning/ForecastsSection.js:ForecastsSection() | src/core/analytics/PredictionService.js:generatePredictions()
 - **Account Balance Projections** - Future balances for all accounts up to 12 months | src/core/Account/account-balance-predictor.js:projectBalances() | src/views/financial-planning/ForecastsSection.js:balance projections
 - **Cash Flow Analysis** - Predicted cash inflows and outflows | src/core/forecast-engine.js:generateIncomeForecasts() | src/views/financial-planning/ForecastsSection.js:cash flow display
-- **Scenario Planning** - "What-if" analysis for major financial decisions | src/core/forecast-engine.js:generateExpenseForecasts() | src/views/financial-planning/ForecastsSection.js:scenario planning
+- **Scenario Planning** - Planned "What-if" analysis for major financial decisions | src/core/forecast-engine.js:generateExpenseForecasts() | src/views/financial-planning/ForecastsSection.js:scenario planning
 
 #### **Investments Section**
 
-- **Simple Holdings List** - Track investments with symbol, shares, cost basis, and current value | src/views/financial-planning/InvestmentsSection.js:InvestmentsSection() | src/core/investment-tracker.js:portfolio management
+- **Manual portfolio holdings** - Track investments with symbol, name, shares, cost basis, current value, and optional asset metadata | src/views/financial-planning/InvestmentsSection.js:InvestmentsSection() | src/core/investment-tracker.js:portfolio management
 - **Total Portfolio Value** - Quick overview of your investment portfolio worth | src/core/investment-tracker.js:calculatePortfolioValue() | src/views/financial-planning/InvestmentsSection.js:total value display
 - **Gains/Losses** - See how your investments have performed | src/core/investment-tracker.js:calculateGainsLosses() | src/views/financial-planning/InvestmentsSection.js:gains display
 

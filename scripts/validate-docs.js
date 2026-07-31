@@ -104,15 +104,45 @@ function getLineNumber(content, index) {
 }
 
 /**
- * Check if a file exists in the codebase
+ * Resolve and validate a file path inside the project root.
+ * Reject paths outside the project, symlinks that resolve outside, directories,
+ * and unreadable files.
+ * @param {string} filePath
+ * @returns {string|null} Validated absolute file path or null
  */
-function fileExists(filePath) {
+function getValidatedProjectFilePath(filePath) {
   const fullPath = path.resolve(projectRoot, filePath);
   const resolvedProjectRoot = path.resolve(projectRoot);
-  if (!fullPath.startsWith(resolvedProjectRoot)) {
-    return false;
+  const relativePath = path.relative(resolvedProjectRoot, fullPath);
+
+  if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
+    return null;
   }
-  return fs.existsSync(fullPath);
+
+  try {
+    const realProjectRoot = fs.realpathSync(resolvedProjectRoot);
+    const realFullPath = fs.realpathSync(fullPath);
+
+    if (!realFullPath.startsWith(realProjectRoot)) {
+      return null;
+    }
+
+    const stat = fs.statSync(realFullPath);
+    if (!stat.isFile()) {
+      return null;
+    }
+
+    return realFullPath;
+  } catch (error) {
+    return null;
+  }
+}
+
+/**
+ * Check if a file exists in the codebase
+ */
+export function fileExists(filePath) {
+  return getValidatedProjectFilePath(filePath) !== null;
 }
 
 // Cache for file contents to avoid repeated reads during validation
@@ -123,19 +153,25 @@ const fileContentCache = new Map();
  * @param {string} filePath - Relative path to the file
  * @returns {string|null} File content or null if file doesn't exist
  */
-function getFileContent(filePath) {
+export function getFileContent(filePath) {
   if (fileContentCache.has(filePath)) {
     return fileContentCache.get(filePath);
   }
-  const fullPath = path.resolve(projectRoot, filePath);
-  const resolvedProjectRoot = path.resolve(projectRoot);
-  if (!fullPath.startsWith(resolvedProjectRoot) || !fs.existsSync(fullPath)) {
+
+  const validatedPath = getValidatedProjectFilePath(filePath);
+  if (!validatedPath) {
     fileContentCache.set(filePath, null);
     return null;
   }
-  const content = fs.readFileSync(fullPath, 'utf8');
-  fileContentCache.set(filePath, content);
-  return content;
+
+  try {
+    const content = fs.readFileSync(validatedPath, 'utf8');
+    fileContentCache.set(filePath, content);
+    return content;
+  } catch (error) {
+    fileContentCache.set(filePath, null);
+    return null;
+  }
 }
 
 /**
@@ -150,31 +186,52 @@ function getFileContent(filePath) {
  * @param {string} methodOrDescription - Method name or descriptive text from README
  * @returns {boolean} True if the method exists or the reference is descriptive prose
  */
-function methodExists(filePath, methodOrDescription) {
+function stripCommentsAndStrings(source) {
+  return source
+    .replace(/\/\/.*$/gm, '')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(["'`])(?:\\.|(?!\1).)*\1/g, '');
+}
+
+export function methodExists(filePath, methodOrDescription) {
   // Extract method names that use call syntax: methodName() or Class.methodName()
-  const methodPattern = /(\w+)\(\)/g;
-  const methodNames = [];
+  const methodPattern = /(?:\b(\w+)\.)?(\w+)\(\)/g;
+  const methodSignatures = [];
   let match;
   while ((match = methodPattern.exec(methodOrDescription)) !== null) {
-    methodNames.push(match[1]);
+    methodSignatures.push({ className: match[1], methodName: match[2] });
   }
 
-  // No method() pattern found — it's descriptive prose, can't validate
-  if (methodNames.length === 0) {
+  if (methodSignatures.length === 0) {
     return true;
   }
 
-  // If file doesn't exist, let fileExists handle the error
   const content = getFileContent(filePath);
   if (content === null) {
     return true;
   }
 
-  // Check each method name exists as an identifier in the file content
-  return methodNames.every(methodName => {
-    const escaped = methodName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const identifierRegex = new RegExp(`\\b${escaped}\\b`);
-    return identifierRegex.test(content);
+  const cleanContent = stripCommentsAndStrings(content);
+
+  return methodSignatures.every(({ className, methodName }) => {
+    const escapedMethod = methodName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const declarationPatterns = [
+      new RegExp(`(?<![\.\w$])(?:async\\s+)?(?:static\\s+)?(?:function\\s+)?${escapedMethod}\\s*\\([^)]*\\)\\s*\\{`, 'm'),
+      new RegExp(`(?<![\.\w$])${escapedMethod}\\s*=\\s*\\([^)]*\\)\\s*=>`, 'm'),
+      new RegExp(`(?<![\.\w$])${escapedMethod}\\s*:\\s*function\\s*\\(`, 'm'),
+    ];
+
+    if (className) {
+      const escapedClassName = className.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      declarationPatterns.unshift(
+        new RegExp(
+          `\\bclass\\s+${escapedClassName}\\b[\\s\\S]*?\\b(?:static\\s+)?${escapedMethod}\\s*\\([^)]*\\)\\s*\\{`,
+          'm'
+        )
+      );
+    }
+
+    return declarationPatterns.some(pattern => pattern.test(cleanContent));
   });
 }
 
@@ -367,8 +424,11 @@ function generateStats() {
 }
 
 // Main execution
-if (process.argv.includes('--stats')) {
-  generateStats();
-} else {
-  validateReferences();
+const isMain = process.argv[1] === fileURLToPath(import.meta.url);
+if (isMain) {
+  if (process.argv.includes('--stats')) {
+    generateStats();
+  } else {
+    validateReferences();
+  }
 }

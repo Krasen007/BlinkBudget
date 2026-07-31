@@ -231,7 +231,18 @@ function createInvestmentsList() {
         const meta = document.createElement('div');
         meta.style.fontSize = '0.9rem';
         const currentPrice = inv.currentPrice || inv.purchasePrice;
-        const currency = inv.currency || inv.metadata?.currency || 'EUR';
+        const currencyCode = inv.currency || inv.metadata?.currency || 'EUR';
+        const validatedCurrency = (() => {
+          try {
+            new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: currencyCode,
+            }).format(0);
+            return currencyCode;
+          } catch (error) {
+            return 'EUR';
+          }
+        })();
         const currentValue = inv.shares * currentPrice;
         const purchaseValue = inv.shares * inv.purchasePrice;
         const gainLoss = currentValue - purchaseValue;
@@ -240,7 +251,22 @@ function createInvestmentsList() {
             ? ((gainLoss / purchaseValue) * 100).toFixed(1)
             : '0.0';
         const sign = gainLoss >= 0 ? '+' : '';
-        meta.innerHTML = `${inv.shares} shares @ ${new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(currentPrice)} → <strong>${new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(currentValue)}</strong> <span style="color:${gainLoss >= 0 ? COLORS.SUCCESS : COLORS.ERROR}">(${sign}${gainPct}%)</span>`;
+        meta.textContent = `${inv.shares} shares @ ${new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: validatedCurrency,
+        }).format(currentPrice)} → `;
+
+        const totalValueEl = document.createElement('strong');
+        totalValueEl.textContent = new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: validatedCurrency,
+        }).format(currentValue);
+        meta.appendChild(totalValueEl);
+
+        const gainSpan = document.createElement('span');
+        gainSpan.style.color = gainLoss >= 0 ? COLORS.SUCCESS : COLORS.ERROR;
+        gainSpan.textContent = ` (${sign}${gainPct}%)`;
+        meta.appendChild(gainSpan);
         left.appendChild(meta);
 
         if (inv.notes) {
@@ -285,6 +311,8 @@ function createInvestmentsList() {
           const inputStyle = `width:100%;padding:${SPACING.SM};border:1px solid ${COLORS.BORDER};border-radius:var(--radius-md);font-size:var(--font-size-sm);background:${COLORS.BACKGROUND};color:var(--color-text-main);box-sizing:border-box;`;
           const labelStyle = `font-size:var(--font-size-xs);font-weight:500;color:${COLORS.TEXT_MUTED};margin-bottom:2px;`;
 
+          const fieldPrefix = `edit-${String(inv.id || 'investment').replace(/[^a-zA-Z0-9_-]+/g, '-')}-`;
+
           // Symbol field with label
           const symbolWrapper = document.createElement('div');
           symbolWrapper.style.display = 'flex';
@@ -293,9 +321,9 @@ function createInvestmentsList() {
           const symbolLabel = document.createElement('label');
           symbolLabel.textContent = 'Symbol';
           symbolLabel.style.cssText = labelStyle;
-          symbolLabel.setAttribute('for', 'edit-symbol');
+          symbolLabel.setAttribute('for', `${fieldPrefix}symbol`);
           const symbolFld = document.createElement('input');
-          symbolFld.id = 'edit-symbol';
+          symbolFld.id = `${fieldPrefix}symbol`;
           symbolFld.type = 'text';
           symbolFld.value = inv.symbol;
           symbolFld.placeholder = 'e.g. AAPL';
@@ -311,9 +339,9 @@ function createInvestmentsList() {
           const nameLabel = document.createElement('label');
           nameLabel.textContent = 'Name';
           nameLabel.style.cssText = labelStyle;
-          nameLabel.setAttribute('for', 'edit-name');
+          nameLabel.setAttribute('for', `${fieldPrefix}name`);
           const nameFld = document.createElement('input');
-          nameFld.id = 'edit-name';
+          nameFld.id = `${fieldPrefix}name`;
           nameFld.type = 'text';
           nameFld.value = inv.name || '';
           nameFld.placeholder = 'Optional';
@@ -329,9 +357,9 @@ function createInvestmentsList() {
           const sharesLabel = document.createElement('label');
           sharesLabel.textContent = 'Shares';
           sharesLabel.style.cssText = labelStyle;
-          sharesLabel.setAttribute('for', 'edit-shares');
+          sharesLabel.setAttribute('for', `${fieldPrefix}shares`);
           const sharesFld = document.createElement('input');
-          sharesFld.id = 'edit-shares';
+          sharesFld.id = `${fieldPrefix}shares`;
           sharesFld.type = 'number';
           sharesFld.value = inv.shares;
           sharesFld.step = '0.0001';
@@ -348,9 +376,9 @@ function createInvestmentsList() {
           const purchasePriceLabel = document.createElement('label');
           purchasePriceLabel.textContent = 'Purchase Price';
           purchasePriceLabel.style.cssText = labelStyle;
-          purchasePriceLabel.setAttribute('for', 'edit-purchase-price');
+          purchasePriceLabel.setAttribute('for', `${fieldPrefix}purchase-price`);
           const purchasePriceFld = document.createElement('input');
-          purchasePriceFld.id = 'edit-purchase-price';
+          purchasePriceFld.id = `${fieldPrefix}purchase-price`;
           purchasePriceFld.type = 'number';
           purchasePriceFld.value = inv.purchasePrice;
           purchasePriceFld.step = '0.01';
@@ -367,9 +395,9 @@ function createInvestmentsList() {
           const currentPriceLabel = document.createElement('label');
           currentPriceLabel.textContent = 'Current Price';
           currentPriceLabel.style.cssText = labelStyle;
-          currentPriceLabel.setAttribute('for', 'edit-current-price');
+          currentPriceLabel.setAttribute('for', `${fieldPrefix}current-price`);
           const currentPriceFld = document.createElement('input');
-          currentPriceFld.id = 'edit-current-price';
+          currentPriceFld.id = `${fieldPrefix}current-price`;
           currentPriceFld.type = 'number';
           currentPriceFld.value = inv.currentPrice || inv.purchasePrice;
           currentPriceFld.step = '0.01';
@@ -386,9 +414,9 @@ function createInvestmentsList() {
           const dateLabel = document.createElement('label');
           dateLabel.textContent = 'Purchase Date';
           dateLabel.style.cssText = labelStyle;
-          dateLabel.setAttribute('for', 'edit-date');
+          dateLabel.setAttribute('for', `${fieldPrefix}date`);
           const dateFld = document.createElement('input');
-          dateFld.id = 'edit-date';
+          dateFld.id = `${fieldPrefix}date`;
           dateFld.type = 'date';
           dateFld.value = inv.purchaseDate
             ? new Date(inv.purchaseDate).toISOString().split('T')[0]
@@ -405,9 +433,9 @@ function createInvestmentsList() {
           const notesLabel = document.createElement('label');
           notesLabel.textContent = 'Notes';
           notesLabel.style.cssText = labelStyle;
-          notesLabel.setAttribute('for', 'edit-notes');
+          notesLabel.setAttribute('for', `${fieldPrefix}notes`);
           const notesFld = document.createElement('textarea');
-          notesFld.id = 'edit-notes';
+          notesFld.id = `${fieldPrefix}notes`;
           notesFld.value = inv.notes || '';
           notesFld.rows = 2;
           notesFld.placeholder = 'Optional notes';
