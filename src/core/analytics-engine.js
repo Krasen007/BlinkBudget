@@ -45,13 +45,6 @@ export class AnalyticsEngine {
   }
 
   /**
-   * Calculate cost of living summary
-   */
-  calculateCostOfLiving(transactions, timePeriod) {
-    return MetricsService.calculateCostOfLiving(transactions, timePeriod);
-  }
-
-  /**
    * Generate spending insights
    */
   generateSpendingInsights(transactions, currentPeriod, previousPeriod = null) {

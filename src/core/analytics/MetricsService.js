@@ -183,64 +183,6 @@ export class MetricsService {
   }
 
   /**
-   * Calculate cost of living summary
-   * @param {Array} transactions - Transaction data
-   * @param {Object} timePeriod - Time period configuration
-   * @returns {Object} Cost of living metrics
-   */
-  static calculateCostOfLiving(transactions, timePeriod) {
-    const incomeVsExpenses = this.calculateIncomeVsExpenses(
-      transactions,
-      timePeriod
-    );
-    const categoryBreakdown = this.calculateCategoryBreakdown(
-      transactions,
-      timePeriod
-    );
-
-    // Calculate time period duration in days
-    const startDate = new Date(timePeriod.startDate);
-    const endDate = new Date(timePeriod.endDate);
-    const durationDays = Math.ceil(
-      (endDate - startDate) / (1000 * 60 * 60 * 24)
-    );
-
-    // Calculate daily averages
-    const dailySpending =
-      durationDays > 0 ? incomeVsExpenses.totalExpenses / durationDays : 0;
-    const dailyIncome =
-      durationDays > 0 ? incomeVsExpenses.totalIncome / durationDays : 0;
-
-    // Estimate monthly values (30-day month)
-    const monthlySpending = dailySpending * 30;
-    const monthlyIncome = dailyIncome * 30;
-
-    // Identify top spending category by largest net spending amount
-    const rankedCategories = [...categoryBreakdown.categories].sort(
-      (a, b) => b.amount - a.amount
-    );
-    const topCategory =
-      rankedCategories.length > 0 ? rankedCategories[0] : null;
-
-    return {
-      totalExpenditure: incomeVsExpenses.totalExpenses,
-      dailySpending,
-      monthlySpending,
-      dailyIncome,
-      monthlyIncome,
-      durationDays,
-      topSpendingCategory: topCategory,
-      categoryCount: categoryBreakdown.categories.length,
-      timePeriod,
-      spendingRate:
-        incomeVsExpenses.totalIncome > 0
-          ? (incomeVsExpenses.totalExpenses / incomeVsExpenses.totalIncome) *
-            100
-          : 0,
-    };
-  }
-
-  /**
    * Identify top spending categories with detailed analysis
    * @param {Array} transactions - Transaction data
    * @param {Object} timePeriod - Time period

@@ -45,7 +45,6 @@ export class ForecastEngine {
       }
 
       const monthlyData = this._aggregateByMonth(incomeTransactions);
-      const seasonalPatterns = this.detectSeasonalPatterns(incomeTransactions);
 
       // Weighted baseline: use all complete months, with linearly increasing
       // weights so recent months count more but older history still anchors the estimate.
@@ -62,12 +61,9 @@ export class ForecastEngine {
         const futureDate = new Date();
         futureDate.setMonth(futureDate.getMonth() + i + 1);
 
-        const monthIndex = futureDate.getMonth();
-        const seasonalMultiplier = seasonalPatterns.income?.[monthIndex] || 1;
-
-        // Project: baseline + trend * steps ahead, then apply seasonal factor
+        // Project: baseline + trend * steps ahead (no seasonal adjustment)
         const projectedBase = baseline + trend * (i + 1);
-        const predictedAmount = Math.max(0, projectedBase * seasonalMultiplier);
+        const predictedAmount = Math.max(0, projectedBase);
 
         const confidence = this._calculateConfidence(monthlyData.values, i);
         const confidenceInterval = this._calculateConfidenceInterval(
@@ -82,7 +78,7 @@ export class ForecastEngine {
           confidenceInterval,
           confidence,
           method: 'weighted_moving_average',
-          seasonalFactor: seasonalMultiplier,
+          seasonalFactor: 1,
           trend,
         });
       }
@@ -134,7 +130,6 @@ export class ForecastEngine {
       }
 
       const monthlyData = this._aggregateByMonth(expenseTransactions);
-      const seasonalPatterns = this.detectSeasonalPatterns(expenseTransactions);
 
       // Weighted baseline: use all complete months, with linearly increasing
       // weights so recent months count more but older history still anchors the estimate.
@@ -151,12 +146,9 @@ export class ForecastEngine {
         const futureDate = new Date();
         futureDate.setMonth(futureDate.getMonth() + i + 1);
 
-        const monthIndex = futureDate.getMonth();
-        const seasonalMultiplier = seasonalPatterns.expense?.[monthIndex] || 1;
-
-        // Project: baseline + trend * steps ahead, then apply seasonal factor
+        // Project: baseline + trend * steps ahead (no seasonal adjustment)
         const projectedBase = baseline + trend * (i + 1);
-        const predictedAmount = Math.max(0, projectedBase * seasonalMultiplier);
+        const predictedAmount = Math.max(0, projectedBase);
 
         const confidence = this._calculateConfidence(monthlyData.values, i);
         const confidenceInterval = this._calculateConfidenceInterval(
@@ -171,7 +163,7 @@ export class ForecastEngine {
           confidenceInterval,
           confidence,
           method: 'weighted_moving_average',
-          seasonalFactor: seasonalMultiplier,
+          seasonalFactor: 1,
           trend,
         });
       }
@@ -180,101 +172,6 @@ export class ForecastEngine {
     } catch (error) {
       console.error('Error generating expense forecasts:', error);
       return this._generateBasicForecast('expense', 0, months);
-    }
-  }
-
-  /**
-   * Detect seasonal patterns in transaction data
-   * @param {Array} transactions - Transaction data
-   * @returns {Object} Seasonal patterns by type and month
-   */
-  detectSeasonalPatterns(transactions) {
-    try {
-      const patterns = {
-        income: new Array(12).fill(1),
-        expense: new Array(12).fill(1),
-      };
-
-      // Filter valid transactions — exclude negatives (mapped refunds) so they
-      // don't distort the seasonal multipliers
-      const validTransactions = transactions.filter(
-        transaction =>
-          transaction &&
-          typeof transaction.amount === 'number' &&
-          transaction.amount > 0 &&
-          transaction.timestamp &&
-          transaction.type &&
-          !transaction.isGhost
-      );
-
-      if (validTransactions.length < 12) {
-        return patterns; // Not enough data for seasonal analysis
-      }
-
-      const monthlyTotals = {
-        income: new Array(12).fill(0),
-        expense: new Array(12).fill(0),
-      };
-      const monthlyCounts = {
-        income: new Array(12).fill(0),
-        expense: new Array(12).fill(0),
-      };
-
-      validTransactions.forEach(transaction => {
-        try {
-          const date = new Date(transaction.timestamp);
-          if (isNaN(date.getTime())) {
-            return; // Skip invalid dates
-          }
-
-          const month = date.getMonth();
-          const type = transaction.type === 'income' ? 'income' : 'expense';
-
-          monthlyTotals[type][month] += transaction.amount;
-          monthlyCounts[type][month]++;
-        } catch (error) {
-          console.warn(
-            'Error processing transaction for seasonal analysis:',
-            transaction,
-            error
-          );
-        }
-      });
-
-      // Calculate average monthly amounts
-      const monthlyAverages = { income: [], expense: [] };
-      ['income', 'expense'].forEach(type => {
-        for (let month = 0; month < 12; month++) {
-          const avg =
-            monthlyCounts[type][month] > 0
-              ? monthlyTotals[type][month] / monthlyCounts[type][month]
-              : 0;
-          monthlyAverages[type][month] = avg;
-        }
-      });
-
-      // Calculate seasonal multipliers
-      ['income', 'expense'].forEach(type => {
-        const yearlyAverage =
-          monthlyAverages[type].reduce((sum, val) => sum + val, 0) / 12;
-
-        if (yearlyAverage > 0) {
-          for (let month = 0; month < 12; month++) {
-            patterns[type][month] =
-              monthlyAverages[type][month] / yearlyAverage;
-            // Cap extreme values to be more conservative
-            patterns[type][month] = Math.max(
-              0.6, // More moderate lower bound
-              Math.min(1.6, patterns[type][month]) // More moderate upper bound
-            );
-          }
-        }
-      });
-
-      return patterns;
-    } catch (error) {
-      console.error('Error detecting seasonal patterns:', error);
-      return { income: new Array(12).fill(1), expense: new Array(12).fill(1) };
     }
   }
 

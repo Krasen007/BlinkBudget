@@ -534,10 +534,6 @@ export const ReportsView = (params = {}) => {
             transactions,
             currentTimePeriod
           ),
-          costOfLiving: analyticsEngine.calculateCostOfLiving(
-            transactions,
-            currentTimePeriod
-          ),
         };
       } catch (analyticsError) {
         console.error('Progressive data loading error:', analyticsError);

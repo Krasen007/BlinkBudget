@@ -83,10 +83,6 @@ const preloadReportsData = () => {
       transactions,
       currentTimePeriod
     );
-    const costOfLiving = analyticsEngine.calculateCostOfLiving(
-      transactions,
-      currentTimePeriod
-    );
 
     const cacheEntry = {
       data: {
@@ -94,7 +90,6 @@ const preloadReportsData = () => {
         insights,
         categoryBreakdown,
         incomeVsExpenses,
-        costOfLiving,
         meta: {
           transactionCount: transactions.length,
         },
