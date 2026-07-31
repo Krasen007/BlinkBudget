@@ -101,7 +101,7 @@ function createInvestmentFormControls() {
   saveInvBtn.textContent = 'Save Investment';
   saveInvBtn.className = 'btn btn-primary btn-save';
   saveInvBtn.disabled = true;
-  
+
   const cancelInvBtn = document.createElement('button');
   cancelInvBtn.textContent = 'Cancel';
   cancelInvBtn.className = 'btn btn-ghost';
@@ -111,7 +111,7 @@ function createInvestmentFormControls() {
     Object.values(inputs).forEach(i => (i.value = ''));
     notesInput.value = '';
   });
-  
+
   invForm.appendChild(saveInvBtn);
   invForm.appendChild(cancelInvBtn);
 
