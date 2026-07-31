@@ -451,6 +451,30 @@ export const TransactionListItem = ({
   // Click — in selection mode toggle selection, otherwise navigate to edit
   item.addEventListener('click', _e => {
     if (!longPressed) {
+      // If transaction has anomaly highlight, remove it on click
+      if (shouldHighlight && item.classList.contains('transaction-item-anomaly')) {
+        // Remove anomaly badge
+        const badge = val.querySelector('.transaction-item-anomaly-badge');
+        if (badge) {
+          badge.remove();
+        }
+        
+        // Remove anomaly styling
+        item.classList.remove('transaction-item-anomaly');
+        item.style.background = '';
+        item.style.borderLeft = '';
+        
+        // Dispatch event to update transaction status
+        window.dispatchEvent(
+          new CustomEvent('anomaly-dismissed', {
+            detail: { transactionId: transaction.id },
+            bubbles: true,
+          })
+        );
+        
+        return;
+      }
+      
       if (selectionMode && typeof onToggleSelect === 'function') {
         onToggleSelect(transaction.id);
       } else {
@@ -503,15 +527,33 @@ export const TransactionListItem = ({
   item.appendChild(info);
   item.appendChild(val);
 
-  // Apply success highlight if this transaction should be highlighted
+  // Apply anomaly highlight if this transaction should be highlighted
   if (shouldHighlight) {
-    // Add new transaction animation class
-    item.classList.add('transaction-item-new');
-
-    // Use rAF to ensure the item is painted before the highlight runs
-    requestAnimationFrame(() => {
-      highlightTransactionSuccess(item, 1500);
+    // Add anomaly indicator badge
+    const anomalyBadge = document.createElement('span');
+    anomalyBadge.textContent = '⚠️';
+    anomalyBadge.style.cssText = `
+      margin-left: 8px;
+      font-size: 1.1rem;
+      cursor: help;
+      title: 'This transaction was flagged as unusual based on your spending patterns';
+    `;
+    
+    // Add tooltip on hover
+    anomalyBadge.addEventListener('mouseenter', () => {
+      anomalyBadge.title = 'This transaction was flagged as unusual based on your spending patterns';
     });
+    
+    // Add class to badge for easy removal
+    anomalyBadge.classList.add('transaction-item-anomaly-badge');
+    
+    // Insert badge after the value element
+    val.appendChild(anomalyBadge);
+    
+    // Add subtle highlight animation
+    item.classList.add('transaction-item-anomaly');
+    item.style.background = 'rgba(251, 191, 36, 0.1)';
+    item.style.borderLeft = '3px solid #fbbf24';
   }
 
   return item;

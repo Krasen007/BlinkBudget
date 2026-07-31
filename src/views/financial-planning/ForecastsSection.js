@@ -347,20 +347,51 @@ export const ForecastsSection = (
         expenseForecasts.reduce((sum, f) => sum + f.confidence, 0)) /
       (incomeForecasts.length + expenseForecasts.length);
 
+    // Calculate uncertainty ranges for income and expenses
+    const incomeRange = incomeForecasts.length > 0
+      ? {
+          lower: incomeForecasts.reduce((sum, f) => sum + (f.lowerBound || 0), 0),
+          upper: incomeForecasts.reduce((sum, f) => sum + (f.upperBound || 0), 0),
+        }
+      : { lower: 0, upper: 0 };
+
+    const expenseRange = expenseForecasts.length > 0
+      ? {
+          lower: expenseForecasts.reduce((sum, f) => sum + (f.lowerBound || 0), 0),
+          upper: expenseForecasts.reduce((sum, f) => sum + (f.upperBound || 0), 0),
+        }
+      : { lower: 0, upper: 0 };
+
+    const netRange = {
+      lower: incomeRange.lower - expenseRange.upper,
+      upper: incomeRange.upper - expenseRange.lower,
+    };
+
+    // Determine trend arrows
+    const incomeTrend = incomeForecasts.length > 0 && incomeForecasts[0].trend
+      ? (incomeForecasts[0].trend > 0 ? '↑' : incomeForecasts[0].trend < 0 ? '↓' : '→')
+      : '→';
+
+    const expenseTrend = expenseForecasts.length > 0 && expenseForecasts[0].trend
+      ? (expenseForecasts[0].trend > 0 ? '↑' : expenseForecasts[0].trend < 0 ? '↓' : '→')
+      : '→';
+
     const summaryCards = [
       {
         label: 'Forecasted Income (6mo)',
         value: `€${totalIncomeForecasted.toFixed(2)}`,
         color: COLORS.SUCCESS,
         icon: '📈',
-        subtitle: `Avg: €${(totalIncomeForecasted / 6).toFixed(2)}/month`,
+        subtitle: `Avg: €${(totalIncomeForecasted / 6).toFixed(2)}/month ${incomeTrend}`,
+        range: `Range: €${incomeRange.lower.toFixed(2)} - €${incomeRange.upper.toFixed(2)}`,
       },
       {
         label: 'Forecasted Expenses (6mo)',
         value: `€${totalExpensesForecasted.toFixed(2)}`,
         color: COLORS.ERROR,
         icon: '📉',
-        subtitle: `Avg: €${(totalExpensesForecasted / 6).toFixed(2)}/month`,
+        subtitle: `Avg: €${(totalExpensesForecasted / 6).toFixed(2)}/month ${expenseTrend}`,
+        range: `Range: €${expenseRange.lower.toFixed(2)} - €${expenseRange.upper.toFixed(2)}`,
       },
       {
         label: 'Net Forecast (6mo)',
@@ -368,6 +399,7 @@ export const ForecastsSection = (
         color: netForecast >= 0 ? COLORS.SUCCESS : COLORS.ERROR,
         icon: netForecast >= 0 ? '💰' : '⚠️',
         subtitle: `Avg: €${(netForecast / 6).toFixed(2)}/month`,
+        range: `Range: €${netRange.lower.toFixed(2)} - €${netRange.upper.toFixed(2)}`,
       },
       {
         label: 'Forecast Confidence',

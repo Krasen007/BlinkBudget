@@ -5,7 +5,7 @@
  * No charts. No allocation analysis. No type-specific fields.
  */
 
-import { COLORS, SPACING, FONT_SIZES } from '../../utils/constants.js';
+import { COLORS, SPACING, FONT_SIZES, CURRENCY_SYMBOL } from '../../utils/constants.js';
 import {
   createUsageNote,
   createSectionContainer,
@@ -231,18 +231,6 @@ function createInvestmentsList() {
         const meta = document.createElement('div');
         meta.style.fontSize = '0.9rem';
         const currentPrice = inv.currentPrice || inv.purchasePrice;
-        const currencyCode = inv.currency || inv.metadata?.currency || 'EUR';
-        const validatedCurrency = (() => {
-          try {
-            new Intl.NumberFormat('en-US', {
-              style: 'currency',
-              currency: currencyCode,
-            }).format(0);
-            return currencyCode;
-          } catch (error) {
-            return 'EUR';
-          }
-        })();
         const currentValue = inv.shares * currentPrice;
         const purchaseValue = inv.shares * inv.purchasePrice;
         const gainLoss = currentValue - purchaseValue;
@@ -251,16 +239,10 @@ function createInvestmentsList() {
             ? ((gainLoss / purchaseValue) * 100).toFixed(1)
             : '0.0';
         const sign = gainLoss >= 0 ? '+' : '';
-        meta.textContent = `${inv.shares} shares @ ${new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: validatedCurrency,
-        }).format(currentPrice)} → `;
+        meta.textContent = `${inv.shares} shares @ ${CURRENCY_SYMBOL}${currentPrice.toFixed(2)} → `;
 
         const totalValueEl = document.createElement('strong');
-        totalValueEl.textContent = new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: validatedCurrency,
-        }).format(currentValue);
+        totalValueEl.textContent = `${CURRENCY_SYMBOL}${currentValue.toFixed(2)}`;
         meta.appendChild(totalValueEl);
 
         const gainSpan = document.createElement('span');

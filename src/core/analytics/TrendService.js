@@ -8,7 +8,7 @@ import { TRANSACTION_TYPES } from '../../utils/constants.js';
 
 const STORAGE_KEY = 'blinkbudget_trend_data';
 
-// Month names for seasonal pattern detection
+// Month names for trend analysis
 const MONTHS = [
   'January',
   'February',
@@ -136,59 +136,6 @@ export class TrendService {
         : 1.0;
 
     return { categories: categoryConsistency, overall: overallConsistency };
-  }
-
-  /**
-   * Detect seasonal patterns in spending
-   * @param {string} categoryId - Category to analyze
-   * @returns {Object} Seasonal pattern data
-   */
-  detectSeasonalPatterns(categoryId, transactions) {
-    const monthTotals = Array(12).fill(0);
-    const monthCounts = Array(12).fill(0);
-
-    transactions.forEach(t => {
-      if (t.type !== TRANSACTION_TYPES.EXPENSE) return;
-      if (categoryId && t.category !== categoryId) return;
-
-      const d = new Date(t.date || t.timestamp);
-      if (isNaN(d.getTime())) return;
-      const month = d.getMonth();
-      if (month < 0 || month > 11) return;
-      monthTotals[month] += Math.abs(t.amount || 0);
-      monthCounts[month]++;
-    });
-
-    const averages = monthTotals.map((total, i) =>
-      monthCounts[i] > 0 ? total / monthCounts[i] : 0
-    );
-
-    const positiveAverages = averages.filter(a => a > 0);
-    const overallAvg =
-      positiveAverages.length > 0
-        ? positiveAverages.reduce((s, v) => s + v, 0) / positiveAverages.length
-        : 0;
-
-    const peaks = [];
-    averages.forEach((avg, i) => {
-      if (overallAvg > 0 && avg > overallAvg * 1.3) {
-        peaks.push({
-          month: MONTHS[i],
-          average: avg,
-          percentAboveAvg: (avg / overallAvg - 1) * 100,
-        });
-      }
-    });
-
-    return {
-      monthlyAverages: MONTHS.map((m, i) => ({
-        month: m,
-        average: averages[i],
-      })),
-      overallAverage: overallAvg,
-      peaks,
-      hasSeasonality: peaks.length > 0,
-    };
   }
 
   /**

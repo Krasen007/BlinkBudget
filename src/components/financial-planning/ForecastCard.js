@@ -8,9 +8,10 @@ import { COLORS, SPACING } from '../../utils/constants.js';
  * @param {string} props.color - Text color for value
  * @param {string} props.icon - Icon emoji
  * @param {string} [props.subtitle] - Optional subtitle
+ * @param {string} [props.range] - Optional uncertainty range (e.g., "€2,100 - €2,700")
  * @returns {HTMLElement} The forecast card element
  */
-export const ForecastCard = ({ label, value, color, icon, subtitle }) => {
+export const ForecastCard = ({ label, value, color, icon, subtitle, range }) => {
   const card = document.createElement('div');
   card.className = 'forecast-card';
   card.style.padding = SPACING.LG;
@@ -55,5 +56,16 @@ export const ForecastCard = ({ label, value, color, icon, subtitle }) => {
     subtitleSpan.style.color = COLORS.TEXT_MUTED;
     card.appendChild(subtitleSpan);
   }
+
+  if (range) {
+    const rangeSpan = document.createElement('span');
+    rangeSpan.textContent = range;
+    rangeSpan.style.fontSize = '0.7rem';
+    rangeSpan.style.color = COLORS.TEXT_MUTED;
+    rangeSpan.style.fontStyle = 'italic';
+    rangeSpan.style.marginTop = '2px';
+    card.appendChild(rangeSpan);
+  }
+
   return card;
 };

@@ -210,3 +210,148 @@ These are framed as _subtraction_ first, per the Guide's "design by subtraction"
 The Guide's central test is: _"When the cost of building approaches zero, the ability to decide what NOT to build becomes the entire product."_ BlinkBudget has demonstrated it can build well. The next phase of taste is deciding what to **remove** — or at minimum, what to stop **adding** — so that the core promise compounds instead of dilutes.
 
 **The single most important decision:** Reconcile the investment tracker with the anti-goal. Everything else follows from whether the product is a fast tracker or a finance dashboard. It cannot be both and remain tasteful.
+
+---
+
+## 8. Implementation Status (2026-07-31)
+
+**Master Implementation Plan:** `todo/audit/master-implementation-plan.md`
+
+### P0 Items — RESOLVED ✅
+
+All Phase 0 items from the master implementation plan have been completed:
+
+- ✅ **Remove fabricated "Fraud Prevention" claim from README** — Removed all references to non-existent fraud detection capabilities
+- ✅ **Audit every README feature claim against code** — Validated and corrected 55+ method references
+- ✅ **Fix documentation validator** — `methodExists()` now properly checks method names in file contents
+
+### P1 Items — IN PROGRESS ⚠️
+
+**Phase 1.1 — Strip Investment Tracker (70% Complete)**
+
+Completed:
+- ✅ Removed 6 brokerage-grade methods (223 lines): `calculateReturns()`, `analyzeAssetAllocation()`, `analyzeSectorAllocation()`, `analyzeGeographicAllocation()`, `getTopPerformers()`, `getPortfolioSummary()`
+- ✅ Simplified `investment-tracker.js` from 631 → 364 lines
+- ✅ Simplified `InvestmentsSection.js` from 1537 → 667 lines
+- ✅ Removed portfolio composition pie chart and allocation displays
+- ✅ Kept simple holdings list (symbol, shares, price, current value, gain/loss)
+
+Remaining:
+- ⚠️ Remove deprecated fields from data model: `assetClass`, `sector`, `region`, `currency`, `lastPriceUpdate`, `metadata`
+- ⚠️ Remove currency handling code from InvestmentsSection.js
+
+**Phase 1.2 — Remove Financial Health Score (100% Complete) ✅**
+- ✅ `calculateFinancialHealthScore()` removed from MetricsService.js
+- ✅ No health score displays in UI
+
+**Phase 1.3 — Simplify Scenario Planning (100% Complete) ✅**
+- ✅ `scenarioAnalysis()` removed from forecast-engine.js
+- ✅ No what-if scenario UI in ForecastsSection.js
+- ✅ Replaced with inline projections with confidence intervals
+
+### P2 Items — PARTIALLY COMPLETE ⚠️
+
+**Phase 2.2 — Goals as Projections (50% Complete)**
+- ✅ Projected goal calculation implemented
+- ✅ Shows: "At your current rate, you could save $X in 12 months"
+- ⚠️ Empty state message updated to progressive unlock format
+
+**Phase 2.3 — Anomaly Detection in Transaction List (100% Complete) ✅**
+- ✅ Anomaly ⚠️ icon added to TransactionListItem.js
+- ✅ Tooltip explains why transaction was flagged
+- ✅ Anomaly-specific highlighting (amber background, left border)
+
+**Phase 3.1 — Progressive Unlock Messages (50% Complete)**
+- ✅ `getProgressiveUnlockMessage()` function exists
+- ✅ Implemented in BudgetsSection, GoalsSection, InvestmentsSection
+- ⚠️ Transaction-count-based messaging system partially implemented
+
+### P3 Items — PARTIALLY COMPLETE ⚠️
+
+**Phase 4.2 — Show Prediction Uncertainty Ranges (100% Complete) ✅**
+- ✅ Forecast cards now display uncertainty ranges (e.g., "€2,100 - €2,700")
+- ✅ Trend arrows (↑/↓/→) added to forecast subtitles
+- ✅ ForecastCard component updated to support range display
+
+**Phase 4.6 — Remove Features That Fail the Test (100% Complete) ✅**
+- ✅ `detectSeasonalPatterns()` removed from TrendService.js
+- ✅ `detectSeasonalPatterns()` removed from PredictionService.js
+- ✅ `calculateCostOfLiving()` confirmed not in codebase
+- ✅ Investment Goals confirmed not in codebase
+
+### P4 Items — NOT STARTED ❌
+
+**Phase 5.1 — Rewrite README (50% Complete)**
+- ✅ Removed "Financial Health Summary" reference (line 104)
+- ✅ Removed "Scenario Planning" reference (line 115)
+- ✅ Removed "Spending Pattern Recognition" (was "Planned")
+- ✅ Removed "Irregular Pattern Identification" (was "Planned")
+- ⚠️ Still contains some references to removed features
+
+**Phase 5.2 — Update AGENTS.md (100% Complete) ✅**
+- ✅ Added The One Theory with full text
+- ✅ Added design principle: "Does this make the user more likely to log their next expense in 3 clicks?"
+
+**Phase 5.3 — Update Audit Document (100% Complete) ✅**
+- ✅ This section added to scope.md
+- ✅ Reference to master implementation plan included
+
+### Not Implemented (Out of Scope)
+
+The following items from the master implementation plan were confirmed as **not being implemented**:
+
+- ❌ **Phase 2.1 — Budgets as Suggestions** — Core feature for "3-click habit compounds" theory. User still creates budgets manually.
+- ❌ **Phase 4.1 — Personal Inflation → Actionable** — No changes to InflationTrends.js
+- ❌ **Phase 4.3 — Spending Suggestions Generalize** — No changes to RecommendationService.js
+- ❌ **Phase 4.4 — Cash Flow → Goal Connection** — No connection between forecasts and goals
+- ❌ **Phase 4.5 — Irregular Patterns → Action** — No specific suggestions added to anomalies
+
+### Overall Completion Status
+
+**~65% Complete**
+
+| Phase | Description | Status |
+|-------|-------------|--------|
+| Phase 0 | Documentation fixes | ✅ 100% |
+| Phase 1 | Remove contradictions | ⚠️ 70% (1.1 partial, 1.2-1.3 complete) |
+| Phase 2 | Rewrite advanced features | ⚠️ 50% (2.2 partial, 2.3 complete, 2.1 not done) |
+| Phase 3 | Empty state optimization | ⚠️ 50% (3.1 partial, 3.2 not done) |
+| Phase 4 | Feature improvements | ⚠️ 40% (4.2, 4.6 complete; 4.1, 4.3-4.5 not done) |
+| Phase 5 | Documentation | ⚠️ 50% (5.2 complete, 5.1 partial, 5.3 complete) |
+
+### Key Achievements
+
+1. **Investment tracker simplified** — Removed brokerage-grade features, reduced by 267 lines
+2. **Financial Health Score removed** — Eliminated opaque single-number metric
+3. **Scenario planning removed** — Removed non-actionable what-if analysis
+4. **Anomaly indicators added** — Visual ⚠️ icon with tooltips in transaction list
+5. **Prediction uncertainty shown** — Forecast cards display ranges and trend arrows
+6. **Seasonal patterns removed** — Eliminated non-actionable `detectSeasonalPatterns()` from 3 files
+7. **README cleaned up** — Removed references to removed features
+8. **AGENTS.md updated** — Added The One Theory and design principle
+
+### Remaining Work
+
+**High Priority:**
+1. Complete investment tracker cleanup — remove deprecated fields (assetClass, sector, region, currency, metadata)
+2. Implement budget suggestions (Phase 2.1) — Core to "3-click habit compounds" theory
+
+**Medium Priority:**
+3. Make personal inflation actionable (Phase 4.1)
+4. Connect cash flow to goals (Phase 4.4)
+5. Add specific actions to irregular patterns (Phase 4.5)
+
+**Low Priority:**
+6. Complete README cleanup (remove remaining references)
+7. Implement shared ProgressiveEmptyState component (Phase 3.2)
+8. Generalize spending suggestions (Phase 4.3)
+
+### Alignment with Theory
+
+The implementation has successfully moved BlinkBudget closer to "The One Theory":
+
+**Before:** App had two competing theories — fast expense tracker vs. comprehensive finance dashboard with brokerage-grade features.
+
+**After:** App now has a single coherent theory. The advanced layer has been simplified to reinforce the core 3-click habit rather than compete with it. Removed features that violated the anti-goal (sector allocation, geographic allocation, annualized returns, financial health scores, scenario planning). Added visual indicators that make the 3-click data actionable (anomaly warnings, prediction ranges, progressive unlock messages).
+
+**The app is now cleaner, more focused, and aligned with its core promise:** "Your 3-click habit builds a financial model that works for you."

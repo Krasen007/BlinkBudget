@@ -144,9 +144,11 @@ element.innerHTML = userInput; // XSS vulnerability
 
 ## The One Theory
 
-**Every feature should answer: "What does your 3-click data tell you?"**
+**"Your 3-click habit builds a financial model that works for you."**
 
-The advanced layer (insights, forecasts, budgets, goals, anomalies) exists to reinforce the core habit of logging transactions in 3 clicks. It does NOT exist as a separate product. If a feature doesn't connect back to the 3-click data, it doesn't belong. Advanced features should be read-only by default — they surface what the data already says, not ask the user to do more work.
+Every transaction logged in 3 clicks feeds a personal financial engine that gets smarter over time. The advanced layer exists not as a separate dashboard, but as the _reason the 3-click habit compounds_ — each tap makes forecasts more accurate, budgets more relevant, and insights more personal.
+
+**Design principle:** Before adding any new feature, ask: _"Does this make the user more likely to log their next expense in 3 clicks?"_ If yes, build it. If no, don't. If maybe, find a way to make it yes.
 
 ## Additional context
 

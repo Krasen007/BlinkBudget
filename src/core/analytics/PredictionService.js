@@ -111,7 +111,7 @@ export class PredictionService {
       });
 
     const trend = this.calculateSpendingTrend(monthlySpending);
-    const seasonalPatterns = this.detectSeasonalPatterns(monthlySpending);
+    const seasonalPatterns = { hasPatterns: false, seasonalAverages: {}, seasonalPatterns: {} };
 
     const totalSpending = monthlySpending.reduce(
       (sum, month) => sum + month.totalSpending,
@@ -223,68 +223,6 @@ export class PredictionService {
       confidence,
       monthlyChange: slope,
       projectedChange: slope * 12,
-    };
-  }
-
-  static detectSeasonalPatterns(monthlySpending) {
-    const seasonalData = { spring: [], summer: [], fall: [], winter: [] };
-    // No change needed for seasonalData as keys are hardcoded: spring, summer, fall, winter
-
-    monthlySpending.forEach(monthData => {
-      const month = monthData.month;
-      let season;
-      if (month >= 3 && month <= 5) season = 'spring';
-      else if (month >= 6 && month <= 8) season = 'summer';
-      else if (month >= 9 && month <= 11) season = 'fall';
-      else season = 'winter';
-      seasonalData[season].push(monthData.totalSpending);
-    });
-
-    const seasonalAverages = Object.create(null);
-    const seasonalPatterns = Object.create(null);
-
-    for (const [season, amounts] of Object.entries(seasonalData)) {
-      if (amounts.length > 0) {
-        const average =
-          amounts.reduce((sum, amount) => sum + amount, 0) / amounts.length;
-        const variance =
-          amounts.reduce(
-            (sum, amount) => sum + Math.pow(amount - average, 2),
-            0
-          ) / amounts.length;
-
-        seasonalAverages[season] = average;
-        seasonalPatterns[season] = {
-          average,
-          variance,
-          standardDeviation: Math.sqrt(variance),
-          dataPoints: amounts.length,
-        };
-      }
-    }
-
-    const seasons = Object.entries(seasonalAverages);
-    if (seasons.length === 0) return { hasPatterns: false };
-
-    const highestSeason = seasons.reduce(
-      (max, [season, avg]) =>
-        avg > max.average ? { season, average: avg } : max,
-      { season: seasons[0][0], average: seasons[0][1] }
-    );
-
-    const lowestSeason = seasons.reduce(
-      (min, [season, avg]) =>
-        avg < min.average ? { season, average: avg } : min,
-      { season: seasons[0][0], average: seasons[0][1] }
-    );
-
-    return {
-      hasPatterns: seasons.length >= 2,
-      seasonalAverages,
-      seasonalPatterns,
-      highestSpendingSeason: highestSeason,
-      lowestSpendingSeason: lowestSeason,
-      seasonalVariation: highestSeason.average - lowestSeason.average,
     };
   }
 

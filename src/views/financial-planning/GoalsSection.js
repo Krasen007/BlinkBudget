@@ -1016,7 +1016,7 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
   if (!hasRealGoals) {
     const placeholder = createPlaceholder(
       'No Goals Yet',
-      'Start planning your financial future by creating your first goal.',
+      'Log more transactions to see what goals are realistic for you.',
       '🎯'
     );
     section.appendChild(placeholder);

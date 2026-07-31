@@ -25,7 +25,7 @@ export class InvestmentTracker {
    * @param {Object} metadata - Additional investment metadata
    * @returns {Object} Created investment object
    */
-  addInvestment(symbol, shares, purchasePrice, purchaseDate, metadata = {}) {
+  addInvestment(symbol, shares, purchasePrice, purchaseDate, notes = '') {
     try {
       // Validate inputs
       if (!symbol || typeof symbol !== 'string') {
@@ -48,19 +48,14 @@ export class InvestmentTracker {
       const investment = {
         id: generateId(),
         symbol: symbol.toUpperCase().trim(),
-        name: metadata.name || symbol.toUpperCase(),
+        name: symbol.toUpperCase(),
         shares: Math.round(shares * 10000) / 10000, // Round to 4 decimal places
         purchasePrice: Math.round(purchasePrice * 100) / 100, // Round to 2 decimal places
-        currentPrice: metadata.currentPrice || purchasePrice, // Use currentPrice from metadata or default to purchase price
+        currentPrice: purchasePrice, // Default to purchase price
         purchaseDate: new Date(purchaseDate),
-        notes: metadata.notes || '',
-        lastPriceUpdate:
-          metadata.currentPrice && metadata.currentPrice !== purchasePrice
-            ? new Date()
-            : null,
+        notes: notes || '',
         createdAt: new Date(),
         updatedAt: new Date(),
-        metadata: { ...metadata },
       };
 
       this.investments.push(investment);
@@ -147,7 +142,6 @@ export class InvestmentTracker {
         'purchaseDate',
         'name',
         'notes',
-        'metadata',
       ];
       allowed.forEach(key => {
         if (updates[key] !== undefined) {
