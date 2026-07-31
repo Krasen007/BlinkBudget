@@ -15,6 +15,7 @@ import {
   STORAGE_KEYS,
 } from '../utils/constants.js';
 import { getAnalyticsEngine } from '../core/analytics/AnalyticsInstance.js';
+import { AnomalyService } from '../core/analytics/AnomalyService.js';
 import { getCurrentMonthPeriod } from '../utils/reports-utils.js';
 
 import { getTransactionToHighlight } from '../utils/success-feedback.js';
@@ -954,6 +955,21 @@ export const DashboardView = (params = {}) => {
     // Add highlight transaction ID from params if provided
     if (params.highlightTransactionId) {
       highlightTransactionIds.push(params.highlightTransactionId);
+    }
+    // Mark anomalous transactions with a subtle highlight in the list
+    try {
+      const currentPeriod = getCurrentMonthPeriod();
+      const anomalyInsights = AnomalyService.detectAnomalies(
+        allTransactions,
+        currentPeriod
+      );
+      const anomalyIds = anomalyInsights
+        .filter(i => i.metadata?.spikeTransactions)
+        .flatMap(i => i.metadata.spikeTransactions.map(t => t.id))
+        .filter(Boolean);
+      highlightTransactionIds.push(...anomalyIds);
+    } catch {
+      // Anomaly highlighting is non-critical — silently fail
     }
     const transactionList = TransactionList({
       transactions,

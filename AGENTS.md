@@ -142,6 +142,12 @@ element.innerHTML = userInput; // XSS vulnerability
 - ⚠️ **Ask first:** Adding new dependencies (zero-dependency principle), modifying Firebase configuration, changing the core routing system, significant data model changes
 - 🚫 **Never do:** Use React/Vue/heavy frameworks, hardcode secrets or API keys, render unsanitized user input to DOM, use Linux/Unix terminal commands on Windows, modify node_modules/ or vendor/
 
+## The One Theory
+
+**Every feature should answer: "What does your 3-click data tell you?"**
+
+The advanced layer (insights, forecasts, budgets, goals, anomalies) exists to reinforce the core habit of logging transactions in 3 clicks. It does NOT exist as a separate product. If a feature doesn't connect back to the 3-click data, it doesn't belong. Advanced features should be read-only by default — they surface what the data already says, not ask the user to do more work.
+
 ## Additional context
 
 - **Design Principles:** Zero Dependencies (no React/Vue), Instant Interaction (3-click max workflow), Local First (data in browser)

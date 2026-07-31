@@ -146,6 +146,7 @@ export class AnomalyService {
           recommendation: `Review these large "${category}" purchases to ensure they align with your financial goals.`,
           metadata: {
             spikeTransactions: catSpikes.map(t => ({
+              id: t.id,
               amount: t.amount,
               category: t.category,
               description: t.description,
@@ -187,6 +188,7 @@ export class AnomalyService {
             'Review these large transactions to ensure they align with your budget and financial goals.',
           metadata: {
             spikeTransactions: effectiveSpikes.map(t => ({
+              id: t.id,
               amount: t.amount,
               category: t.category,
               description: t.description,

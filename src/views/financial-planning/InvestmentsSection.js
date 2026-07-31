@@ -9,13 +9,13 @@
  * - Investment list management and editing
  */
 
-import { COLORS, SPACING } from '../../utils/constants.js';
+import { COLORS, SPACING, FONT_SIZES } from '../../utils/constants.js';
 import {
   createUsageNote,
   createSectionContainer,
   createPlaceholder,
 } from '../../utils/financial-planning-helpers.js';
-import { createEnhancedEmptyState } from '../../utils/enhanced-empty-states.js';
+import { createEnhancedEmptyState, getProgressiveUnlockMessage } from '../../utils/enhanced-empty-states.js';
 
 /**
  * Helper function to create form fields
@@ -1254,6 +1254,21 @@ export const InvestmentsSection = async (chartRenderer, activeCharts) => {
       'Track manual investments here. Add holdings with symbol, shares, and purchase price. Edits sync to cloud; deletions remove from cloud.'
     )
   );
+
+  // Progressive unlock message — connects advanced features to the core logging habit
+  try {
+    const { StorageService: SS } = await import('../../core/storage.js');
+    const txCount = (SS.getAllTransactions() || []).length;
+    const unlockMsg = getProgressiveUnlockMessage(txCount);
+    if (unlockMsg) {
+      const msg = document.createElement('div');
+      msg.textContent = unlockMsg;
+      msg.style.cssText = `font-size:${FONT_SIZES.SM};color:${COLORS.TEXT_MUTED};padding:${SPACING.SM} 0;text-align:center;`;
+      section.appendChild(msg);
+    }
+  } catch {
+    // Non-critical — silently fail
+  }
 
   // Add investment controls
   const { controls } = createInvestmentFormControls();

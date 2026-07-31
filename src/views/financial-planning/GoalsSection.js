@@ -11,8 +11,8 @@
  * - Progress tracking display
  */
 
-import { createEnhancedEmptyState } from '../../utils/enhanced-empty-states.js';
-import { COLORS, SPACING } from '../../utils/constants.js';
+import { createEnhancedEmptyState, getProgressiveUnlockMessage } from '../../utils/enhanced-empty-states.js';
+import { COLORS, SPACING, FONT_SIZES } from '../../utils/constants.js';
 import { createGoalProgressChart } from '../../utils/financial-planning-charts.js';
 import {
   createSectionContainer,
@@ -687,6 +687,21 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
     )
   );
 
+  // Progressive unlock message — connects advanced features to the core logging habit
+  try {
+    const { StorageService: SS } = await import('../../core/storage.js');
+    const txCount = (SS.getAllTransactions() || []).length;
+    const unlockMsg = getProgressiveUnlockMessage(txCount);
+    if (unlockMsg) {
+      const msg = document.createElement('div');
+      msg.textContent = unlockMsg;
+      msg.style.cssText = `font-size:${FONT_SIZES.SM};color:${COLORS.TEXT_MUTED};padding:${SPACING.SM} 0;text-align:center;`;
+      section.appendChild(msg);
+    }
+  } catch {
+    // Non-critical — silently fail
+  }
+
   // Load goals from StorageService (Firebase handles offline automatically)
   let goalsFromStorage;
   try {
@@ -698,27 +713,59 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
     goalsFromStorage = [];
   }
 
-  const sampleGoals = [
+  // Compute a projected goal suggestion from income vs expenses
+  let projectedGoal = null;
+  try {
+    const { StorageService: SS } = await import('../../core/storage.js');
+    const allTx = SS.getAllTransactions() || [];
+    const income = allTx.filter(t => t.type === 'income' && !t.isGhost);
+    const expenses = allTx.filter(t => (t.type === 'expense' || t.type === 'refund') && !t.isGhost);
+    const totalIncome = income.reduce((s, t) => s + Math.abs(t.amount || 0), 0);
+    const totalExpenses = expenses.reduce((s, t) => s + Math.abs(t.amount || 0), 0);
+    const monthlySavings = Math.max(0, (totalIncome - totalExpenses) / Math.max(1, new Set(allTx.filter(t => !t.isGhost).map(t => {
+      const d = new Date(t.timestamp);
+      return `${d.getFullYear()}-${d.getMonth()}`;
+    })).size));
+    const projectedAmount = Math.round(monthlySavings * 12);
+    if (projectedAmount > 0) {
+      projectedGoal = {
+        title: 'Projected Savings Goal',
+        description: `At your current rate, you could save ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(projectedAmount)} in 12 months.`,
+        targetAmount: projectedAmount,
+        monthlySavings: Math.round(monthlySavings),
+      };
+    }
+  } catch (e) {
+    console.warn('Failed to compute goal projection:', e);
+  }
+
+  const sampleGoals = projectedGoal ? [{
+    id: 'projected',
+    name: projectedGoal.title,
+    targetAmount: projectedGoal.targetAmount,
+    currentSavings: 0,
+    targetDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+  }] : [
     {
       id: '1',
       name: 'Emergency Fund',
       targetAmount: 10000,
       currentSavings: 7500,
-      targetDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
+      targetDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
     },
     {
       id: '2',
       name: 'House Down Payment',
       targetAmount: 50000,
       currentSavings: 15000,
-      targetDate: new Date(Date.now() + 3 * 365 * 24 * 60 * 60 * 1000), // 3 years from now
+      targetDate: new Date(Date.now() + 3 * 365 * 24 * 60 * 60 * 1000),
     },
     {
       id: '3',
       name: 'Vacation Fund',
       targetAmount: 5000,
       currentSavings: 2000,
-      targetDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000), // 6 months from now
+      targetDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000),
     },
   ];
 

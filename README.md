@@ -66,9 +66,9 @@
 - **Enhanced data visualization** with consistent colors for transactions | src/utils/reports-charts.js:chart rendering | src/utils/constants.js:COLOR definitions
 - **Seamless category filtering** between Reports and Dashboard views for consistent analysis | src/views/ReportsView.js:category filter state | src/views/DashboardView.js:category filter state
 
-### Advanced Analytics & Intelligence
+### Insights From Your Data
 
-BlinkBudget goes beyond basic tracking with sophisticated analytics powered by AI and machine learning:
+BlinkBudget turns your 3-click data into actionable insights using statistical heuristics:
 
 #### **Spending Intelligence**
 
@@ -79,7 +79,7 @@ BlinkBudget goes beyond basic tracking with sophisticated analytics powered by A
 
 #### **Budget Optimization**
 
-- **Smart Budget Recommendations** - AI-powered suggestions based on your spending patterns | src/core/analytics/RecommendationService.js:getBudgetRecommendations() | src/core/analytics-engine.js:budget optimization
+- **Smart Budget Recommendations** - Statistical suggestions based on your spending patterns | src/core/analytics/RecommendationService.js:getBudgetRecommendations() | src/core/analytics-engine.js:budget optimization
 - **Category Optimization** - Recommendations to switch categories for better tracking | src/core/analytics/RecommendationService.js:getRecommendedAmount() | src/core/custom-category-service.js:category suggestions
 - **Spending Reduction Suggestions** - Tailored advice to meet savings goals | src/core/analytics/RecommendationService.js:getSeasonalAdjustments() | src/core/savings-goals-service.js:goal tracking
 - **Budget Health Monitoring** - Real-time status of all budget limits | src/core/budget-service.js:getByCategory() | src/core/analytics/InsightsService.js:budget status
@@ -95,7 +95,6 @@ BlinkBudget goes beyond basic tracking with sophisticated analytics powered by A
 - **Personal Inflation Rate** - Track how inflation affects your specific spending | src/components/InflationTrends.js:InflationTrends() | src/utils/inflation-chart-utils.js:calculatePersonalInflation()
 - **Cost of Living Analysis** - Personal cost-of-living calculations | src/core/analytics/MetricsService.js:calculateCostOfLiving() | src/core/analytics-engine.js:cost analysis
 - **Savings Rate Tracking** - Monitor your savings performance over time | src/core/savings-goals-service.js:calculateSingleGoalProgress() | src/core/analytics/MetricsService.js:savings calculations
-- **Financial Health Score** - Overall assessment of your financial well-being | src/core/analytics/MetricsService.js:calculateIncomeVsExpenses() | src/views/financial-planning/OverviewSection.js:health score display
 
 ### Financial Planning & Insights
 
@@ -118,10 +117,9 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 
 #### **Investments Section**
 
-- **Portfolio Tracking** - Monitor investment performance across all asset classes | src/views/financial-planning/InvestmentsSection.js:InvestmentsSection() | src/core/investment-tracker.js:portfolio management
-- **Asset Allocation** - Visual breakdown of investment diversification | src/core/investment-tracker.js:analyzeAssetAllocation() | src/views/financial-planning/InvestmentsSection.js:allocation display
-- **Performance Metrics** - Returns, growth rates, and risk assessment | src/core/investment-tracker.js:performance calculations | src/views/financial-planning/InvestmentsSection.js:performance display
-- **Investment Goals** - Track progress toward investment targets | src/views/financial-planning/InvestmentsSection.js:goal tracking
+- **Simple Holdings List** - Track investments with symbol, shares, cost basis, and current value | src/views/financial-planning/InvestmentsSection.js:InvestmentsSection() | src/core/investment-tracker.js:portfolio management
+- **Total Portfolio Value** - Quick overview of your investment portfolio worth | src/core/investment-tracker.js:calculatePortfolioValue() | src/views/financial-planning/InvestmentsSection.js:total value display
+- **Gains/Losses** - See how your investments have performed | src/core/investment-tracker.js:calculateGainsLosses() | src/views/financial-planning/InvestmentsSection.js:gains display
 
 #### **Goals Section**
 
@@ -134,7 +132,7 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 #### **Insights Section**
 
 - **Spending Pattern Analysis** - Identify trends and anomalies in your habits | src/views/financial-planning/InsightsSection.js:InsightsSection() | src/core/analytics/TrendService.js:spending patterns
-- **Budget Recommendations** - AI-powered suggestions for optimization | src/core/analytics/RecommendationService.js:getBudgetRecommendations() | src/views/financial-planning/InsightsSection.js:recommendations display
+- **Budget Recommendations** - Statistical suggestions for optimization | src/core/analytics/RecommendationService.js:getBudgetRecommendations() | src/views/financial-planning/InsightsSection.js:recommendations display
 - **Personal Inflation Trends** - Track how inflation affects your personal finances | src/components/InflationTrends.js:InflationTrends() | src/views/financial-planning/InsightsSection.js:inflation trends
 - **Unusual Spending Detection** - Automatic alerts for atypical transactions | src/core/analytics/AnomalyService.js:detectAnomalies() | src/views/financial-planning/InsightsSection.js:anomaly alerts
 

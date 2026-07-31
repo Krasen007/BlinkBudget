@@ -12,6 +12,7 @@ import { BudgetForm } from '../../components/BudgetForm.js';
 import { BudgetProgress } from '../../components/BudgetProgress.js';
 import { BudgetSummaryCard } from '../../components/BudgetSummaryCard.js';
 import { BudgetPlanner } from '../../core/budget-planner.js';
+import { getProgressiveUnlockMessage } from '../../utils/enhanced-empty-states.js';
 
 /**
  * Create budgets management section
@@ -45,6 +46,15 @@ export const BudgetsSection = async planningData => {
     const summaryData = BudgetPlanner.getSummary(transactions);
     const summaryCard = BudgetSummaryCard(summaryData);
     container.appendChild(summaryCard);
+
+    // Progressive unlock message — connects advanced features to the core logging habit
+    const unlockMsg = getProgressiveUnlockMessage(transactions.length);
+    if (unlockMsg) {
+      const msg = document.createElement('div');
+      msg.textContent = unlockMsg;
+      msg.style.cssText = `font-size:${FONT_SIZES.SM};color:${COLORS.TEXT_MUTED};padding:${SPACING.SM} 0;text-align:center;`;
+      container.appendChild(msg);
+    }
 
     // Categories List
     const listSection = document.createElement('div');
@@ -102,9 +112,11 @@ export const BudgetsSection = async planningData => {
       actionBtn.addEventListener('click', () => {
         // Show form instead of progress
         card.innerHTML = '';
+        // Suggest a budget limit based on current spending, rounded to nearest 10
+        const suggestedLimit = cat.budget?.amountLimit ?? Math.ceil(cat.amount / 10) * 10;
         const form = BudgetForm({
           categoryName: cat.name,
-          initialLimit: cat.budget?.amountLimit,
+          initialLimit: suggestedLimit,
           onSave: limit => {
             // If user entered 0, delete the budget; if they left it blank (null), treat as no-op
             if (limit === 0) {
