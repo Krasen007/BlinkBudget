@@ -53,10 +53,6 @@ export class InvestmentTracker {
         purchasePrice: Math.round(purchasePrice * 100) / 100, // Round to 2 decimal places
         currentPrice: metadata.currentPrice || purchasePrice, // Use currentPrice from metadata or default to purchase price
         purchaseDate: new Date(purchaseDate),
-        assetClass: metadata.investmentType || metadata.assetClass || 'stocks',
-        sector: metadata.sector || 'Unknown',
-        region: metadata.region || 'Unknown',
-        currency: metadata.currency || 'EUR',
         notes: metadata.notes || '',
         lastPriceUpdate:
           metadata.currentPrice && metadata.currentPrice !== purchasePrice
@@ -133,7 +129,7 @@ export class InvestmentTracker {
   /**
    * Update an existing investment's fields
    * @param {string} id - Investment id
-   * @param {Object} updates - Fields to update (shares, purchasePrice, currentPrice, name, assetClass, sector, region)
+   * @param {Object} updates - Fields to update (shares, purchasePrice, currentPrice, name, notes)
    * @returns {Object|null} Updated investment or null if not found
    */
   updateInvestment(id, updates = {}) {
@@ -150,10 +146,6 @@ export class InvestmentTracker {
         'currentPrice',
         'purchaseDate',
         'name',
-        'assetClass',
-        'sector',
-        'region',
-        'currency',
         'notes',
         'metadata',
       ];
