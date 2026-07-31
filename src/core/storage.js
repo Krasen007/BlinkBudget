@@ -147,7 +147,12 @@ export const StorageService = {
   calculatePortfolioSummary: function () {
     const cached = CacheService.get('portfolioSummary');
     if (cached) return cached;
-    const summary = this._investmentTracker.getPortfolioSummary();
+    const investments = this._investmentTracker.getAllInvestments();
+    const summary = {
+      totalValue: this._investmentTracker.calculatePortfolioValue(),
+      investmentCount: investments.length,
+      gainsLosses: this._investmentTracker.calculateGainsLosses(),
+    };
     // Cache for 30 seconds
     CacheService.put('portfolioSummary', summary, 30000);
     return summary;

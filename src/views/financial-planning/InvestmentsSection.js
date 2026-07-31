@@ -2,49 +2,20 @@
  * Investments Section - Portfolio Tracking
  *
  * Extracted from FinancialPlanningView.js for better maintainability.
- * Displays investment portfolio with CRUD operations and charts.
+ * Displays investment portfolio with CRUD operations.
  *
  * Responsibilities:
- * - Portfolio composition chart
- * - Complex investment form with type-specific fields
  * - Investment CRUD operations (Create, Read, Update, Delete)
  * - Investment list management and editing
  */
 
 import { COLORS, SPACING } from '../../utils/constants.js';
-import { escapeHtml } from '../../utils/security-utils.js';
-import { createPortfolioCompositionChart } from '../../utils/financial-planning-charts.js';
 import {
   createUsageNote,
   createSectionContainer,
   createPlaceholder,
 } from '../../utils/financial-planning-helpers.js';
-import { refreshChart } from '../../utils/chart-refresh-helper.js';
 import { createEnhancedEmptyState } from '../../utils/enhanced-empty-states.js';
-
-/**
- * Transform portfolio data from StorageService to the format expected by the chart
- * @param {Object} portfolioData - Raw portfolio data from StorageService
- * @returns {Object} Transformed portfolio data for chart rendering
- */
-function transformPortfolioData(portfolioData) {
-  if (
-    !portfolioData ||
-    !portfolioData.totalValue ||
-    !portfolioData.assetAllocation
-  ) {
-    return {
-      totalValue: 0,
-      assetAllocation: {},
-    };
-  }
-  return {
-    totalValue: portfolioData.totalValue,
-    assetAllocation:
-      portfolioData.assetAllocation.assetAllocation ||
-      portfolioData.assetAllocation,
-  };
-}
 
 /**
  * Helper function to create form fields
@@ -316,7 +287,7 @@ function generateTypeSpecificFields(
 /**
  * Create investment form controls
  */
-function createInvestmentFormControls(chartRenderer, activeCharts) {
+function createInvestmentFormControls() {
   const controls = document.createElement('div');
   controls.style.display = 'flex';
   controls.style.gap = SPACING.SM;
@@ -444,13 +415,13 @@ function createInvestmentFormControls(chartRenderer, activeCharts) {
   invForm.appendChild(typeSelect);
   invForm.appendChild(typeError);
   invForm.appendChild(basicFieldsContainer);
-  invForm.appendChild(nameError); // Added nameError here
+  invForm.appendChild(nameError);
   invForm.appendChild(priceInput);
   invForm.appendChild(priceError);
   invForm.appendChild(currentPriceInput);
   invForm.appendChild(currentPriceError);
   invForm.appendChild(typeSpecificFields);
-  invForm.appendChild(valueError); // Added valueError here
+  invForm.appendChild(valueError);
   invForm.appendChild(notesInput);
   invForm.appendChild(dateInput);
   invForm.appendChild(saveInvBtn);
@@ -482,13 +453,11 @@ function createInvestmentFormControls(chartRenderer, activeCharts) {
     const price = Number(priceInput.value) || 0;
     const currentPrice = Number(currentPriceInput.value) || 0;
 
-    // Get basic fields dynamically
     const basicInputs = basicFieldsContainer.querySelectorAll('input, select');
     const typeSpecificInputs =
       typeSpecificFields.querySelectorAll('input, select');
     const formData = {};
 
-    // Collect from both containers
     [...basicInputs, ...typeSpecificInputs].forEach(input => {
       if (input.value && input.value.trim() !== '') {
         formData[input.name] =
@@ -503,14 +472,12 @@ function createInvestmentFormControls(chartRenderer, activeCharts) {
 
     let isValid = investmentType && price >= 0 && currentPrice >= 0;
 
-    // Clear all errors first
     typeError.style.display = 'none';
     nameError.style.display = 'none';
     valueError.style.display = 'none';
     priceError.style.display = 'none';
     currentPriceError.style.display = 'none';
 
-    // Type-specific validation with helpful messages
     switch (investmentType) {
       case 'stocks':
       case 'etf':
@@ -564,7 +531,6 @@ function createInvestmentFormControls(chartRenderer, activeCharts) {
         break;
     }
 
-    // Validate price fields
     if (price < 0) {
       priceError.textContent = 'Purchase price cannot be negative';
       priceError.style.display = 'block';
@@ -580,7 +546,6 @@ function createInvestmentFormControls(chartRenderer, activeCharts) {
     return isValid;
   }
 
-  // Event listeners for real-time validation
   typeSelect.addEventListener('change', () => {
     generateTypeSpecificFields(
       typeSelect.value,
@@ -611,13 +576,11 @@ function createInvestmentFormControls(chartRenderer, activeCharts) {
       : new Date();
     const notes = notesInput.value.trim();
 
-    // Collect basic fields dynamically
     const basicInputs = basicFieldsContainer.querySelectorAll('input, select');
     const typeSpecificFieldsInputs =
       typeSpecificFields.querySelectorAll('input, select');
     const formData = {};
 
-    // Collect from both containers
     [...basicInputs, ...typeSpecificFieldsInputs].forEach(input => {
       if (input.value) {
         formData[input.name] =
@@ -630,14 +593,12 @@ function createInvestmentFormControls(chartRenderer, activeCharts) {
     const units = formData.units || 0;
     const quantity = formData.quantity || 0;
 
-    // Collect type-specific metadata
     const metadata = {
       investmentType,
       notes,
       lastPriceUpdate: currentPrice !== purchasePrice ? new Date() : null,
     };
 
-    // Collect type-specific fields
     const typeSpecificFieldsData = typeSpecificFields.querySelectorAll(
       'input, select, textarea'
     );
@@ -648,16 +609,13 @@ function createInvestmentFormControls(chartRenderer, activeCharts) {
       }
     });
 
-    // Type-specific validation
     let valid = true;
-    // Reset errors
     typeError.style.display = 'none';
     nameError.style.display = 'none';
     valueError.style.display = 'none';
     priceError.style.display = 'none';
     currentPriceError.style.display = 'none';
 
-    // Clear all dynamic field errors
     basicFieldsContainer
       .querySelectorAll('.field-error')
       .forEach(el => (el.style.display = 'none'));
@@ -671,7 +629,6 @@ function createInvestmentFormControls(chartRenderer, activeCharts) {
       valid = false;
     }
 
-    // Validate based on investment type
     switch (investmentType) {
       case 'stocks':
       case 'etf':
@@ -735,10 +692,7 @@ function createInvestmentFormControls(chartRenderer, activeCharts) {
     if (!valid) return;
 
     try {
-      // Use appropriate quantity field based on type
       const quantityToUse = shares || units || quantity || 1;
-
-      // Import StorageService dynamically to avoid circular dependency
       const { StorageService } = await import('../../core/storage.js');
 
       StorageService.addInvestment(
@@ -748,18 +702,6 @@ function createInvestmentFormControls(chartRenderer, activeCharts) {
         purchaseDate,
         metadata
       );
-
-      // Refresh portfolio chart using helper
-      const updated = StorageService.calculatePortfolioSummary();
-      const portfolioToRender = transformPortfolioData(updated);
-      await refreshChart({
-        createChartFn: createPortfolioCompositionChart,
-        chartRenderer,
-        data: portfolioToRender,
-        section: document.querySelector('.investments-section'),
-        chartType: 'portfolio-composition',
-        activeCharts,
-      });
 
       invForm.style.display = 'none';
       priceInput.value = '';
@@ -780,23 +722,21 @@ function createInvestmentFormControls(chartRenderer, activeCharts) {
   controls.appendChild(addInvBtn);
   controls.appendChild(invForm);
 
-  return { controls, investmentsList: null };
+  return { controls };
 }
 
 /**
  * Create investments list with CRUD operations
  */
-function createInvestmentsList(chartRenderer, activeCharts) {
+function createInvestmentsList() {
   const investmentsList = document.createElement('div');
   investmentsList.className = 'investment-list';
   investmentsList.style.marginTop = SPACING.MD;
 
   async function refreshInvestmentsList() {
-    // Security: Clearing list content, no user input involved
     investmentsList.innerHTML = '';
     let items;
     try {
-      // Import StorageService dynamically
       const { StorageService } = await import('../../core/storage.js');
       items = StorageService.getInvestments() || [];
 
@@ -874,7 +814,6 @@ function createInvestmentsList(chartRenderer, activeCharts) {
         left.appendChild(title);
         left.appendChild(meta);
 
-        // Show notes if present
         const notes = inv.notes || inv.metadata?.notes;
         if (notes) {
           const notesEl = document.createElement('div');
@@ -908,48 +847,11 @@ function createInvestmentsList(chartRenderer, activeCharts) {
 
         ul.appendChild(li);
 
-        // Performance chart for each item if data exists
-        if (inv.performance && Array.isArray(inv.performance)) {
-          const perfContainer = document.createElement('div');
-          perfContainer.className = 'performance-chart';
-          perfContainer.style.height = '60px';
-          perfContainer.style.marginTop = SPACING.XS;
-          li.appendChild(perfContainer);
-
-          const perfCanvas = document.createElement('canvas');
-          perfContainer.appendChild(perfCanvas);
-
-          const perfData = {
-            labels: inv.performance.map((_, i) => i),
-            datasets: [
-              {
-                data: inv.performance,
-                borderColor: COLORS.SUCCESS,
-                borderWidth: 2,
-                pointRadius: 0,
-                fill: false,
-                tension: 0.4,
-              },
-            ],
-          };
-
-          chartRenderer.createLineChart(perfCanvas, perfData, {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false },
-              tooltip: { enabled: false },
-            },
-            scales: { x: { display: false }, y: { display: false } },
-          });
-        }
-
         // Edit handler
         editBtn.addEventListener('click', () => {
           if (li._editing) return;
           li._editing = true;
 
-          // Hide view mode elements
           left.style.display = 'none';
           actions.style.display = 'none';
 
@@ -960,7 +862,6 @@ function createInvestmentsList(chartRenderer, activeCharts) {
           form.style.width = '100%';
           form.style.boxSizing = 'border-box';
 
-          // Shared input styles
           const inputStyle = `
             width: 100%;
             padding: var(--spacing-sm);
@@ -979,7 +880,6 @@ function createInvestmentsList(chartRenderer, activeCharts) {
             margin-bottom: 2px;
           `;
 
-          // Helper to create a labeled field group
           const createFieldGroup = (label, element) => {
             const group = document.createElement('div');
             group.style.display = 'flex';
@@ -997,7 +897,6 @@ function createInvestmentsList(chartRenderer, activeCharts) {
             return group;
           };
 
-          // Asset Type selector
           const typeGroup = document.createElement('div');
           typeGroup.style.width = '100%';
 
@@ -1028,7 +927,6 @@ function createInvestmentsList(chartRenderer, activeCharts) {
           typeGroup.appendChild(typeLabel);
           typeGroup.appendChild(typeSelect);
 
-          // Row 1: Symbol + Name
           const row1 = document.createElement('div');
           row1.style.display = 'flex';
           row1.style.gap = SPACING.SM;
@@ -1056,7 +954,6 @@ function createInvestmentsList(chartRenderer, activeCharts) {
           row1.appendChild(createFieldGroup('Symbol', symbolFld));
           row1.appendChild(createFieldGroup('Name', nameFld));
 
-          // Row 2: Amount + Purchase Price + Current Price
           const row2 = document.createElement('div');
           row2.style.display = 'flex';
           row2.style.gap = SPACING.SM;
@@ -1100,7 +997,6 @@ function createInvestmentsList(chartRenderer, activeCharts) {
           );
           row2.appendChild(createFieldGroup('Current Price', currentPriceFld));
 
-          // Row 3: Exchange (for crypto) + Date
           const row3 = document.createElement('div');
           row3.style.display = 'flex';
           row3.style.gap = SPACING.SM;
@@ -1140,7 +1036,6 @@ function createInvestmentsList(chartRenderer, activeCharts) {
           row3.appendChild(createFieldGroup('Exchange', exchangeFld));
           row3.appendChild(createFieldGroup('Purchase Date', dateFld));
 
-          // Notes
           const notesGroup = document.createElement('div');
           notesGroup.style.width = '100%';
           const notesLabel = document.createElement('label');
@@ -1157,7 +1052,6 @@ function createInvestmentsList(chartRenderer, activeCharts) {
           notesGroup.appendChild(notesLabel);
           notesGroup.appendChild(notesTextarea);
 
-          // Buttons
           const btnRow = document.createElement('div');
           btnRow.style.display = 'flex';
           btnRow.style.gap = SPACING.SM;
@@ -1254,7 +1148,6 @@ function createInvestmentsList(chartRenderer, activeCharts) {
                 purchaseDate: newDate,
                 notes: newNotes,
               });
-              // Update metadata for exchange and notes
               const updatedMetadata = {
                 ...(inv.metadata || {}),
                 notes: newNotes,
@@ -1264,18 +1157,6 @@ function createInvestmentsList(chartRenderer, activeCharts) {
               }
               StorageService.updateInvestment(inv.id, {
                 metadata: updatedMetadata,
-              });
-
-              // Refresh chart and list using helper
-              const updated = StorageService.calculatePortfolioSummary();
-              const portfolioToRender = transformPortfolioData(updated);
-              await refreshChart({
-                createChartFn: createPortfolioCompositionChart,
-                chartRenderer,
-                data: portfolioToRender,
-                section: document.querySelector('.investments-section'),
-                chartType: 'portfolio-composition',
-                activeCharts,
               });
 
               cleanupEdit();
@@ -1288,7 +1169,6 @@ function createInvestmentsList(chartRenderer, activeCharts) {
 
         // Delete handler
         delBtn.addEventListener('click', () => {
-          // Import ConfirmDialog directly and surface import failures to the user
           import('../../components/ConfirmDialog.js')
             .then(({ ConfirmDialog }) => {
               ConfirmDialog({
@@ -1300,25 +1180,11 @@ function createInvestmentsList(chartRenderer, activeCharts) {
                   try {
                     const { StorageService } =
                       await import('../../core/storage.js');
-                    // StorageService.removeInvestment expects a symbol (API documented in storage.js)
                     StorageService.removeInvestment(inv.symbol);
-
-                    // Refresh chart and list using helper
-                    const updated = StorageService.calculatePortfolioSummary();
-                    const portfolioToRender = transformPortfolioData(updated);
-                    await refreshChart({
-                      createChartFn: createPortfolioCompositionChart,
-                      chartRenderer,
-                      data: portfolioToRender,
-                      section: document.querySelector('.investments-section'),
-                      chartType: 'portfolio-composition',
-                      activeCharts,
-                    });
 
                     refreshInvestmentsList();
                   } catch (err) {
                     console.error('Failed to remove investment', err);
-                    // Show user-visible error when deletion fails
                     import('../../components/ConfirmDialog.js')
                       .then(({ AlertDialog }) => {
                         AlertDialog({
@@ -1366,7 +1232,6 @@ function createInvestmentsList(chartRenderer, activeCharts) {
     }
   }
 
-  // Return both the element and a way to populate it
   return { investmentsList, refreshInvestmentsList };
 }
 
@@ -1384,91 +1249,34 @@ export const InvestmentsSection = async (chartRenderer, activeCharts) => {
   );
   section.className += ' investments-section';
 
-  // Add a helper class for tests
-  const portfolioChartPlaceholder = document.createElement('div');
-  portfolioChartPlaceholder.className = 'portfolio-chart';
-  portfolioChartPlaceholder.style.display = 'none';
-  section.appendChild(portfolioChartPlaceholder);
-
   section.appendChild(
     createUsageNote(
-      'Track manual investments here. Add holdings with symbol, shares, and purchase price. Edits sync to cloud; deletions remove from cloud. Charts update automatically.'
+      'Track manual investments here. Add holdings with symbol, shares, and purchase price. Edits sync to cloud; deletions remove from cloud.'
     )
   );
 
-  // Try to load real portfolio summary from StorageService
-  let portfolioData;
-  try {
-    // Import StorageService dynamically
-    const { StorageService } = await import('../../core/storage.js');
-    portfolioData = StorageService.calculatePortfolioSummary();
-    console.log('Loaded portfolio data:', portfolioData);
-  } catch (err) {
-    console.warn('Error fetching portfolio summary from StorageService:', err);
-    portfolioData = null;
-  }
-
-  const portfolioToRender = transformPortfolioData(portfolioData);
-
-  // Create portfolio composition chart or sample chart
-  if (
-    portfolioToRender.totalValue === 0 ||
-    Object.keys(portfolioToRender.assetAllocation).length === 0
-  ) {
-    // Show sample portfolio chart for demonstration
-    const samplePortfolio = {
-      totalValue: 100000,
-      assetAllocation: {
-        stocks: 40000,
-        bonds: 25000,
-        etf: 20000,
-        realestate: 10000,
-        cash: 5000,
-      },
-    };
-    try {
-      const { section: chartSection, chart } =
-        await createPortfolioCompositionChart(chartRenderer, samplePortfolio, {
-          title: 'Sample Portfolio (Demo)',
-        });
-      chartSection.classList.add('portfolio-chart');
-      chartSection.style.opacity = '0.7';
-      section.appendChild(chartSection);
-      activeCharts.set('portfolio-composition', chart);
-    } catch (error) {
-      console.error('Error creating sample portfolio chart:', error);
-    }
-  } else {
-    try {
-      const { section: chartSection, chart } =
-        await createPortfolioCompositionChart(chartRenderer, portfolioToRender);
-      chartSection.classList.add('portfolio-chart'); // Add class for tests
-      section.appendChild(chartSection);
-      activeCharts.set('portfolio-composition', chart);
-    } catch (error) {
-      console.error('Error creating portfolio composition chart:', error);
-    }
-  }
-
   // Add investment controls
-  const { controls } = createInvestmentFormControls(
-    chartRenderer,
-    activeCharts
-  );
+  const { controls } = createInvestmentFormControls();
   section.appendChild(controls);
 
   // Add investments list
-  const { investmentsList, refreshInvestmentsList } = createInvestmentsList(
-    chartRenderer,
-    activeCharts
-  );
+  const { investmentsList, refreshInvestmentsList } = createInvestmentsList();
   investmentsList.className = 'investment-list';
   section.appendChild(investmentsList);
 
   // Initial population of the list
   await refreshInvestmentsList();
 
-  // Add portfolio statistics
+  // Add total portfolio value
+  let totalValue = 0;
+  try {
+    const { StorageService } = await import('../../core/storage.js');
+    const summary = StorageService.calculatePortfolioSummary();
+    totalValue = summary.totalValue || 0;
+  } catch (err) {
+    console.warn('Error fetching portfolio summary:', err);
+  }
+
   const stats = document.createElement('div');
   stats.className = 'portfolio-stats';
   stats.style.display = 'flex';
@@ -1477,54 +1285,19 @@ export const InvestmentsSection = async (chartRenderer, activeCharts) => {
 
   const totalVal = document.createElement('div');
   totalVal.className = 'total-portfolio-value';
-  // Security: Use safe DOM manipulation instead of innerHTML to prevent XSS
   totalVal.textContent = 'Total: ';
   const valueSpan = document.createElement('span');
   valueSpan.className = 'currency-value';
   valueSpan.textContent = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'EUR',
-  }).format(portfolioToRender.totalValue);
+  }).format(totalValue);
   totalVal.appendChild(valueSpan);
 
-  const assetCnt = document.createElement('div');
-  assetCnt.className = 'asset-count';
-  assetCnt.textContent = `Assets: ${Object.keys(portfolioToRender.assetAllocation).length}`;
-
   stats.appendChild(totalVal);
-  stats.appendChild(assetCnt);
   section.insertBefore(stats, controls);
 
-  // Add insights
-  const insights = document.createElement('div');
-  insights.className = 'investment-insights';
-  insights.style.marginTop = SPACING.MD;
-  insights.style.padding = SPACING.MD;
-  insights.style.background = COLORS.SURFACE;
-  insights.style.borderRadius = 'var(--radius-md)';
-
-  const highConcentration = Object.values(
-    portfolioToRender.assetAllocation
-  ).some(val => val / portfolioToRender.totalValue > 0.7);
-  if (highConcentration) {
-    // Security: Static strings, escaped for safety
-    insights.innerHTML = `
-      <h4 style="margin-top:0">${escapeHtml('Portfolio Insights')}</h4>
-      <p style="font-size:0.9rem; color: ${COLORS.WARNING}"><strong>${escapeHtml('Concentration Risk:')}</strong> ${escapeHtml('Consider more diversification to reduce risk.')}</p>
-    `;
-  } else {
-    // Security: Static strings, escaped for safety
-    insights.innerHTML = `
-      <h4 style="margin-top:0">${escapeHtml('Portfolio Insights')}</h4>
-      <p style="font-size:0.9rem; color: ${COLORS.SUCCESS}"><strong>${escapeHtml('Good Diversification:')}</strong> ${escapeHtml('Your portfolio allocation is well-balanced.')}</p>
-    `;
-  }
-  section.appendChild(insights);
-
-  const hasInvestments =
-    portfolioToRender.totalValue > 0 ||
-    Object.keys(portfolioToRender.assetAllocation).length > 0;
-  if (!hasInvestments) {
+  if (totalValue === 0) {
     const placeholder = createPlaceholder(
       'No Investments Yet',
       'Start tracking your portfolio by adding your first investment holdings.',

@@ -37,7 +37,14 @@ vi.mock('../../src/core/storage.js', () => ({
     removeInvestment: vi.fn(),
     calculatePortfolioSummary: vi.fn(() => ({
       totalValue: 0,
-      assetAllocation: {},
+      investmentCount: 0,
+      gainsLosses: {
+        totalCurrentValue: 0,
+        totalPurchaseValue: 0,
+        totalGainLoss: 0,
+        totalGainLossPercentage: 0,
+        individualGains: [],
+      },
     })),
     calculateGoalsSummary: vi.fn(() => ({
       totalGoalProgress: 0,
@@ -106,7 +113,14 @@ describe('InvestmentsSection', () => {
     StorageService.getInvestments.mockReturnValue([]);
     StorageService.calculatePortfolioSummary.mockReturnValue({
       totalValue: 0,
-      assetAllocation: {},
+      investmentCount: 0,
+      gainsLosses: {
+        totalCurrentValue: 0,
+        totalPurchaseValue: 0,
+        totalGainLoss: 0,
+        totalGainLossPercentage: 0,
+        individualGains: [],
+      },
     });
 
     const section = await InvestmentsSection(
