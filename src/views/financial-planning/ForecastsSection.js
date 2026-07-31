@@ -348,19 +348,33 @@ export const ForecastsSection = (
       (incomeForecasts.length + expenseForecasts.length);
 
     // Calculate uncertainty ranges for income and expenses
-    const incomeRange = incomeForecasts.length > 0
-      ? {
-          lower: incomeForecasts.reduce((sum, f) => sum + (f.lowerBound || 0), 0),
-          upper: incomeForecasts.reduce((sum, f) => sum + (f.upperBound || 0), 0),
-        }
-      : { lower: 0, upper: 0 };
+    const incomeRange =
+      incomeForecasts.length > 0
+        ? {
+            lower: incomeForecasts.reduce(
+              (sum, f) => sum + (f.lowerBound || 0),
+              0
+            ),
+            upper: incomeForecasts.reduce(
+              (sum, f) => sum + (f.upperBound || 0),
+              0
+            ),
+          }
+        : { lower: 0, upper: 0 };
 
-    const expenseRange = expenseForecasts.length > 0
-      ? {
-          lower: expenseForecasts.reduce((sum, f) => sum + (f.lowerBound || 0), 0),
-          upper: expenseForecasts.reduce((sum, f) => sum + (f.upperBound || 0), 0),
-        }
-      : { lower: 0, upper: 0 };
+    const expenseRange =
+      expenseForecasts.length > 0
+        ? {
+            lower: expenseForecasts.reduce(
+              (sum, f) => sum + (f.lowerBound || 0),
+              0
+            ),
+            upper: expenseForecasts.reduce(
+              (sum, f) => sum + (f.upperBound || 0),
+              0
+            ),
+          }
+        : { lower: 0, upper: 0 };
 
     const netRange = {
       lower: incomeRange.lower - expenseRange.upper,
@@ -368,13 +382,23 @@ export const ForecastsSection = (
     };
 
     // Determine trend arrows
-    const incomeTrend = incomeForecasts.length > 0 && incomeForecasts[0].trend
-      ? (incomeForecasts[0].trend > 0 ? '↑' : incomeForecasts[0].trend < 0 ? '↓' : '→')
-      : '→';
+    const incomeTrend =
+      incomeForecasts.length > 0 && incomeForecasts[0].trend
+        ? incomeForecasts[0].trend > 0
+          ? '↑'
+          : incomeForecasts[0].trend < 0
+            ? '↓'
+            : '→'
+        : '→';
 
-    const expenseTrend = expenseForecasts.length > 0 && expenseForecasts[0].trend
-      ? (expenseForecasts[0].trend > 0 ? '↑' : expenseForecasts[0].trend < 0 ? '↓' : '→')
-      : '→';
+    const expenseTrend =
+      expenseForecasts.length > 0 && expenseForecasts[0].trend
+        ? expenseForecasts[0].trend > 0
+          ? '↑'
+          : expenseForecasts[0].trend < 0
+            ? '↓'
+            : '→'
+        : '→';
 
     const summaryCards = [
       {

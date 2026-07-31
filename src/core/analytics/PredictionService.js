@@ -111,7 +111,11 @@ export class PredictionService {
       });
 
     const trend = this.calculateSpendingTrend(monthlySpending);
-    const seasonalPatterns = { hasPatterns: false, seasonalAverages: {}, seasonalPatterns: {} };
+    const seasonalPatterns = {
+      hasPatterns: false,
+      seasonalAverages: {},
+      seasonalPatterns: {},
+    };
 
     const totalSpending = monthlySpending.reduce(
       (sum, month) => sum + month.totalSpending,

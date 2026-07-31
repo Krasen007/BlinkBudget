@@ -11,7 +11,14 @@ import { COLORS, SPACING } from '../../utils/constants.js';
  * @param {string} [props.range] - Optional uncertainty range (e.g., "€2,100 - €2,700")
  * @returns {HTMLElement} The forecast card element
  */
-export const ForecastCard = ({ label, value, color, icon, subtitle, range }) => {
+export const ForecastCard = ({
+  label,
+  value,
+  color,
+  icon,
+  subtitle,
+  range,
+}) => {
   const card = document.createElement('div');
   card.className = 'forecast-card';
   card.style.padding = SPACING.LG;

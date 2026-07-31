@@ -5,7 +5,12 @@
  * No charts. No allocation analysis. No type-specific fields.
  */
 
-import { COLORS, SPACING, FONT_SIZES, CURRENCY_SYMBOL } from '../../utils/constants.js';
+import {
+  COLORS,
+  SPACING,
+  FONT_SIZES,
+  CURRENCY_SYMBOL,
+} from '../../utils/constants.js';
 import {
   createUsageNote,
   createSectionContainer,
@@ -358,7 +363,10 @@ function createInvestmentsList() {
           const purchasePriceLabel = document.createElement('label');
           purchasePriceLabel.textContent = 'Purchase Price';
           purchasePriceLabel.style.cssText = labelStyle;
-          purchasePriceLabel.setAttribute('for', `${fieldPrefix}purchase-price`);
+          purchasePriceLabel.setAttribute(
+            'for',
+            `${fieldPrefix}purchase-price`
+          );
           const purchasePriceFld = document.createElement('input');
           purchasePriceFld.id = `${fieldPrefix}purchase-price`;
           purchasePriceFld.type = 'number';

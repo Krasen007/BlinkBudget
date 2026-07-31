@@ -963,7 +963,7 @@ export const DashboardView = (params = {}) => {
         .flatMap(i => i.metadata.spikeTransactions.map(t => t.id))
         .filter(Boolean);
       highlightTransactionIds.push(...anomalyIds);
-    } catch {
+    } catch (error) {
       // Anomaly highlighting is non-critical
       console.warn('[DashboardView] Anomaly highlighting failed:', error);
     }

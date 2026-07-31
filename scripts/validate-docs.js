@@ -133,7 +133,7 @@ function getValidatedProjectFilePath(filePath) {
     }
 
     return realFullPath;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -168,7 +168,7 @@ export function getFileContent(filePath) {
     const content = fs.readFileSync(validatedPath, 'utf8');
     fileContentCache.set(filePath, content);
     return content;
-  } catch (error) {
+  } catch {
     fileContentCache.set(filePath, null);
     return null;
   }
@@ -216,9 +216,15 @@ export function methodExists(filePath, methodOrDescription) {
   return methodSignatures.every(({ className, methodName }) => {
     const escapedMethod = methodName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const declarationPatterns = [
-      new RegExp(`(?<![\.\w$])(?:async\\s+)?(?:static\\s+)?(?:function\\s+)?${escapedMethod}\\s*\\([^)]*\\)\\s*\\{`, 'm'),
-      new RegExp(`(?<![\.\w$])${escapedMethod}\\s*=\\s*\\([^)]*\\)\\s*=>`, 'm'),
-      new RegExp(`(?<![\.\w$])${escapedMethod}\\s*:\\s*function\\s*\\(`, 'm'),
+      new RegExp(
+        `(?<![.\\w$])(?:async\\s+)?(?:static\\s+)?(?:function\\s+)?${escapedMethod}\\s*\\([^)]*\\)\\s*\\{`,
+        'm'
+      ),
+      new RegExp(
+        `(?<![.\\w$])${escapedMethod}\\s*=\\s*(?:async\\s*)?(?:\\([^)]*\\)|\\w+)?\\s*=>`,
+        'm'
+      ),
+      new RegExp(`(?<![.\\w$])${escapedMethod}\\s*:\\s*function\\s*\\(`, 'm'),
     ];
 
     if (className) {

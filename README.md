@@ -180,7 +180,7 @@ BlinkBudget provides robust data management with cloud synchronization and local
 
 #### **Account Management**
 
-- **Account Deletion** - Complete account removal with data cleanup | src/core/Account/account-deletion-service.js:deleteAccount() | src/components/AccountDeletionSection.js:deletion UI
+- **Account Deletion** - Complete account removal with data cleanup | src/core/Account/account-deletion-service.js:initiateAccountDeletion() | src/components/AccountDeletionSection.js:deletion UI
 - **Data Portability** - Full control over your financial data | src/components/DataManagementSection.js:data portability handler | src/core/privacy-service.js:data export
 - **Privacy Controls** - Granular control over data sharing | src/components/PrivacyControls.js:PrivacyControls | src/core/privacy-service.js:privacy management
 - **GDPR Compliance** - Right to data deletion and export | src/core/privacy-service.js:exportUserData() | src/components/PrivacyControls.js:GDPR controls

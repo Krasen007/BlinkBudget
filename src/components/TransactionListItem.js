@@ -16,7 +16,6 @@ import {
   BREAKPOINTS,
   CURRENCY_SYMBOL,
 } from '../utils/constants.js';
-import { highlightTransactionSuccess } from '../utils/success-feedback.js';
 import { setSelectedStyle } from '../views/DashboardView.js';
 
 export const TransactionListItem = ({
@@ -452,18 +451,21 @@ export const TransactionListItem = ({
   item.addEventListener('click', _e => {
     if (!longPressed) {
       // If transaction has anomaly highlight, remove it on click
-      if (shouldHighlight && item.classList.contains('transaction-item-anomaly')) {
+      if (
+        shouldHighlight &&
+        item.classList.contains('transaction-item-anomaly')
+      ) {
         // Remove anomaly badge
         const badge = val.querySelector('.transaction-item-anomaly-badge');
         if (badge) {
           badge.remove();
         }
-        
+
         // Remove anomaly styling
         item.classList.remove('transaction-item-anomaly');
         item.style.background = '';
         item.style.borderLeft = '';
-        
+
         // Dispatch event to update transaction status
         window.dispatchEvent(
           new CustomEvent('anomaly-dismissed', {
@@ -471,10 +473,10 @@ export const TransactionListItem = ({
             bubbles: true,
           })
         );
-        
+
         return;
       }
-      
+
       if (selectionMode && typeof onToggleSelect === 'function') {
         onToggleSelect(transaction.id);
       } else {
@@ -538,18 +540,19 @@ export const TransactionListItem = ({
       cursor: help;
       title: 'This transaction was flagged as unusual based on your spending patterns';
     `;
-    
+
     // Add tooltip on hover
     anomalyBadge.addEventListener('mouseenter', () => {
-      anomalyBadge.title = 'This transaction was flagged as unusual based on your spending patterns';
+      anomalyBadge.title =
+        'This transaction was flagged as unusual based on your spending patterns';
     });
-    
+
     // Add class to badge for easy removal
     anomalyBadge.classList.add('transaction-item-anomaly-badge');
-    
+
     // Insert badge after the value element
     val.appendChild(anomalyBadge);
-    
+
     // Add subtle highlight animation
     item.classList.add('transaction-item-anomaly');
     item.style.background = 'rgba(251, 191, 36, 0.1)';

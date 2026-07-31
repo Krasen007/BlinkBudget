@@ -8,22 +8,6 @@ import { TRANSACTION_TYPES } from '../../utils/constants.js';
 
 const STORAGE_KEY = 'blinkbudget_trend_data';
 
-// Month names for trend analysis
-const MONTHS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
-
 export class TrendService {
   constructor() {
     this._loadPersistedData();

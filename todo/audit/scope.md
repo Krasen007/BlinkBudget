@@ -230,6 +230,7 @@ All Phase 0 items from the master implementation plan have been completed:
 **Phase 1.1 — Strip Investment Tracker (70% Complete)**
 
 Completed:
+
 - ✅ Removed 6 brokerage-grade methods (223 lines): `calculateReturns()`, `analyzeAssetAllocation()`, `analyzeSectorAllocation()`, `analyzeGeographicAllocation()`, `getTopPerformers()`, `getPortfolioSummary()`
 - ✅ Simplified `investment-tracker.js` from 631 → 364 lines
 - ✅ Simplified `InvestmentsSection.js` from 1537 → 667 lines
@@ -237,14 +238,17 @@ Completed:
 - ✅ Kept simple holdings list (symbol, shares, price, current value, gain/loss)
 
 Remaining:
+
 - ⚠️ Remove deprecated fields from data model: `assetClass`, `sector`, `region`, `currency`, `lastPriceUpdate`, `metadata`
 - ⚠️ Remove currency handling code from InvestmentsSection.js
 
 **Phase 1.2 — Remove Financial Health Score (100% Complete) ✅**
+
 - ✅ `calculateFinancialHealthScore()` removed from MetricsService.js
 - ✅ No health score displays in UI
 
 **Phase 1.3 — Simplify Scenario Planning (100% Complete) ✅**
+
 - ✅ `scenarioAnalysis()` removed from forecast-engine.js
 - ✅ No what-if scenario UI in ForecastsSection.js
 - ✅ Replaced with inline projections with confidence intervals
@@ -252,16 +256,19 @@ Remaining:
 ### P2 Items — PARTIALLY COMPLETE ⚠️
 
 **Phase 2.2 — Goals as Projections (50% Complete)**
+
 - ✅ Projected goal calculation implemented
 - ✅ Shows: "At your current rate, you could save $X in 12 months"
 - ⚠️ Empty state message updated to progressive unlock format
 
 **Phase 2.3 — Anomaly Detection in Transaction List (100% Complete) ✅**
+
 - ✅ Anomaly ⚠️ icon added to TransactionListItem.js
 - ✅ Tooltip explains why transaction was flagged
 - ✅ Anomaly-specific highlighting (amber background, left border)
 
 **Phase 3.1 — Progressive Unlock Messages (50% Complete)**
+
 - ✅ `getProgressiveUnlockMessage()` function exists
 - ✅ Implemented in BudgetsSection, GoalsSection, InvestmentsSection
 - ⚠️ Transaction-count-based messaging system partially implemented
@@ -269,11 +276,13 @@ Remaining:
 ### P3 Items — PARTIALLY COMPLETE ⚠️
 
 **Phase 4.2 — Show Prediction Uncertainty Ranges (100% Complete) ✅**
+
 - ✅ Forecast cards now display uncertainty ranges (e.g., "€2,100 - €2,700")
 - ✅ Trend arrows (↑/↓/→) added to forecast subtitles
 - ✅ ForecastCard component updated to support range display
 
 **Phase 4.6 — Remove Features That Fail the Test (100% Complete) ✅**
+
 - ✅ `detectSeasonalPatterns()` removed from TrendService.js
 - ✅ `detectSeasonalPatterns()` removed from PredictionService.js
 - ✅ `calculateCostOfLiving()` confirmed not in codebase
@@ -282,6 +291,7 @@ Remaining:
 ### P4 Items — NOT STARTED ❌
 
 **Phase 5.1 — Rewrite README (50% Complete)**
+
 - ✅ Removed "Financial Health Summary" reference (line 104)
 - ✅ Removed "Scenario Planning" reference (line 115)
 - ✅ Removed "Spending Pattern Recognition" (was "Planned")
@@ -289,10 +299,12 @@ Remaining:
 - ⚠️ Still contains some references to removed features
 
 **Phase 5.2 — Update AGENTS.md (100% Complete) ✅**
+
 - ✅ Added The One Theory with full text
 - ✅ Added design principle: "Does this make the user more likely to log their next expense in 3 clicks?"
 
 **Phase 5.3 — Update Audit Document (100% Complete) ✅**
+
 - ✅ This section added to scope.md
 - ✅ Reference to master implementation plan included
 
@@ -310,14 +322,14 @@ The following items from the master implementation plan were confirmed as **not 
 
 **~65% Complete**
 
-| Phase | Description | Status |
-|-------|-------------|--------|
-| Phase 0 | Documentation fixes | ✅ 100% |
-| Phase 1 | Remove contradictions | ⚠️ 70% (1.1 partial, 1.2-1.3 complete) |
-| Phase 2 | Rewrite advanced features | ⚠️ 50% (2.2 partial, 2.3 complete, 2.1 not done) |
-| Phase 3 | Empty state optimization | ⚠️ 50% (3.1 partial, 3.2 not done) |
-| Phase 4 | Feature improvements | ⚠️ 40% (4.2, 4.6 complete; 4.1, 4.3-4.5 not done) |
-| Phase 5 | Documentation | ⚠️ 50% (5.2 complete, 5.1 partial, 5.3 complete) |
+| Phase   | Description               | Status                                            |
+| ------- | ------------------------- | ------------------------------------------------- |
+| Phase 0 | Documentation fixes       | ✅ 100%                                           |
+| Phase 1 | Remove contradictions     | ⚠️ 70% (1.1 partial, 1.2-1.3 complete)            |
+| Phase 2 | Rewrite advanced features | ⚠️ 50% (2.2 partial, 2.3 complete, 2.1 not done)  |
+| Phase 3 | Empty state optimization  | ⚠️ 50% (3.1 partial, 3.2 not done)                |
+| Phase 4 | Feature improvements      | ⚠️ 40% (4.2, 4.6 complete; 4.1, 4.3-4.5 not done) |
+| Phase 5 | Documentation             | ⚠️ 50% (5.2 complete, 5.1 partial, 5.3 complete)  |
 
 ### Key Achievements
 
@@ -333,18 +345,13 @@ The following items from the master implementation plan were confirmed as **not 
 ### Remaining Work
 
 **High Priority:**
+
 1. Complete investment tracker cleanup — remove deprecated fields (assetClass, sector, region, currency, metadata)
 2. Implement budget suggestions (Phase 2.1) — Core to "3-click habit compounds" theory
 
-**Medium Priority:**
-3. Make personal inflation actionable (Phase 4.1)
-4. Connect cash flow to goals (Phase 4.4)
-5. Add specific actions to irregular patterns (Phase 4.5)
+**Medium Priority:** 3. Make personal inflation actionable (Phase 4.1) 4. Connect cash flow to goals (Phase 4.4) 5. Add specific actions to irregular patterns (Phase 4.5)
 
-**Low Priority:**
-6. Complete README cleanup (remove remaining references)
-7. Implement shared ProgressiveEmptyState component (Phase 3.2)
-8. Generalize spending suggestions (Phase 4.3)
+**Low Priority:** 6. Complete README cleanup (remove remaining references) 7. Implement shared ProgressiveEmptyState component (Phase 3.2) 8. Generalize spending suggestions (Phase 4.3)
 
 ### Alignment with Theory
 
