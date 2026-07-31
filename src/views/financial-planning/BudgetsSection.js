@@ -113,7 +113,8 @@ export const BudgetsSection = async planningData => {
         // Show form instead of progress
         card.innerHTML = '';
         // Suggest a budget limit based on current spending, rounded to nearest 10
-        const suggestedLimit = cat.budget?.amountLimit ?? Math.ceil(cat.amount / 10) * 10;
+        const suggestedLimit =
+          cat.budget?.amountLimit ?? Math.ceil(cat.amount / 10) * 10;
         const form = BudgetForm({
           categoryName: cat.name,
           initialLimit: suggestedLimit,

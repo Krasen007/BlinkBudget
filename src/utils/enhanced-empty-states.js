@@ -372,9 +372,12 @@ function createBasicEmptyState(message) {
  */
 export function getProgressiveUnlockMessage(transactionCount) {
   if (transactionCount >= 365) return null; // All features unlocked
-  if (transactionCount >= 90) return 'Forecasts are now available. Your data is telling a story.';
-  if (transactionCount >= 30) return 'You have enough data for budget suggestions. Visit Budgets to see them.';
-  if (transactionCount >= 5) return "You're building your financial picture. Check back after 30 transactions for budget suggestions.";
+  if (transactionCount >= 90)
+    return 'Forecasts are now available. Your data is telling a story.';
+  if (transactionCount >= 30)
+    return 'You have enough data for budget suggestions. Visit Budgets to see them.';
+  if (transactionCount >= 5)
+    return "You're building your financial picture. Check back after 30 transactions for budget suggestions.";
   return 'Log 30+ transactions to unlock personalized insights.';
 }
 

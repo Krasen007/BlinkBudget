@@ -11,7 +11,10 @@ import {
   createSectionContainer,
   createPlaceholder,
 } from '../../utils/financial-planning-helpers.js';
-import { createEnhancedEmptyState, getProgressiveUnlockMessage } from '../../utils/enhanced-empty-states.js';
+import {
+  createEnhancedEmptyState,
+  getProgressiveUnlockMessage,
+} from '../../utils/enhanced-empty-states.js';
 
 /**
  * Create investment form controls
@@ -37,10 +40,36 @@ function createInvestmentFormControls() {
 
   // Simple fields: symbol, shares, purchase price, current price, date, notes
   const fields = [
-    { id: 'inv-symbol', name: 'symbol', type: 'text', placeholder: 'Symbol (e.g. AAPL)', required: true },
-    { id: 'inv-shares', name: 'shares', type: 'number', placeholder: 'Shares', required: true, step: '0.0001' },
-    { id: 'inv-price', name: 'purchasePrice', type: 'number', placeholder: 'Purchase Price', required: true, step: '0.01' },
-    { id: 'inv-current', name: 'currentPrice', type: 'number', placeholder: 'Current Price (optional)', step: '0.01' },
+    {
+      id: 'inv-symbol',
+      name: 'symbol',
+      type: 'text',
+      placeholder: 'Symbol (e.g. AAPL)',
+      required: true,
+    },
+    {
+      id: 'inv-shares',
+      name: 'shares',
+      type: 'number',
+      placeholder: 'Shares',
+      required: true,
+      step: '0.0001',
+    },
+    {
+      id: 'inv-price',
+      name: 'purchasePrice',
+      type: 'number',
+      placeholder: 'Purchase Price',
+      required: true,
+      step: '0.01',
+    },
+    {
+      id: 'inv-current',
+      name: 'currentPrice',
+      type: 'number',
+      placeholder: 'Current Price (optional)',
+      step: '0.01',
+    },
     { id: 'inv-date', name: 'purchaseDate', type: 'date', required: true },
   ];
 
@@ -72,7 +101,19 @@ function createInvestmentFormControls() {
   saveInvBtn.textContent = 'Save Investment';
   saveInvBtn.className = 'btn btn-primary btn-save';
   saveInvBtn.disabled = true;
+  
+  const cancelInvBtn = document.createElement('button');
+  cancelInvBtn.textContent = 'Cancel';
+  cancelInvBtn.className = 'btn btn-ghost';
+  cancelInvBtn.addEventListener('click', () => {
+    invForm.style.display = 'none';
+    // Reset form
+    Object.values(inputs).forEach(i => (i.value = ''));
+    notesInput.value = '';
+  });
+  
   invForm.appendChild(saveInvBtn);
+  invForm.appendChild(cancelInvBtn);
 
   // Validation
   function validate() {
@@ -106,14 +147,20 @@ function createInvestmentFormControls() {
 
     try {
       const { StorageService } = await import('../../core/storage.js');
-      StorageService.addInvestment(symbol, shares, purchasePrice, purchaseDate, {
-        name: symbol,
-        currentPrice,
-        notes,
-      });
+      StorageService.addInvestment(
+        symbol,
+        shares,
+        purchasePrice,
+        purchaseDate,
+        {
+          name: symbol,
+          currentPrice,
+          notes,
+        }
+      );
 
       // Reset form
-      Object.values(inputs).forEach(i => i.value = '');
+      Object.values(inputs).forEach(i => (i.value = ''));
       notesInput.value = '';
       invForm.style.display = 'none';
     } catch (err) {
@@ -188,7 +235,10 @@ function createInvestmentsList() {
         const currentValue = inv.shares * currentPrice;
         const purchaseValue = inv.shares * inv.purchasePrice;
         const gainLoss = currentValue - purchaseValue;
-        const gainPct = purchaseValue > 0 ? ((gainLoss / purchaseValue) * 100).toFixed(1) : '0.0';
+        const gainPct =
+          purchaseValue > 0
+            ? ((gainLoss / purchaseValue) * 100).toFixed(1)
+            : '0.0';
         const sign = gainLoss >= 0 ? '+' : '';
         meta.innerHTML = `${inv.shares} shares @ ${new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(currentPrice)} → <strong>${new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(currentValue)}</strong> <span style="color:${gainLoss >= 0 ? COLORS.SUCCESS : COLORS.ERROR}">(${sign}${gainPct}%)</span>`;
         left.appendChild(meta);
@@ -233,44 +283,137 @@ function createInvestmentsList() {
           form.style.width = '100%';
 
           const inputStyle = `width:100%;padding:${SPACING.SM};border:1px solid ${COLORS.BORDER};border-radius:var(--radius-md);font-size:var(--font-size-sm);background:${COLORS.BACKGROUND};color:var(--color-text-main);box-sizing:border-box;`;
+          const labelStyle = `font-size:var(--font-size-xs);font-weight:500;color:${COLORS.TEXT_MUTED};margin-bottom:2px;`;
 
+          // Symbol field with label
+          const symbolWrapper = document.createElement('div');
+          symbolWrapper.style.display = 'flex';
+          symbolWrapper.style.flexDirection = 'column';
+          symbolWrapper.style.gap = '2px';
+          const symbolLabel = document.createElement('label');
+          symbolLabel.textContent = 'Symbol';
+          symbolLabel.style.cssText = labelStyle;
+          symbolLabel.setAttribute('for', 'edit-symbol');
           const symbolFld = document.createElement('input');
+          symbolFld.id = 'edit-symbol';
           symbolFld.type = 'text';
           symbolFld.value = inv.symbol;
+          symbolFld.placeholder = 'e.g. AAPL';
           symbolFld.style.cssText = inputStyle;
+          symbolWrapper.appendChild(symbolLabel);
+          symbolWrapper.appendChild(symbolFld);
 
+          // Name field with label
+          const nameWrapper = document.createElement('div');
+          nameWrapper.style.display = 'flex';
+          nameWrapper.style.flexDirection = 'column';
+          nameWrapper.style.gap = '2px';
+          const nameLabel = document.createElement('label');
+          nameLabel.textContent = 'Name';
+          nameLabel.style.cssText = labelStyle;
+          nameLabel.setAttribute('for', 'edit-name');
           const nameFld = document.createElement('input');
+          nameFld.id = 'edit-name';
           nameFld.type = 'text';
           nameFld.value = inv.name || '';
+          nameFld.placeholder = 'Optional';
           nameFld.style.cssText = inputStyle;
+          nameWrapper.appendChild(nameLabel);
+          nameWrapper.appendChild(nameFld);
 
+          // Shares field with label
+          const sharesWrapper = document.createElement('div');
+          sharesWrapper.style.display = 'flex';
+          sharesWrapper.style.flexDirection = 'column';
+          sharesWrapper.style.gap = '2px';
+          const sharesLabel = document.createElement('label');
+          sharesLabel.textContent = 'Shares';
+          sharesLabel.style.cssText = labelStyle;
+          sharesLabel.setAttribute('for', 'edit-shares');
           const sharesFld = document.createElement('input');
+          sharesFld.id = 'edit-shares';
           sharesFld.type = 'number';
           sharesFld.value = inv.shares;
           sharesFld.step = '0.0001';
+          sharesFld.placeholder = 'Number of shares';
           sharesFld.style.cssText = inputStyle;
+          sharesWrapper.appendChild(sharesLabel);
+          sharesWrapper.appendChild(sharesFld);
 
+          // Purchase Price field with label
+          const purchasePriceWrapper = document.createElement('div');
+          purchasePriceWrapper.style.display = 'flex';
+          purchasePriceWrapper.style.flexDirection = 'column';
+          purchasePriceWrapper.style.gap = '2px';
+          const purchasePriceLabel = document.createElement('label');
+          purchasePriceLabel.textContent = 'Purchase Price';
+          purchasePriceLabel.style.cssText = labelStyle;
+          purchasePriceLabel.setAttribute('for', 'edit-purchase-price');
           const purchasePriceFld = document.createElement('input');
+          purchasePriceFld.id = 'edit-purchase-price';
           purchasePriceFld.type = 'number';
           purchasePriceFld.value = inv.purchasePrice;
           purchasePriceFld.step = '0.01';
+          purchasePriceFld.placeholder = 'Price per share';
           purchasePriceFld.style.cssText = inputStyle;
+          purchasePriceWrapper.appendChild(purchasePriceLabel);
+          purchasePriceWrapper.appendChild(purchasePriceFld);
 
+          // Current Price field with label
+          const currentPriceWrapper = document.createElement('div');
+          currentPriceWrapper.style.display = 'flex';
+          currentPriceWrapper.style.flexDirection = 'column';
+          currentPriceWrapper.style.gap = '2px';
+          const currentPriceLabel = document.createElement('label');
+          currentPriceLabel.textContent = 'Current Price';
+          currentPriceLabel.style.cssText = labelStyle;
+          currentPriceLabel.setAttribute('for', 'edit-current-price');
           const currentPriceFld = document.createElement('input');
+          currentPriceFld.id = 'edit-current-price';
           currentPriceFld.type = 'number';
           currentPriceFld.value = inv.currentPrice || inv.purchasePrice;
           currentPriceFld.step = '0.01';
+          currentPriceFld.placeholder = 'Optional';
           currentPriceFld.style.cssText = inputStyle;
+          currentPriceWrapper.appendChild(currentPriceLabel);
+          currentPriceWrapper.appendChild(currentPriceFld);
 
+          // Purchase Date field with label
+          const dateWrapper = document.createElement('div');
+          dateWrapper.style.display = 'flex';
+          dateWrapper.style.flexDirection = 'column';
+          dateWrapper.style.gap = '2px';
+          const dateLabel = document.createElement('label');
+          dateLabel.textContent = 'Purchase Date';
+          dateLabel.style.cssText = labelStyle;
+          dateLabel.setAttribute('for', 'edit-date');
           const dateFld = document.createElement('input');
+          dateFld.id = 'edit-date';
           dateFld.type = 'date';
-          dateFld.value = inv.purchaseDate ? new Date(inv.purchaseDate).toISOString().split('T')[0] : '';
+          dateFld.value = inv.purchaseDate
+            ? new Date(inv.purchaseDate).toISOString().split('T')[0]
+            : '';
           dateFld.style.cssText = inputStyle;
+          dateWrapper.appendChild(dateLabel);
+          dateWrapper.appendChild(dateFld);
 
+          // Notes field with label
+          const notesWrapper = document.createElement('div');
+          notesWrapper.style.display = 'flex';
+          notesWrapper.style.flexDirection = 'column';
+          notesWrapper.style.gap = '2px';
+          const notesLabel = document.createElement('label');
+          notesLabel.textContent = 'Notes';
+          notesLabel.style.cssText = labelStyle;
+          notesLabel.setAttribute('for', 'edit-notes');
           const notesFld = document.createElement('textarea');
+          notesFld.id = 'edit-notes';
           notesFld.value = inv.notes || '';
           notesFld.rows = 2;
+          notesFld.placeholder = 'Optional notes';
           notesFld.style.cssText = `${inputStyle}resize:vertical;`;
+          notesWrapper.appendChild(notesLabel);
+          notesWrapper.appendChild(notesFld);
 
           const btnRow = document.createElement('div');
           btnRow.style.display = 'flex';
@@ -289,13 +432,13 @@ function createInvestmentsList() {
           btnRow.appendChild(saveBtn);
           btnRow.appendChild(cancelBtn);
 
-          form.appendChild(symbolFld);
-          form.appendChild(nameFld);
-          form.appendChild(sharesFld);
-          form.appendChild(purchasePriceFld);
-          form.appendChild(currentPriceFld);
-          form.appendChild(dateFld);
-          form.appendChild(notesFld);
+          form.appendChild(symbolWrapper);
+          form.appendChild(nameWrapper);
+          form.appendChild(sharesWrapper);
+          form.appendChild(purchasePriceWrapper);
+          form.appendChild(currentPriceWrapper);
+          form.appendChild(dateWrapper);
+          form.appendChild(notesWrapper);
           form.appendChild(btnRow);
           li.appendChild(form);
 
@@ -311,9 +454,14 @@ function createInvestmentsList() {
           saveBtn.addEventListener('click', async () => {
             const newSymbol = symbolFld.value.trim().toUpperCase();
             if (!newSymbol) {
-              import('../../components/ConfirmDialog.js').then(({ AlertDialog }) => {
-                AlertDialog({ title: 'Invalid input', message: 'Symbol is required.' });
-              }).catch(err => console.error('Failed to show alert:', err));
+              import('../../components/ConfirmDialog.js')
+                .then(({ AlertDialog }) => {
+                  AlertDialog({
+                    title: 'Invalid input',
+                    message: 'Symbol is required.',
+                  });
+                })
+                .catch(err => console.error('Failed to show alert:', err));
               return;
             }
             try {
@@ -323,8 +471,13 @@ function createInvestmentsList() {
                 name: nameFld.value.trim() || newSymbol,
                 shares: Number(sharesFld.value) || 0,
                 purchasePrice: Number(purchasePriceFld.value) || 0,
-                currentPrice: Number(currentPriceFld.value) || Number(purchasePriceFld.value) || 0,
-                purchaseDate: dateFld.value ? new Date(dateFld.value) : inv.purchaseDate,
+                currentPrice:
+                  Number(currentPriceFld.value) ||
+                  Number(purchasePriceFld.value) ||
+                  0,
+                purchaseDate: dateFld.value
+                  ? new Date(dateFld.value)
+                  : inv.purchaseDate,
                 notes: notesFld.value.trim(),
               });
               cleanupEdit();
@@ -337,26 +490,39 @@ function createInvestmentsList() {
 
         // Delete handler
         delBtn.addEventListener('click', () => {
-          import('../../components/ConfirmDialog.js').then(({ ConfirmDialog }) => {
-            ConfirmDialog({
-              title: 'Delete Investment',
-              message: `Are you sure you want to delete ${inv.symbol}? This action cannot be undone.`,
-              confirmText: 'Delete',
-              variant: 'danger',
-              onConfirm: async () => {
-                try {
-                  const { StorageService } = await import('../../core/storage.js');
-                  StorageService.removeInvestment(inv.symbol);
-                  refreshInvestmentsList();
-                } catch (err) {
-                  console.error('Failed to remove investment', err);
-                  import('../../components/ConfirmDialog.js').then(({ AlertDialog }) => {
-                    AlertDialog({ title: 'Error', message: 'Could not remove investment. Please try again.' });
-                  }).catch(error => console.error('Error loading AlertDialog:', error));
-                }
-              },
-            });
-          }).catch(err => console.error('Failed to load confirmation dialog:', err));
+          import('../../components/ConfirmDialog.js')
+            .then(({ ConfirmDialog }) => {
+              ConfirmDialog({
+                title: 'Delete Investment',
+                message: `Are you sure you want to delete ${inv.symbol}? This action cannot be undone.`,
+                confirmText: 'Delete',
+                variant: 'danger',
+                onConfirm: async () => {
+                  try {
+                    const { StorageService } =
+                      await import('../../core/storage.js');
+                    StorageService.removeInvestment(inv.symbol);
+                    refreshInvestmentsList();
+                  } catch (err) {
+                    console.error('Failed to remove investment', err);
+                    import('../../components/ConfirmDialog.js')
+                      .then(({ AlertDialog }) => {
+                        AlertDialog({
+                          title: 'Error',
+                          message:
+                            'Could not remove investment. Please try again.',
+                        });
+                      })
+                      .catch(error =>
+                        console.error('Error loading AlertDialog:', error)
+                      );
+                  }
+                },
+              });
+            })
+            .catch(err =>
+              console.error('Failed to load confirmation dialog:', err)
+            );
         });
       });
 
@@ -375,12 +541,16 @@ function createInvestmentsList() {
 
 /**
  * Investments Section Component
- * @param {Object} chartRenderer - Chart renderer service instance (unused, kept for API compat)
- * @param {Map} activeCharts - Map to track active chart instances (unused, kept for API compat)
+ * @param {Object} _chartRenderer - Chart renderer service instance (unused, kept for API compat)
+ * @param {Map} _activeCharts - Map to track active chart instances (unused, kept for API compat)
  * @returns {HTMLElement} DOM element containing investments section content
  */
-export const InvestmentsSection = async (chartRenderer, activeCharts) => {
-  const section = createSectionContainer('investments', 'Investment Portfolio', '💰');
+export const InvestmentsSection = async (_chartRenderer, _activeCharts) => {
+  const section = createSectionContainer(
+    'investments',
+    'Investment Portfolio',
+    '💰'
+  );
   section.className += ' investments-section';
 
   section.appendChild(
@@ -440,7 +610,10 @@ export const InvestmentsSection = async (chartRenderer, activeCharts) => {
   totalVal.textContent = 'Total: ';
   const valueSpan = document.createElement('span');
   valueSpan.className = 'currency-value';
-  valueSpan.textContent = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(totalValue);
+  valueSpan.textContent = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(totalValue);
   totalVal.appendChild(valueSpan);
 
   const gainLoss = document.createElement('div');

@@ -8,8 +8,6 @@
 
 // Chart.js renders on HTML Canvas, which doesn't understand CSS variables like `var(--color-success)`. When these variables were passed as chart colors, Canvas couldn't resolve them and defaulted to black.
 import { COLORS, SPACING } from './constants.js';
-import { getChartColors } from '../core/chart-config.js';
-import { escapeHtml } from './security-utils.js';
 import { formatDateForDisplay } from './date-utils.js';
 
 /**

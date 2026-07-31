@@ -25,30 +25,31 @@ The 8 asset classes, `sector`, and `region` fields exist solely to power the all
 
 ### Current methods (what the tracker does)
 
-| Method | Lines | Purpose | Verdict |
-|---|---|---|---|
-| `addInvestment()` | 50 | CRUD — add a holding | ✅ Keep |
-| `updateInvestmentValue()` | 23 | Update current price | ✅ Keep |
-| `removeInvestment()` | 18 | CRUD — remove a holding | ✅ Keep |
-| `updateInvestment()` | 35 | CRUD — update fields | ✅ Keep |
-| `getAllInvestments()` | 4 | List holdings | ✅ Keep |
-| `getInvestment()` | 7 | Get by symbol | ✅ Keep |
-| `calculatePortfolioValue()` | 6 | Total value | ✅ Keep |
-| `calculateGainsLosses()` | 39 | Gain/loss per holding | ✅ Keep but simplify |
-| `calculateReturns()` | 75 | Returns with annualized calculation | ❌ Remove (brokerage-grade) |
-| `analyzeAssetAllocation()` | 47 | Allocation by 8 asset classes | ❌ Remove |
-| `analyzeSectorAllocation()` | 35 | Sector breakdown | ❌ Remove |
-| `analyzeGeographicAllocation()` | 35 | Geographic breakdown | ❌ Remove |
-| `getTopPerformers()` | 12 | Top/bottom ranking | ❌ Remove |
-| `getPortfolioSummary()` | 19 | Assembles all of the above | ❌ Remove (aggregates removed methods) |
-| `clearAllInvestments()` | 4 | Reset | ✅ Keep |
-| `batchSetInvestments()` | 39 | Restore | ✅ Keep |
-| `_loadInvestments()` | 38 | Persistence | ✅ Keep |
-| `_saveInvestments()` | 15 | Persistence | ✅ Keep |
+| Method                          | Lines | Purpose                             | Verdict                                |
+| ------------------------------- | ----- | ----------------------------------- | -------------------------------------- |
+| `addInvestment()`               | 50    | CRUD — add a holding                | ✅ Keep                                |
+| `updateInvestmentValue()`       | 23    | Update current price                | ✅ Keep                                |
+| `removeInvestment()`            | 18    | CRUD — remove a holding             | ✅ Keep                                |
+| `updateInvestment()`            | 35    | CRUD — update fields                | ✅ Keep                                |
+| `getAllInvestments()`           | 4     | List holdings                       | ✅ Keep                                |
+| `getInvestment()`               | 7     | Get by symbol                       | ✅ Keep                                |
+| `calculatePortfolioValue()`     | 6     | Total value                         | ✅ Keep                                |
+| `calculateGainsLosses()`        | 39    | Gain/loss per holding               | ✅ Keep but simplify                   |
+| `calculateReturns()`            | 75    | Returns with annualized calculation | ❌ Remove (brokerage-grade)            |
+| `analyzeAssetAllocation()`      | 47    | Allocation by 8 asset classes       | ❌ Remove                              |
+| `analyzeSectorAllocation()`     | 35    | Sector breakdown                    | ❌ Remove                              |
+| `analyzeGeographicAllocation()` | 35    | Geographic breakdown                | ❌ Remove                              |
+| `getTopPerformers()`            | 12    | Top/bottom ranking                  | ❌ Remove                              |
+| `getPortfolioSummary()`         | 19    | Assembles all of the above          | ❌ Remove (aggregates removed methods) |
+| `clearAllInvestments()`         | 4     | Reset                               | ✅ Keep                                |
+| `batchSetInvestments()`         | 39    | Restore                             | ✅ Keep                                |
+| `_loadInvestments()`            | 38    | Persistence                         | ✅ Keep                                |
+| `_saveInvestments()`            | 15    | Persistence                         | ✅ Keep                                |
 
 ### What the UI shows (InvestmentsSection.js — 1537 lines)
 
 The view renders:
+
 1. **Portfolio composition chart** (asset allocation pie chart)
 2. **Investment form** with type-specific fields (stocks show shares/price, crypto shows units, real estate shows sqm/property type, etc.)
 3. **Investment list** with edit/delete per row
@@ -62,14 +63,15 @@ The 1537 lines include: form builders for ALL 8 asset types, chart logic, CRUD U
 ### Proposed: "Intentionally Simple" version
 
 **Data model** (simplified):
+
 ```javascript
 {
-  id, symbol, name, shares, purchasePrice, currentPrice, purchaseDate,
-  notes  // free text only — no structured sector/region/assetClass
+  (id, symbol, name, shares, purchasePrice, currentPrice, purchaseDate, notes); // free text only — no structured sector/region/assetClass
 }
 ```
 
 **Methods to keep** (those that serve the 3-click user):
+
 - `addInvestment()` — but accept only symbol, shares, purchasePrice, purchaseDate
 - `updateInvestmentValue()` — manual price update
 - `removeInvestment()`, `updateInvestment()`, `getAllInvestments()`, `getInvestment()`
@@ -78,6 +80,7 @@ The 1537 lines include: form builders for ALL 8 asset types, chart logic, CRUD U
 - `clearAllInvestments()`, `batchSetInvestments()`, `_loadInvestments()`, `_saveInvestments()`
 
 **Methods to remove entirely** (57% of the file):
+
 - `calculateReturns()` — annualized return calculation is brokerage-grade
 - `analyzeAssetAllocation()` — the 8 asset classes were the anti-goal violation
 - `analyzeSectorAllocation()` — sector analysis is brokerage-grade
@@ -86,6 +89,7 @@ The 1537 lines include: form builders for ALL 8 asset types, chart logic, CRUD U
 - `getPortfolioSummary()` — no longer needed without the above
 
 **What the simplified version looks like:**
+
 ```
 My Investments
 ━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -103,6 +107,7 @@ BTC   —  0.5 @ $42,000     →  $21,000 (+$2,000)
 No charts. No allocation breakdowns. No sector/region analysis. No annualized returns. No "top performers" ranking.
 
 **What the user loses:**
+
 - Asset allocation pie chart
 - Sector breakdown
 - Geographic breakdown
@@ -111,6 +116,7 @@ No charts. No allocation breakdowns. No sector/region analysis. No annualized re
 - Type-specific form fields (crypto units, real estate sqm, etc.)
 
 **What the user gains:**
+
 - 300 fewer lines of code to maintain
 - No cognitive load from investment analysis in an expense tracking app
 - A simple holdings list that answers "what do I own and what is it worth?"
@@ -127,6 +133,7 @@ The current version tries to be a mini-Personal Capital. The simplified version 
 ### Implementation plan summary
 
 **Files to change:**
+
 1. `src/core/investment-tracker.js` (631 → ~250 lines): Remove 6 methods, simplify data model, simplify `updateInvestment()` allowed fields
 2. `src/views/financial-planning/InvestmentsSection.js` (1537 → ~500 lines): Remove chart, remove type-specific form fields, remove allocation display, simplify to flat list
 3. `src/views/financial-planning/OverviewSection.js`: Remove net balance chart reference if it depends on investment allocation
@@ -135,12 +142,14 @@ The current version tries to be a mini-Personal Capital. The simplified version 
 6. `tests/services/investment-tracker.test.js`: Update tests to match simplified API
 
 **What stays in the UI:**
+
 - Investment list (symbol, name, shares, price, current value, gain/loss)
 - Add/edit/delete form (symbol, shares, purchase price, current price, purchase date, notes)
 - Total portfolio value display
 - Total gain/loss display
 
 **What goes:**
+
 - Portfolio composition pie chart
 - Asset allocation breakdown
 - Sector allocation

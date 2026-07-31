@@ -11,7 +11,10 @@
  * - Progress tracking display
  */
 
-import { createEnhancedEmptyState, getProgressiveUnlockMessage } from '../../utils/enhanced-empty-states.js';
+import {
+  createEnhancedEmptyState,
+  getProgressiveUnlockMessage,
+} from '../../utils/enhanced-empty-states.js';
 import { COLORS, SPACING, FONT_SIZES } from '../../utils/constants.js';
 import { createGoalProgressChart } from '../../utils/financial-planning-charts.js';
 import {
@@ -719,13 +722,29 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
     const { StorageService: SS } = await import('../../core/storage.js');
     const allTx = SS.getAllTransactions() || [];
     const income = allTx.filter(t => t.type === 'income' && !t.isGhost);
-    const expenses = allTx.filter(t => (t.type === 'expense' || t.type === 'refund') && !t.isGhost);
+    const expenses = allTx.filter(
+      t => (t.type === 'expense' || t.type === 'refund') && !t.isGhost
+    );
     const totalIncome = income.reduce((s, t) => s + Math.abs(t.amount || 0), 0);
-    const totalExpenses = expenses.reduce((s, t) => s + Math.abs(t.amount || 0), 0);
-    const monthlySavings = Math.max(0, (totalIncome - totalExpenses) / Math.max(1, new Set(allTx.filter(t => !t.isGhost).map(t => {
-      const d = new Date(t.timestamp);
-      return `${d.getFullYear()}-${d.getMonth()}`;
-    })).size));
+    const totalExpenses = expenses.reduce(
+      (s, t) => s + Math.abs(t.amount || 0),
+      0
+    );
+    const monthlySavings = Math.max(
+      0,
+      (totalIncome - totalExpenses) /
+        Math.max(
+          1,
+          new Set(
+            allTx
+              .filter(t => !t.isGhost)
+              .map(t => {
+                const d = new Date(t.timestamp);
+                return `${d.getFullYear()}-${d.getMonth()}`;
+              })
+          ).size
+        )
+    );
     const projectedAmount = Math.round(monthlySavings * 12);
     if (projectedAmount > 0) {
       projectedGoal = {
@@ -739,35 +758,39 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
     console.warn('Failed to compute goal projection:', e);
   }
 
-  const sampleGoals = projectedGoal ? [{
-    id: 'projected',
-    name: projectedGoal.title,
-    targetAmount: projectedGoal.targetAmount,
-    currentSavings: 0,
-    targetDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-  }] : [
-    {
-      id: '1',
-      name: 'Emergency Fund',
-      targetAmount: 10000,
-      currentSavings: 7500,
-      targetDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-    },
-    {
-      id: '2',
-      name: 'House Down Payment',
-      targetAmount: 50000,
-      currentSavings: 15000,
-      targetDate: new Date(Date.now() + 3 * 365 * 24 * 60 * 60 * 1000),
-    },
-    {
-      id: '3',
-      name: 'Vacation Fund',
-      targetAmount: 5000,
-      currentSavings: 2000,
-      targetDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000),
-    },
-  ];
+  const sampleGoals = projectedGoal
+    ? [
+        {
+          id: 'projected',
+          name: projectedGoal.title,
+          targetAmount: projectedGoal.targetAmount,
+          currentSavings: 0,
+          targetDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+        },
+      ]
+    : [
+        {
+          id: '1',
+          name: 'Emergency Fund',
+          targetAmount: 10000,
+          currentSavings: 7500,
+          targetDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+        },
+        {
+          id: '2',
+          name: 'House Down Payment',
+          targetAmount: 50000,
+          currentSavings: 15000,
+          targetDate: new Date(Date.now() + 3 * 365 * 24 * 60 * 60 * 1000),
+        },
+        {
+          id: '3',
+          name: 'Vacation Fund',
+          targetAmount: 5000,
+          currentSavings: 2000,
+          targetDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000),
+        },
+      ];
 
   const hasRealGoals =
     Array.isArray(goalsFromStorage) && goalsFromStorage.length > 0;
