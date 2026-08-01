@@ -778,6 +778,17 @@
   flex-direction: column;
 }
 
+.transaction-item-anomaly {
+  background: rgba(251, 191, 36, 0.1) !important;
+  border-left: 3px solid #fbbf24 !important;
+}
+
+.transaction-item-anomaly-badge {
+  margin-left: 8px;
+  font-size: 1.1rem;
+  cursor: help;
+}
+
 .dashboard-transactions-title {
   line-height: var(--line-height-tight);
   font-weight: 600;

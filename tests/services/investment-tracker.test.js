@@ -12,11 +12,7 @@ describe('InvestmentTracker', () => {
   });
 
   it('performs CRUD operations', () => {
-    const inv = tracker.addInvestment('AAPL', 10, 150, new Date('2023-01-01'), {
-      currentPrice: 200,
-      assetClass: 'stocks',
-      sector: 'tech',
-    });
+    const inv = tracker.addInvestment('AAPL', 10, 150, new Date('2023-01-01'));
     expect(inv).toBeTruthy();
     expect(inv.symbol).toBe('AAPL');
     expect(inv.shares).toBe(10);
@@ -37,14 +33,11 @@ describe('InvestmentTracker', () => {
   });
 
   it('calculates portfolio value and gains/losses', () => {
-    tracker.addInvestment('AAA', 2, 50, new Date('2022-01-01'), {
-      currentPrice: 75,
-      assetClass: 'stocks',
-    });
-    tracker.addInvestment('BBB', 5, 20, new Date('2022-06-01'), {
-      currentPrice: 18,
-      assetClass: 'bonds',
-    });
+    tracker.addInvestment('AAA', 2, 50, new Date('2022-01-01'));
+    tracker.updateInvestmentValue('AAA', 75);
+
+    tracker.addInvestment('BBB', 5, 20, new Date('2022-06-01'));
+    tracker.updateInvestmentValue('BBB', 18);
 
     const totalValue = tracker.calculatePortfolioValue();
     // AAA: 2*75=150, BBB:5*18=90 => total 240

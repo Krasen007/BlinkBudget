@@ -115,6 +115,7 @@ function createInvestmentFormControls() {
     // Reset form
     Object.values(inputs).forEach(i => (i.value = ''));
     notesInput.value = '';
+    saveInvBtn.disabled = true;
   });
 
   invForm.appendChild(saveInvBtn);
@@ -146,7 +147,10 @@ function createInvestmentFormControls() {
     const symbol = inputs.symbol.value.trim().toUpperCase();
     const shares = Number(inputs.shares.value);
     const purchasePrice = Number(inputs.purchasePrice.value);
-    const currentPrice = Number(inputs.currentPrice.value) || purchasePrice;
+    const currentPrice =
+      inputs.currentPrice.value !== ''
+        ? Number(inputs.currentPrice.value)
+        : purchasePrice;
     const purchaseDate = new Date(inputs.purchaseDate.value);
     const notes = notesInput.value.trim();
 
@@ -235,7 +239,7 @@ function createInvestmentsList() {
 
         const meta = document.createElement('div');
         meta.style.fontSize = '0.9rem';
-        const currentPrice = inv.currentPrice || inv.purchasePrice;
+        const currentPrice = inv.currentPrice ?? inv.purchasePrice;
         const currentValue = inv.shares * currentPrice;
         const purchaseValue = inv.shares * inv.purchasePrice;
         const gainLoss = currentValue - purchaseValue;
@@ -389,7 +393,7 @@ function createInvestmentsList() {
           const currentPriceFld = document.createElement('input');
           currentPriceFld.id = `${fieldPrefix}current-price`;
           currentPriceFld.type = 'number';
-          currentPriceFld.value = inv.currentPrice || inv.purchasePrice;
+          currentPriceFld.value = inv.currentPrice ?? inv.purchasePrice;
           currentPriceFld.step = '0.01';
           currentPriceFld.placeholder = 'Optional';
           currentPriceFld.style.cssText = inputStyle;
@@ -490,9 +494,9 @@ function createInvestmentsList() {
                 shares: Number(sharesFld.value) || 0,
                 purchasePrice: Number(purchasePriceFld.value) || 0,
                 currentPrice:
-                  Number(currentPriceFld.value) ||
-                  Number(purchasePriceFld.value) ||
-                  0,
+                  currentPriceFld.value !== ''
+                    ? Number(currentPriceFld.value)
+                    : (Number(purchasePriceFld.value) || 0),
                 purchaseDate: dateFld.value
                   ? new Date(dateFld.value)
                   : inv.purchaseDate,
@@ -622,22 +626,18 @@ export const InvestmentsSection = async (_chartRenderer, _activeCharts) => {
   stats.style.gap = SPACING.MD;
   stats.style.marginBottom = SPACING.MD;
   stats.style.flexWrap = 'wrap';
-
   const totalVal = document.createElement('div');
   totalVal.className = 'total-portfolio-value';
   totalVal.textContent = 'Total: ';
   const valueSpan = document.createElement('span');
   valueSpan.className = 'currency-value';
-  valueSpan.textContent = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'EUR',
-  }).format(totalValue);
+  valueSpan.textContent = `${CURRENCY_SYMBOL}${totalValue.toFixed(2)}`;
   totalVal.appendChild(valueSpan);
 
   const gainLoss = document.createElement('div');
   gainLoss.className = 'total-gain-loss';
   const sign = totalGainLoss >= 0 ? '+' : '';
-  gainLoss.textContent = `Gain/Loss: ${sign}${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(totalGainLoss)}`;
+  gainLoss.textContent = `Gain/Loss: ${sign}${CURRENCY_SYMBOL}${Math.abs(totalGainLoss).toFixed(2)}`;
   gainLoss.style.color = totalGainLoss >= 0 ? COLORS.SUCCESS : COLORS.ERROR;
 
   stats.appendChild(totalVal);

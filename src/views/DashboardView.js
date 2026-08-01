@@ -258,6 +258,31 @@ export const DashboardView = (params = {}) => {
 
   // Multi-select state
   let isSelectionMode = false;
+
+  // Dismissed anomaly IDs — persisted in sessionStorage so dismissals survive
+  // filter changes and storage-updated re-renders within the same session.
+  const DISMISSED_ANOMALIES_KEY = 'blinkbudget_dismissed_anomalies';
+  const _loadDismissedAnomalyIds = () => {
+    try {
+      return new Set(
+        JSON.parse(sessionStorage.getItem(DISMISSED_ANOMALIES_KEY) || '[]')
+      );
+    } catch {
+      return new Set();
+    }
+  };
+  const _saveDismissedAnomalyId = id => {
+    try {
+      const ids = _loadDismissedAnomalyIds();
+      ids.add(id);
+      sessionStorage.setItem(
+        DISMISSED_ANOMALIES_KEY,
+        JSON.stringify([...ids])
+      );
+    } catch {
+      // Non-critical
+    }
+  };
   let selectedTransactionIds = new Set();
   // Tracks the current filtered+sorted list so updateSelectionUI can access it
   // without triggering a re-render.
@@ -962,7 +987,10 @@ export const DashboardView = (params = {}) => {
         .filter(i => i.metadata?.spikeTransactions)
         .flatMap(i => i.metadata.spikeTransactions.map(t => t.id))
         .filter(Boolean);
-      highlightTransactionIds.push(...anomalyIds);
+      const dismissedIds = _loadDismissedAnomalyIds();
+      highlightTransactionIds.push(
+        ...anomalyIds.filter(id => !dismissedIds.has(id))
+      );
     } catch (error) {
       // Anomaly highlighting is non-critical
       console.warn('[DashboardView] Anomaly highlighting failed:', error);
@@ -1210,6 +1238,15 @@ export const DashboardView = (params = {}) => {
   window.addEventListener('storage-updated', handleStorageUpdate);
   window.addEventListener('auth-state-changed', handleAuthChange);
 
+  // Persist anomaly dismissals so they survive re-renders and filter changes
+  const handleAnomalyDismissed = e => {
+    const { transactionId } = e.detail || {};
+    if (transactionId) {
+      _saveDismissedAnomalyId(transactionId);
+    }
+  };
+  window.addEventListener('anomaly-dismissed', handleAnomalyDismissed);
+
   accountSelect.addEventListener('change', e => {
     currentAccountFilter = e.target.value;
     // Use localStorage directly to avoid syncing this preference
@@ -1223,6 +1260,7 @@ export const DashboardView = (params = {}) => {
   container.cleanup = () => {
     window.removeEventListener('storage-updated', handleStorageUpdate);
     window.removeEventListener('auth-state-changed', handleAuthChange);
+    window.removeEventListener('anomaly-dismissed', handleAnomalyDismissed);
   };
 
   return container;

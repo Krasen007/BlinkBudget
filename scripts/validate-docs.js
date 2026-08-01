@@ -123,7 +123,7 @@ function getValidatedProjectFilePath(filePath) {
     const realProjectRoot = fs.realpathSync(resolvedProjectRoot);
     const realFullPath = fs.realpathSync(fullPath);
 
-    if (!realFullPath.startsWith(realProjectRoot)) {
+    if (!realFullPath.startsWith(realProjectRoot + path.sep)) {
       return null;
     }
 
@@ -187,10 +187,12 @@ export function getFileContent(filePath) {
  * @returns {boolean} True if the method exists or the reference is descriptive prose
  */
 function stripCommentsAndStrings(source) {
-  return source
-    .replace(/\/\/.*$/gm, '')
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/(["'`])(?:\\.|(?!\1).)*\1/g, '');
+  // Process in source order so `//` inside string literals isn't treated as a line comment.
+  // Single pass: match strings, block comments, and line comments by whichever appears first.
+  return source.replace(
+    /(["'`])(?:\\.|(?!\1).)*\1|\/\*[\s\S]*?\*\/|\/\/[^\n]*/g,
+    ''
+  );
 }
 
 export function methodExists(filePath, methodOrDescription) {

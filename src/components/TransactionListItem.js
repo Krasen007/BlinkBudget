@@ -534,29 +534,15 @@ export const TransactionListItem = ({
     // Add anomaly indicator badge
     const anomalyBadge = document.createElement('span');
     anomalyBadge.textContent = '⚠️';
-    anomalyBadge.style.cssText = `
-      margin-left: 8px;
-      font-size: 1.1rem;
-      cursor: help;
-      title: 'This transaction was flagged as unusual based on your spending patterns';
-    `;
+    anomalyBadge.className = 'transaction-item-anomaly-badge';
+    anomalyBadge.title =
+      'This transaction was flagged as unusual based on your spending patterns';
 
-    // Add tooltip on hover
-    anomalyBadge.addEventListener('mouseenter', () => {
-      anomalyBadge.title =
-        'This transaction was flagged as unusual based on your spending patterns';
-    });
-
-    // Add class to badge for easy removal
-    anomalyBadge.classList.add('transaction-item-anomaly-badge');
-
-    // Insert badge after the value element
+    // Add class to badge for easy removal — appended inside value element
     val.appendChild(anomalyBadge);
 
-    // Add subtle highlight animation
+    // Add subtle highlight animation via CSS class
     item.classList.add('transaction-item-anomaly');
-    item.style.background = 'rgba(251, 191, 36, 0.1)';
-    item.style.borderLeft = '3px solid #fbbf24';
   }
 
   return item;

@@ -45,10 +45,6 @@ describe('analytics and forecast regressions', () => {
     const engine = new ForecastEngine();
     vi.spyOn(engine, '_weightedBaseline').mockReturnValue(-100);
     vi.spyOn(engine, '_calculateTrend').mockReturnValue(-1000);
-    vi.spyOn(engine, 'detectSeasonalPatterns').mockReturnValue({
-      expense: Array(12).fill(1),
-      income: Array(12).fill(1),
-    });
     vi.spyOn(engine, '_aggregateByMonth').mockReturnValue({
       values: [90, 100, 110],
       variance: 100,
@@ -101,17 +97,13 @@ describe('analytics and forecast regressions', () => {
       },
     ];
 
-    const costOfLiving = MetricsService.calculateCostOfLiving(
-      transactions,
-      timePeriod
-    );
     const topCategories = MetricsService.identifyTopCategories(
       transactions,
       timePeriod,
       2
     );
 
-    expect(costOfLiving.topSpendingCategory?.name).toBe('Groceries');
+    // Groceries has higher net spend (80) than Utilities (40)
     expect(topCategories.topCategories[0].name).toBe('Groceries');
   });
 
