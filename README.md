@@ -36,7 +36,7 @@
 - **Optional transaction descriptions**: Add notes to transactions or leave them blank, as you prefer | src/components/TransactionForm.js:noteField creation | src/utils/form-utils/submission.js:prepareTransactionData()
 - **Custom Category Management**: Create, edit, and manage your own expense categories for personalized tracking | src/components/CustomCategoryManager.js:CustomCategoryManager() | src/core/custom-category-service.js:CustomCategoryService
 - **Category Reordering**: Organize your expense categories in a way that works best for you. Reordering now respects filtered views — arrow-move reorders only the currently visible categories and persists that order. Previously it reordered across all categories (including hidden types), so moves inside a filtered view often had no visible effect | src/core/custom-category-service.js:reorder() | src/components/CustomCategoryManager.js:arrow-move handlers
-- **Tags System**: Add custom tags to transactions for flexible organization and analysis beyond categories. Features a 3-state filter — tap once to include transactions with the tag, tap twice to exclude them (shows the tag crossed out), tap a third time to restore the default state | src/utils/form-utils/transaction-tags.js:createTransactionTagSelector() | src/utils/form-utils/transaction-tags.js:applyExpenseTagToTransactionData() | src/views/DashboardView.js:tag filtering
+- **Tags System**: Add custom tags to transactions for flexible organization and analysis beyond categories. Features a 3-state filter — tap once to include transactions with the tag, tap twice to exclude them (shows the tag crossed out), tap a third time to restore the default state. Tags are now supported on all transaction types including refunds | src/utils/form-utils/transaction-tags.js:createTransactionTagSelector() | src/utils/form-utils/transaction-tags.js:applyExpenseTagToTransactionData() | src/views/DashboardView.js:tag filtering
 - **Streamlined transaction indicators**: Simplified notifications and indicators for different transaction types:
   - **Refunds** are marked with an ↑ arrow to indicate money coming back | src/components/TransactionListItem.js:sign assignment for refund type
   - **Transfers** are marked with a ⇆ arrow to indicate money moving between accounts | src/components/TransactionListItem.js:sign assignment for transfer type
@@ -123,6 +123,7 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 - **Savings Targets** - Monthly savings requirements to reach goals | src/core/goal-planner.js:calculateRequiredMonthlySavings() | src/views/financial-planning/GoalsSection.js:targets display
 - **Progress Visualization** - Charts showing goal completion status | src/views/financial-planning/GoalsSection.js:progress charts | src/utils/financial-planning-charts.js:goal progress
 - **Milestone Tracking** - Celebrate achievements along the journey | src/core/goal-planner.js:calculateGoalProgress() | src/views/financial-planning/GoalsSection.js:milestone display
+- **Cancel Button** - Added a cancel button to prevent accidental goal modifications and improve user experience during goal creation and editing
 
 #### **Insights Section**
 

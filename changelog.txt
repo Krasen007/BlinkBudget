@@ -1,31 +1,27 @@
-### Summary v1.44
+### Summary v1.45
 
-- Quarter-based navigation added to reports for faster period switching
-- Transactions can now be saved with Enter and duplicated with a long-press
-- Category reordering now respects filtered views
-- New eye icon reveals password fields; missing empty states fixed
-- Privacy policy and terms of service are now served from the public directory
+This release focuses on enhanced validation, improved investment tracking, and bug fixes across the application.
 
 ---
 
 ### Added
 
-- **Quarter navigation in reports** — Quickly jump between Q1, Q2, Q3, and Q4 periods when viewing reports.
-- **Enter to save in edit mode** — Pressing Enter while editing a transaction now automatically saves it, matching the behavior in ReportsView.
-- **Copy transactions** — Long-press (hold) over any transaction in the dashboard to duplicate it instantly.
-- **Password visibility toggle** — An eye icon has been added to password fields so you can reveal or hide the text as you type.
+- **Enhanced transaction validation** — Improved validation logic for all transaction types to prevent data inconsistencies and ensure data integrity.
+- **Refund transaction labels** — Added support for tags on refund transactions, completing the labeling feature across all transaction types.
+- **Cancel button in Goals section** — Added a cancel button to make goal management more intuitive and reduce accidental actions.
 
 ### Changed
 
-- **Category reordering respects filters** — Arrow-move now reorders only the currently visible (filtered) category list and persists that order. Previously it reordered across all categories (including hidden types), so moves inside a filtered view often had no visible effect.
-- **Landing page updated** — Refreshed content and layout on the landing page.
-- **Documentation moved to public** — `docs/privacy-policy.md` and `docs/terms-of-service.md` have been moved to `public/`. They are now copied to `dist/` during build and served publicly at `/privacy-policy.md` and `/terms-of-service.md`.
+- **Investment section simplified** — Rewrote the advanced features to be read-only by default, with a clearer focus on portfolio overview and essential functionality.
+- **Labels feature** — Improved label system with better organization and management.
+- **Documentation updates** — Verified implementation of audit documents and updated README with the latest features.
 
 ### Fixed
 
-- **Missing empty state** — Restored the empty state UI that was previously missing.
-- **Font preload warnings** — Removed explicit `rel="preload"` font tags from `index.html` since fonts are loaded via the Google Fonts stylesheet and the preload hints were not being used early enough.
+- **Validation fixes** — Resolved several edge cases in transaction validation that could cause issues with certain data combinations.
+- **False statement handling** — Fixed incorrect statements in validation and reporting logic.
+- **DODCS validator fix** — Corrected issues in the data validation system for better accuracy.
 
-### Screenshots
+---
 
-- Captured crisp, high-resolution screenshots of all major application views using an automated browser agent on the live dev server.
+**Full Changelog**: [v1.44...v1.45](https://github.com/Krasen007/BlinkBudget/compare/v1.44...v1.45)
