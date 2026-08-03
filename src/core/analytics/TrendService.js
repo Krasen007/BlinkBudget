@@ -267,12 +267,12 @@ export class TrendService {
     const suggestions = [];
 
     topDrivers.forEach(driver => {
-      let suggestionData = null;
+      let suggestion = null;
 
       // Generate category-specific suggestions based on patterns
       if (/\b(food|restaurant|dining|cafe|eating out|groceries)\b/i.test(driver.category)) {
         const savingsTip = Math.round(driver.spending * 0.15); // 15% reduction suggestion
-        suggestionData = {
+        suggestion = {
           category: driver.category,
           message: `Food prices went up ${driver.rate.toFixed(1)}% for you. "${driver.category}" is the main driver.`,
           actionable: true,
@@ -282,7 +282,7 @@ export class TrendService {
         };
       } else if (/\b(transport|gas|fuel|uber|taxi|public transit)\b/i.test(driver.category)) {
         const savingsTip = Math.round(driver.spending * 0.1);
-        suggestionData = {
+        suggestion = {
           category: driver.category,
           message: `Transportation costs increased ${driver.rate.toFixed(1)}% for you.`,
           actionable: true,
@@ -292,7 +292,7 @@ export class TrendService {
         };
       } else if (/\b(shopping|clothes|entertainment|subscription)\b/i.test(driver.category)) {
         const savingsTip = Math.round(driver.spending * 0.2);
-        suggestionData = {
+        suggestion = {
           category: driver.category,
           message: `Spending on "${driver.category}" rose ${driver.rate.toFixed(1)}%.`,
           actionable: true,
@@ -302,7 +302,7 @@ export class TrendService {
         };
       } else if (/\b(utilities|electric|water|internet|phone)\b/i.test(driver.category)) {
         const savingsTip = Math.round(driver.spending * 0.08);
-        suggestionData = {
+        suggestion = {
           category: driver.category,
           message: `Utilities costs up ${driver.rate.toFixed(1)}%.`,
           actionable: true,
@@ -313,7 +313,7 @@ export class TrendService {
       } else {
         // Generic suggestion
         const savingsTip = Math.round(driver.spending * 0.1);
-        suggestionData = {
+        suggestion = {
           category: driver.category,
           message: `Spending on "${driver.category}" increased ${driver.rate.toFixed(1)}%.`,
           actionable: true,
@@ -323,8 +323,8 @@ export class TrendService {
         };
       }
 
-      if (suggestionData) {
-        suggestions.push(suggestionData);
+      if (suggestion) {
+        suggestions.push(suggestion);
       }
     });
 
