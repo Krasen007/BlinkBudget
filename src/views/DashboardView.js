@@ -275,10 +275,7 @@ export const DashboardView = (params = {}) => {
     try {
       const ids = _loadDismissedAnomalyIds();
       ids.add(id);
-      sessionStorage.setItem(
-        DISMISSED_ANOMALIES_KEY,
-        JSON.stringify([...ids])
-      );
+      sessionStorage.setItem(DISMISSED_ANOMALIES_KEY, JSON.stringify([...ids]));
     } catch {
       // Non-critical
     }
@@ -970,13 +967,17 @@ export const DashboardView = (params = {}) => {
     }
 
     // Recent Transactions
-    // Create a new array copy instead of mutating the returned reference
-    const highlightTransactionIds = [...(getTransactionToHighlight() || [])];
+    // Create a new array copy instead of mutating the returned reference.
+    // Success highlights are for recently saved transactions (subtle green pulse).
+    const successHighlightIds = [...(getTransactionToHighlight() || [])];
     // Add highlight transaction ID from params if provided
     if (params.highlightTransactionId) {
-      highlightTransactionIds.push(params.highlightTransactionId);
+      successHighlightIds.push(params.highlightTransactionId);
     }
-    // Mark anomalous transactions with a subtle highlight in the list
+    // Mark anomalous transactions with a subtle highlight in the list.
+    // These are kept separate from success highlights so newly logged
+    // transactions don't appear flagged as unusual.
+    const highlightTransactionIds = [];
     try {
       const currentPeriod = getCurrentMonthPeriod();
       const anomalyInsights = AnomalyService.detectAnomalies(
@@ -1000,6 +1001,7 @@ export const DashboardView = (params = {}) => {
       currentAccountFilter,
       accounts: currentAccounts,
       highlightTransactionIds,
+      successHighlightIds,
       selectionMode: isSelectionMode,
       selectedIds: selectedTransactionIds,
       onToggleSelect: toggleSelection,

@@ -10,7 +10,7 @@ import { formatCurrency } from '../../utils/financial-planning-helpers.js';
 import { MetricsService } from '../../core/analytics/MetricsService.js';
 import { getCurrentMonthPeriod } from '../../utils/reports-utils.js';
 import { BudgetForm } from '../../components/BudgetForm.js';
-import { BudgetSuggestion, BudgetSuggestionsContainer } from '../../components/BudgetSuggestion.js';
+import { BudgetSuggestionsContainer } from '../../components/BudgetSuggestion.js';
 import { BudgetProgress } from '../../components/BudgetProgress.js';
 import { BudgetSummaryCard } from '../../components/BudgetSummaryCard.js';
 import { BudgetPlanner } from '../../core/budget-planner.js';
@@ -63,6 +63,10 @@ export const BudgetsSection = async planningData => {
       container.appendChild(msg);
     }
 
+    // Track which suggestions have been dismissed
+    let dismissedCategories = new Set();
+    let suggestions = [];
+
     // Generate suggestions if enough transactions
     if (transactions.length >= MIN_TRANSACTIONS_FOR_SUGGESTIONS) {
       suggestions = await BudgetService.suggestBudgets(transactions);
@@ -79,7 +83,6 @@ export const BudgetsSection = async planningData => {
 
     // Render suggestions if available and not all dismissed
     if (suggestions.length > 0) {
-      showingSuggestions = true;
       const suggestionsContainer = BudgetSuggestionsContainer(suggestions, {
         onAccept: async (suggestion) => {
           StorageService.saveBudget({
@@ -162,12 +165,36 @@ export const BudgetsSection = async planningData => {
       listSection.appendChild(emptyMsg);
     }
 
-    const categoriesWithBudgets = categoryBreakdown.categories.map(cat => {
+    // Build categories list: include categories from breakdown AND categories with budgets
+    // This ensures budgets without current-month transactions are still shown
+    const existingCategoryNames = new Set(
+      categoryBreakdown.categories.map(c => c.name)
+    );
+
+    // Add categories that have budgets but no transactions in current period
+    const budgetCategoriesWithoutTransactions = budgets
+      .filter(b => !existingCategoryNames.has(b.categoryName))
+      .map(b => ({
+        name: b.categoryName,
+        amount: 0,
+        transactionCount: 0,
+        percentage: 0,
+        budget: b,
+      }));
+
+    // Combine: categories with transactions + budgets without transactions
+    const allCategories = [
+      ...categoryBreakdown.categories,
+      ...budgetCategoriesWithoutTransactions,
+    ];
+
+    // Merge budgets into categories
+    const categoriesWithBudgets = allCategories.map(cat => {
       const budget = budgets.find(b => b.categoryName === cat.name);
       return { ...cat, budget };
     });
 
-    // Sort: categories with budgets first, then others
+    // Sort: categories with budgets first, then others by amount
     categoriesWithBudgets.sort((a, b) => {
       if (a.budget && !b.budget) return -1;
       if (!a.budget && b.budget) return 1;
@@ -198,39 +225,95 @@ export const BudgetsSection = async planningData => {
       name.style.fontWeight = 'bold';
       header.appendChild(name);
 
-      const actionBtn = document.createElement('button');
-      actionBtn.textContent = cat.budget ? 'Edit Budget' : 'Set Budget';
-      actionBtn.className = 'btn btn-ghost';
-      actionBtn.style.padding = `${SPACING.XS} ${SPACING.SM}`;
-      actionBtn.style.fontSize = FONT_SIZES.SM;
+      const actions = document.createElement('div');
+      actions.style.display = 'flex';
+      actions.style.gap = SPACING.XS;
 
-      actionBtn.addEventListener('click', () => {
-        card.innerHTML = '';
-        const suggestedLimit =
-          cat.budget?.amountLimit ?? Math.ceil(cat.amount / 10) * 10;
-        const form = BudgetForm({
-          categoryName: cat.name,
-          initialLimit: suggestedLimit,
-          onSave: limit => {
-            if (limit === 0) {
-              const existing = StorageService.getBudgetByCategory(cat.name);
-              if (existing) StorageService.deleteBudget(existing.id);
-            } else if (limit === null) {
-              // no-op
-            } else {
-              StorageService.saveBudget({
-                categoryName: cat.name,
-                amountLimit: limit,
-              });
-            }
-            render();
-          },
-          onCancel: () => render(),
+      if (cat.budget) {
+        // Edit and Delete buttons
+        const editBtn = document.createElement('button');
+        editBtn.textContent = 'Edit';
+        editBtn.className = 'btn btn-ghost';
+        editBtn.style.padding = `${SPACING.XS} ${SPACING.SM}`;
+        editBtn.style.fontSize = FONT_SIZES.SM;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.className = 'btn btn-ghost';
+        deleteBtn.style.padding = `${SPACING.XS} ${SPACING.SM}`;
+        deleteBtn.style.fontSize = FONT_SIZES.SM;
+        deleteBtn.style.color = COLORS.ERROR;
+
+        editBtn.addEventListener('click', () => {
+          card.innerHTML = '';
+          const form = BudgetForm({
+            categoryName: cat.name,
+            initialLimit: cat.budget.amountLimit,
+            onSave: limit => {
+              if (limit === 0 || limit === null) {
+                const existing = StorageService.getBudgetByCategory(cat.name);
+                if (existing) StorageService.deleteBudget(existing.id);
+              } else {
+                StorageService.saveBudget({
+                  categoryName: cat.name,
+                  amountLimit: limit,
+                });
+              }
+              render();
+            },
+            onCancel: () => render(),
+          });
+          card.appendChild(form);
         });
-        card.appendChild(form);
-      });
 
-      header.appendChild(actionBtn);
+        deleteBtn.addEventListener('click', async () => {
+          const { ConfirmDialog } = await import('../../components/ConfirmDialog.js');
+          ConfirmDialog({
+            title: 'Delete Budget',
+            message: `Remove budget for ${cat.name}? You can set a new budget anytime.`,
+            confirmText: 'Delete',
+            variant: 'danger',
+            onConfirm: () => {
+              StorageService.deleteBudget(cat.budget.id);
+              render();
+            },
+          });
+        });
+
+        actions.appendChild(editBtn);
+        actions.appendChild(deleteBtn);
+      } else {
+        // Set Budget button
+        const setBtn = document.createElement('button');
+        setBtn.textContent = 'Set Budget';
+        setBtn.className = 'btn btn-ghost';
+        setBtn.style.padding = `${SPACING.XS} ${SPACING.SM}`;
+        setBtn.style.fontSize = FONT_SIZES.SM;
+
+        setBtn.addEventListener('click', () => {
+          card.innerHTML = '';
+          const suggestedLimit = Math.ceil(cat.amount / 10) * 10;
+          const form = BudgetForm({
+            categoryName: cat.name,
+            initialLimit: suggestedLimit,
+            onSave: limit => {
+              if (limit && limit > 0) {
+                StorageService.saveBudget({
+                  categoryName: cat.name,
+                  amountLimit: limit,
+                });
+              }
+              render();
+            },
+            onCancel: () => render(),
+          });
+          card.appendChild(form);
+        });
+
+        actions.appendChild(setBtn);
+      }
+
+      header.appendChild(actions);
       card.appendChild(header);
 
       if (cat.budget) {
