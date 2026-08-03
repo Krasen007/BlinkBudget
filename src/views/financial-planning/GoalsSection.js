@@ -25,128 +25,7 @@ import {
 } from '../../utils/financial-planning-helpers.js';
 import { refreshChart } from '../../utils/chart-refresh-helper.js';
 import { formatDateForDisplay } from '../../utils/date-utils.js';
-import { ForecastEngine } from '../../core/forecast-engine.js';
 import { SavingsGoalsService } from '../../core/savings-goals-service.js';
-
-/**
- * Create a goal connection section showing forecast vs goal progress
- */
-function createGoalConnectionSection(goals, forecasts, currentBalance) {
-  // Filter to active goals with targets
-  const activeGoals = goals.filter(g => g.targetAmount > 0 && !g.progress?.isCompleted);
-  if (activeGoals.length === 0) return null;
-
-  const container = document.createElement('div');
-  container.className = 'goal-connection-section';
-  container.style.background = COLORS.SURFACE;
-  container.style.border = `1px solid ${COLORS.BORDER}`;
-  container.style.borderRadius = 'var(--radius-lg)';
-  container.style.padding = SPACING.LG;
-  container.style.marginBottom = SPACING.LG;
-
-  const title = document.createElement('h3');
-  title.textContent = 'Goal Progress';
-  title.style.margin = '0';
-  title.style.marginBottom = SPACING.MD;
-  title.style.fontSize = '1.125rem';
-  title.style.fontWeight = '600';
-  title.style.color = COLORS.TEXT_MAIN;
-  container.appendChild(title);
-
-  const grid = document.createElement('div');
-  grid.style.display = 'grid';
-  grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(280px, 1fr))';
-  grid.style.gap = SPACING.MD;
-
-  activeGoals.forEach(goal => {
-    // Calculate projected balance at goal target date
-    const goalDate = new Date(goal.targetDate);
-    const projectedBalanceAtGoal = forecasts.reduce((balance, forecast) => {
-      if (forecast.period <= goalDate) {
-        return balance + forecast.predictedAmount - (forecasts.find(f => f.period === forecast.period)?.predictedAmount || 0);
-      }
-      return balance;
-    }, currentBalance);
-
-    // Use goalComparison from the first forecast if available
-    const firstForecast = forecasts[0];
-    const goalComparison = firstForecast?.goalComparison;
-
-    let statusHtml = '';
-    let statusColor = COLORS.TEXT_MUTED;
-
-    if (goalComparison && goalComparison.goalId === goal.id) {
-      const { status, statusMessage, shortfall } = goalComparison;
-      const goalProjectedBalance = projectedBalanceAtGoal; // Use calculated value
-      statusColor = status === 'on_track' ? COLORS.SUCCESS : status === 'at_risk' ? COLORS.WARNING : COLORS.ERROR;
-
-      if (status === 'on_track') {
-        statusHtml = `
-          <div style="color: ${COLORS.SUCCESS}; font-weight: 600;">✓ On Track</div>
-          <div style="font-size: 0.875rem; margin-top: 4px;">${statusMessage}</div>
-          <div style="font-size: 0.75rem; color: ${COLORS.TEXT_MUTED}; margin-top: 8px;">
-            Projected: €${goalProjectedBalance.toFixed(0)} / Target: €${goal.targetAmount}
-          </div>
-        `;
-      } else if (status === 'at_risk') {
-        statusHtml = `
-          <div style="color: ${COLORS.WARNING}; font-weight: 600;">⚠️ Needs Attention</div>
-          <div style="font-size: 0.875rem; margin-top: 4px;">${statusMessage}</div>
-          <div style="font-size: 0.75rem; color: ${COLORS.TEXT_MUTED}; margin-top: 8px;">
-            Shortfall: €${shortfall.toFixed(0)} by ${goalDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-          </div>
-        `;
-      } else {
-        statusHtml = `
-          <div style="color: ${COLORS.ERROR}; font-weight: 600;">⚠️ Off Track</div>
-          <div style="font-size: 0.875rem; margin-top: 4px;">${statusMessage}</div>
-          <div style="font-size: 0.75rem; color: ${COLORS.TEXT_MUTED}; margin-top: 8px;">
-            Shortfall: €${shortfall.toFixed(0)}
-          </div>
-        `;
-      }
-    } else {
-      // Fallback calculation
-      const remaining = goal.targetAmount - goal.progress?.currentAmount;
-      const monthsToGoal = goal.progress?.estimatedMonthsToComplete;
-
-      if (monthsToGoal && monthsToGoal <= 12) {
-        statusHtml = `
-          <div style="color: ${COLORS.WARNING}; font-weight: 600;">Track Progress</div>
-          <div style="font-size: 0.875rem; margin-top: 4px;">€${remaining.toFixed(0)} remaining</div>
-          <div style="font-size: 0.75rem; color: ${COLORS.TEXT_MUTED}; margin-top: 8px;">
-            ${monthsToGoal} months at current rate
-          </div>
-        `;
-      } else {
-        statusHtml = `
-          <div style="color: ${COLORS.TEXT_MUTED}; font-weight: 600;">📍 ${goal.progress?.percentage?.toFixed(0) || 0}% Complete</div>
-          <div style="font-size: 0.875rem; margin-top: 4px;">€${goal.progress?.currentAmount?.toFixed(0) || 0} saved</div>
-        `;
-      }
-    }
-
-    const goalCard = document.createElement('div');
-    goalCard.className = 'goal-connection-card';
-    goalCard.style.background = 'var(--color-surface-alt)';
-    goalCard.style.borderRadius = 'var(--radius-md)';
-    goalCard.style.padding = SPACING.MD;
-    goalCard.style.borderLeft = `4px solid ${statusColor}`;
-
-    goalCard.innerHTML = `
-      <div style="font-weight: 600; margin-bottom: ${SPACING.SM};">${goal.name}</div>
-      <div style="font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: ${SPACING.SM};">
-        Target: €${goal.targetAmount.toLocaleString()} by ${goalDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-      </div>
-      ${statusHtml}
-    `;
-
-    grid.appendChild(goalCard);
-  });
-
-  container.appendChild(grid);
-  return container;
-}
 
 /**
  * Create goal form controls
@@ -815,16 +694,9 @@ function createGoalsSummaryCard(goals) {
  * Goals Section Component
  * @param {Object} chartRenderer - Chart renderer service instance
  * @param {Map} activeCharts - Map to track active chart instances
- * @param {Object} planningData - Financial planning data including transactions
- * @param {Object} forecastEngine - Forecast engine service instance
  * @returns {HTMLElement} DOM element containing goals section content
  */
-export const GoalsSection = async (
-  chartRenderer,
-  activeCharts,
-  planningData,
-  forecastEngine
-) => {
+export const GoalsSection = async (chartRenderer, activeCharts) => {
   const section = createSectionContainer('goals', 'Financial Goals', '🎯');
   section.className += ' goals-section';
 
@@ -955,57 +827,6 @@ export const GoalsSection = async (
     activeCharts.set('goal-progress', chart);
   } catch (error) {
     console.error('Error creating goal progress chart:', error);
-  }
-
-  // Add goal connection section (forecast vs goal progress) if we have real goals and transaction data
-  if (hasRealGoals && planningData && planningData.transactions && planningData.transactions.length > 0) {
-    try {
-      // Load active goals with progress data
-      const activeGoals = await SavingsGoalsService.calculateGoalProgress(
-        planningData.transactions || []
-      );
-
-      // Generate forecasts - pass first active goal for comparison (if any)
-      const firstActiveGoal = activeGoals.find(g => g.targetAmount > 0 && !g.progress?.isCompleted);
-      const goalOptions = firstActiveGoal
-        ? {
-            goalId: firstActiveGoal.id,
-            goalTarget: {
-              id: firstActiveGoal.id,
-              name: firstActiveGoal.name,
-              targetAmount: firstActiveGoal.targetAmount,
-              targetDate: firstActiveGoal.targetDate,
-            },
-          }
-        : {};
-
-      const forecastEngineInstance = forecastEngine || new ForecastEngine();
-      const incomeForecasts = forecastEngineInstance.generateIncomeForecasts(
-        planningData.transactions,
-        6,
-        goalOptions
-      );
-
-      // Calculate current balance
-      const currentBalance = planningData.transactions.reduce((balance, t) => {
-        if (t.isGhost) return balance;
-        return balance + (t.type === 'income' ? t.amount : -t.amount);
-      }, 0);
-
-      // Add goal connection section if goals exist
-      if (activeGoals.length > 0) {
-        const goalSection = createGoalConnectionSection(
-          activeGoals,
-          incomeForecasts,
-          currentBalance
-        );
-        if (goalSection) {
-          section.appendChild(goalSection);
-        }
-      }
-    } catch (error) {
-      console.warn('Could not load goal progress for goals section:', error);
-    }
   }
 
   // Add summary card with aggregate metrics

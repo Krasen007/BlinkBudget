@@ -322,12 +322,7 @@ export const FinancialPlanningView = (params = {}) => {
    * Render Goals section - Long-term planning
    */
   async function renderGoalsSection() {
-    const goalsElement = await GoalsSection(
-      chartRenderer,
-      activeCharts,
-      planningData,
-      forecastEngine
-    );
+    const goalsElement = await GoalsSection(chartRenderer, activeCharts);
     content.appendChild(goalsElement);
   }
 
