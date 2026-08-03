@@ -5,7 +5,7 @@
  * Part of the progressive unlock system — shows suggestions when user has 30+ transactions.
  */
 
-import { COLORS, SPACING, FONT_SIZES, CURRENCY_SYMBOL } from '../utils/constants.js';
+import { COLORS, SPACING, FONT_SIZES } from '../utils/constants.js';
 import { ButtonComponent } from './Button.js';
 import { getColorForCategory } from '../utils/reports-charts.js';
 import { formatCurrency } from '../utils/financial-planning-helpers.js';
@@ -17,7 +17,8 @@ import { formatCurrency } from '../utils/financial-planning-helpers.js';
  * @returns {HTMLElement}
  */
 export const BudgetSuggestion = (suggestion, handlers) => {
-  const { category, suggestedAmount, basedOnTransactions, averageMonthly } = suggestion;
+  const { category, suggestedAmount, basedOnTransactions, averageMonthly } =
+    suggestion;
   const { onAccept, onAdjust, onDismiss } = handlers;
 
   const card = document.createElement('div');

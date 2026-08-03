@@ -779,7 +779,7 @@
 }
 
 .transaction-item-anomaly {
-  background: rgba(251, 191, 36, 0.1) !important;
+  background: rgb(251, 191, 36, 0.1) !important;
   border-left: 3px solid #fbbf24 !important;
 }
 

@@ -18,14 +18,14 @@ Every transaction logged in 3 clicks feeds a personal financial engine that gets
 
 ## Quick Status
 
-| Phase | Description | Remaining % |
-|-------|-------------|-------------|
-| Phase 0 | Documentation fixes | 0% ✅ |
-| Phase 1 | Remove contradictions | 0% ✅ (P0.1 already complete) |
+| Phase   | Description               | Remaining %                               |
+| ------- | ------------------------- | ----------------------------------------- |
+| Phase 0 | Documentation fixes       | 0% ✅                                     |
+| Phase 1 | Remove contradictions     | 0% ✅ (P0.1 already complete)             |
 | Phase 2 | Rewrite advanced features | 40% ⚠️ (P0.2 complete, P2.1/P2.2 pending) |
-| Phase 3 | Empty state optimization | 50% ⚠️ |
-| Phase 4 | Feature improvements | 60% ⚠️ |
-| Phase 5 | Documentation | 40% ⚠️ (P1.5 complete) |
+| Phase 3 | Empty state optimization  | 50% ⚠️                                    |
+| Phase 4 | Feature improvements      | 60% ⚠️                                    |
+| Phase 5 | Documentation             | 40% ⚠️ (P1.5 complete)                    |
 
 **Overall:** ~75% complete (was ~65%), ~25% remaining
 
@@ -40,6 +40,7 @@ These items are critical to the product theory and must be completed before the 
 **Status:** ✅ **COMPLETE** — Already cleaned in Phase 1.1
 
 **Verified:** The investment tracker data model already contains only valid fields:
+
 - `id`, `symbol`, `name`, `shares`, `purchasePrice`, `currentPrice`, `purchaseDate`, `notes`
 - Deprecated fields (assetClass, sector, region, currency, metadata) were removed during Phase 1.1
 
@@ -213,10 +214,10 @@ These items improve the advanced layer without being critical to the theory.
 async getSeasonalAdjustments() {
   const lastYearTransactions = await this._getTransactions(365);
   const thisYearTransactions = await this._getTransactions(90);
-  
+
   // Group by month and category
   const patterns = analyzeYearOverYearPatterns(lastYearTransactions, thisYearTransactions);
-  
+
   return patterns.map(pattern => ({
     category: pattern.category,
     lastYearAmount: pattern.amount,
@@ -245,6 +246,7 @@ async getSeasonalAdjustments() {
 - `README.md`
 
 **Checklist:**
+
 - [ ] Remove "Financial Health Score" (1.2) ✓ in progress
 - [ ] Remove "Scenario Planning" (1.3) ✓ in progress
 - [ ] Remove "Spending Pattern Recognition" (4.6) ✓ in progress
@@ -270,10 +272,14 @@ async getSeasonalAdjustments() {
 **Implementation:**
 
 ```javascript
-export const ProgressiveEmptyState = ({ section, transactionCount, minTransactions }) => {
+export const ProgressiveEmptyState = ({
+  section,
+  transactionCount,
+  minTransactions,
+}) => {
   const el = document.createElement('div');
   el.className = 'progressive-empty-state';
-  
+
   if (transactionCount < minTransactions) {
     el.innerHTML = `
       <div class="empty-icon">📊</div>
@@ -282,7 +288,7 @@ export const ProgressiveEmptyState = ({ section, transactionCount, minTransactio
       <p class="benefit">${getUnlockBenefit(section)}</p>
     `;
   }
-  
+
   return el;
 };
 ```
@@ -315,11 +321,11 @@ export const ProgressiveEmptyState = ({ section, transactionCount, minTransactio
 
 **Message matrix:**
 
-| Transaction count | Message |
-|-------------------|---------|
-| 0-29 | "Log 30+ transactions to unlock [section] suggestions" |
-| 30-89 | "Suggested [section] ready →" |
-| 90+ | Active (no empty state) |
+| Transaction count | Message                                                |
+| ----------------- | ------------------------------------------------------ |
+| 0-29              | "Log 30+ transactions to unlock [section] suggestions" |
+| 30-89             | "Suggested [section] ready →"                          |
+| 90+               | Active (no empty state)                                |
 
 **Implementation:**
 
@@ -333,17 +339,17 @@ export const ProgressiveEmptyState = ({ section, transactionCount, minTransactio
 
 ## Effort Summary
 
-| Priority | Item | Complexity | Estimated Time |
-|----------|------|------------|----------------|
-| **P0.1** | Complete investment cleanup | Low | 0 min ✅ Already complete |
-| **P0.2** | Budget suggestions | **High** | **45 min** ✅ Complete |
-| **P1.1** | Personal inflation → actionable | Low | 20-30 min |
-| **P1.2** | Cash flow → goals | Medium | 25-35 min |
-| **P1.3** | Irregular patterns → action | Low | 15-20 min |
-| **P1.4** | Spending suggestions generalize | Low | 20-30 min |
-| **P1.5** | Complete README cleanup | Low | 15-20 min |
-| **P2.1** | ProgressiveEmptyState component | Medium | 30-45 min |
-| **P2.2** | Update unlock messages | Low | 20-30 min |
+| Priority | Item                            | Complexity | Estimated Time            |
+| -------- | ------------------------------- | ---------- | ------------------------- |
+| **P0.1** | Complete investment cleanup     | Low        | 0 min ✅ Already complete |
+| **P0.2** | Budget suggestions              | **High**   | **45 min** ✅ Complete    |
+| **P1.1** | Personal inflation → actionable | Low        | 20-30 min                 |
+| **P1.2** | Cash flow → goals               | Medium     | 25-35 min                 |
+| **P1.3** | Irregular patterns → action     | Low        | 15-20 min                 |
+| **P1.4** | Spending suggestions generalize | Low        | 20-30 min                 |
+| **P1.5** | Complete README cleanup         | Low        | 15-20 min                 |
+| **P2.1** | ProgressiveEmptyState component | Medium     | 30-45 min                 |
+| **P2.2** | Update unlock messages          | Low        | 20-30 min                 |
 
 **Total estimated time:** 3.5-5.5 hours
 

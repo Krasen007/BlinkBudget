@@ -42,10 +42,8 @@ export const BudgetsSection = async planningData => {
     transactions = StorageService.getAllTransactions() || [];
   }
 
-  // Track which suggestions have been dismissed
-  let dismissedCategories = new Set();
-  let suggestions = [];
-  let showingSuggestions = false;
+  let manualMode = false;
+  const dismissedCategories = new Set();
 
   const render = async () => {
     container.innerHTML = '';
@@ -63,51 +61,54 @@ export const BudgetsSection = async planningData => {
       container.appendChild(msg);
     }
 
-    // Track which suggestions have been dismissed
-    let dismissedCategories = new Set();
     let suggestions = [];
 
-    // Generate suggestions if enough transactions
-    if (transactions.length >= MIN_TRANSACTIONS_FOR_SUGGESTIONS) {
+    // Generate suggestions only when manual mode is inactive.
+    if (!manualMode && transactions.length >= MIN_TRANSACTIONS_FOR_SUGGESTIONS) {
       suggestions = await BudgetService.suggestBudgets(transactions);
       // Filter out dismissed categories
-      suggestions = suggestions.filter(s => !dismissedCategories.has(s.category));
+      suggestions = suggestions.filter(
+        s => !dismissedCategories.has(s.category)
+      );
       // Filter out categories that already have budgets
       const existingBudgets = StorageService.getBudgets();
-      suggestions = suggestions.filter(s =>
-        !existingBudgets.find(b => b.categoryName === s.category)
+      suggestions = suggestions.filter(
+        s => !existingBudgets.find(b => b.categoryName === s.category)
       );
-    } else {
-      suggestions = [];
     }
 
     // Render suggestions if available and not all dismissed
     if (suggestions.length > 0) {
       const suggestionsContainer = BudgetSuggestionsContainer(suggestions, {
-        onAccept: async (suggestion) => {
+        onAccept: async suggestion => {
           StorageService.saveBudget({
             categoryName: suggestion.category,
             amountLimit: suggestion.suggestedAmount,
           });
           // Remove from suggestions and re-render
-          suggestions = suggestions.filter(s => s.category !== suggestion.category);
+          suggestions = suggestions.filter(
+            s => s.category !== suggestion.category
+          );
           render();
         },
         onAdjust: (suggestion, index) => {
           // Replace the suggestion card with an edit form
-          const cardEl = container.querySelectorAll('.budget-suggestion')[index];
+          const cardEl =
+            container.querySelectorAll('.budget-suggestion')[index];
           if (cardEl) {
             const form = BudgetForm({
               categoryName: suggestion.category,
               initialLimit: suggestion.suggestedAmount,
-              onSave: (limit) => {
+              onSave: limit => {
                 if (limit && limit > 0) {
                   StorageService.saveBudget({
                     categoryName: suggestion.category,
                     amountLimit: limit,
                   });
                 }
-                suggestions = suggestions.filter(s => s.category !== suggestion.category);
+                suggestions = suggestions.filter(
+                  s => s.category !== suggestion.category
+                );
                 render();
               },
               onCancel: () => render(),
@@ -115,23 +116,20 @@ export const BudgetsSection = async planningData => {
             cardEl.replaceWith(form);
           }
         },
-        onDismiss: (suggestion) => {
+        onDismiss: suggestion => {
           dismissedCategories.add(suggestion.category);
-          suggestions = suggestions.filter(s => s.category !== suggestion.category);
-          if (suggestions.length === 0) {
-            showingSuggestions = false;
-          }
+          suggestions = suggestions.filter(
+            s => s.category !== suggestion.category
+          );
           render();
         },
         onManual: () => {
-          // Switch to manual mode by clearing dismissed and hiding suggestions
-          showingSuggestions = false;
+          // Enter manual mode and keep suggestions hidden until a refresh clears it.
+          manualMode = true;
           render();
         },
       });
       container.appendChild(suggestionsContainer);
-    } else {
-      showingSuggestions = false;
     }
 
     // Categories List
@@ -157,7 +155,8 @@ export const BudgetsSection = async planningData => {
       if (transactions.length < MIN_TRANSACTIONS_FOR_SUGGESTIONS) {
         emptyMsg.textContent = `Log ${MIN_TRANSACTIONS_FOR_SUGGESTIONS - transactions.length} more transaction${transactions.length === MIN_TRANSACTIONS_FOR_SUGGESTIONS - 1 ? '' : 's'} to get personalized budget suggestions.`;
       } else {
-        emptyMsg.textContent = 'No budgets set yet. Set a budget for a category below.';
+        emptyMsg.textContent =
+          'No budgets set yet. Set a budget for a category below.';
       }
       emptyMsg.style.padding = SPACING.MD;
       emptyMsg.style.textAlign = 'center';
@@ -267,7 +266,8 @@ export const BudgetsSection = async planningData => {
         });
 
         deleteBtn.addEventListener('click', async () => {
-          const { ConfirmDialog } = await import('../../components/ConfirmDialog.js');
+          const { ConfirmDialog } =
+            await import('../../components/ConfirmDialog.js');
           ConfirmDialog({
             title: 'Delete Budget',
             message: `Remove budget for ${cat.name}? You can set a new budget anytime.`,

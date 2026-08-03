@@ -51,13 +51,16 @@ describe('TransactionListItem - Anomaly vs Success highlight separation', () => 
     note: 'Lunch',
   };
 
-  it('does NOT show the ⚠️ anomaly badge for a newly saved transaction (success highlight)', () => {
+  it('does NOT show the ⚠️ anomaly badge for a newly saved transaction (success highlight)', async () => {
     const item = TransactionListItem({
       transaction: baseTransaction,
       accounts: [{ id: 'acc-1', name: 'Main Checking' }],
       shouldHighlight: false,
       highlightSuccess: true, // recently logged transaction
     });
+
+    // Wait for requestAnimationFrame used by success highlight helper
+    await new Promise(resolve => window.requestAnimationFrame(resolve));
 
     // Success feedback: subtle green pulse class, no warning badge
     expect(item.classList.contains('success-highlight')).toBe(true);

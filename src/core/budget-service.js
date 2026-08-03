@@ -104,7 +104,8 @@ export const BudgetService = {
     const categoryTotals = {};
     recentTransactions.forEach(txn => {
       const category = txn.category || 'Uncategorized';
-      categoryTotals[category] = (categoryTotals[category] || 0) + (txn.amount || 0);
+      categoryTotals[category] =
+        (categoryTotals[category] || 0) + (txn.amount || 0);
     });
 
     // Calculate monthly average and generate suggestions
@@ -120,7 +121,9 @@ export const BudgetService = {
         return {
           category,
           suggestedAmount: finalAmount,
-          basedOnTransactions: recentTransactions.filter(t => (t.category || 'Uncategorized') === category).length,
+          basedOnTransactions: recentTransactions.filter(
+            t => (t.category || 'Uncategorized') === category
+          ).length,
           averageMonthly: Math.round(monthlyAverage * 100) / 100,
         };
       })

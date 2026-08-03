@@ -496,7 +496,7 @@ function createInvestmentsList() {
                 currentPrice:
                   currentPriceFld.value !== ''
                     ? Number(currentPriceFld.value)
-                    : (Number(purchasePriceFld.value) || 0),
+                    : Number(purchasePriceFld.value) || 0,
                 purchaseDate: dateFld.value
                   ? new Date(dateFld.value)
                   : inv.purchaseDate,
