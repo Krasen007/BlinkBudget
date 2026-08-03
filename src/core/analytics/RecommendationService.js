@@ -389,58 +389,225 @@ export class RecommendationService {
 
   /**
    * Get seasonal adjustments for categories
+   * Enhanced to detect year-over-year patterns and suggest preemptive savings
+   * @param {string} categoryId - Category to analyze
+   * @param {Array} transactions - All transactions
+   * @returns {Object} Seasonal adjustment data with year-over-year patterns
    */
   getSeasonalAdjustments(categoryId, transactions) {
     if (!transactions || transactions.length === 0 || !categoryId) {
-      return { adjustment: 1, factors: [] };
+      return { adjustment: 1, factors: [], yoyPatterns: [] };
     }
 
-    const monthlySpending = {};
-    transactions.forEach(t => {
-      if (t.type !== 'expense' || t.category !== categoryId) return;
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    oneYearAgo.setMonth(oneYearAgo.getMonth() + 1); // Look back 13 months to have a full year
+
+    // Current year transactions (last 12 months)
+    const currentYearTransactions = transactions.filter(t => {
       const tDate = t.date || t.timestamp;
-      if (!tDate) return;
-
-      const month = new Date(tDate).getMonth();
-      if (!monthlySpending[month]) {
-        monthlySpending[month] = [];
-      }
-      monthlySpending[month].push(t.amount || 0);
+      if (!tDate) return false;
+      const date = new Date(tDate);
+      return t.category === categoryId && t.type === 'expense' && date >= oneYearAgo;
     });
 
-    const monthlyAvg = {};
-    Object.entries(monthlySpending).forEach(([month, amounts]) => {
-      const sum = amounts.reduce((a, b) => a + b, 0);
-      monthlyAvg[month] = sum / amounts.length;
+    // Previous year transactions (13-24 months ago)
+    const twoYearsAgo = new Date();
+    twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+    const previousYearTransactions = transactions.filter(t => {
+      const tDate = t.date || t.timestamp;
+      if (!tDate) return false;
+      const date = new Date(tDate);
+      return t.category === categoryId && t.type === 'expense' && date >= twoYearsAgo && date < oneYearAgo;
     });
 
-    const allAmounts = Object.values(monthlySpending).flat();
-    let overallAvg = 0;
-    if (allAmounts.length > 0) {
-      overallAvg = allAmounts.reduce((a, b) => a + b, 0) / allAmounts.length;
-    }
+    // Group by month for both periods
+    const currentYearByMonth = this._groupTransactionsByMonth(currentYearTransactions);
+    const previousYearByMonth = this._groupTransactionsByMonth(previousYearTransactions);
 
+    // Calculate year-over-year patterns
+    const yoyPatterns = this._analyzeYearOverYearPatterns(
+      currentYearByMonth,
+      previousYearByMonth,
+      categoryId
+    );
+
+    // Calculate overall monthly adjustment
     const currentMonth = new Date().getMonth();
-    const currentMonthAvg = monthlyAvg[currentMonth] || overallAvg;
-    const adjustment =
-      currentMonthAvg > 0 && overallAvg > 0 ? currentMonthAvg / overallAvg : 1;
+    const currentMonthData = currentYearByMonth[currentMonth] || [];
+    const previousMonthData = previousYearByMonth[currentMonth] || [];
 
-    const factors = Object.entries(monthlyAvg)
-      .map(([month, avg]) => ({
-        month: parseInt(month, 10),
-        label: new Date(0, parseInt(month, 10), 1).toLocaleDateString('en-US', {
-          month: 'long',
-        }),
-        average: Math.round(avg * 100) / 100,
-        factor: overallAvg > 0 ? Math.round((avg / overallAvg) * 100) / 100 : 1,
-      }))
-      .sort((a, b) => a.month - b.month);
+    const currentAvg = currentMonthData.length > 0
+      ? currentMonthData.reduce((a, b) => a + b, 0) / currentMonthData.length
+      : 0;
+    const previousAvg = previousMonthData.length > 0
+      ? previousMonthData.reduce((a, b) => a + b, 0) / previousMonthData.length
+      : 0;
+
+    const adjustment = currentAvg > 0 && previousAvg > 0 ? currentAvg / previousAvg : 1;
+
+    // Generate factors with YOY context
+    const factors = this._generateMonthlyFactors(currentYearByMonth, previousYearByMonth);
 
     return {
       adjustment: Math.round(adjustment * 100) / 100,
       currentMonth: new Date().toLocaleDateString('en-US', { month: 'long' }),
       factors,
+      yoyPatterns,
+      suggestion: this._generateSeasonalSuggestion(yoyPatterns, categoryId),
     };
+  }
+
+  /**
+   * Group transactions by month (0-11)
+   * @param {Array} transactions - Transactions to group
+   * @returns {Object} Month-indexed amounts
+   */
+  _groupTransactionsByMonth(transactions) {
+    const grouped = Object.create(null);
+    for (let i = 0; i < 12; i++) {
+      grouped[i] = [];
+    }
+
+    transactions.forEach(t => {
+      const month = new Date(t.date || t.timestamp).getMonth();
+      if (grouped[month]) {
+        grouped[month].push(Math.abs(t.amount || 0));
+      }
+    });
+
+    return grouped;
+  }
+
+  /**
+   * Analyze year-over-year spending patterns
+   * @param {Object} currentYearByMonth - Current year spending by month
+   * @param {Object} previousYearByMonth - Previous year spending by month
+   * @param {string} categoryId - Category name
+   * @returns {Array} Year-over-year patterns
+   */
+  _analyzeYearOverYearPatterns(currentYearByMonth, previousYearByMonth, _categoryId) {
+    const patterns = [];
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'];
+
+    for (let i = 0; i < 12; i++) {
+      const currentMonthData = currentYearByMonth[i] || [];
+      const previousMonthData = previousYearByMonth[i] || [];
+
+      const currentTotal = currentMonthData.reduce((a, b) => a + b, 0);
+      const previousTotal = previousMonthData.reduce((a, b) => a + b, 0);
+
+      if (previousTotal > 0) {
+        const change = ((currentTotal - previousTotal) / previousTotal) * 100;
+
+        // Detect significant YOY patterns (20%+ change)
+        if (Math.abs(change) >= 20) {
+          const pattern = {
+            month: monthNames[i],
+            monthIndex: i,
+            previousYearAmount: Math.round(previousTotal * 100) / 100,
+            currentYearAmount: Math.round(currentTotal * 100) / 100,
+            changePercent: Math.round(change),
+            isIncrease: change > 0,
+            predictable: Math.abs(change) >= 30, // High confidence pattern
+          };
+
+          // Generate preemptive savings suggestion
+          if (pattern.isIncrease && pattern.predictable) {
+            const monthlySetAside = Math.round(pattern.previousYearAmount / 10); // 10 months to save
+            pattern.suggestion = `Set aside €${monthlySetAside}/month starting ${monthNames[i]} to cover €${Math.round(pattern.previousYearAmount)} in ${monthNames[i]}.`;
+            pattern.estimatedSavings = monthlySetAside * 10;
+          }
+
+          patterns.push(pattern);
+        }
+      }
+    }
+
+    return patterns.sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent));
+  }
+
+  /**
+   * Generate monthly factors with YOY context
+   * @param {Object} currentYearByMonth - Current year spending
+   * @param {Object} previousYearByMonth - Previous year spending
+   * @returns {Array} Monthly factors
+   */
+  _generateMonthlyFactors(currentYearByMonth, previousYearByMonth) {
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'];
+
+    return Object.entries(currentYearByMonth).map(([month, amounts]) => {
+      const monthIndex = parseInt(month);
+      const previousAmounts = previousYearByMonth[month] || [];
+
+      const currentTotal = amounts.reduce((a, b) => a + b, 0);
+      const previousTotal = previousAmounts.reduce((a, b) => a + b, 0);
+
+      let factor = 1;
+      if (previousTotal > 0) {
+        factor = Math.round((currentTotal / previousTotal) * 100) / 100;
+      }
+
+      const avgCurrent = amounts.length > 0 ? currentTotal / amounts.length : 0;
+
+      return {
+        month: monthNames[monthIndex],
+        monthIndex,
+        average: Math.round(avgCurrent * 100) / 100,
+        factor,
+        hasYoyData: previousAmounts.length > 0,
+      };
+    }).sort((a, b) => a.monthIndex - b.monthIndex);
+  }
+
+  /**
+   * Generate seasonal suggestion based on YOY patterns
+   * @param {Array} yoyPatterns - Year-over-year patterns
+   * @param {string} _categoryId - Category name (unused, kept for API consistency)
+   * @returns {Object|null} Suggestion or null
+   */
+  _generateSeasonalSuggestion(yoyPatterns, _categoryId) {
+    if (yoyPatterns.length === 0) return null;
+
+    // Find upcoming month with high spending pattern
+    const currentMonth = new Date().getMonth();
+    const upcomingPattern = yoyPatterns.find(p => {
+      // Suggest starting 1-2 months before the high-spending month
+      const leadTime = (p.monthIndex - currentMonth + 12) % 12;
+      return leadTime > 0 && leadTime <= 2 && p.isIncrease && p.predictable;
+    });
+
+    if (upcomingPattern) {
+      const monthlySetAside = Math.round(upcomingPattern.previousYearAmount / 10);
+      return {
+        type: 'preemptive_savings',
+        category: _categoryId,
+        targetMonth: upcomingPattern.month,
+        suggestion: `Start setting aside €${monthlySetAside}/month now for your ${upcomingPattern.month} expenses (€${Math.round(upcomingPattern.previousYearAmount)} expected).`,
+        monthlyAmount: monthlySetAside,
+        totalTarget: Math.round(upcomingPattern.previousYearAmount),
+        monthsToSave: 10,
+      };
+    }
+
+    // Find biggest pattern as fallback
+    const biggestPattern = yoyPatterns[0];
+    if (biggestPattern && biggestPattern.isIncrease && biggestPattern.predictable) {
+      const monthlySetAside = Math.round(biggestPattern.previousYearAmount / 10);
+      return {
+        type: 'historical_pattern',
+        category: _categoryId,
+        targetMonth: biggestPattern.month,
+        suggestion: `Last ${biggestPattern.month} you spent €${Math.round(biggestPattern.previousYearAmount)} on ${_categoryId}. Consider setting aside €${monthlySetAside}/month to prepare.`,
+        monthlyAmount: monthlySetAside,
+        totalTarget: Math.round(biggestPattern.previousYearAmount),
+        monthsToSave: 10,
+      };
+    }
+
+    return null;
   }
 
   // ========== Optimization Engine Methods ==========

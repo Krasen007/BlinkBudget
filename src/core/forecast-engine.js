@@ -18,13 +18,18 @@ export class ForecastEngine {
    * Generate income forecasts for the specified number of months
    * @param {Array} transactions - Historical transaction data
    * @param {number} months - Number of months to forecast (default: 12)
-   * @returns {Array} Array of forecast objects
+   * @param {Object} options - Optional configuration
+   * @param {string} options.goalId - Optional goal ID to compare against
+   * @param {Object} options.goalTarget - Optional goal target amount and date
+   * @returns {Array} Array of forecast objects with optional goal comparison
    */
-  generateIncomeForecasts(transactions, months = 12) {
+  generateIncomeForecasts(transactions, months = 12, options = {}) {
+    const { goalId, goalTarget } = options || {};
+
     try {
       // Validate input
       if (!Array.isArray(transactions) || transactions.length === 0) {
-        return this._generateBasicForecast('income', 0, months);
+        return this._generateBasicForecast('income', 0, months, goalId, goalTarget);
       }
 
       const allIncomeTransactions = transactions.filter(
@@ -41,7 +46,7 @@ export class ForecastEngine {
       );
 
       if (incomeTransactions.length < this.minDataPoints) {
-        return this._generateBasicForecast('income', 0, months);
+        return this._generateBasicForecast('income', 0, months, goalId, goalTarget);
       }
 
       const monthlyData = this._aggregateByMonth(incomeTransactions);
@@ -56,6 +61,7 @@ export class ForecastEngine {
       const trend = Math.max(rawTrend, maxDownTrend);
 
       const forecasts = [];
+      let cumulativeBalance = 0;
 
       for (let i = 0; i < months; i++) {
         const futureDate = new Date();
@@ -65,6 +71,8 @@ export class ForecastEngine {
         const projectedBase = baseline + trend * (i + 1);
         const predictedAmount = Math.max(0, projectedBase);
 
+        cumulativeBalance += predictedAmount;
+
         const confidence = this._calculateConfidence(monthlyData.values, i);
         const confidenceInterval = this._calculateConfidenceInterval(
           predictedAmount,
@@ -72,7 +80,7 @@ export class ForecastEngine {
           i
         );
 
-        forecasts.push({
+        const forecast = {
           period: new Date(futureDate),
           predictedAmount: Math.round(predictedAmount * 100) / 100,
           confidenceInterval,
@@ -80,23 +88,110 @@ export class ForecastEngine {
           method: 'weighted_moving_average',
           seasonalFactor: 1,
           trend,
-        });
+        };
+
+        // Add goal comparison if goal provided
+        if (goalId && goalTarget) {
+          forecast.goalComparison = this._generateGoalComparison(
+            cumulativeBalance,
+            goalTarget,
+            futureDate
+          );
+        }
+
+        forecasts.push(forecast);
       }
 
       return forecasts;
     } catch (error) {
       console.error('Error generating income forecasts:', error);
-      return this._generateBasicForecast('income', 0, months);
+      return this._generateBasicForecast('income', 0, months, goalId, goalTarget);
     }
+  }
+
+  /**
+   * Generate goal comparison data
+   * @param {number} projectedBalance - Projected cumulative balance at date
+   * @param {Object} goalTarget - Goal target with amount and targetDate
+   * @param {Date} projectionDate - Date of projection
+   * @returns {Object} Goal comparison data
+   */
+  _generateGoalComparison(projectedBalance, goalTarget, projectionDate) {
+    const { targetAmount, targetDate } = goalTarget;
+    const goalDate = new Date(targetDate);
+
+    // Calculate months until goal
+    const monthsUntilGoal = Math.max(
+      0,
+      (goalDate.getFullYear() - projectionDate.getFullYear()) * 12 +
+        (goalDate.getMonth() - projectionDate.getMonth())
+    );
+
+    // Determine if on track
+    const balanceAtGoalDate = projectedBalance;
+    const isOnTrack = balanceAtGoalDate >= targetAmount;
+    const shortfall = Math.max(0, targetAmount - balanceAtGoalDate);
+    const surplus = Math.max(0, balanceAtGoalDate - targetAmount);
+
+    // Calculate required monthly savings to reach goal
+    let requiredMonthlySavings = 0;
+    let status;
+    let statusMessage;
+
+    if (isOnTrack) {
+      status = 'on_track';
+      statusMessage = `You're on track! You'll have €${balanceAtGoalDate.toFixed(0)} by ${goalDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}.`;
+    } else {
+      if (monthsUntilGoal > 0) {
+        requiredMonthlySavings = shortfall / monthsUntilGoal;
+        // Check if required is more than 50% higher than current average
+        const currentAvgMonthly = this._calculateAverageMonthlySavings();
+        if (requiredMonthlySavings > currentAvgMonthly * 1.5) {
+          status = 'at_risk';
+          statusMessage = `At current pace, you'll have €${balanceAtGoalDate.toFixed(0)} by ${goalDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}, €${shortfall.toFixed(0)} short. Need €${requiredMonthlySavings.toFixed(0)}/month extra.`;
+        } else {
+          status = 'needs_attention';
+          statusMessage = `At current pace, you'll have €${balanceAtGoalDate.toFixed(0)} by ${goalDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}, €${shortfall.toFixed(0)} short.`;
+        }
+      } else {
+        status = 'off_track';
+        statusMessage = `Target date has passed. You're €${shortfall.toFixed(0)} short of your €${targetAmount} goal.`;
+      }
+    }
+
+    return {
+      goalId: goalTarget.id,
+      goalName: goalTarget.name,
+      targetAmount,
+      targetDate: goalDate.toISOString(),
+      projectedBalance,
+      shortfall,
+      surplus,
+      isOnTrack,
+      status,
+      statusMessage,
+      monthsUntilGoal,
+      requiredMonthlySavings: Math.round(requiredMonthlySavings * 100) / 100,
+    };
+  }
+
+  /**
+   * Calculate average monthly savings from recent transactions
+   * @returns {number} Average monthly savings
+   */
+  _calculateAverageMonthlySavings() {
+    // Simple default - would need transactions passed in for accurate calculation
+    return 0;
   }
 
   /**
    * Generate expense forecasts for the specified number of months
    * @param {Array} transactions - Historical transaction data
    * @param {number} months - Number of months to forecast (default: 12)
+   * @param {Object} options - Optional configuration
    * @returns {Array} Array of forecast objects
    */
-  generateExpenseForecasts(transactions, months = 12) {
+  generateExpenseForecasts(transactions, months = 12, _options = {}) {
     try {
       // Validate input
       if (!Array.isArray(transactions) || transactions.length === 0) {
@@ -373,16 +468,19 @@ export class ForecastEngine {
    * @param {string} type - 'income' or 'expense'
    * @param {number} baseAmount - Base amount to use
    * @param {number} months - Number of months
+   * @param {string} goalId - Optional goal ID
+   * @param {Object} goalTarget - Optional goal target
    * @returns {Array} Basic forecast array
    */
-  _generateBasicForecast(type, baseAmount, months) {
+  _generateBasicForecast(type, baseAmount, months, goalId = null, goalTarget = null) {
     const forecasts = [];
+    let cumulativeBalance = 0;
 
     for (let i = 0; i < months; i++) {
       const futureDate = new Date();
       futureDate.setMonth(futureDate.getMonth() + i + 1);
 
-      forecasts.push({
+      const forecast = {
         period: new Date(futureDate),
         predictedAmount: baseAmount,
         confidenceInterval: { lower: 0, upper: baseAmount * 1.5 },
@@ -390,7 +488,21 @@ export class ForecastEngine {
         method: 'insufficient_data',
         seasonalFactor: 1,
         trend: 0, // No trend for basic forecasts
-      });
+      };
+
+      // Add cumulative balance for goal comparison
+      cumulativeBalance += baseAmount;
+
+      // Add goal comparison if goal provided
+      if (goalId && goalTarget) {
+        forecast.goalComparison = this._generateGoalComparison(
+          cumulativeBalance,
+          goalTarget,
+          futureDate
+        );
+      }
+
+      forecasts.push(forecast);
     }
 
     return forecasts;

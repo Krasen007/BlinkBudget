@@ -246,7 +246,7 @@ export class AnomalyService {
   /**
    * Detect unusual timing patterns
    * @param {Array} expenseTransactions - Expense transactions
-   * @returns {Array} Timing anomaly insights
+   * @returns {Array} Timing anomaly insights with actions
    */
   static detectTimingAnomalies(expenseTransactions) {
     const insights = [];
@@ -254,42 +254,188 @@ export class AnomalyService {
 
     expenseTransactions.forEach(transaction => {
       const date = new Date(transaction.date || transaction.timestamp);
-      const dateKey = date.toISOString().split('T')[0];
+      const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
       const amount = Math.abs(transaction.amount || 0);
 
-      if (!dailySpending[dateKey]) {
-        dailySpending[dateKey] = 0;
+      // Group by day of week for pattern detection
+      const dayKey = `day_${dayOfWeek}`;
+      if (!dailySpending[dayKey]) {
+        dailySpending[dayKey] = { total: 0, count: 0, categories: Object.create(null) };
       }
-      dailySpending[dateKey] += amount;
+      dailySpending[dayKey].total += amount;
+      dailySpending[dayKey].count += 1;
+
+      // Track categories per day of week
+      const cat = transaction.category || 'Uncategorized';
+      if (!dailySpending[dayKey].categories[cat]) {
+        dailySpending[dayKey].categories[cat] = 0;
+      }
+      dailySpending[dayKey].categories[cat] += amount;
     });
 
-    const dailyAmounts = Object.values(dailySpending);
-    if (dailyAmounts.length < 3) return insights;
+    // Calculate overall average spending per day
+    const dayKeys = Object.keys(dailySpending);
+    const overallTotal = dayKeys.reduce((sum, k) => sum + dailySpending[k].total, 0);
+    const overallAvg = dayKeys.length > 0 ? overallTotal / dayKeys.length : 0;
 
-    const meanDaily =
-      dailyAmounts.reduce((sum, amount) => sum + amount, 0) /
-      dailyAmounts.length;
-    const maxDaily = Math.max(...dailyAmounts);
+    // Find days with significantly higher spending
+    const highSpendingDays = dayKeys.filter(key => {
+      const dayData = dailySpending[key];
+      const spendingRatio = dayData.total / (overallAvg || 1);
+      return spendingRatio > 1.4 && dayData.total > 30; // 40%+ above average
+    });
 
-    // Consistency fix: Use meanDaily * 2 for both detection and message
-    const threshold = meanDaily * 2;
+    if (highSpendingDays.length > 0) {
+      highSpendingDays.forEach(dayKey => {
+        const dayData = dailySpending[dayKey];
+        const spendingRatio = dayData.total / (overallAvg || 1);
+        const excessAmount = dayData.total - overallAvg;
+        const dayName = this._getDayName(parseInt(dayKey.split('_')[1]));
 
-    if (maxDaily > threshold && maxDaily > 30) {
-      const highSpendingDays = Object.entries(dailySpending).filter(
-        ([_date, amount]) => amount > threshold
-      ).length;
+        // Find the category contributing most to the excess
+        const sortedCategories = Object.entries(dayData.categories)
+          .sort((a, b) => b[1] - a[1]);
+        const topCategory = sortedCategories[0];
+        const categoryExcess = topCategory ? (topCategory[1] / dayData.total) * excessAmount : 0;
 
-      insights.push({
-        id: 'daily_spending_spike',
-        type: 'anomaly',
-        message: `Detected ${highSpendingDays} day${highSpendingDays > 1 ? 's' : ''} with unusually high spending (over ${formatCurrency(threshold)}).`,
-        severity: 'medium',
-        actionable: true,
-        recommendation:
-          'Review what caused the high spending on these days to better plan for similar situations.',
+        // Generate actionable suggestion based on category
+        const suggestion = this._generateTimingAnomalySuggestion(topCategory, dayName, categoryExcess);
+
+        const dayIndex = parseInt(dayKey.split('_')[1]);
+        insights.push({
+          id: `timing_anomaly_day_${dayIndex}`,
+          type: 'timing_anomaly',
+          pattern: `weekend`,
+          description: `You spend ${((spendingRatio - 1) * 100).toFixed(0)}% more on ${dayName}s`,
+          contributingCategory: topCategory ? topCategory[0] : null,
+          suggestion: suggestion.text,
+          estimatedSavings: Math.round(categoryExcess * 0.2), // 20% reduction estimate
+          severity: spendingRatio > 2 ? 'high' : 'medium',
+          actionable: true,
+          metadata: {
+            dayOfWeek: dayIndex,
+            dayName,
+            averageSpending: overallAvg,
+            actualSpending: dayData.total,
+            excessAmount,
+            topCategories: sortedCategories.slice(0, 3),
+          },
+        });
       });
     }
 
+    // Detect monthly timing patterns (e.g., spending spikes at month end)
+    const monthlyPatterns = this._detectMonthlyPatterns(expenseTransactions);
+    if (monthlyPatterns) {
+      insights.push(monthlyPatterns);
+    }
+
     return insights;
+  }
+
+  /**
+   * Get day name from day index
+   * @param {number} dayIndex - Day of week (0-6)
+   * @returns {string} Day name
+   */
+  static _getDayName(dayIndex) {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return days[dayIndex] || 'Day';
+  }
+
+  /**
+   * Generate actionable suggestion for timing anomaly
+   * @param {Array} topCategory - Top contributing category [name, amount]
+   * @param {string} dayName - Day name
+   * @param {number} excessAmount - Excess amount for this pattern
+   * @returns {Object} Suggestion object
+   */
+  static _generateTimingAnomalySuggestion(topCategory, dayName, excessAmount) {
+    const categoryName = topCategory ? topCategory[0].toLowerCase() : '';
+    const savings = Math.round(excessAmount * 0.2);
+
+    if (/\b(restaurant|dining|food|cafe|eating out|groceries)\b/.test(categoryName)) {
+      return {
+        text: `Consider meal prepping on ${dayName}s to reduce dining costs.`,
+        estimatedSavings: savings,
+        difficulty: 'medium',
+      };
+    }
+    if (/\b(entertainment|shopping|bar|nightlife)\b/.test(categoryName)) {
+      return {
+        text: `Plan ${dayName} activities in advance to stick to your budget.`,
+        estimatedSavings: savings,
+        difficulty: 'easy',
+      };
+    }
+    if (/\b(fuel|transport|uber|taxi)\b/.test(categoryName)) {
+      return {
+        text: `Consider consolidating ${dayName} errands to save on transportation.`,
+        estimatedSavings: savings,
+        difficulty: 'hard',
+      };
+    }
+
+    return {
+      text: `Review your ${dayName} spending habits for potential savings.`,
+      estimatedSavings: savings,
+      difficulty: 'medium',
+    };
+  }
+
+  /**
+   * Detect monthly timing patterns (e.g., spending at month end)
+   * @param {Array} expenseTransactions - Expense transactions
+   * @returns {Object|null} Monthly pattern insight or null
+   */
+  static _detectMonthlyPatterns(expenseTransactions) {
+    const dayOfMonthSpending = Object.create(null);
+
+    expenseTransactions.forEach(transaction => {
+      const date = new Date(transaction.date || transaction.timestamp);
+      const dayOfMonth = date.getDate();
+      const amount = Math.abs(transaction.amount || 0);
+
+      if (!dayOfMonthSpending[dayOfMonth]) {
+        dayOfMonthSpending[dayOfMonth] = 0;
+      }
+      dayOfMonthSpending[dayOfMonth] += amount;
+    });
+
+    // Check for month-end spike (days 25-31 vs rest of month)
+    const monthEndDays = [25, 26, 27, 28, 29, 30, 31];
+    const monthEndTotal = monthEndDays.reduce((sum, d) => sum + (dayOfMonthSpending[d] || 0), 0);
+    const otherDaysTotal = Object.entries(dayOfMonthSpending)
+      .filter(([d]) => !monthEndDays.includes(parseInt(d)))
+      .reduce((sum, [, v]) => sum + v, 0);
+
+    const otherDaysCount = Object.keys(dayOfMonthSpending).filter(d => !monthEndDays.includes(parseInt(d))).length;
+    const monthEndDaysCount = monthEndDays.filter(d => dayOfMonthSpending[d]).length;
+
+    const avgOtherDays = otherDaysCount > 0 ? otherDaysTotal / otherDaysCount : 0;
+    const avgMonthEnd = monthEndDaysCount > 0 ? monthEndTotal / monthEndDaysCount : 0;
+
+    if (avgMonthEnd > avgOtherDays * 1.5 && avgMonthEnd > 50) {
+      const excess = avgMonthEnd - avgOtherDays;
+
+      return {
+        id: 'month_end_spending_spike',
+        type: 'timing_anomaly',
+        pattern: 'month_end',
+        description: `Spending spikes at month-end (days 25-31) - ${((avgMonthEnd / avgOtherDays - 1) * 100).toFixed(0)}% above average`,
+        contributingCategory: null,
+        suggestion: `Plan ahead for month-end expenses. Consider setting aside budget earlier in the month.`,
+        estimatedSavings: Math.round(excess * 0.15),
+        severity: 'medium',
+        actionable: true,
+        metadata: {
+          avgOtherDays,
+          avgMonthEnd,
+          excess,
+        },
+      };
+    }
+
+    return null;
   }
 }

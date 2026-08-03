@@ -171,6 +171,176 @@ export class TrendService {
   // ========== Personal Inflation Methods ==========
 
   /**
+   * Calculate personal inflation with per-category breakdown and actionable suggestions
+   * @param {Array} transactions - All transactions
+   * @param {number} monthsBack - Number of months to look back (default: 6)
+   * @returns {Object} Personal inflation analysis with breakdown and suggestions
+   */
+  calculatePersonalInflation(transactions, monthsBack = 6) {
+    const categories = [
+      ...new Set(
+        transactions
+          .filter(t => t.type === TRANSACTION_TYPES.EXPENSE)
+          .map(t => t.category)
+      ),
+    ];
+
+    const categoryBreakdown = [];
+    let totalWeightedInflation = 0;
+    let totalSpending = 0;
+
+    categories.forEach(category => {
+      const inflationRate = this.calculateCategoryInflation(
+        transactions,
+        category,
+        monthsBack,
+        'average',
+        new Date()
+      );
+
+      // Get category spending in recent period
+      const cutoff = new Date();
+      cutoff.setMonth(cutoff.getMonth() - monthsBack);
+      cutoff.setDate(1);
+      cutoff.setHours(0, 0, 0, 0);
+
+      const categorySpending = transactions
+        .filter(
+          t =>
+            t.category === category &&
+            !t.isGhost &&
+            t.type === TRANSACTION_TYPES.EXPENSE &&
+            new Date(t.timestamp) >= cutoff
+        )
+        .reduce((sum, t) => sum + (Math.abs(t.amount) || 0), 0);
+
+      if (categorySpending > 0) {
+        categoryBreakdown.push({
+          category,
+          rate: inflationRate * 100, // Convert to percentage
+          contribution: inflationRate * categorySpending, // Contribution to overall inflation
+          spending: categorySpending,
+        });
+
+        totalWeightedInflation += inflationRate * categorySpending;
+        totalSpending += categorySpending;
+      }
+    });
+
+    // Calculate overall personal inflation rate (weighted average)
+    const overallRate = totalSpending > 0 ? (totalWeightedInflation / totalSpending) * 100 : 0;
+
+    // Sort by contribution to find top drivers
+    const sortedBreakdown = categoryBreakdown
+      .filter(c => c.rate > 0)
+      .sort((a, b) => b.contribution - a.contribution);
+
+    const topDrivers = sortedBreakdown.slice(0, 3);
+
+    // Generate actionable suggestions
+    const suggestions = this._generateInflationSuggestions(topDrivers, overallRate);
+
+    return {
+      overallRate: Math.round(overallRate * 10) / 10,
+      categoryBreakdown: sortedBreakdown.map(c => ({
+        category: c.category,
+        rate: Math.round(c.rate * 10) / 10,
+        spending: Math.round(c.spending * 100) / 100,
+      })),
+      topDrivers: topDrivers.map(c => ({
+        category: c.category,
+        rate: Math.round(c.rate * 10) / 10,
+        spending: Math.round(c.spending * 100) / 100,
+      })),
+      suggestions,
+      analyzedMonths: monthsBack,
+    };
+  }
+
+  /**
+   * Generate actionable suggestions based on inflation drivers
+   * @param {Array} topDrivers - Top categories driving inflation
+   * @param {number} overallRate - Overall personal inflation rate
+   * @returns {Array} Actionable suggestions
+   */
+  _generateInflationSuggestions(topDrivers, overallRate) {
+    const suggestions = [];
+
+    topDrivers.forEach(driver => {
+      let suggestionData = null;
+
+      // Generate category-specific suggestions based on patterns
+      if (/\b(food|restaurant|dining|cafe|eating out|groceries)\b/i.test(driver.category)) {
+        const savingsTip = Math.round(driver.spending * 0.15); // 15% reduction suggestion
+        suggestionData = {
+          category: driver.category,
+          message: `Food prices went up ${driver.rate.toFixed(1)}% for you. "${driver.category}" is the main driver.`,
+          actionable: true,
+          suggestion: `Consider cooking at home 2-3 more times per week to save approximately €${savingsTip}/month.`,
+          estimatedSavings: savingsTip,
+          difficulty: 'medium',
+        };
+      } else if (/\b(transport|gas|fuel|uber|taxi|public transit)\b/i.test(driver.category)) {
+        const savingsTip = Math.round(driver.spending * 0.1);
+        suggestionData = {
+          category: driver.category,
+          message: `Transportation costs increased ${driver.rate.toFixed(1)}% for you.`,
+          actionable: true,
+          suggestion: `Consider consolidating errands or using public transit 1-2 days per week to save €${savingsTip}/month.`,
+          estimatedSavings: savingsTip,
+          difficulty: 'hard',
+        };
+      } else if (/\b(shopping|clothes|entertainment|subscription)\b/i.test(driver.category)) {
+        const savingsTip = Math.round(driver.spending * 0.2);
+        suggestionData = {
+          category: driver.category,
+          message: `Spending on "${driver.category}" rose ${driver.rate.toFixed(1)}%.`,
+          actionable: true,
+          suggestion: `Review subscriptions and pause unused services to save €${savingsTip}/month.`,
+          estimatedSavings: savingsTip,
+          difficulty: 'easy',
+        };
+      } else if (/\b(utilities|electric|water|internet|phone)\b/i.test(driver.category)) {
+        const savingsTip = Math.round(driver.spending * 0.08);
+        suggestionData = {
+          category: driver.category,
+          message: `Utilities costs up ${driver.rate.toFixed(1)}%.`,
+          actionable: true,
+          suggestion: `Review providers and consider switching plans to save €${savingsTip}/month.`,
+          estimatedSavings: savingsTip,
+          difficulty: 'medium',
+        };
+      } else {
+        // Generic suggestion
+        const savingsTip = Math.round(driver.spending * 0.1);
+        suggestionData = {
+          category: driver.category,
+          message: `Spending on "${driver.category}" increased ${driver.rate.toFixed(1)}%.`,
+          actionable: true,
+          suggestion: `Review your "${driver.category}" spending for potential savings of €${savingsTip}/month.`,
+          estimatedSavings: savingsTip,
+          difficulty: 'medium',
+        };
+      }
+
+      if (suggestionData) {
+        suggestions.push(suggestionData);
+      }
+    });
+
+    // Add overall context if inflation is significant
+    if (overallRate > 5) {
+      suggestions.unshift({
+        type: 'context',
+        message: `Your personal inflation rate is ${overallRate.toFixed(1)}%, which is ${overallRate > 10 ? 'significantly' : ''} ${overallRate > 10 ? 'above' : 'above'} typical rates.`,
+        actionable: false,
+      });
+    }
+
+    return suggestions;
+  }
+
+  /**
    * Calculate personal inflation rate for a specific category
    * @param {Array} transactions - All transactions
    * @param {string} category - Category to analyze

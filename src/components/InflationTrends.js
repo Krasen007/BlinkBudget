@@ -3,12 +3,15 @@
  *
  * Displays personal inflation trends for top spending categories.
  * Shows how individual prices are changing over time for the user.
+ * Includes actionable suggestions based on inflation analysis.
  *
  * Features:
  * - Chart type toggle (line vs bar)
  * - Calculation method toggle (average vs median)
  * - Time period selector (1, 3, 6, 12 months)
  * - Visual trend indicators
+ * - Personal inflation rate with category breakdown
+ * - Actionable suggestions to offset inflation
  */
 
 import {
@@ -18,6 +21,7 @@ import {
 } from '../utils/inflation-chart-utils.js';
 import { InsightsGenerator } from '../core/insights-generator.js';
 import { generateId } from '../utils/id-utils.js';
+import { trendService } from '../core/analytics/TrendService.js';
 
 export const InflationTrends = (
   data,
@@ -60,6 +64,12 @@ export const InflationTrends = (
   canvas.style.height = '100%';
   chartContainer.appendChild(canvas);
 
+  // Personal inflation summary container (actionable section)
+  const inflationSummaryContainer = document.createElement('div');
+  inflationSummaryContainer.className = 'inflation-summary';
+  inflationSummaryContainer.style.marginBottom = 'var(--spacing-lg)';
+  inflationSummaryContainer.style.display = 'none'; // Hidden by default, shown when data available
+
   /**
    * Helper to get transactions for the selected month in sharedState
    */
@@ -91,6 +101,142 @@ export const InflationTrends = (
       const ts = new Date(t.timestamp);
       return ts >= startOfMonth && ts < endOfMonth;
     });
+  };
+
+  /**
+   * Render personal inflation summary with actionable suggestions
+   */
+  const renderInflationSummary = () => {
+    if (!data.transactions || data.transactions.length < 30) {
+      inflationSummaryContainer.style.display = 'none';
+      return;
+    }
+
+    const inflationData = trendService.calculatePersonalInflation(
+      data.transactions,
+      currentPeriod
+    );
+
+    if (!inflationData || inflationData.overallRate === 0) {
+      inflationSummaryContainer.style.display = 'none';
+      return;
+    }
+
+    inflationSummaryContainer.style.display = 'block';
+
+    // Clear previous content
+    inflationSummaryContainer.innerHTML = '';
+
+    // Overall rate header
+    const header = document.createElement('div');
+    header.className = 'inflation-summary-header';
+    header.style.display = 'flex';
+    header.style.alignItems = 'center';
+    header.style.gap = 'var(--spacing-md)';
+    header.style.marginBottom = 'var(--spacing-md)';
+
+    const rateBadge = document.createElement('div');
+    rateBadge.className = `inflation-rate-badge ${inflationData.overallRate > 5 ? 'badge-error' : inflationData.overallRate > 0 ? 'badge-warning' : 'badge-success'}`;
+    rateBadge.style.padding = 'var(--spacing-sm) var(--spacing-md)';
+    rateBadge.style.borderRadius = 'var(--radius-full)';
+    rateBadge.style.fontWeight = '600';
+    rateBadge.style.fontSize = '1.25rem';
+    rateBadge.textContent = `${inflationData.overallRate > 0 ? '+' : ''}${inflationData.overallRate}%`;
+
+    const title = document.createElement('div');
+    title.innerHTML = `<strong>Your Personal Inflation Rate</strong><br><span style="font-size: 0.875rem; color: var(--color-text-muted)">Based on ${inflationData.analyzedMonths} months of spending</span>`;
+
+    header.appendChild(rateBadge);
+    header.appendChild(title);
+    inflationSummaryContainer.appendChild(header);
+
+    // Top drivers section
+    if (inflationData.topDrivers && inflationData.topDrivers.length > 0) {
+      const driversSection = document.createElement('div');
+      driversSection.className = 'inflation-drivers';
+      driversSection.style.marginBottom = 'var(--spacing-md)';
+
+      const driversTitle = document.createElement('h4');
+      driversTitle.textContent = 'Top Inflation Drivers';
+      driversTitle.style.fontSize = '0.875rem';
+      driversTitle.style.fontWeight = '600';
+      driversTitle.style.color = 'var(--color-text-muted)';
+      driversTitle.style.marginBottom = 'var(--spacing-sm)';
+      driversSection.appendChild(driversTitle);
+
+      inflationData.topDrivers.forEach(driver => {
+        const driverItem = document.createElement('div');
+        driverItem.className = 'inflation-driver-item';
+        driverItem.style.display = 'flex';
+        driverItem.style.justifyContent = 'space-between';
+        driverItem.style.alignItems = 'center';
+        driverItem.style.padding = 'var(--spacing-sm) 0';
+        driverItem.style.borderBottom = '1px solid var(--color-border)';
+
+        const driverInfo = document.createElement('div');
+        driverInfo.innerHTML = `<strong>${driver.category}</strong><br><span style="font-size: 0.75rem; color: var(--color-text-muted)">Spending: €${driver.spending.toFixed(0)}</span>`;
+
+        const driverRate = document.createElement('span');
+        driverRate.className = 'badge badge-error';
+        driverRate.textContent = `+${driver.rate}%`;
+        driverRate.style.fontWeight = '600';
+
+        driverItem.appendChild(driverInfo);
+        driverItem.appendChild(driverRate);
+        driversSection.appendChild(driverItem);
+      });
+
+      inflationSummaryContainer.appendChild(driversSection);
+    }
+
+    // Actionable suggestions section
+    if (inflationData.suggestions && inflationData.suggestions.length > 0) {
+      const suggestionsSection = document.createElement('div');
+      suggestionsSection.className = 'inflation-suggestions';
+
+      const suggestionsTitle = document.createElement('h4');
+      suggestionsTitle.textContent = 'Suggestions to Offset';
+      suggestionsTitle.style.fontSize = '0.875rem';
+      suggestionsTitle.style.fontWeight = '600';
+      suggestionsTitle.style.color = 'var(--color-text-muted)';
+      suggestionsTitle.style.marginBottom = 'var(--spacing-sm)';
+      suggestionsSection.appendChild(suggestionsTitle);
+
+      inflationData.suggestions.forEach(suggestion => {
+        if (!suggestion.actionable) return;
+
+        const suggestionCard = document.createElement('div');
+        suggestionCard.className = 'inflation-suggestion-card';
+        suggestionCard.style.background = 'var(--color-surface-alt)';
+        suggestionCard.style.border = '1px solid var(--color-border)';
+        suggestionCard.style.borderRadius = 'var(--radius-md)';
+        suggestionCard.style.padding = 'var(--spacing-md)';
+        suggestionCard.style.marginBottom = 'var(--spacing-sm)';
+
+        const message = document.createElement('div');
+        message.style.fontSize = '0.875rem';
+        message.style.marginBottom = 'var(--spacing-sm)';
+        message.textContent = suggestion.message;
+
+        const action = document.createElement('div');
+        action.style.fontSize = '0.875rem';
+        action.style.color = 'var(--color-success)';
+        action.innerHTML = `<strong>💡 ${suggestion.suggestion}</strong>`;
+
+        const savings = document.createElement('div');
+        savings.style.fontSize = '0.75rem';
+        savings.style.color = 'var(--color-text-muted)';
+        savings.style.marginTop = 'var(--spacing-sm)';
+        savings.textContent = `Est. savings: €${suggestion.estimatedSavings}/month`;
+
+        suggestionCard.appendChild(message);
+        suggestionCard.appendChild(action);
+        suggestionCard.appendChild(savings);
+        suggestionsSection.appendChild(suggestionCard);
+      });
+
+      inflationSummaryContainer.appendChild(suggestionsSection);
+    }
   };
 
   /**
@@ -178,6 +324,9 @@ export const InflationTrends = (
       if (currentChart) {
         activeCharts.set(instanceId, currentChart);
       }
+
+      // Also render the personal inflation summary
+      renderInflationSummary();
     } catch (error) {
       console.error('Error rendering inflation trends chart:', error);
       showErrorMessage(chartContainer, 'Failed to load inflation data');
@@ -349,6 +498,7 @@ export const InflationTrends = (
   // Assemble component
   container.appendChild(header);
   container.appendChild(controls);
+  container.appendChild(inflationSummaryContainer);
   container.appendChild(chartContainer);
 
   // Initial render

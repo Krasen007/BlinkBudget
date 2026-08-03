@@ -296,8 +296,8 @@ export const FinancialPlanningView = (params = {}) => {
   /**
    * Render Forecasts section - Income/expense predictions
    */
-  function renderForecastsSection() {
-    const forecastsElement = ForecastsSection(
+  async function renderForecastsSection() {
+    const forecastsElement = await ForecastsSection(
       planningData,
       forecastEngine,
       balancePredictor,
