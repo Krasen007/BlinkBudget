@@ -23,6 +23,7 @@ export const TransactionList = ({
   currentFilter,
   accounts,
   highlightTransactionIds = null,
+  successHighlightIds = null,
   currentDateFilter = null,
   onDateClick = () => {},
   currentCategoryFilter = null,
@@ -250,11 +251,14 @@ export const TransactionList = ({
       const shouldHighlight =
         highlightTransactionIds &&
         highlightTransactionIds.includes(transaction.id);
+      const highlightSuccess =
+        successHighlightIds && successHighlightIds.includes(transaction.id);
       const item = TransactionListItem({
         transaction,
         currentFilter,
         accounts,
         shouldHighlight,
+        highlightSuccess,
         currentDateFilter,
         onDateClick,
         currentCategoryFilter,

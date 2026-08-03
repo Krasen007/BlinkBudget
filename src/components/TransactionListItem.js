@@ -23,6 +23,7 @@ export const TransactionListItem = ({
   currentFilter,
   accounts,
   shouldHighlight = false,
+  highlightSuccess = false,
   currentDateFilter = null,
   onDateClick = () => {},
   currentCategoryFilter = null,
@@ -528,6 +529,11 @@ export const TransactionListItem = ({
 
   item.appendChild(info);
   item.appendChild(val);
+
+  // Apply success highlight animation for recently saved transactions (no warning badge)
+  if (highlightSuccess) {
+    item.classList.add('success-highlight', 'success-highlight-active');
+  }
 
   // Apply anomaly highlight if this transaction should be highlighted
   if (shouldHighlight) {
