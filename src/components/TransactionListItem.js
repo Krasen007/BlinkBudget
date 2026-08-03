@@ -17,6 +17,7 @@ import {
   CURRENCY_SYMBOL,
 } from '../utils/constants.js';
 import { setSelectedStyle } from '../views/DashboardView.js';
+import { highlightTransactionSuccess } from '../utils/success-feedback.js';
 
 export const TransactionListItem = ({
   transaction,
@@ -532,7 +533,10 @@ export const TransactionListItem = ({
 
   // Apply success highlight animation for recently saved transactions (no warning badge)
   if (highlightSuccess) {
-    item.classList.add('success-highlight', 'success-highlight-active');
+    item.classList.add('transaction-item-new');
+    requestAnimationFrame(() => {
+      highlightTransactionSuccess(item, 1500);
+    });
   }
 
   // Apply anomaly highlight if this transaction should be highlighted
