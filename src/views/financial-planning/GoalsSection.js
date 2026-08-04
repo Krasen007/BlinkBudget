@@ -13,9 +13,9 @@
 
 import {
   createEnhancedEmptyState,
-  getProgressiveUnlockMessage,
 } from '../../utils/enhanced-empty-states.js';
-import { COLORS, SPACING, FONT_SIZES } from '../../utils/constants.js';
+import { ProgressiveEmptyState } from '../../components/ProgressiveEmptyState.js';
+import { COLORS, SPACING } from '../../utils/constants.js';
 import { createGoalProgressChart } from '../../utils/financial-planning-charts.js';
 import {
   createSectionContainer,
@@ -710,12 +710,13 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
   try {
     const { StorageService: SS } = await import('../../core/storage.js');
     const txCount = (SS.getAllTransactions() || []).length;
-    const unlockMsg = getProgressiveUnlockMessage(txCount);
-    if (unlockMsg) {
-      const msg = document.createElement('div');
-      msg.textContent = unlockMsg;
-      msg.style.cssText = `font-size:${FONT_SIZES.SM};color:${COLORS.TEXT_MUTED};padding:${SPACING.SM} 0;text-align:center;`;
-      section.appendChild(msg);
+    const unlockCard = ProgressiveEmptyState({
+      section: 'goals',
+      transactionCount: txCount,
+      minTransactions: 30,
+    });
+    if (unlockCard) {
+      section.appendChild(unlockCard);
     }
   } catch {
     // Non-critical — silently fail

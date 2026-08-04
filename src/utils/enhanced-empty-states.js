@@ -367,18 +367,33 @@ function createBasicEmptyState(message) {
 /**
  * Get a progressive unlock message based on transaction count.
  * Connects the advanced layer to the core logging habit.
- * @param {number} transactionCount - Total number of transactions
+ * @param {string|number} sectionOrCount - Section key or transaction count (for backward compatibility)
+ * @param {number} [countParam] - Total number of transactions if section is passed first
  * @returns {string|null} Message to display, or null if enough data
  */
-export function getProgressiveUnlockMessage(transactionCount) {
-  if (transactionCount >= 365) return null; // All features unlocked
-  if (transactionCount >= 90)
-    return 'Forecasts are now available. Your data is telling a story.';
-  if (transactionCount >= 30)
-    return 'You have enough data for budget suggestions. Visit Budgets to see them.';
-  if (transactionCount >= 5)
-    return "You're building your financial picture. Check back after 30 transactions for budget suggestions.";
-  return 'Log 30+ transactions to unlock personalized insights.';
+export function getProgressiveUnlockMessage(sectionOrCount, countParam) {
+  let section = 'general';
+  let transactionCount;
+
+  if (typeof sectionOrCount === 'number') {
+    transactionCount = sectionOrCount;
+  } else {
+    section = (sectionOrCount || 'general').toLowerCase();
+    transactionCount = typeof countParam === 'number' ? countParam : 0;
+  }
+
+  const threshold = section === 'forecasts' ? 90 : 30;
+
+  if (transactionCount >= threshold) {
+    return null;
+  }
+
+  const remaining = threshold - transactionCount;
+  const sectionLabel = section === 'general' ? 'personalized insights' : `${section} analysis`;
+  if (transactionCount === 0) {
+    return `Log ${threshold}+ transactions to unlock ${sectionLabel}.`;
+  }
+  return `Log ${remaining} more transaction${remaining === 1 ? '' : 's'} (${transactionCount}/${threshold}) to unlock ${sectionLabel}.`;
 }
 
 /**

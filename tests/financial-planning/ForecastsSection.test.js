@@ -28,6 +28,13 @@ vi.mock('../src/utils/constants.js', () => ({
     LG: '24px',
     XL: '32px',
   },
+  FONT_SIZES: {
+    XS: '0.75rem',
+    SM: '0.875rem',
+    MD: '1rem',
+    LG: '1.25rem',
+    XL: '1.5rem',
+  },
 }));
 
 vi.mock('../src/utils/financial-planning-helpers.js', () => ({

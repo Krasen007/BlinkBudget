@@ -306,6 +306,7 @@ export class AnomalyService {
           id: `timing_anomaly_day_${dayIndex}`,
           type: 'timing_anomaly',
           pattern: `weekend`,
+          message: `You spend ${((spendingRatio - 1) * 100).toFixed(0)}% more on ${dayName}s`,
           description: `You spend ${((spendingRatio - 1) * 100).toFixed(0)}% more on ${dayName}s`,
           contributingCategory: topCategory ? topCategory[0] : null,
           suggestion: suggestion.text,

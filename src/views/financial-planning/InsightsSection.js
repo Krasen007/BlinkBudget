@@ -20,6 +20,7 @@ import {
 import { InsightsGenerator } from '../../core/insights-generator.js';
 import { InflationTrends } from '../../components/InflationTrends.js';
 import { createNetBalanceChart } from '../../components/NetBalanceChart.js';
+import { ProgressiveEmptyState } from '../../components/ProgressiveEmptyState.js';
 
 /**
  * Helper function to get transaction amount with consistent refund handling
@@ -1067,6 +1068,16 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
       'Insights highlight Top Movers and timeline comparisons. Use these to find categories driving changes and drill into transactions for details.'
     )
   );
+
+  const txCount = (planningData?.transactions || []).length;
+  const unlockCard = ProgressiveEmptyState({
+    section: 'insights',
+    transactionCount: txCount,
+    minTransactions: 30,
+  });
+  if (unlockCard) {
+    section.appendChild(unlockCard);
+  }
 
   if (
     !planningData ||

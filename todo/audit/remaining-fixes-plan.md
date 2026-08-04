@@ -263,55 +263,12 @@ async getSeasonalAdjustments() {
 
 ### P2.1 Shared ProgressiveEmptyState Component (Phase 3.2)
 
+**Status:** ✅ **COMPLETE**
+
 **Rationale:** Avoid duplicating the progressive unlock logic across 6 sections.
 
-**Files to create:**
-
-- `src/components/ProgressiveEmptyState.js`
-
-**Implementation:**
-
-```javascript
-export const ProgressiveEmptyState = ({
-  section,
-  transactionCount,
-  minTransactions,
-}) => {
-  const el = document.createElement('div');
-  el.className = 'progressive-empty-state';
-
-  if (transactionCount < minTransactions) {
-    el.innerHTML = `
-      <div class="empty-icon">📊</div>
-      <h3>${getUnlockTitle(section)}</h3>
-      <p>Log ${minTransactions - transactionCount} more transaction${minTransactions - transactionCount === 1 ? '' : 's'} to unlock ${section}.</p>
-      <p class="benefit">${getUnlockBenefit(section)}</p>
-    `;
-  }
-
-  return el;
-};
-```
-
-**Usage in sections:**
-
-- BudgetsSection.js
-- GoalsSection.js
-- InsightsSection.js
-- ForecastsSection.js
-- InvestmentsSection.js
-- OverviewSection.js
-
-**Estimated time:** 30-45 minutes (create + update 6 files)
-
----
-
-### P2.2 Update Progressive Unlock Messages (Phase 3.1)
-
-**Rationale:** Ensure all sections use consistent transaction-count-based messaging.
-
-**Files to change:**
-
+**Files created & updated:**
+- `src/components/ProgressiveEmptyState.js` — **NEW** functional component
 - `src/views/financial-planning/BudgetsSection.js`
 - `src/views/financial-planning/GoalsSection.js`
 - `src/views/financial-planning/InsightsSection.js`
@@ -319,19 +276,18 @@ export const ProgressiveEmptyState = ({
 - `src/views/financial-planning/InvestmentsSection.js`
 - `src/views/financial-planning/OverviewSection.js`
 
-**Message matrix:**
+---
 
-| Transaction count | Message                                                |
-| ----------------- | ------------------------------------------------------ |
-| 0-29              | "Log 30+ transactions to unlock [section] suggestions" |
-| 30-89             | "Suggested [section] ready →"                          |
-| 90+               | Active (no empty state)                                |
+### P2.2 Update Progressive Unlock Messages (Phase 3.1)
+
+**Status:** ✅ **COMPLETE**
+
+**Rationale:** Ensure all sections use consistent transaction-count-based messaging.
 
 **Implementation:**
-
-1. Create shared `getProgressiveUnlockMessage(section, count)` utility
-2. Replace inline messages with utility calls
-3. Ensure all sections use consistent threshold (30 for suggestions, 90 for forecasts)
+1. Enhanced `getProgressiveUnlockMessage(section, count)` utility in `enhanced-empty-states.js`
+2. Unified thresholds across all 6 financial planning sections (30 transactions for budgets/goals/insights/investments/overview, 90 for forecasts)
+3. Verified build with `yarn run build`
 
 **Estimated time:** 20-30 minutes
 

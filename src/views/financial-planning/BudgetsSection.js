@@ -15,7 +15,7 @@ import { BudgetProgress } from '../../components/BudgetProgress.js';
 import { BudgetSummaryCard } from '../../components/BudgetSummaryCard.js';
 import { BudgetPlanner } from '../../core/budget-planner.js';
 import { BudgetService } from '../../core/budget-service.js';
-import { getProgressiveUnlockMessage } from '../../utils/enhanced-empty-states.js';
+import { ProgressiveEmptyState } from '../../components/ProgressiveEmptyState.js';
 
 const MIN_TRANSACTIONS_FOR_SUGGESTIONS = 30;
 
@@ -52,13 +52,14 @@ export const BudgetsSection = async planningData => {
     const summaryCard = BudgetSummaryCard(summaryData);
     container.appendChild(summaryCard);
 
-    // Progressive unlock message
-    const unlockMsg = getProgressiveUnlockMessage(transactions.length);
-    if (unlockMsg) {
-      const msg = document.createElement('div');
-      msg.textContent = unlockMsg;
-      msg.style.cssText = `font-size:${FONT_SIZES.SM};color:${COLORS.TEXT_MUTED};padding:${SPACING.SM} 0;text-align:center;`;
-      container.appendChild(msg);
+    // Progressive unlock empty state component
+    const unlockCard = ProgressiveEmptyState({
+      section: 'budgets',
+      transactionCount: transactions.length,
+      minTransactions: MIN_TRANSACTIONS_FOR_SUGGESTIONS,
+    });
+    if (unlockCard) {
+      container.appendChild(unlockCard);
     }
 
     let suggestions = [];

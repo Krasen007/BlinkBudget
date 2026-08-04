@@ -18,6 +18,7 @@ import {
   createPlaceholder,
   createUsageNote,
 } from '../../utils/financial-planning-helpers.js';
+import { ProgressiveEmptyState } from '../../components/ProgressiveEmptyState.js';
 
 // Risk thresholds for emergency fund assessment
 const RISK_THRESHOLDS = {
@@ -128,6 +129,16 @@ export const OverviewSection = planningData => {
       'At-a-glance health summary: shows current balance, monthly expense averages, savings rate and emergency fund advice.'
     )
   );
+
+  const txCount = (planningData?.transactions || []).length;
+  const unlockCard = ProgressiveEmptyState({
+    section: 'overview',
+    transactionCount: txCount,
+    minTransactions: 30,
+  });
+  if (unlockCard) {
+    section.appendChild(unlockCard);
+  }
 
   if (!planningData) {
     const placeholder = createPlaceholder(

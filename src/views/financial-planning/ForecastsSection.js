@@ -22,6 +22,7 @@ import {
   createPlaceholder,
   createUsageNote,
 } from '../../utils/financial-planning-helpers.js';
+import { ProgressiveEmptyState } from '../../components/ProgressiveEmptyState.js';
 /**
  * Generate historical monthly data from transactions
  */
@@ -274,6 +275,16 @@ export const ForecastsSection = async (
       'Forecasts use all available transaction history to predict income and expenses. Recent months are weighted more heavily.'
     )
   );
+
+  const txCount = (planningData?.transactions || []).length;
+  const unlockCard = ProgressiveEmptyState({
+    section: 'forecasts',
+    transactionCount: txCount,
+    minTransactions: 90,
+  });
+  if (unlockCard) {
+    section.appendChild(unlockCard);
+  }
 
   if (
     !planningData ||
