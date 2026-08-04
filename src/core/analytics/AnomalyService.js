@@ -423,6 +423,7 @@ export class AnomalyService {
         id: 'month_end_spending_spike',
         type: 'timing_anomaly',
         pattern: 'month_end',
+        message: `Spending spikes at month-end (days 25-31) - ${((avgMonthEnd / avgOtherDays - 1) * 100).toFixed(0)}% above average`,
         description: `Spending spikes at month-end (days 25-31) - ${((avgMonthEnd / avgOtherDays - 1) * 100).toFixed(0)}% above average`,
         contributingCategory: null,
         suggestion: `Plan ahead for month-end expenses. Consider setting aside budget earlier in the month.`,
