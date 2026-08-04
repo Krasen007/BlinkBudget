@@ -1,27 +1,37 @@
-### Summary v1.45
+# Changelog
 
-This release focuses on enhanced validation, improved investment tracking, and bug fixes across the application.
+All notable changes to BlinkBudget will be documented in this file.
 
----
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.46.0] - 2026-02-21
 
 ### Added
 
-- **Enhanced transaction validation** — Improved validation logic for all transaction types to prevent data inconsistencies and ensure data integrity.
-- **Refund transaction labels** — Added support for tags on refund transactions, completing the labeling feature across all transaction types.
-- **Cancel button in Goals section** — Added a cancel button to make goal management more intuitive and reduce accidental actions.
+- **Progressive Unlock System** - Advanced financial planning features now unlock progressively as you log transactions, connecting your 3-click habit to powerful insights:
+  - **Smart Budget Suggestions** (30+ transactions) - Auto-suggested category budgets based on your actual spending history
+  - **Goal Cash Flow Insights** (30+ transactions) - Connect spending patterns to long-term savings goals
+  - **Deep Analytics & Trends** (30+ transactions) - View top expense movers, category trends, and personal inflation analysis
+  - **Income & Expense Forecasting** (90+ transactions) - Unlock 6-month balance and cash flow predictions
+  - **Portfolio & Net Worth Sync** (30+ transactions) - See how portfolio holdings interact with overall net worth
+  - **Financial Health Assessment** (30+ transactions) - Get accurate emergency fund coverage assessment and risk score
+
+- **Automatic Budget Suggestions** - When you have 30+ transactions, BlinkBudget automatically suggests category budgets based on your spending history with Accept, Adjust, or Dismiss options
 
 ### Changed
 
-- **Investment section simplified** — Rewrote the advanced features to be read-only by default, with a clearer focus on portfolio overview and essential functionality.
-- **Labels feature** — Improved label system with better organization and management.
-- **Documentation updates** — Verified implementation of audit documents and updated README with the latest features.
+- **Goals Section Optimization** - Moved and optimized the goals section as part of "The One Theory" implementation, connecting the 3-click transaction logging habit to advanced financial planning features
+- **Budget Updates** - Enhanced budget management with better integration of automatic suggestions
+- **Anomaly Detection** - Improved AnomalyService for better spending pattern analysis
 
 ### Fixed
 
-- **Validation fixes** — Resolved several edge cases in transaction validation that could cause issues with certain data combinations.
-- **False statement handling** — Fixed incorrect statements in validation and reporting logic.
-- **DODCS validator fix** — Corrected issues in the data validation system for better accuracy.
+- Animation issues when adding transactions
+- Property test failures
+- All verification checklist items complete (404/404 tests passing, 47/47 files)
 
----
+### Maintenance
 
-**Full Changelog**: [v1.44...v1.45](https://github.com/Krasen007/BlinkBudget/compare/v1.44...v1.45)
+- Lint fixes and code quality improvements
+- Full test suite validation

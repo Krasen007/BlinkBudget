@@ -29,6 +29,7 @@
 - **Local-first operation**: the app can run without cloud configuration using a `local-only` mode, keeping all data in localStorage for offline use and faster startup on mobile.
 - **Ghost Transactions** - See historical transaction data when dates are modified. Ghost entries are only created for older edits, not immediate corrections | src/views/EditView.js:ghost transaction rendering | src/core/transaction-service.js:getTransactionsByDate()
 - **Dynamic quick amount presets** - Buttons automatically update based on your most frequently used transaction amounts with usage counters and reset functionality. Can be shown or hidden from Settings → Advanced | src/components/QuickAmountPresets.js:QuickAmountPresets() | src/core/amount-preset-service.js:recordAmount() | src/core/amount-preset-service.js:getPresets()
+- **Progressive Unlock System** - Advanced financial planning features unlock as you build your 3-click logging habit. Log 30+ transactions to unlock smart budget suggestions, goal insights, deep analytics, and portfolio sync. Log 90+ transactions for income/expense forecasting | src/components/ProgressiveEmptyState.js:ProgressiveEmptyState() | src/views/financial-planning/*Section.js:progressive unlock integration
 
 ### Transaction Management
 
@@ -57,7 +58,6 @@
 - **Enter to save in edit mode** - Pressing Enter while editing a transaction now automatically saves it, matching the behavior in reports | src/components/TransactionForm.js:TransactionForm | src/components/TransactionForm.js:Enter key handler
 - **Bulk transaction editing** - Long-press to enter multi-select mode, select multiple transactions, and edit or delete them in bulk | src/views/DashboardView.js:multi-select | src/components/TransactionListItem.js:long-press selection
 - **Multi-select visual feedback** - Clear selection indicators and count display when selecting transactions | src/views/DashboardView.js:selection mode | src/styles/main.css:bulk-actions styles
-
 ### Dashboard & Analytics
 
 - **Real-time balance calculations** across all accounts. Dashboard label changes to "Total Filtered" when a filter is active so it's clear the number shown is not your full balance | src/core/Account/account-service.js:getAccounts() | src/views/DashboardView.js:balance display
@@ -87,6 +87,7 @@ BlinkBudget turns your 3-click data into actionable insights using statistical h
 
 - **Unusual Spending Alerts** - Automatic detection of atypical transactions | src/core/analytics/AnomalyService.js:detectAnomalies() | src/core/unusual-spending-detector.js:UnusualSpendingDetector.detectUnusualTransactions()
 - **Large Transaction Warnings** - Notifications for purchases outside your normal range | src/core/analytics/AnomalyService.js:detectSpendingSpikes() | src/core/analytics-engine.js:transaction validation
+- **Enhanced Anomaly Detection** - Improved AnomalyService with better spending pattern analysis and more accurate alerts | src/core/analytics/AnomalyService.js:enhanced detection logic
 
 #### **Personal Finance Metrics**
 
@@ -125,6 +126,7 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 - **Progress Visualization** - Charts showing goal completion status | src/views/financial-planning/GoalsSection.js:progress charts | src/utils/financial-planning-charts.js:goal progress
 - **Milestone Tracking** - Celebrate achievements along the journey | src/core/goal-planner.js:calculateGoalProgress() | src/views/financial-planning/GoalsSection.js:milestone display
 - **Cancel Button** - Added a cancel button to prevent accidental goal modifications and improve user experience during goal creation and editing
+- **Goal Cash Flow Insights** - After logging 30+ transactions, connect your spending patterns to long-term savings goals with personalized recommendations | src/views/financial-planning/GoalsSection.js:goal recommendations | src/core/savings-goals-service.js:getGoalRecommendations()
 
 #### **Insights Section**
 
@@ -139,6 +141,7 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 - **Budget Health Tracking** - Real-time status (on track, at risk, exceeded) | src/core/budget-service.js:getByCategory() | src/views/financial-planning/BudgetsSection.js:health status
 - **Overspending Alerts** - Notifications when approaching limits | src/core/budget-service.js:getByCategory() | src/views/financial-planning/BudgetsSection.js:alerts
 - **Budget Performance Reports** - Historical budget adherence analysis | src/core/budget-service.js:getAll() | src/views/financial-planning/BudgetsSection.js:performance reports
+- **Automatic Budget Suggestions** - After logging 30+ transactions, BlinkBudget suggests category budgets based on your actual spending history. Accept, adjust, or dismiss each suggestion | src/components/BudgetSuggestion.js:BudgetSuggestion() | src/core/budget-service.js:suggestBudgets() | src/views/financial-planning/BudgetsSection.js:budget suggestions integration
 
 ### User Experience & UI
 
