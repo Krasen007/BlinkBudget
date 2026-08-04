@@ -327,9 +327,26 @@ export const ForecastsSection = async (
     }
 
     // Generate forecasts
+    // Connect forecasts to a savings goal when one exists so users can see
+    // whether their projected balance will reach the goal by its target date.
+    const goals = Array.isArray(planningData.goals) ? planningData.goals : [];
+    const activeGoal = goals.find(g => g && g.targetAmount > 0) || null;
+    const forecastOptions = activeGoal
+      ? {
+          goalId: activeGoal.id,
+          goalTarget: {
+            id: activeGoal.id,
+            name: activeGoal.name,
+            targetAmount: activeGoal.targetAmount,
+            targetDate: activeGoal.targetDate,
+          },
+        }
+      : {};
+
     const incomeForecasts = forecastEngine.generateIncomeForecasts(
       planningData.transactions,
-      6
+      6,
+      forecastOptions
     );
     const expenseForecasts = forecastEngine.generateExpenseForecasts(
       planningData.transactions,
@@ -461,6 +478,46 @@ export const ForecastsSection = async (
     });
 
     section.appendChild(summaryGrid);
+
+    // Goal connection card — shows whether projected balance will reach the
+    // active savings goal by its target date.
+    if (activeGoal && incomeForecasts.length > 0) {
+      const goalComparison = incomeForecasts[0].goalComparison;
+      if (goalComparison) {
+        const goalCard = document.createElement('div');
+        goalCard.className = 'forecast-goal-connection';
+        goalCard.style.background = COLORS.SURFACE;
+        goalCard.style.border = `1px solid ${COLORS.BORDER}`;
+        goalCard.style.borderRadius = 'var(--radius-lg)';
+        goalCard.style.padding = SPACING.LG;
+        goalCard.style.marginTop = SPACING.MD;
+
+        const goalTitle = document.createElement('h3');
+        goalTitle.textContent = `🎯 Goal Connection: ${goalComparison.goalName}`;
+        goalTitle.style.margin = '0';
+        goalTitle.style.marginBottom = SPACING.SM;
+        goalTitle.style.fontSize = '1.125rem';
+        goalTitle.style.fontWeight = '600';
+        goalTitle.style.color = COLORS.TEXT_MAIN;
+        goalCard.appendChild(goalTitle);
+
+        const status = document.createElement('div');
+        status.textContent = goalComparison.statusMessage;
+        status.style.fontSize = '0.9rem';
+        status.style.color =
+          goalComparison.isOnTrack ? COLORS.SUCCESS : COLORS.ERROR;
+        status.style.marginBottom = SPACING.SM;
+        goalCard.appendChild(status);
+
+        const meta = document.createElement('div');
+        meta.style.fontSize = '0.85rem';
+        meta.style.color = COLORS.TEXT_MUTED;
+        meta.textContent = `Target: €${goalComparison.targetAmount.toFixed(0)} by ${new Date(goalComparison.targetDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} · Projected: €${goalComparison.projectedBalance.toFixed(0)}`;
+        goalCard.appendChild(meta);
+
+        section.appendChild(goalCard);
+      }
+    }
 
     // Generate balance projections
     const currentBalance = planningData.transactions.reduce((balance, t) => {

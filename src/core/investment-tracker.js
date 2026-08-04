@@ -22,10 +22,10 @@ export class InvestmentTracker {
    * @param {number} shares - Number of shares
    * @param {number} purchasePrice - Price per share at purchase
    * @param {Date} purchaseDate - Date of purchase
-   * @param {Object} metadata - Additional investment metadata
+   * @param {Object|string} metadata - Additional investment metadata (name, currentPrice, notes) or a plain notes string
    * @returns {Object} Created investment object
    */
-  addInvestment(symbol, shares, purchasePrice, purchaseDate, notes = '') {
+  addInvestment(symbol, shares, purchasePrice, purchaseDate, metadata = '') {
     try {
       // Validate inputs
       if (!symbol || typeof symbol !== 'string') {
@@ -45,15 +45,29 @@ export class InvestmentTracker {
         throw new Error('Purchase date must be a valid Date object');
       }
 
+      // Normalize metadata: accept either an object { name, currentPrice, notes }
+      // or a plain notes string (backward compatible).
+      const meta =
+        metadata && typeof metadata === 'object' ? metadata : { notes: metadata };
+      const notes = typeof meta.notes === 'string' ? meta.notes : '';
+      const name =
+        typeof meta.name === 'string' && meta.name.trim() !== ''
+          ? meta.name.trim()
+          : symbol.toUpperCase().trim();
+      const currentPrice =
+        typeof meta.currentPrice === 'number' && meta.currentPrice > 0
+          ? meta.currentPrice
+          : purchasePrice;
+
       const investment = {
         id: generateId(),
         symbol: symbol.toUpperCase().trim(),
-        name: symbol.toUpperCase(),
+        name,
         shares: Math.round(shares * 10000) / 10000, // Round to 4 decimal places
         purchasePrice: Math.round(purchasePrice * 100) / 100, // Round to 2 decimal places
-        currentPrice: purchasePrice, // Default to purchase price
+        currentPrice: Math.round(currentPrice * 100) / 100, // Round to 2 decimal places
         purchaseDate: new Date(purchaseDate),
-        notes: notes || '',
+        notes,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
