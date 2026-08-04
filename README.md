@@ -109,7 +109,7 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 - **Income/Expense Predictions** - Forecasting based on historical patterns | src/views/financial-planning/ForecastsSection.js:ForecastsSection() | src/core/analytics/PredictionService.js:generatePredictions()
 - **Account Balance Projections** - Future balances for all accounts up to 12 months | src/core/Account/account-balance-predictor.js:projectBalances() | src/views/financial-planning/ForecastsSection.js:balance projections
 - **Cash Flow Analysis** - Predicted cash inflows and outflows | src/core/forecast-engine.js:generateIncomeForecasts() | src/views/financial-planning/ForecastsSection.js:cash flow display
-- **Goal Connection** - Forecasts show whether your projected balance will reach an active savings goal by its target date | src/core/forecast-engine.js:_generateGoalComparison() | src/views/financial-planning/ForecastsSection.js:goal connection card
+- **Goal Connection** - Forecasts show whether your projected balance will reach an active savings goal by its target date | src/core/forecast-engine.js:\_generateGoalComparison() | src/views/financial-planning/ForecastsSection.js:goal connection card
 
 #### **Investments Section**
 

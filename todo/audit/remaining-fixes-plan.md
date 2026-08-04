@@ -18,14 +18,14 @@ Every transaction logged in 3 clicks feeds a personal financial engine that gets
 
 ## Quick Status
 
-| Phase   | Description               | Remaining %                  |
-| ------- | ------------------------- | ---------------------------- |
-| Phase 0 | Documentation fixes       | 0% ✅                        |
-| Phase 1 | Remove contradictions     | 0% ✅                        |
-| Phase 2 | Rewrite advanced features | 40% ⚠️ (P2.1/P2.2 pending)   |
-| Phase 3 | Empty state optimization  | 50% ⚠️                       |
-| Phase 4 | Feature improvements      | 60% ⚠️                       |
-| Phase 5 | Documentation             | 50% ⚠️ (P1.5 in progress)    |
+| Phase   | Description               | Remaining %                |
+| ------- | ------------------------- | -------------------------- |
+| Phase 0 | Documentation fixes       | 0% ✅                      |
+| Phase 1 | Remove contradictions     | 0% ✅                      |
+| Phase 2 | Rewrite advanced features | 40% ⚠️ (P2.1/P2.2 pending) |
+| Phase 3 | Empty state optimization  | 50% ⚠️                     |
+| Phase 4 | Feature improvements      | 60% ⚠️                     |
+| Phase 5 | Documentation             | 50% ⚠️ (P1.5 in progress)  |
 
 **Overall:** ~75% complete, ~25% remaining
 
@@ -268,6 +268,7 @@ async getSeasonalAdjustments() {
 **Rationale:** Avoid duplicating the progressive unlock logic across 6 sections.
 
 **Files created & updated:**
+
 - `src/components/ProgressiveEmptyState.js` — **NEW** functional component
 - `src/views/financial-planning/BudgetsSection.js`
 - `src/views/financial-planning/GoalsSection.js`
@@ -285,6 +286,7 @@ async getSeasonalAdjustments() {
 **Rationale:** Ensure all sections use consistent transaction-count-based messaging.
 
 **Implementation:**
+
 1. Enhanced `getProgressiveUnlockMessage(section, count)` utility in `enhanced-empty-states.js`
 2. Unified thresholds across all 6 financial planning sections (30 transactions for budgets/goals/insights/investments/overview, 90 for forecasts)
 3. Verified build with `yarn run build`
@@ -306,6 +308,7 @@ async getSeasonalAdjustments() {
 | **P2.2** | Update unlock messages          | Low        | 20-30 min      |
 
 **Completed (from prior work):**
+
 - P0.1 Investment tracker cleanup (~15 min)
 - P0.2 Budget suggestions (~45 min)
 

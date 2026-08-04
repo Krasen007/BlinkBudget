@@ -67,7 +67,9 @@ describe('getProgressiveUnlockMessage Utility', () => {
   });
 
   it('should preserve backward compatibility for single parameter calls', () => {
-    expect(getProgressiveUnlockMessage(10)).toContain('Log 20 more transactions');
+    expect(getProgressiveUnlockMessage(10)).toContain(
+      'Log 20 more transactions'
+    );
     expect(getProgressiveUnlockMessage(30)).toBeNull();
   });
 });

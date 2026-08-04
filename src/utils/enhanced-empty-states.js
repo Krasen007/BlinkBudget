@@ -389,7 +389,8 @@ export function getProgressiveUnlockMessage(sectionOrCount, countParam) {
   }
 
   const remaining = threshold - transactionCount;
-  const sectionLabel = section === 'general' ? 'personalized insights' : `${section} analysis`;
+  const sectionLabel =
+    section === 'general' ? 'personalized insights' : `${section} analysis`;
   if (transactionCount === 0) {
     return `Log ${threshold}+ transactions to unlock ${sectionLabel}.`;
   }

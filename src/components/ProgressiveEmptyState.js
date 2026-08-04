@@ -90,7 +90,10 @@ export const ProgressiveEmptyState = ({
   const colorTextMuted = COLORS?.TEXT_MUTED || '#64748b';
 
   const remaining = Math.max(0, threshold - transactionCount);
-  const progressPercent = Math.min(100, Math.round((transactionCount / threshold) * 100));
+  const progressPercent = Math.min(
+    100,
+    Math.round((transactionCount / threshold) * 100)
+  );
 
   const container = document.createElement('div');
   container.className = `progressive-empty-state progressive-empty-state--${normalizedKey}`;

@@ -504,8 +504,9 @@ export const ForecastsSection = async (
         const status = document.createElement('div');
         status.textContent = goalComparison.statusMessage;
         status.style.fontSize = '0.9rem';
-        status.style.color =
-          goalComparison.isOnTrack ? COLORS.SUCCESS : COLORS.ERROR;
+        status.style.color = goalComparison.isOnTrack
+          ? COLORS.SUCCESS
+          : COLORS.ERROR;
         status.style.marginBottom = SPACING.SM;
         goalCard.appendChild(status);
 

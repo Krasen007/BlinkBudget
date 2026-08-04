@@ -65,7 +65,10 @@ export const BudgetsSection = async planningData => {
     let suggestions = [];
 
     // Generate suggestions only when manual mode is inactive.
-    if (!manualMode && transactions.length >= MIN_TRANSACTIONS_FOR_SUGGESTIONS) {
+    if (
+      !manualMode &&
+      transactions.length >= MIN_TRANSACTIONS_FOR_SUGGESTIONS
+    ) {
       suggestions = await BudgetService.suggestBudgets(transactions);
       // Filter out dismissed categories
       suggestions = suggestions.filter(

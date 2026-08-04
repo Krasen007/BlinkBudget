@@ -11,9 +11,7 @@
  * - Progress tracking display
  */
 
-import {
-  createEnhancedEmptyState,
-} from '../../utils/enhanced-empty-states.js';
+import { createEnhancedEmptyState } from '../../utils/enhanced-empty-states.js';
 import { ProgressiveEmptyState } from '../../components/ProgressiveEmptyState.js';
 import { COLORS, SPACING } from '../../utils/constants.js';
 import { createGoalProgressChart } from '../../utils/financial-planning-charts.js';

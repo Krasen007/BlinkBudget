@@ -260,7 +260,11 @@ export class AnomalyService {
       // Group by day of week for pattern detection
       const dayKey = `day_${dayOfWeek}`;
       if (!dailySpending[dayKey]) {
-        dailySpending[dayKey] = { total: 0, count: 0, categories: Object.create(null) };
+        dailySpending[dayKey] = {
+          total: 0,
+          count: 0,
+          categories: Object.create(null),
+        };
       }
       dailySpending[dayKey].total += amount;
       dailySpending[dayKey].count += 1;
@@ -275,7 +279,10 @@ export class AnomalyService {
 
     // Calculate overall average spending per day
     const dayKeys = Object.keys(dailySpending);
-    const overallTotal = dayKeys.reduce((sum, k) => sum + dailySpending[k].total, 0);
+    const overallTotal = dayKeys.reduce(
+      (sum, k) => sum + dailySpending[k].total,
+      0
+    );
     const overallAvg = dayKeys.length > 0 ? overallTotal / dayKeys.length : 0;
 
     // Find days with significantly higher spending
@@ -293,13 +300,20 @@ export class AnomalyService {
         const dayName = this._getDayName(parseInt(dayKey.split('_')[1]));
 
         // Find the category contributing most to the excess
-        const sortedCategories = Object.entries(dayData.categories)
-          .sort((a, b) => b[1] - a[1]);
+        const sortedCategories = Object.entries(dayData.categories).sort(
+          (a, b) => b[1] - a[1]
+        );
         const topCategory = sortedCategories[0];
-        const categoryExcess = topCategory ? (topCategory[1] / dayData.total) * excessAmount : 0;
+        const categoryExcess = topCategory
+          ? (topCategory[1] / dayData.total) * excessAmount
+          : 0;
 
         // Generate actionable suggestion based on category
-        const suggestion = this._generateTimingAnomalySuggestion(topCategory, dayName, categoryExcess);
+        const suggestion = this._generateTimingAnomalySuggestion(
+          topCategory,
+          dayName,
+          categoryExcess
+        );
 
         const dayIndex = parseInt(dayKey.split('_')[1]);
         insights.push({
@@ -340,7 +354,15 @@ export class AnomalyService {
    * @returns {string} Day name
    */
   static _getDayName(dayIndex) {
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const days = [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+    ];
     return days[dayIndex] || 'Day';
   }
 
@@ -355,7 +377,11 @@ export class AnomalyService {
     const categoryName = topCategory ? topCategory[0].toLowerCase() : '';
     const savings = Math.round(excessAmount * 0.2);
 
-    if (/\b(restaurant|dining|food|cafe|eating out|groceries)\b/.test(categoryName)) {
+    if (
+      /\b(restaurant|dining|food|cafe|eating out|groceries)\b/.test(
+        categoryName
+      )
+    ) {
       return {
         text: `Consider meal prepping on ${dayName}s to reduce dining costs.`,
         estimatedSavings: savings,
@@ -405,16 +431,25 @@ export class AnomalyService {
 
     // Check for month-end spike (days 25-31 vs rest of month)
     const monthEndDays = [25, 26, 27, 28, 29, 30, 31];
-    const monthEndTotal = monthEndDays.reduce((sum, d) => sum + (dayOfMonthSpending[d] || 0), 0);
+    const monthEndTotal = monthEndDays.reduce(
+      (sum, d) => sum + (dayOfMonthSpending[d] || 0),
+      0
+    );
     const otherDaysTotal = Object.entries(dayOfMonthSpending)
       .filter(([d]) => !monthEndDays.includes(parseInt(d)))
       .reduce((sum, [, v]) => sum + v, 0);
 
-    const otherDaysCount = Object.keys(dayOfMonthSpending).filter(d => !monthEndDays.includes(parseInt(d))).length;
-    const monthEndDaysCount = monthEndDays.filter(d => dayOfMonthSpending[d]).length;
+    const otherDaysCount = Object.keys(dayOfMonthSpending).filter(
+      d => !monthEndDays.includes(parseInt(d))
+    ).length;
+    const monthEndDaysCount = monthEndDays.filter(
+      d => dayOfMonthSpending[d]
+    ).length;
 
-    const avgOtherDays = otherDaysCount > 0 ? otherDaysTotal / otherDaysCount : 0;
-    const avgMonthEnd = monthEndDaysCount > 0 ? monthEndTotal / monthEndDaysCount : 0;
+    const avgOtherDays =
+      otherDaysCount > 0 ? otherDaysTotal / otherDaysCount : 0;
+    const avgMonthEnd =
+      monthEndDaysCount > 0 ? monthEndTotal / monthEndDaysCount : 0;
 
     if (avgMonthEnd > avgOtherDays * 1.5 && avgMonthEnd > 50) {
       const excess = avgMonthEnd - avgOtherDays;

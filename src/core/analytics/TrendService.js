@@ -228,7 +228,8 @@ export class TrendService {
     });
 
     // Calculate overall personal inflation rate (weighted average)
-    const overallRate = totalSpending > 0 ? (totalWeightedInflation / totalSpending) * 100 : 0;
+    const overallRate =
+      totalSpending > 0 ? (totalWeightedInflation / totalSpending) * 100 : 0;
 
     // Sort by contribution to find top drivers
     const sortedBreakdown = categoryBreakdown
@@ -238,7 +239,10 @@ export class TrendService {
     const topDrivers = sortedBreakdown.slice(0, 3);
 
     // Generate actionable suggestions
-    const suggestions = this._generateInflationSuggestions(topDrivers, overallRate);
+    const suggestions = this._generateInflationSuggestions(
+      topDrivers,
+      overallRate
+    );
 
     return {
       overallRate: Math.round(overallRate * 10) / 10,
@@ -267,10 +271,14 @@ export class TrendService {
     const suggestions = [];
 
     topDrivers.forEach(driver => {
-      let suggestion = null;
+      let suggestion;
 
       // Generate category-specific suggestions based on patterns
-      if (/\b(food|restaurant|dining|cafe|eating out|groceries)\b/i.test(driver.category)) {
+      if (
+        /\b(food|restaurant|dining|cafe|eating out|groceries)\b/i.test(
+          driver.category
+        )
+      ) {
         const savingsTip = Math.round(driver.spending * 0.15); // 15% reduction suggestion
         suggestion = {
           category: driver.category,
@@ -280,7 +288,11 @@ export class TrendService {
           estimatedSavings: savingsTip,
           difficulty: 'medium',
         };
-      } else if (/\b(transport|gas|fuel|uber|taxi|public transit)\b/i.test(driver.category)) {
+      } else if (
+        /\b(transport|gas|fuel|uber|taxi|public transit)\b/i.test(
+          driver.category
+        )
+      ) {
         const savingsTip = Math.round(driver.spending * 0.1);
         suggestion = {
           category: driver.category,
@@ -290,7 +302,11 @@ export class TrendService {
           estimatedSavings: savingsTip,
           difficulty: 'hard',
         };
-      } else if (/\b(shopping|clothes|entertainment|subscription)\b/i.test(driver.category)) {
+      } else if (
+        /\b(shopping|clothes|entertainment|subscription)\b/i.test(
+          driver.category
+        )
+      ) {
         const savingsTip = Math.round(driver.spending * 0.2);
         suggestion = {
           category: driver.category,
@@ -300,7 +316,9 @@ export class TrendService {
           estimatedSavings: savingsTip,
           difficulty: 'easy',
         };
-      } else if (/\b(utilities|electric|water|internet|phone)\b/i.test(driver.category)) {
+      } else if (
+        /\b(utilities|electric|water|internet|phone)\b/i.test(driver.category)
+      ) {
         const savingsTip = Math.round(driver.spending * 0.08);
         suggestion = {
           category: driver.category,

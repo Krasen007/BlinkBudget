@@ -5,11 +5,7 @@
  * No charts. No allocation analysis. No type-specific fields.
  */
 
-import {
-  COLORS,
-  SPACING,
-  CURRENCY_SYMBOL,
-} from '../../utils/constants.js';
+import { COLORS, SPACING, CURRENCY_SYMBOL } from '../../utils/constants.js';
 import {
   createUsageNote,
   createSectionContainer,

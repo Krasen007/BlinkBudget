@@ -48,7 +48,9 @@ export class InvestmentTracker {
       // Normalize metadata: accept either an object { name, currentPrice, notes }
       // or a plain notes string (backward compatible).
       const meta =
-        metadata && typeof metadata === 'object' ? metadata : { notes: metadata };
+        metadata && typeof metadata === 'object'
+          ? metadata
+          : { notes: metadata };
       const notes = typeof meta.notes === 'string' ? meta.notes : '';
       const name =
         typeof meta.name === 'string' && meta.name.trim() !== ''

@@ -408,7 +408,9 @@ export class RecommendationService {
       const tDate = t.date || t.timestamp;
       if (!tDate) return false;
       const date = new Date(tDate);
-      return t.category === categoryId && t.type === 'expense' && date >= oneYearAgo;
+      return (
+        t.category === categoryId && t.type === 'expense' && date >= oneYearAgo
+      );
     });
 
     // Previous year transactions (13-24 months ago)
@@ -418,12 +420,21 @@ export class RecommendationService {
       const tDate = t.date || t.timestamp;
       if (!tDate) return false;
       const date = new Date(tDate);
-      return t.category === categoryId && t.type === 'expense' && date >= twoYearsAgo && date < oneYearAgo;
+      return (
+        t.category === categoryId &&
+        t.type === 'expense' &&
+        date >= twoYearsAgo &&
+        date < oneYearAgo
+      );
     });
 
     // Group by month for both periods
-    const currentYearByMonth = this._groupTransactionsByMonth(currentYearTransactions);
-    const previousYearByMonth = this._groupTransactionsByMonth(previousYearTransactions);
+    const currentYearByMonth = this._groupTransactionsByMonth(
+      currentYearTransactions
+    );
+    const previousYearByMonth = this._groupTransactionsByMonth(
+      previousYearTransactions
+    );
 
     // Calculate year-over-year patterns
     const yoyPatterns = this._analyzeYearOverYearPatterns(
@@ -437,17 +448,24 @@ export class RecommendationService {
     const currentMonthData = currentYearByMonth[currentMonth] || [];
     const previousMonthData = previousYearByMonth[currentMonth] || [];
 
-    const currentAvg = currentMonthData.length > 0
-      ? currentMonthData.reduce((a, b) => a + b, 0) / currentMonthData.length
-      : 0;
-    const previousAvg = previousMonthData.length > 0
-      ? previousMonthData.reduce((a, b) => a + b, 0) / previousMonthData.length
-      : 0;
+    const currentAvg =
+      currentMonthData.length > 0
+        ? currentMonthData.reduce((a, b) => a + b, 0) / currentMonthData.length
+        : 0;
+    const previousAvg =
+      previousMonthData.length > 0
+        ? previousMonthData.reduce((a, b) => a + b, 0) /
+          previousMonthData.length
+        : 0;
 
-    const adjustment = currentAvg > 0 && previousAvg > 0 ? currentAvg / previousAvg : 1;
+    const adjustment =
+      currentAvg > 0 && previousAvg > 0 ? currentAvg / previousAvg : 1;
 
     // Generate factors with YOY context
-    const factors = this._generateMonthlyFactors(currentYearByMonth, previousYearByMonth);
+    const factors = this._generateMonthlyFactors(
+      currentYearByMonth,
+      previousYearByMonth
+    );
 
     return {
       adjustment: Math.round(adjustment * 100) / 100,
@@ -486,10 +504,26 @@ export class RecommendationService {
    * @param {string} categoryId - Category name
    * @returns {Array} Year-over-year patterns
    */
-  _analyzeYearOverYearPatterns(currentYearByMonth, previousYearByMonth, _categoryId) {
+  _analyzeYearOverYearPatterns(
+    currentYearByMonth,
+    previousYearByMonth,
+    _categoryId
+  ) {
     const patterns = [];
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'];
+    const monthNames = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
 
     for (let i = 0; i < 12; i++) {
       const currentMonthData = currentYearByMonth[i] || [];
@@ -525,7 +559,9 @@ export class RecommendationService {
       }
     }
 
-    return patterns.sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent));
+    return patterns.sort(
+      (a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent)
+    );
   }
 
   /**
@@ -535,31 +571,46 @@ export class RecommendationService {
    * @returns {Array} Monthly factors
    */
   _generateMonthlyFactors(currentYearByMonth, previousYearByMonth) {
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'];
+    const monthNames = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
 
-    return Object.entries(currentYearByMonth).map(([month, amounts]) => {
-      const monthIndex = parseInt(month);
-      const previousAmounts = previousYearByMonth[month] || [];
+    return Object.entries(currentYearByMonth)
+      .map(([month, amounts]) => {
+        const monthIndex = parseInt(month);
+        const previousAmounts = previousYearByMonth[month] || [];
 
-      const currentTotal = amounts.reduce((a, b) => a + b, 0);
-      const previousTotal = previousAmounts.reduce((a, b) => a + b, 0);
+        const currentTotal = amounts.reduce((a, b) => a + b, 0);
+        const previousTotal = previousAmounts.reduce((a, b) => a + b, 0);
 
-      let factor = 1;
-      if (previousTotal > 0) {
-        factor = Math.round((currentTotal / previousTotal) * 100) / 100;
-      }
+        let factor = 1;
+        if (previousTotal > 0) {
+          factor = Math.round((currentTotal / previousTotal) * 100) / 100;
+        }
 
-      const avgCurrent = amounts.length > 0 ? currentTotal / amounts.length : 0;
+        const avgCurrent =
+          amounts.length > 0 ? currentTotal / amounts.length : 0;
 
-      return {
-        month: monthNames[monthIndex],
-        monthIndex,
-        average: Math.round(avgCurrent * 100) / 100,
-        factor,
-        hasYoyData: previousAmounts.length > 0,
-      };
-    }).sort((a, b) => a.monthIndex - b.monthIndex);
+        return {
+          month: monthNames[monthIndex],
+          monthIndex,
+          average: Math.round(avgCurrent * 100) / 100,
+          factor,
+          hasYoyData: previousAmounts.length > 0,
+        };
+      })
+      .sort((a, b) => a.monthIndex - b.monthIndex);
   }
 
   /**
@@ -580,7 +631,9 @@ export class RecommendationService {
     });
 
     if (upcomingPattern) {
-      const monthlySetAside = Math.round(upcomingPattern.previousYearAmount / 10);
+      const monthlySetAside = Math.round(
+        upcomingPattern.previousYearAmount / 10
+      );
       return {
         type: 'preemptive_savings',
         category: _categoryId,
@@ -594,8 +647,14 @@ export class RecommendationService {
 
     // Find biggest pattern as fallback
     const biggestPattern = yoyPatterns[0];
-    if (biggestPattern && biggestPattern.isIncrease && biggestPattern.predictable) {
-      const monthlySetAside = Math.round(biggestPattern.previousYearAmount / 10);
+    if (
+      biggestPattern &&
+      biggestPattern.isIncrease &&
+      biggestPattern.predictable
+    ) {
+      const monthlySetAside = Math.round(
+        biggestPattern.previousYearAmount / 10
+      );
       return {
         type: 'historical_pattern',
         category: _categoryId,

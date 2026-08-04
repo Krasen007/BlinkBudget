@@ -29,7 +29,13 @@ export class ForecastEngine {
     try {
       // Validate input
       if (!Array.isArray(transactions) || transactions.length === 0) {
-        return this._generateBasicForecast('income', 0, months, goalId, goalTarget);
+        return this._generateBasicForecast(
+          'income',
+          0,
+          months,
+          goalId,
+          goalTarget
+        );
       }
 
       const allIncomeTransactions = transactions.filter(
@@ -46,7 +52,13 @@ export class ForecastEngine {
       );
 
       if (incomeTransactions.length < this.minDataPoints) {
-        return this._generateBasicForecast('income', 0, months, goalId, goalTarget);
+        return this._generateBasicForecast(
+          'income',
+          0,
+          months,
+          goalId,
+          goalTarget
+        );
       }
 
       const monthlyData = this._aggregateByMonth(incomeTransactions);
@@ -105,7 +117,13 @@ export class ForecastEngine {
       return forecasts;
     } catch (error) {
       console.error('Error generating income forecasts:', error);
-      return this._generateBasicForecast('income', 0, months, goalId, goalTarget);
+      return this._generateBasicForecast(
+        'income',
+        0,
+        months,
+        goalId,
+        goalTarget
+      );
     }
   }
 
@@ -472,7 +490,13 @@ export class ForecastEngine {
    * @param {Object} goalTarget - Optional goal target
    * @returns {Array} Basic forecast array
    */
-  _generateBasicForecast(type, baseAmount, months, goalId = null, goalTarget = null) {
+  _generateBasicForecast(
+    type,
+    baseAmount,
+    months,
+    goalId = null,
+    goalTarget = null
+  ) {
     const forecasts = [];
     let cumulativeBalance = 0;
 
