@@ -450,16 +450,25 @@ export class AnomalyService {
       otherDaysCount > 0 ? otherDaysTotal / otherDaysCount : 0;
     const avgMonthEnd =
       monthEndDaysCount > 0 ? monthEndTotal / monthEndDaysCount : 0;
+    const hasBaseline = otherDaysCount > 0 && avgOtherDays > 0;
 
-    if (avgMonthEnd > avgOtherDays * 1.5 && avgMonthEnd > 50) {
+    if (
+      hasBaseline &&
+      monthEndDaysCount > 0 &&
+      avgMonthEnd > avgOtherDays * 1.5 &&
+      avgMonthEnd > 50
+    ) {
       const excess = avgMonthEnd - avgOtherDays;
+      const percentageAbove = ((avgMonthEnd / avgOtherDays - 1) * 100).toFixed(
+        0
+      );
 
       return {
         id: 'month_end_spending_spike',
         type: 'timing_anomaly',
         pattern: 'month_end',
-        message: `Spending spikes at month-end (days 25-31) - ${((avgMonthEnd / avgOtherDays - 1) * 100).toFixed(0)}% above average`,
-        description: `Spending spikes at month-end (days 25-31) - ${((avgMonthEnd / avgOtherDays - 1) * 100).toFixed(0)}% above average`,
+        message: `Spending spikes at month-end (days 25-31) - ${percentageAbove}% above average`,
+        description: `Spending spikes at month-end (days 25-31) - ${percentageAbove}% above average`,
         contributingCategory: null,
         suggestion: `Plan ahead for month-end expenses. Consider setting aside budget earlier in the month.`,
         estimatedSavings: Math.round(excess * 0.15),

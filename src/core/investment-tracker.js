@@ -31,14 +31,10 @@ export class InvestmentTracker {
       if (!symbol || typeof symbol !== 'string') {
         throw new Error('Symbol is required and must be a string');
       }
-      if (!shares || typeof shares !== 'number' || shares <= 0) {
+      if (!Number.isFinite(shares) || shares <= 0) {
         throw new Error('Shares must be a positive number');
       }
-      if (
-        !purchasePrice ||
-        typeof purchasePrice !== 'number' ||
-        purchasePrice <= 0
-      ) {
+      if (!Number.isFinite(purchasePrice) || purchasePrice <= 0) {
         throw new Error('Purchase price must be a positive number');
       }
       if (!purchaseDate || !(purchaseDate instanceof Date)) {
@@ -57,7 +53,7 @@ export class InvestmentTracker {
           ? meta.name.trim()
           : symbol.toUpperCase().trim();
       const currentPrice =
-        typeof meta.currentPrice === 'number' && meta.currentPrice > 0
+        Number.isFinite(meta.currentPrice) && meta.currentPrice > 0
           ? meta.currentPrice
           : purchasePrice;
 

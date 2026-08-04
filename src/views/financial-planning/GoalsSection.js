@@ -711,7 +711,6 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
     const unlockCard = ProgressiveEmptyState({
       section: 'goals',
       transactionCount: txCount,
-      minTransactions: 30,
     });
     if (unlockCard) {
       section.appendChild(unlockCard);

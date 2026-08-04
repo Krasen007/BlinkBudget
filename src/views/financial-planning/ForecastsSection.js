@@ -330,7 +330,18 @@ export const ForecastsSection = async (
     // Connect forecasts to a savings goal when one exists so users can see
     // whether their projected balance will reach the goal by its target date.
     const goals = Array.isArray(planningData.goals) ? planningData.goals : [];
-    const activeGoal = goals.find(g => g && g.targetAmount > 0) || null;
+    const isActiveSavingsGoal = goal => {
+      if (
+        !goal ||
+        !Number.isFinite(goal.targetAmount) ||
+        goal.targetAmount <= 0
+      ) {
+        return false;
+      }
+      const currentSavings = Number(goal.currentSavings || 0);
+      return currentSavings < goal.targetAmount;
+    };
+    const activeGoal = goals.find(isActiveSavingsGoal) || null;
     const forecastOptions = activeGoal
       ? {
           goalId: activeGoal.id,

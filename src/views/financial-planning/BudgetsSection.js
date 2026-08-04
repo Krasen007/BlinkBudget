@@ -156,12 +156,8 @@ export const BudgetsSection = async planningData => {
     // Show message if no budgets exist and no suggestions available
     if (budgets.length === 0 && suggestions.length === 0) {
       const emptyMsg = document.createElement('div');
-      if (transactions.length < MIN_TRANSACTIONS_FOR_SUGGESTIONS) {
-        emptyMsg.textContent = `Log ${MIN_TRANSACTIONS_FOR_SUGGESTIONS - transactions.length} more transaction${transactions.length === MIN_TRANSACTIONS_FOR_SUGGESTIONS - 1 ? '' : 's'} to get personalized budget suggestions.`;
-      } else {
-        emptyMsg.textContent =
-          'No budgets set yet. Set a budget for a category below.';
-      }
+      emptyMsg.textContent =
+        'No budgets set yet. Set a budget for a category below.';
       emptyMsg.style.padding = SPACING.MD;
       emptyMsg.style.textAlign = 'center';
       emptyMsg.style.color = COLORS.TEXT_MUTED;
