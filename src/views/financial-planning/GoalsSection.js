@@ -458,29 +458,49 @@ function createGoalsList(chartRenderer, activeCharts, section) {
           form.style.flexWrap = 'wrap';
           form.style.width = '100%';
 
+          // Helper to create a compact labeled field: label sits beside the
+          // input and the wrapper carries the sizing so the row keeps its
+          // original horizontal layout.
+          const createField = (labelText, input, sizeStyle) => {
+            const wrapper = document.createElement('label');
+            wrapper.style.display = 'flex';
+            wrapper.style.alignItems = 'center';
+            wrapper.style.gap = '6px';
+            wrapper.style.fontSize = '0.75rem';
+            wrapper.style.color = COLORS.TEXT_MUTED;
+            wrapper.style.whiteSpace = 'nowrap';
+            Object.assign(wrapper.style, sizeStyle);
+
+            const label = document.createElement('span');
+            label.textContent = labelText;
+
+            input.style.flex = '1';
+            input.style.minWidth = '0';
+
+            wrapper.appendChild(label);
+            wrapper.appendChild(input);
+            return wrapper;
+          };
+
           const nameFld = document.createElement('input');
           nameFld.value = goal.name;
-          nameFld.style.minWidth = '160px';
-          nameFld.style.flex = '1 1 160px';
+          nameFld.setAttribute('aria-label', 'Goal name');
 
           const targetFld = document.createElement('input');
           targetFld.type = 'number';
           targetFld.value = goal.targetAmount;
-          targetFld.style.flex = '0 0 120px';
-          targetFld.style.minWidth = '100px';
+          targetFld.setAttribute('aria-label', 'Target amount');
 
           const dateFld = document.createElement('input');
           dateFld.type = 'date';
-          dateFld.style.flex = '0 0 160px';
-          dateFld.style.minWidth = '140px';
+          dateFld.setAttribute('aria-label', 'Target date');
           // Use helper to safely parse targetDate
           dateFld.value = safeParseDate(goal.targetDate);
 
           const currentFld = document.createElement('input');
           currentFld.type = 'number';
           currentFld.value = goal.currentSavings;
-          currentFld.style.flex = '0 0 120px';
-          currentFld.style.minWidth = '100px';
+          currentFld.setAttribute('aria-label', 'Current savings');
 
           const saveBtn = document.createElement('button');
           saveBtn.textContent = 'Save';
@@ -490,10 +510,30 @@ function createGoalsList(chartRenderer, activeCharts, section) {
           cancelBtn.textContent = 'Cancel';
           cancelBtn.className = 'btn btn-ghost';
 
-          form.appendChild(nameFld);
-          form.appendChild(targetFld);
-          form.appendChild(dateFld);
-          form.appendChild(currentFld);
+          form.appendChild(
+            createField('Name', nameFld, {
+              flex: '1 1 160px',
+              minWidth: '160px',
+            })
+          );
+          form.appendChild(
+            createField('Target', targetFld, {
+              flex: '0 0 130px',
+              minWidth: '120px',
+            })
+          );
+          form.appendChild(
+            createField('Date', dateFld, {
+              flex: '0 0 170px',
+              minWidth: '150px',
+            })
+          );
+          form.appendChild(
+            createField('Current', currentFld, {
+              flex: '0 0 130px',
+              minWidth: '120px',
+            })
+          );
           form.appendChild(saveBtn);
           form.appendChild(cancelBtn);
 
