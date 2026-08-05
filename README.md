@@ -29,7 +29,7 @@
 - **Local-first operation**: the app can run without cloud configuration using a `local-only` mode, keeping all data in localStorage for offline use and faster startup on mobile.
 - **Ghost Transactions** - See historical transaction data when dates are modified. Ghost entries are only created for older edits, not immediate corrections | src/views/EditView.js:ghost transaction rendering | src/core/transaction-service.js:getTransactionsByDate()
 - **Dynamic quick amount presets** - Buttons automatically update based on your most frequently used transaction amounts with usage counters and reset functionality. Can be shown or hidden from Settings → Advanced | src/components/QuickAmountPresets.js:QuickAmountPresets() | src/core/amount-preset-service.js:recordAmount() | src/core/amount-preset-service.js:getPresets()
-- **Progressive Unlock System** - Advanced financial planning features unlock as you build your 3-click logging habit. Log 30+ transactions to unlock smart budget suggestions, goal insights, deep analytics, and portfolio sync. Log 90+ transactions for income/expense forecasting | src/components/ProgressiveEmptyState.js:ProgressiveEmptyState() | src/views/financial-planning/*Section.js:progressive unlock integration
+- **Progressive Unlock System** - Advanced financial planning features unlock as you build your 3-click logging habit. Log 30+ transactions to unlock smart budget suggestions, goal insights, deep analytics, and portfolio sync. Log 90+ transactions for income/expense forecasting | src/components/ProgressiveEmptyState.js:ProgressiveEmptyState() | src/views/financial-planning/\*Section.js:progressive unlock integration
 
 ### Transaction Management
 
@@ -58,6 +58,7 @@
 - **Enter to save in edit mode** - Pressing Enter while editing a transaction now automatically saves it, matching the behavior in reports | src/components/TransactionForm.js:TransactionForm | src/components/TransactionForm.js:Enter key handler
 - **Bulk transaction editing** - Long-press to enter multi-select mode, select multiple transactions, and edit or delete them in bulk | src/views/DashboardView.js:multi-select | src/components/TransactionListItem.js:long-press selection
 - **Multi-select visual feedback** - Clear selection indicators and count display when selecting transactions | src/views/DashboardView.js:selection mode | src/styles/main.css:bulk-actions styles
+
 ### Dashboard & Analytics
 
 - **Real-time balance calculations** across all accounts. Dashboard label changes to "Total Filtered" when a filter is active so it's clear the number shown is not your full balance | src/core/Account/account-service.js:getAccounts() | src/views/DashboardView.js:balance display
