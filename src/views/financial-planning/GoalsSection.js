@@ -660,6 +660,7 @@ function createGoalsList(chartRenderer, activeCharts, section) {
  */
 function createGoalsSummaryCard(goals) {
   const card = document.createElement('div');
+  card.className = 'goals-summary-card';
   card.style.cssText = `
     background: ${COLORS.SURFACE};
     border: 1px solid ${COLORS.BORDER};
@@ -1029,6 +1030,16 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
               );
             } else {
               section.replaceChild(newSummaryCard, currentSummary);
+            }
+
+            // Remove this recommendation card now that its goal was created
+            recCard.remove();
+            // Remove the whole recommendations block when no cards are left
+            const hasRemainingCards = [...recommendationsSection.children].some(
+              child => child !== recTitle
+            );
+            if (!hasRemainingCards) {
+              recommendationsSection.remove();
             }
           } catch (err) {
             console.error('Failed to create goal from recommendation:', err);

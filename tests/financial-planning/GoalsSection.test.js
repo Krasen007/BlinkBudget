@@ -35,10 +35,37 @@ vi.mock('../../src/utils/financial-planning-helpers.js', () => ({
 vi.mock('../../src/core/storage.js', () => ({
   StorageService: {
     getGoals: vi.fn(() => []),
+    getAllTransactions: vi.fn(() => []),
     createGoal: vi.fn(),
     updateGoal: vi.fn(),
     deleteGoal: vi.fn(),
     getGoalsSummary: vi.fn(() => ({ totalGoalProgress: 0, goalsCount: 0 })),
+  },
+}));
+
+// Mock SavingsGoalsService so recommendation cards are deterministic
+vi.mock('../../src/core/savings-goals-service.js', () => ({
+  SavingsGoalsService: {
+    getGoalRecommendations: vi.fn(async () => [
+      {
+        type: 'emergency_fund',
+        title: 'Build Emergency Fund',
+        description: 'Save 6 months of expenses',
+        target: 6000,
+        current: 0,
+        priority: 'high',
+        category: 'Emergency Fund',
+      },
+      {
+        type: 'vacation',
+        title: 'Vacation Fund',
+        description: 'Save for your next vacation',
+        target: 2000,
+        current: 0,
+        priority: 'low',
+        category: 'Vacation',
+      },
+    ]),
   },
 }));
 
@@ -115,5 +142,52 @@ describe('GoalsSection', () => {
 
     const placeholder = section.querySelector('.placeholder');
     expect(placeholder).toBeTruthy();
+  });
+
+  it('should remove a recommendation card when its goal is created', async () => {
+    mockStorageService.getGoals.mockReturnValue([
+      {
+        id: 'existing',
+        name: 'Existing Goal',
+        targetAmount: 10000,
+        currentSavings: 5000,
+        targetDate: '2027-06-01',
+      },
+    ]);
+
+    const section = await GoalsSection(mockChartRenderer, mockActiveCharts);
+
+    const recSection = section.querySelector('.goal-recommendations');
+    expect(recSection).toBeTruthy();
+
+    const createButtons = [...recSection.querySelectorAll('button')].filter(
+      btn => btn.textContent === 'Create Goal'
+    );
+    expect(createButtons.length).toBe(2);
+
+    // Helper to flush pending microtasks/await chains in the async handler
+    const flushAsync = async () => {
+      for (let i = 0; i < 5; i++) {
+        await new Promise(resolve => setTimeout(resolve, 0));
+      }
+    };
+
+    createButtons[0].click();
+    await flushAsync();
+
+    // The created card is removed, the other card remains
+    const remainingButtons = [...recSection.querySelectorAll('button')].filter(
+      btn => btn.textContent === 'Create Goal'
+    );
+    expect(remainingButtons.length).toBe(1);
+    expect(section.contains(recSection)).toBe(true);
+    expect(mockStorageService.createGoal).toHaveBeenCalledTimes(1);
+
+    remainingButtons[0].click();
+    await flushAsync();
+
+    // The whole recommendations block disappears when the last card is created
+    expect(section.querySelector('.goal-recommendations')).toBeFalsy();
+    expect(mockStorageService.createGoal).toHaveBeenCalledTimes(2);
   });
 });
