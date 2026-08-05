@@ -144,6 +144,7 @@ export const BulkEditDialog = ({ selectedIds, onClose }) => {
       const newCategory = categorySelect.value || null;
       const newTag = tagSelect.value || null;
       const newDate = dateInput.value || null;
+      const updatedIds = [];
 
       selectedIds.forEach(id => {
         const tx = TransactionService.get(id);
@@ -163,12 +164,15 @@ export const BulkEditDialog = ({ selectedIds, onClose }) => {
           }
         }
 
-        if (Object.keys(updates).length > 0)
+        if (Object.keys(updates).length > 0) {
           TransactionService.update(id, updates);
+          updatedIds.push(id);
+        }
       });
 
-      // Mark all edited transactions for green highlight animation on the dashboard
-      markTransactionForHighlight([...selectedIds].join(','));
+      if (updatedIds.length > 0) {
+        markTransactionForHighlight(updatedIds.join(','));
+      }
 
       close();
     },
@@ -200,5 +204,6 @@ export const BulkEditDialog = ({ selectedIds, onClose }) => {
   document.body.addEventListener('keydown', onKey);
 
   document.body.appendChild(overlay);
+  overlay.close = close;
   return overlay;
 };

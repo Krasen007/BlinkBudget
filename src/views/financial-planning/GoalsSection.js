@@ -1032,6 +1032,11 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
               section.replaceChild(newSummaryCard, currentSummary);
             }
 
+            if (emptyPlaceholder && section.contains(emptyPlaceholder)) {
+              emptyPlaceholder.remove();
+              emptyPlaceholder = null;
+            }
+
             // Remove this recommendation card now that its goal was created
             recCard.remove();
             // Remove the whole recommendations block when no cards are left
@@ -1060,14 +1065,15 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
   // Initial population of the list
   await refreshGoalsList();
 
+  let emptyPlaceholder = null;
   // Add placeholder only when goals are not managed yet
   if (!hasRealGoals) {
-    const placeholder = createPlaceholder(
+    emptyPlaceholder = createPlaceholder(
       'No Goals Yet',
       'Log more transactions to see what goals are realistic for you.',
       '🎯'
     );
-    section.appendChild(placeholder);
+    section.appendChild(emptyPlaceholder);
   }
 
   return section;

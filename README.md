@@ -29,7 +29,7 @@
 - **Local-first operation**: the app can run without cloud configuration using a `local-only` mode, keeping all data in localStorage for offline use and faster startup on mobile.
 - **Ghost Transactions** - See historical transaction data when dates are modified. Ghost entries are only created for older edits, not immediate corrections | src/views/EditView.js:ghost transaction rendering | src/core/transaction-service.js:getTransactionsByDate()
 - **Dynamic quick amount presets** - Buttons automatically update based on your most frequently used transaction amounts with usage counters and reset functionality. Can be shown or hidden from Settings → Advanced | src/components/QuickAmountPresets.js:QuickAmountPresets() | src/core/amount-preset-service.js:recordAmount() | src/core/amount-preset-service.js:getPresets()
-- **Progressive Unlock System** - Advanced financial planning features unlock as you build your 3-click logging habit. Log 30+ transactions to unlock smart budget suggestions, goal insights, deep analytics, and portfolio sync. Log 90+ transactions for income/expense forecasting | src/components/ProgressiveEmptyState.js:ProgressiveEmptyState() | src/views/financial-planning/\*Section.js:progressive unlock integration
+- **Progressive Unlock System** - Advanced financial planning features unlock as you build your 3-click logging habit. Log 30+ transactions to unlock smart budget suggestions, goal insights, deep analytics, and portfolio sync. Log 90+ transactions for income/expense forecasting | src/components/ProgressiveEmptyState.js:ProgressiveEmptyState() | src/views/financial-planning/Section.js:progressive unlock integration
 
 ### Transaction Management
 

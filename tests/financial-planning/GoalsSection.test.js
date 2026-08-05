@@ -144,6 +144,32 @@ describe('GoalsSection', () => {
     expect(placeholder).toBeTruthy();
   });
 
+  it('should create a goal and remove the no-goals placeholder when starting from empty state', async () => {
+    mockStorageService.getGoals.mockReturnValue([]);
+
+    const section = await GoalsSection(mockChartRenderer, mockActiveCharts);
+    const recSection = section.querySelector('.goal-recommendations');
+    expect(recSection).toBeTruthy();
+    expect(section.querySelector('.placeholder')).toBeTruthy();
+
+    const createButtons = [...recSection.querySelectorAll('button')].filter(
+      btn => btn.textContent === 'Create Goal'
+    );
+    expect(createButtons.length).toBeGreaterThan(0);
+
+    const flushAsync = async () => {
+      for (let i = 0; i < 5; i++) {
+        await new Promise(resolve => setTimeout(resolve, 0));
+      }
+    };
+
+    createButtons[0].click();
+    await flushAsync();
+
+    expect(mockStorageService.createGoal).toHaveBeenCalledTimes(1);
+    expect(section.querySelector('.placeholder')).toBeFalsy();
+  });
+
   it('should remove a recommendation card when its goal is created', async () => {
     mockStorageService.getGoals.mockReturnValue([
       {

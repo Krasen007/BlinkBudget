@@ -56,21 +56,31 @@ vi.mock('../../src/utils/success-feedback.js', () => ({
 }));
 
 describe('BulkEditDialog', () => {
+  let dialog;
+
   beforeEach(() => {
+    dialog = null;
     updateMock.mockClear();
     markHighlightMock.mockClear();
     document.body.innerHTML = '';
   });
 
+  afterEach(() => {
+    if (dialog && typeof dialog.close === 'function') {
+      dialog.close();
+      dialog = null;
+    }
+  });
+
   it('renders a date input field', () => {
-    BulkEditDialog({ selectedIds: new Set(['tx-1']), onClose: vi.fn() });
+    dialog = BulkEditDialog({ selectedIds: new Set(['tx-1']), onClose: vi.fn() });
     const dateInput = document.getElementById('bulk-date');
     expect(dateInput).not.toBeNull();
     expect(dateInput.type).toBe('date');
   });
 
   it('updates the date of all selected transactions when a new date is chosen', () => {
-    BulkEditDialog({
+    dialog = BulkEditDialog({
       selectedIds: new Set(['tx-1', 'tx-2']),
       onClose: vi.fn(),
     });
@@ -89,7 +99,7 @@ describe('BulkEditDialog', () => {
   });
 
   it('does not update timestamp when date field is left empty', () => {
-    BulkEditDialog({ selectedIds: new Set(['tx-1']), onClose: vi.fn() });
+    dialog = BulkEditDialog({ selectedIds: new Set(['tx-1']), onClose: vi.fn() });
     const applyBtn = [...document.querySelectorAll('button')].find(
       b => b.textContent === 'Apply Changes'
     );
@@ -98,7 +108,7 @@ describe('BulkEditDialog', () => {
   });
 
   it('marks all edited transactions for green highlight animation', () => {
-    BulkEditDialog({
+    dialog = BulkEditDialog({
       selectedIds: new Set(['tx-1', 'tx-2']),
       onClose: vi.fn(),
     });
