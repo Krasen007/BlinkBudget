@@ -85,6 +85,40 @@ export const BulkEditDialog = ({ selectedIds, onClose }) => {
   });
   form.appendChild(tagSelect);
 
+  // Date change field
+  form.appendChild(mkLabel('Date', 'bulk-date'));
+  const dateInput = document.createElement('input');
+  dateInput.type = 'date';
+  dateInput.id = 'bulk-date';
+  dateInput.className = 'mobile-form-input date-input-field';
+  dateInput.value = '';
+  dateInput.setAttribute('aria-label', 'Change date of selected transactions');
+  dateInput.style.width = '100%';
+  dateInput.style.padding = `${SPACING.SM} ${SPACING.MD}`;
+  dateInput.style.border = `1px solid ${COLORS.BORDER}`;
+  dateInput.style.borderRadius = 'var(--radius-md)';
+  dateInput.style.background = COLORS.SURFACE;
+  dateInput.style.color = COLORS.TEXT_MAIN;
+  dateInput.style.fontSize = 'var(--font-size-base)';
+  form.appendChild(dateInput);
+
+  // Helper to preserve the time-of-day from an existing timestamp when changing the date
+  const buildTimestampForDate = (existingTimestamp, newDate) => {
+    if (!existingTimestamp || !newDate) return null;
+    if (newDate.includes('T')) return newDate;
+
+    const tIndex = existingTimestamp.indexOf('T');
+    if (tIndex === -1) return null;
+    const timePart = existingTimestamp.slice(tIndex + 1);
+    if (!timePart) return null;
+
+    const isoCandidate = `${newDate}T${timePart}`;
+    const parsed = new Date(isoCandidate);
+    if (isNaN(parsed.getTime())) return null;
+
+    return parsed.toISOString();
+  };
+
   card.appendChild(form);
 
   const btnGroup = document.createElement('div');
@@ -108,6 +142,7 @@ export const BulkEditDialog = ({ selectedIds, onClose }) => {
       const newAccount = accountSelect.value || null;
       const newCategory = categorySelect.value || null;
       const newTag = tagSelect.value || null;
+      const newDate = dateInput.value || null;
 
       selectedIds.forEach(id => {
         const tx = TransactionService.get(id);
@@ -118,6 +153,15 @@ export const BulkEditDialog = ({ selectedIds, onClose }) => {
         if (newCategory && tx.category !== newCategory)
           updates.category = newCategory;
         if (newTag !== null) updates.tags = newTag ? [newTag] : [];
+
+        // Change date: preserve the original time-of-day from the existing timestamp
+        if (newDate) {
+          const newTimestamp = buildTimestampForDate(tx.timestamp, newDate);
+          if (newTimestamp && newTimestamp !== tx.timestamp) {
+            updates.timestamp = newTimestamp;
+          }
+        }
+
         if (Object.keys(updates).length > 0)
           TransactionService.update(id, updates);
       });
