@@ -84,10 +84,12 @@ export const ProgressiveEmptyState = ({
   const spaceMd = SPACING?.MD || '16px';
 
   const colorPrimary = COLORS?.PRIMARY || '#3b82f6';
-  const colorBgMuted = COLORS?.BACKGROUND_MUTED || '#f8fafc';
-  const colorBorder = COLORS?.BORDER || '#e2e8f0';
-  const colorTextMain = COLORS?.TEXT_MAIN || '#0f172a';
-  const colorTextMuted = COLORS?.TEXT_MUTED || '#64748b';
+  const colorSurface = COLORS?.SURFACE || 'var(--color-surface)';
+  const colorSurfaceHover =
+    COLORS?.SURFACE_HOVER || 'var(--color-surface-hover)';
+  const colorBorder = COLORS?.BORDER || 'var(--color-border)';
+  const colorTextMain = COLORS?.TEXT_MAIN || 'var(--color-text-main)';
+  const colorTextMuted = COLORS?.TEXT_MUTED || 'var(--color-text-muted)';
 
   const remaining = Math.max(0, threshold - transactionCount);
   const progressPercent = Math.min(
@@ -102,7 +104,7 @@ export const ProgressiveEmptyState = ({
     flexDirection: 'column',
     gap: spaceSm,
     padding: spaceMd,
-    backgroundColor: colorBgMuted,
+    backgroundColor: colorSurface,
     borderRadius: '8px',
     border: `1px solid ${colorBorder}`,
     margin: `${spaceSm} 0`,
@@ -168,7 +170,7 @@ export const ProgressiveEmptyState = ({
   Object.assign(track.style, {
     width: '100%',
     height: '6px',
-    backgroundColor: 'rgba(0, 0, 0, 0.08)',
+    backgroundColor: colorSurfaceHover,
     borderRadius: '3px',
     overflow: 'hidden',
   });

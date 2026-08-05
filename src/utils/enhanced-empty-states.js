@@ -254,7 +254,7 @@ export function createEnhancedEmptyState(scenario, options = {}) {
     Object.assign(tipsContainer.style, {
       marginTop: SPACING.XL,
       padding: `${SPACING.MD} ${SPACING.LG}`,
-      backgroundColor: `color-mix(in srgb, ${COLORS.BACKGROUND_MUTED} 12.5%, transparent)`,
+      backgroundColor: `color-mix(in srgb, ${COLORS.SURFACE} 12.5%, transparent)`,
       borderRadius: '8px',
       border: `1px solid color-mix(in srgb, ${COLORS.BORDER} 12.5%, transparent)`,
     });
