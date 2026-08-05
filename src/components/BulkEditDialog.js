@@ -3,6 +3,7 @@ import { CustomCategoryService } from '../core/custom-category-service.js';
 import { AccountService } from '../core/Account/account-service.js';
 import { TransactionService } from '../core/transaction-service.js';
 import { SPACING, COLORS } from '../utils/constants.js';
+import { markTransactionForHighlight } from '../utils/success-feedback.js';
 
 export const BulkEditDialog = ({ selectedIds, onClose }) => {
   const overlay = document.createElement('div');
@@ -165,6 +166,9 @@ export const BulkEditDialog = ({ selectedIds, onClose }) => {
         if (Object.keys(updates).length > 0)
           TransactionService.update(id, updates);
       });
+
+      // Mark all edited transactions for green highlight animation on the dashboard
+      markTransactionForHighlight([...selectedIds].join(','));
 
       close();
     },

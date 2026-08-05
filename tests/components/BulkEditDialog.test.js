@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BulkEditDialog } from '../../src/components/BulkEditDialog.js';
 
-const { updateMock, mockTransactions } = vi.hoisted(() => ({
+const { updateMock, markHighlightMock, mockTransactions } = vi.hoisted(() => ({
   updateMock: vi.fn(),
+  markHighlightMock: vi.fn(),
   mockTransactions: [
     {
       id: 'tx-1',
@@ -50,9 +51,14 @@ vi.mock('../../src/core/transaction-service.js', () => ({
   },
 }));
 
+vi.mock('../../src/utils/success-feedback.js', () => ({
+  markTransactionForHighlight: markHighlightMock,
+}));
+
 describe('BulkEditDialog', () => {
   beforeEach(() => {
     updateMock.mockClear();
+    markHighlightMock.mockClear();
     document.body.innerHTML = '';
   });
 
@@ -89,5 +95,18 @@ describe('BulkEditDialog', () => {
     );
     applyBtn.click();
     expect(updateMock).not.toHaveBeenCalled();
+  });
+
+  it('marks all edited transactions for green highlight animation', () => {
+    BulkEditDialog({
+      selectedIds: new Set(['tx-1', 'tx-2']),
+      onClose: vi.fn(),
+    });
+    document.getElementById('bulk-date').value = '2026-07-01';
+    const applyBtn = [...document.querySelectorAll('button')].find(
+      b => b.textContent === 'Apply Changes'
+    );
+    applyBtn.click();
+    expect(markHighlightMock).toHaveBeenCalledWith('tx-1,tx-2');
   });
 });
