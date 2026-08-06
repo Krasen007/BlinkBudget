@@ -204,6 +204,5 @@ export const BulkEditDialog = ({ selectedIds, onClose }) => {
   document.body.addEventListener('keydown', onKey);
 
   document.body.appendChild(overlay);
-  overlay.close = close;
   return overlay;
 };

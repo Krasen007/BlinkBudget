@@ -119,4 +119,17 @@ describe('BulkEditDialog', () => {
     applyBtn.click();
     expect(markHighlightMock).toHaveBeenCalledWith('tx-1,tx-2');
   });
+
+  it('only highlights transactions that were actually updated', () => {
+    dialog = BulkEditDialog({
+      selectedIds: new Set(['tx-1', 'tx-2']),
+      onClose: vi.fn(),
+    });
+    document.getElementById('bulk-date').value = '';
+    const applyBtn = [...document.querySelectorAll('button')].find(
+      b => b.textContent === 'Apply Changes'
+    );
+    applyBtn.click();
+    expect(markHighlightMock).not.toHaveBeenCalled();
+  });
 });
