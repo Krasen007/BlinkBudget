@@ -73,7 +73,10 @@ describe('BulkEditDialog', () => {
   });
 
   it('renders a date input field', () => {
-    dialog = BulkEditDialog({ selectedIds: new Set(['tx-1']), onClose: vi.fn() });
+    dialog = BulkEditDialog({
+      selectedIds: new Set(['tx-1']),
+      onClose: vi.fn(),
+    });
     const dateInput = document.getElementById('bulk-date');
     expect(dateInput).not.toBeNull();
     expect(dateInput.type).toBe('date');
@@ -99,7 +102,10 @@ describe('BulkEditDialog', () => {
   });
 
   it('does not update timestamp when date field is left empty', () => {
-    dialog = BulkEditDialog({ selectedIds: new Set(['tx-1']), onClose: vi.fn() });
+    dialog = BulkEditDialog({
+      selectedIds: new Set(['tx-1']),
+      onClose: vi.fn(),
+    });
     const applyBtn = [...document.querySelectorAll('button')].find(
       b => b.textContent === 'Apply Changes'
     );

@@ -108,15 +108,23 @@ service firebase.storage {
 
 ### Automated Scanning
 
-1. **Snyk Integration**:
-   - `.snyk` policy file configured
-   - Automated vulnerability scanning
-   - Integration with GitHub for monitoring
+1. **GitHub Actions CI** (`.github/workflows/ci.yml`):
+   - Automated `npm audit` on every push/PR to master
+   - Quality checks (`yarn run check`) — lint, stylelint, prettier, docs validation
+   - Unit test suite (`yarn test`)
+   - Production build verification
+   - Snyk dependency scan (requires `SNYK_TOKEN` secret)
 
-2. **GitHub Dependabot**:
-   - Weekly dependency updates
+2. **Snyk Integration**:
+   - `.snyk` policy file configured
+   - Snyk scan step in CI (`yarn snyk`)
+   - Snyk Monitor for continuous dependency monitoring on master pushes
+
+3. **GitHub Dependabot** (`.github/dependabot.yml`):
+   - Weekly dependency updates (Monday 07:00 Europe/Sofia)
    - Automatic pull request creation
    - Security vulnerability alerts
+   - Also tracks GitHub Actions workflow versions
 
 ### Manual Security Checks
 
@@ -126,11 +134,11 @@ Run security scans manually:
 # Validate environment variables
 node config/validate-env.cjs
 
-# Audit npm packages
-npm audit
+# Audit npm packages (via Yarn)
+yarn npm audit --all
 
-# Run Snyk scan (requires Snyk CLI)
-npx snyk test --severity-threshold=high
+# Run Snyk scan (requires Snyk CLI and SNYK_TOKEN)
+yarn snyk
 ```
 
 ## Security Monitoring

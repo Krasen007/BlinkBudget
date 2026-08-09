@@ -7,14 +7,6 @@ exclude:
     - dist/**
     - .git/**
     # Hardcoded passwords in test files are intentional test fixtures
-    - tests/security/auth-penetration-simple.test.js:
-        - javascript/NoHardcodedPasswords/test
-    - tests/security/auth-penetration.test.js:
-        - javascript/NoHardcodedPasswords/test
-    - tests/security/comprehensive-security.test.js:
-        - javascript/NoHardcodedPasswords/test
-    - tests/security/security-validation.test.js:
-        - javascript/NoHardcodedPasswords/test
     - tests/security/test-data.js:
         - javascript/NoHardcodedPasswords/test
     
@@ -28,4 +20,4 @@ exclude:
 
         
 
-version: v1.0.0
+version: v1.1.0

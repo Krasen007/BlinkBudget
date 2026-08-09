@@ -118,9 +118,9 @@ const createMemoryStorage = () => {
 
 /** Extract the rendered transaction ids from the dashboard DOM. */
 const getRenderedTransactionIds = container =>
-  Array.from(
-    container.querySelectorAll('.transaction-list-item')
-  ).map(item => item.dataset.transactionId);
+  Array.from(container.querySelectorAll('.transaction-list-item')).map(
+    item => item.dataset.transactionId
+  );
 
 /** Find the rendered tag badge for a given tag name inside a transaction row. */
 const findTagBadge = (container, tagName) => {
@@ -128,8 +128,7 @@ const findTagBadge = (container, tagName) => {
     container.querySelectorAll('.transaction-item-tag')
   );
   return badges.find(
-    badge =>
-      badge.textContent.trim().toUpperCase() === tagName.toUpperCase()
+    badge => badge.textContent.trim().toUpperCase() === tagName.toUpperCase()
   );
 };
 
@@ -149,10 +148,7 @@ const getActiveFilterChip = container => {
 const getActiveFilterChipText = container => {
   const chip = getActiveFilterChip(container);
   if (!chip) return null;
-  return chip.textContent
-    .replace(/×/g, '')
-    .trim()
-    .toUpperCase();
+  return chip.textContent.replace(/×/g, '').trim().toUpperCase();
 };
 
 describe('DashboardView tag (label) filtering', () => {

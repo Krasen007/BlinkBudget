@@ -21,6 +21,7 @@
     "check": "yarn run lint && yarn run lint:css && yarn run format:check && yarn run validate-docs",
     "fix": "yarn run lint:fix && yarn run lint:css:fix && yarn run format && yarn run validate-docs:stats && yarn run validate-docs",
     "validate-env": "node config/validate-env.cjs",
+    "snyk": "snyk test --severity-threshold=high",
     "validate-docs": "node scripts/validate-docs.js",
     "validate-docs:stats": "node scripts/validate-docs.js --stats"
   },

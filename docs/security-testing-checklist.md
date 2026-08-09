@@ -290,19 +290,20 @@ npm install -g audit-ci
 - [ ] **Static Analysis**: Code security scanning
 - [ ] **Dependency Scanning**: Automated vulnerability scanning
 
-### CI/CD Integration
+### CI/CD Integration (Implemented)
 
-```yaml
-# GitHub Actions Example
-- name: Security Audit
-  run: npm audit
+The project has a GitHub Actions CI pipeline in `.github/workflows/ci.yml` that runs on every push/PR to `master`:
 
-- name: Snyk Security Scan
-  run: npx snyk test --severity-threshold=high
+- **Dependency Audit**: `yarn npm audit --all` blocks on known vulnerabilities
+- **Quality Checks**: `yarn run check` (ESLint, Stylelint, Prettier, docs validation)
+- **Unit Tests**: Full Vitest suite (`yarn test`)
+- **Production Build**: `yarn run build` with output verification
+- **Snyk Scan**: `snyk test --severity-threshold=high` (requires `SNYK_TOKEN` secret)
+- **Snyk Monitor**: Continuous dependency monitoring on master pushes
 
-- name: OWASP ZAP Baseline Scan
-  run: docker run -t owasp/zap2docker-stable zap-baseline.py -t $URL
-```
+Dependabot (`.github/dependabot.yml`) provides weekly dependency update PRs and security alerts.
+
+> **Note**: OWASP ZAP baseline scanning is not yet integrated. It can be added as a scheduled job or on-demand via `docker run -t owasp/zap2docker-stable zap-baseline.py -t $URL`.
 
 ## Frequency
 
