@@ -1,5 +1,5 @@
 # Dependabot configuration for BlinkBudget
-# Enables automated dependency updates and security alerts
+# Enables automated dependency update pull requests only; Dependabot alerts require repository/org security settings
 
 version: 2
 updates:

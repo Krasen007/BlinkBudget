@@ -168,12 +168,16 @@ describe('DashboardView tag (label) filtering', () => {
       JSON.stringify(FLAG_CATEGORIES)
     );
     global.localStorage.setItem('categories_initialized_user-1', 'true');
+
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-08T12:00:00.000Z'));
   });
 
   afterEach(() => {
     container?.cleanup?.();
     container = null;
     vi.clearAllMocks();
+    vi.useRealTimers();
   });
 
   it('cycles tag filter through none -> include -> exclude -> none via user clicks', () => {

@@ -301,7 +301,7 @@ The project has a GitHub Actions CI pipeline in `.github/workflows/ci.yml` that 
 - **Snyk Scan**: `snyk test --severity-threshold=high` (requires `SNYK_TOKEN` secret)
 - **Snyk Monitor**: Continuous dependency monitoring on master pushes
 
-Dependabot (`.github/dependabot.yml`) provides weekly dependency update PRs and security alerts.
+Dependabot (`.github/dependabot.yml`) provides weekly dependency update PRs; Dependabot alerts require GitHub repository or organization security settings.
 
 > **Note**: OWASP ZAP baseline scanning is not yet integrated. It can be added as a scheduled job or on-demand via `docker run -t owasp/zap2docker-stable zap-baseline.py -t $URL`.
 
@@ -358,5 +358,5 @@ Each security task has assigned ownership:
 - **Incident Response**: Participate in security incident response procedures
 - **Documentation**: Maintain security documentation and runbooks
 
-**Last Updated**: April 7, 2026  
+**Last Updated**: August 9, 2026  
 **Version**: 1.0

@@ -131,10 +131,10 @@ A `.github/` directory now provides the full CI/CD security pipeline:
   - `unit-tests` job: full Vitest suite
   - `build` job: production build with output verification
   - `snyk` job: Snyk scan (`snyk test --severity-threshold=high`) with conditional `SNYK_TOKEN` check and Snyk Monitor on master pushes
-- **`.github/dependabot.yml`** — weekly dependency updates (npm + GitHub Actions), security alerts, auto PRs
+- **`.github/dependabot.yml`** — weekly dependency updates (npm + GitHub Actions), auto PRs; security alerts and security updates require enabling the appropriate GitHub repository or organization settings
 - **`package.json`** — `snyk` script: `snyk test --severity-threshold=high` for local/CI scanning
 
-> **Note**: Dependabot security alerts and the Snyk CI runner require the repo owner to add the `SNYK_TOKEN` secret in GitHub repository settings for the Snyk job to run.
+> **Note**: `SNYK_TOKEN` is required only for the Snyk CI scan and monitor steps; Dependabot alerts/security updates require enabling the corresponding GitHub repository/org security settings.
 
 ### G2. Stale `.snyk` Exclusions
 

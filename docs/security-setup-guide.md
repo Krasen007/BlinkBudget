@@ -117,13 +117,13 @@ service firebase.storage {
 
 2. **Snyk Integration**:
    - `.snyk` policy file configured
-   - Snyk scan step in CI (`yarn snyk`)
+   - Snyk scan step in CI using the `snyk/actions/node` GitHub action
    - Snyk Monitor for continuous dependency monitoring on master pushes
 
 3. **GitHub Dependabot** (`.github/dependabot.yml`):
    - Weekly dependency updates (Monday 07:00 Europe/Sofia)
    - Automatic pull request creation
-   - Security vulnerability alerts
+   - Security vulnerability alerts require enabling GitHub Dependabot alerts/security updates in repository or organization settings
    - Also tracks GitHub Actions workflow versions
 
 ### Manual Security Checks

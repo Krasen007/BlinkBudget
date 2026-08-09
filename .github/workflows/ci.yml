@@ -13,6 +13,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   # ─── Dependency Security Audit ─────────────────────────────────────────────
   security-audit:
@@ -29,7 +32,7 @@ jobs:
           cache: yarn
 
       - name: Enable Corepack (Yarn 4)
-        run: npm install -g corepack && corepack enable
+        run: npm install -g corepack@0.35.0 && corepack enable
 
       - name: Install Dependencies
         run: yarn install --immutable
@@ -52,7 +55,7 @@ jobs:
           cache: yarn
 
       - name: Enable Corepack (Yarn 4)
-        run: npm install -g corepack && corepack enable
+        run: npm install -g corepack@0.35.0 && corepack enable
 
       - name: Install Dependencies
         run: yarn install --immutable
@@ -75,7 +78,7 @@ jobs:
           cache: yarn
 
       - name: Enable Corepack (Yarn 4)
-        run: npm install -g corepack && corepack enable
+        run: npm install -g corepack@0.35.0 && corepack enable
 
       - name: Install Dependencies
         run: yarn install --immutable
@@ -98,7 +101,7 @@ jobs:
           cache: yarn
 
       - name: Enable Corepack (Yarn 4)
-        run: npm install -g corepack && corepack enable
+        run: npm install -g corepack@0.35.0 && corepack enable
 
       - name: Install Dependencies
         run: yarn install --immutable
@@ -140,7 +143,7 @@ jobs:
 
       - name: Enable Corepack (Yarn 4)
         if: steps.snyk-token-check.outputs.configured == 'true'
-        run: npm install -g corepack && corepack enable
+        run: npm install -g corepack@0.35.0 && corepack enable
 
       - name: Install Dependencies
         if: steps.snyk-token-check.outputs.configured == 'true'
@@ -148,7 +151,8 @@ jobs:
 
       - name: Snyk Test (blocking)
         if: steps.snyk-token-check.outputs.configured == 'true'
-        uses: snyk/actions/node@master
+        # pin to verified release v1.0.0 commit
+        uses: snyk/actions/node@9adf32b1121593767fc3c057af55b55db032dc04
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
@@ -156,7 +160,8 @@ jobs:
 
       - name: Snyk Monitor (continuous monitoring)
         if: steps.snyk-token-check.outputs.configured == 'true' && github.ref == 'refs/heads/master' && github.event_name == 'push'
-        uses: snyk/actions/node@master
+        # pin to verified release v1.0.0 commit
+        uses: snyk/actions/node@9adf32b1121593767fc3c057af55b55db032dc04
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
