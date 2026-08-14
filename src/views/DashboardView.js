@@ -170,6 +170,17 @@ const preloadFinancialPlanningData = async () => {
   return financialPlanningPreloadPromise;
 };
 
+/**
+ * Normalize stale/deleted account filter back to 'all'.
+ * Ensures displayed account name and balance stay in sync by detecting when
+ * the persisted currentAccountFilter points to a deleted account.
+ * Updates both currentAccountFilter and DASHBOARD_FILTER session value.
+ * @param {Array} accounts Current list of valid accounts
+ * @param {HTMLSelectElement} [selectElement] Optional select to update value
+ * @returns {boolean} True if normalization occurred, false otherwise
+ */
+let normalizeStaleAccountFilter; // Forward declaration
+
 export const DashboardView = (params = {}) => {
   const container = document.createElement('div');
   container.className = 'view-dashboard view-container';
@@ -255,6 +266,21 @@ export const DashboardView = (params = {}) => {
       console.error('[DashboardView] Failed to parse saved date range:', e);
     }
   }
+
+  // Helper: Normalize stale/deleted account filter back to 'all'
+  const normalizeStaleAccountFilterImpl = (accounts, selectElement) => {
+    const accountExists = accounts.some(a => a.id === currentAccountFilter);
+
+    if (currentAccountFilter !== 'all' && !accountExists) {
+      currentAccountFilter = 'all';
+      sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, 'all');
+      if (selectElement) {
+        selectElement.value = 'all';
+      }
+      return true;
+    }
+    return false;
+  };
 
   // Multi-select state
   let isSelectionMode = false;
@@ -458,6 +484,13 @@ export const DashboardView = (params = {}) => {
 
   const accounts = AccountService.getAccounts();
 
+  // Guard against a stale/persisted account filter (e.g. set by an earlier
+  // transaction flow to an account that no longer exists). A leftover filter
+  // would display an account name that does not correspond to the balance that
+  // is computed below, so we normalize it back to "All Accounts" before any
+  // render. This keeps the shown account name and the shown amount in sync.
+  normalizeStaleAccountFilterImpl(accounts);
+
   const allOption = document.createElement('option');
   allOption.value = 'all';
   allOption.textContent = 'All Accounts';
@@ -472,6 +505,10 @@ export const DashboardView = (params = {}) => {
     accountSelect.appendChild(opt);
   });
 
+  // Explicitly synchronize the select with the filter used to compute the
+  // balance so the visible account name always matches the displayed amount.
+  accountSelect.value = currentAccountFilter;
+
   filterRow.appendChild(accountSelect);
   leftHeader.appendChild(filterRow);
   header.appendChild(leftHeader);
@@ -479,7 +516,6 @@ export const DashboardView = (params = {}) => {
 
   const refreshAccountOptions = () => {
     const accounts = AccountService.getAccounts();
-    const currentVal = accountSelect.value;
     // Security: Clearing select options, no user input involved
     accountSelect.innerHTML = '';
 
@@ -495,7 +531,12 @@ export const DashboardView = (params = {}) => {
       accountSelect.appendChild(opt);
     });
 
-    accountSelect.value = currentVal;
+    // Normalize stale account filter after refreshing options
+    // This ensures currentAccountFilter is set to 'all' if the current account was deleted
+    normalizeStaleAccountFilterImpl(accounts, accountSelect);
+
+    // Use the normalized currentAccountFilter (not the old saved value)
+    accountSelect.value = currentAccountFilter;
   };
 
   // Main Content Area
