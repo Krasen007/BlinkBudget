@@ -57,6 +57,7 @@
 - **Duplicate transactions** - Long-press any transaction in the dashboard to duplicate it instantly | src/core/transaction-service.js:copy()
 - **Enter to save in edit mode** - Pressing Enter while editing a transaction now automatically saves it, matching the behavior in reports | src/components/TransactionForm.js:TransactionForm | src/components/TransactionForm.js:Enter key handler
 - **Bulk transaction editing** - Long-press to enter multi-select mode, select multiple transactions, and edit or delete them in bulk | src/views/DashboardView.js:multi-select | src/components/TransactionListItem.js:long-press selection
+- **Change Date in bulk edit** - Reschedule multiple selected transactions at once from the bulk edit menu, with every updated transaction highlighted when you return to the dashboard | src/components/BulkEditDialog.js:BulkEditDialog() | src/utils/success-feedback.js:markTransactionForHighlight()
 - **Multi-select visual feedback** - Clear selection indicators and count display when selecting transactions | src/views/DashboardView.js:selection mode | src/styles/main.css:bulk-actions styles
 
 ### Dashboard & Analytics
@@ -64,6 +65,7 @@
 - **Real-time balance calculations** across all accounts. Dashboard label changes to "Total Filtered" when a filter is active so it's clear the number shown is not your full balance | src/core/Account/account-service.js:getAccounts() | src/views/DashboardView.js:balance display
 - **Transaction history** with edit/delete capabilities | src/components/TransactionList.js:TransactionList() | src/views/DashboardView.js:transaction rendering
 - **Visual feedback** for recently added transactions | src/utils/success-feedback.js:highlightTransactionSuccess() | src/components/TransactionListItem.js:highlight animation
+- **Visual feedback for edited transactions** - Edited transactions briefly pulse green so you can instantly spot what just changed | src/utils/success-feedback.js:markTransactionForHighlight() | src/components/TransactionListItem.js:highlight animation
 - **Enhanced data visualization** with consistent colors for transactions | src/utils/reports-charts.js:chart rendering | src/utils/constants.js:COLOR definitions
 - **Seamless category filtering** between Reports and Dashboard views for consistent analysis | src/views/ReportsView.js:category filter state | src/views/DashboardView.js:category filter state
 

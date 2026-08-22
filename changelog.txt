@@ -1,37 +1,29 @@
 # Changelog
 
-All notable changes to BlinkBudget will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [1.46.0] - 2026-02-21
+## [1.47.0] - 2026-08-22
 
 ### Added
 
-- **Progressive Unlock System** - Advanced financial planning features now unlock progressively as you log transactions, connecting your 3-click habit to powerful insights:
-  - **Smart Budget Suggestions** (30+ transactions) - Auto-suggested category budgets based on your actual spending history
-  - **Goal Cash Flow Insights** (30+ transactions) - Connect spending patterns to long-term savings goals
-  - **Deep Analytics & Trends** (30+ transactions) - View top expense movers, category trends, and personal inflation analysis
-  - **Income & Expense Forecasting** (90+ transactions) - Unlock 6-month balance and cash flow predictions
-  - **Portfolio & Net Worth Sync** (30+ transactions) - See how portfolio holdings interact with overall net worth
-  - **Financial Health Assessment** (30+ transactions) - Get accurate emergency fund coverage assessment and risk score
-
-- **Automatic Budget Suggestions** - When you have 30+ transactions, BlinkBudget automatically suggests category budgets based on your spending history with Accept, Adjust, or Dismiss options
-
-### Changed
-
-- **Goals Section Optimization** - Moved and optimized the goals section as part of "The One Theory" implementation, connecting the 3-click transaction logging habit to advanced financial planning features
-- **Budget Updates** - Enhanced budget management with better integration of automatic suggestions
-- **Anomaly Detection** - Improved AnomalyService for better spending pattern analysis
+- **Change Date in Bulk Edit** - You can now reschedule multiple selected transactions at once from the bulk edit menu
+- **Edit Highlight Animation** - Edited transactions briefly pulse green so you can instantly spot what just changed
 
 ### Fixed
 
-- Animation issues when adding transactions
-- Property test failures
-- All verification checklist items complete (404/404 tests passing, 47/47 files)
+- **Notes Now Save on New Transactions** - Notes typed while adding a transaction were silently discarded; they now persist exactly like they do when editing
+- **Dashboard Account Filter Self-Heals** - If the selected account is deleted, the filter automatically resets to "All Accounts", keeping the displayed account name and balance in sync
+- **Savings Goals** - Several goal-related bugs fixed
+- **Empty States** - Empty-state screens now use the correct background color
+- **Highlighting** - Fixed transaction highlight behavior in the list
 
-### Maintenance
+### Changed
 
-- Lint fixes and code quality improvements
-- Full test suite validation
+- **Goal Edit Form Layout** - Field labels now sit beside their inputs again, restoring the compact inline form instead of tall stacked fields
+
+### Security & Maintenance
+
+- CI workflows now target the main branch and pin GitHub Actions to immutable commit SHAs
+- Security hardening (G1) and reconciled security documentation claims
+- Dashboard filters are persisted only after a transaction is successfully saved
+- Safer rollback handling when moving transaction dates creates ghost entries
+- Corrected financial-planning formula descriptions
+- Test logic updates and lint/format cleanup
