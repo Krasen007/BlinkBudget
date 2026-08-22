@@ -1,4 +1,4 @@
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { JSDOM } from 'jsdom';
 import { GoalsSection } from '../../src/views/financial-planning/GoalsSection.js';
 import { StorageService } from '../../src/core/storage.js';
@@ -157,17 +157,14 @@ describe('GoalsSection', () => {
     );
     expect(createButtons.length).toBeGreaterThan(0);
 
-    const flushAsync = async () => {
-      for (let i = 0; i < 5; i++) {
-        await new Promise(resolve => setTimeout(resolve, 0));
-      }
-    };
-
     createButtons[0].click();
-    await flushAsync();
+    
+    // Wait for the placeholder to be removed when the first goal is created
+    await vi.waitFor(() => {
+      expect(section.querySelector('.placeholder')).toBeFalsy();
+    });
 
     expect(mockStorageService.createGoal).toHaveBeenCalledTimes(1);
-    expect(section.querySelector('.placeholder')).toBeFalsy();
   });
 
   it('should remove a recommendation card when its goal is created', async () => {
@@ -191,29 +188,29 @@ describe('GoalsSection', () => {
     );
     expect(createButtons.length).toBe(2);
 
-    // Helper to flush pending microtasks/await chains in the async handler
-    const flushAsync = async () => {
-      for (let i = 0; i < 5; i++) {
-        await new Promise(resolve => setTimeout(resolve, 0));
-      }
-    };
-
     createButtons[0].click();
-    await flushAsync();
+    
+    // Wait for the first recommendation card to be removed
+    await vi.waitFor(() => {
+      const remainingButtons = [...recSection.querySelectorAll('button')].filter(
+        btn => btn.textContent === 'Create Goal'
+      );
+      expect(remainingButtons.length).toBe(1);
+    });
 
-    // The created card is removed, the other card remains
-    const remainingButtons = [...recSection.querySelectorAll('button')].filter(
-      btn => btn.textContent === 'Create Goal'
-    );
-    expect(remainingButtons.length).toBe(1);
     expect(section.contains(recSection)).toBe(true);
     expect(mockStorageService.createGoal).toHaveBeenCalledTimes(1);
 
+    const remainingButtons = [...recSection.querySelectorAll('button')].filter(
+      btn => btn.textContent === 'Create Goal'
+    );
     remainingButtons[0].click();
-    await flushAsync();
+    
+    // Wait for the whole recommendations block to disappear
+    await vi.waitFor(() => {
+      expect(section.querySelector('.goal-recommendations')).toBeFalsy();
+    });
 
-    // The whole recommendations block disappears when the last card is created
-    expect(section.querySelector('.goal-recommendations')).toBeFalsy();
     expect(mockStorageService.createGoal).toHaveBeenCalledTimes(2);
   });
 });
