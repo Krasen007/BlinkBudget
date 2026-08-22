@@ -127,13 +127,10 @@ export const PrivacyService = {
 
     switch (dataType) {
       case 'transaction':
-        // Remove optional metadata if enabled
-        if (settings.dataMinimization.excludeOptionalMetadata) {
-          // Remove optional fields like description/notes while preserving
-          // essential data like timestamp for proper sorting/ordering
-          delete sanitized.description;
-          delete sanitized.notes;
-        }
+        // Notes/descriptions are user-entered feature data, not optional
+        // metadata. Stripping them here silently discarded the note on every
+        // newly added transaction (edits bypass this sanitizer via
+        // TransactionService.update), so they must never be removed.
         break;
 
       case 'audit':
