@@ -174,7 +174,15 @@ export const InflationTrends = (
         driverItem.style.borderBottom = '1px solid var(--color-border)';
 
         const driverInfo = document.createElement('div');
-        driverInfo.innerHTML = `<strong>${driver.category}</strong><br><span style="font-size: 0.75rem; color: var(--color-text-muted)">Spending: €${driver.spending.toFixed(0)}</span>`;
+        const driverCategory = document.createElement('strong');
+        driverCategory.textContent = driver.category;
+        const driverSpending = document.createElement('span');
+        driverSpending.style.fontSize = '0.75rem';
+        driverSpending.style.color = 'var(--color-text-muted)';
+        driverSpending.textContent = `Spending: €${driver.spending.toFixed(0)}`;
+        driverInfo.appendChild(driverCategory);
+        driverInfo.appendChild(document.createElement('br'));
+        driverInfo.appendChild(driverSpending);
 
         const driverRate = document.createElement('span');
         driverRate.className = 'badge badge-error';
@@ -221,7 +229,9 @@ export const InflationTrends = (
         const action = document.createElement('div');
         action.style.fontSize = '0.875rem';
         action.style.color = 'var(--color-success)';
-        action.innerHTML = `<strong>💡 ${suggestion.suggestion}</strong>`;
+        const actionStrong = document.createElement('strong');
+        actionStrong.textContent = `💡 ${suggestion.suggestion}`;
+        action.appendChild(actionStrong);
 
         const savings = document.createElement('div');
         savings.style.fontSize = '0.75rem';

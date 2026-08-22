@@ -153,8 +153,12 @@ const getActiveFilterChipText = container => {
 
 describe('DashboardView tag (label) filtering', () => {
   let container;
+  let originalLocalStorage;
+  let originalSessionStorage;
 
   beforeEach(() => {
+    originalLocalStorage = global.localStorage;
+    originalSessionStorage = global.sessionStorage;
     global.localStorage = createMemoryStorage();
     global.sessionStorage = createMemoryStorage();
 
@@ -176,6 +180,8 @@ describe('DashboardView tag (label) filtering', () => {
   afterEach(() => {
     container?.cleanup?.();
     container = null;
+    global.localStorage = originalLocalStorage;
+    global.sessionStorage = originalSessionStorage;
     vi.clearAllMocks();
     vi.useRealTimers();
   });

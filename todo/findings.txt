@@ -1,0 +1,619 @@
+BlinkBudget Audit Report: src/components/ and src/views/
+PART 1: src/components/
+1. src/components/BaseComponent.js
+Purpose: Base class providing component lifecycle, state management, event handling, and DOM utilities. Also exports functional component wrappers and HOC patterns. Key exports: BaseComponent (class), createComponent, withHOC, createErrorBoundary Pattern: Class-based (not functional). This is the base class for the class-based component pattern. Findings:
+
+Line 70: this.element.className = baseClasses.join(' ') — This overwrites any existing classes on the element. If a caller passes an element with pre-existing classes (e.g., btn btn-primary), they are wiped out. This is a bug that affects Button.js and EnhancedInput.js which call super.setupElement().
+Line 205: this.setupElement() in setState() re-runs setupElement() which re-sets className — this can wipe out classes added by subclasses after super.setupElement().
+Line 413: this.element.innerHTML = '' in destroy() — clears content but doesn't remove the element itself from the DOM.
+Line 461-464: createShimmer uses inline style attribute — violates the "CSS classes over inline styles" principle.
+Line 470-485: announceStatus appends a div to document.body and removes it after 1000ms — no cleanup if the component is destroyed before the timeout fires.
+2. src/components/Button.js
+Purpose: Enhanced button component with accessibility, animations, and touch support. Key exports: Button (class), ButtonComponent (functional wrapper), createButton, default export Button Pattern: Class-based with a functional wrapper ButtonComponent that returns a DOM element. Findings:
+
+Line 56-58: this.element.classList.add('btn') etc. — but super.setupElement() at line 49 already overwrote className to just 'component' (plus any option className). So the btn classes are added on top of 'component', but any pre-existing classes on the passed element are lost.
+Line 117: this.element.innerHTML = '' — wipes out any pre-existing content of the element passed in.
+Line 145: spinner.innerHTML = '<div class="spinner-inner"></div>' — hardcoded HTML string, minor.
+Line 265-266: getRole() returns 'link' for href buttons, but the element is still a <button> element, not an <a>. Setting role="link" on a button is semantically incorrect.
+Line 285-290: ButtonComponent creates a <button> element and passes it to new Button(button, props). The Button constructor calls super(element, ...) which calls init() → setupElement() → which overwrites the button's className. This is a real bug: any className passed via props is lost.
+Line 302: export { Button as default } — but ButtonComponent is the functional wrapper. Consumers importing default get the class, not the function.
+3. src/components/ErrorBoundary.js
+Purpose: Error boundary component that catches and handles component errors gracefully. Key exports: ErrorBoundary (class), withErrorBoundary, createErrorBoundary Pattern: Class-based. Findings:
+
+Line 11: fallbackContent: '<div class="error-fallback">Something went wrong</div>' — default fallback is an HTML string, but renderError() at line 56-101 doesn't use this.options.fallbackContent at all. It always renders its own hardcoded error card. The fallbackContent option is dead code.
+Line 30: this.originalContent = this.element.innerHTML — stores original content, but renderContent() at line 49-54 uses this.originalChildren (captured at line 31) instead. originalContent is never used in renderContent().
+Line 68: errorIcon.innerHTML = '⚠️' — hardcoded emoji, minor.
+Line 145-192: withErrorBoundary returns a class that expects Component to be a class (line 163: new Component(container, this.componentProps)). This won't work with functional components that return DOM elements.
+4. src/components/LoadingStates.js
+Purpose: Loading states components (spinner, skeleton, dots) and empty state, plus HOC for loading. Key exports: LoadingState, EmptyState, ProgressIndicator, withLoadingState, createLoadingState, createEmptyState, createProgressIndicator Pattern: Class-based. Findings:
+
+Line 41-44: this.createElement('div', ['loading-container', this.options.center ? 'loading-centered' : '']) — passes an empty string as a class when center is false. createElement joins with space, resulting in a trailing space in className. Minor.
+Line 250-253: ProgressIndicator.render() calculates percentage but doesn't guard against this.options.max being 0 — division by zero yields Infinity/NaN.
+Line 290-386: withLoadingState HOC — same issue as withErrorBoundary: expects Component to be a class (line 360: new Component(container, this.componentProps)).
+5. src/components/LoadingView.js
+Purpose: Full-screen loading indicator during initial app load. Key exports: LoadingView Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 20-26: Uses innerHTML with inline styles and a <style> tag injected into the container. This is a code smell — inline styles and embedded <style> should be in CSS files. The @keyframes spin is defined inside the component, which is unusual.
+6. src/components/EnhancedInput.js
+Purpose: Standardized input with accessibility, validation, and touch support. Key exports: EnhancedInput (class), EnhancedInputComponent (functional wrapper), createEnhancedInput, default export Pattern: Class-based with functional wrapper. Findings:
+
+Line 8: const ICONS = Object.freeze({}) — empty object. The applySafeIconContent function at line 10-19 checks ICONS[safeKey] which will always be undefined, so it always falls through to iconEl.textContent = safeKey. The ICONS map is dead code.
+Line 89-106: setupElement() calls super.setupElement() which overwrites className (same bug as Button).
+Line 109: this.element.innerHTML = '' — wipes pre-existing content.
+Line 330: new RegExp(this.options.pattern) — if pattern is an invalid regex, this throws. No try/catch.
+Line 343-349: validate() calls this.setState({ error, validated: true }) which triggers render() which calls bindEvents(). Then line 347-349 calls this.bindEvents() again — double-binding events. The AbortController at line 246-249 is supposed to prevent this, but bindEvents() is called twice in the same tick, and the second call aborts the first's listeners. This is a potential bug where events may not fire correctly.
+Line 384-389: setError() calls this.setState({ error }) which triggers render() → bindEvents(), then calls this.bindEvents() again — same double-binding issue.
+7. src/components/ExpandableSection.js
+Purpose: Progressive disclosure interface with expandable/collapsible sections. Key exports: ExpandableSection, createExpandableSection, default export Pattern: Functional (returns an object with container, toggle, content, and methods). ⚠️ Violates the pattern — it returns an object, not a DOM element directly. Callers must use .container. Findings:
+
+Line 63: toggle.style.outline = '2px solid Highlight' — Highlight is not a valid CSS color keyword in all browsers. Should be Highlight (system color) or a proper color.
+Line 105: arrow.textContent = String.fromCharCode(9662) — hardcoded Unicode character (▼). Minor.
+Line 117: contentContainer.style.maxHeight = expanded ? '2000px' : '0' — hardcoded max-height of 2000px. If content is taller than 2000px, it will be clipped.
+Line 190-207: Returns an object with methods, not a DOM element. This is inconsistent with the functional component pattern used elsewhere.
+8. src/components/FeedbackLink.js
+Purpose: Simple feedback link to GitHub issues. Key exports: FeedbackLink Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 121-124: Uses innerHTML with a hardcoded anchor tag. The href is a static string, so no XSS risk, but it's inconsistent with the DOM-creation pattern used elsewhere.
+Line 36: Hardcoded GitHub URL https://github.com/Krasen007/BlinkBudget/issues — should be a constant.
+9. src/components/FloatingBackButton.js
+Purpose: Floating back button for mobile views that appears on scroll. Key exports: FloatingBackButton Pattern: Functional (returns an object { element, cleanup }). ⚠️ Violates the pattern — returns an object, not a DOM element. Findings:
+
+Line 17: button.innerHTML = '←' — hardcoded arrow character.
+Line 22: window.innerWidth < BREAKPOINTS.MOBILE — uses window.innerWidth at creation time, not responsive. The bottom position is set once and never updated on resize (unlike NetworkStatus.js which handles resize).
+Line 39: Router.navigate('dashboard') — hardcoded route.
+10. src/components/GeneralSection.js
+Purpose: General settings section (Refresh, Install PWA, Logout). Key exports: GeneralSection Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 31-32: window.location.hash = '#dashboard'; window.location.reload(); — hardcoded hash. Should use Router.navigate('dashboard').
+Line 68: window.mobileUtils?.isMobile() — relies on a global window.mobileUtils being set. If not set, isMobile is undefined (falsy), which is fine, but it's a fragile global dependency.
+Line 93: InstallService.subscribe(...) — subscription is stored but the cleanup is attached to section.cleanup (line 131-133). This is a non-standard cleanup pattern.
+11. src/components/InflationTrends.js
+Purpose: Displays personal inflation trends with charts and actionable suggestions. Key exports: InflationTrends Pattern: Functional (returns an object { element, render, cleanup }). ⚠️ Violates the pattern — returns an object, not a DOM element. Findings:
+
+Line 147: title.innerHTML = '<strong>Your Personal Inflation Rate</strong><br>...' — uses innerHTML with hardcoded HTML. The inflationData.analyzedMonths is interpolated into the string, but it's a number, so no XSS risk.
+Line 177: driverInfo.innerHTML = '<strong>${driver.category}</strong>...' — XSS vulnerability: driver.category is interpolated into innerHTML without sanitization. If a category name contains HTML, it will be injected.
+Line 224: action.innerHTML = '<strong>💡 ${suggestion.suggestion}</strong>' — XSS vulnerability: suggestion.suggestion is interpolated into innerHTML without sanitization.
+Line 562: const methods = [{ value: 'average', label: 'Average' }] — the calc method selector only has one option ("Average"), but the component header comment (line 10) says "Calculation method toggle (average vs median)". The median option was removed but the comment wasn't updated.
+Line 592-595: Period selector only offers 3, 6, 12 months, but the comment (line 11) says "Time period selector (1, 3, 6, 12 months)". The 1-month option is missing.
+12. src/components/InsightCard.js
+Purpose: Displays an individual financial insight with icon and recommendation. Key exports: InsightCard Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 14: export const InsightCard = (insight, _index) => { — the _index parameter is unused (prefixed with underscore). The JSDoc says "index for animation delays" but no animation is implemented.
+Line 56: recommendation.style.borderTop = 'none' — sets border-top to none, but no border-top was ever set. Dead code.
+13. src/components/MobileModal.js
+Purpose: Mobile-optimized modal dialogs (modal, alert, prompt, confirm, bottom sheet). Key exports: MobileModal, MobileAlert, MobilePrompt, MobileConfirmDialog, MobileBottomSheet Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 87: contentContainer.innerHTML = content — XSS vulnerability: if content is a string containing user data, it will be injected as HTML. The function accepts both strings and HTMLElements, but strings are treated as raw HTML.
+Line 458: Same issue in MobileBottomSheet: contentContainer.innerHTML = content.
+Line 125: document.body.style.overflow = 'hidden' — sets body overflow, but if multiple modals are open, closing one restores overflow even if another is still open.
+Line 128-133: closeModalWithScrollRestore calls originalCloseModal() which is the original closeModal — but closeModal at line 96-106 already has a setTimeout of 200ms. The scroll restore happens immediately, not after the animation. Minor timing issue.
+14. src/components/MobileNavigation.js
+Purpose: Bottom navigation bar for mobile devices. Key exports: MobileNavigation, MobileBackButton, updateMobileNavigation Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 16-45: Navigation items are hardcoded. The add-expense route is labeled "Add" with a ➕ icon, but the route is add-expense — inconsistent naming (the route is add-expense but the label is "Add").
+Line 50: currentRoute === item.id — compares against item.id (e.g., 'add-expense'), but the currentRoute prop is expected to be a route name. If currentRoute is 'add-expense', it matches. But if the route is 'add' or something else, it won't match. This is fragile.
+Line 178-190: updateMobileNavigation uses data-route attribute to match, which is more robust than the currentRoute === item.id check in the component.
+15. src/components/NetBalanceChart.js
+Purpose: Displays net balance over time chart. Key exports: createNetBalanceChart Pattern: Functional (async, returns DOM element). ✅ Findings:
+
+Line 59-105: calculateNetBalance and calculateNetWorth duplicate logic that exists in MetricsService.calculateIncomeVsExpenses and the Dashboard's "Total Available" calculation. The comment says "Matches MetricsService.calculateIncomeVsExpenses logic exactly" — this is duplicated logic that could drift.
+Line 172: Subtitle says "Last 5 completed months" but the loop at line 206 goes from i=5 to i=1, which is 5 months. Correct.
+Line 237: canvas.id = 'net-balance-chart' — hardcoded ID. If this component is rendered multiple times (e.g., navigating away and back), the ID will collide. Should use a unique ID like InflationTrends.js does with generateId().
+Line 268: const chartRenderer = new ChartRenderer() — creates a new ChartRenderer instance each time. This is fine but could be shared.
+16. src/components/NetworkStatus.js
+Purpose: Subtle offline/online status indicator. Key exports: NetworkStatus Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 13: const isMobile = viewportWidth < 768 — hardcoded breakpoint of 768px, but BREAKPOINTS.MOBILE is imported from constants. Should use BREAKPOINTS.MOBILE instead of hardcoding 768.
+Line 75: Same hardcoded 768 in updatePosition.
+Line 84-88: Cleanup is attached to container.cleanup — non-standard pattern.
+17. src/components/PrivacyControls.js
+Purpose: Privacy settings and consent management UI. Key exports: createPrivacyControls, initializePrivacyControls Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 130-296: Massive innerHTML string with broken HTML: Line 131 has < div class="privacy-header" > with spaces inside the tags — this is invalid HTML that will be parsed as a text node, not a div. Same for line 134 </div > and line 136 <div class="privacy-sections">.
+Line 299-464: Inline <style> block with broken CSS: Line 301 .privacy - controls has spaces around the hyphen — this is invalid CSS. The entire style block is broken because every CSS property has spaces around hyphens (e.g., max - width, border - radius, background: var(--bg - primary)).
+Line 480-486: container.querySelector('[data - consent= "${consentType}"]') — the selector has spaces around the hyphen in data - consent, which is invalid. This means the querySelector will never match, and privacy settings will never be loaded into the checkboxes.
+Line 490-496: Same broken selector for data - setting.
+Line 500-506: Same broken selector for data - retention.
+Line 509-514: container.querySelector('[value = "${settings.privacyMode}"]') — spaces around = in the attribute selector, which is invalid.
+Line 583: a.download = 'blinkbudget - data -export -${...}.json' — filename has spaces around hyphens.
+Line 81-98: buttonsDiv.innerHTML with hardcoded button styles — inline styles instead of CSS classes.
+Line 106-114: dialog.querySelector('#confirm-yes') — if the innerHTML at line 81-98 fails to parse (due to the broken HTML), these queries will return null and throw.
+18. src/components/ProgressiveEmptyState.js
+Purpose: Progressive unlock banner/card across financial planning sections. Key exports: ProgressiveEmptyState Pattern: Functional (returns DOM element or null). ✅ Findings:
+
+Line 74-76: Returns null when the feature is fully unlocked. Callers must handle null (e.g., if (unlockCard) { ... }). This is a valid pattern but inconsistent with other components that always return a DOM element.
+Line 78-92: Uses optional chaining with fallbacks for FONT_SIZES, SPACING, COLORS — defensive but suggests the constants might not be reliably available.
+Line 146: backgroundColor: 'rgba(59, 130, 246, 0.1)' — hardcoded color instead of using a CSS variable or COLORS constant.
+19. src/components/QuickAmountPresets.js
+Purpose: Quick amount preset buttons with dynamic updates. Key exports: QuickAmountPresets, createQuickAmountPresets, default export Pattern: Functional (returns an object { container, unsubscribe }). ⚠️ Violates the pattern — returns an object, not a DOM element. Findings:
+
+Line 28, 35: Commented-out console.log statements — dead code.
+Line 40: button.textContent = '$${amount}' — hardcoded dollar sign. The app uses CURRENCY_SYMBOL from constants elsewhere (e.g., DashboardStatsCard.js line 68, TransactionListItem.js line 520). This is a cross-file inconsistency: the app supports EUR (per ActionCard.js default currency = 'EUR' and NetBalanceChart.js using currency: 'EUR'), but this component hardcodes $.
+Line 131: transactions.filter(t => t.amount === amount) — strict equality on floating-point numbers. If amounts are stored as 10.00 vs 10, this won't match. Also, this is called inside renderButtons() for every preset button, which is O(n*m) — inefficient.
+Line 256-258: AmountPresetService.onPresetsChange(...) — subscription is returned as unsubscribe, but the component returns { container, unsubscribe } instead of { container, destroy }. The factory createQuickAmountPresets at line 279-292 wraps this into { container, destroy }, which is good, but the raw QuickAmountPresets export is inconsistent.
+20. src/components/SecuritySection.js
+Purpose: Displays basic security and privacy information. Key exports: SecuritySection Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 45: "End-to-end encryption for all data" — this is a factual claim that may not be accurate. The app uses Firebase Auth and localStorage, but "end-to-end encryption" is a strong claim that isn't verified in the codebase.
+Line 48: "No third-party analytics or tracking" — but ReportsView.js line 138-143 and 683-688 use window.gtag (Google Analytics). This is a contradiction between the UI text and the actual code.
+21. src/components/TimePeriodSelector.js
+Purpose: Time period selection with daily, weekly, monthly, and custom options. Key exports: TimePeriodSelector Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 115-121: Injects a <style> element into document.head with a hardcoded CSS rule. This is a code smell — should be in a CSS file.
+Line 147: arrow.innerHTML = direction === 'left' ? '←' : '→' — hardcoded arrow characters.
+Line 178: arrow.style.background = 'rgba(255, 255, 255, 0.1)' — hardcoded color.
+Line 186: e.key === 'Spacebar' — Spacebar is a deprecated key value. Modern browsers use ' ' (space). This is a bug for older browsers but also a code smell.
+Line 404: button.style.flex = '1 0 auto' — inline style, but the comment says "Use global .view-tab styling instead of inline styles". The comment contradicts the code.
+Line 415-418: button.style.background = COLORS.PRIMARY; button.style.color = 'white' — inline styles for active state, but setActiveButton at line 937-951 also sets these. Duplicated logic.
+Line 1005: window.addEventListener('resize', updateResponsiveLayout) — listener is added but updateResponsiveLayout at line 998-1002 is an empty function (just a comment). Dead code.
+22. src/components/ToastNotification.js
+Purpose: Non-intrusive notification banner with action buttons. Key exports: ToastNotification Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 68: document.body.appendChild(toast) — appends directly to body. No cleanup if the component is destroyed before the timeout fires.
+Line 76-78: setTimeout(dismiss, duration) — if duration is 0 (default), no auto-dismiss. But the dismiss function at line 43-50 uses a 300ms timeout. If the component is removed from the DOM before the timeout, the toast.parentNode check handles it, but the timeout isn't cleared.
+23. src/components/TransactionForm.js
+Purpose: Transaction form for adding/editing transactions. Key exports: TransactionForm Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 1: // Phase 2 changes: — leftover comment.
+Line 4: Comment says "now ~180 lines (down from 724)" but the file is 428 lines. The comment is outdated.
+Line 50: window.mobileUtils && window.mobileUtils.isMobile() — relies on global window.mobileUtils.
+Line 57: let currentAccountId = initialValues.accountId || defaultAccount.id; — if defaultAccount is null/undefined, this throws. No null check.
+Line 191-227: Clones buttons to remove existing click listeners — this is a hack. The typeToggle.setType is wrapped (line 177-188) but the buttons are cloned to re-bind. This is fragile and could break if the button structure changes.
+Line 193: btn.parentNode.replaceChild(newBtn, btn) — if btn.parentNode is null, this throws.
+Line 356-358: externalDateInput.addEventListener('change', submitForm) — adds a listener to the external date input. If the form is re-rendered, this listener is never removed (no cleanup).
+Line 407: form.addEventListener('submit', e => e.preventDefault()) — prevents form submission entirely, but the OK button at line 334-353 uses click event, not submit. This is fine but the form's submit event is dead.
+24. src/components/TransactionList.js
+Purpose: Displays a scrollable list of transactions. Key exports: TransactionList Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 69: ClickTracker.getAverageMetrics() — called on every render. If ClickTracker is not initialized, this throws.
+Line 76: COLORS.TEXT_MUTED || '#6b7280' — fallback to hardcoded color. If COLORS.TEXT_MUTED is an empty string, the fallback is used. Minor.
+Line 139-141: currentTagFilter.substring(8) — hardcoded substring length for 'exclude:' prefix. If the prefix changes, this breaks.
+Line 177: icon.innerHTML = ' &times;' — hardcoded HTML entity.
+Line 191-235: Empty state logic is duplicated between TransactionList and DashboardView (which also has filter logic).
+25. src/components/TransactionListItem.js
+Purpose: Displays a single transaction in the dashboard list. Key exports: TransactionListItem Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 19: import { setSelectedStyle } from '../views/DashboardView.js' — circular dependency: DashboardView.js imports TransactionList.js which imports TransactionListItem.js which imports DashboardView.js. This is a cross-file inconsistency and a code smell.
+Line 61: setSelectedStyle(item, isSelected) — uses a function from the view layer in a component. This violates the component/view separation.
+Line 84: (Number(transaction.amount) || 0).toFixed(2) — if transaction.amount is a string like "10.5", Number() converts it. But if it's null, Number(null) is 0, which is fine. If it's undefined, Number(undefined) is NaN, and NaN || 0 is 0. OK.
+Line 105: TransactionService.split(transaction.id) — if split doesn't exist on the service, this throws. No feature detection.
+Line 131: const { first, second } = result; — if result is null (checked at line 106), this would throw. But the null check at line 106-117 returns early, so this is safe.
+Line 245: }, 500); // 500ms for long press — hardcoded 500ms.
+Line 263: /// seems to be only for windows where we do not have this problem — leftover comment.
+Line 291: accounts.find(a => a.id === id)?.name || 'Unknown' — good defensive coding.
+Line 461: const badge = val.querySelector('.transaction-item-anomaly-badge') — val is defined at line 490, after it's used at line 461. This is a temporal dead zone bug: val is a const declared at line 490, but referenced at line 461. In JavaScript, const declarations are hoisted but not initialized, so accessing val before the declaration throws a ReferenceError. This is a real bug — the click handler at line 453-488 will throw when a user clicks on an anomaly-highlighted transaction.
+Line 520: val.textContent = '${sign}${CURRENCY_SYMBOL}${Math.abs(transaction.amount).toFixed(2)}' — uses CURRENCY_SYMBOL from constants, which is good. But QuickAmountPresets.js line 40 hardcodes $. Cross-file inconsistency.
+26. src/components/financial-planning/DataTable.js
+Purpose: Reusable data table with grid layout. Key exports: DataTable Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 41: table.style.gridTemplateColumns = 'repeat(${headers.length}, ${headers.length === 5 ? '1fr auto auto auto auto' : '1fr'})' — hardcoded special case for 5 columns. If a table has 5 columns, it uses a specific layout; otherwise, all columns are 1fr. This is a magic number and a code smell.
+27. src/components/financial-planning/EmergencyFundCard.js
+Purpose: Displays emergency fund assessment. Key exports: EmergencyFundCard Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 12-21: Throws an error if required properties are missing. This is a hard failure — if the assessment data is incomplete, the entire component throws. Other components handle missing data gracefully (e.g., ProgressiveEmptyState returns null).
+Line 27: Nested ternary for border color — hard to read.
+28. src/components/financial-planning/ForecastCard.js
+Purpose: Enhanced forecast statistics display card. Key exports: ForecastCard Pattern: Functional (returns DOM element). ✅ Findings:
+
+No significant issues. Clean component.
+29. src/components/financial-planning/Placeholder.js
+Purpose: Displays placeholder content for sections. Key exports: Placeholder Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 15: placeholder.querySelector('div:first-child') — assumes the placeholder structure has a div as the first child. If createPlaceholder changes its structure, this breaks. The warning at line 19-23 acknowledges this fragility.
+30. src/components/financial-planning/SectionContainer.js
+Purpose: Wrapper for financial planning sections. Key exports: SectionContainer Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 25: headerTitle.textContent = '${icon} ${title}' — concatenates icon and title into a single text node. This means the icon is not separately accessible for styling or screen readers.
+31. src/components/financial-planning/StatsCard.js
+Purpose: Reusable statistics display card. Key exports: StatsCard Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 100: helpDetails.innerHTML = calculationHelp — XSS vulnerability: calculationHelp is interpolated into innerHTML without sanitization. If calculationHelp contains user data, it will be injected as HTML. In OverviewSection.js lines 231-294, calculationHelp is a hardcoded string, so no immediate risk, but the component itself is unsafe.
+32. src/components/ui/ActionCard.js
+Purpose: Reusable alert/notification card with severity indicators. Key exports: ActionCard, UnusualSpendingCard, SavingsGoalCard Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 41-67: Hardcoded hex colors (#ef4444, #f59e0b, #22c55e, #3b82f6) instead of using COLORS.ERROR, COLORS.WARNING, COLORS.SUCCESS, COLORS.PRIMARY. Cross-file inconsistency with other components that use COLORS.*.
+Line 179-182: new Intl.NumberFormat('en-US', { style: 'currency', currency: currency }) — uses the currency prop (default 'EUR'), which is good. But UnusualSpendingCard at line 264-272 doesn't pass a currency, so it defaults to 'EUR'. SavingsGoalCard at line 311, 315, 319 hardcodes currency: 'EUR' in the Intl.NumberFormat calls — inconsistent with the currency prop pattern.
+Line 311: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }) — hardcoded EUR in SavingsGoalCard, while ActionCard accepts a currency prop. Cross-file inconsistency.
+PART 2: src/views/
+33. src/views/AddView.js
+Purpose: Add transaction view. Key exports: AddView Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 15: export const AddView = ({ accountId, amount } = {}) => { — destructures params with default. Good.
+Line 26: header.style.background = 'var(--color-background)' — uses CSS variable, good.
+Line 43: DateInput({ showLabel: false }) — creates a date input with no initial value, which defaults to today. Good.
+Line 85-89: console.log for metrics — debug logging left in production code.
+Line 114-123: Escape key handler is added to window and cleaned up at line 125-127. Good.
+Line 97: TransactionService.add(data) — no try/catch. If the service throws, the error propagates.
+34. src/views/DashboardView.js
+Purpose: Main dashboard view. Key exports: DashboardView, setSelectedStyle Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 27-35: setSelectedStyle is exported from the view and imported by TransactionListItem.js (line 19). This is a circular dependency and a violation of the component/view separation.
+Line 36: import { createNavigationButtons } from '../utils/navigation-helper.js' — placed after the setSelectedStyle export and other imports. This is an import ordering issue.
+Line 40-43: Module-level state variables (hasPreloadedReports, hasPreloadedFinancialPlanning, hasScheduledDashboardPreloads, financialPlanningPreloadPromise) — these are global state that persists across view instances. If the user navigates away and back, the preload state is stale.
+Line 46-107: preloadReportsData — uses localStorage for caching with a hardcoded cache key blinkbudget_reports_cache_.... This duplicates the caching logic in ReportsView.js which uses CacheService.
+Line 110-171: preloadFinancialPlanningData — same pattern, hardcoded cache key blinkbudget_financial_planning_cache.
+Line 173: export const DashboardView = (params = {}) => { — good.
+Line 196-198: typeof __APP_VERSION__ !== 'undefined' — relies on a global __APP_VERSION__ being defined by the build. If not defined, the version is omitted. This is fragile.
+Line 229-239: Filter state is read from sessionStorage at view creation. If the user navigates away and back, the filters persist. Good.
+Line 242: const savedDateRange = sessionStorage.getItem('dashboard_date_range_filter') — hardcoded key, not using STORAGE_KEYS.
+Line 264: const DISMISSED_ANOMALIES_KEY = 'blinkbudget_dismissed_anomalies' — hardcoded key.
+Line 288-298: enterSelectionMode and exitSelectionMode call renderDashboard() which re-renders the entire view. This is inefficient for selection mode toggling.
+Line 304-347: updateSelectionUI — good, updates in-place without full re-render.
+Line 349-357: toggleSelection — good, uses updateSelectionUI.
+Line 480-499: refreshAccountOptions — uses accountSelect.innerHTML = '' to clear options. The comment says "Security: Clearing select options, no user input involved" — this is fine.
+Line 507: renderDashboard — the main render function. It's very long (lines 507-1189, ~680 lines). This is a code smell — the function is too large and should be broken up.
+Line 509: content.innerHTML = '' — clears content. Fine.
+Line 516-573: Filter logic — complex but well-structured.
+Line 596-620: All-time net worth calculation — duplicates logic in NetBalanceChart.js and OverviewSection.js.
+Line 660-701: Period filtering — duplicates logic in ReportsView.js.
+Line 790-814: Quick amount presets — uses createQuickAmountPresets which returns { container, destroy }. The destroy is stored in content._cleanupFunctions but never called in the cleanup function at line 1262-1266. Memory leak.
+Line 817-847: Add Transaction button — has a fallback for when addBtn is null. Good defensive coding.
+Line 972: const successHighlightIds = [...(getTransactionToHighlight() || [])] — good.
+Line 980-998: Anomaly detection — wrapped in try/catch. Good.
+Line 1219-1224: handleStorageUpdate — re-renders the entire dashboard on any storage update. This is inefficient.
+Line 1226-1238: handleAuthChange — resets preload state. Good.
+Line 1262-1266: Cleanup function — removes event listeners but doesn't call content._cleanupFunctions (the quick presets destroy functions). Memory leak.
+35. src/views/EditView.js
+Purpose: Edit transaction view. Key exports: EditView Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 25: setTimeout(() => Router.navigate('dashboard'), TIMING.ANIMATION_FAST * 10) — hardcoded timeout multiplier. If TIMING.ANIMATION_FAST is undefined, this is NaN * 10 = NaN, and setTimeout with NaN is treated as 0.
+Line 30-35: Ownership validation — good security practice.
+Line 64: dateInput.dataset.timestamp = transaction.timestamp — sets a dataset property on the DateInput container. This is a non-standard way to pass data.
+Line 99-156: Ghost transaction logic — complex but well-commented.
+Line 163: TransactionService.update(id, data) — no try/catch. If the service throws, the error propagates.
+36. src/views/FinancialPlanningView.js
+Purpose: Main financial planning view with sections. Key exports: FinancialPlanningView Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 37-63: isDeepEqual — custom deep equality function. This is a code smell — should use a library or a simpler approach.
+Line 66: import { CacheService } from '../core/cache-service.js' — placed in the middle of the file, not at the top. Import ordering issue.
+Line 68-69: PLANNING_CACHE_KEY and PLANNING_CACHE_TTL_MS — hardcoded cache key and TTL.
+Line 71-81: getCachedPlanningData, setCachedPlanningData, clearPlanningCache — wrapper functions around CacheService. Fine.
+Line 83: export const FinancialPlanningView = (params = {}) => { — good.
+Line 88: let currentSection = params.section || 'overview' — good.
+Line 93-95: Creates forecastEngine, balancePredictor, chartRenderer — these are created fresh on each view instance. Fine.
+Line 107-119: cleanupCharts — iterates activeCharts and calls chart.destroy(). But ChartRenderer instances have their own activeCharts map. The view's activeCharts is separate. This is a duplication of chart tracking.
+Line 122-130: Header and navigation creation. Good.
+Line 142-174: createHeader — uses backButton.innerHTML = '← Back' (line 152) — hardcoded arrow.
+Line 179-227: createNavigation — uses tab.innerHTML with escapeHtml (line 213-216). Good security practice.
+Line 232-251: switchSection — cleans up charts, updates tabs, renders section. Good.
+Line 256-286: renderSection — switch statement. Good.
+Line 291-294: renderOverviewSection — calls OverviewSection(planningData) which returns a DOM element. Good.
+Line 299-307: renderForecastsSection — calls ForecastsSection(...) which returns a Promise. Good.
+Line 313-318: renderInvestmentsSection — calls InvestmentsSection(chartRenderer, activeCharts). Good.
+Line 324-327: renderGoalsSection — calls GoalsSection(chartRenderer, activeCharts). Good.
+Line 332-339: renderInsightsSection — calls InsightsSection(...) which returns { element, cleanup }. The view accesses .element (line 338). Good.
+Line 344-347: renderBudgetsSection — calls BudgetsSection(planningData). Good.
+Line 357-473: loadPlanningData — complex caching and background refresh logic. Well-commented.
+Line 496-498: updateResponsiveLayout — debounced but the function body is empty (just a comment). Dead code.
+Line 501: window.addEventListener('resize', updateResponsiveLayout) — adds a listener for a no-op function. Wasted listener.
+Line 504-515: handleHashChange — parses hash to update section. Good.
+Line 518-533: handleStorageUpdate — clears cache and reloads. Good.
+Line 536-548: handleForecastInvalidate — clears forecast cache. Good.
+Line 551-568: handleSyncState — updates sync status. Good.
+Line 571-576: handleKeyboardShortcuts — Escape navigates to dashboard. Good.
+Line 578-581: Event listeners added. Good.
+Line 584-602: Cleanup — removes all listeners. Good.
+Line 606: loadPlanningData() — initial load. Good.
+37. src/views/LandingView.js
+Purpose: Marketing landing page. Key exports: LandingView Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 8: import '../styles/hero.css' — imports CSS directly in a JS file. This is a Vite feature, but it's inconsistent with other views that don't import CSS.
+Line 11-42: initScrollReveal — uses IntersectionObserver. Good.
+Line 47-62: createGetStartedButton — uses ButtonComponent and setTimeout for navigation. The timer is tracked in timers array for cleanup. Good.
+Line 76: iconImg.src = '/favicon.png' — hardcoded path.
+Line 135: learnMoreLink.href = '#how-it-works' — hardcoded anchor.
+Line 269-291: Screenshot paths are hardcoded (/screenshots/dashboard.png, etc.). If the files don't exist, broken images.
+Line 498-500: Footer links — href: '/privacy-policy.md' and href: '/terms-of-service.md' — these are Markdown files served as-is. The browser will display raw Markdown, not rendered HTML. This is a UX issue.
+Line 515: © ${new Date().getFullYear()} BlinkBudget. Open source (GPL-3.0). — hardcoded license. The LICENSE file should be checked to verify GPL-3.0.
+Line 524-553: LandingView — good cleanup with observers and timers.
+38. src/views/LoginView.js
+Purpose: Login/signup view. Key exports: LoginView Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 11-167: createPasswordResetModal — creates a modal. Good.
+Line 106: const { error } = await AuthService.resetPassword(email) — no try/catch. If AuthService.resetPassword throws, the error propagates.
+Line 169: export const LoginView = () => { — good.
+Line 183: title.textContent = 'BlinkBudget Sync' — the title says "Sync" but the view is for login/signup. Minor.
+Line 244-249: Eye SVG is hardcoded inline SVG. Fine.
+Line 347-358: Password input handler — the if (!result.isValid) and else branches both set errorMsg.textContent = ''. This is dead code — both branches do the same thing.
+Line 402-404: const { error } = isSignup ? await AuthService.signup(email, password) : await AuthService.login(email, password) — no try/catch. If the service throws, the error propagates.
+Line 473-474: googleIcon.src = 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg' — hardcoded external URL. If the URL changes or is blocked, the icon breaks.
+Line 549: submitBtn.type = 'submit' — sets type to submit, but the button was created by ButtonComponent which sets type to 'button' by default. This overrides it. Fine.
+Line 552-563: Both a submit event listener and a keydown Enter listener on the form. The submit listener calls submitBtn.click(), and the keydown listener also calls submitBtn.click(). Double submission on Enter key press: the keydown fires first, calls submitBtn.click(), which triggers the click handler. Then the form's submit event fires (because the button has type="submit"), which calls submitBtn.click() again. This could cause double login/signup attempts.
+39. src/views/ReportsView.js
+Purpose: Reports and analytics view. Key exports: ReportsView Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 74-78: buildAnalyticsCacheKey — uses toISOString() on dates. Good.
+Line 83-123: parsePeriodFromParams — parses URL params. Good.
+Line 125: export const ReportsView = (params = {}) => { — good.
+Line 130-144: handleGlobalError — uses window.gtag for analytics. Good.
+Line 147-171: Overrides window.onerror and window.onunhandledrejection — this is dangerous: it replaces global error handlers. If another view or component also overrides these, they'll conflict. The cleanup at line 1555-1556 restores the originals, but if the view is destroyed and recreated, the original handlers are lost.
+Line 173: // ... (imports) — leftover comment.
+Line 196-199: currentTimePeriod initialization — good.
+Line 207-220: highlightCategoryCard — uses setTimeout and stores the timeout ID in container.cleanupTimeouts. Good.
+Line 222-224: createHeader() — creates header. Good.
+Line 233-239: sectionContainers — persistent section containers. Good.
+Line 251-253: loadingState, emptyState, errorState — created via createLoadingState(), createEmptyState(), createErrorState(). These are from reports-ui.js. Good.
+Line 258-306: createHeader — creates header with back button and time period selector. Good.
+Line 311-339: handleCategoryChartClick — safe selector lookup using iteration. Good security practice.
+Line 344-366: handleCategoryCardClick — saves filter state and navigates. Good.
+Line 371-394: handleTimePeriodChange — navigates with period param. Good.
+Line 399-441: getPeriodParamFromTimePeriod — converts time period to URL param. Good.
+Line 446-459: createChartContainer — creates chart container with sr-only title. Good.
+Line 464-690: loadReportData — very long function (~226 lines). Code smell — should be broken up.
+Line 508: localStorage.removeItem('blinkbudget_transactions') — dangerous: this deletes the user's transaction data from localStorage as a "recovery" attempt. If the storage error was transient, this permanently deletes data.
+Line 519-554: Analytics data generation with fallback. Good.
+Line 556-583: Triple-nested validation/sanitization — code smell: the same validation is attempted 3 times with the same sanitization. If the first sanitization doesn't fix it, the second won't either.
+Line 585-617: Empty state handling. Good.
+Line 621-642: Insights and predictions generation. Good.
+Line 644-646: Cache storage. Good.
+Line 648-654: Performance warning. Good.
+Line 658-689: Error handling with user-friendly messages. Good.
+Line 695-701: createSkeletonLoader — creates skeleton. Good.
+Line 706-712: clearSkeletonLoader — removes skeleton. Good.
+Line 717-731: showSkeletonLoaders — shows all skeletons. Good.
+Line 736-740: hideSkeletonLoader — hides a specific skeleton. Good.
+Line 745-878: renderReports — very long function (~133 lines). Code smell.
+Line 883-899: updateSectionsIncrementally — uses Promise.all for concurrent section updates. Good.
+Line 908-950: updateBudgetSummary — good.
+Line 955-999: updateCategoryBreakdown — good.
+Line 1004-1065: updateCategorySelector — good.
+Line 1070-1163: updateFinancialInsights — good.
+Line 1168-1210: updateIncomeExpense — good.
+Line 1215-1232: showLoadingState — good.
+Line 1237-1249: showContentState — good.
+Line 1254-1263: cleanupCharts — good.
+Line 1268-1319: updateResponsiveLayout — good.
+Line 1324-1336: updateVisualViewportHeight — good.
+Line 1341-1349: handleOrientationChange — good.
+Line 1352-1353: Event listeners. Good.
+Line 1356-1376: handleHashChange — good.
+Line 1378-1383: Visual viewport listener. Good.
+Line 1389-1413: handleStorageUpdate — uses requestIdleCallback. Good.
+Line 1416-1418: handleAuthChange — reloads data. Good.
+Line 1421-1437: handleNavigationStateChange — good.
+Line 1440-1450: handleKeyboardShortcuts — Ctrl+B and Ctrl+R shortcuts. Good.
+Line 1452-1458: Event listeners. Good.
+Line 1463-1465: refreshData — good.
+Line 1470-1502: checkDataIntegrity — good.
+Line 1505-1557: Cleanup — comprehensive. Good.
+Line 1559-1563: Exposed methods. Good.
+Line 1566: loadReportData() — initial load. Good.
+40. src/views/SettingsView.js
+Purpose: Settings view. Key exports: SettingsView Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 16-19: import { CURRENT_VERSION, GITHUB_RELEASES_URL, checkForUpdatesWithFeedback } from '../pwa.js' — imports from pwa.js. This creates a dependency on the PWA module for the settings view.
+Line 42: backButton.innerHTML = '← Back' — hardcoded arrow.
+Line 60-70: Save button — onClick: () => Router.navigate('dashboard') — the "Save" button just navigates to dashboard without actually saving anything. Misleading UI.
+Line 94-99: categoryManagementSection.innerHTML with escapeHtml — good security practice.
+Line 116-118: advancedToggleContainer.role = 'button' — sets role via property. Fine.
+Line 128-163: toggleAdvancedSettings — good.
+Line 194: SettingsService.getSetting('showQuickPresets') — good.
+Line 196-273: Quick presets toggle — good.
+Line 279-280: DataManagementSection() — good.
+Line 283-287: DateFormatSection({ showAutoDetect: true, allowManualChange: true }) — good.
+Line 290-291: BackupRestoreSection() — good.
+Line 295-296: SecuritySection() — good.
+Line 299-300: AccountDeletionSection() — good.
+Line 303-309: Updates section — uses innerHTML with escapeHtml. Good.
+Line 320-323: versionInfo.innerHTML — uses escapeHtml(CURRENT_VERSION). Good.
+Line 328-376: Check updates button — good.
+Line 380-397: Release notes link — good.
+Line 402-403: FeedbackLink() — good.
+Line 405-414: handleStorageUpdate — re-renders the entire view by replacing the parent's innerHTML. This is inefficient and destructive: it wipes out the parent's content and creates a new SettingsView. If the parent has other children, they're lost.
+Line 417-433: Done button — good.
+Line 435-445: handleBackupOperation — logs to console. Good.
+Line 447: window.addEventListener('backup-operation', handleBackupOperation) — good.
+Line 449-454: Escape key handler. Good.
+Line 456-457: Event listeners. Good.
+Line 459-469: Cleanup — removes listeners and calls dataSection.cleanup() and generalSection.cleanup(). Good.
+41. src/views/financial-planning/BudgetsSection.js
+Purpose: Budgets management section. Key exports: BudgetsSection Pattern: Functional (async, returns DOM element). ✅ Findings:
+
+Line 27: export const BudgetsSection = async planningData => { — async function. Good.
+Line 28: const { StorageService } = await import('../../core/storage.js') — dynamic import. Good.
+Line 39-43: Handles null planningData by loading transactions directly. Good.
+Line 48-350: render function — very long (~300 lines). Code smell.
+Line 51: BudgetPlanner.getSummary(transactions) — no time period passed. The BudgetSummaryCard at line 52 is called without a timePeriod parameter, so it defaults to null and shows "Monthly Budget" (line 70 of BudgetSummaryCard.js). But the section is for the current month. Inconsistency: BudgetSummaryCard is called with timePeriod in ReportsView.js line 928-931, but not here.
+Line 56-63: ProgressiveEmptyState — good.
+Line 68-82: Suggestion generation — good.
+Line 86-137: BudgetSuggestionsContainer — good.
+Line 150-153: MetricsService.calculateCategoryBreakdown(transactions, currentPeriod) — good.
+Line 154: StorageService.getBudgets() — good.
+Line 157-165: Empty message. Good.
+Line 169-188: Category list building. Good.
+Line 191-201: Merge budgets into categories. Good.
+Line 203-347: Category cards. Good.
+Line 246-266: Edit budget — uses card.innerHTML = '' to clear the card. Fine.
+Line 268-281: Delete budget — uses ConfirmDialog. Good.
+Line 295: const suggestedLimit = Math.ceil(cat.amount / 10) * 10 — rounds up to nearest 10. Good.
+42. src/views/financial-planning/ForecastsSection.js
+Purpose: Forecasts section. Key exports: ForecastsSection Pattern: Functional (async, returns DOM element). ✅ Findings:
+
+Line 29-81: generateHistoricalData — good.
+Line 86-249: createForecastTable — good.
+Line 140, 149, 159, 209, 218, 228: €${...} — hardcoded Euro symbol. The app uses CURRENCY_SYMBOL from constants elsewhere. Cross-file inconsistency.
+Line 260-266: ForecastsSection — async function. Good.
+Line 267-271: createSectionContainer('forecasts', 'Financial Forecasts', '🔮') — good.
+Line 273-277: createUsageNote — good.
+Line 279-287: ProgressiveEmptyState — good.
+Line 289-311: Empty data handling. Good.
+Line 313-321: Insufficient data handling. Good.
+Line 323-327: Clears forecast cache. Good.
+Line 332-355: Goal connection logic. Good.
+Line 357-365: Forecast generation. Good.
+Line 368-372: Summary grid. Good.
+Line 375-387: Totals and confidence. Good.
+Line 390-421: Uncertainty ranges. Good.
+Line 424-440: Trend arrows. Good.
+Line 442-484: Summary cards. Good.
+Line 486-489: Card rendering. Good.
+Line 495-532: Goal connection card. Good.
+Line 535-538: Current balance calculation. Good.
+Line 541-552: Forecast comparison chart. Good.
+Line 554-559: Balance projections. Good.
+Line 562-569: Projected balance chart. Good.
+Line 572-578: Forecast table. Good.
+Line 579-587: Error handling. Good.
+43. src/views/financial-planning/GoalsSection.js
+Purpose: Goals section. Key exports: GoalsSection Pattern: Functional (async, returns DOM element). ✅ Findings:
+
+Line 31-237: createGoalFormControls — good.
+Line 130-201: Save goal handler — good.
+Line 203-231: Real-time validation on blur. Good.
+Line 242-654: createGoalsList — very long function (~412 lines). Code smell.
+Line 247-249: goalsList.innerHTML = '' — clears list. Fine.
+Line 257-262: Empty state. Good.
+Line 271-640: Goal items with edit/delete. Good.
+Line 327-334: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }) — hardcoded EUR. Cross-file inconsistency with CURRENCY_SYMBOL.
+Line 336-349: Safe DOM manipulation instead of innerHTML. Good security practice.
+Line 356: const diffMonths = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 30)) — assumes 30 days per month. This is an approximation that can be inaccurate.
+Line 365: const needed = (goal.targetAmount - goal.currentSavings) / diffMonths — if diffMonths is 0 (target date is this month), this is division by zero → Infinity.
+Line 427: progBg.style.background = '#eee' — hardcoded color.
+Line 447-583: Edit handler — good.
+Line 586-639: Delete handler — good.
+Line 661-730: createGoalsSummaryCard — good.
+Line 738: export const GoalsSection = async (chartRenderer, activeCharts) => { — good.
+Line 749-761: Progressive unlock. Good.
+Line 764-772: Load goals. Good.
+Line 775-814: Projected goal calculation. Good.
+Line 816-848: Sample goals fallback. Good.
+Line 850-852: hasRealGoals check. Good.
+Line 856-869: Goal progress chart. Good.
+Line 872-873: Summary card. Good.
+Line 876-881: Goal form controls. Good.
+Line 884-889: Goals list. Good.
+Line 892-939: Goal insights. Good.
+Line 942-1063: Goal recommendations. Good.
+Line 1068-1077: Empty placeholder. Good.
+44. src/views/financial-planning/InsightsSection.js
+Purpose: Insights section. Key exports: InsightsSection Pattern: Functional (returns an object { element, cleanup }). ⚠️ Violates the pattern — returns an object, not a DOM element. Findings:
+
+Line 30-39: getTransactionAmount — good.
+Line 44-264: createTopMoversSection — good.
+Line 79: const monthOffset = sharedMonthState.offset — relies on sharedMonthState being passed. If null, this throws.
+Line 89: chartRenderer.destroyChart('insights-top-movers') — uses a hardcoded chart ID.
+Line 133-136: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }) — hardcoded EUR. Cross-file inconsistency.
+Line 162: topCanvas.id = 'insights-top-movers-chart' — hardcoded ID. If the section is rendered multiple times, ID collision.
+Line 269-721: createTimelineSection — very long function (~452 lines). Code smell.
+Line 415: timelineCanvas.id = 'insights-timeline-chart' — hardcoded ID. Same issue.
+Line 477: title = 'Daily Expenses : Current Month vs Previous Month' — space before colon. Minor.
+Line 731-1044: createFinancialSnapshotSection — good.
+Line 854-860: fmtUSD — hardcoded USD currency. The app uses EUR elsewhere. Cross-file inconsistency.
+Line 1053: export const InsightsSection = (planningData, chartRenderer, activeCharts) => { — good.
+Line 1055-1058: sharedMonthState — good.
+Line 1094: return { element: section, cleanup: () => {} } — returns an object with element and cleanup. The FinancialPlanningView.js at line 338 accesses .element. Good, but inconsistent with other sections that return DOM elements directly.
+Line 1100-1101: Financial snapshot. Good.
+Line 1104-1110: Top movers. Good.
+Line 1113-1120: Timeline. Good.
+Line 1123-1129: Inflation trends. Good.
+Line 1132-1134: Net balance chart — appended asynchronously. Good.
+Line 1137-1143: Synchronized navigation. Good.
+Line 1146-1151: Cleanup. Good.
+45. src/views/financial-planning/InvestmentsSection.js
+Purpose: Investments section. Key exports: InvestmentsSection Pattern: Functional (async, returns DOM element). ✅ Findings:
+
+Line 20-176: createInvestmentFormControls — good.
+Line 118-127: validate — good.
+Line 181-555: createInvestmentsList — very long function (~374 lines). Code smell.
+Line 244: meta.textContent = '${inv.shares} shares @ ${CURRENCY_SYMBOL}${currentPrice.toFixed(2)} → ' — uses CURRENCY_SYMBOL. Good.
+Line 247: totalValueEl.textContent = '${CURRENCY_SYMBOL}${currentValue.toFixed(2)}' — good.
+Line 295: inputStyle — inline styles as a string. Code smell — should be CSS classes.
+Line 298: fieldPrefix = 'edit-${String(inv.id || 'investment').replace(/[^a-zA-Z0-9_-]+/g, '-')}-' — sanitizes the ID for use in HTML IDs. Good security practice.
+Line 563: export const InvestmentsSection = async (_chartRenderer, _activeCharts) => { — parameters are unused (prefixed with underscore). The JSDoc says "kept for API compat". This is a code smell — the function signature doesn't match its usage.
+Line 610: StorageService.calculatePortfolioSummary() — good.
+Line 641-648: Empty placeholder. Good.
+46. src/views/financial-planning/OverviewSection.js
+Purpose: Overview section. Key exports: OverviewSection Pattern: Functional (returns DOM element). ✅ Findings:
+
+Line 24-30: RISK_THRESHOLDS — good.
+Line 38-114: assessEmergencyFundAdequacy — good.
+Line 76: recommendation = 'Build emergency fund to €${recommendedAmount.toFixed(2)} (6 months of expenses)' — hardcoded Euro symbol. Cross-file inconsistency.
+Line 81: recommendation = 'Urgent: Build emergency fund to at least €${(monthlyExpenses * 3).toFixed(2)} (3 months minimum)' — same.
+Line 86: recommendation = 'Critical: Start building emergency fund immediately. Target: €${recommendedAmount.toFixed(2)}' — same.
+Line 120: export const OverviewSection = planningData => { — good.
+Line 133-141: Progressive unlock. Good.
+Line 143-150: Loading placeholder. Good.
+Line 153-157: Stats grid. Good.
+Line 159: Comment says "SAME LOGIC AS DASHBOARD" — this is duplicated logic from DashboardView.js.
+Line 165-186: All-time totals calculation — duplicates DashboardView.js lines 596-620.
+Line 191-206: Monthly expenses calculation — duplicates DashboardView.js lines 660-701.
+Line 208-212: Savings rate calculation — unique to this view.
+Line 218: const emergencyFund = Math.max(0, currentBalance) — uses current balance as a proxy for emergency fund. The comment at line 215-217 acknowledges this is a limitation.
+Line 224-295: Stats cards. Good.
+Line 231-234, 242-245, 263-266, 290-293: calculationHelp strings use innerHTML in StatsCard.js — XSS risk if these strings ever contain user data.
+Line 305-306: Emergency fund card. Good.
+Line 316-448: createEmergencyFundCard — good.
+Line 409-413: detail.innerHTML — uses innerHTML with hardcoded values. The item.label and item.value are hardcoded strings, so no XSS risk, but it's inconsistent with the DOM-creation pattern.
+Line 437-440: recommendation.innerHTML — same pattern.
+PART 3: Cross-File Inconsistencies Summary
+A. Currency Symbol Inconsistency
+QuickAmountPresets.js line 40: button.textContent = '$${amount}' — hardcoded $
+ForecastsSection.js lines 140, 149, 159, 209, 218, 228: €${...} — hardcoded €
+OverviewSection.js lines 76, 81, 86, 227, 238, 388, 392, 401: €${...} — hardcoded €
+InsightsSection.js lines 133-136, 854-860: currency: 'EUR' and fmtUSD (hardcoded USD)
+GoalsSection.js lines 327-334, 374-377: currency: 'EUR' — hardcoded EUR
+ActionCard.js line 34: currency = 'EUR' — default prop, but SavingsGoalCard at line 311, 315, 319 hardcodes EUR
+DashboardStatsCard.js line 68: CURRENCY_SYMBOL — uses constant
+TransactionListItem.js line 520: CURRENCY_SYMBOL — uses constant
+InvestmentsSection.js lines 244, 247: CURRENCY_SYMBOL — uses constant
+Conclusion: The app is inconsistent about currency. Some components use CURRENCY_SYMBOL from constants, others hardcode $ or €, and one uses USD.
+
+B. Component Return Pattern Inconsistency
+Returns DOM element directly: Most components (e.g., AccountSection, BudgetForm, CategoryCard, TransactionForm, etc.)
+Returns { element, ... } object: ExpandableSection (line 190), FloatingBackButton (line 68), InflationTrends (line 508), QuickAmountPresets (line 260), InsightsSection (line 1094)
+Returns { container, ... } object: QuickAmountPresets (line 260)
+Returns null when unlocked: ProgressiveEmptyState (line 74-76)
+This inconsistency makes it hard for callers to know what to expect.
+
+C. Circular Dependency
+TransactionListItem.js line 19: import { setSelectedStyle } from '../views/DashboardView.js'
+DashboardView.js line 3: import { TransactionList } from '../components/TransactionList.js'
+TransactionList.js line 6: import { TransactionListItem } from './TransactionListItem.js'
+This creates a circular dependency: DashboardView → TransactionList → TransactionListItem → DashboardView.
+
+D. Cache Key Inconsistency
+DashboardView.js line 61: blinkbudget_reports_cache_${...} — localStorage
+DashboardView.js line 131: blinkbudget_financial_planning_cache — localStorage
+ReportsView.js line 77: analytics_reports_${start}_${end} — CacheService
+FinancialPlanningView.js line 68: financial_planning_data — CacheService
+Different caching mechanisms and keys for the same data.
+
+E. Hardcoded Breakpoints
+NetworkStatus.js lines 13, 75: 768 — hardcoded
+DashboardStatsCard.js line 33: BREAKPOINTS.MOBILE — uses constant
+TransactionList.js line 59: BREAKPOINTS.MOBILE — uses constant
+F. Security Claims vs Reality
+SecuritySection.js line 45: "End-to-end encryption for all data" — not verified in codebase
+SecuritySection.js line 48: "No third-party analytics or tracking" — but ReportsView.js uses window.gtag (Google Analytics)
+G. XSS Vulnerabilities
+InflationTrends.js line 177: driverInfo.innerHTML = '<strong>${driver.category}</strong>...' — unsanitized
+InflationTrends.js line 224: action.innerHTML = '<strong>💡 ${suggestion.suggestion}</strong>' — unsanitized
+MobileModal.js line 87: contentContainer.innerHTML = content — unsanitized string
+MobileModal.js line 458: contentContainer.innerHTML = content — unsanitized string
+StatsCard.js line 100: helpDetails.innerHTML = calculationHelp — unsanitized
+H. Dead Code / Unused Variables
+ErrorBoundary.js line 11: fallbackContent option is never used in renderError()
+ErrorBoundary.js line 30: originalContent is never used in renderContent()
+EnhancedInput.js line 8: ICONS is an empty object, applySafeIconContent always falls through
+InsightCard.js line 14: _index parameter is unused
+TimePeriodSelector.js line 998-1002: updateResponsiveLayout is an empty function
+FinancialPlanningView.js line 496-498: updateResponsiveLayout is an empty function
+LoginView.js lines 351-356: Both branches of if (!result.isValid) set errorMsg.textContent = ''
+InvestmentsSection.js line 563: _chartRenderer and _activeCharts are unused
+I. Temporal Dead Zone Bug
+TransactionListItem.js line 461: val.querySelector(...) — val is declared at line 490 with const, but referenced at line 461. This throws a ReferenceError when a user clicks on an anomaly-highlighted transaction.
+J. Memory Leaks
+DashboardView.js line 810-813: content._cleanupFunctions stores quick presets destroy functions, but the cleanup at line 1262-1266 never calls them.
+TransactionForm.js line 356-358: externalDateInput.addEventListener('change', submitForm) — listener never removed.
+K. Broken HTML/CSS in PrivacyControls.js
+Lines 131, 134, 136: < div class="privacy-header" > — spaces inside tags
+Lines 301-464: CSS with spaces around hyphens (e.g., max - width, border - radius)
+Lines 480-514: Query selectors with spaces around hyphens (e.g., [data - consent= "..."])
+L. Hardcoded IDs
+NetBalanceChart.js line 237: canvas.id = 'net-balance-chart'
+InsightsSection.js line 162: topCanvas.id = 'insights-top-movers-chart'
+InsightsSection.js line 415: timelineCanvas.id = 'insights-timeline-chart'
+These will collide if the components are rendered multiple times.
+
+Relevant file paths
+src/components/BaseComponent.js src/components/Button.js src/components/ErrorBoundary.js src/components/LoadingStates.js src/components/LoadingView.js src/components/EnhancedInput.js src/components/ExpandableSection.js src/components/FeedbackLink.js src/components/FloatingBackButton.js src/components/GeneralSection.js src/components/InflationTrends.js src/components/InsightCard.js src/components/MobileModal.js src/components/MobileNavigation.js src/components/NetBalanceChart.js src/components/NetworkStatus.js src/components/PrivacyControls.js src/components/ProgressiveEmptyState.js src/components/QuickAmountPresets.js src/components/SecuritySection.js src/components/TimePeriodSelector.js src/components/ToastNotification.js src/components/TransactionForm.js src/components/TransactionList.js src/components/TransactionListItem.js src/components/financial-planning/DataTable.js src/components/financial-planning/EmergencyFundCard.js src/components/financial-planning/ForecastCard.js src/components/financial-planning/Placeholder.js src/components/financial-planning/SectionContainer.js src/components/financial-planning/StatsCard.js src/components/ui/ActionCard.js src/views/AddView.js src/views/DashboardView.js src/views/EditView.js src/views/FinancialPlanningView.js src/views/LandingView.js src/views/LoginView.js src/views/ReportsView.js src/views/SettingsView.js src/views/financial-planning/BudgetsSection.js src/views/financial-planning/ForecastsSection.js src/views/financial-planning/GoalsSection.js src/views/financial-planning/InsightsSection.js src/views/financial-planning/InvestmentsSection.js src/views/financial-planning/OverviewSection.js

@@ -327,8 +327,17 @@ export class EnhancedInput extends BaseComponent {
     }
 
     // Pattern validation
-    if (this.options.pattern && !new RegExp(this.options.pattern).test(value)) {
-      error = 'Invalid format';
+    if (this.options.pattern) {
+      try {
+        if (!new RegExp(this.options.pattern).test(value)) {
+          error = 'Invalid format';
+        }
+      } catch (regexError) {
+        console.warn(
+          `[EnhancedInput] Invalid pattern "${this.options.pattern}":`,
+          regexError
+        );
+      }
     }
 
     // Custom validation
@@ -343,10 +352,6 @@ export class EnhancedInput extends BaseComponent {
     this.setState({ error, validated: true });
     this.setupElement();
     this.render();
-
-    if (this.inputElement) {
-      this.bindEvents();
-    }
 
     // Emit validation event
     this.emit('validate', {
@@ -385,21 +390,18 @@ export class EnhancedInput extends BaseComponent {
     this.setState({ error });
     this.setupElement();
     this.render();
-    this.bindEvents();
   }
 
   clearError() {
     this.setState({ error: null });
     this.setupElement();
     this.render();
-    this.bindEvents();
   }
 
   setDisabled(disabled) {
     this.options.disabled = disabled;
     this.setupElement();
     this.render();
-    this.bindEvents();
   }
 
   focus() {

@@ -458,7 +458,7 @@ export const TransactionListItem = ({
         item.classList.contains('transaction-item-anomaly')
       ) {
         // Remove anomaly badge
-        const badge = val.querySelector('.transaction-item-anomaly-badge');
+        const badge = item.querySelector('.transaction-item-anomaly-badge');
         if (badge) {
           badge.remove();
         }

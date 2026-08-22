@@ -130,8 +130,8 @@ A `.github/` directory now provides the full CI/CD security pipeline:
   - `quality` job: `yarn run check` (ESLint, Stylelint, Prettier, docs validation)
   - `unit-tests` job: full Vitest suite
   - `build` job: production build with output verification
-  - `snyk` job: Snyk scan (`snyk test --severity-threshold=high`) with conditional `SNYK_TOKEN` check and Snyk Monitor on master pushes
-- **`.github/dependabot.yml`** — weekly dependency updates (npm + GitHub Actions), auto PRs; security alerts and security updates require enabling the appropriate GitHub repository or organization settings
+  - `snyk` job: Snyk scan (`snyk test --severity-threshold=high`) with conditional `SNYK_TOKEN` check and Snyk Monitor on main pushes
+- **`.github/dependabot.yml`** — weekly dependency update scheduling for npm and GitHub Actions, with automatic PRs; GitHub security alerts and security updates additionally require the appropriate repository or organization security settings
 - **`package.json`** — `snyk` script: `snyk test --severity-threshold=high` for local/CI scanning
 
 > **Note**: `SNYK_TOKEN` is required only for the Snyk CI scan and monitor steps; Dependabot alerts/security updates require enabling the corresponding GitHub repository/org security settings.
@@ -153,6 +153,10 @@ Data in localStorage is unencrypted by design (local-first, zero-dependency). Th
 
 - [ ] Document the accepted risk in the README / privacy policy
 - [ ] Note that a compromised XSS or a shared device exposes the data; input sanitization and CSP are the mitigations
+
+### G7. Security and Analytics Claims Need Reconciliation
+
+- [ ] Reconcile `SecuritySection.js` claims of end-to-end encryption and no third-party tracking with the documented plaintext localStorage behavior and the conditional `window.gtag` analytics call in `ReportsView.js`; treat both claims as unresolved until verified.
 
 ### G5. Client-Side Rate Limiting Is Not Server-Enforced
 
@@ -178,7 +182,7 @@ The companion docs (`security-setup-guide.md`, `security-testing-checklist.md`) 
 - **Firebase Console**: authentication events, Firestore access patterns
 - **Netlify Dashboard**: deployments, access logs, build status
 - **Snyk Dashboard**: dependency scanning via CI (`SNYK_TOKEN` secret) and on-demand `yarn snyk`
-- **GitHub Dependabot**: weekly dependency update PRs and security alerts (enabled via `.github/dependabot.yml`)
+- **GitHub Dependabot**: weekly dependency update PRs scheduled by `.github/dependabot.yml`; GitHub security alerts and security updates additionally require repository or organization security settings
 - **GitHub Actions**: CI status for audits, quality checks, tests, build, and Snyk scan
 
 ---

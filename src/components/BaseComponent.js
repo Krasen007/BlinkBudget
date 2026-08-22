@@ -55,19 +55,18 @@ export class BaseComponent {
   setupElement() {
     if (!this.element) return;
 
-    // Add base classes
-    const baseClasses = ['component'];
+    // Add base classes without wiping pre-existing classes on the element
+    this.element.classList.add('component');
     if (this.options.className) {
-      baseClasses.push(this.options.className);
-    }
-    if (this.state.loading) {
-      baseClasses.push('loading');
-    }
-    if (this.state.error) {
-      baseClasses.push('error');
+      this.options.className
+        .split(/\s+/)
+        .filter(Boolean)
+        .forEach(className => this.element.classList.add(className));
     }
 
-    this.element.className = baseClasses.join(' ');
+    // Manage state classes (toggle so stale state classes are removed)
+    this.element.classList.toggle('loading', !!this.state.loading);
+    this.element.classList.toggle('error', !!this.state.error);
 
     // Add accessibility attributes
     if (this.options.accessible) {

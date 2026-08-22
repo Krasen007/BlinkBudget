@@ -170,17 +170,6 @@ const preloadFinancialPlanningData = async () => {
   return financialPlanningPreloadPromise;
 };
 
-/**
- * Normalize stale/deleted account filter back to 'all'.
- * Ensures displayed account name and balance stay in sync by detecting when
- * the persisted currentAccountFilter points to a deleted account.
- * Updates both currentAccountFilter and DASHBOARD_FILTER session value.
- * @param {Array} accounts Current list of valid accounts
- * @param {HTMLSelectElement} [selectElement] Optional select to update value
- * @returns {boolean} True if normalization occurred, false otherwise
- */
-let normalizeStaleAccountFilter; // Forward declaration
-
 export const DashboardView = (params = {}) => {
   const container = document.createElement('div');
   container.className = 'view-dashboard view-container';

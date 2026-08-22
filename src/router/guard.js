@@ -36,6 +36,7 @@ export const routeGuard = route => {
     'dashboard',
     'add-expense',
     'edit-expense',
+    'category-manager',
     'settings',
     'reports',
     'financial-planning',

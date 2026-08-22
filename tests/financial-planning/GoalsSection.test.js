@@ -158,7 +158,7 @@ describe('GoalsSection', () => {
     expect(createButtons.length).toBeGreaterThan(0);
 
     createButtons[0].click();
-    
+
     // Wait for the placeholder to be removed when the first goal is created
     await vi.waitFor(() => {
       expect(section.querySelector('.placeholder')).toBeFalsy();
@@ -189,12 +189,12 @@ describe('GoalsSection', () => {
     expect(createButtons.length).toBe(2);
 
     createButtons[0].click();
-    
+
     // Wait for the first recommendation card to be removed
     await vi.waitFor(() => {
-      const remainingButtons = [...recSection.querySelectorAll('button')].filter(
-        btn => btn.textContent === 'Create Goal'
-      );
+      const remainingButtons = [
+        ...recSection.querySelectorAll('button'),
+      ].filter(btn => btn.textContent === 'Create Goal');
       expect(remainingButtons.length).toBe(1);
     });
 
@@ -205,7 +205,7 @@ describe('GoalsSection', () => {
       btn => btn.textContent === 'Create Goal'
     );
     remainingButtons[0].click();
-    
+
     // Wait for the whole recommendations block to disappear
     await vi.waitFor(() => {
       expect(section.querySelector('.goal-recommendations')).toBeFalsy();

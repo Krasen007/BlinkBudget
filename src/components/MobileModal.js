@@ -84,7 +84,7 @@ export const MobileModal = ({
   contentContainer.className = 'mobile-modal-content';
 
   if (typeof content === 'string') {
-    contentContainer.innerHTML = content;
+    contentContainer.textContent = content;
   } else if (content instanceof HTMLElement) {
     contentContainer.appendChild(content);
   }
@@ -455,7 +455,7 @@ export const MobileBottomSheet = ({
   contentContainer.className = 'mobile-bottom-sheet-content';
 
   if (typeof content === 'string') {
-    contentContainer.innerHTML = content;
+    contentContainer.textContent = content;
   } else if (content instanceof HTMLElement) {
     contentContainer.appendChild(content);
   }

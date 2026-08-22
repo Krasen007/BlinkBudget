@@ -109,16 +109,18 @@ service firebase.storage {
 ### Automated Scanning
 
 1. **GitHub Actions CI** (`.github/workflows/ci.yml`):
-   - Automated `npm audit` on every push/PR to master
-   - Quality checks (`yarn run check`) — lint, stylelint, prettier, docs validation
-   - Unit test suite (`yarn test`)
-   - Production build verification
-   - Snyk dependency scan (requires `SNYK_TOKEN` secret)
+
+- Automated `npm audit` on every push/PR to main
+- Quality checks (`yarn run check`) — lint, stylelint, prettier, docs validation
+- Unit test suite (`yarn test`)
+- Production build verification
+- Snyk dependency scan (requires `SNYK_TOKEN` secret)
 
 2. **Snyk Integration**:
    - `.snyk` policy file configured
    - Snyk scan step in CI using the `snyk/actions/node` GitHub action
-   - Snyk Monitor for continuous dependency monitoring on master pushes
+
+- Snyk Monitor for continuous dependency monitoring on main pushes
 
 3. **GitHub Dependabot** (`.github/dependabot.yml`):
    - Weekly dependency updates (Monday 07:00 Europe/Sofia)

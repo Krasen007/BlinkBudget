@@ -103,7 +103,13 @@ const createPasswordResetModal = () => {
       submitBtn.disabled = true;
       submitBtn.textContent = 'Sending...';
 
-      const { error } = await AuthService.resetPassword(email);
+      let error;
+      try {
+        ({ error } = await AuthService.resetPassword(email));
+      } catch (err) {
+        console.error('Password reset failed:', err);
+        error = 'Failed to send reset link. Please try again.';
+      }
 
       if (error) {
         errorMsg.textContent = error;
@@ -399,9 +405,15 @@ export const LoginView = () => {
       submitBtn.disabled = true;
       submitBtn.textContent = isSignup ? 'Signing up...' : 'Logging in...';
 
-      const { error } = isSignup
-        ? await AuthService.signup(email, password)
-        : await AuthService.login(email, password);
+      let error;
+      try {
+        ({ error } = isSignup
+          ? await AuthService.signup(email, password)
+          : await AuthService.login(email, password));
+      } catch (err) {
+        console.error('Authentication failed:', err);
+        error = 'Authentication failed. Please try again.';
+      }
 
       if (error) {
         errorMsg.textContent = error;
@@ -452,7 +464,16 @@ export const LoginView = () => {
       googleBtn.disabled = true;
       googleBtn.textContent = 'Connecting...';
 
-      const result = await AuthService.loginWithGoogle();
+      let result;
+      try {
+        result = await AuthService.loginWithGoogle();
+      } catch (err) {
+        console.error('Google sign-in failed:', err);
+        errorMsg.textContent = 'Google sign-in failed. Please try again.';
+        googleBtn.disabled = false;
+        googleBtn.textContent = 'Sign in with Google';
+        return;
+      }
 
       if (result.error) {
         errorMsg.textContent = result.error;
@@ -545,16 +566,10 @@ export const LoginView = () => {
   form.appendChild(errorMsg);
   form.appendChild(submitBtn);
 
-  // Ensure the submit button has type="submit" for proper Enter key behavior
-  submitBtn.type = 'submit';
-
-  // Add form submit event listener to handle Enter key
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    submitBtn.click();
-  });
-
-  // Add Enter key listener to the form for better accessibility
+  // Keep the submit button as type="button" (ButtonComponent default) to avoid
+  // double submission: a type="submit" button would fire both its own onClick
+  // AND the form's submit event, each calling submitBtn.click() again.
+  // The keydown handler below is the single entry point for the Enter key.
   form.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       e.preventDefault();

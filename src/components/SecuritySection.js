@@ -45,7 +45,7 @@ export const SecuritySection = () => {
     'End-to-end encryption for all data',
     'Local-first storage - data stays on your device',
     'Optional cloud sync with your control',
-    'No third-party analytics or tracking',
+    'No third-party analytics or tracking scripts are loaded',
     'You can export all your data anytime',
     'Secure authentication',
   ];

@@ -88,13 +88,28 @@ export const AddView = ({ accountId, amount } = {}) => {
         );
       }
 
-      // Update dashboard filter to show the account used for this transaction
+      // Add the transaction and get the full transaction object
+      let newTransaction;
+      try {
+        newTransaction = TransactionService.add(data);
+      } catch (error) {
+        console.error('Failed to add transaction:', error);
+        import('../utils/toast-notifications.js')
+          .then(({ showErrorToast }) => {
+            showErrorToast('Failed to add transaction. Please try again.');
+          })
+          .catch(() => {
+            console.error(
+              'Failed to add transaction and toast system unavailable'
+            );
+          });
+        return;
+      }
+
+      // Update dashboard filter only after the transaction is persisted
       if (data.accountId) {
         sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, data.accountId);
       }
-
-      // Add the transaction and get the full transaction object
-      const newTransaction = TransactionService.add(data);
 
       // Mark transaction for highlighting in dashboard
       markTransactionForHighlight(newTransaction.id);

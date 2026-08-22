@@ -20,7 +20,7 @@ updates:
       prefix: 'chore(deps)'
       prefix-development: 'chore(deps-dev)'
       include: 'scope'
-    target-branch: 'master'
+    target-branch: 'main'
     ignore:
       # Vite is pinned via rolldown-vite override - managed manually
       - dependency-name: 'vite'
@@ -47,4 +47,4 @@ updates:
     commit-message:
       prefix: 'ci(deps)'
       include: 'scope'
-    target-branch: 'master'
+    target-branch: 'main'

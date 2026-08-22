@@ -292,14 +292,14 @@ npm install -g audit-ci
 
 ### CI/CD Integration (Implemented)
 
-The project has a GitHub Actions CI pipeline in `.github/workflows/ci.yml` that runs on every push/PR to `master`:
+The project has a GitHub Actions CI pipeline in `.github/workflows/ci.yml` that runs on every push/PR to `main`:
 
 - **Dependency Audit**: `yarn npm audit --all` blocks on known vulnerabilities
 - **Quality Checks**: `yarn run check` (ESLint, Stylelint, Prettier, docs validation)
 - **Unit Tests**: Full Vitest suite (`yarn test`)
 - **Production Build**: `yarn run build` with output verification
 - **Snyk Scan**: `snyk test --severity-threshold=high` (requires `SNYK_TOKEN` secret)
-- **Snyk Monitor**: Continuous dependency monitoring on master pushes
+- **Snyk Monitor**: Continuous dependency monitoring on main pushes
 
 Dependabot (`.github/dependabot.yml`) provides weekly dependency update PRs; Dependabot alerts require GitHub repository or organization security settings.
 

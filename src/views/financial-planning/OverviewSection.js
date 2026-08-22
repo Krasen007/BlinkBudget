@@ -228,10 +228,8 @@ export const OverviewSection = planningData => {
       color: currentBalance >= 0 ? COLORS.SUCCESS : COLORS.ERROR,
       icon: '💰',
       subtitle: currentBalance >= 0 ? 'Positive balance' : 'Negative balance',
-      calculationHelp: `
-        <p><strong>Formula:</strong> Total Income - Total Expenses (including refunds and transfers)</p>
-        <p>This shows your net financial position by calculating all income minus all expenses, refunds, and transfer movements across all your accounts. Matches the dashboard calculation.</p>
-      `,
+      calculationHelp:
+        'Formula: Total Income - Total Expenses (including refunds). All-time transfers are excluded from this calculation. This shows your net financial position across all your accounts.',
     },
     {
       label: 'Monthly Expenses',
@@ -239,10 +237,8 @@ export const OverviewSection = planningData => {
       color: COLORS.ERROR,
       icon: '📉',
       subtitle: 'Average last 3 months',
-      calculationHelp: `
-        <p><strong>Formula:</strong> Total expenses from last 3 months ÷ Number of months in that period</p>
-        <p>This calculates your average monthly spending by analyzing expense transactions over the most recent 3-month period, providing a realistic view of your regular spending patterns.</p>
-      `,
+      calculationHelp:
+        'Formula: Total expenses from last 3 months ÷ Number of months in that period. This calculates your average monthly spending by analyzing expense transactions over the most recent 3-month period, providing a realistic view of your regular spending patterns.',
     },
     {
       label: 'Savings Rate',
@@ -260,10 +256,8 @@ export const OverviewSection = planningData => {
           : savingsRate > 10
             ? 'Good'
             : 'Needs improvement',
-      calculationHelp: `
-        <p><strong>Formula:</strong> (Total Income - Total Expenses) ÷ Total Income × 100</p>
-        <p>This percentage shows how much of your income you're saving. A higher rate indicates better financial health and more money available for investments or emergencies.</p>
-      `,
+      calculationHelp:
+        'Formula: (Total Income - Total Expenses) ÷ (Total Income - All-time Transfers) × 100. This percentage shows how much of your effective income you are saving.',
     },
     {
       label: 'Risk Level',
@@ -287,10 +281,8 @@ export const OverviewSection = planningData => {
               ? '🚨'
               : '❓',
       subtitle: emergencyFundAssessment.message,
-      calculationHelp: `
-        <p><strong>Assessment:</strong> Based on emergency fund adequacy</p>
-        <p>Risk level is determined by evaluating your emergency fund coverage relative to monthly expenses. Low risk indicates strong financial preparedness, while high risk suggests immediate attention is needed.</p>
-      `,
+      calculationHelp:
+        'Assessment: Based on emergency fund adequacy. Risk level is determined by evaluating your emergency fund coverage relative to monthly expenses. Low risk indicates strong financial preparedness, while high risk suggests immediate attention is needed.',
     },
   ];
 
@@ -406,10 +398,18 @@ function createEmergencyFundCard(assessment) {
 
   detailItems.forEach(item => {
     const detail = document.createElement('div');
-    detail.innerHTML = `
-      <div style="font-size: 0.75rem; color: ${COLORS.TEXT_MUTED}; margin-bottom: 4px;">${item.label}</div>
-      <div style="font-weight: 600; color: ${COLORS.TEXT_MAIN}; font-size: 1rem;">${item.value}</div>
-    `;
+    const detailLabel = document.createElement('div');
+    detailLabel.style.fontSize = '0.75rem';
+    detailLabel.style.color = COLORS.TEXT_MUTED;
+    detailLabel.style.marginBottom = '4px';
+    detailLabel.textContent = item.label;
+    const detailValue = document.createElement('div');
+    detailValue.style.fontWeight = '600';
+    detailValue.style.color = COLORS.TEXT_MAIN;
+    detailValue.style.fontSize = '1rem';
+    detailValue.textContent = item.value;
+    detail.appendChild(detailLabel);
+    detail.appendChild(detailValue);
     details.appendChild(detail);
   });
 
@@ -434,10 +434,19 @@ function createEmergencyFundCard(assessment) {
           ? COLORS.ERROR
           : COLORS.TEXT_MUTED
   }`;
-  recommendation.innerHTML = `
-    <div style="font-size: 0.75rem; color: ${COLORS.TEXT_MUTED}; margin-bottom: 4px; font-weight: 500;">Recommendation</div>
-    <div style="font-weight: 500; color: ${COLORS.TEXT_MAIN}; font-size: 0.875rem;">${assessment.recommendation}</div>
-  `;
+  const recommendationLabel = document.createElement('div');
+  recommendationLabel.style.fontSize = '0.75rem';
+  recommendationLabel.style.color = COLORS.TEXT_MUTED;
+  recommendationLabel.style.marginBottom = '4px';
+  recommendationLabel.style.fontWeight = '500';
+  recommendationLabel.textContent = 'Recommendation';
+  const recommendationText = document.createElement('div');
+  recommendationText.style.fontWeight = '500';
+  recommendationText.style.color = COLORS.TEXT_MAIN;
+  recommendationText.style.fontSize = '0.875rem';
+  recommendationText.textContent = assessment.recommendation;
+  recommendation.appendChild(recommendationLabel);
+  recommendation.appendChild(recommendationText);
 
   card.appendChild(header);
   card.appendChild(message);

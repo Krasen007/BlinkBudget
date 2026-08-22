@@ -95,78 +95,117 @@ export const EditView = ({ id }) => {
     initialValues: transaction,
     externalDateInput: dateInput,
     onSubmit: data => {
-      // Check for date change to create a "ghost" of the original transaction
-      const originalDate = transaction.timestamp.split('T')[0];
-      const newDate = data.timestamp.split('T')[0];
+      let ghostMutation = null;
+      try {
+        // Check for date change to create a "ghost" of the original transaction
+        const originalDate = transaction.timestamp.split('T')[0];
+        const newDate = data.timestamp.split('T')[0];
 
-      if (originalDate !== newDate) {
-        const createdAt = transaction.createdAt
-          ? new Date(transaction.createdAt)
-          : null;
-        const isRecent =
-          createdAt && new Date() - createdAt < TIMING.RECENT_TRANSACTION_LIMIT;
+        if (originalDate !== newDate) {
+          const createdAt = transaction.createdAt
+            ? new Date(transaction.createdAt)
+            : null;
+          const isRecent =
+            createdAt &&
+            new Date() - createdAt < TIMING.RECENT_TRANSACTION_LIMIT;
 
-        if (isRecent) {
-          // Skip creating/updating ghost transactions for recent edits (mistake correction).
-          // If there is an existing ghost, remove it and clear metadata.
-          if (transaction.ghostId) {
-            TransactionService.remove(transaction.ghostId);
-          }
-          data.originalDate = null;
-          data.ghostId = null;
-        } else if (
-          transaction.originalDate &&
-          newDate === transaction.originalDate.split('T')[0]
-        ) {
-          // REVERSION: If moving back to the VERY FIRST original date, just clear the metadata
-          if (transaction.ghostId) {
-            TransactionService.remove(transaction.ghostId);
-          }
-          data.originalDate = null;
-          data.ghostId = null;
-        } else {
-          // If we already have a ghost (moving for the 2nd/3rd time), reuse it
-          if (transaction.ghostId) {
-            // Update the existing ghost's info to point to the new destination
-            TransactionService.update(transaction.ghostId, {
-              movedToDate: data.timestamp,
-            });
-            // Keep the original metadata
-            data.originalDate = transaction.originalDate;
-            data.ghostId = transaction.ghostId;
+          if (isRecent) {
+            // Skip creating/updating ghost transactions for recent edits (mistake correction).
+            // If there is an existing ghost, remove it and clear metadata.
+            if (transaction.ghostId) {
+              const ghost = TransactionService.get(transaction.ghostId);
+              TransactionService.remove(transaction.ghostId);
+              ghostMutation = { type: 'removed', ghost };
+            }
+            data.originalDate = null;
+            data.ghostId = null;
+          } else if (
+            transaction.originalDate &&
+            newDate === transaction.originalDate.split('T')[0]
+          ) {
+            // REVERSION: If moving back to the VERY FIRST original date, just clear the metadata
+            if (transaction.ghostId) {
+              const ghost = TransactionService.get(transaction.ghostId);
+              TransactionService.remove(transaction.ghostId);
+              ghostMutation = { type: 'removed', ghost };
+            }
+            data.originalDate = null;
+            data.ghostId = null;
           } else {
-            // FIRST MOVE: Create new ghost
-            const ghostTransaction = {
-              ...transaction,
-              isGhost: true,
-              movedToDate: data.timestamp,
-            };
+            // If we already have a ghost (moving for the 2nd/3rd time), reuse it
+            if (transaction.ghostId) {
+              // Update the existing ghost's info to point to the new destination
+              const ghost = TransactionService.get(transaction.ghostId);
+              TransactionService.update(transaction.ghostId, {
+                movedToDate: data.timestamp,
+              });
+              ghostMutation = { type: 'updated', ghost };
+              // Keep the original metadata
+              data.originalDate = transaction.originalDate;
+              data.ghostId = transaction.ghostId;
+            } else {
+              // FIRST MOVE: Create new ghost
+              const ghostTransaction = {
+                ...transaction,
+                isGhost: true,
+                movedToDate: data.timestamp,
+              };
 
-            delete ghostTransaction.id;
-            delete ghostTransaction.ghostId;
-            delete ghostTransaction.originalDate;
+              delete ghostTransaction.id;
+              delete ghostTransaction.ghostId;
+              delete ghostTransaction.originalDate;
 
-            const addedGhost = TransactionService.add(ghostTransaction);
+              const addedGhost = TransactionService.add(ghostTransaction);
+              ghostMutation = { type: 'added', id: addedGhost.id };
 
-            // Link the moved transaction to its ghost
-            data.originalDate = transaction.timestamp;
-            data.ghostId = addedGhost.id;
+              // Link the moved transaction to its ghost
+              data.originalDate = transaction.timestamp;
+              data.ghostId = addedGhost.id;
+            }
           }
         }
+
+        // Update dashboard filter to show the account used for this transaction
+        if (data.accountId) {
+          sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, data.accountId);
+        }
+
+        TransactionService.update(id, data);
+
+        // Mark transaction for highlighting in dashboard
+        markTransactionForHighlight(id);
+
+        // Navigate to dashboard immediately
+        Router.navigate('dashboard');
+      } catch (error) {
+        try {
+          if (ghostMutation?.type === 'added') {
+            TransactionService.remove(ghostMutation.id);
+          } else if (ghostMutation?.type === 'updated') {
+            TransactionService.update(
+              ghostMutation.ghost.id,
+              ghostMutation.ghost
+            );
+          } else if (ghostMutation?.type === 'removed' && ghostMutation.ghost) {
+            TransactionService.add(ghostMutation.ghost);
+          }
+        } catch (rollbackError) {
+          console.error(
+            'Failed to roll back ghost transaction:',
+            rollbackError
+          );
+        }
+        console.error('Failed to update transaction:', error);
+        import('../utils/toast-notifications.js')
+          .then(({ showErrorToast }) => {
+            showErrorToast('Failed to update transaction. Please try again.');
+          })
+          .catch(() => {
+            console.error(
+              'Failed to update transaction and toast system unavailable'
+            );
+          });
       }
-
-      // Update dashboard filter to show the account used for this transaction
-      if (data.accountId) {
-        sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, data.accountId);
-      }
-
-      TransactionService.update(id, data);
-
-      // Mark transaction for highlighting in dashboard
-      markTransactionForHighlight(id);
-
-      // Navigate to dashboard immediately
-      Router.navigate('dashboard');
     },
     onCancel: () => Router.navigate('dashboard'),
     onDelete: () => {

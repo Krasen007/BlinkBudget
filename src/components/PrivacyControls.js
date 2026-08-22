@@ -128,10 +128,10 @@ export function createPrivacyControls() {
   container.className = 'privacy-controls';
 
   container.innerHTML = `
-      < div class="privacy-header" >
+      <div class="privacy-header">
       <h2>Privacy & Data Controls</h2>
       <p>Manage your privacy settings and data preferences</p>
-    </div >
+    </div>
 
     <div class="privacy-sections">
       <!-- Data Collection Consent -->
@@ -145,7 +145,7 @@ export function createPrivacyControls() {
               <small>Help us improve the app by collecting anonymous usage statistics</small>
             </span>
           </label>
-          
+
           <label class="consent-item">
             <input type="checkbox" id="consent-crash-reporting" data-consent="crashReporting">
             <span class="consent-label">
@@ -153,7 +153,7 @@ export function createPrivacyControls() {
               <small>Automatically report errors to help us fix bugs</small>
             </span>
           </label>
-          
+
           <label class="consent-item">
             <input type="checkbox" id="consent-feature-usage" data-consent="featureUsage">
             <span class="consent-label">
@@ -161,7 +161,7 @@ export function createPrivacyControls() {
               <small>Help us understand which features are most valuable</small>
             </span>
           </label>
-          
+
           <label class="consent-item">
             <input type="checkbox" id="consent-marketing" data-consent="marketing">
             <span class="consent-label">
@@ -183,7 +183,7 @@ export function createPrivacyControls() {
               <small>Remove unnecessary metadata from stored data</small>
             </span>
           </label>
-          
+
           <label class="consent-item">
             <input type="checkbox" id="anonymize-analytics" data-setting="anonymizeAnalytics">
             <span class="consent-label">
@@ -191,7 +191,7 @@ export function createPrivacyControls() {
               <small>Remove personally identifiable information from analytics</small>
             </span>
           </label>
-          
+
           <label class="consent-item">
             <input type="checkbox" id="limit-collection" data-setting="limitDataCollection">
             <span class="consent-label">
@@ -217,7 +217,7 @@ export function createPrivacyControls() {
               <option value="-1">Forever</option>
             </select>
           </div>
-          
+
           <div class="retention-item">
             <label for="retention-audit">Audit Logs</label>
             <select id="retention-audit" data-retention="auditLogs">
@@ -228,7 +228,7 @@ export function createPrivacyControls() {
               <option value="-1">Forever</option>
             </select>
           </div>
-          
+
           <div class="retention-item">
             <label for="retention-analytics">Analytics Data</label>
             <select id="retention-analytics" data-retention="analytics">
@@ -253,7 +253,7 @@ export function createPrivacyControls() {
               <small>Balance between functionality and privacy</small>
             </span>
           </label>
-          
+
           <label class="mode-item">
             <input type="radio" name="privacy-mode" value="enhanced">
             <span class="mode-label">
@@ -261,7 +261,7 @@ export function createPrivacyControls() {
               <small>Increased privacy with some feature limitations</small>
             </span>
           </label>
-          
+
           <label class="mode-item">
             <input type="radio" name="privacy-mode" value="minimal">
             <span class="mode-label">
@@ -298,167 +298,167 @@ export function createPrivacyControls() {
   // Add styles
   const style = document.createElement('style');
   style.textContent = `
-      .privacy - controls {
-      max - width: 800px;
+      .privacy-controls {
+      max-width: 800px;
       margin: 0 auto;
       padding: 2rem;
-      background: var(--bg - primary);
-      border - radius: 12px;
-      box - shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      background: var(--bg-primary);
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
-    .privacy - header {
-      text - align: center;
-      margin - bottom: 2rem;
+    .privacy-header {
+      text-align: center;
+      margin-bottom: 2rem;
     }
 
-    .privacy - header h2 {
-      color: var(--text - primary);
-      margin - bottom: 0.5rem;
+    .privacy-header h2 {
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
     }
 
-    .privacy - header p {
-      color: var(--text - secondary);
+    .privacy-header p {
+      color: var(--text-secondary);
       margin: 0;
     }
 
-    .privacy - section {
-      margin - bottom: 2rem;
+    .privacy-section {
+      margin-bottom: 2rem;
       padding: 1.5rem;
-      background: var(--bg - secondary);
-      border - radius: 8px;
-      border: 1px solid var(--border - color);
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
     }
 
-    .privacy - section h3 {
-      color: var(--text - primary);
-      margin - bottom: 1rem;
-      font - size: 1.1rem;
+    .privacy-section h3 {
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
     }
 
-    .consent - item, .mode - item {
+    .consent-item, .mode-item {
       display: flex;
-      align - items: flex - start;
+      align-items: flex-start;
       gap: 0.75rem;
-      margin - bottom: 1rem;
+      margin-bottom: 1rem;
       cursor: pointer;
     }
 
-    .consent - item input, .mode - item input {
-      margin - top: 0.25rem;
-      flex - shrink: 0;
+    .consent-item input, .mode-item input {
+      margin-top: 0.25rem;
+      flex-shrink: 0;
     }
 
-    .consent - label, .mode - label {
+    .consent-label, .mode-label {
       flex: 1;
     }
 
-    .consent - label strong, .mode - label strong {
+    .consent-label strong, .mode-label strong {
       display: block;
-      color: var(--text - primary);
-      margin - bottom: 0.25rem;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
     }
 
-    .consent - label small, .mode - label small {
+    .consent-label small, .mode-label small {
       display: block;
-      color: var(--text - secondary);
-      line - height: 1.4;
+      color: var(--text-secondary);
+      line-height: 1.4;
     }
 
-    .retention - options {
+    .retention-options {
       display: grid;
-      grid - template - columns: repeat(auto - fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
     }
 
-    .retention - item {
+    .retention-item {
       display: flex;
-      flex - direction: column;
+      flex-direction: column;
       gap: 0.5rem;
     }
 
-    .retention - item label {
-      color: var(--text - primary);
-      font - weight: 500;
+    .retention-item label {
+      color: var(--text-primary);
+      font-weight: 500;
     }
 
-    .retention - item select {
+    .retention-item select {
       padding: 0.5rem;
-      border: 1px solid var(--border - color);
-      border - radius: 4px;
-      background: var(--bg - primary);
-      color: var(--text - primary);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background: var(--bg-primary);
+      color: var(--text-primary);
     }
 
-    .privacy - modes {
+    .privacy-modes {
       display: flex;
-      flex - direction: column;
+      flex-direction: column;
       gap: 1rem;
     }
 
-    .data - actions {
+    .data-actions {
       display: flex;
-      flex - wrap: wrap;
+      flex-wrap: wrap;
       gap: 1rem;
     }
 
-    .privacy - actions {
+    .privacy-actions {
       display: flex;
-      justify - content: center;
+      justify-content: center;
       gap: 1rem;
-      margin - top: 2rem;
-      padding - top: 2rem;
-      border - top: 1px solid var(--border - color);
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border-color);
     }
 
     .btn {
       padding: 0.75rem 1.5rem;
       border: none;
-      border - radius: 6px;
-      font - weight: 500;
+      border-radius: 6px;
+      font-weight: 500;
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
-    .btn - primary {
-      background: var(--primary - color);
+    .btn-primary {
+      background: var(--primary-color);
       color: white;
     }
 
-    .btn - primary:hover {
-      background: var(--primary - hover);
+    .btn-primary:hover {
+      background: var(--primary-hover);
     }
 
-    .btn - secondary {
-      background: var(--bg - tertiary);
-      color: var(--text - primary);
-      border: 1px solid var(--border - color);
+    .btn-secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
     }
 
-    .btn - secondary:hover {
-      background: var(--bg - hover);
+    .btn-secondary:hover {
+      background: var(--bg-hover);
     }
 
-    .btn - warning {
-      background: var(--warning - color);
+    .btn-warning {
+      background: var(--warning-color);
       color: white;
     }
 
-    .btn - warning:hover {
-      background: var(--warning - hover);
+    .btn-warning:hover {
+      background: var(--warning-hover);
     }
 
-    @media(max - width: 768px) {
-      .privacy - controls {
+    @media(max-width: 768px) {
+      .privacy-controls {
         padding: 1rem;
       }
 
-      .data - actions, .privacy - actions {
-        flex - direction: column;
+      .data-actions, .privacy-actions {
+        flex-direction: column;
       }
 
       .btn {
-        width: 100 %;
+        width: 100%;
       }
     }
     `;
@@ -478,7 +478,7 @@ export function initializePrivacyControls(container) {
     // Set consent checkboxes
     Object.keys(settings.consent).forEach(consentType => {
       const checkbox = container.querySelector(
-        `[data - consent= "${consentType}"]`
+        `[data-consent="${consentType}"]`
       );
       if (checkbox) {
         checkbox.checked = settings.consent[consentType];
@@ -487,9 +487,7 @@ export function initializePrivacyControls(container) {
 
     // Set data minimization checkboxes
     Object.keys(settings.dataMinimization).forEach(setting => {
-      const checkbox = container.querySelector(
-        `[data - setting= "${setting}"]`
-      );
+      const checkbox = container.querySelector(`[data-setting="${setting}"]`);
       if (checkbox) {
         checkbox.checked = settings.dataMinimization[setting];
       }
@@ -498,7 +496,7 @@ export function initializePrivacyControls(container) {
     // Set retention period selects
     Object.keys(settings.dataRetention).forEach(retentionType => {
       const select = container.querySelector(
-        `[data - retention= "${retentionType}"]`
+        `[data-retention="${retentionType}"]`
       );
       if (select) {
         select.value = settings.dataRetention[retentionType];
@@ -507,7 +505,7 @@ export function initializePrivacyControls(container) {
 
     // Set privacy mode
     const modeRadio = container.querySelector(
-      `[value = "${settings.privacyMode}"]`
+      `[value="${settings.privacyMode}"]`
     );
     if (modeRadio) {
       modeRadio.checked = true;
@@ -580,7 +578,7 @@ export function initializePrivacyControls(container) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `blinkbudget - data -export -${new Date().toISOString().split('T')[0]}.json`;
+        a.download = `blinkbudget-data-export-${new Date().toISOString().split('T')[0]}.json`;
         a.click();
         URL.revokeObjectURL(url);
       } catch (error) {

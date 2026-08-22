@@ -247,10 +247,7 @@ export class ProgressIndicator extends BaseComponent {
       this.options.animated ? 'progress-animated' : '',
     ]);
 
-    const percentage = Math.min(
-      100,
-      Math.max(0, (this.state.value / this.options.max) * 100)
-    );
+    const percentage = this.getPercentage();
     progressFill.style.width = `${percentage}%`;
 
     progressBar.appendChild(progressFill);
@@ -271,12 +268,17 @@ export class ProgressIndicator extends BaseComponent {
     this.setState({ value });
   }
 
+  getPercentage() {
+    const max = this.options.max > 0 ? this.options.max : 1;
+    return Math.min(100, Math.max(0, (this.state.value / max) * 100));
+  }
+
   getRole() {
     return 'progressbar';
   }
 
   getAriaLabel() {
-    return `Progress: ${Math.round((this.state.value / this.options.max) * 100)}%`;
+    return `Progress: ${Math.round(this.getPercentage())}%`;
   }
 
   getAriaDescribedBy() {

@@ -97,7 +97,7 @@ export const StatsCard = ({
     helpDetails.style.fontSize = '0.625rem';
     helpDetails.style.color = COLORS.TEXT_MUTED;
     helpDetails.style.lineHeight = '1.3';
-    helpDetails.innerHTML = calculationHelp;
+    helpDetails.textContent = calculationHelp;
 
     // Initially hide details
     helpDetails.style.display = 'none';
