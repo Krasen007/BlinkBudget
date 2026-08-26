@@ -34,10 +34,35 @@ export const StorageService = {
         } catch (err) {
           attempt += 1;
           if (attempt > retries) {
-            console.error(`[Storage] pushToCloud failed for ${key}:`, err);
+            console.error('[Storage] pushToCloud failed', key, err.code, err);
+            try {
+              localStorage.setItem(
+                'last_sync_error',
+                JSON.stringify({
+                  key,
+                  code: err.code || null,
+                  message: err.message || String(err),
+                  timestamp: new Date().toISOString(),
+                })
+              );
+            } catch {
+              /* ignore storage errors */
+            }
             window.dispatchEvent(
               new CustomEvent('sync-error', {
-                detail: { key, error: String(err) },
+                detail: {
+                  key,
+                  error:
+                    'Unable to sync — saved locally, will sync when online.',
+                },
+              })
+            );
+            window.dispatchEvent(
+              new CustomEvent('toast', {
+                detail: {
+                  message:
+                    'Unable to sync — saved locally, will sync when online.',
+                },
               })
             );
             return;

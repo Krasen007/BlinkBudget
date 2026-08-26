@@ -82,13 +82,35 @@ export const BackupService = {
         );
         console.log('[Backup] Daily backup created successfully');
       } catch (error) {
-        console.error('[Backup] Failed to create backup:', error);
+        console.error('[Backup] Failed to create backup:', error.code, error);
+        try {
+          localStorage.setItem(
+            'last_backup_error',
+            JSON.stringify({
+              operation: 'backup',
+              code: error.code || null,
+              message: error.message || String(error),
+              timestamp: new Date().toISOString(),
+            })
+          );
+        } catch {
+          /* ignore storage errors */
+        }
         window.dispatchEvent(
           new CustomEvent('backup-operation', {
             detail: {
               operation: 'backup',
               status: 'failed',
-              error: error.message,
+              error:
+                'Unable to backup — saved locally, will retry when online.',
+            },
+          })
+        );
+        window.dispatchEvent(
+          new CustomEvent('toast', {
+            detail: {
+              message:
+                'Unable to backup — saved locally, will retry when online.',
             },
           })
         );
@@ -218,18 +240,38 @@ export const BackupService = {
 
       return restored;
     } catch (error) {
-      console.error('[Backup] Restore failed:', error);
+      console.error('[Backup] Restore failed', error.code, error);
+      try {
+        localStorage.setItem(
+          'last_backup_error',
+          JSON.stringify({
+            operation: 'restore',
+            code: error.code || null,
+            message: error.message || String(error),
+            timestamp: new Date().toISOString(),
+          })
+        );
+      } catch {
+        /* ignore storage errors */
+      }
+      const userMessage =
+        'Unable to restore — please try again when online. Your local data is safe.';
       window.dispatchEvent(
         new CustomEvent('backup-operation', {
           detail: {
             operation: 'restore',
             status: 'failed',
-            error: error.message,
+            error: userMessage,
           },
         })
       );
+      window.dispatchEvent(
+        new CustomEvent('toast', {
+          detail: { message: userMessage },
+        })
+      );
       hideProgressIndicator(progressId);
-      throw error;
+      throw new Error(userMessage, { cause: error });
     }
   },
 

@@ -176,7 +176,21 @@ export const SyncService = {
         }
       }, 1000); // 1 second should be enough for Firebase to process
     } catch (error) {
-      console.error(`[Sync] Failed to push ${dataType} to cloud:`, error);
+      // Keep technical error for debugging, but never expose it to the user
+      console.error('[Sync] pushToCloud failed', dataType, error.code, error);
+      try {
+        localStorage.setItem(
+          'last_sync_error',
+          JSON.stringify({
+            dataType,
+            code: error.code || null,
+            message: error.message || String(error),
+            timestamp: new Date().toISOString(),
+          })
+        );
+      } catch {
+        /* ignore storage errors */
+      }
 
       // Check if it's a network error
       const isNetworkError =
@@ -192,15 +206,22 @@ export const SyncService = {
         );
       }
 
-      // Emit sync error for UI
+      // Emit generic, user-friendly error for UI (Design by subtraction)
       window.dispatchEvent(
         new CustomEvent('sync-state', {
           detail: {
             dataType,
             state: 'error',
-            error: String(error),
+            error: 'Unable to sync — saved locally, will sync when online.',
             timestamp: Date.now(),
             isNetworkError: isNetworkError || false,
+          },
+        })
+      );
+      window.dispatchEvent(
+        new CustomEvent('toast', {
+          detail: {
+            message: 'Unable to sync — saved locally, will sync when online.',
           },
         })
       );

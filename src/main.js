@@ -69,6 +69,17 @@ const initApp = () => {
   // Network status
   document.body.appendChild(NetworkStatus());
 
+  // Design by subtraction: generic toast bridge — UI never sees raw Firestore codes
+  // Technical details stay in console + localStorage (last_sync_error / last_auth_error)
+  window.addEventListener('toast', e => {
+    const message =
+      e.detail?.message ||
+      'Unable to sync — saved locally, will sync when online.';
+    import('./utils/toast-notifications.js')
+      .then(({ showWarningToast }) => showWarningToast(message))
+      .catch(() => {});
+  });
+
   // For returning users, render mobile nav immediately without waiting for Firebase auth
   // This eliminates the visible delay on first load when the user is already signed in
   if (
