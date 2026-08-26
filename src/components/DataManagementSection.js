@@ -166,9 +166,9 @@ export const DataManagementSection = () => {
         emergencyBtn.disabled = true;
         emergencyBtn.textContent = '⏳ Exporting...';
 
-        const { EmergencyExportService } =
-          await import('../core/emergency-export-service.js');
-        const result = await EmergencyExportService.createEmergencyExport();
+        const { BackupService } =
+          await import('../core/backup-service.js');
+        const result = await BackupService.createEmergencyExport();
 
         if (result.success) {
           // Dynamic import to avoid circular dependencies
@@ -300,9 +300,9 @@ export const DataManagementSection = () => {
         cleanupBtn.disabled = true;
         cleanupBtn.textContent = '🔧 Fixing...';
 
-        const { DataCleanupService } =
-          await import('../core/data-cleanup-service.js');
-        const result = await DataCleanupService.fixTransactionDataIssues();
+        const { BackupService } =
+          await import('../core/backup-service.js');
+        const result = await BackupService.fixTransactionDataIssues();
 
         if (result.fixed > 0) {
           const { MobileAlert } = await import('./MobileModal.js');
@@ -370,10 +370,10 @@ export const DataManagementSection = () => {
         recoveryBtn.disabled = true;
         recoveryBtn.textContent = '🚨 Recovering...';
 
-        const { emergencyRecoveryService } =
-          await import('../core/emergency-recovery-service.js');
+        const { BackupService } =
+          await import('../core/backup-service.js');
         const result =
-          await emergencyRecoveryService.performEmergencyRecovery();
+          await BackupService.performEmergencyRecovery();
 
         if (result.success) {
           const { MobileAlert } = await import('./MobileModal.js');

@@ -1,5 +1,5 @@
 import { registerSW } from 'virtual:pwa-register';
-import { ToastNotification } from './components/ToastNotification.js';
+import { showSuccessToast } from './utils/toast-notifications.js';
 
 const GITHUB_RELEASES_URL = 'https://github.com/Krasen007/BlinkBudget/releases';
 // __APP_VERSION__ is injected by Vite at build time
@@ -167,10 +167,9 @@ function showUpdateConfirmation(onConfirm) {
  * Show version confirmation toast after update
  */
 function showVersionConfirmation() {
-  ToastNotification({
-    message: `Updated to v${CURRENT_VERSION}`,
+  showSuccessToast(`Updated to v${CURRENT_VERSION}`, {
+    persistent: true,
     actionText: 'View Changes',
-    variant: 'success',
     onAction: () => {
       window.open(GITHUB_RELEASES_URL, '_blank', 'noopener,noreferrer');
     },

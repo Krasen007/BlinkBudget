@@ -25,8 +25,8 @@ import {
 } from '../utils/constants.js';
 import { debounce } from '../utils/touch-utils.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
-import { UnusualSpendingDetector } from '../core/unusual-spending-detector.js';
 import { UnusualSpendingCard } from '../components/ui/ActionCard.js';
+import { AnomalyService } from '../core/analytics/AnomalyService.js';
 
 // Import utility modules
 import {
@@ -40,7 +40,7 @@ import {
   createMinimalAnalyticsData,
 } from '../utils/reports-utils.js';
 
-import { CacheService } from '../core/cache-service.js';
+import { analyticsCache } from '../core/analytics/AnalyticsCache.js';
 
 const REPORTS_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -482,7 +482,7 @@ export const ReportsView = (params = {}) => {
 
       // --- Cache check: skip recalculation if data hasn't changed ---
       const cacheKey = buildAnalyticsCacheKey(currentTimePeriod);
-      const cachedAnalytics = CacheService.get(cacheKey);
+      const cachedAnalytics = analyticsCache.get(cacheKey);
       if (cachedAnalytics) {
         currentData = cachedAnalytics;
         await renderReports();
@@ -643,7 +643,7 @@ export const ReportsView = (params = {}) => {
 
       // Store enriched data in cache so re-visits don't recalculate.
       // CacheInvalidator clears 'analytics_*' keys when transactions change.
-      CacheService.put(cacheKey, currentData, REPORTS_CACHE_TTL_MS);
+      analyticsCache.set(cacheKey, currentData, REPORTS_CACHE_TTL_MS);
 
       const processingTime = Date.now() - startTime;
       if (processingTime > 2000) {
@@ -1091,7 +1091,7 @@ export const ReportsView = (params = {}) => {
       // Add unusual spending alerts below Financial Insights
       if (currentData.transactions && currentData.transactions.length > 0) {
         const unusualTransactions =
-          UnusualSpendingDetector.detectUnusualTransactions(
+          AnomalyService.detectUnusualTransactions(
             currentData.transactions
           ).filter(transaction => {
             const transactionDate = new Date(

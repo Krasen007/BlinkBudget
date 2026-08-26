@@ -104,11 +104,11 @@ export class AccountDeletionService {
     };
 
     try {
-      const { EmergencyExportService } =
-        await import('../emergency-export-service.js');
+      const { BackupService } =
+        await import('../backup-service.js');
 
       // Create comprehensive export
-      const exportResult = await EmergencyExportService.createEmergencyExport({
+      const exportResult = await BackupService.createEmergencyExport({
         format: 'json',
         includeAudit: true,
         reason: 'account_deletion',

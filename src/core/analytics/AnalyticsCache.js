@@ -16,6 +16,7 @@ export class AnalyticsCache {
   constructor() {
     this.cache = new Map();
     this.cacheTimestamps = new Map();
+    this._expiresAt = new Map(); // optional per-key TTL (ms epoch)
     this.cacheStats = {
       hits: 0,
       misses: 0,
@@ -175,12 +176,17 @@ export class AnalyticsCache {
   }
 
   /**
-   * Set data in both caches with mutex protection
+   * Set data in both caches with mutex protection.
+   * @param {string} key - Cache key
+   * @param {*} result - Data to cache
+   * @param {number} [ttl] - Optional in-memory TTL override in ms
+   *                        (persistent layer keeps the 24h policy)
    */
-  set(key, result) {
+  set(key, result, ttl = this.PERSISTENT_CACHE_DURATION) {
     // Set in-memory cache
     this.cache.set(key, result);
     this.cacheTimestamps.set(key, Date.now());
+    this._expiresAt.set(key, Date.now() + ttl);
 
     // Set in persistent storage asynchronously (fire and forget)
     this.setToPersistentStorage(key, result).catch(error => {
@@ -201,10 +207,17 @@ export class AnalyticsCache {
    * use _getFromPersistentStorage(key) which is async and uses the lock.
    */
   get(key) {
-    // Check in-memory cache first
+    // Check in-memory cache first (honor per-key TTL)
     if (this.cache.has(key)) {
-      this.cacheStats.hits++;
-      return this.cache.get(key);
+      const expiresAt = this._expiresAt.get(key);
+      if (expiresAt !== undefined && Date.now() > expiresAt) {
+        this.cache.delete(key);
+        this.cacheTimestamps.delete(key);
+        this._expiresAt.delete(key);
+      } else {
+        this.cacheStats.hits++;
+        return this.cache.get(key);
+      }
     }
 
     // Check persistent storage (relaxed consistency - no lock)
@@ -213,6 +226,10 @@ export class AnalyticsCache {
       // Update in-memory cache with persistent data
       this.cache.set(key, cached[key].data);
       this.cacheTimestamps.set(key, cached[key].timestamp);
+      this._expiresAt.set(
+        key,
+        cached[key].timestamp + (cached[key].ttl || this.PERSISTENT_CACHE_DURATION)
+      );
       return cached[key].data;
     }
 
@@ -239,17 +256,26 @@ export class AnalyticsCache {
   }
 
   /**
-   * Set data in persistent storage with mutex protection
+   * Set data in persistent storage with mutex protection.
+   * Entries are stored as envelopes ({data,timestamp,version,ttl}) so the
+   * persistent hit path in get() can enforce per-key TTLs.
    */
-  async setToPersistentStorage(key, result) {
+  async setToPersistentStorage(key, result, ttl = this.PERSISTENT_CACHE_DURATION) {
     // Read existing persistent data first without acquiring lock
     const cached = this._getFromStorage('analytics_cache') || {};
 
     await this._acquireLock();
 
     try {
-      const updated = { ...cached, [key]: result };
-
+      const updated = {
+        ...cached,
+        [key]: {
+          data: result,
+          timestamp: Date.now(),
+          version: CACHE_VERSION,
+          ttl,
+        },
+      };
       this._setInStorage(
         'analytics_cache',
         updated,
@@ -415,6 +441,7 @@ export class AnalyticsCache {
   clearAll() {
     this.cache.clear();
     this.cacheTimestamps.clear();
+    this._expiresAt.clear();
     this.cacheStats.invalidations++;
 
     // Clear persistent storage completely
@@ -428,3 +455,8 @@ export class AnalyticsCache {
     }
   }
 }
+
+// App-wide singleton — the single cache regime for analytics, planning,
+// reports preloads and summary memoization (replaces cache-service.js).
+export const analyticsCache = new AnalyticsCache();
+

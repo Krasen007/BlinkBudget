@@ -82,9 +82,10 @@ vi.mock('../../src/utils/navigation-helper.js', () => ({
   createNavigationButtons: () => document.createElement('div'),
 }));
 
-vi.mock('../../src/core/unusual-spending-detector.js', () => ({
-  UnusualSpendingDetector: {
-    detect: vi.fn(() => []),
+vi.mock('../../src/core/analytics/AnomalyService.js', () => ({
+  AnomalyService: {
+    detectUnusualTransactions: vi.fn(() => []),
+    detectAnomalies: vi.fn(() => []),
   },
 }));
 

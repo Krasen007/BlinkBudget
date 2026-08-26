@@ -1,6 +1,15 @@
 /**
- * BackupService
- * Handles automatic daily backups and restore operations
+ * BackupService — the single local data-safety service for BlinkBudget.
+ *
+ * Owns three jobs:
+ *   1. Daily Firestore backup + restore (cloud safety net)
+ *   2. Emergency JSON/CSV export & integrity validation (absorbs
+ *      emergency-export-service.js)
+ *   3. Emergency recovery + transaction repair (absorbs
+ *      emergency-recovery-service.js and data-cleanup-service.js)
+ *
+ * Integrity checks live in data-integrity-service.js; nothing else should
+ * grow here without first asking "does the user need this?"
  */
 
 import { getDb } from './firebase-config.js';
@@ -8,6 +17,7 @@ import { AuthService } from './auth-service.js';
 import { TransactionService } from './transaction-service.js';
 import { AccountService } from './Account/account-service.js';
 import { SettingsService } from './settings-service.js';
+import { BudgetService } from './budget-service.js';
 import { goalPlanner } from './goal-planner.js';
 import { investmentTracker } from './investment-tracker.js';
 import {
@@ -15,28 +25,32 @@ import {
   hideProgressIndicator,
 } from '../utils/progress-indicators.js';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { STORAGE_KEYS } from '../utils/constants.js';
+import { safeJsonParse } from '../utils/security-utils.js';
+
+const EXPORT_SECTIONS = [
+  'transactions',
+  'accounts',
+  'budgets',
+  'goals',
+  'investments',
+  'settings',
+];
 
 export const BackupService = {
   init() {
-    // Delayed startup check (30 seconds after app load)
     setTimeout(() => {
       this.checkAndCreateBackup();
     }, 30000);
 
-    // Add visibilitychange listener for automatic backup when user returns to app
     document.addEventListener('visibilitychange', () => {
       this.handleVisibilityChange();
     });
   },
 
-  /**
-   * Handle visibility change events for automatic backup
-   */
   handleVisibilityChange() {
-    // Only create backup when page becomes visible (user returns to app)
     if (!document.hidden) {
       console.log('[Backup] App became visible, checking for backup');
-      // Small delay to ensure app is fully active
       setTimeout(() => {
         this.checkAndCreateBackup();
       }, 1000);
@@ -47,9 +61,7 @@ export const BackupService = {
     const lastBackupDate = SettingsService.getSetting('lastBackupDate');
     const today = this.getTodayISO();
 
-    // Only create backup if not already created today
     if (!lastBackupDate || lastBackupDate !== today) {
-      // Skip if offline
       if (!navigator.onLine) {
         console.log('[Backup] Skipping backup - offline');
         return;
@@ -68,7 +80,6 @@ export const BackupService = {
             detail: { operation: 'backup', status: 'completed' },
           })
         );
-
         console.log('[Backup] Daily backup created successfully');
       } catch (error) {
         console.error('[Backup] Failed to create backup:', error);
@@ -89,15 +100,12 @@ export const BackupService = {
     const userId = AuthService.getUserId();
     if (!userId) return;
 
-    // Create backup of CURRENT state
-    // Represents "yesterday's backup" even though created today
     const backupData = {
-      backupDate: this.getTodayISO(), // When backup was created (today)
-      dataAsOf: this.getYesterdayISO(), // What this backup represents (yesterday's state)
+      backupDate: this.getTodayISO(),
+      dataAsOf: this.getYesterdayISO(),
       transactions: TransactionService.getAll(),
       accounts: AccountService.getAccounts(),
       settings: SettingsService.getAllSettings(),
-      // Check if these services exist/are imported correctly before accessing
       goals: goalPlanner?.getAllGoals ? goalPlanner.getAllGoals() : [],
       investments: investmentTracker?.getAllInvestments
         ? investmentTracker.getAllInvestments()
@@ -132,6 +140,44 @@ export const BackupService = {
     return null;
   },
 
+  /**
+   * Shared apply logic used by both restoreBackup() and recovery.
+   */
+  _applyRestoredData(backup) {
+    const restored = {
+      transactions: 0,
+      accounts: 0,
+      goals: 0,
+      investments: 0,
+    };
+
+    if (Array.isArray(backup.transactions)) {
+      TransactionService.clear();
+      backup.transactions.forEach(t => TransactionService.add(t));
+      restored.transactions = backup.transactions.length;
+    }
+
+    if (Array.isArray(backup.accounts)) {
+      AccountService.clear();
+      AccountService.batchSet(backup.accounts);
+      restored.accounts = backup.accounts.length;
+    }
+
+    if (Array.isArray(backup.goals)) {
+      goalPlanner.clearAllGoals();
+      goalPlanner.batchSetGoals(backup.goals);
+      restored.goals = backup.goals.length;
+    }
+
+    if (Array.isArray(backup.investments)) {
+      investmentTracker.clearAllInvestments();
+      investmentTracker.batchSetInvestments(backup.investments);
+      restored.investments = backup.investments.length;
+    }
+
+    return restored;
+  },
+
   async restoreBackup() {
     if (!navigator.onLine) {
       throw new Error('Restore requires internet connection');
@@ -142,9 +188,7 @@ export const BackupService = {
       progressId,
       'Restoring from backup...',
       document.body,
-      {
-        showCancel: false,
-      }
+      { showCancel: false }
     );
 
     window.dispatchEvent(
@@ -159,65 +203,20 @@ export const BackupService = {
         throw new Error('No backup data available');
       }
 
-      // Hard Restore Strategy (Replace)
-      // User wants state to be exactly like backup.
-
-      // 1. Clear current transactions
-      TransactionService.clear();
-
-      // 2. Load transactions from backup
-      // Assuming backup.transactions is an array
-      if (Array.isArray(backup.transactions)) {
-        backup.transactions.forEach(t => TransactionService.add(t));
-      }
-
-      // 3. Restore Accounts
-      if (backup.accounts && Array.isArray(backup.accounts)) {
-        AccountService.clear();
-        AccountService.batchSet(backup.accounts);
-        console.log(`[Backup] Restored ${backup.accounts.length} accounts`);
-      }
-
-      // 4. Restore Goals
-      if (backup.goals && Array.isArray(backup.goals)) {
-        goalPlanner.clearAllGoals();
-        goalPlanner.batchSetGoals(backup.goals);
-        console.log(`[Backup] Restored ${backup.goals.length} goals`);
-      }
-
-      // 5. Restore Investments
-      if (backup.investments && Array.isArray(backup.investments)) {
-        investmentTracker.clearAllInvestments();
-        investmentTracker.batchSetInvestments(backup.investments);
-        console.log(
-          `[Backup] Restored ${backup.investments.length} investments`
-        );
-      }
-
-      // Create restore summary
-      const restoreSummary = {
-        accounts: backup.accounts?.length || 0,
-        goals: backup.goals?.length || 0,
-        investments: backup.investments?.length || 0,
-        transactions: backup.transactions?.length || 0,
-      };
+      const restored = this._applyRestoredData(backup);
 
       window.dispatchEvent(
         new CustomEvent('backup-operation', {
-          detail: {
-            operation: 'restore',
-            status: 'completed',
-            ...restoreSummary,
-          },
+          detail: { operation: 'restore', status: 'completed', ...restored },
         })
       );
 
       console.log(
-        `[Backup] Restore completed: ${restoreSummary.transactions} transactions, ${restoreSummary.accounts} accounts, ${restoreSummary.goals} goals, ${restoreSummary.investments} investments restored`
+        `[Backup] Restore completed: ${restored.transactions} transactions, ${restored.accounts} accounts, ${restored.goals} goals, ${restored.investments} investments restored`
       );
       hideProgressIndicator(progressId);
 
-      return restoreSummary;
+      return restored;
     } catch (error) {
       console.error('[Backup] Restore failed:', error);
       window.dispatchEvent(
@@ -244,344 +243,398 @@ export const BackupService = {
     return yesterday.toISOString().split('T')[0];
   },
 
+  // ==================== Emergency Export (absorbed) ====================
+
   /**
-   * Verify backup integrity and completeness
-   * @param {string} userId - User ID to verify backup for
-   * @returns {Object} Verification results
+   * Collect all user data into export sections.
    */
-  async verifyBackup(userId = null) {
-    const targetUserId = userId || AuthService.getUserId();
-    if (!targetUserId) {
-      throw new Error('User authentication required for backup verification');
+  _collectExportData() {
+    const wrap = items => ({
+      count: Array.isArray(items) ? items.length : 0,
+      items: Array.isArray(items) ? items : [],
+    });
+
+    let budgets;
+    try {
+      budgets = BudgetService.getAll();
+    } catch {
+      budgets = [];
     }
 
-    const verificationResult = {
-      userId: targetUserId,
-      timestamp: new Date().toISOString(),
-      success: false,
-      checks: {},
-      errors: [],
-      warnings: [],
+    return {
+      transactions: wrap(TransactionService.getAll()),
+      accounts: wrap(AccountService.getAccounts()),
+      budgets: wrap(budgets),
+      goals: wrap(
+        goalPlanner?.getAllGoals ? goalPlanner.getAllGoals() : []
+      ),
+      investments: wrap(
+        investmentTracker?.getAllInvestments
+          ? investmentTracker.getAllInvestments()
+          : []
+      ),
+      settings: SettingsService.getAllSettings() || {},
     };
+  },
+
+  /**
+   * Small deterministic hash (djb2) for integrity checksums.
+   */
+  _simpleHash(str) {
+    let hash = 5381;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) + hash + str.charCodeAt(i)) | 0;
+    }
+    return (hash >>> 0).toString(16);
+  },
+
+  _generateIntegrityChecksums(data) {
+    const checksums = {};
+    EXPORT_SECTIONS.forEach(section => {
+      checksums[section] = this._simpleHash(JSON.stringify(data[section]));
+    });
+    checksums.overall = this._simpleHash(JSON.stringify(checksums));
+    return checksums;
+  },
+
+  _generateFilename(format = 'json') {
+    const date = new Date().toISOString().slice(0, 10);
+    return `blinkbudget-emergency-${date}.${format}`;
+  },
+
+  /**
+   * Trigger a browser download for the export payload.
+   */
+  _downloadFile(payload, format = 'json') {
+    const isCsv = format === 'csv';
+    const content = isCsv ? payload : JSON.stringify(payload, null, 2);
+    const blob = new Blob([content], {
+      type: isCsv ? 'text/csv;charset=utf-8;' : 'application/json',
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = this._generateFilename(format);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    return content.length;
+  },
+
+  _convertToCSV(data) {
+    const tx = (data.transactions && data.transactions.items) || [];
+    if (tx.length === 0) return '';
+    const headers = ['id', 'date', 'type', 'category', 'amount', 'note'];
+    const escapeCell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    return [
+      headers.join(','),
+      ...tx.map(t =>
+        headers.map(h => escapeCell(t[h] ?? t[h === 'note' ? 'description' : h])).join(',')
+      ),
+    ].join('\n');
+  },
+
+  _getAppVersion() {
+    // eslint-disable-next-line no-undef
+    return typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev';
+  },
+
+  async createEmergencyExport(options = {}) {
+    const { format = 'json', reason = 'manual' } = options;
 
     try {
-      // Check 1: Verify backup exists
-      const backupExists = await this.checkBackupExists(targetUserId);
-      verificationResult.checks.backupExists = backupExists;
+      const data = this._collectExportData();
+      const integrity = this._generateIntegrityChecksums(data);
+      const dataCount =
+        EXPORT_SECTIONS.reduce(
+          (sum, s) => sum + (data[s]?.count || 0),
+          0
+        ) || 0;
 
-      if (!backupExists.exists) {
-        verificationResult.errors.push('No backup found for user');
-        return verificationResult;
-      }
+      const payload = {
+        meta: {
+          type: 'emergency-export',
+          appVersion: this._getAppVersion(),
+          createdAt: new Date().toISOString(),
+          reason,
+          dataCount,
+        },
+        data,
+        integrity,
+      };
 
-      // Check 2: Verify backup integrity
-      const integrityCheck = await this.verifyBackupIntegrity(
-        backupExists.data
-      );
-      verificationResult.checks.integrity = integrityCheck;
+      const size =
+        format === 'csv'
+          ? this._downloadFile(this._convertToCSV(data), 'csv')
+          : this._downloadFile(payload, 'json');
 
-      // Check 3: Verify data completeness
-      const completenessCheck = await this.verifyDataCompleteness(
-        backupExists.data
-      );
-      verificationResult.checks.completeness = completenessCheck;
-
-      // Check 4: Verify backup freshness
-      const freshnessCheck = await this.verifyBackupFreshness(
-        backupExists.data
-      );
-      verificationResult.checks.freshness = freshnessCheck;
-
-      // Check 5: Verify data consistency
-      const consistencyCheck = await this.verifyDataConsistency(
-        backupExists.data
-      );
-      verificationResult.checks.consistency = consistencyCheck;
-
-      return verificationResult;
+      return {
+        success: true,
+        filename: this._generateFilename(format),
+        size,
+        format,
+        dataCount,
+        downloadUrl: null,
+      };
     } catch (error) {
-      console.error('Backup verification failed:', error);
-      verificationResult.errors.push(error.message);
-      return verificationResult;
+      console.error('[Backup] Emergency export failed:', error);
+      return { success: false, error: error.message };
     }
   },
 
   /**
-   * Check if backup exists for user
-   * @param {string} userId - User ID
-   * @returns {Object} Backup existence check result
+   * Validate an export payload's integrity checksums.
+   * @returns {Object} { valid, mismatches, checksums }
    */
-  async checkBackupExists(userId) {
+  async validateExportIntegrity(exportData) {
+    const mismatches = [];
+    const checksums = {};
+
     try {
-      const backupRef = doc(
-        getDb(),
-        'users',
-        userId,
-        'backups',
-        'daily_backup'
-      );
-      const backupSnap = await getDoc(backupRef);
+      const data = exportData?.data;
+      const stored = exportData?.integrity || {};
 
-      return {
-        exists: backupSnap.exists(),
-        data: backupSnap.exists() ? backupSnap.data() : null,
-        lastModified: backupSnap.exists()
-          ? backupSnap.metadata.hasPendingWrites
-          : null,
-      };
-    } catch (error) {
-      return {
-        exists: false,
-        data: null,
-        error: error.message,
-      };
-    }
-  },
-
-  /**
-   * Verify backup data integrity
-   * @param {Object} backupData - Backup data to verify
-   * @returns {Object} Integrity check result
-   */
-  async verifyBackupIntegrity(backupData) {
-    const result = {
-      valid: true,
-      issues: [],
-    };
-
-    if (!backupData) {
-      result.valid = false;
-      result.issues.push('Backup data is null or undefined');
-      return result;
-    }
-
-    // Check required fields
-    const requiredFields = ['backupDate', 'dataAsOf', 'transactions'];
-    for (const field of requiredFields) {
-      if (!(field in backupData)) {
-        result.valid = false;
-        result.issues.push(`Missing required field: ${field}`);
+      if (!data || typeof data !== 'object') {
+        return { valid: false, mismatches: ['data'], checksums };
       }
-    }
 
-    // Validate data types
-    if (backupData.backupDate && typeof backupData.backupDate !== 'string') {
-      result.valid = false;
-      result.issues.push('backupDate must be a string');
-    }
-
-    if (backupData.dataAsOf && typeof backupData.dataAsOf !== 'string') {
-      result.valid = false;
-      result.issues.push('dataAsOf must be a string');
-    }
-
-    if (backupData.transactions && !Array.isArray(backupData.transactions)) {
-      result.valid = false;
-      result.issues.push('transactions must be an array');
-    }
-
-    // Validate transaction data structure
-    if (backupData.transactions && Array.isArray(backupData.transactions)) {
-      backupData.transactions.forEach((transaction, index) => {
-        if (!transaction || typeof transaction !== 'object') {
-          result.valid = false;
-          result.issues.push(
-            `Transaction at index ${index} is not a valid object`
-          );
-          return;
-        }
-
-        const requiredTxFields = ['amount', 'category', 'date', 'type'];
-        for (const field of requiredTxFields) {
-          if (!(field in transaction)) {
-            result.valid = false;
-            result.issues.push(
-              `Transaction at index ${index} missing field: ${field}`
-            );
-          }
+      EXPORT_SECTIONS.forEach(section => {
+        if (stored[section] === undefined) return; // legacy payloads
+        const computed = this._simpleHash(JSON.stringify(data[section]));
+        checksums[section] = computed;
+        if (computed !== stored[section]) {
+          mismatches.push(section);
         }
       });
-    }
+      checksums.overall = this._simpleHash(
+        JSON.stringify({ ...checksums, overall: undefined })
+      );
 
-    return result;
+      return {
+        valid: mismatches.length === 0,
+        mismatches,
+        checksums,
+      };
+    } catch (error) {
+      console.error('[Backup] Integrity validation failed:', error);
+      return { valid: false, mismatches: ['validation'], checksums };
+    }
   },
 
-  /**
-   * Verify data completeness
-   * @param {Object} backupData - Backup data to verify
-   * @returns {Object} Completeness check result
-   */
-  async verifyDataCompleteness(backupData) {
-    const result = {
-      valid: true,
-      issues: [],
-      summary: {},
-    };
+  // ==================== Emergency Recovery (absorbed) ====================
 
-    if (!backupData) {
-      result.valid = false;
-      result.issues.push('No backup data to verify');
-      return result;
+  async performEmergencyRecovery() {
+    const steps = [];
+    const errors = [];
+    const warnings = [];
+    const step = (name, status) => steps.push({ name, status });
+
+    step('Validate environment', 'completed');
+
+    // Strategy 1: cloud backup
+    let backup = null;
+    if (navigator.onLine) {
+      try {
+        backup = await this.fetchBackup();
+        step('Fetch cloud backup', backup ? 'completed' : 'skipped');
+      } catch (error) {
+        warnings.push(`Cloud backup unavailable: ${error.message}`);
+        step('Fetch cloud backup', 'failed');
+      }
+    } else {
+      warnings.push('Offline - cloud backup unavailable');
+      step('Fetch cloud backup', 'skipped');
     }
 
-    // Check transaction count
-    const transactionCount = backupData.transactions
-      ? backupData.transactions.length
-      : 0;
-    result.summary.transactionCount = transactionCount;
-
-    if (transactionCount === 0) {
-      result.issues.push('No transactions found in backup');
-      // Don't fail for empty transactions - might be a new user
-    }
-
-    // Check for duplicate transaction IDs
-    if (backupData.transactions && Array.isArray(backupData.transactions)) {
-      const transactionIds = backupData.transactions
-        .filter(tx => tx.id)
-        .map(tx => tx.id);
-
-      const uniqueIds = new Set(transactionIds);
-      if (transactionIds.length !== uniqueIds.size) {
-        result.valid = false;
-        result.issues.push('Duplicate transaction IDs found in backup');
+    // Strategy 2: salvage raw localStorage transactions
+    let salvaged = null;
+    if (!backup || !backup.transactions) {
+      try {
+        const raw = safeJsonParse(
+          localStorage.getItem(STORAGE_KEYS.TRANSACTIONS),
+          []
+        );
+        if (Array.isArray(raw) && raw.length > 0) {
+          salvaged = raw.filter(
+            t => t && t.id && Number.isFinite(Number(t.amount))
+          );
+          step('Salvage local storage', 'completed');
+          if (salvaged.length < raw.length) {
+            warnings.push(
+              `Discarded ${raw.length - salvaged.length} corrupt entries during salvage`
+            );
+          }
+        } else {
+          step('Salvage local storage', 'skipped');
+        }
+      } catch (error) {
+        errors.push(`Local storage salvage failed: ${error.message}`);
+        step('Salvage local storage', 'failed');
       }
     }
 
-    // Check account data if present
-    if (backupData.accounts) {
-      result.summary.accountCount = Array.isArray(backupData.accounts)
-        ? backupData.accounts.length
-        : 0;
+    if (
+      (!backup || !backup.transactions) &&
+      (!salvaged || salvaged.length === 0)
+    ) {
+      errors.push('No recoverable data found');
+      step('Restore data', 'failed');
+      return { success: false, dataRestored: {}, steps, errors, warnings };
     }
 
-    // Check settings data if present
-    if (backupData.settings) {
-      result.summary.settingsCount =
-        typeof backupData.settings === 'object'
-          ? Object.keys(backupData.settings).length
-          : 0;
-    }
-
-    return result;
-  },
-
-  /**
-   * Verify backup freshness
-   * @param {Object} backupData - Backup data to verify
-   * @returns {Object} Freshness check result
-   */
-  async verifyBackupFreshness(backupData) {
-    const result = {
-      valid: true,
-      issues: [],
-      age: null,
-    };
-
-    if (!backupData || !backupData.backupDate) {
-      result.valid = false;
-      result.issues.push('No backup date found');
-      return result;
-    }
-
-    const backupDate = new Date(backupData.backupDate);
-    const now = new Date();
-    const ageInDays = Math.floor((now - backupDate) / (1000 * 60 * 60 * 24));
-
-    result.age = ageInDays;
-
-    // Backup should be no older than 7 days
-    if (ageInDays > 7) {
-      result.valid = false;
-      result.issues.push(
-        `Backup is ${ageInDays} days old (maximum allowed: 7 days)`
-      );
-    } else if (ageInDays > 2) {
-      result.issues.push(
-        `Backup is ${ageInDays} days old (consider more frequent backups)`
-      );
-    }
-
-    return result;
-  },
-
-  /**
-   * Verify data consistency
-   * @param {Object} backupData - Backup data to verify
-   * @returns {Object} Consistency check result
-   */
-  async verifyDataConsistency(backupData) {
-    const result = {
-      valid: true,
-      issues: [],
-    };
-
-    if (!backupData || !backupData.transactions) {
-      return result;
-    }
-
-    // Check transaction amounts are valid numbers
-    backupData.transactions.forEach((transaction, index) => {
-      if (
-        transaction.amount &&
-        (isNaN(transaction.amount) || transaction.amount < 0)
-      ) {
-        result.valid = false;
-        result.issues.push(
-          `Transaction at index ${index} has invalid amount: ${transaction.amount}`
-        );
+    try {
+      let restored = {};
+      if (backup && backup.transactions) {
+        restored = this._applyRestoredData(backup);
+        step('Restore data (cloud)', 'completed');
+      } else {
+        TransactionService.clear();
+        salvaged.forEach(t => TransactionService.add(t));
+        restored = { transactions: salvaged.length };
+        step('Restore data (local salvage)', 'completed');
       }
-    });
 
-    // Check date consistency
-    backupData.transactions.forEach((transaction, index) => {
-      if (transaction.date) {
-        const txDate = new Date(transaction.date);
-        const backupDate = new Date(
-          backupData.dataAsOf || backupData.backupDate
-        );
+      window.dispatchEvent(
+        new CustomEvent('storage-updated', {
+          detail: { key: STORAGE_KEYS.TRANSACTIONS },
+        })
+      );
 
-        if (txDate > backupDate) {
-          result.issues.push(
-            `Transaction at index ${index} has date after backup date`
+      return {
+        success: true,
+        dataRestored: restored,
+        steps,
+        errors,
+        warnings,
+      };
+    } catch (error) {
+      errors.push(`Apply recovered data failed: ${error.message}`);
+      step('Restore data', 'failed');
+      return { success: false, dataRestored: {}, steps, errors, warnings };
+    }
+  },
+
+  // ==================== Transaction Repair (absorbed) ====================
+
+  /**
+   * Repair common transaction data issues in place.
+   * @returns {Object} { fixed, errors, details, warnings? }
+   */
+  async fixTransactionDataIssues() {
+    const results = { fixed: 0, errors: 0, details: [] };
+
+    // Safety backup before making changes
+    try {
+      const backupData = {
+        timestamp: new Date().toISOString(),
+        transactions: TransactionService.getAll(),
+        accounts: AccountService.getAccounts(),
+      };
+      localStorage.setItem(
+        `cleanup_backup_${Date.now()}`,
+        JSON.stringify(backupData)
+      );
+      results.details.push('Created safety backup before cleanup');
+    } catch (backupError) {
+      results.warnings = [`Failed to create backup: ${backupError.message}`];
+    }
+
+    try {
+      const transactions = TransactionService.getAll();
+      const accountIds = new Set(
+        AccountService.getAccounts().map(a => a.id)
+      );
+      const seenIds = new Set();
+      let changed = false;
+
+      for (const transaction of transactions) {
+        let hasChanges = false;
+
+        // Fix missing or invalid dates
+        if (
+          !transaction.date ||
+          Number.isNaN(new Date(transaction.date).getTime())
+        ) {
+          transaction.date = new Date().toISOString().split('T')[0];
+          hasChanges = true;
+          results.details.push(
+            `Fixed date for ${transaction.category || 'Unknown'} transaction (${transaction.amount ?? 'N/A'})`
           );
         }
-      }
-    });
 
-    return result;
-  },
-
-  /**
-   * Get backup verification status for all users (admin function)
-   * @returns {Array} Array of verification results
-   */
-  async getAllUsersBackupStatus() {
-    // This would be implemented as a Cloud Function for admin access
-    // For now, return placeholder
-    return {
-      message: 'This function requires Cloud Function implementation',
-      scheduledFor: 'Cloud Function deployment',
-    };
-  },
-
-  /**
-   * Schedule automatic backup verification
-   */
-  scheduleBackupVerification() {
-    // Schedule verification every 6 hours
-    setInterval(
-      async () => {
-        try {
-          const userId = AuthService.getUserId();
-          if (userId && navigator.onLine) {
-            await this.verifyBackup(userId);
-          }
-        } catch (error) {
-          console.error('[Backup] Scheduled verification failed:', error);
+        // Fix missing categories (skip transfers - they use toAccountId)
+        if (
+          transaction.type !== 'transfer' &&
+          (!transaction.category || typeof transaction.category !== 'string')
+        ) {
+          transaction.category = 'Uncategorized';
+          hasChanges = true;
+          results.details.push(
+            `Fixed category for $${transaction.amount || 'N/A'} transaction`
+          );
         }
-      },
-      6 * 60 * 60 * 1000
-    ); // 6 hours
+
+        // Ensure amount is valid (allow negative for refunds)
+        if (
+          typeof transaction.amount !== 'number' ||
+          !Number.isFinite(transaction.amount)
+        ) {
+          transaction.amount = Math.abs(parseFloat(transaction.amount) || 0);
+          hasChanges = true;
+          results.details.push(
+            `Fixed amount for ${transaction.category || 'Unknown'} transaction`
+          );
+        }
+
+        // Fix missing or invalid transaction type
+        const validTypes = ['income', 'expense', 'transfer', 'refund'];
+        if (!validTypes.includes(transaction.type)) {
+          transaction.type = 'expense';
+          hasChanges = true;
+          results.details.push(
+            `Fixed type for ${transaction.category || 'Unknown'} transaction - now: expense`
+          );
+        }
+
+        // Reset orphaned account references to the default account
+        if (transaction.accountId && !accountIds.has(transaction.accountId)) {
+          const fallback = AccountService.getDefaultAccount?.()?.id || null;
+          if (fallback && fallback !== transaction.accountId) {
+            transaction.accountId = fallback;
+            hasChanges = true;
+            results.details.push('Reset orphaned accountId to default account');
+          }
+        }
+
+        // Drop duplicate ids (keep first occurrence)
+        if (seenIds.has(transaction.id)) {
+          hasChanges = false; // removal handled below
+          results.fixed++;
+          results.details.push(`Removed duplicate transaction id ${transaction.id}`);
+          continue;
+        }
+        seenIds.add(transaction.id);
+
+        if (hasChanges) {
+          results.fixed++;
+          changed = true;
+        }
+      }
+
+      if (changed || results.fixed > 0) {
+        TransactionService.clear();
+        transactions.forEach(t => TransactionService.add(t));
+      }
+    } catch (error) {
+      results.errors++;
+      console.error('[Backup] Transaction repair failed:', error);
+    }
+
+    return results;
   },
+
+
+
+
 };

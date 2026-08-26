@@ -55,7 +55,7 @@ These are ignored because they're not actual code implementations but rather ext
 ### Valid References
 
 ```
-✅ VALID: | src/core/click-tracking-service.js:recordClick() (line 25)
+✅ VALID: | src/utils/form-utils/submission.js:handleFormSubmit() (line 25)
 ```
 
 ### Invalid References
@@ -140,7 +140,7 @@ If the script misses invalid references:
 
 Found 156 references to validate
 
-✅ VALID: | src/core/click-tracking-service.js:recordClick() (line 25)
+✅ VALID: | src/utils/form-utils/submission.js:handleFormSubmit() (line 25)
 ✅ VALID: | src/components/TransactionForm.js:TransactionForm() (line 26)
 ...
 ❌ INVALID: | src/core/old-service.js:deprecatedMethod() (line 142)

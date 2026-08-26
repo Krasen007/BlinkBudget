@@ -62,22 +62,23 @@ const isDeepEqual = (a, b) => {
   return true;
 };
 
-// Use in-memory CacheService for instant planning data access (no JSON overhead)
-import { CacheService } from '../core/cache-service.js';
+// Use the shared AnalyticsCache (in-memory first, persistent fallback) for
+// instant planning data access — replaces the retired cache-service.js.
+import { analyticsCache } from '../core/analytics/AnalyticsCache.js';
 
 const PLANNING_CACHE_KEY = 'financial_planning_data';
 const PLANNING_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 function getCachedPlanningData() {
-  return CacheService.get(PLANNING_CACHE_KEY);
+  return analyticsCache.get(PLANNING_CACHE_KEY);
 }
 
 function setCachedPlanningData(data) {
-  CacheService.put(PLANNING_CACHE_KEY, data, PLANNING_CACHE_TTL_MS);
+  analyticsCache.set(PLANNING_CACHE_KEY, data, PLANNING_CACHE_TTL_MS);
 }
 
 function clearPlanningCache() {
-  CacheService.del(PLANNING_CACHE_KEY);
+  analyticsCache.invalidate(PLANNING_CACHE_KEY);
 }
 
 export const FinancialPlanningView = (params = {}) => {

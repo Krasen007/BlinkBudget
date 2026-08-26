@@ -116,6 +116,23 @@ function createToastElement(message, type, options = {}) {
   // Assemble toast
   toast.appendChild(icon);
   toast.appendChild(messageElement);
+
+  // Optional action button (e.g. "View Changes" after a PWA update)
+  const { actionText, onAction } = options;
+  if (actionText && typeof onAction === 'function') {
+    const actionButton = document.createElement('button');
+    actionButton.className = 'toast-action';
+    actionButton.textContent = actionText;
+    actionButton.setAttribute('aria-label', actionText);
+    actionButton.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      removeToast(toastId);
+      onAction();
+    });
+    toast.appendChild(actionButton);
+  }
+
   toast.appendChild(closeButton);
 
   // Event handlers

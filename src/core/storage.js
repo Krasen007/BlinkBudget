@@ -6,7 +6,7 @@ import { GoalPlanner } from './goal-planner.js';
 import { SyncService } from './sync-service.js';
 import { BudgetService } from './budget-service.js';
 import { STORAGE_KEYS } from '../utils/constants.js';
-import { CacheService } from './cache-service.js';
+import { analyticsCache } from './analytics/AnalyticsCache.js';
 import { generateId } from '../utils/id-utils.js';
 
 /**
@@ -102,7 +102,7 @@ export const StorageService = {
       metadata
     );
     // Invalidate related caches
-    CacheService.del('portfolioSummary');
+    analyticsCache.invalidate('portfolioSummary');
     // Push updated investments to cloud (authoritative single-doc pattern)
     // Use safe, serialized push with retries (non-blocking)
     this._pushToCloudSafe(
@@ -116,7 +116,7 @@ export const StorageService = {
       symbol,
       currentPrice
     );
-    CacheService.del('portfolioSummary');
+    analyticsCache.invalidate('portfolioSummary');
     this._pushToCloudSafe(
       STORAGE_KEYS.INVESTMENTS,
       this._investmentTracker.getAllInvestments()
@@ -125,7 +125,7 @@ export const StorageService = {
   },
   removeInvestment: function (symbol) {
     const res = this._investmentTracker.removeInvestment(symbol);
-    CacheService.del('portfolioSummary');
+    analyticsCache.invalidate('portfolioSummary');
     this._pushToCloudSafe(
       STORAGE_KEYS.INVESTMENTS,
       this._investmentTracker.getAllInvestments()
@@ -134,7 +134,7 @@ export const StorageService = {
   },
   updateInvestment: function (id, updates) {
     const res = this._investmentTracker.updateInvestment(id, updates);
-    CacheService.del('portfolioSummary');
+    analyticsCache.invalidate('portfolioSummary');
     this._pushToCloudSafe(
       STORAGE_KEYS.INVESTMENTS,
       this._investmentTracker.getAllInvestments()
@@ -145,7 +145,7 @@ export const StorageService = {
     return this._investmentTracker.getInvestment(symbol);
   },
   calculatePortfolioSummary: function () {
-    const cached = CacheService.get('portfolioSummary');
+    const cached = analyticsCache.get('portfolioSummary');
     if (cached) return cached;
     const investments = this._investmentTracker.getAllInvestments();
     const summary = {
@@ -154,7 +154,7 @@ export const StorageService = {
       gainsLosses: this._investmentTracker.calculateGainsLosses(),
     };
     // Cache for 30 seconds
-    CacheService.put('portfolioSummary', summary, 30000);
+    analyticsCache.set('portfolioSummary', summary, 30000);
     return summary;
   },
 
@@ -171,7 +171,7 @@ export const StorageService = {
       goal.currentSavings || 0,
       goal.options || {}
     );
-    CacheService.del('goalsSummary');
+    analyticsCache.invalidate('goalsSummary');
     this._pushToCloudSafe(STORAGE_KEYS.GOALS, this._goalPlanner.getAllGoals());
     return res;
   },
@@ -189,33 +189,33 @@ export const StorageService = {
       currentSavings,
       options
     );
-    CacheService.del('goalsSummary');
+    analyticsCache.invalidate('goalsSummary');
     this._pushToCloudSafe(STORAGE_KEYS.GOALS, this._goalPlanner.getAllGoals());
     return res;
   },
   updateGoalProgress: function (goalId, newSavings) {
     const res = this._goalPlanner.updateGoalProgress(goalId, newSavings);
-    CacheService.del('goalsSummary');
+    analyticsCache.invalidate('goalsSummary');
     this._pushToCloudSafe(STORAGE_KEYS.GOALS, this._goalPlanner.getAllGoals());
     return res;
   },
   deleteGoal: function (goalId) {
     const res = this._goalPlanner.deleteGoal(goalId);
-    CacheService.del('goalsSummary');
+    analyticsCache.invalidate('goalsSummary');
     this._pushToCloudSafe(STORAGE_KEYS.GOALS, this._goalPlanner.getAllGoals());
     return res;
   },
   updateGoal: function (goalId, updates) {
     const res = this._goalPlanner.updateGoal(goalId, updates);
-    CacheService.del('goalsSummary');
+    analyticsCache.invalidate('goalsSummary');
     this._pushToCloudSafe(STORAGE_KEYS.GOALS, this._goalPlanner.getAllGoals());
     return res;
   },
   getGoalsSummary: function () {
-    const cached = CacheService.get('goalsSummary');
+    const cached = analyticsCache.get('goalsSummary');
     if (cached) return cached;
     const summary = this._goalPlanner.getGoalsSummary();
-    CacheService.put('goalsSummary', summary, 30000);
+    analyticsCache.set('goalsSummary', summary, 30000);
     return summary;
   },
 

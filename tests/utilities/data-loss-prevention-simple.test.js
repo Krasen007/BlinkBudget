@@ -1,9 +1,71 @@
 /** @vitest-environment jsdom */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { EmergencyExportService } from '../../src/core/emergency-export-service.js';
+import { BackupService } from '../../src/core/backup-service.js';
 import { dataIntegrityService } from '../../src/core/data-integrity-service.js';
 
-// Mock the services that EmergencyExportService depends on
+// Firebase and storage-layer dependencies of BackupService
+vi.mock('../../src/core/firebase-config.js', () => ({
+  getDb: vi.fn(() => ({})),
+}));
+vi.mock('firebase/firestore', () => ({
+  doc: vi.fn(),
+  getDoc: vi.fn(),
+  setDoc: vi.fn(),
+}));
+vi.mock('../../src/core/Account/account-service.js', () => ({
+  AccountService: {
+    getAccounts: vi.fn(() => []),
+    getDefaultAccount: vi.fn(() => null),
+    clear: vi.fn(),
+    batchSet: vi.fn(),
+  },
+}));
+vi.mock('../../src/core/goal-planner.js', () => ({
+  goalPlanner: {
+    getAllGoals: vi.fn(() => []),
+    clearAllGoals: vi.fn(),
+    batchSetGoals: vi.fn(),
+  },
+  GoalPlanner: class {
+    goals = [];
+    getAllGoals() {
+      return this.goals;
+    }
+    clearAllGoals() {}
+    batchSetGoals(list) {
+      this.goals = list || [];
+    }
+  },
+}));
+vi.mock('../../src/core/sync-service.js', () => ({
+  SyncService: {
+    startRealtimeSync: vi.fn(),
+    stopSync: vi.fn(),
+    getStatus: vi.fn(() => ({})),
+  },
+}));
+vi.mock('../../src/core/investment-tracker.js', () => ({
+  investmentTracker: {
+    getAllInvestments: vi.fn(() => []),
+    clearAllInvestments: vi.fn(),
+    batchSetInvestments: vi.fn(),
+  },
+  InvestmentTracker: class {
+    investments = [];
+    getAllInvestments() {
+      return this.investments;
+    }
+    clearAllInvestments() {}
+    batchSetInvestments(list) {
+      this.investments = list || [];
+    }
+  },
+}));
+vi.mock('../../src/core/budget-service.js', () => ({
+  BudgetService: { getAll: vi.fn(() => []) },
+}));
+
+// Mock the services that BackupService depends on
 vi.mock('../../src/core/transaction-service.js', () => ({
   TransactionService: {
     getAll: vi.fn(() => [
@@ -107,12 +169,12 @@ describe('Week 2: Data Loss Prevention - Simple Tests', () => {
 
   describe('Emergency Export Service - Core Functionality', () => {
     it('should have required methods', () => {
-      expect(EmergencyExportService).toHaveProperty('createEmergencyExport');
-      expect(EmergencyExportService).toHaveProperty('validateExportIntegrity');
-      expect(typeof EmergencyExportService.createEmergencyExport).toBe(
+      expect(BackupService).toHaveProperty('createEmergencyExport');
+      expect(BackupService).toHaveProperty('validateExportIntegrity');
+      expect(typeof BackupService.createEmergencyExport).toBe(
         'function'
       );
-      expect(typeof EmergencyExportService.validateExportIntegrity).toBe(
+      expect(typeof BackupService.validateExportIntegrity).toBe(
         'function'
       );
     });
@@ -131,7 +193,7 @@ describe('Week 2: Data Loss Prevention - Simple Tests', () => {
       };
 
       const validation =
-        await EmergencyExportService.validateExportIntegrity(exportData);
+        await BackupService.validateExportIntegrity(exportData);
 
       expect(validation).toHaveProperty('valid');
       expect(validation).toHaveProperty('mismatches');
@@ -152,7 +214,7 @@ describe('Week 2: Data Loss Prevention - Simple Tests', () => {
       };
 
       const validation =
-        await EmergencyExportService.validateExportIntegrity(exportData);
+        await BackupService.validateExportIntegrity(exportData);
 
       expect(validation.valid).toBe(false);
       expect(validation.mismatches).toContain('transactions');

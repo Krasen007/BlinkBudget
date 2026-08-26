@@ -1,302 +1,161 @@
 /**
- * Enhanced Button Component - WebApp.md Component Pattern
- * Standardized button with accessibility, animations, and touch support
+ * Functional Button component (factory).
+ * Replaces the former BaseComponent-backed class layer while preserving the
+ * public surface consumed across the app: ButtonComponent props, DOM classes,
+ * aria state, touch feedback, click guarding, and a light `buttonInstance`
+ * helper API (setLoading/setDisabled/setText/activate).
+ *
+ * Supported props: text, ariaLabel, variant, size, type, disabled, loading,
+ * icon, iconPosition, fullWidth, href, target, onClick, preventDefault.
  */
 
-import { BaseComponent } from './BaseComponent.js';
+const BUTTON_DEFAULTS = {
+  text: '',
+  ariaLabel: null,
+  variant: 'primary',
+  size: 'medium',
+  type: 'button',
+  disabled: false,
+  loading: false,
+  icon: null,
+  iconPosition: 'left',
+  fullWidth: false,
+  href: null,
+  target: '_self',
+  onClick: null,
+  preventDefault: false,
+};
 
-export class Button extends BaseComponent {
-  constructor(element, options = {}) {
-    super(element, {
-      text: '',
-      ariaLabel: null, // explicit aria-label override
-      variant: 'primary', // primary, secondary, success, warning, error
-      size: 'medium', // small, medium, large
-      type: 'button',
-      disabled: false,
-      loading: false,
-      icon: null,
-      iconPosition: 'left', // left, right
-      fullWidth: false,
-      href: null, // for link-style buttons
-      target: '_self',
-      onClick: null,
-      preventDefault: false,
-      ...options,
-    });
-  }
-
-  getDefaultOptions() {
-    return {
-      text: '',
-      ariaLabel: null,
-      variant: 'primary',
-      size: 'medium',
-      type: 'button',
-      disabled: false,
-      loading: false,
-      icon: null,
-      iconPosition: 'left',
-      fullWidth: false,
-      href: null,
-      target: '_self',
-      onClick: null,
-      preventDefault: false,
-    };
-  }
-
-  setupElement() {
-    super.setupElement();
-
-    if (!this.element) {
-      console.warn('Button: No element provided. Button will not be rendered.');
-      return;
-    }
-
-    this.element.classList.add('btn');
-    this.element.classList.add(`btn-${this.options.variant}`);
-    this.element.classList.add(`btn-${this.options.size}`);
-
-    if (this.options.fullWidth) {
-      this.element.classList.add('btn-full-width');
-    }
-
-    if (this.options.disabled) {
-      this.element.classList.add('btn-disabled');
-    } else {
-      this.element.classList.remove('btn-disabled');
-    }
-
-    if (this.options.loading) {
-      this.element.classList.add('btn-loading');
-    } else {
-      this.element.classList.remove('btn-loading');
-    }
-
-    this.updateAriaAttributes();
-  }
-
-  updateAriaAttributes() {
-    if (!this.element) return;
-
-    const role = this.getRole();
-    const ariaLabel = this.getAriaLabel();
-
-    if (role) {
-      this.element.setAttribute('role', role);
-    } else {
-      this.element.removeAttribute('role');
-    }
-
-    if (ariaLabel) {
-      this.element.setAttribute('aria-label', ariaLabel);
-    } else {
-      this.element.removeAttribute('aria-label');
-    }
-
-    // Set aria-disabled for disabled/loading states
-    if (this.options.disabled || this.options.loading) {
-      this.element.setAttribute('aria-disabled', 'true');
-    } else {
-      this.element.removeAttribute('aria-disabled');
-    }
-
-    // Set aria-busy for loading state
-    if (this.options.loading) {
-      this.element.setAttribute('aria-busy', 'true');
-    } else {
-      this.element.removeAttribute('aria-busy');
-    }
-  }
-
-  render() {
-    if (!this.element) {
-      return;
-    }
-
-    this.element.innerHTML = '';
-
-    // Create button content
-    const content = this.createElement('span', ['btn-content']);
-
-    // Add icon if specified
-    if (this.options.icon) {
-      const icon = this.createElement('span', [
-        'btn-icon',
-        `btn-icon-${this.options.iconPosition}`,
-      ]);
-      icon.textContent = this.options.icon;
-      icon.setAttribute('aria-hidden', 'true');
-
-      if (this.options.iconPosition === 'right') {
-        content.appendChild(this.createTextNode(this.options.text));
-        content.appendChild(icon);
-      } else {
-        content.appendChild(icon);
-        content.appendChild(this.createTextNode(this.options.text));
-      }
-    } else {
-      content.appendChild(this.createTextNode(this.options.text));
-    }
-
-    // Add loading spinner
-    if (this.options.loading) {
-      const spinner = this.createElement('span', ['btn-spinner']);
-      spinner.innerHTML = '<div class="spinner-inner"></div>';
-      content.appendChild(spinner);
-    }
-
-    this.element.appendChild(content);
-
-    // Set attributes
-    this.element.setAttribute('type', this.options.type);
-
-    // Only set disabled attribute if actually disabled or loading
-    if (this.options.disabled || this.options.loading) {
-      this.element.setAttribute('disabled', 'true');
-    } else {
-      this.element.removeAttribute('disabled');
-    }
-
-    if (this.options.href) {
-      this.element.setAttribute('href', this.options.href);
-      this.element.setAttribute('target', this.options.target);
-      if (this.options.target === '_blank') {
-        this.element.setAttribute('rel', 'noopener noreferrer');
-      }
-    }
-
-    this.updateAriaAttributes();
-  }
-
-  bindEvents() {
-    super.bindEvents();
-
-    this.addEventListener('click', e => {
-      if (!this.options.onClick) return;
-      if (this.options.disabled || this.options.loading) return;
-
-      if (this.options.preventDefault) {
-        e.preventDefault();
-      }
-      this.options.onClick(e);
-    });
-
-    // Touch event handlers for mobile optimization
-    this.addEventListener(
-      'touchstart',
-      _e => {
-        if (!this.options.disabled && !this.options.loading) {
-          this.element.classList.add('btn-touch-active');
-        }
-      },
-      { passive: true }
-    );
-
-    this.addEventListener(
-      'touchend',
-      () => {
-        this.element.classList.remove('btn-touch-active');
-      },
-      { passive: true }
-    );
-
-    this.addEventListener(
-      'touchcancel',
-      () => {
-        this.element.classList.remove('btn-touch-active');
-      },
-      { passive: true }
-    );
-
-    // Keyboard support
-    this.addEventListener('keydown', e => {
-      if (this.element && this.element.tagName === 'BUTTON') return;
-      if (
-        (e.key === 'Enter' || e.key === ' ') &&
-        !this.options.disabled &&
-        !this.options.loading
-      ) {
-        e.preventDefault();
-        if (this.options.onClick) {
-          this.options.onClick(e);
-        }
-      }
-    });
-  }
-
-  // Public API methods
-  setText(text) {
-    this.options.text = text;
-    this.render();
-  }
-
-  setVariant(variant) {
-    if (!this.element) {
-      return;
-    }
-    this.element.classList.remove(`btn-${this.options.variant}`);
-    this.options.variant = variant;
-    this.element.classList.add(`btn-${this.options.variant}`);
-  }
-
-  setDisabled(disabled) {
-    this.options.disabled = disabled;
-    this.setupElement();
-    this.render();
-  }
-
-  setLoading(loading) {
-    this.options.loading = loading;
-    this.setupElement();
-    this.render();
-  }
-
-  activate() {
-    if (
-      this.options.onClick &&
-      !this.options.disabled &&
-      !this.options.loading
-    ) {
-      this.options.onClick(new Event('click'));
-    }
-  }
-
-  getRole() {
-    return this.options.href ? 'link' : 'button';
-  }
-
-  getAriaLabel() {
-    if (this.options.loading) return this.options.ariaLabel || 'Loading';
-    if (this.options.disabled)
-      return this.options.ariaLabel || 'Disabled button';
-    return this.options.ariaLabel || this.options.text || null;
-  }
-
-  // Utility method to create text nodes
-  createTextNode(text) {
-    return document.createTextNode(text || '');
-  }
-}
-
-/**
- * Functional Component Wrapper - Backward compatibility
- */
 export const ButtonComponent = (props = {}) => {
-  const button = document.createElement('button');
-  const instance = new Button(button, props);
-  button.buttonInstance = instance;
-  return button;
+  const opts = { ...BUTTON_DEFAULTS, ...props };
+
+  const el = document.createElement('button');
+  el.type = opts.type;
+  el.className = [
+    'btn',
+    `btn-${opts.variant}`,
+    `btn-${opts.size}`,
+    opts.fullWidth ? 'btn-full-width' : null,
+    opts.loading ? 'btn-loading' : null,
+    opts.disabled ? 'btn-disabled' : null,
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  // Content kept flat so button.textContent === text when no icon is used
+  if (opts.icon && opts.iconPosition === 'left') {
+    const iconLeft = document.createElement('span');
+    iconLeft.className = 'btn-icon btn-icon-left';
+    iconLeft.textContent = opts.icon;
+    el.appendChild(iconLeft);
+  }
+
+  const label = document.createElement('span');
+  label.className = 'btn-content';
+  label.textContent = opts.text;
+  el.appendChild(label);
+
+  if (opts.icon && opts.iconPosition === 'right') {
+    const iconRight = document.createElement('span');
+    iconRight.className = 'btn-icon btn-icon-right';
+    iconRight.textContent = opts.icon;
+    el.appendChild(iconRight);
+  }
+
+  // Link-style buttons still render as <button> (legacy behavior)
+  if (opts.href) {
+    el.setAttribute('role', 'link');
+    el.dataset.href = opts.href;
+    el.dataset.target = opts.target;
+    if (opts.target === '_blank') {
+      el.setAttribute('rel', 'noopener noreferrer');
+    }
+  } else {
+    el.removeAttribute('role');
+  }
+
+  const syncState = () => {
+    el.classList.toggle('btn-loading', opts.loading);
+    el.classList.toggle('btn-disabled', opts.disabled);
+    el.disabled = Boolean(opts.disabled || opts.loading);
+
+    let ariaLabel = opts.ariaLabel || opts.text || null;
+    if (opts.loading && !opts.ariaLabel) ariaLabel = 'Loading';
+    else if (opts.disabled && !opts.ariaLabel) ariaLabel = 'Disabled button';
+    if (ariaLabel) el.setAttribute('aria-label', ariaLabel);
+    else el.removeAttribute('aria-label');
+
+    if (opts.disabled || opts.loading) {
+      el.setAttribute('aria-disabled', 'true');
+    } else {
+      el.removeAttribute('aria-disabled');
+    }
+
+    if (opts.loading) el.setAttribute('aria-busy', 'true');
+    else el.removeAttribute('aria-busy');
+  };
+  syncState();
+
+  el.addEventListener('click', e => {
+    if (!opts.onClick || opts.disabled || opts.loading) return;
+    if (opts.preventDefault) e.preventDefault();
+    opts.onClick(e);
+  });
+
+  // Touch feedback (guarded for disabled/loading)
+  el.addEventListener(
+    'touchstart',
+    () => {
+      if (!opts.disabled && !opts.loading) {
+        el.classList.add('btn-touch-active');
+      }
+    },
+    { passive: true }
+  );
+  const clearTouch = () => el.classList.remove('btn-touch-active');
+  el.addEventListener('touchend', clearTouch, { passive: true });
+  el.addEventListener('touchcancel', clearTouch, { passive: true });
+
+  // Light instance API for callers needing imperative control
+  el.buttonInstance = {
+    element: el,
+    setText(text) {
+      opts.text = text;
+      label.textContent = text;
+      syncState();
+    },
+    setVariant(variant) {
+      el.classList.remove(`btn-${opts.variant}`);
+      opts.variant = variant;
+      el.classList.add(`btn-${opts.variant}`);
+    },
+    setDisabled(disabled) {
+      opts.disabled = Boolean(disabled);
+      syncState();
+    },
+    setLoading(loading) {
+      opts.loading = Boolean(loading);
+      syncState();
+    },
+    activate() {
+      if (opts.onClick && !opts.disabled && !opts.loading) {
+        opts.onClick(new Event('click'));
+      }
+    },
+  };
+
+  return el;
 };
 
 /**
- * Factory function for creating buttons
+ * Factory alias retained for compatibility.
  */
-export function createButton(element, options = {}) {
-  return new Button(element, options);
+export function createButton(_elementOrOptions, maybeOptions = {}) {
+  const props =
+    _elementOrOptions && !_elementOrOptions.nodeType
+      ? _elementOrOptions
+      : maybeOptions;
+  return ButtonComponent(props);
 }
 
-/**
- * Backward compatibility export
- */
-export { Button as default };
+export { ButtonComponent as default };

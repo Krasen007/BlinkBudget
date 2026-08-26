@@ -485,3 +485,90 @@ export class AnomalyService {
     return null;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Transaction-level outlier detection (absorbed from
+// core/unusual-spending-detector.js during the taste-subtraction pass).
+// Attached as statics to keep one anomaly home.
+Object.assign(AnomalyService, {
+  /**
+   * Detect unusual transactions based on statistical analysis
+   * @param {Array} transactions - Array of transaction objects
+   * @param {Object} options - { multiplier=3, minTransactions=5, category=null }
+   * @returns {Array} Unusual transactions with `unusualSpending` metadata
+   */
+  detectUnusualTransactions(transactions, options = {}) {
+    const { multiplier = 3, minTransactions = 5, category = null } = options;
+
+    if (!transactions || transactions.length < minTransactions) {
+      return [];
+    }
+
+    // Include both expense and refund transactions so that refunds offset
+    // large expenses when calculating the statistical baseline.
+    const baselineTransactions = category
+      ? transactions.filter(
+          t =>
+            t.category === category &&
+            (t.type === 'expense' || t.type === 'refund')
+        )
+      : transactions.filter(t => t.type === 'expense' || t.type === 'refund');
+
+    // Only expense transactions can be flagged as unusual
+    const expenseTransactions = baselineTransactions.filter(
+      t => t.type === 'expense'
+    );
+
+    if (expenseTransactions.length < minTransactions) {
+      return [];
+    }
+
+    const amounts = baselineTransactions.map(t => {
+      const raw = Math.abs(t.amount ?? 0);
+      return t.type === 'refund' ? -raw : raw;
+    });
+    const mean = amounts.reduce((sum, a) => sum + a, 0) / amounts.length;
+    const variance =
+      amounts.reduce((sum, a) => sum + Math.pow(a - mean, 2), 0) /
+      amounts.length;
+    const standardDeviation = Math.sqrt(variance);
+    const threshold = mean + multiplier * standardDeviation;
+
+    const rawUnusual = expenseTransactions.filter(t => t.amount > threshold);
+
+    // Final guard: if refunds in the same category bring net spending per
+    // transaction back below the threshold, suppress the alert.
+    const unusualTransactions = rawUnusual.filter(tx => {
+      const sameCategory = baselineTransactions.filter(
+        other => other.category === tx.category
+      );
+      const netExpenseSum = sameCategory.reduce((sum, t) => {
+        const raw = Math.abs(t.amount ?? 0);
+        return sum + (t.type === 'refund' ? -raw : raw);
+      }, 0);
+      const expenseCount = sameCategory.filter(
+        t => t.type === 'expense'
+      ).length;
+      const netAvg = expenseCount > 0 ? netExpenseSum / expenseCount : 0;
+      return netAvg > threshold;
+    });
+
+    return unusualTransactions.map(transaction => ({
+      ...transaction,
+      unusualSpending: {
+        averageAmount: mean,
+        standardDeviation,
+        threshold,
+        multiplier:
+          mean !== 0 && Number.isFinite(mean)
+            ? (transaction.amount / mean).toFixed(1)
+            : 'N/A',
+        deviation:
+          standardDeviation !== 0 && Number.isFinite(standardDeviation)
+            ? ((transaction.amount - mean) / standardDeviation).toFixed(2)
+            : 'N/A',
+      },
+    }));
+  },
+});
+

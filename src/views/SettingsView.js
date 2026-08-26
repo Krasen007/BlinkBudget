@@ -1,5 +1,9 @@
 import { ButtonComponent } from '../components/Button.js';
-import { ToastNotification } from '../components/ToastNotification.js';
+import {
+  showSuccessToast,
+  showInfoToast,
+  showErrorToast,
+} from '../utils/toast-notifications.js';
 import { Router } from '../core/router.js';
 import { AccountSection } from '../components/AccountSection.js';
 import { DataManagementSection } from '../components/DataManagementSection.js';
@@ -254,13 +258,12 @@ export const SettingsView = () => {
       'showQuickPresets',
       presetsCheckboxInput.checked
     );
-    ToastNotification({
-      message: presetsCheckboxInput.checked
+    showSuccessToast(
+      presetsCheckboxInput.checked
         ? 'Quick amount presets enabled'
         : 'Quick amount presets disabled',
-      variant: 'success',
-      duration: 2000,
-    });
+      { duration: 2000 }
+    );
   });
 
   // Support click interaction for label wrapping in custom toggles
@@ -341,11 +344,7 @@ export const SettingsView = () => {
 
       try {
         // Show checking toast
-        ToastNotification({
-          message: 'Checking for updates...',
-          variant: 'info',
-          duration: 2000,
-        });
+        showInfoToast('Checking for updates...', { duration: 2000 });
 
         const updateFound = await checkForUpdatesWithFeedback();
 
@@ -353,18 +352,12 @@ export const SettingsView = () => {
           // Update dialog will be shown by pwa.js onNeedRefresh
           console.log('[PWA Update] Update found - dialog should appear');
         } else {
-          ToastNotification({
-            message: 'You have the latest version!',
-            variant: 'success',
-            duration: 3000,
-          });
+          showSuccessToast('You have the latest version!', { duration: 3000 });
           console.log('[PWA Update] No updates available');
         }
       } catch (error) {
         console.error('[PWA Update] Manual check failed:', error);
-        ToastNotification({
-          message: 'Update check failed. Check your connection.',
-          variant: 'error',
+        showErrorToast('Update check failed. Check your connection.', {
           duration: 3000,
         });
       } finally {

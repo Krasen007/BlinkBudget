@@ -9,12 +9,11 @@
 
 import { FilteringService } from './analytics/FilteringService.js';
 import { MetricsService } from './analytics/MetricsService.js';
-import { InsightsService } from './analytics/InsightsService.js';
+import { InsightsGenerator } from './insights-generator.js';
 import { AnomalyService } from './analytics/AnomalyService.js';
 import { PredictionService } from './analytics/PredictionService.js';
 import { CategoryUsageService } from './analytics/category-usage-service.js';
 import { AmountPresetService } from './amount-preset-service.js';
-import { recommendationService } from './analytics/RecommendationService.js';
 import { trendService } from './analytics/TrendService.js';
 import comparisonService from './analytics/ComparisonService.js';
 
@@ -48,7 +47,7 @@ export class AnalyticsEngine {
    * Generate spending insights
    */
   generateSpendingInsights(transactions, currentPeriod, previousPeriod = null) {
-    return InsightsService.generateSpendingInsights(
+    return InsightsGenerator.generateSpendingInsights(
       transactions,
       currentPeriod,
       previousPeriod
@@ -197,62 +196,6 @@ export class AnalyticsEngine {
   // Legacy/Internal methods - mostly proxied if still needed by other services
   // but many are now static in their respective services.
 
-  // ========== Recommendation Service (Feature 3.3.1 & 3.3.3) ==========
-
-  /**
-   * Generate optimization insights
-   * @param {Array} transactions - Transaction data
-   * @param {Object} timePeriod - Time period
-   * @returns {Array} Optimization insights
-   */
-  getOptimizationInsights(transactions, timePeriod) {
-    return recommendationService.getOptimizationInsights(
-      transactions,
-      timePeriod
-    );
-  }
-
-  /**
-   * Get total savings potential
-   * @param {Array} transactions - Transaction data
-   * @param {Object} timePeriod - Time period
-   * @returns {Object} Savings potential breakdown
-   */
-  getSavingsPotential(transactions, timePeriod) {
-    return recommendationService.getSavingsPotential(transactions, timePeriod);
-  }
-
-  /**
-   * Get alternative suggestions for a category
-   * @param {string} categoryId - Category name
-   * @param {Array} transactions - Transaction data
-   * @param {Object} timePeriod - Time period
-   * @returns {Array} Alternative suggestions
-   */
-  getAlternativeSuggestions(categoryId, transactions, timePeriod) {
-    return recommendationService.getAlternativeSuggestions(
-      categoryId,
-      transactions,
-      timePeriod
-    );
-  }
-
-  /**
-   * Dismiss an optimization insight
-   * @param {string} insightId - Insight ID
-   */
-  dismissOptimizationInsight(insightId) {
-    recommendationService.dismissInsight(insightId);
-  }
-
-  /**
-   * Get optimization stats
-   * @returns {Object} Optimization statistics
-   */
-  getOptimizationStats() {
-    return recommendationService.getStats();
-  }
-
   // ========== Trend Service (Feature 3.3.2) ==========
 
   /**
@@ -331,57 +274,6 @@ export class AnalyticsEngine {
     return comparisonService.getHistoricalInsights(
       transactions,
       historicalPeriods
-    );
-  }
-
-  // ========== Recommendation Service (Feature 3.3.4) ==========
-
-  /**
-   * Get percentile rankings for categories
-   * @param {Array} transactions - Transaction data
-   * @param {Object} timePeriod - Time period
-   * @returns {Array} Percentile rankings
-   */
-  getPercentileRankings(transactions, timePeriod) {
-    return recommendationService.getPercentileRankings(
-      transactions,
-      timePeriod
-    );
-  }
-
-  /**
-   * Get budget recommendations based on historical spending
-   * @param {Array} transactions - Transaction data
-   * @param {Object} timePeriod - Time period
-   * @returns {Array} Budget recommendations
-   */
-  getBudgetRecommendations(transactions, timePeriod) {
-    return recommendationService.getBudgetRecommendations(
-      transactions,
-      timePeriod
-    );
-  }
-
-  /**
-   * Get recommended amount for a specific category
-   * @param {string} categoryId - Category name
-   * @param {Array} transactions - Transaction data
-   * @returns {Object} Recommended amount
-   */
-  getRecommendedAmount(categoryId, transactions) {
-    return recommendationService.getRecommendedAmount(categoryId, transactions);
-  }
-
-  /**
-   * Get seasonal adjustments for categories
-   * @param {string} categoryId - Category name
-   * @param {Array} transactions - Transaction data
-   * @returns {Object} Seasonal adjustments
-   */
-  getSeasonalAdjustments(categoryId, transactions) {
-    return recommendationService.getSeasonalAdjustments(
-      categoryId,
-      transactions
     );
   }
 }

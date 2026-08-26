@@ -2,7 +2,7 @@
 
 <img src="public/favicon.png" alt="Icon" width="256"/>
 
-**Track your expenses in 3 clicks max.** BlinkBudget transforms expense tracking into a swift, almost unconscious habit with beautiful, actionable insights for smarter financial decisions. | src/core/click-tracking-service.js:recordClick() | src/components/TransactionForm.js:TransactionForm() | src/utils/form-utils/category-chips.js:createCategorySelector()
+**Track your expenses in 3 clicks max.** BlinkBudget transforms expense tracking into a swift, almost unconscious habit with beautiful, actionable insights for smarter financial decisions. | src/utils/form-utils/submission.js:handleFormSubmit() | src/components/TransactionForm.js:TransactionForm() | src/utils/form-utils/category-chips.js:createCategorySelector()
 
 ## Screenshots
 
@@ -22,7 +22,7 @@
 
 ### Lightning Fast Entry
 
-- **3-click expense logging** - Amount -> Category -> Done | src/core/click-tracking-service.js:startTransactionFlow() | src/core/click-tracking-service.js:recordClick() | src/core/click-tracking-service.js:completeTransactionFlow()
+- **3-click expense logging** - Amount -> Category -> Done | src/views/AddView.js:AddView() | src/components/TransactionForm.js:TransactionForm() | src/utils/form-utils/submission.js:handleFormSubmit()
 - **Auto-submit on category selection** - No save buttons needed | src/utils/form-utils/category-chips.js:createCategorySelector() - onSubmit callback | src/utils/form-utils/submission.js:handleFormSubmit()
 - **Mobile-optimized interface** focused on speed and simplicity. Bottom navigation loads instantly for returning users without waiting for cloud sign-in | src/core/mobile-utils.js:MobileUtils - mobile detection and optimization | src/components/TransactionForm.js:TransactionForm() - mobile-optimized class
 - **Offline-capable** with localStorage and Service Worker persistence | src/pwa.js:registerSW() - Service Worker registration | src/core/transaction-service.js:localStorage operations
@@ -76,19 +76,19 @@ BlinkBudget turns your 3-click data into actionable insights using statistical h
 #### **Spending Intelligence**
 
 - **Category Usage Frequency Analysis** - Track how often you use each category | src/core/custom-category-service.js:getStatistics() | src/core/analytics-engine.js:generateSpendingInsights()
-- **Top Movers Analysis** - Discover your biggest spending changes month-over-month | src/core/analytics/ComparisonService.js:getPersonalBenchmarking() | src/core/analytics/InsightsService.js:topMoversAnalysis
+- **Top Movers Analysis** - Discover your biggest spending changes month-over-month | src/core/analytics/ComparisonService.js:getPersonalBenchmarking() | src/core/insights-generator.js:topMovers
 - **Historical Timeline Comparisons** - Compare current spending to previous periods | src/core/analytics/ComparisonService.js:comparePeriodsSpending() | src/core/analytics-engine.js:historical comparisons
 
 #### **Budget Optimization**
 
-- **Smart Budget Recommendations** - Statistical suggestions based on your spending patterns | src/core/analytics/RecommendationService.js:getBudgetRecommendations() | src/core/analytics-engine.js:budget optimization
-- **Category Optimization** - Recommendations to switch categories for better tracking | src/core/analytics/RecommendationService.js:getRecommendedAmount() | src/core/custom-category-service.js:category suggestions
-- **Spending Reduction Suggestions** - Tailored advice to meet savings goals | src/core/analytics/RecommendationService.js:getSeasonalAdjustments() | src/core/savings-goals-service.js:goal tracking
-- **Budget Health Monitoring** - Real-time status of all budget limits | src/core/budget-service.js:getByCategory() | src/core/analytics/InsightsService.js:budget status
+- **Smart Budget Recommendations** - Statistical suggestions based on your spending patterns | src/components/BudgetSuggestion.js:BudgetSuggestion() | src/core/analytics-engine.js:budget optimization
+- **Category Optimization** - Recommendations to switch categories for better tracking | src/core/insights-generator.js:topMovers() | src/core/custom-category-service.js:category suggestions
+- **Spending Reduction Suggestions** - Tailored advice to meet savings goals | src/core/analytics/TrendService.js:getTrendAnalysis() | src/core/savings-goals-service.js:goal tracking
+- **Budget Health Monitoring** - Real-time status of all budget limits | src/core/budget-service.js:getByCategory() | src/core/insights-generator.js:budget status
 
 #### **Anomaly Detection**
 
-- **Unusual Spending Alerts** - Automatic detection of atypical transactions | src/core/analytics/AnomalyService.js:detectAnomalies() | src/core/unusual-spending-detector.js:UnusualSpendingDetector.detectUnusualTransactions()
+- **Unusual Spending Alerts** - Automatic detection of atypical transactions | src/core/analytics/AnomalyService.js:detectAnomalies() | src/core/analytics/AnomalyService.js:AnomalyService.detectUnusualTransactions()
 - **Large Transaction Warnings** - Notifications for purchases outside your normal range | src/core/analytics/AnomalyService.js:detectSpendingSpikes() | src/core/analytics-engine.js:transaction validation
 - **Enhanced Anomaly Detection** - Improved AnomalyService with better spending pattern analysis and more accurate alerts | src/core/analytics/AnomalyService.js:enhanced detection logic
 
@@ -134,7 +134,7 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 #### **Insights Section**
 
 - **Spending Pattern Analysis** - Identify trends and anomalies in your habits | src/views/financial-planning/InsightsSection.js:InsightsSection() | src/core/analytics/TrendService.js:spending patterns
-- **Budget Recommendations** - Statistical suggestions for optimization | src/core/analytics/RecommendationService.js:getBudgetRecommendations() | src/views/financial-planning/InsightsSection.js:recommendations display
+- **Budget Recommendations** - Statistical suggestions for optimization | src/components/BudgetSuggestion.js:BudgetSuggestion() | src/views/financial-planning/InsightsSection.js:recommendations display
 - **Personal Inflation Trends** - Track how inflation affects your personal finances | src/components/InflationTrends.js:InflationTrends() | src/views/financial-planning/InsightsSection.js:inflation trends
 - **Unusual Spending Detection** - Automatic alerts for atypical transactions | src/core/analytics/AnomalyService.js:detectAnomalies() | src/views/financial-planning/InsightsSection.js:anomaly alerts
 
@@ -156,7 +156,7 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 - **Password visibility toggle** - An eye icon in password fields lets you reveal or hide the text as you type | src/views/LoginView.js:eye button with toggle logic | src/views/LoginView.js:password visibility toggle
 - **Top-tier Security** - Advanced XSS protection, strict URL validation, comprehensive privacy compliance, and regular security patches | src/utils/security-utils.js:safeJsonParse() | src/core/privacy-service.js:privacy controls
 - **Improved accessibility** with "Skip to Content" links, ARIA roles, proper form label associations, and keyboard support for all interactive elements | src/core/accessibility-service.js:accessibility helpers | src/components/TransactionForm.js:ARIA labels
-- **Modern component foundation** - BaseComponent building blocks and an Enhanced Button component for consistent UI behavior | src/components/Button.js:ButtonComponent | src/components/BaseComponent.js:BaseComponent foundation
+- **Functional component primitives** - A pure-factory Button component and DOM helpers for consistent UI behavior | src/components/Button.js:ButtonComponent | src/utils/dom-factory.js:createButton()
 - **Enhanced color schemes** with improved text contrast for better readability | src/utils/constants.js:COLOR definitions | src/styles/base.css:color scheme variables
 - **Improved Reports navigation** with filter preservation and breadcrumb indicators for quick category return | src/views/ReportsView.js:navigation state | src/utils/navigation-helper.js:breadcrumb navigation
 
@@ -181,9 +181,9 @@ BlinkBudget provides robust data management with cloud synchronization and local
 
 #### **Data Export & Import**
 
-- **JSON Export** - Complete data export in human-readable format | src/components/DataManagementSection.js:JSON export handler | src/core/emergency-export-service.js:exportData()
-- **CSV Export** - Spreadsheet-compatible export for analysis | src/components/DataManagementSection.js:CSV export handler | src/core/emergency-export-service.js:CSV generation
-- **Selective Export** - Export specific date ranges or categories | src/components/DataManagementSection.js:date-range export handler | src/core/emergency-export-service.js:filtered export
+- **JSON Export** - Complete data export in human-readable format | src/components/DataManagementSection.js:JSON export handler | src/core/backup-service.js:createEmergencyExport()
+- **CSV Export** - Spreadsheet-compatible export for analysis | src/components/DataManagementSection.js:CSV export handler | src/core/backup-service.js:_convertToCSV()
+- **Selective Export** - Export specific date ranges or categories | src/components/DataManagementSection.js:date-range export handler | src/core/backup-service.js:createEmergencyExport()
 - **Import Validation** - Safe import with data integrity checks | src/components/DataManagementSection.js:import handler | src/core/data-integrity-service.js:import validation
 
 #### **Account Management**
@@ -266,7 +266,7 @@ BlinkBudget delivers exceptional performance with modern web technologies:
 - **General Settings section** - Unified Refresh App, Install App, and Logout actions | src/components/GeneralSection.js:GeneralSection() | src/views/SettingsView.js:settings management
 - **Account management** - Add, edit, delete accounts | src/components/AccountSection.js:AccountSection() | src/core/Account/account-service.js:account operations
 - **Date format preferences** (US, ISO, EU formats) applied consistently across transaction lists, CSV exports, goal dates, and filter summaries. A note in Settings explains that the date picker itself follows the browser/OS locale | src/core/settings-service.js:saveSetting() | src/utils/date-utils.js:date formatting
-- **Data export/import** capabilities | src/components/DataManagementSection.js:DataManagementSection() | src/core/emergency-export-service.js:export/import functions
+- **Data export/import** capabilities | src/components/DataManagementSection.js:DataManagementSection() | src/core/backup-service.js:createEmergencyExport()/restoreBackup()
 - **Transaction editing** with validation | src/views/EditView.js:EditView() | src/utils/form-utils/validation.js:edit validation
 - **Simplified feedback system** - Direct GitHub issues link for bug reports and suggestions | src/views/SettingsView.js:feedback system | GitHub integration
 
@@ -340,7 +340,7 @@ When you run `yarn fix`, the system automatically:
 References in README must follow this pattern:
 
 ```
-| src/components/TransactionForm.js:TransactionForm() | src/core/click-tracking-service.js:recordClick()
+| src/components/TransactionForm.js:TransactionForm() | src/utils/form-utils/submission.js:handleFormSubmit()
 ```
 
 ### What Happens When Code Changes
