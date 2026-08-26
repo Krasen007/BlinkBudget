@@ -265,9 +265,7 @@ export const BackupService = {
       transactions: wrap(TransactionService.getAll()),
       accounts: wrap(AccountService.getAccounts()),
       budgets: wrap(budgets),
-      goals: wrap(
-        goalPlanner?.getAllGoals ? goalPlanner.getAllGoals() : []
-      ),
+      goals: wrap(goalPlanner?.getAllGoals ? goalPlanner.getAllGoals() : []),
       investments: wrap(
         investmentTracker?.getAllInvestments
           ? investmentTracker.getAllInvestments()
@@ -330,7 +328,9 @@ export const BackupService = {
     return [
       headers.join(','),
       ...tx.map(t =>
-        headers.map(h => escapeCell(t[h] ?? t[h === 'note' ? 'description' : h])).join(',')
+        headers
+          .map(h => escapeCell(t[h] ?? t[h === 'note' ? 'description' : h]))
+          .join(',')
       ),
     ].join('\n');
   },
@@ -347,10 +347,7 @@ export const BackupService = {
       const data = this._collectExportData();
       const integrity = this._generateIntegrityChecksums(data);
       const dataCount =
-        EXPORT_SECTIONS.reduce(
-          (sum, s) => sum + (data[s]?.count || 0),
-          0
-        ) || 0;
+        EXPORT_SECTIONS.reduce((sum, s) => sum + (data[s]?.count || 0), 0) || 0;
 
       const payload = {
         meta: {
@@ -542,9 +539,7 @@ export const BackupService = {
 
     try {
       const transactions = TransactionService.getAll();
-      const accountIds = new Set(
-        AccountService.getAccounts().map(a => a.id)
-      );
+      const accountIds = new Set(AccountService.getAccounts().map(a => a.id));
       const seenIds = new Set();
       let changed = false;
 
@@ -611,7 +606,9 @@ export const BackupService = {
         if (seenIds.has(transaction.id)) {
           hasChanges = false; // removal handled below
           results.fixed++;
-          results.details.push(`Removed duplicate transaction id ${transaction.id}`);
+          results.details.push(
+            `Removed duplicate transaction id ${transaction.id}`
+          );
           continue;
         }
         seenIds.add(transaction.id);
@@ -633,8 +630,4 @@ export const BackupService = {
 
     return results;
   },
-
-
-
-
 };

@@ -228,7 +228,8 @@ export class AnalyticsCache {
       this.cacheTimestamps.set(key, cached[key].timestamp);
       this._expiresAt.set(
         key,
-        cached[key].timestamp + (cached[key].ttl || this.PERSISTENT_CACHE_DURATION)
+        cached[key].timestamp +
+          (cached[key].ttl || this.PERSISTENT_CACHE_DURATION)
       );
       return cached[key].data;
     }
@@ -260,7 +261,11 @@ export class AnalyticsCache {
    * Entries are stored as envelopes ({data,timestamp,version,ttl}) so the
    * persistent hit path in get() can enforce per-key TTLs.
    */
-  async setToPersistentStorage(key, result, ttl = this.PERSISTENT_CACHE_DURATION) {
+  async setToPersistentStorage(
+    key,
+    result,
+    ttl = this.PERSISTENT_CACHE_DURATION
+  ) {
     // Read existing persistent data first without acquiring lock
     const cached = this._getFromStorage('analytics_cache') || {};
 
@@ -459,4 +464,3 @@ export class AnalyticsCache {
 // App-wide singleton — the single cache regime for analytics, planning,
 // reports preloads and summary memoization (replaces cache-service.js).
 export const analyticsCache = new AnalyticsCache();
-

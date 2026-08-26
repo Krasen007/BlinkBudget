@@ -166,8 +166,7 @@ export const DataManagementSection = () => {
         emergencyBtn.disabled = true;
         emergencyBtn.textContent = '⏳ Exporting...';
 
-        const { BackupService } =
-          await import('../core/backup-service.js');
+        const { BackupService } = await import('../core/backup-service.js');
         const result = await BackupService.createEmergencyExport();
 
         if (result.success) {
@@ -300,8 +299,7 @@ export const DataManagementSection = () => {
         cleanupBtn.disabled = true;
         cleanupBtn.textContent = '🔧 Fixing...';
 
-        const { BackupService } =
-          await import('../core/backup-service.js');
+        const { BackupService } = await import('../core/backup-service.js');
         const result = await BackupService.fixTransactionDataIssues();
 
         if (result.fixed > 0) {
@@ -370,10 +368,8 @@ export const DataManagementSection = () => {
         recoveryBtn.disabled = true;
         recoveryBtn.textContent = '🚨 Recovering...';
 
-        const { BackupService } =
-          await import('../core/backup-service.js');
-        const result =
-          await BackupService.performEmergencyRecovery();
+        const { BackupService } = await import('../core/backup-service.js');
+        const result = await BackupService.performEmergencyRecovery();
 
         if (result.success) {
           const { MobileAlert } = await import('./MobileModal.js');

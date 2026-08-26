@@ -14,7 +14,6 @@ import { BudgetSuggestionsContainer } from '../../components/BudgetSuggestion.js
 import { BudgetProgress } from '../../components/BudgetProgress.js';
 import { BudgetSummaryCard } from '../../components/BudgetSummaryCard.js';
 import { BudgetPlanner } from '../../core/budget-planner.js';
-import { BudgetService } from '../../core/budget-service.js';
 import { ProgressiveEmptyState } from '../../components/ProgressiveEmptyState.js';
 
 const MIN_TRANSACTIONS_FOR_SUGGESTIONS = 30;
@@ -69,7 +68,7 @@ export const BudgetsSection = async planningData => {
       !manualMode &&
       transactions.length >= MIN_TRANSACTIONS_FOR_SUGGESTIONS
     ) {
-      suggestions = await BudgetService.suggestBudgets(transactions);
+      suggestions = await BudgetPlanner.suggestBudgets(transactions);
       // Filter out dismissed categories
       suggestions = suggestions.filter(
         s => !dismissedCategories.has(s.category)

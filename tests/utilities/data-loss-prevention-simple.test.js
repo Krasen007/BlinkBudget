@@ -171,12 +171,8 @@ describe('Week 2: Data Loss Prevention - Simple Tests', () => {
     it('should have required methods', () => {
       expect(BackupService).toHaveProperty('createEmergencyExport');
       expect(BackupService).toHaveProperty('validateExportIntegrity');
-      expect(typeof BackupService.createEmergencyExport).toBe(
-        'function'
-      );
-      expect(typeof BackupService.validateExportIntegrity).toBe(
-        'function'
-      );
+      expect(typeof BackupService.createEmergencyExport).toBe('function');
+      expect(typeof BackupService.validateExportIntegrity).toBe('function');
     });
 
     it('should validate integrity with mocked crypto', async () => {

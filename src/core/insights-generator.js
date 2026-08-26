@@ -424,10 +424,6 @@ const InsightsGenerator = {
 
     return insights;
   },
-
-
-
-
 };
 
 export { InsightsGenerator };

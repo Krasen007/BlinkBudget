@@ -166,6 +166,7 @@ vi.mock('../../src/components/BudgetSummaryCard.js', () => ({
 vi.mock('../../src/core/budget-planner.js', () => ({
   BudgetPlanner: {
     getSummary: vi.fn(() => ({ totalBudgets: 0 })),
+    getBudgetsStatus: vi.fn(() => []),
   },
 }));
 

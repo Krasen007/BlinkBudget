@@ -144,7 +144,7 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 - **Budget Health Tracking** - Real-time status (on track, at risk, exceeded) | src/core/budget-service.js:getByCategory() | src/views/financial-planning/BudgetsSection.js:health status
 - **Overspending Alerts** - Notifications when approaching limits | src/core/budget-service.js:getByCategory() | src/views/financial-planning/BudgetsSection.js:alerts
 - **Budget Performance Reports** - Historical budget adherence analysis | src/core/budget-service.js:getAll() | src/views/financial-planning/BudgetsSection.js:performance reports
-- **Automatic Budget Suggestions** - After logging 30+ transactions, BlinkBudget suggests category budgets based on your actual spending history. Accept, adjust, or dismiss each suggestion | src/components/BudgetSuggestion.js:BudgetSuggestion() | src/core/budget-service.js:suggestBudgets() | src/views/financial-planning/BudgetsSection.js:budget suggestions integration
+- **Automatic Budget Suggestions** - After logging 30+ transactions, BlinkBudget suggests category budgets based on your actual spending history. Accept, adjust, or dismiss each suggestion | src/components/BudgetSuggestion.js:BudgetSuggestion() | src/core/budget-planner.js:suggestBudgets() | src/views/financial-planning/BudgetsSection.js:budget suggestions integration
 
 ### User Experience & UI
 
@@ -182,7 +182,7 @@ BlinkBudget provides robust data management with cloud synchronization and local
 #### **Data Export & Import**
 
 - **JSON Export** - Complete data export in human-readable format | src/components/DataManagementSection.js:JSON export handler | src/core/backup-service.js:createEmergencyExport()
-- **CSV Export** - Spreadsheet-compatible export for analysis | src/components/DataManagementSection.js:CSV export handler | src/core/backup-service.js:_convertToCSV()
+- **CSV Export** - Spreadsheet-compatible export for analysis | src/components/DataManagementSection.js:CSV export handler | src/core/backup-service.js:\_convertToCSV()
 - **Selective Export** - Export specific date ranges or categories | src/components/DataManagementSection.js:date-range export handler | src/core/backup-service.js:createEmergencyExport()
 - **Import Validation** - Safe import with data integrity checks | src/components/DataManagementSection.js:import handler | src/core/data-integrity-service.js:import validation
 

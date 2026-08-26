@@ -571,4 +571,3 @@ Object.assign(AnomalyService, {
     }));
   },
 });
-

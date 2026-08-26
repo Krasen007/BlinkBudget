@@ -47,8 +47,6 @@ const REPORTS_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 // Import utility modules
 import {
   createLoadingState,
-  createEmptyState,
-  showEmptyState,
   createErrorState,
   showErrorState,
   showUnsupportedBrowserError,
@@ -56,6 +54,11 @@ import {
   showPerformanceWarning,
   showChartRenderingWarning,
 } from '../utils/reports-ui.js';
+
+import {
+  createEnhancedEmptyState,
+  EMPTY_STATE_SCENARIOS,
+} from '../utils/enhanced-empty-states.js';
 
 import {
   createCategoryBreakdownChart,
@@ -249,8 +252,50 @@ export const ReportsView = (params = {}) => {
 
   // State components
   const loadingState = createLoadingState();
-  const emptyState = createEmptyState();
   const errorState = createErrorState();
+
+  /**
+   * Handle empty-state action buttons (Add Transaction, Change Time Period, ...)
+   */
+  function handleEmptyStateAction(action) {
+    switch (action) {
+      case 'add-transaction':
+        Router.navigate('add-expense');
+        break;
+      case 'change-period':
+        // The time period selector sits at the top of the view; bring it into view.
+        if (timePeriodSelectorComponent) {
+          timePeriodSelectorComponent.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+          });
+        }
+        break;
+      case 'clear-filters':
+      case 'adjust-filters':
+      default:
+        break;
+    }
+  }
+
+  /**
+   * Build a fresh enhanced empty-state (bound to the current render) and show it.
+   * Replaces the old reports-ui createEmptyState/showEmptyState pair.
+   */
+  let noDataStateEl = null;
+  function showNoData(scenario, { title, message } = {}) {
+    if (noDataStateEl && noDataStateEl.parentNode) {
+      noDataStateEl.remove();
+    }
+    noDataStateEl = createEnhancedEmptyState(scenario, {
+      onAction: handleEmptyStateAction,
+      showTips: false,
+      title,
+      message,
+    });
+    content.appendChild(noDataStateEl);
+    noDataStateEl.style.display = 'flex';
+  }
 
   /**
    * Create header with title and back button - match FinancialPlanningView
@@ -592,25 +637,11 @@ export const ReportsView = (params = {}) => {
         }
 
         if (transactions.length === 0) {
-          showEmptyState(
-            emptyState,
-            'no-transactions',
-            currentTimePeriod,
-            formatTimePeriod
-          );
-          if (!container.contains(emptyState))
-            container.appendChild(emptyState);
-          emptyState.style.display = 'flex';
+          showNoData(EMPTY_STATE_SCENARIOS.NO_TRANSACTIONS);
         } else {
-          showEmptyState(
-            emptyState,
-            'no-data-for-period',
-            currentTimePeriod,
-            formatTimePeriod
-          );
-          if (!container.contains(emptyState))
-            container.appendChild(emptyState);
-          emptyState.style.display = 'flex';
+          showNoData(EMPTY_STATE_SCENARIOS.NO_TRANSACTIONS_PERIOD, {
+            message: `No transactions found for ${formatTimePeriod(currentTimePeriod)}. Try selecting a different time period or add some transactions.`,
+          });
         }
         isLoading = false;
         return;
@@ -756,14 +787,9 @@ export const ReportsView = (params = {}) => {
       }
 
       if (!currentData.transactions || currentData.transactions.length === 0) {
-        showEmptyState(
-          emptyState,
-          'no-data-for-period',
-          currentTimePeriod,
-          formatTimePeriod
-        );
-        if (!content.contains(emptyState)) content.appendChild(emptyState);
-        emptyState.style.display = 'flex';
+        showNoData(EMPTY_STATE_SCENARIOS.NO_TRANSACTIONS_PERIOD, {
+          message: `No transactions found for ${formatTimePeriod(currentTimePeriod)}. Try selecting a different time period or add some transactions.`,
+        });
         return;
       }
 
@@ -1090,17 +1116,16 @@ export const ReportsView = (params = {}) => {
 
       // Add unusual spending alerts below Financial Insights
       if (currentData.transactions && currentData.transactions.length > 0) {
-        const unusualTransactions =
-          AnomalyService.detectUnusualTransactions(
-            currentData.transactions
-          ).filter(transaction => {
-            const transactionDate = new Date(
-              transaction.date || transaction.timestamp
-            );
-            const startDate = new Date(currentTimePeriod.startDate);
-            const endDate = new Date(currentTimePeriod.endDate);
-            return transactionDate >= startDate && transactionDate <= endDate;
-          });
+        const unusualTransactions = AnomalyService.detectUnusualTransactions(
+          currentData.transactions
+        ).filter(transaction => {
+          const transactionDate = new Date(
+            transaction.date || transaction.timestamp
+          );
+          const startDate = new Date(currentTimePeriod.startDate);
+          const endDate = new Date(currentTimePeriod.endDate);
+          return transactionDate >= startDate && transactionDate <= endDate;
+        });
 
         if (unusualTransactions.length > 0) {
           const alertsSection = document.createElement('div');
@@ -1214,7 +1239,8 @@ export const ReportsView = (params = {}) => {
    */
   function showLoadingState() {
     content.style.display = 'none';
-    if (content.contains(emptyState)) content.removeChild(emptyState);
+    if (noDataStateEl && content.contains(noDataStateEl))
+      content.removeChild(noDataStateEl);
     if (content.contains(errorState)) content.removeChild(errorState);
     if (!container.contains(loadingState)) {
       container.appendChild(loadingState);
@@ -1238,8 +1264,8 @@ export const ReportsView = (params = {}) => {
     if (container.contains(loadingState)) {
       container.removeChild(loadingState);
     }
-    if (container.contains(emptyState)) {
-      container.removeChild(emptyState);
+    if (noDataStateEl && noDataStateEl.parentNode) {
+      noDataStateEl.remove();
     }
     if (container.contains(errorState)) {
       container.removeChild(errorState);

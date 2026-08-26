@@ -155,7 +155,13 @@ const EMPTY_STATE_CONTENT = {
  * @returns {HTMLElement} Empty state element
  */
 export function createEnhancedEmptyState(scenario, options = {}) {
-  const { onAction, showTips = true, compact = false } = options;
+  const {
+    onAction,
+    showTips = true,
+    compact = false,
+    title: titleOverride,
+    message: messageOverride,
+  } = options;
 
   const content = EMPTY_STATE_CONTENT[scenario];
   const icons = EMPTY_STATE_ICONS[scenario];
@@ -197,7 +203,7 @@ export function createEnhancedEmptyState(scenario, options = {}) {
   // Title
   const title = document.createElement('h3');
   title.className = 'empty-state__title';
-  title.textContent = content.title;
+  title.textContent = titleOverride || content.title;
   Object.assign(title.style, {
     margin: `0 0 ${SPACING.SM} 0`,
     fontSize: compact ? FONT_SIZES.LG : FONT_SIZES.XL,
@@ -208,7 +214,7 @@ export function createEnhancedEmptyState(scenario, options = {}) {
   // Message
   const message = document.createElement('p');
   message.className = 'empty-state__message';
-  message.textContent = content.message;
+  message.textContent = messageOverride || content.message;
   Object.assign(message.style, {
     margin: `0 0 ${SPACING.LG} 0`,
     fontSize: FONT_SIZES.MD,
