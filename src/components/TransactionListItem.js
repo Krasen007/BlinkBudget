@@ -16,7 +16,7 @@ import {
   BREAKPOINTS,
   CURRENCY_SYMBOL,
 } from '../utils/constants.js';
-import { setSelectedStyle } from '../views/DashboardView.js';
+import { setSelectedStyle } from '../utils/transaction-selection.js';
 import { highlightTransactionSuccess } from '../utils/success-feedback.js';
 
 export const TransactionListItem = ({

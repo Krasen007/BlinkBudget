@@ -2,12 +2,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TransactionListItem } from '../../src/components/TransactionListItem.js';
 
-// Mock DashboardView to break the circular import (TransactionListItem
-// imports setSelectedStyle from DashboardView)
-vi.mock('../../src/views/DashboardView.js', () => ({
-  setSelectedStyle: vi.fn(),
-}));
-
 vi.mock('../../src/core/router.js', () => ({
   Router: {
     navigate: vi.fn(),

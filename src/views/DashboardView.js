@@ -21,19 +21,8 @@ import { getCurrentMonthPeriod } from '../utils/reports-utils.js';
 
 import { getTransactionToHighlight } from '../utils/success-feedback.js';
 
-/**
- * Apply or remove selected styling to a transaction item
- * Shared helper used by both TransactionListItem and DashboardView
- */
-export const setSelectedStyle = (item, isSelected) => {
-  if (isSelected) {
-    item.style.background = 'rgba(59, 130, 246, 0.12)';
-    item.style.borderLeft = '3px solid var(--color-primary)';
-  } else {
-    item.style.background = '';
-    item.style.borderLeft = '';
-  }
-};
+import { setSelectedStyle } from '../utils/transaction-selection.js';
+export { setSelectedStyle };
 import { createNavigationButtons } from '../utils/navigation-helper.js';
 import { BulkEditDialog } from '../components/BulkEditDialog.js';
 
@@ -1264,6 +1253,19 @@ export const DashboardView = (params = {}) => {
     window.removeEventListener('storage-updated', handleStorageUpdate);
     window.removeEventListener('auth-state-changed', handleAuthChange);
     window.removeEventListener('anomaly-dismissed', handleAnomalyDismissed);
+
+    // Run any stored destroy functions (e.g. quick amount presets) to
+    // prevent memory leaks when the view is destroyed.
+    if (content && Array.isArray(content._cleanupFunctions)) {
+      content._cleanupFunctions.forEach(fn => {
+        try {
+          if (typeof fn === 'function') fn();
+        } catch (error) {
+          console.error('Failed to run cleanup function:', error);
+        }
+      });
+      content._cleanupFunctions = [];
+    }
   };
 
   return container;

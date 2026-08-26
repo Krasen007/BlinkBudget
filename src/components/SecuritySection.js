@@ -42,10 +42,10 @@ export const SecuritySection = () => {
   `;
 
   const features = [
-    'End-to-end encryption for all data',
+    'Encrypted in transit (HTTPS) and protected by Firebase security',
     'Local-first storage - data stays on your device',
     'Optional cloud sync with your control',
-    'No third-party analytics or tracking scripts are loaded',
+    'Only anonymous error diagnostics are collected - no cross-site advertising tracking',
     'You can export all your data anytime',
     'Secure authentication',
   ];

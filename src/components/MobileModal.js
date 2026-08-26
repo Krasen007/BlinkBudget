@@ -4,6 +4,10 @@
  * Requirements: 6.3
  */
 
+// Reference counter so body scroll-lock only unlocks when the last nested
+// modal closes (prevents prematurely restoring scroll while other modals are open).
+let openModalCount = 0;
+
 /**
  * Mobile Modal Component
  * Creates a full-screen modal optimized for mobile devices
@@ -121,13 +125,17 @@ export const MobileModal = ({
   };
   document.addEventListener('keydown', handleEscape);
 
-  // Prevent body scroll when modal is open
+  // Prevent body scroll while a modal is open (ref-counted for nested modals)
+  openModalCount++;
   document.body.style.overflow = 'hidden';
 
-  // Restore body scroll when modal closes
+  // Restore body scroll when the last modal closes
   const originalCloseModal = closeModal;
   const closeModalWithScrollRestore = () => {
-    document.body.style.overflow = '';
+    openModalCount = Math.max(0, openModalCount - 1);
+    if (openModalCount === 0) {
+      document.body.style.overflow = '';
+    }
     document.removeEventListener('keydown', handleEscape);
     originalCloseModal();
   };

@@ -11,6 +11,7 @@
 import { AmountPresetService } from '../core/amount-preset-service.js';
 import { TransactionService } from '../core/transaction-service.js';
 import { getCopyString } from '../utils/copy-strings.js';
+import { CURRENCY_SYMBOL } from '../utils/constants.js';
 
 export const QuickAmountPresets = ({ onPresetSelect }) => {
   const container = document.createElement('div');
@@ -37,10 +38,11 @@ export const QuickAmountPresets = ({ onPresetSelect }) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'quick-amount-preset-btn';
-      button.textContent = `$${amount}`;
+      // Use the app's configured currency symbol instead of a hardcoded $
+      button.textContent = `${CURRENCY_SYMBOL}${amount}`;
       button.setAttribute(
         'aria-label',
-        `${getCopyString('transaction.quickAmount')}: $${amount}`
+        `${getCopyString('transaction.quickAmount')}: ${CURRENCY_SYMBOL}${amount}`
       );
       button.setAttribute('data-amount', amount);
       button.setAttribute('tabindex', '0');
