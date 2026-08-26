@@ -7,6 +7,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { dataIntegrityService } from '../../src/core/data-integrity-service.js';
+import { CATEGORY_DEFINITIONS } from '../../src/utils/constants.js';
 
 // Create a real localStorage implementation for these tests
 class LocalStorageMock {
@@ -293,5 +294,92 @@ describe('DataIntegrityService - Category Protection', () => {
     const issues = dataIntegrityService.validateSetting('theme', undefined);
     expect(issues.length).toBeGreaterThan(0);
     expect(issues).toContain('Setting value is undefined');
+  });
+
+  it('should not mutate category.label / CATEGORY_DEFINITIONS (Bulgarian Храна/Заведения) via performIntegrityCheck and validateSetting', async () => {
+    // Snapshot CATEGORY_DEFINITIONS to prove immutability
+    const cDefsBefore = JSON.stringify(CATEGORY_DEFINITIONS);
+    const cDefsKeysBefore = Object.keys(CATEGORY_DEFINITIONS).sort();
+
+    const bulgarianCategories = [
+      { id: 'cat-hrana', name: 'Храна', type: 'expense', color: '#22C55E' },
+      { id: 'cat-zavedenia', name: 'Заведения', type: 'expense', color: '#F97316' },
+    ];
+    const originalJson = JSON.stringify(bulgarianCategories);
+    const originalClone = JSON.parse(originalJson);
+
+    localStorage.setItem(
+      'blinkbudget_setting_custom_categories',
+      originalJson
+    );
+    localStorage.setItem(
+      'blinkbudget_setting_category_usage',
+      JSON.stringify({ categories: { Храна: { count: 2 } } })
+    );
+    localStorage.setItem('blinkbudget_setting_theme', JSON.stringify('dark'));
+
+    // validateSetting must be a no-op for excluded keys and must not add `label`
+    const issuesCustom = dataIntegrityService.validateSetting(
+      'custom_categories',
+      bulgarianCategories
+    );
+    expect(issuesCustom).toEqual([]);
+    // input object not mutated
+    expect(bulgarianCategories).toEqual(originalClone);
+    expect(bulgarianCategories.every(c => !('label' in c))).toBe(true);
+
+    const issuesUsage = dataIntegrityService.validateSetting('category_usage', {
+      categories: {},
+    });
+    expect(issuesUsage).toEqual([]);
+
+    // Also ensure direct label object is untouched if passed under excluded key
+    const withLabel = [{ id: 'x', name: 'Храна', label: 'should-stay' }];
+    const withLabelClone = JSON.parse(JSON.stringify(withLabel));
+    const issuesWithLabel = dataIntegrityService.validateSetting(
+      'custom_categories',
+      withLabel
+    );
+    expect(issuesWithLabel).toEqual([]);
+    expect(withLabel).toEqual(withLabelClone);
+
+    // performIntegrityCheck must not mutate CATEGORY_DEFINITIONS or storage
+    const result = await dataIntegrityService.performIntegrityCheck();
+    expect(result).toBeDefined();
+
+    expect(JSON.stringify(CATEGORY_DEFINITIONS)).toBe(cDefsBefore);
+    expect(Object.keys(CATEGORY_DEFINITIONS).sort()).toEqual(cDefsKeysBefore);
+    expect(CATEGORY_DEFINITIONS['Храна']).toBe(
+      'Supermarket runs, bakery, household supplies.'
+    );
+    expect(CATEGORY_DEFINITIONS['Заведения']).toBe(
+      'Restaurants, fast food, coffee shops, food delivery.'
+    );
+    // definitions stay strings, never objects with label
+    expect(
+      Object.values(CATEGORY_DEFINITIONS).every(v => typeof v === 'string')
+    ).toBe(true);
+
+    const afterRaw = localStorage.getItem(
+      'blinkbudget_setting_custom_categories'
+    );
+    expect(afterRaw).toBe(originalJson);
+    const afterParsed = JSON.parse(afterRaw);
+    expect(afterParsed).toEqual(originalClone);
+    afterParsed.forEach(cat => {
+      expect(cat).not.toHaveProperty('label');
+      expect(Object.keys(cat).sort()).toEqual(
+        ['color', 'id', 'name', 'type'].sort()
+      );
+    });
+
+    // non-category setting still validated and present
+    expect(JSON.parse(localStorage.getItem('blinkbudget_setting_theme'))).toBe(
+      'dark'
+    );
+    const settings = dataIntegrityService.getAllSettings();
+    expect(settings).not.toHaveProperty('custom_categories');
+    expect(settings).not.toHaveProperty('category_usage');
+    expect(settings).toHaveProperty('theme');
   });
 });
