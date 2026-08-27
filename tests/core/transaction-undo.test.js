@@ -42,12 +42,20 @@ const TRANSACTIONS_KEY = STORAGE_KEYS.TRANSACTIONS;
 // tests/setup.js installs inert vi.fn() storage stubs — replace with a
 // functional Map-backed implementation so persistence actually round-trips.
 const store = new Map();
+const sessionStorageStore = new Map();
 const installStorage = () => {
   global.localStorage = {
     getItem: key => (store.has(key) ? store.get(key) : null),
     setItem: (key, value) => store.set(key, String(value)),
     removeItem: key => store.delete(key),
     clear: () => store.clear(),
+  };
+  global.sessionStorage = {
+    getItem: key =>
+      sessionStorageStore.has(key) ? sessionStorageStore.get(key) : null,
+    setItem: (key, value) => sessionStorageStore.set(key, String(value)),
+    removeItem: key => sessionStorageStore.delete(key),
+    clear: () => sessionStorageStore.clear(),
   };
 };
 
@@ -146,6 +154,7 @@ describe('TransactionService remove/restore (undo)', () => {
 describe('notifyTransactionDeleted (undo toast)', () => {
   beforeEach(() => {
     store.clear();
+    sessionStorageStore.clear();
     installStorage();
     vi.clearAllMocks();
     vi.useFakeTimers();
@@ -171,12 +180,21 @@ describe('notifyTransactionDeleted (undo toast)', () => {
     expect(toast).not.toBeNull();
     expect(toast.textContent).toContain('Transaction deleted');
 
+    // Muted hint style, pinned to the bottom edge
+    expect(toast.classList.contains('toast-neutral')).toBe(true);
+    expect(toast.classList.contains('toast-bottom')).toBe(true);
+    expect(toast.closest('.toast-container-bottom')).not.toBeNull();
+    expect(toast.querySelector('.toast-icon')).toBeNull(); // no loud icon
+
     const undoBtn = toast.querySelector('.toast-action');
     expect(undoBtn).not.toBeNull();
     expect(undoBtn.textContent).toBe('Undo');
 
     undoBtn.click();
     expect(readAll().map(t => t.id)).toEqual(['a', 'b']);
+
+    // Restored rows get the same green-highlight treatment as add/edit
+    expect(sessionStorage.getItem('highlightTransactionId')).toBe('b');
   });
 
   it('auto-dismisses after the undo window without restoring', () => {

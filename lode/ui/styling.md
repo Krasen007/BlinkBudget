@@ -17,7 +17,7 @@ Related: [summary.md](summary.md) · [../practices.md](../practices.md)
 
 ## Purgecss safelist — why it exists
 
-Purgecss scans `index.html` + `src/**/*.{js,html}` for class names. Because components build classes in JS (`el.className = 'btn btn-primary'`), dynamic/prefixed names are safelisted by regex: state prefixes (`active|disabled|loading|error|success|warning|info`), `mobile-`, animations (`fade|slide|bounce|pulse|spin`), pseudo/hover states, responsive prefixes, form states.
+Purgecss scans `index.html` + `src/**/*.{js,html}` for class names. Because components build classes in JS (`el.className = 'btn btn-primary'`), dynamic/prefixed names are safelisted by regex: state prefixes (`active|disabled|loading|error|success|warning|info`), `mobile-`, `toast-` (toast type classes are built via `toast-${type}`), animations (`fade|slide|bounce|pulse|spin`), pseudo/hover states, responsive prefixes, form states.
 
 **Invariant:** if you construct class names dynamically in JS, either match a safelist pattern or extend the safelist — otherwise prod silently drops the CSS.
 

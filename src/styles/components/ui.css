@@ -242,6 +242,14 @@
   }
 }
 
+/* Bottom-anchored container (e.g. transaction delete undo hint) */
+.toast-container-bottom {
+  inset: auto var(--spacing-md) var(--spacing-md) var(--spacing-md);
+  width: auto;
+  max-width: none;
+  align-items: center;
+}
+
 .toast {
   color: var(--color-text-main);
   padding: var(--spacing-sm) var(--spacing-md);
@@ -271,6 +279,16 @@
   opacity: 1;
 }
 
+/* Bottom toasts slide up from the bottom edge */
+.toast-bottom {
+  transform: translateY(100%);
+}
+
+.toast-bottom.active {
+  transform: translateY(0);
+  opacity: 1;
+}
+
 .toast-success {
   background: var(--color-success);
   color: var(--color-text-main);
@@ -293,6 +311,14 @@
   background: var(--color-info);
   color: var(--color-text-main);
   box-shadow: var(--shadow-info);
+}
+
+/* Muted hint toast — calm, non-alarming feedback (e.g. delete undo) */
+.toast-neutral {
+  background: var(--color-surface);
+  color: var(--color-text-main);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
 }
 
 .toast-icon {

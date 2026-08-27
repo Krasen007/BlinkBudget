@@ -15,6 +15,7 @@ export const TOAST_TYPES = {
   ERROR: 'error',
   WARNING: 'warning',
   INFO: 'info',
+  NEUTRAL: 'neutral',
 };
 
 /**
@@ -28,24 +29,41 @@ export const TOAST_POSITIONS = {
 };
 
 /**
- * Active toast notifications container
+ * Active toast notification containers
  */
 let toastContainer = null;
+let toastContainerBottom = null;
 const activeToasts = new Map();
 
 /**
- * Initialize toast container
+ * Initialize a toast container
+ * @param {string} position - One of TOAST_POSITIONS (bottom variants get
+ *   their own container pinned to the bottom edge)
+ * @returns {HTMLElement} The container for this toast
  */
-function initializeContainer() {
-  if (toastContainer) return;
+function initializeContainer(position = TOAST_POSITIONS.TOP_CENTER) {
+  if (position === TOAST_POSITIONS.BOTTOM_CENTER) {
+    if (!toastContainerBottom || !toastContainerBottom.isConnected) {
+      toastContainerBottom = document.createElement('div');
+      toastContainerBottom.id = 'toast-container-bottom';
+      toastContainerBottom.className = 'toast-container toast-container-bottom';
+      toastContainerBottom.setAttribute('aria-live', 'polite');
+      toastContainerBottom.setAttribute('aria-label', 'Notifications');
+      document.body.appendChild(toastContainerBottom);
+    }
+    return toastContainerBottom;
+  }
 
-  toastContainer = document.createElement('div');
-  toastContainer.id = 'toast-container';
-  toastContainer.className = 'toast-container';
-  toastContainer.setAttribute('aria-live', 'polite');
-  toastContainer.setAttribute('aria-label', 'Notifications');
+  if (!toastContainer || !toastContainer.isConnected) {
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'toast-container';
+    toastContainer.className = 'toast-container';
+    toastContainer.setAttribute('aria-live', 'polite');
+    toastContainer.setAttribute('aria-label', 'Notifications');
 
-  document.body.appendChild(toastContainer);
+    document.body.appendChild(toastContainer);
+  }
+  return toastContainer;
 }
 
 /**
@@ -75,6 +93,12 @@ function getToastConfig(type) {
       icon: 'ℹ️',
       duration: TIMING.NOTIFICATION_INFO || 3000,
     },
+    [TOAST_TYPES.NEUTRAL]: {
+      // Muted hint style — calm, non-alarming feedback (e.g. delete undo)
+      background: COLORS.SURFACE,
+      icon: '',
+      duration: TIMING.NOTIFICATION_INFO || 3000,
+    },
   };
 
   return configs[type] || configs[TOAST_TYPES.INFO];
@@ -90,17 +114,23 @@ function getToastConfig(type) {
 function createToastElement(message, type, options = {}) {
   const config = getToastConfig(type);
   const toastId = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const { position } = options;
 
   const toast = document.createElement('div');
   toast.id = toastId;
-  toast.className = `toast toast-${type}`;
+  toast.className = `toast toast-${type}${
+    position === TOAST_POSITIONS.BOTTOM_CENTER ? ' toast-bottom' : ''
+  }`;
   toast.setAttribute('role', 'alert');
   toast.setAttribute('aria-live', 'assertive');
 
-  // Icon
-  const icon = document.createElement('span');
-  icon.className = 'toast-icon';
-  icon.textContent = config.icon;
+  // Icon (omitted for muted variants)
+  let icon = null;
+  if (config.icon) {
+    icon = document.createElement('span');
+    icon.className = 'toast-icon';
+    icon.textContent = config.icon;
+  }
 
   // Message
   const messageElement = document.createElement('div');
@@ -114,7 +144,9 @@ function createToastElement(message, type, options = {}) {
   closeButton.setAttribute('aria-label', 'Close notification');
 
   // Assemble toast
-  toast.appendChild(icon);
+  if (icon) {
+    toast.appendChild(icon);
+  }
   toast.appendChild(messageElement);
 
   // Optional action button (e.g. "View Changes" after a PWA update)
@@ -221,15 +253,13 @@ function removeToast(toastId) {
 export function showToast(message, type = TOAST_TYPES.INFO, options = {}) {
   const { duration, persistent = false } = options;
 
-  // Initialize container if needed
-  initializeContainer();
-
   // Create toast
   const toast = createToastElement(message, type, options);
   const toastId = toast.id;
 
-  // Add to container
-  toastContainer.appendChild(toast);
+  // Initialize the right container (top or bottom) if needed and mount
+  const container = initializeContainer(options.position);
+  container.appendChild(toast);
 
   // Animate in
   animateToastIn(toast);
@@ -296,7 +326,10 @@ export function showInfoToast(message, options = {}) {
  * @param {Object} options - Additional options (duration, onClose, ...)
  */
 export function showUndoToast(message, onUndo, options = {}) {
-  return showToast(message, TOAST_TYPES.INFO, {
+  // Muted hint pinned to the bottom edge — deletion is assumed intentional;
+  // the toast is a restore hint, not an alarm.
+  return showToast(message, TOAST_TYPES.NEUTRAL, {
+    position: TOAST_POSITIONS.BOTTOM_CENTER,
     actionText: 'Undo',
     onAction: onUndo,
     ...options,

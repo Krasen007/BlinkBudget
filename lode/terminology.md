@@ -11,7 +11,7 @@ Short entries: **term** — meaning. Grouped by domain. Keep alphabetized inside
 - **Flag category** — custom category with `showAsCheckbox: true` (expense-only). Rendered as a checkbox on the transaction form and stored as a **tag** on the transaction (at most one).
 - **Ghost transaction** — placeholder transaction fields (`isGhost`, `ghostId`, `movedToDate`, `originalDate`) used by dashboard month/recurring logic; stripped when copying.
 - **Bulgarian default categories** — built-in categories are in Bulgarian (e.g. `Храна` = food, `Заведения` = restaurants, `Заплата` = salary). Definitions/colors in `src/utils/constants.js`.
-- **Undo toast** — transient 5 s toast after a transaction delete (single or bulk) with an **Undo** action; restores the exact removed object(s) at their original positions via `TransactionService.restore()` (see [data/data-model.md](data/data-model.md), [ui/summary.md](ui/summary.md)).
+- **Undo toast** — muted bottom-center hint (5 s, `TOAST_TYPES.NEUTRAL`) after a transaction delete (single or bulk), with an **Undo** action; restores the exact removed object(s) at their original positions via `TransactionService.restore()` and green-highlights the restored rows (see [data/data-model.md](data/data-model.md), [ui/summary.md](ui/summary.md)).
 
 ## Architecture
 

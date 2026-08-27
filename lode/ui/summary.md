@@ -35,22 +35,26 @@ Supporting pieces: `utils/form-utils/` (amount-input, category-chips, type-toggl
 
 ## Delete → Undo toast
 
-Deleting (EditView `onDelete`, DashboardView bulk delete) shows a transient **"Transaction deleted [Undo]"** toast (5 s window, `TIMING.UNDO_TOAST`):
+Deleting (EditView `onDelete`, DashboardView bulk delete) shows a **muted hint** pinned to the bottom edge — deletion is assumed intentional; the toast is a restore hint, not an alarm (5 s window, `TIMING.UNDO_TOAST`):
 
 ```mermaid
 flowchart LR
     A[Delete confirmed] --> B["TransactionService.remove(id)"]
     B --> C["returns [{transaction, index}]"]
     C --> D[notifyTransactionDeleted<br/>utils/transaction-undo.js]
-    D --> E[Undo toast 5s<br/>.toast-action button]
-    E -- Undo clicked --> F[TransactionService.restore]
-    F --> G[persist + pushToCloudSafe<br/>+ storage-updated]
-    G --> H[UI re-renders, tx back at original position]
+    D --> E[Muted neutral toast, bottom-center<br/>5s, .toast-action Undo button]
+    E -- Undo clicked --> F["markTransactionForHighlight(ids)"]
+    F --> G[TransactionService.restore]
+    G --> H[persist + pushToCloudSafe<br/>+ storage-updated]
+    H --> I[Dashboard re-render:<br/>green pulse + entrance on restored rows]
 ```
 
-- `remove()` is pure data (no DOM, no animations) — the delete itself stays instant; hardware-acceleration requirement is met because only the fixed-position toast animates (transform/opacity).
-- `showUndoToast()` in `toast-notifications.js` is the generic message + Undo-button helper (`actionText`/`onAction` toast options).
-- No new CSS was needed: `.toast-action` styles already exist in `components/ui.css`; `prefers-reduced-motion` is covered by the global rule in `base.css`.
+- `remove()` is pure data (no DOM, no animations) — the delete itself stays instant.
+- Toast styling: `TOAST_TYPES.NEUTRAL` (surface background, border, no icon) + `position: BOTTOM_CENTER` → separate `#toast-container-bottom` (`.toast-container-bottom`) with a slide-up animation (`.toast-bottom`). All in `components/ui.css`; `.toast-action` keeps its primary-button affordance on the muted surface.
+- `showUndoToast()` in `toast-notifications.js` is the generic helper wiring these defaults.
+- Undo marks `sessionStorage.highlightTransactionId` **before** `restore()` — the `storage-updated` re-render reads it via `getTransactionToHighlight()` and gives restored rows the same green highlight + entrance treatment as added/edited transactions.
+- Purgecss: all `toast-*` classes are safelisted (`/^toast-/` in `vite.config.js`) because `toast-${type}` is built dynamically.
+- `prefers-reduced-motion` is covered by the global rule in `base.css`; only the fixed-position toast animates → no layout thrash.
 
 ## Shared components inventory (src/components/)
 

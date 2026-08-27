@@ -10,6 +10,7 @@
  * `prefers-reduced-motion` (global rule in src/styles/base.css).
  */
 import { TransactionService } from '../core/transaction-service.js';
+import { markTransactionForHighlight } from './success-feedback.js';
 import { TIMING } from './constants.js';
 import { showUndoToast } from './toast-notifications.js';
 
@@ -33,6 +34,13 @@ export function notifyTransactionDeleted(removedEntries, options = {}) {
   return showUndoToast(
     message,
     () => {
+      // Mark BEFORE restore: the storage-updated re-render reads this marker
+      // and gives the restored rows the same green highlight + entrance
+      // treatment used for added/edited transactions.
+      markTransactionForHighlight(
+        removedEntries.map(entry => entry.transaction.id).join(',')
+      );
+
       const restored = TransactionService.restore(removedEntries);
       if (!restored) {
         console.warn(

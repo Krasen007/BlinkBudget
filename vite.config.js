@@ -196,6 +196,7 @@ export default defineConfig({
                   /^(flex|grid|hidden|block|inline|absolute|relative|fixed|sticky)/,
                   /^(active|disabled|loading|error|success|warning|info)/,
                   /^mobile-/,
+                  /^toast-/,
                   /^(fade|slide|bounce|pulse|spin)/,
                   /:hover/,
                   /:focus/,
