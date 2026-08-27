@@ -33,6 +33,25 @@ flowchart LR
 
 Supporting pieces: `utils/form-utils/` (amount-input, category-chips, type-toggle, keyboard, submission, validation, transaction-tags), `QuickAmountPresets`, `DateInput`, `MobileModal`.
 
+## Delete → Undo toast
+
+Deleting (EditView `onDelete`, DashboardView bulk delete) shows a transient **"Transaction deleted [Undo]"** toast (5 s window, `TIMING.UNDO_TOAST`):
+
+```mermaid
+flowchart LR
+    A[Delete confirmed] --> B["TransactionService.remove(id)"]
+    B --> C["returns [{transaction, index}]"]
+    C --> D[notifyTransactionDeleted<br/>utils/transaction-undo.js]
+    D --> E[Undo toast 5s<br/>.toast-action button]
+    E -- Undo clicked --> F[TransactionService.restore]
+    F --> G[persist + pushToCloudSafe<br/>+ storage-updated]
+    G --> H[UI re-renders, tx back at original position]
+```
+
+- `remove()` is pure data (no DOM, no animations) — the delete itself stays instant; hardware-acceleration requirement is met because only the fixed-position toast animates (transform/opacity).
+- `showUndoToast()` in `toast-notifications.js` is the generic message + Undo-button helper (`actionText`/`onAction` toast options).
+- No new CSS was needed: `.toast-action` styles already exist in `components/ui.css`; `prefers-reduced-motion` is covered by the global rule in `base.css`.
+
 ## Shared components inventory (src/components/)
 
 - **Navigation/shell:** MobileNavigation, FloatingBackButton, NetworkStatus, LoadingView, ProgressiveEmptyState (+ `utils/enhanced-empty-states.js`)

@@ -170,22 +170,79 @@ export const TransactionService = {
   },
 
   /**
-   * Remove a transaction
+   * Remove a transaction (and its cascaded ghost, if any) in a single persist.
+   * Instant by design: one localStorage write + one storage-updated event,
+   * no DOM work and no animations on this path.
    * @param {string} id - Transaction ID
+   * @returns {Array<{transaction: Object, index: number}>|null} Removed
+   *   entries with their original array positions (for undo), or null if
+   *   nothing was removed.
    */
   remove(id) {
     const transaction = this.get(id);
-    if (!transaction) return;
+    if (!transaction) return null;
 
-    if (transaction && transaction.ghostId) {
-      // Cascade to ghost if this is a moved transaction being deleted
-      this.remove(transaction.ghostId);
+    const transactions = this.getAll();
+    const index = transactions.findIndex(t => t.id === id);
+    if (index === -1) return null;
+
+    const removed = [{ transaction: transactions[index], index }];
+
+    // Cascade to ghost if this is a moved transaction being deleted
+    if (transaction.ghostId) {
+      const ghostIndex = transactions.findIndex(
+        t => t.id === transaction.ghostId
+      );
+      if (ghostIndex !== -1) {
+        removed.push({
+          transaction: transactions[ghostIndex],
+          index: ghostIndex,
+        });
+      }
     }
 
-    let transactions = this.getAll();
-    transactions = transactions.filter(t => t.id !== id);
-    this._persist(transactions);
+    const removedIds = new Set(removed.map(entry => entry.transaction.id));
+    const remaining = transactions.filter(t => !removedIds.has(t.id));
+    this._persist(remaining);
 
+    return removed;
+  },
+
+  /**
+   * Restore previously removed transactions (delete undo).
+   * Re-inserts the exact objects at their original positions, then persists,
+   * syncs (pushToCloudSafe) and dispatches `storage-updated` via _persist.
+   * @param {Array<{transaction: Object, index: number}>} removedEntries
+   *   Value previously returned by remove().
+   * @returns {boolean} true if at least one transaction was restored
+   */
+  restore(removedEntries) {
+    if (!Array.isArray(removedEntries) || removedEntries.length === 0) {
+      return false;
+    }
+
+    const transactions = this.getAll();
+    const existingIds = new Set(transactions.map(t => t.id));
+
+    const restorable = removedEntries
+      .filter(
+        entry =>
+          entry &&
+          entry.transaction &&
+          entry.transaction.id &&
+          !existingIds.has(entry.transaction.id)
+      )
+      // Insert highest original index first so lower indexes stay valid
+      .sort((a, b) => (b.index || 0) - (a.index || 0));
+
+    if (restorable.length === 0) return false;
+
+    for (const { transaction, index } of restorable) {
+      const insertAt = Math.min(Math.max(index || 0, 0), transactions.length);
+      transactions.splice(insertAt, 0, transaction);
+    }
+
+    this._persist(transactions);
     return true;
   },
 

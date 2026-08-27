@@ -4,10 +4,9 @@ Mirrors `todo/` at repo root (authoritative owner list lives there — `todo/tod
 
 ## Open
 
-1. **Undo button for deleted transactions** — keep `TransactionService.remove()` instant (transform/opacity only), transient toast `Transaction deleted [Undo]` 4–5 s, Undo restores via StorageService + `pushToCloud` + `storage-updated`. Design sketch in `todo/todo.md`.
-2. **TWA → Windows Store** — package the existing web app as a Trusted Web Activity (`androidTWA/` exists for Android); no new framework deps.
-3. **Configurable currency sign** — `CURRENCY_SYMBOL` hardcoded `'€'` at `src/utils/constants.js:14`; make it computed (locale/settings-based) with tests.
-4. **Drag-to-reorder custom categories** — `src/core/custom-category-service.js` (reorder region ~lines 22–94) currently arrow-buttons only.
+1. **TWA → Windows Store** — package the existing web app as a Trusted Web Activity (`androidTWA/` exists for Android); no new framework deps.
+2. **Configurable currency sign** — `CURRENCY_SYMBOL` hardcoded `'€'` at `src/utils/constants.js:14`; make it computed (locale/settings-based) with tests.
+3. **Drag-to-reorder custom categories** — `src/core/custom-category-service.js` (reorder region ~lines 22–94) currently arrow-buttons only.
 
 ## Related context
 

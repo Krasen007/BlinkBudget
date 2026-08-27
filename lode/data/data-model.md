@@ -68,7 +68,9 @@ flowchart LR
 
 - `getAll()` **migrates on read**: transactions missing `accountId` get the default account's id, then persist+sync.
 - `add()` stamps `id/timestamp/createdAt/updatedAt/userId`, sanitizes via `PrivacyService.sanitizeDataForStorage(t, 'transaction')`, `unshift`s (newest first), and records expense amounts into the analytics engine for quick presets.
-- `copy(id)` strips id/audit/ghost fields, fresh timestamp. `split(id, a, b)` replaces one tx with two. `clear()` wipes + syncs.
+- `remove(id)` returns `[{ transaction, index }]` — the exact removed object(s) with their original array positions — or `null`. Cascades a linked ghost (`ghostId`) and removes both in **one** persist. No DOM work on this path → the delete stays instant; the undo UI lives in `utils/transaction-undo.js`.
+- `restore(removedEntries)` re-inserts those exact objects at their original positions (highest index first, duplicate-id guard), then persists + syncs + dispatches `storage-updated`. Returns `false` when nothing was restorable.
+- `copy(id)` strips id/audit/ghost fields, fresh timestamp. `split(id)` replaces one tx with two. `clear()` wipes + syncs.
 - `_persist(arr, sync=true)`: `localStorage.setItem` → optional `SyncService.pushToCloudSafe` → **always** dispatch `storage-updated {key}`.
 
 ## Invariants

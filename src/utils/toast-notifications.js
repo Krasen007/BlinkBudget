@@ -290,6 +290,20 @@ export function showInfoToast(message, options = {}) {
 }
 
 /**
+ * Show info toast with an Undo action button (e.g. transaction delete undo)
+ * @param {string} message - Toast message
+ * @param {Function} onUndo - Called when the Undo button is clicked
+ * @param {Object} options - Additional options (duration, onClose, ...)
+ */
+export function showUndoToast(message, onUndo, options = {}) {
+  return showToast(message, TOAST_TYPES.INFO, {
+    actionText: 'Undo',
+    onAction: onUndo,
+    ...options,
+  });
+}
+
+/**
  * Clear all active toasts
  */
 export function clearAllToasts() {

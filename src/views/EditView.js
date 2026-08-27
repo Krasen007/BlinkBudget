@@ -213,8 +213,13 @@ export const EditView = ({ id }) => {
         ConfirmDialog({
           message: 'Are you sure you want to delete this transaction?',
           onConfirm: () => {
-            TransactionService.remove(id);
+            const removed = TransactionService.remove(id);
             Router.navigate('dashboard');
+            import('../utils/transaction-undo.js')
+              .then(({ notifyTransactionDeleted }) => {
+                notifyTransactionDeleted(removed);
+              })
+              .catch(() => {});
           },
         });
       });

@@ -182,6 +182,7 @@ export const TIMING = {
   KEYBOARD_DELAY: 300,
   FOCUS_DELAY: 100,
   INITIAL_LOAD_DELAY: 100,
+  UNDO_TOAST: 3000, // window to undo a transaction delete
   RECENT_TRANSACTION_LIMIT: 300000, // 5 * 60 * 1000 = 5 minutes in milliseconds
 };
 

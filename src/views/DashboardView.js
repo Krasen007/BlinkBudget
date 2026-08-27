@@ -344,14 +344,23 @@ export const DashboardView = (params = {}) => {
     import('../components/ConfirmDialog.js').then(({ ConfirmDialog }) => {
       ConfirmDialog({
         title: 'Delete Transactions',
-        message: `Delete ${selectedTransactionIds.size} selected transaction${selectedTransactionIds.size > 1 ? 's' : ''}? This cannot be undone.`,
+        message: `Delete ${selectedTransactionIds.size} selected transaction${selectedTransactionIds.size > 1 ? 's' : ''}?`,
         confirmText: 'Delete',
         variant: 'danger',
         onConfirm: () => {
+          const removedEntries = [];
           selectedTransactionIds.forEach(id => {
-            TransactionService.remove(id);
+            const removed = TransactionService.remove(id);
+            if (removed) removedEntries.push(...removed);
           });
           exitSelectionMode();
+          import('../utils/transaction-undo.js')
+            .then(({ notifyTransactionDeleted }) => {
+              notifyTransactionDeleted(removedEntries, {
+                message: `${removedEntries.length} transaction${removedEntries.length > 1 ? 's' : ''} deleted`,
+              });
+            })
+            .catch(() => {});
         },
       });
     });
