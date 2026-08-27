@@ -110,6 +110,8 @@ release-artifacts-*
 .gradle/
 gradle/
 **/build/
+
+.devin
 !**/src/**/build/
 
 # Ignore Gradle GUI config
@@ -135,3 +137,6 @@ app-release*
 androidTWA/
 /mempalace.yaml
 /entities.json
+
+# Lode (AI memory) session scraps — never commit
+lode/tmp/
