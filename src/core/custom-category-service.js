@@ -866,7 +866,7 @@ export const CustomCategoryService = {
   _persist(categories, sync = true) {
     localStorage.setItem(CUSTOM_CATEGORIES_KEY, JSON.stringify(categories));
     if (sync) {
-      SyncService.pushToCloud(CUSTOM_CATEGORIES_KEY, categories);
+      SyncService.pushToCloudSafe(CUSTOM_CATEGORIES_KEY, categories);
     }
     // Notify the app that categories changed so views can refresh
     try {

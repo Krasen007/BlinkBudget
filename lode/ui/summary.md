@@ -11,15 +11,15 @@ Related: [styling.md](styling.md) · [../practices.md](../practices.md) · [../a
 
 ## Views (`src/views/`) — one per route
 
-| View | Route | Size signal |
-| --- | --- | --- |
-| DashboardView | `dashboard` | biggest view (~45 KB) — stats, filters, transaction list |
-| AddView | `add-expense` | small — the 3-click form (see below) |
-| EditView | `edit-expense` | edit form, reads `?id=` |
-| ReportsView | `reports` | largest file (~51 KB) — Chart.js heavy |
-| FinancialPlanningView | `financial-planning` | tabs: Budgets, Forecasts, Goals, Insights, Investments, Overview (sections in `views/financial-planning/`) |
-| SettingsView | `settings` | sections: General, DateFormat, Account, DataManagement, BackupRestore, Security, AccountDeletion, Feedback |
-| LoginView / LandingView | `login` / `landing` | unauthenticated entry |
+| View                    | Route                | Size signal                                                                                                |
+| ----------------------- | -------------------- | ---------------------------------------------------------------------------------------------------------- |
+| DashboardView           | `dashboard`          | biggest view (~45 KB) — stats, filters, transaction list                                                   |
+| AddView                 | `add-expense`        | small — the 3-click form (see below)                                                                       |
+| EditView                | `edit-expense`       | edit form, reads `?id=`                                                                                    |
+| ReportsView             | `reports`            | largest file (~51 KB) — Chart.js heavy                                                                     |
+| FinancialPlanningView   | `financial-planning` | tabs: Budgets, Forecasts, Goals, Insights, Investments, Overview (sections in `views/financial-planning/`) |
+| SettingsView            | `settings`           | sections: General, DateFormat, Account, DataManagement, BackupRestore, Security, AccountDeletion, Feedback |
+| LoginView / LandingView | `login` / `landing`  | unauthenticated entry                                                                                      |
 
 ## The 3-click form path
 

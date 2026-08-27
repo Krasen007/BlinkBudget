@@ -16,7 +16,8 @@ Short entries: **term** — meaning. Grouped by domain. Keep alphabetized inside
 
 - **`config.localMode`** — true when no `VITE_FIREBASE_*` env vars exist (and not test mode): Firebase is never initialized, auth/sync disabled, all routes open.
 - **`auth_hint`** — localStorage flag (`'true'`) meaning "user was authenticated recently". Lets mobile nav render before Firebase resolves and gives the route guard grace.
-- **StorageService (Bridge)** — facade in `src/core/storage.js` that delegates to domain services for backward compatibility; also owns cloud-push retry logic.
+- **StorageService (Bridge)** — facade in `src/core/storage.js` that delegates to domain services for backward compatibility; retains `_pushToCloudSafe` as an alias for `SyncService.pushToCloudSafe`.
+- **`pushToCloudSafe`** — `SyncService`'s canonical synced-write funnel: per-key serialization, 3 retries (500 ms ×2 backoff + ≤200 ms jitter), never throws, emits `sync-error` + `toast` on final failure. Used by all persisting domain services and the bridge.
 - **Domain services** — `TransactionService`, `AccountService`, `SettingsService`, `BudgetService`, `GoalPlanner`, `InvestmentTracker`, `CustomCategoryService`. Each owns one `STORAGE_KEYS` slice.
 - **STORAGE_KEYS** — canonical localStorage key constants (`blinkbudget_transactions`, `blinkbudget_accounts`, `custom_categories`, `blink_settings`, `blinkbudget_investments`, `blinkbudget_goals`, `blinkbudget_budgets`, dashboard filter keys, `blinkbudget_click_tracking`).
 - **ViewManager** — singleton that owns `#app`; `setView(el)` is the only way a view gets mounted.
@@ -31,7 +32,9 @@ Short entries: **term** — meaning. Grouped by domain. Keep alphabetized inside
 - **`storage-updated`** — `CustomEvent(detail: {key})` dispatched after every local write; UI re-renders on this.
 - **`categories-updated`** — fired by category-manager route so selectors app-wide refresh.
 - **`auth-state-changed`** — `detail: {user}` after `AuthService.init` callback resolves.
-- **`sync-error`** — cloud push failed after retries (data is still saved locally).
+- **`sync-error`** — cloud push failed after retries (data is still saved locally). Dispatch-only today — no listener.
+- **`sync-state`** — push lifecycle from `_executePush`: `{dataType, state: 'syncing'|'synced'|'error', isNetworkError?}`. Dispatch-only today — no listener.
+- **`sync-conflict`** — near-simultaneous edit detected (≤2 s apart, differing payloads); cloud version applies until user resolves via ConflictDialog.
 - **`toast`** — generic user-facing message bridge; consumed in `main.js` via dynamic import.
 - **`connection-change`** — `detail: {isOnline}` from SyncService online/offline monitoring.
 - **`sync-conflict-resolution`** — user picked local/cloud in `ConflictDialog`; SyncService applies it.

@@ -30,7 +30,7 @@ export const SettingsService = {
     const settings = safeJsonParse(localStorage.getItem(SETTINGS_KEY) || '{}');
     settings[key] = value;
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-    SyncService.pushToCloud(SETTINGS_KEY, settings);
+    SyncService.pushToCloudSafe(SETTINGS_KEY, settings);
 
     // Dispatch event for UI re-renders
     window.dispatchEvent(

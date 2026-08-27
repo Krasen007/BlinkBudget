@@ -303,15 +303,17 @@ describe('DataIntegrityService - Category Protection', () => {
 
     const bulgarianCategories = [
       { id: 'cat-hrana', name: 'Храна', type: 'expense', color: '#22C55E' },
-      { id: 'cat-zavedenia', name: 'Заведения', type: 'expense', color: '#F97316' },
+      {
+        id: 'cat-zavedenia',
+        name: 'Заведения',
+        type: 'expense',
+        color: '#F97316',
+      },
     ];
     const originalJson = JSON.stringify(bulgarianCategories);
     const originalClone = JSON.parse(originalJson);
 
-    localStorage.setItem(
-      'blinkbudget_setting_custom_categories',
-      originalJson
-    );
+    localStorage.setItem('blinkbudget_setting_custom_categories', originalJson);
     localStorage.setItem(
       'blinkbudget_setting_category_usage',
       JSON.stringify({ categories: { Храна: { count: 2 } } })

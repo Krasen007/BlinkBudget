@@ -33,6 +33,7 @@ const sanitize = (value, seen = new WeakSet()) => {
 export const SyncService = {
   unsubscribes: [],
   pendingWrites: new Map(), // Track pending writes to avoid race conditions
+  _pushChains: new Map(), // Serialized per-key push chains (see pushToCloudSafe)
   lastPushTimes: new Map(), // Track last push time per dataType for rate limiting
   _debounceTimeouts: new Map(), // Track active debounces per dataType
   _conflictResolutionHandler: null,
@@ -106,6 +107,83 @@ export const SyncService = {
     }, 300);
 
     this._debounceTimeouts.set(dataType, timeout);
+  },
+
+  /**
+   * Safely push data to cloud with retries and per-key serialization.
+   * This is the canonical funnel for every local write that syncs
+   * (domain services and the StorageService bridge alike).
+   * Never throws: on final failure it records `last_sync_error` and
+   * emits `sync-error` + `toast` events.
+   * Note: pushToCloud() currently never rejects (errors are handled in
+   * _executePush), so the retry loop activates only if that changes.
+   */
+  pushToCloudSafe(dataType, data, retries = 3) {
+    const attemptPush = async () => {
+      let attempt = 0;
+      let delay = 500; // initial backoff
+      while (true) {
+        try {
+          await this.pushToCloud(dataType, data);
+          return;
+        } catch (err) {
+          attempt += 1;
+          if (attempt > retries) {
+            console.error(
+              '[Sync] pushToCloudSafe failed',
+              dataType,
+              err.code,
+              err
+            );
+            try {
+              localStorage.setItem(
+                'last_sync_error',
+                JSON.stringify({
+                  dataType,
+                  code: err.code || null,
+                  message: err.message || String(err),
+                  timestamp: new Date().toISOString(),
+                })
+              );
+            } catch {
+              /* ignore storage errors */
+            }
+            window.dispatchEvent(
+              new CustomEvent('sync-error', {
+                detail: {
+                  key: dataType,
+                  error:
+                    'Unable to sync — saved locally, will sync when online.',
+                },
+              })
+            );
+            window.dispatchEvent(
+              new CustomEvent('toast', {
+                detail: {
+                  message:
+                    'Unable to sync — saved locally, will sync when online.',
+                },
+              })
+            );
+            return;
+          }
+          // exponential backoff with jitter
+          const jitter = Math.floor(Math.random() * 200);
+          const wait = delay + jitter;
+          await new Promise(res => setTimeout(res, wait));
+          delay *= 2;
+        }
+      }
+    };
+
+    const chain = this._pushChains.get(dataType) || Promise.resolve();
+    const newChain = chain.then(() => attemptPush());
+    // keep chain but swallow final rejection so it doesn't break subsequent chains
+    this._pushChains.set(
+      dataType,
+      newChain.catch(() => {})
+    );
+    return newChain;
   },
 
   /**

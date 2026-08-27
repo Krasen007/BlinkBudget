@@ -41,6 +41,7 @@ vi.mock('../../src/core/sync-service.js', () => ({
   SyncService: {
     startRealtimeSync: vi.fn(),
     stopSync: vi.fn(),
+    pushToCloudSafe: vi.fn(),
     getStatus: vi.fn(() => ({})),
   },
 }));

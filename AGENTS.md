@@ -84,7 +84,7 @@ el.style.padding = '10px';
   id: 'uuid-v4',
   amount: 15.5,
   category: 'Food & Drink',
-  type: 'expense', // 'expense' | 'income' | 'transfer'
+  type: 'expense', // 'expense' | 'income' | 'transfer' | 'refund'
   accountId: 'acc-1',
   toAccountId: null, // if transfer
   timestamp: '2026-02-21T10:00:00.000Z',

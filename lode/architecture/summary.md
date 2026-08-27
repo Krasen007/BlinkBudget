@@ -38,18 +38,18 @@ flowchart TD
 
 ## Module map (src/)
 
-| Directory | Role | Notable |
-| --- | --- | --- |
-| `src/core/` | services + engines | `router.js`, `sync-service.js`, `auth-service.js`, `storage.js` (bridge), `lazy-loader.js`, `data-integrity-service.js`, `forecast-engine.js`, `analytics-engine.js` |
-| `src/core/Account/` | account domain | `account-service.js`, `account-deletion-service.js`, `account-balance-predictor.js` |
-| `src/core/analytics/` | analytics domain | `AnalyticsCache`, `TrendService`, `PredictionService`, `AnomalyService`, `FilteringService`, `MetricsService`, `ComparisonService`, `category-usage-service` |
-| `src/core/financial-planning/` | planning data layer | `PlanningDataManager.js` |
-| `src/router/` | route defs + guard | `routes.js`, `guard.js` |
-| `src/views/` | page components | 8 views + `financial-planning/` sections |
-| `src/components/` | reusable UI | 45+ components + `financial-planning/` |
-| `src/utils/` | helpers | `constants.js` (single source of keys/colors/timing), `form-utils/`, chart utils, touch utils |
-| `src/styles/` | PostCSS CSS | see [../ui/styling.md](../ui/styling.md) |
-| `config/app.config.js` | env validation | validates 7 `VITE_FIREBASE_*` vars, derives `localMode` |
+| Directory                      | Role                | Notable                                                                                                                                                              |
+| ------------------------------ | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/core/`                    | services + engines  | `router.js`, `sync-service.js`, `auth-service.js`, `storage.js` (bridge), `lazy-loader.js`, `data-integrity-service.js`, `forecast-engine.js`, `analytics-engine.js` |
+| `src/core/Account/`            | account domain      | `account-service.js`, `account-deletion-service.js`, `account-balance-predictor.js`                                                                                  |
+| `src/core/analytics/`          | analytics domain    | `AnalyticsCache`, `TrendService`, `PredictionService`, `AnomalyService`, `FilteringService`, `MetricsService`, `ComparisonService`, `category-usage-service`         |
+| `src/core/financial-planning/` | planning data layer | `PlanningDataManager.js`                                                                                                                                             |
+| `src/router/`                  | route defs + guard  | `routes.js`, `guard.js`                                                                                                                                              |
+| `src/views/`                   | page components     | 8 views + `financial-planning/` sections                                                                                                                             |
+| `src/components/`              | reusable UI         | 45+ components + `financial-planning/`                                                                                                                               |
+| `src/utils/`                   | helpers             | `constants.js` (single source of keys/colors/timing), `form-utils/`, chart utils, touch utils                                                                        |
+| `src/styles/`                  | PostCSS CSS         | see [../ui/styling.md](../ui/styling.md)                                                                                                                             |
+| `config/app.config.js`         | env validation      | validates 7 `VITE_FIREBASE_*` vars, derives `localMode`                                                                                                              |
 
 ## Invariants
 

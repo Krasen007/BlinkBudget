@@ -327,7 +327,7 @@ export const TransactionService = {
   _persist(transactions, sync = true) {
     localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(transactions));
     if (sync) {
-      SyncService.pushToCloud(TRANSACTIONS_KEY, transactions);
+      SyncService.pushToCloudSafe(TRANSACTIONS_KEY, transactions);
     }
     // Dispatch storage-updated event for local changes so UI re-renders
     window.dispatchEvent(

@@ -15,16 +15,16 @@ BlinkBudget is a zero-runtime-dependency (except `chart.js` + `firebase`) expens
 
 ## Where to look next
 
-| I need to understand… | Read |
-| --- | --- |
-| How the app boots | [architecture/summary.md](architecture/summary.md) |
-| Routing, views, lazy loading | [architecture/routing-and-views.md](architecture/routing-and-views.md) |
-| Data model & services | [data/data-model.md](data/data-model.md) |
-| Cloud sync & offline | [data/sync.md](data/sync.md) |
-| Auth & local mode | [data/authentication.md](data/authentication.md) |
-| Component/UI conventions | [ui/summary.md](ui/summary.md) |
-| CSS pipeline & theming | [ui/styling.md](ui/styling.md) |
-| Product principles (3 clicks) | [product/three-clicks.md](product/three-clicks.md) |
-| Active TODOs | [plans/roadmap.md](plans/roadmap.md) |
+| I need to understand…         | Read                                                                   |
+| ----------------------------- | ---------------------------------------------------------------------- |
+| How the app boots             | [architecture/summary.md](architecture/summary.md)                     |
+| Routing, views, lazy loading  | [architecture/routing-and-views.md](architecture/routing-and-views.md) |
+| Data model & services         | [data/data-model.md](data/data-model.md)                               |
+| Cloud sync & offline          | [data/sync.md](data/sync.md)                                           |
+| Auth & local mode             | [data/authentication.md](data/authentication.md)                       |
+| Component/UI conventions      | [ui/summary.md](ui/summary.md)                                         |
+| CSS pipeline & theming        | [ui/styling.md](ui/styling.md)                                         |
+| Product principles (3 clicks) | [product/three-clicks.md](product/three-clicks.md)                     |
+| Active TODOs                  | [plans/roadmap.md](plans/roadmap.md)                                   |
 
 Full index: [lode-map.md](lode-map.md)

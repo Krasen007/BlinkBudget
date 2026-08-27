@@ -4,11 +4,11 @@ Related: [../architecture/summary.md](../architecture/summary.md) · [../archite
 
 ## Two runtime modes (`config/app.config.js` + `firebase-config.js`)
 
-| Mode | Trigger | Behavior |
-| --- | --- | --- |
+| Mode          | Trigger                                          | Behavior                                                                               |
+| ------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------- |
 | **localMode** | zero `VITE_FIREBASE_*` env vars (and not `test`) | Firebase never initialized; auth + sync off; guard allows everything; dashboard direct |
-| **cloud** | all 7 vars present & valid | Auth + Firestore available; guard protects routes |
-| **test** | `MODE === 'test'` | mock firebase config, `validationPassed = true`, never forced into localMode |
+| **cloud**     | all 7 vars present & valid                       | Auth + Firestore available; guard protects routes                                      |
+| **test**      | `MODE === 'test'`                                | mock firebase config, `validationPassed = true`, never forced into localMode           |
 
 Validation: 7 required `VITE_FIREBASE_*` vars, `apiKey.length ≥ 20`, projectId matches `^[a-zA-Z0-9-]+$`. Invalid config in dev renders a full-screen config-error card. ⚠️ Changing Firebase configuration is an **ask-first** boundary.
 

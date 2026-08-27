@@ -12,17 +12,17 @@ Related: [summary.md](summary.md) · [../data/authentication.md](../data/authent
 
 ## Routes (`src/router/routes.js`)
 
-| Route | View | Load strategy |
-| --- | --- | --- |
-| `landing` | LandingView | lazy |
-| `dashboard` | DashboardView | **static** |
-| `add-expense` | AddView | **static** |
-| `edit-expense` | EditView | **static** |
-| `reports` | ReportsView | **static** |
-| `category-manager` | CustomCategoryManager (component!) | lazy |
-| `settings` | SettingsView | lazy |
-| `financial-planning` | FinancialPlanningView | lazy |
-| `login` | LoginView | lazy |
+| Route                | View                               | Load strategy |
+| -------------------- | ---------------------------------- | ------------- |
+| `landing`            | LandingView                        | lazy          |
+| `dashboard`          | DashboardView                      | **static**    |
+| `add-expense`        | AddView                            | **static**    |
+| `edit-expense`       | EditView                           | **static**    |
+| `reports`            | ReportsView                        | **static**    |
+| `category-manager`   | CustomCategoryManager (component!) | lazy          |
+| `settings`           | SettingsView                       | lazy          |
+| `financial-planning` | FinancialPlanningView              | lazy          |
+| `login`              | LoginView                          | lazy          |
 
 Every handler does the same three steps — keep that order in new routes:
 

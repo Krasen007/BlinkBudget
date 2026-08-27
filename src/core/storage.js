@@ -18,72 +18,11 @@ import { generateId } from '../utils/id-utils.js';
 export const StorageService = {
   // Utility
   generateId: () => generateId(),
-  // Serialized per-key push chains to avoid concurrent write races
-  _pushChains: new Map(),
 
-  // Safely push data to cloud with retries and per-key serialization.
-  // This method never throws and will emit a `sync-error` event on final failure.
+  // Retained alias: the retry/serialization funnel now lives in
+  // SyncService.pushToCloudSafe so every write path shares one contract.
   _pushToCloudSafe: function (key, data, retries = 3) {
-    const attemptPush = async () => {
-      let attempt = 0;
-      let delay = 500; // initial backoff
-      while (true) {
-        try {
-          await SyncService.pushToCloud(key, data);
-          return;
-        } catch (err) {
-          attempt += 1;
-          if (attempt > retries) {
-            console.error('[Storage] pushToCloud failed', key, err.code, err);
-            try {
-              localStorage.setItem(
-                'last_sync_error',
-                JSON.stringify({
-                  key,
-                  code: err.code || null,
-                  message: err.message || String(err),
-                  timestamp: new Date().toISOString(),
-                })
-              );
-            } catch {
-              /* ignore storage errors */
-            }
-            window.dispatchEvent(
-              new CustomEvent('sync-error', {
-                detail: {
-                  key,
-                  error:
-                    'Unable to sync — saved locally, will sync when online.',
-                },
-              })
-            );
-            window.dispatchEvent(
-              new CustomEvent('toast', {
-                detail: {
-                  message:
-                    'Unable to sync — saved locally, will sync when online.',
-                },
-              })
-            );
-            return;
-          }
-          // exponential backoff with jitter
-          const jitter = Math.floor(Math.random() * 200);
-          const wait = delay + jitter;
-          await new Promise(res => setTimeout(res, wait));
-          delay *= 2;
-        }
-      }
-    };
-
-    const chain = this._pushChains.get(key) || Promise.resolve();
-    const newChain = chain.then(() => attemptPush());
-    // keep chain but swallow final rejection so it doesn't break subsequent chains
-    this._pushChains.set(
-      key,
-      newChain.catch(() => {})
-    );
-    return newChain;
+    return SyncService.pushToCloudSafe(key, data, retries);
   },
 
   // --- Accounts (delegated to AccountService) ---

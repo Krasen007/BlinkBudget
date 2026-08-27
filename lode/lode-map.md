@@ -8,6 +8,7 @@ lode/
 ├── terminology.md                    # Domain language glossary
 ├── practices.md                      # Patterns & conventions (components, services, events, security, testing)
 ├── lode-map.md                       # ← this index
+├── systemprompt.md                   # The Lode Coding method itself (owner-provided reference)
 ├── architecture/
 │   ├── summary.md                    # Bootstrap order (main.js), module map, init contracts
 │   └── routing-and-views.md          # Hash Router, routes table, guard, ViewManager, lazy loading
@@ -27,13 +28,13 @@ lode/
 
 ## Suggested reading by task
 
-| Task | Files |
-| --- | --- |
-| New UI feature | [practices.md](practices.md) → [ui/summary.md](ui/summary.md) → [ui/styling.md](ui/styling.md) |
-| Data/storage change | [data/data-model.md](data/data-model.md) → [data/sync.md](data/sync.md) |
+| Task                | Files                                                                                                                     |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| New UI feature      | [practices.md](practices.md) → [ui/summary.md](ui/summary.md) → [ui/styling.md](ui/styling.md)                            |
+| Data/storage change | [data/data-model.md](data/data-model.md) → [data/sync.md](data/sync.md)                                                   |
 | Auth/routing change | [data/authentication.md](data/authentication.md) → [architecture/routing-and-views.md](architecture/routing-and-views.md) |
-| Performance work | [architecture/routing-and-views.md](architecture/routing-and-views.md) → [ui/styling.md](ui/styling.md) |
-| Product decision | [product/three-clicks.md](product/three-clicks.md) → [summary.md](summary.md) |
+| Performance work    | [architecture/routing-and-views.md](architecture/routing-and-views.md) → [ui/styling.md](ui/styling.md)                   |
+| Product decision    | [product/three-clicks.md](product/three-clicks.md) → [summary.md](summary.md)                                             |
 
 ## Non-lode docs (repo)
 

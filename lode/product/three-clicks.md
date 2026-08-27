@@ -6,7 +6,7 @@ Related: [../summary.md](../summary.md) · [../ui/summary.md](../ui/summary.md) 
 
 > **"Your 3-click habit builds a financial model that works for you."**
 
-Every transaction logged in 3 clicks feeds a personal financial engine that gets smarter over time. The advanced layer (budgets, forecasts, insights, investments) exists not as a separate dashboard but as the *reason the 3-click habit compounds* — each tap makes forecasts more accurate, budgets more relevant, insights more personal.
+Every transaction logged in 3 clicks feeds a personal financial engine that gets smarter over time. The advanced layer (budgets, forecasts, insights, investments) exists not as a separate dashboard but as the _reason the 3-click habit compounds_ — each tap makes forecasts more accurate, budgets more relevant, insights more personal.
 
 ## The feature filter (ask before building anything)
 
@@ -33,7 +33,8 @@ Users never see technical failure modes. Example: the `toast` bridge in `main.js
 
 ```js
 window.addEventListener('toast', e => {
-  const message = e.detail?.message ||
+  const message =
+    e.detail?.message ||
     'Unable to sync — saved locally, will sync when online.';
   import('./utils/toast-notifications.js')
     .then(({ showWarningToast }) => showWarningToast(message))

@@ -176,7 +176,7 @@ export const AccountService = {
   _persist(accounts, sync = true) {
     localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
     if (sync) {
-      SyncService.pushToCloud(ACCOUNTS_KEY, accounts);
+      SyncService.pushToCloudSafe(ACCOUNTS_KEY, accounts);
     }
   },
 

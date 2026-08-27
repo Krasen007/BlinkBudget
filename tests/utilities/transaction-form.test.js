@@ -12,6 +12,7 @@ vi.mock('../../src/core/auth-service.js', () => ({
 vi.mock('../../src/core/sync-service.js', () => ({
   SyncService: {
     pushToCloud: vi.fn(),
+    pushToCloudSafe: vi.fn(),
     pullFromCloud: vi.fn(),
   },
 }));

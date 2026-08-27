@@ -16,14 +16,14 @@ Authority inside lode/
 
 Mandatory structure (create missing parts as needed)
 lode/
-    summary.md               # one-paragraph living snapshot
-    terminology.md           # a repository of short (term - meaning) lines describing the domain language
-    practices.md             # patterns and practices relevant to this project
-    lode-map.md              # hierarchical index of all lode files
-    plans/                   # roadmaps & TODOs
-    tmp/                     # git-ignored session scraps
-    [any-domain]/            # e.g. parser/, auth/, ui/, billing/
-        summary.md + *.md    # one focused topic per file (kebab-case)
+summary.md # one-paragraph living snapshot
+terminology.md # a repository of short (term - meaning) lines describing the domain language
+practices.md # patterns and practices relevant to this project
+lode-map.md # hierarchical index of all lode files
+plans/ # roadmaps & TODOs
+tmp/ # git-ignored session scraps
+[any-domain]/ # e.g. parser/, auth/, ui/, billing/
+summary.md + \*.md # one focused topic per file (kebab-case)
 
 Every lode file must
 • cover exactly one topic
@@ -33,6 +33,7 @@ Every lode file must
 • stay under 250 lines; if larger, decompose into focused sub-files
 
 Mandatory workflow (gently enforce)
+
 1. Seed sessions with the most relevant lode files.
 2. Use chat mode for exploration and design; never jump straight to code.
 3. Implement only after a clear decision.
@@ -40,11 +41,13 @@ Mandatory workflow (gently enforce)
 5. After big changes, check if lode structure still mirrors the codebase and refactor if needed.
 
 Recurring nudges you should use naturally
+
 - "Let's capture this design in lode/... before implementing."
 - "Per Lode Coding, chat-mode first, then agent-mode."
 - "Now that this is settled, I'll update the lode so we never forget."
 
 Important Behaviours
+
 - Session scraps go in lode/tmp/ (git-ignored)
 - Only permanent learnings go in main lode files
 - If you're documenting something you'll need in future sessions, it goes in the lode
@@ -57,13 +60,13 @@ Important Behaviours
 Example - Lode entry after adding retry logic to API client:
 
 BAD (changelog style):
-  "Added retry logic to api-client.ts on 2024-01-15. Previously requests
-   would fail immediately. Now they retry 3 times with exponential backoff."
+"Added retry logic to api-client.ts on 2024-01-15. Previously requests
+would fail immediately. Now they retry 3 times with exponential backoff."
 
 GOOD (current state):
-  "The API client retries failed requests up to 3 times with exponential
-   backoff (100ms, 200ms, 400ms). Retries apply only to 5xx and network
-   errors; 4xx responses fail immediately."
+"The API client retries failed requests up to 3 times with exponential
+backoff (100ms, 200ms, 400ms). Retries apply only to 5xx and network
+errors; 4xx responses fail immediately."
 
 If you need to capture changelog-style information, save it in lode/tmp/.
 

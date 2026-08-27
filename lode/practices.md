@@ -10,8 +10,8 @@ No classes, no render methods, no frameworks.
 // ✅ src/components/Button.js pattern
 export const MyComponent = ({ label, onClick }) => {
   const el = document.createElement('button');
-  el.className = 'btn btn-primary';          // CSS classes, never inline static styles
-  el.textContent = label;                    // textContent = XSS-safe
+  el.className = 'btn btn-primary'; // CSS classes, never inline static styles
+  el.textContent = label; // textContent = XSS-safe
   el.onclick = onClick;
   return el;
 };
@@ -22,7 +22,8 @@ export const MyComponent = ({ label, onClick }) => {
 ## 2. Services are object literals; Router is the one class
 
 ```js
-export const SettingsService = {           // object literal, one STORAGE_KEY slice
+export const SettingsService = {
+  // object literal, one STORAGE_KEY slice
   saveSetting(key, value) {
     /* read → merge → localStorage → SyncService.pushToCloud → dispatch 'storage-updated' */
   },
@@ -46,9 +47,11 @@ flowchart LR
 ```
 
 ```js
-// StorageService._pushToCloudSafe — the retry contract
+// SyncService.pushToCloudSafe — the retry contract; single funnel for ALL synced writes
+// (Transaction/Settings/Account/CustomCategory services + StorageService bridge alias)
 // 3 retries · 500ms backoff ×2 + ≤200ms jitter · per-key serialized chains (_pushChains Map)
 // NEVER throws; on final failure writes last_sync_error and emits sync-error + toast.
+// pushToCloud() never rejects today (errors handled inside _executePush) — retries are a safety net.
 ```
 
 **Invariant:** a failed sync must never fail the user's local save. Offline/failed push = toast + `last_sync_error`, nothing else.

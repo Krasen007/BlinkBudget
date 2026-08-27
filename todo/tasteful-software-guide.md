@@ -29,6 +29,7 @@ Taste is the ability to make good decisions about what to include and what to ex
 - **DO** make choices that serve a coherent point of view about the problem domain
 - **DO** accumulate value over time through consistent, opinionated decisions
 - **DO** find the right amount - the mean between extremes (Aristotle's principle of calibration)
+- **DO** treat taste as dynamic - a point of view compounds through deliberate refinement
 
 ### Execution
 
@@ -67,7 +68,7 @@ Taste is the ability to make good decisions about what to include and what to ex
 - **DON'T** rely on stated preferences alone - users can't describe what doesn't exist yet
 - **DON'T** optimize for local maxima through A/B testing without a coherent vision
 - **DON'T** make decisions based solely on available data points
-- **DON'T** backward-looking - don't just compress the past, imagine a better future
+- **DON'T** be backward-looking - don't just compress the past, imagine a better future
 - **DON'T** defer taste decisions to "later" - every default and omission is a taste decision
 - **DON'T** separate aesthetics from function - taste is not a coat of paint
 - **DON'T** build without a point of view about how the product should work
@@ -81,7 +82,6 @@ Taste is the ability to make good decisions about what to include and what to ex
 - **DON'T** add complexity that doesn't serve a clear purpose
 - **DON'T** build without understanding the full context of user workflow
 - **DON'T** replicate patterns without considering if they belong
-- **DON'T** treat taste as static - a point of view compounds
 
 ### Product Shape
 
@@ -104,6 +104,27 @@ Before building or adding anything, ask:
 6. **Unarticulated Need**: Does this serve something users can't articulate but will recognize when they experience it?
 
 If you cannot answer these questions clearly and affirmatively, do not build it.
+
+---
+
+## When Taste Says Yes
+
+Taste is not a synonym for restraint. Sometimes the right decision is a bold, contrarian bet that rejects the available data because the team's model of the user is stronger than what the data can yet show.
+
+- **DO** make the contrarian bet when your model of the user is stronger than the available data
+- **DO** distinguish between removing something because it is noise and removing it because you are afraid to commit
+- **DO** use subtraction to serve a point of view; minimalism without a point of view is just emptiness
+
+The goal is not to remove as much as possible. The goal is to make the fewest choices necessary to express a clear belief about what users need.
+
+---
+
+## Failure Modes and Escape Hatches
+
+When the taste test is ambiguous, use these defaults:
+
+- **Default to omission**: When uncertain, don't build it - features are easy to add and hard to remove
+- **Reversibility test**: Prefer decisions that are cheap to reverse when your taste might be wrong
 
 ---
 
@@ -132,6 +153,12 @@ If you cannot answer these questions clearly and affirmatively, do not build it.
 - Optimizing for stated preferences without a theory of what users actually need
 - A/B testing to local maxima without coherent direction
 - Backward-looking design that compresses the past rather than imagining a better future
+
+### The Everything Machine
+
+- Building every plausible feature because the team can, without deciding what the product is for
+- Treating an ever-expanding roadmap as evidence of ambition or completeness
+- Team A behavior: optimizing for visible activity and feature count instead of a coherent user experience
 
 ---
 

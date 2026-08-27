@@ -4,17 +4,17 @@ Related: [sync.md](sync.md) · [../practices.md](../practices.md) · [../termino
 
 ## Storage keys (`src/utils/constants.js` → `STORAGE_KEYS`)
 
-| Key | Contents |
-| --- | --- |
-| `blinkbudget_transactions` | transactions array |
-| `blinkbudget_accounts` | accounts array |
-| `custom_categories` | custom/flag categories |
-| `blink_settings` | settings object |
-| `blinkbudget_investments` | investments |
-| `blinkbudget_goals` | savings goals |
-| `blinkbudget_budgets` | category budgets |
-| `dashboard_filter`, `dashboard_date_filter`, `dashboard_category_filter`, `dashboard_tag_filter`, `dashboard_month_filter` | dashboard UI state |
-| `blinkbudget_click_tracking` | 3-click telemetry |
+| Key                                                                                                                        | Contents               |
+| -------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `blinkbudget_transactions`                                                                                                 | transactions array     |
+| `blinkbudget_accounts`                                                                                                     | accounts array         |
+| `custom_categories`                                                                                                        | custom/flag categories |
+| `blink_settings`                                                                                                           | settings object        |
+| `blinkbudget_investments`                                                                                                  | investments            |
+| `blinkbudget_goals`                                                                                                        | savings goals          |
+| `blinkbudget_budgets`                                                                                                      | category budgets       |
+| `dashboard_filter`, `dashboard_date_filter`, `dashboard_category_filter`, `dashboard_tag_filter`, `dashboard_month_filter` | dashboard UI state     |
+| `blinkbudget_click_tracking`                                                                                               | 3-click telemetry      |
 
 Other keys: `auth_hint`, `last_sync_error`, `last_auth_error`, `blinkbudget-version`.
 
@@ -37,8 +37,6 @@ Other keys: `auth_hint`, `last_sync_error`, `last_auth_error`, `blinkbudget-vers
 }
 ```
 
-⚠️ Note: `AGENTS.md` lists three transaction types; **code is truth** — `TRANSACTION_TYPES` in `constants.js` also defines `refund`. Confirm with the user before "fixing" either side.
-
 Custom category: `{ id, name, type: 'expense', color, showAsCheckbox }` — `showAsCheckbox: true` = flag category rendered as checkbox, stored as a transaction **tag**. Renaming/deleting a flag cascades via `TransactionService.renameTagOnAllTransactions / removeTagFromAllTransactions`.
 
 Settings: `{ lastBackupDate, lastBackupDataAsOf, showQuickPresets }` defaults merged over stored object (`SettingsService.getAllSettings`), plus `dateFormat`/`theme` per AGENTS.md.
@@ -56,7 +54,7 @@ flowchart LR
     B --> BS[BudgetService<br/>blinkbudget_budgets]
     B --> GP[GoalPlanner<br/>blinkbudget_goals]
     B --> IT[InvestmentTracker<br/>blinkbudget_investments]
-    TS --> SYNC[SyncService.pushToCloud]
+    TS --> SYNC[SyncService.pushToCloudSafe]
     AS --> SYNC
     SS --> SYNC
     BS --> SYNC
@@ -71,7 +69,7 @@ flowchart LR
 - `getAll()` **migrates on read**: transactions missing `accountId` get the default account's id, then persist+sync.
 - `add()` stamps `id/timestamp/createdAt/updatedAt/userId`, sanitizes via `PrivacyService.sanitizeDataForStorage(t, 'transaction')`, `unshift`s (newest first), and records expense amounts into the analytics engine for quick presets.
 - `copy(id)` strips id/audit/ghost fields, fresh timestamp. `split(id, a, b)` replaces one tx with two. `clear()` wipes + syncs.
-- `_persist(arr, sync=true)`: `localStorage.setItem` → optional `pushToCloud` → **always** dispatch `storage-updated {key}`.
+- `_persist(arr, sync=true)`: `localStorage.setItem` → optional `SyncService.pushToCloudSafe` → **always** dispatch `storage-updated {key}`.
 
 ## Invariants
 
