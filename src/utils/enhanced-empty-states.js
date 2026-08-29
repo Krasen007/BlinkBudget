@@ -23,10 +23,11 @@ export const EMPTY_STATE_SCENARIOS = {
  */
 const EMPTY_STATE_ICONS = {
   [EMPTY_STATE_SCENARIOS.NO_TRANSACTIONS]: {
-    emoji: '📊',
+    emoji: '💰',
     svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M3 3v18h18"/>
-      <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
+      <circle cx="12" cy="12" r="9"/>
+      <path d="M14.8 9A2 2 0 0 0 13 8h-2a2 2 0 0 0 0 4h2a2 2 0 0 1 0 4h-2a2 2 0 0 1-1.8-1"/>
+      <path d="M12 6v2m0 8v2"/>
     </svg>`,
   },
   [EMPTY_STATE_SCENARIOS.NO_TRANSACTIONS_PERIOD]: {
@@ -68,9 +69,9 @@ const EMPTY_STATE_ICONS = {
  */
 const EMPTY_STATE_CONTENT = {
   [EMPTY_STATE_SCENARIOS.NO_TRANSACTIONS]: {
-    title: 'No Transactions Yet',
+    title: 'Start Tracking Your Spending',
     message:
-      'Start tracking your expenses to see beautiful insights about your spending patterns.',
+      'Add your first transaction to see your money story unfold. It only takes 3 clicks.',
     primaryAction: {
       text: 'Add Your First Transaction',
       action: 'add-transaction',

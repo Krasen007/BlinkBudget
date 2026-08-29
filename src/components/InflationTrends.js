@@ -5,13 +5,11 @@
  * Shows how individual prices are changing over time for the user.
  * Includes actionable suggestions based on inflation analysis.
  *
- * Features:
- * - Chart type toggle (line vs bar)
- * - Calculation method toggle (average vs median)
- * - Time period selector (1, 3, 6, 12 months)
- * - Visual trend indicators
- * - Personal inflation rate with category breakdown
- * - Actionable suggestions to offset inflation
+ * Design:
+ * - Statistical default: Median (outlier-resistant)
+ * - Time window: 6 months
+ * - Visualization: Trend line
+ * - Zero toggles (tasteful defaults)
  */
 
 import {
@@ -34,21 +32,12 @@ export const InflationTrends = (
 
   const instanceId = generateId();
 
-  // State management
-  let currentChartType = 'line';
-  let currentCalcMethod = 'average';
-  let currentPeriod = 6;
+  // Tasteful defaults: median (statistically robust), 6 months, line chart
+  const currentChartType = 'line';
+  const currentCalcMethod = 'median';
+  const currentPeriod = 6;
   let currentChart = null;
   let renderVersion = 0;
-
-  // Chart type toggle
-  const chartTypeSelector = createChartTypeSelector(instanceId);
-
-  // Calculation method toggle
-  const calcMethodSelector = createCalcMethodSelector(instanceId);
-
-  // Time period selector
-  const periodSelector = createPeriodSelector();
 
   // Chart container
   const chartContainer = document.createElement('div');
@@ -269,7 +258,6 @@ export const InflationTrends = (
         : endOfPreviousMonth; // End of previous month to exclude current incomplete month
 
       // Ensure reference date never includes current incomplete month
-      // If the calculated reference date is in the current month, use end of previous month instead
       if (
         referenceDate.getMonth() === now.getMonth() &&
         referenceDate.getFullYear() === now.getFullYear()
@@ -314,12 +302,14 @@ export const InflationTrends = (
         borderColor: dataset.borderColor,
         borderWidth: 2,
         tension: 0.4,
-        fill: currentChartType === 'line' ? false : true,
+        fill: false,
       }));
 
-      const newChart = await chartRenderer[
-        `create${currentChartType === 'line' ? 'Line' : 'Bar'}Chart`
-      ](canvas, { labels, datasets }, getChartOptions(currentChartType));
+      const newChart = await chartRenderer.createLineChart(
+        canvas,
+        { labels, datasets },
+        getChartOptions(currentChartType)
+      );
 
       if (myVersion !== renderVersion) {
         if (newChart) chartRenderer.destroyChart(newChart);
@@ -448,7 +438,7 @@ export const InflationTrends = (
     container.appendChild(wrapper);
   };
 
-  // Header with title and controls
+  // Header with title
   const header = document.createElement('div');
   header.className = 'inflation-header';
 
@@ -457,57 +447,8 @@ export const InflationTrends = (
   title.className = 'inflation-title';
   header.appendChild(title);
 
-  const controls = document.createElement('div');
-  controls.className = 'inflation-controls';
-
-  // Group 1: Data View (Type & Method)
-  const viewGroup = document.createElement('div');
-  viewGroup.className = 'selector-group';
-  viewGroup.appendChild(chartTypeSelector);
-  viewGroup.appendChild(calcMethodSelector);
-
-  // Group 2: Time period
-  const timeGroup = document.createElement('div');
-  timeGroup.className = 'selector-group';
-  timeGroup.appendChild(periodSelector);
-
-  controls.appendChild(viewGroup);
-  controls.appendChild(timeGroup);
-
-  // Handle changes - store listener functions for cleanup
-  const handleChartTypeChange = e => {
-    if (e.target.tagName === 'INPUT') {
-      currentChartType = e.target.value;
-      renderChart();
-    }
-  };
-
-  const handleCalcMethodChange = e => {
-    if (e.target.tagName === 'INPUT') {
-      currentCalcMethod = e.target.value;
-      renderChart();
-    }
-  };
-
-  const handlePeriodClick = e => {
-    const btn = e.target.closest('button');
-    if (btn) {
-      periodSelector
-        .querySelectorAll('button')
-        .forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentPeriod = parseInt(btn.value, 10);
-      renderChart();
-    }
-  };
-
-  chartTypeSelector.addEventListener('change', handleChartTypeChange);
-  calcMethodSelector.addEventListener('change', handleCalcMethodChange);
-  periodSelector.addEventListener('click', handlePeriodClick);
-
   // Assemble component
   container.appendChild(header);
-  container.appendChild(controls);
   container.appendChild(inflationSummaryContainer);
   container.appendChild(chartContainer);
 
@@ -523,96 +464,6 @@ export const InflationTrends = (
         chartRenderer.destroyChart(currentChart);
         activeCharts.delete(instanceId);
       }
-      chartTypeSelector.removeEventListener('change', handleChartTypeChange);
-      calcMethodSelector.removeEventListener('change', handleCalcMethodChange);
-      periodSelector.removeEventListener('click', handlePeriodClick);
     },
   };
-};
-
-/**
- * Create chart type selector
- */
-const createChartTypeSelector = instanceId => {
-  const container = document.createElement('div');
-  container.className = 'chart-type-selector segmented-control';
-
-  const types = [
-    { value: 'line', label: 'Trend Line' },
-    { value: 'bar', label: 'Monthly Bars' },
-  ];
-
-  types.forEach(type => {
-    const wrapper = document.createElement('label');
-    wrapper.className = 'radio-wrapper';
-
-    const input = document.createElement('input');
-    input.type = 'radio';
-    input.name = `inflation-chart-type-${instanceId}`;
-    input.value = type.value;
-    input.checked = type.value === 'line';
-
-    const span = document.createElement('span');
-    span.textContent = type.label;
-
-    wrapper.append(input, span);
-    container.appendChild(wrapper);
-  });
-
-  return container;
-};
-
-/**
- * Create calculation method selector
- */
-const createCalcMethodSelector = instanceId => {
-  const container = document.createElement('div');
-  container.className = 'calc-method-selector segmented-control';
-
-  const methods = [{ value: 'average', label: 'Average' }];
-
-  methods.forEach(method => {
-    const wrapper = document.createElement('label');
-    wrapper.className = 'radio-wrapper';
-
-    const input = document.createElement('input');
-    input.type = 'radio';
-    input.name = `inflation-calc-method-${instanceId}`;
-    input.value = method.value;
-    input.checked = method.value === 'average';
-
-    const span = document.createElement('span');
-    span.textContent = method.label;
-
-    wrapper.append(input, span);
-    container.appendChild(wrapper);
-  });
-
-  return container;
-};
-
-/**
- * Create period selector
- */
-const createPeriodSelector = () => {
-  const container = document.createElement('div');
-  container.className = 'period-selector segmented-control';
-
-  const periods = [
-    { value: 3, label: '3 months' },
-    { value: 6, label: '6 months' },
-    { value: 12, label: '12 months' },
-  ];
-
-  periods.forEach(period => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.textContent = period.label;
-    button.value = period.value;
-    button.className = period.value === 6 ? 'active' : '';
-
-    container.appendChild(button);
-  });
-
-  return container;
 };

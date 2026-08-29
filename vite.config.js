@@ -15,6 +15,15 @@ import cssnano from 'cssnano';
 
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
 
+// This workspace is reached through a symlink (C:\Users\krase\repos → F:\AI\repos).
+// Vitest's native module evaluator converts rooted module ids (e.g. /tests/setup.js)
+// to file URLs against the process CWD; when CWD is on C: but the project realpaths
+// to F:, those ids resolve to a nonexistent C:\... location and every suite fails
+// with "Cannot find module '/tests/setup.js'". Aligning the process CWD with the
+// physical project location keeps CWD, root and module ids consistent. It is a
+// no-op on machines where the workspace is not a symlink.
+process.chdir(fs.realpathSync(process.cwd()));
+
 export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(packageJson.version),
@@ -227,6 +236,11 @@ export default defineConfig({
     devSourcemap: true,
   },
   test: {
+    // Run vitest at the workspace's physical location. This workspace is
+    // reached through a symlink (C:\Users\krase\repos → F:\AI\repos); without
+    // this, setup files realpath to F:\ while the root stays on C:\, producing
+    // /@fs/F:/... module ids that the vitest module runner cannot load.
+    root: fs.realpathSync(process.cwd()),
     environment: 'jsdom',
     globals: true,
     watch: false,

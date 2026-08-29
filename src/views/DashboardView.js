@@ -150,16 +150,27 @@ export const DashboardView = (params = {}) => {
   titleContainer.className = 'flex-center flex-gap-xs';
 
   const title = document.createElement('h2');
+  let currentUser = AuthService.user;
   const updateTitle = userObj => {
-    const u = userObj || AuthService.user;
+    if (userObj !== undefined) {
+      currentUser = userObj;
+    }
+    const u = currentUser || AuthService.user;
     const name = u?.displayName || u?.email?.split('@')[0];
     /* global __APP_VERSION__ */
     const version =
       typeof __APP_VERSION__ !== 'undefined' ? ` v${__APP_VERSION__}` : '';
 
-    title.textContent = name
-      ? `Hi, ${name}!${version}`
-      : `Welcome back!${version}`;
+    const hasTransactions = TransactionService.getAll().length > 0;
+    if (!hasTransactions) {
+      title.textContent = name
+        ? `Welcome to BlinkBudget, ${name}!${version}`
+        : `Welcome to BlinkBudget!${version}`;
+    } else {
+      title.textContent = name
+        ? `Hi, ${name}!${version}`
+        : `Welcome back!${version}`;
+    }
   };
   updateTitle();
   titleContainer.appendChild(title);
@@ -506,6 +517,7 @@ export const DashboardView = (params = {}) => {
   const renderDashboard = () => {
     // Security: Clearing content, no user input involved
     content.innerHTML = '';
+    updateTitle();
 
     // Always get fresh data
     const allTransactions = TransactionService.getAll();
