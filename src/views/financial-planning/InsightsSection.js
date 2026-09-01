@@ -51,7 +51,12 @@ function createTopMoversSection(
   topContainer.className = 'insights-top-movers';
   topContainer.style.display = 'flex';
   topContainer.style.flexDirection = 'column';
-  topContainer.style.gap = SPACING.MD;
+  topContainer.style.gap = SPACING.SM;
+  topContainer.style.background = 'var(--color-surface)';
+  topContainer.style.borderRadius = 'var(--radius-md)';
+  topContainer.style.padding = SPACING.SM;
+  topContainer.style.margin = `${SPACING.SM} 0`;
+  topContainer.style.border = '1px solid var(--color-border)';
 
   function getMonthData(offset) {
     const now = new Date();
@@ -124,7 +129,7 @@ function createTopMoversSection(
     // Chart for Top Movers
     const topChartDiv = document.createElement('div');
     topChartDiv.className = 'top-movers-chart';
-    topChartDiv.style.marginTop = SPACING.MD;
+    topChartDiv.style.marginTop = SPACING.SM;
     topChartDiv.style.position = 'relative';
     topChartDiv.style.height = '220px';
     const topCanvas = document.createElement('canvas');
@@ -158,7 +163,7 @@ function createTopMoversSection(
   topHeader.style.display = 'flex';
   topHeader.style.justifyContent = 'space-between';
   topHeader.style.alignItems = 'center';
-  topHeader.style.marginBottom = SPACING.MD;
+  topHeader.style.marginBottom = SPACING.SM;
 
   const topTitle = document.createElement('h3');
   topTitle.textContent = 'Top Movers';
@@ -242,6 +247,11 @@ function createTimelineSection(
   sharedMonthState
 ) {
   const timelineDiv = document.createElement('div');
+  timelineDiv.style.background = 'var(--color-surface)';
+  timelineDiv.style.borderRadius = 'var(--radius-md)';
+  timelineDiv.style.padding = SPACING.MD;
+  timelineDiv.style.margin = `${SPACING.MD} 0`;
+  timelineDiv.style.border = '1px solid var(--color-border)';
   timelineDiv.style.marginTop = SPACING.LG;
 
   const timelineHeader = document.createElement('div');

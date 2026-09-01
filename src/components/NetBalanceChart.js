@@ -148,10 +148,12 @@ export async function createNetBalanceChart() {
   const section = document.createElement('div');
   section.className = 'chart-section net-balance-chart-section';
   section.setAttribute('data-chart-type', 'net-balance');
-  section.style.background = COLORS.SURFACE;
-  section.style.borderRadius = 'var(--radius-lg)';
+  section.style.background = 'var(--color-surface)';
+  section.style.borderRadius = 'var(--radius-md)';
   section.style.padding = SPACING.MD;
   section.style.marginTop = SPACING.LG;
+  section.style.marginBottom = SPACING.MD;
+  section.style.border = '1px solid var(--color-border)';
 
   // Section header
   const header = document.createElement('div');
