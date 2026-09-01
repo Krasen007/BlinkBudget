@@ -1,29 +1,20 @@
 # Changelog
 
-## [1.47.0] - 2026-08-22
+## [1.49.0] - 2026-09-01
 
 ### Added
 
-- **Change Date in Bulk Edit** - You can now reschedule multiple selected transactions at once from the bulk edit menu
-- **Edit Highlight Animation** - Edited transactions briefly pulse green so you can instantly spot what just changed
+- **Undo for Deleted Transactions** - Accidentally deleted a transaction? An undo toast appears at the bottom of the screen, giving you a chance to restore it. Works for both single deletions and bulk deletions.
 
 ### Fixed
 
-- **Notes Now Save on New Transactions** - Notes typed while adding a transaction were silently discarded; they now persist exactly like they do when editing
-- **Dashboard Account Filter Self-Heals** - If the selected account is deleted, the filter automatically resets to "All Accounts", keeping the displayed account name and balance in sync
-- **Savings Goals** - Several goal-related bugs fixed
-- **Empty States** - Empty-state screens now use the correct background color
-- **Highlighting** - Fixed transaction highlight behavior in the list
+- **Toast Position** - Undo toast now appears at the bottom of the screen for better visibility and accessibility
+- **Firestore Error Messages** - Raw `firestore/*` error messages are no longer shown to users
+- **Category Label Mutation** - Fixed a bug where category labels could be accidentally mutated
+- **UI Fixes** - Multiple UI fixes and polish across the application
+- **General Bug Fixes** - Various stability improvements
 
 ### Changed
 
-- **Goal Edit Form Layout** - Field labels now sit beside their inputs again, restoring the compact inline form instead of tall stacked fields
-
-### Security & Maintenance
-
-- CI workflows now target the main branch and pin GitHub Actions to immutable commit SHAs
-- Security hardening (G1) and reconciled security documentation claims
-- Dashboard filters are persisted only after a transaction is successfully saved
-- Safer rollback handling when moving transaction dates creates ghost entries
-- Corrected financial-planning formula descriptions
-- Test logic updates and lint/format cleanup
+- **Cloud Sync Reliability** - All domain services now use `pushToCloudSafe` for safer and more reliable cloud synchronization
+- **Code Quality** - Refactored code following best practices and removed duplicate subsystems
