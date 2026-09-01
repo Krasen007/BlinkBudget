@@ -1,21 +1,24 @@
 /**
  * Inflation Trends Component Styles (Optimized)
  *
+ * The main container follows the shared NetBalanceChart card pattern
+ * (surface background, MD padding/gaps, 1px border) applied inline in JS.
  * Reuses global patterns from ui.css:
- * - .card: For the main container
- * - .segmented-control: For chart toggles and periods
+ * - .segmented-control: For chart toggles and periods (controls are no longer rendered — kept for reuse)
  * - .badge: For trend indicators
  */
 
 .inflation-trends {
-  margin: var(--spacing-lg) 0;
+  /* Keep CSS in sync with the JS inline card style — a single shared pattern
+     with NetBalanceChart / Top Movers / Timeline cards (MD spacing). */
+  margin: var(--spacing-md) 0;
 }
 
 .inflation-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
   flex-wrap: wrap;
   gap: var(--spacing-md);
 }
@@ -52,7 +55,10 @@
   height: 300px;
   margin: var(--spacing-md) 0;
   position: relative;
-  background: var(--color-background);
+  /* Match the card surface so the chart area looks identical to the other
+     insights cards (NetBalanceChart, Top Movers, Timeline) — which show
+     var(--color-surface) behind their canvases. */
+  background: var(--color-surface);
   border-radius: var(--radius-md);
   overflow: hidden;
   display: flex;

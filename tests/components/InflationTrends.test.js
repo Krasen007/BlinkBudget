@@ -42,10 +42,12 @@ describe('InflationTrends Component', () => {
       trendService,
       'calculateCategoryInflation'
     );
-    const personalInflationSpy = vi.spyOn(
-      trendService,
-      'calculatePersonalInflation'
-    );
+    // NOTE: The UI-level personal inflation summary that called
+    // trendService.calculatePersonalInflation was removed in the "ui fixes"
+    // cleanup. Personal inflation is now computed per-category inside
+    // prepareChartData (via calculateCategoryInflation) and shown in the
+    // dataset labels as "X% personal inflation", so there is no
+    // calculatePersonalInflation collaborator to assert here.
 
     const transactions = [];
     const now = new Date();
@@ -82,7 +84,6 @@ describe('InflationTrends Component', () => {
       'median',
       expect.any(Date)
     );
-    expect(personalInflationSpy).toHaveBeenCalledWith(expect.anything(), 6);
 
     // Assert 6 months of data labels are present
     expect(chartData.labels).toHaveLength(6);

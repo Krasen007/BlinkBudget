@@ -51,11 +51,12 @@ function createTopMoversSection(
   topContainer.className = 'insights-top-movers';
   topContainer.style.display = 'flex';
   topContainer.style.flexDirection = 'column';
-  topContainer.style.gap = SPACING.SM;
   topContainer.style.background = 'var(--color-surface)';
   topContainer.style.borderRadius = 'var(--radius-md)';
-  topContainer.style.padding = SPACING.SM;
-  topContainer.style.margin = `${SPACING.SM} 0`;
+  topContainer.style.padding = SPACING.MD;
+  topContainer.style.marginTop = SPACING.MD;
+  topContainer.style.marginBottom = SPACING.MD;
+  topContainer.style.gap = SPACING.MD;
   topContainer.style.border = '1px solid var(--color-border)';
 
   function getMonthData(offset) {
@@ -129,7 +130,7 @@ function createTopMoversSection(
     // Chart for Top Movers
     const topChartDiv = document.createElement('div');
     topChartDiv.className = 'top-movers-chart';
-    topChartDiv.style.marginTop = SPACING.SM;
+    topChartDiv.style.marginTop = SPACING.MD;
     topChartDiv.style.position = 'relative';
     topChartDiv.style.height = '220px';
     const topCanvas = document.createElement('canvas');
@@ -163,14 +164,24 @@ function createTopMoversSection(
   topHeader.style.display = 'flex';
   topHeader.style.justifyContent = 'space-between';
   topHeader.style.alignItems = 'center';
-  topHeader.style.marginBottom = SPACING.SM;
+  topHeader.style.marginBottom = SPACING.MD;
+
+  const topTitleWrapper = document.createElement('div');
 
   const topTitle = document.createElement('h3');
   topTitle.textContent = 'Top Movers';
-  topTitle.style.margin = '0';
-  topTitle.style.fontSize = '1rem';
-  topTitle.style.fontWeight = '600';
-  topHeader.appendChild(topTitle);
+  topTitle.style.margin = '0 0 4px 0';
+  topTitle.style.color = COLORS.TEXT_MAIN;
+
+  const topSubtitle = document.createElement('p');
+  topSubtitle.textContent = 'Categories with the highest spending this month';
+  topSubtitle.style.margin = '0';
+  topSubtitle.style.fontSize = '0.8125rem';
+  topSubtitle.style.color = COLORS.TEXT_MUTED;
+
+  topTitleWrapper.appendChild(topTitle);
+  topTitleWrapper.appendChild(topSubtitle);
+  topHeader.appendChild(topTitleWrapper);
 
   // Navigation button (single combined button)
   const navButton = document.createElement('div');
@@ -181,7 +192,7 @@ function createTopMoversSection(
   const prevBtn = document.createElement('button');
   prevBtn.className = 'top-movers-prev-btn';
   prevBtn.textContent = '← Previous';
-  prevBtn.style.padding = '6px 12px';
+  prevBtn.style.padding = `${SPACING.SM} ${SPACING.MD}`;
   prevBtn.style.fontSize = '0.85rem';
   prevBtn.style.border = `1px solid ${COLORS.BORDER}`;
   prevBtn.style.background = COLORS.SURFACE;
@@ -204,7 +215,7 @@ function createTopMoversSection(
   const nextBtn = document.createElement('button');
   nextBtn.className = 'top-movers-next-btn';
   nextBtn.textContent = 'Next →';
-  nextBtn.style.padding = '6px 12px';
+  nextBtn.style.padding = `${SPACING.SM} ${SPACING.MD}`;
   nextBtn.style.fontSize = '0.85rem';
   nextBtn.style.border = `1px solid ${COLORS.BORDER}`;
   nextBtn.style.background = COLORS.SURFACE;
@@ -252,7 +263,10 @@ function createTimelineSection(
   timelineDiv.style.padding = SPACING.MD;
   timelineDiv.style.margin = `${SPACING.MD} 0`;
   timelineDiv.style.border = '1px solid var(--color-border)';
-  timelineDiv.style.marginTop = SPACING.LG;
+  timelineDiv.style.gap = SPACING.MD;
+  timelineDiv.style.display = 'flex';
+  timelineDiv.style.flexDirection = 'column';
+  timelineDiv.style.marginTop = SPACING.MD;
 
   const timelineHeader = document.createElement('div');
   timelineHeader.style.display = 'flex';
@@ -260,12 +274,22 @@ function createTimelineSection(
   timelineHeader.style.alignItems = 'center';
   timelineHeader.style.marginBottom = SPACING.MD;
 
+  const timelineTitleWrapper = document.createElement('div');
+
   const timelineTitle = document.createElement('h3');
   timelineTitle.textContent = 'Daily Expenses';
-  timelineTitle.style.margin = '0';
-  timelineTitle.style.fontSize = '1rem';
-  timelineTitle.style.fontWeight = '600';
-  timelineHeader.appendChild(timelineTitle);
+  timelineTitle.style.margin = '0 0 4px 0';
+  timelineTitle.style.color = COLORS.TEXT_MAIN;
+
+  const timelineSubtitle = document.createElement('p');
+  timelineSubtitle.textContent = 'Track your daily spending patterns over time';
+  timelineSubtitle.style.margin = '0';
+  timelineSubtitle.style.fontSize = '0.8125rem';
+  timelineSubtitle.style.color = COLORS.TEXT_MUTED;
+
+  timelineTitleWrapper.appendChild(timelineTitle);
+  timelineTitleWrapper.appendChild(timelineSubtitle);
+  timelineHeader.appendChild(timelineTitleWrapper);
 
   let isRendering = false; // Prevent double rendering
 

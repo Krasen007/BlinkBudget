@@ -151,8 +151,9 @@ export async function createNetBalanceChart() {
   section.style.background = 'var(--color-surface)';
   section.style.borderRadius = 'var(--radius-md)';
   section.style.padding = SPACING.MD;
-  section.style.marginTop = SPACING.LG;
+  section.style.marginTop = SPACING.MD;
   section.style.marginBottom = SPACING.MD;
+  section.style.gap = SPACING.MD;
   section.style.border = '1px solid var(--color-border)';
 
   // Section header

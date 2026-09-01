@@ -102,12 +102,12 @@ export const ProgressiveEmptyState = ({
   Object.assign(container.style, {
     display: 'flex',
     flexDirection: 'column',
-    gap: spaceSm,
+    gap: spaceMd,
     padding: spaceMd,
     backgroundColor: colorSurface,
-    borderRadius: '8px',
+    borderRadius: 'var(--radius-md)',
     border: `1px solid ${colorBorder}`,
-    margin: `${spaceSm} 0`,
+    margin: `${spaceMd} 0`,
   });
 
   // Top Row: Icon + Title + Progress Badge
