@@ -101,9 +101,6 @@ export const BudgetSuggestion = (suggestion, handlers) => {
     variant: 'primary',
   });
   acceptBtn.style.flex = '2';
-  // Use category color for primary action
-  acceptBtn.style.backgroundColor = getColorForCategory(category);
-  acceptBtn.style.borderColor = getColorForCategory(category);
 
   actions.appendChild(adjustBtn);
   actions.appendChild(acceptBtn);

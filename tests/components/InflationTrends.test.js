@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { InflationTrends } from '../../src/components/InflationTrends.js';
+import { trendService } from '../../src/core/analytics/TrendService.js';
 
 describe('InflationTrends Component', () => {
   let mockChartRenderer;
@@ -37,16 +38,21 @@ describe('InflationTrends Component', () => {
   });
 
   it('renders line chart using 6-month median data when sufficient transactions exist', async () => {
+    const categoryInflationSpy = vi.spyOn(
+      trendService,
+      'calculateCategoryInflation'
+    );
+    const personalInflationSpy = vi.spyOn(
+      trendService,
+      'calculatePersonalInflation'
+    );
+
     const transactions = [];
     const now = new Date();
-    const endOfPreviousMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-    const baseDate = new Date(endOfPreviousMonth);
-    baseDate.setMonth(endOfPreviousMonth.getMonth() - 5);
 
     for (let month = 0; month < 6; month++) {
+      const date = new Date(now.getFullYear(), now.getMonth() - 6 + month, 1);
       for (let i = 0; i < 6; i++) {
-        const date = new Date(baseDate);
-        date.setMonth(baseDate.getMonth() + month);
         transactions.push({
           id: `tx-${month}-${i}`,
           amount: 50 + month * 5,
@@ -60,9 +66,27 @@ describe('InflationTrends Component', () => {
     const data = { transactions };
     const component = InflationTrends(data, mockChartRenderer, activeCharts);
 
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await component.render();
 
     expect(mockChartRenderer.createLineChart).toHaveBeenCalled();
+    const [, chartData] = mockChartRenderer.createLineChart.mock.calls[0];
+
+    // Assert final renderer input uses fill: false
+    expect(chartData.datasets[0].fill).toBe(false);
+
+    // Assert collaborator was called requesting 6-month period and median calculation method
+    expect(categoryInflationSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      'Groceries',
+      6,
+      'median',
+      expect.any(Date)
+    );
+    expect(personalInflationSpy).toHaveBeenCalledWith(expect.anything(), 6);
+
+    // Assert 6 months of data labels are present
+    expect(chartData.labels).toHaveLength(6);
+
     component.cleanup();
   });
 });

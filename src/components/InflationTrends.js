@@ -139,53 +139,6 @@ export const InflationTrends = (
     header.appendChild(title);
     inflationSummaryContainer.appendChild(header);
 
-    // Top drivers section
-    if (inflationData.topDrivers && inflationData.topDrivers.length > 0) {
-      const driversSection = document.createElement('div');
-      driversSection.className = 'inflation-drivers';
-      driversSection.style.marginBottom = 'var(--spacing-md)';
-
-      const driversTitle = document.createElement('h4');
-      driversTitle.textContent = 'Top Inflation Drivers';
-      driversTitle.style.fontSize = '0.875rem';
-      driversTitle.style.fontWeight = '600';
-      driversTitle.style.color = 'var(--color-text-muted)';
-      driversTitle.style.marginBottom = 'var(--spacing-sm)';
-      driversSection.appendChild(driversTitle);
-
-      inflationData.topDrivers.forEach(driver => {
-        const driverItem = document.createElement('div');
-        driverItem.className = 'inflation-driver-item';
-        driverItem.style.display = 'flex';
-        driverItem.style.justifyContent = 'space-between';
-        driverItem.style.alignItems = 'center';
-        driverItem.style.padding = 'var(--spacing-sm) 0';
-        driverItem.style.borderBottom = '1px solid var(--color-border)';
-
-        const driverInfo = document.createElement('div');
-        const driverCategory = document.createElement('strong');
-        driverCategory.textContent = driver.category;
-        const driverSpending = document.createElement('span');
-        driverSpending.style.fontSize = '0.75rem';
-        driverSpending.style.color = 'var(--color-text-muted)';
-        driverSpending.textContent = `Spending: €${driver.spending.toFixed(0)}`;
-        driverInfo.appendChild(driverCategory);
-        driverInfo.appendChild(document.createElement('br'));
-        driverInfo.appendChild(driverSpending);
-
-        const driverRate = document.createElement('span');
-        driverRate.className = 'badge badge-error';
-        driverRate.textContent = `+${driver.rate}%`;
-        driverRate.style.fontWeight = '600';
-
-        driverItem.appendChild(driverInfo);
-        driverItem.appendChild(driverRate);
-        driversSection.appendChild(driverItem);
-      });
-
-      inflationSummaryContainer.appendChild(driversSection);
-    }
-
     // Actionable suggestions section
     if (inflationData.suggestions && inflationData.suggestions.length > 0) {
       const suggestionsSection = document.createElement('div');
