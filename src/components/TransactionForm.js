@@ -137,22 +137,18 @@ export const TransactionForm = ({
   amountAccountRow.style.marginBottom = 'var(--spacing-xs)';
 
   const isEditMode = !!initialValues.id;
-  const tagSelector = isEditMode
-    ? createTransactionTagSelector({
-        initialTag: getTransactionTagName(initialValues),
-      })
-    : null;
+  const tagSelector = createTransactionTagSelector({
+    initialTag: getTransactionTagName(initialValues),
+  });
 
   const submitTransactionData = data => {
     const payload = { ...data, description: noteField.value || '' };
     handleFormSubmit(
-      isEditMode
-        ? applyExpenseTagToTransactionData(
-            payload,
-            tagSelector.getSelectedTag(),
-            true
-          )
-        : payload,
+      applyExpenseTagToTransactionData(
+        payload,
+        tagSelector.getSelectedTag(),
+        isEditMode
+      ),
       onSubmit
     );
   };
@@ -169,18 +165,14 @@ export const TransactionForm = ({
     onSubmit: submitTransactionData,
   });
 
-  if (isEditMode) {
-    tagSelector.setTransactionType(typeToggle.currentType());
-  }
+  tagSelector.setTransactionType(typeToggle.currentType());
 
   // Setup type toggle change handler (after categorySelector is created)
   const originalSetType = typeToggle.setType;
   typeToggle.setType = type => {
     originalSetType(type);
     categorySelector.setType(type);
-    if (isEditMode && tagSelector) {
-      tagSelector.setTransactionType(type);
-    }
+    tagSelector.setTransactionType(type);
     // Maintain focus on amount field when switching types
     if (amountInput) {
       amountInput.focus({ preventScroll: true });
@@ -253,9 +245,7 @@ export const TransactionForm = ({
   // Type Toggle (Label handled by fieldset/legend in utility later)
   form.appendChild(typeToggle.container);
 
-  if (isEditMode && tagSelector) {
-    form.appendChild(tagSelector.container);
-  }
+  form.appendChild(tagSelector.container);
 
   // Add note field directly
   form.appendChild(noteField);
@@ -324,8 +314,7 @@ export const TransactionForm = ({
         toAccountId: categorySelector.selectedToAccount(),
         externalDateInput,
         description: noteField.value || initialValues.description || '',
-        tagName:
-          isEditMode && tagSelector ? tagSelector.getSelectedTag() : null,
+        tagName: tagSelector.getSelectedTag(),
       });
 
       handleFormSubmit(transactionData, onSubmit);
