@@ -69,6 +69,29 @@ export const validateTransferAccount = toAccountId => {
 };
 
 /**
+ * Validate string length
+ * @param {string|null|undefined} value - Value to validate
+ * @param {number} maxLength - Maximum allowed length
+ * @param {string} fieldName - Field name for error message
+ * @returns {Object} Validation result with valid flag and error
+ */
+export const validateLength = (value, maxLength, fieldName = 'Field') => {
+  if (value === null || value === undefined) {
+    return { valid: true, error: null };
+  }
+
+  const str = String(value);
+  if (str.length <= maxLength) {
+    return { valid: true, error: null };
+  }
+
+  return {
+    valid: false,
+    error: `${fieldName} is too long (max ${maxLength} characters)`,
+  };
+};
+
+/**
  * Show validation error on a field
  * @param {HTMLElement} element - Element to show error on
  * @param {string} errorMessage - Error message (optional)

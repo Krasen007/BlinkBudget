@@ -85,27 +85,35 @@ export const prepareTransactionData = formState => {
     : getTodayISO();
 
   if (selectedDate) {
-    timestamp = preserveTimeFromExistingTimestamp(selectedDate);
+    // Full ISO timestamp (contains 'T'): preserve exactly if valid
+    if (String(selectedDate).includes('T')) {
+      const parsed = new Date(selectedDate);
+      timestamp = isNaN(parsed.getTime())
+        ? new Date().toISOString()
+        : parsed.toISOString();
+    } else {
+      timestamp = preserveTimeFromExistingTimestamp(selectedDate);
 
-    if (!timestamp) {
-      // Date only (YYYY-MM-DD): combine with the current UTC time
-      const now = new Date();
-      const [year, month, day] = String(selectedDate).split('-').map(Number);
+      if (!timestamp) {
+        // Date only (YYYY-MM-DD): combine with the current UTC time
+        const now = new Date();
+        const [year, month, day] = String(selectedDate).split('-').map(Number);
 
-      if (year && month && day) {
-        timestamp = new Date(
-          Date.UTC(
-            year,
-            month - 1,
-            day,
-            now.getUTCHours(),
-            now.getUTCMinutes(),
-            now.getUTCSeconds(),
-            now.getUTCMilliseconds()
-          )
-        ).toISOString();
-      } else {
-        timestamp = new Date().toISOString();
+        if (year && month && day) {
+          timestamp = new Date(
+            Date.UTC(
+              year,
+              month - 1,
+              day,
+              now.getUTCHours(),
+              now.getUTCMinutes(),
+              now.getUTCSeconds(),
+              now.getUTCMilliseconds()
+            )
+          ).toISOString();
+        } else {
+          timestamp = new Date().toISOString();
+        }
       }
     }
   } else {
