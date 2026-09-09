@@ -74,8 +74,45 @@ export const createTransactionTagSelector = ({ initialTag = null } = {}) => {
     container.innerHTML = '';
     const flagCategories = CustomCategoryService.getCheckboxCategories();
 
+    // Offline fallback: if categories haven't loaded yet but a tag is already
+    // selected (edit mode), synthesise a minimal placeholder option so the
+    // selected value is visible and preserved on save.
     if (!flagCategories.length) {
-      container.hidden = true;
+      if (selectedTag) {
+        container.hidden = false;
+        const option = document.createElement('label');
+        option.className =
+          'transaction-tag-option transaction-tag-option--selected';
+        option.style.setProperty('--tag-color', 'var(--color-primary)');
+
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.className = 'transaction-tag-option__input';
+        input.name = 'transaction-tag';
+        input.value = selectedTag;
+        input.checked = true;
+
+        const mark = document.createElement('span');
+        mark.className = 'transaction-tag-option__mark';
+        mark.style.setProperty('--tag-color', 'var(--color-primary)');
+
+        const text = document.createElement('span');
+        text.className = 'transaction-tag-option__label';
+        text.textContent = selectedTag;
+
+        option.addEventListener('click', e => {
+          e.preventDefault();
+          selectedTag = null;
+          render();
+        });
+
+        option.appendChild(input);
+        option.appendChild(mark);
+        option.appendChild(text);
+        container.appendChild(option);
+      } else {
+        container.hidden = true;
+      }
       return;
     }
 

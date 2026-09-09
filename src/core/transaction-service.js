@@ -384,6 +384,16 @@ export const TransactionService = {
   _persist(transactions, sync = true) {
     localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(transactions));
     if (sync) {
+      // Mark that a local write is pending BEFORE the async push so that any
+      // Firestore onSnapshot arriving in the next 300 ms (from the SDK's
+      // offline IndexedDB cache) skips mergeLocalWithCloud and does not
+      // overwrite the transaction we just saved.  _executePush will also set
+      // this marker, but it runs inside a 300 ms debounce — too late.
+      try {
+        localStorage.setItem(`${TRANSACTIONS_KEY}_lastLocalUpdate`, 'pending');
+      } catch {
+        // ignore storage errors
+      }
       SyncService.pushToCloudSafe(TRANSACTIONS_KEY, transactions);
     }
     // Dispatch storage-updated event for local changes so UI re-renders

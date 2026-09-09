@@ -327,12 +327,16 @@ export const TransactionListItem = ({
   catRow.appendChild(cat);
 
   const tagName = getTransactionTagName(transaction);
-  const flagCategory =
-    tagName && (transaction.type === 'expense' || transaction.type === 'refund')
-      ? CustomCategoryService.getCheckboxCategories().find(
-          c => c.name === tagName
-        )
-      : null;
+  const isTaggableType =
+    tagName &&
+    (transaction.type === 'expense' || transaction.type === 'refund');
+  // Look up full category object for colour; fall back to null when offline
+  // and localStorage hasn't been populated yet — the tag name is still shown.
+  const flagCategory = isTaggableType
+    ? (CustomCategoryService.getCheckboxCategories().find(
+        c => c.name === tagName
+      ) ?? { name: tagName, color: COLORS.PRIMARY })
+    : null;
 
   if (flagCategory) {
     const tagColor = flagCategory.color || COLORS.PRIMARY;
