@@ -64,8 +64,7 @@ export const CategorySelector = (
 
   if (visibleCategories.length === 0) {
     const emptyState = document.createElement('div');
-    emptyState.textContent =
-      'No categories available for this period.';
+    emptyState.textContent = 'No categories available for this period.';
     emptyState.style.color = COLORS.TEXT_MUTED;
     emptyState.style.fontStyle = 'italic';
     emptyState.style.padding = `${SPACING.SM} 0`;
@@ -141,14 +140,14 @@ export const CategorySelector = (
   });
 
   const visibleTags = Object.values(tagBreakdown).map(tag => {
-      return {
-        ...tag,
-        percentage:
-          totalExpensesForPeriod > 0
-            ? (Math.max(0, tag.amount) / totalExpensesForPeriod) * 100
-            : 0,
-      };
-    });
+    return {
+      ...tag,
+      percentage:
+        totalExpensesForPeriod > 0
+          ? (Math.max(0, tag.amount) / totalExpensesForPeriod) * 100
+          : 0,
+    };
+  });
   if (visibleTags.length > 0) {
     // Add tag section divider/title
     const divider = document.createElement('hr');

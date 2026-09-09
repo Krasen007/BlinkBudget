@@ -8,9 +8,7 @@ import { CategorySelector } from '../../src/components/CategorySelector.js';
 
 vi.mock('../../src/core/custom-category-service.js', () => ({
   CustomCategoryService: {
-    getCheckboxCategories: () => [
-      { name: 'Work', color: '#3B82F6' },
-    ],
+    getCheckboxCategories: () => [{ name: 'Work', color: '#3B82F6' }],
   },
 }));
 
@@ -35,8 +33,8 @@ const period = {
 };
 
 const cardsIn = section =>
-  [...section.querySelectorAll('.category-grid .category-card')].map(
-    card => card.getAttribute('data-category')
+  [...section.querySelectorAll('.category-grid .category-card')].map(card =>
+    card.getAttribute('data-category')
   );
 
 describe('CategorySelector - refund visibility (Explore Categories)', () => {
@@ -53,7 +51,12 @@ describe('CategorySelector - refund visibility (Explore Categories)', () => {
       buildData(
         [
           { name: 'Food', amount: 100, transactionCount: 2, percentage: 100 },
-          { name: 'Electronics', amount: -50, transactionCount: 0, percentage: 0 },
+          {
+            name: 'Electronics',
+            amount: -50,
+            transactionCount: 0,
+            percentage: 0,
+          },
         ],
         [
           {
@@ -122,7 +125,14 @@ describe('CategorySelector - refund visibility (Explore Categories)', () => {
   it('invokes onCategoryClick for a refund category card', () => {
     const section = CategorySelector(
       buildData(
-        [{ name: 'Electronics', amount: -50, transactionCount: 0, percentage: 0 }],
+        [
+          {
+            name: 'Electronics',
+            amount: -50,
+            transactionCount: 0,
+            percentage: 0,
+          },
+        ],
         [
           {
             id: 'r1',
@@ -173,7 +183,9 @@ describe('CategorySelector - refund visibility (Explore Categories)', () => {
       onCategoryClick
     );
 
-    const tagHeaders = [...section.querySelectorAll('h3')].map(h => h.textContent);
+    const tagHeaders = [...section.querySelectorAll('h3')].map(
+      h => h.textContent
+    );
     expect(tagHeaders).toContain('Explore Tags');
 
     const cards = cardsIn(section);

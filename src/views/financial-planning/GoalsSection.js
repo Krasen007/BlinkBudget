@@ -24,6 +24,8 @@ import {
 import { refreshChart } from '../../utils/chart-refresh-helper.js';
 import { formatDateForDisplay } from '../../utils/date-utils.js';
 import { SavingsGoalsService } from '../../core/savings-goals-service.js';
+import { StorageService } from '../../core/storage.js';
+import { showErrorToast } from '../../utils/toast-notifications.js';
 
 /**
  * Create goal form controls
@@ -171,7 +173,7 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
 
     try {
       // Import StorageService dynamically
-      const { StorageService } = await import('../../core/storage.js');
+
       StorageService.createGoal(name, target, tdate, current, {});
 
       // Refresh goals chart using helper
@@ -250,7 +252,7 @@ function createGoalsList(chartRenderer, activeCharts, section) {
     let items;
     try {
       // Import StorageService dynamically
-      const { StorageService } = await import('../../core/storage.js');
+
       items = StorageService.getGoals() || [];
 
       if (!items.length) {
@@ -560,7 +562,7 @@ function createGoalsList(chartRenderer, activeCharts, section) {
               };
 
               // Import StorageService dynamically
-              const { StorageService } = await import('../../core/storage.js');
+
               StorageService.updateGoal(goal.id, updates);
 
               // Refresh chart using helper
@@ -596,9 +598,9 @@ function createGoalsList(chartRenderer, activeCharts, section) {
             onConfirm: async () => {
               try {
                 // Import StorageService dynamically
-                const { StorageService } =
-                  await import('../../core/storage.js');
-                await StorageService.deleteGoal(goal.id);
+                const { StorageService } = await StorageService.deleteGoal(
+                  goal.id
+                );
 
                 // Refresh chart using helper
                 const updatedGoals = await StorageService.getGoals();
@@ -615,24 +617,7 @@ function createGoalsList(chartRenderer, activeCharts, section) {
                 await refreshGoalsList();
               } catch (err) {
                 // Show error notification to user and log once
-                const errorDiv = document.createElement('div');
-                errorDiv.style.cssText = `
-                  position: fixed;
-                  top: 20px;
-                  right: 20px;
-                  background: #ef4444;
-                  color: white;
-                  padding: var(--spacing-sm);
-                  border-radius: var(--radius-sm);
-                  z-index: 10000;
-                  font-size: var(--font-size-sm);
-                  max-width: 300px;
-                `;
-                console.error('Failed to delete goal:', err);
-                errorDiv.textContent =
-                  'Failed to delete goal. Please try again.';
-                document.body.appendChild(errorDiv);
-                setTimeout(() => errorDiv.remove(), 5000);
+                showErrorToast('Failed to delete goal. Please try again.', err);
               }
             },
           });
@@ -747,8 +732,7 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
 
   // Progressive unlock message — connects advanced features to the core logging habit
   try {
-    const { StorageService: SS } = await import('../../core/storage.js');
-    const txCount = (SS.getAllTransactions() || []).length;
+    const txCount = (StorageService.getAllTransactions() || []).length;
     const unlockCard = ProgressiveEmptyState({
       section: 'goals',
       transactionCount: txCount,
@@ -764,7 +748,6 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
   let goalsFromStorage;
   try {
     // Import StorageService dynamically
-    const { StorageService } = await import('../../core/storage.js');
     goalsFromStorage = StorageService.getGoals() || [];
   } catch (err) {
     console.warn('Error fetching goals from StorageService:', err);
@@ -774,8 +757,7 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
   // Compute a projected goal suggestion from income vs expenses
   let projectedGoal = null;
   try {
-    const { StorageService: SS } = await import('../../core/storage.js');
-    const allTx = SS.getAllTransactions() || [];
+    const allTx = StorageService.getAllTransactions() || [];
     const income = allTx.filter(t => t.type === 'income' && !t.isGhost);
     const expenses = allTx.filter(
       t => (t.type === 'expense' || t.type === 'refund') && !t.isGhost
@@ -940,7 +922,6 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
 
   // Add goal recommendations based on spending patterns
   try {
-    const { StorageService } = await import('../../core/storage.js');
     const transactions = StorageService.getAllTransactions() || [];
     const recommendations =
       await SavingsGoalsService.getGoalRecommendations(transactions);
@@ -1001,14 +982,18 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
             const targetDate = new Date();
             targetDate.setFullYear(targetDate.getFullYear() + 1); // Default 1 year
 
-            const { StorageService: SS } =
-              await import('../../core/storage.js');
-            SS.createGoal(rec.title, rec.target || 1000, targetDate, 0, {
-              category: rec.category || 'General',
-            });
+            StorageService.createGoal(
+              rec.title,
+              rec.target || 1000,
+              targetDate,
+              0,
+              {
+                category: rec.category || 'General',
+              }
+            );
 
             // Refresh the section
-            const updatedGoals = SS.getGoals();
+            const updatedGoals = StorageService.getGoals();
             await refreshChart({
               createChartFn: createGoalProgressChart,
               chartRenderer,

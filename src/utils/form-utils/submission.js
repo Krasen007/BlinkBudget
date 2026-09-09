@@ -8,35 +8,6 @@ import { sanitizeInput } from '../security-utils.js';
 import { applyExpenseTagToTransactionData } from './transaction-tags.js';
 
 /**
- * Get date source for transaction timestamp
- * @param {HTMLInputElement|null} externalDateInput - External date input
- * @returns {HTMLInputElement} Date input element with value
- */
-export const getDateSource = (externalDateInput = null) => {
-  if (externalDateInput) {
-    if (externalDateInput.getDate) {
-      // Handle DateInput component interface
-      // We create a dummy input-like object that has a value property getter
-      return {
-        get value() {
-          return externalDateInput.getDate();
-        },
-        get dataset() {
-          return externalDateInput.dataset;
-        },
-      };
-    }
-    return externalDateInput;
-  }
-
-  // Create fallback date input with today's date
-  const fallback = document.createElement('input');
-  fallback.type = 'date';
-  fallback.value = getTodayISO();
-  return fallback;
-};
-
-/**
  * Prepare transaction data for submission
  * @param {Object} formState - Form state object containing:
  *   @property {number} formState.amount - Transaction amount
@@ -68,9 +39,10 @@ export const prepareTransactionData = formState => {
   const preserveTimeFromExistingTimestamp = selectedDate => {
     const existingTimestamp = externalDateInput?.dataset?.timestamp;
     if (!selectedDate || selectedDate.includes('T')) return null;
+    if (!existingTimestamp) return null;
 
-    const tIndex = existingTimestamp?.indexOf('T');
-    if (tIndex === undefined || tIndex === -1) return null;
+    const tIndex = existingTimestamp.indexOf('T');
+    if (tIndex === -1) return null;
 
     const parsed = new Date(
       `${selectedDate}T${existingTimestamp.slice(tIndex + 1)}`
@@ -78,48 +50,44 @@ export const prepareTransactionData = formState => {
     return isNaN(parsed.getTime()) ? null : parsed.toISOString();
   };
 
+  // Duck-type: DateInput component (getDate method) or plain input (value property)
   const selectedDate = externalDateInput
     ? externalDateInput.getDate
       ? externalDateInput.getDate()
       : externalDateInput.value
     : getTodayISO();
 
-  if (selectedDate) {
-    // Full ISO timestamp (contains 'T'): preserve exactly if valid
-    if (String(selectedDate).includes('T')) {
-      const parsed = new Date(selectedDate);
-      timestamp = isNaN(parsed.getTime())
-        ? new Date().toISOString()
-        : parsed.toISOString();
-    } else {
-      timestamp = preserveTimeFromExistingTimestamp(selectedDate);
+  if (String(selectedDate).includes('T')) {
+    // Full ISO timestamp: preserve exactly if valid
+    const parsed = new Date(selectedDate);
+    timestamp = isNaN(parsed.getTime())
+      ? new Date().toISOString()
+      : parsed.toISOString();
+  } else {
+    timestamp = preserveTimeFromExistingTimestamp(selectedDate);
 
-      if (!timestamp) {
-        // Date only (YYYY-MM-DD): combine with the current time using UTC
-        // so the calendar date is preserved in the ISO output regardless of
-        // the local timezone offset.
-        const now = new Date();
-        const [year, month, day] = String(selectedDate).split('-').map(Number);
+    if (!timestamp) {
+      // Date only (YYYY-MM-DD): combine with current UTC time so the
+      // calendar date is preserved regardless of local timezone offset.
+      const now = new Date();
+      const [year, month, day] = String(selectedDate).split('-').map(Number);
 
-        if (year && month && day) {
-          timestamp = new Date(
-            Date.UTC(
-              year,
-              month - 1,
-              day,
-              now.getUTCHours(),
-              now.getUTCMinutes(),
-              now.getUTCSeconds(),
-              now.getUTCMilliseconds()
-            )
-          ).toISOString();
-        } else {
-          timestamp = new Date().toISOString();
-        }
+      if (year && month && day) {
+        timestamp = new Date(
+          Date.UTC(
+            year,
+            month - 1,
+            day,
+            now.getUTCHours(),
+            now.getUTCMinutes(),
+            now.getUTCSeconds(),
+            now.getUTCMilliseconds()
+          )
+        ).toISOString();
+      } else {
+        timestamp = new Date().toISOString();
       }
     }
-  } else {
-    timestamp = new Date().toISOString();
   }
 
   const transactionData = {
@@ -129,14 +97,12 @@ export const prepareTransactionData = formState => {
     timestamp,
   };
 
+  transactionData.category =
+    type === 'transfer' ? 'Transfer' : sanitizeInput(category || '');
   if (type === 'transfer') {
-    transactionData.category = 'Transfer';
     transactionData.toAccountId = toAccountId;
-  } else {
-    transactionData.category = sanitizeInput(category || '');
   }
 
-  // Add description/notes field if provided
   if (description && description.trim()) {
     transactionData.description = sanitizeInput(description.trim());
   }
@@ -168,39 +134,13 @@ export const handleFormSubmit = (transactionData, onSubmit, onError = null) => {
     if (onError) {
       onError(e, errorMessage);
     } else {
-      // Import toast notifications dynamically to avoid circular dependencies
       import('../toast-notifications.js')
         .then(({ showErrorToast }) => {
-          showErrorToast(errorMessage, {
-            duration: 5000,
-            persistent: false,
-          });
+          showErrorToast(errorMessage, { duration: 5000, persistent: false });
         })
         .catch(importErr => {
           console.error('Failed to load toast notifications:', importErr);
           console.error('Original error:', errorMessage);
-          // Create a simple DOM-based error message as fallback with generic message
-          const fallbackDiv = document.createElement('div');
-          fallbackDiv.setAttribute('role', 'alert');
-          fallbackDiv.setAttribute('aria-live', 'assertive');
-          fallbackDiv.style.cssText = `
-          position: fixed;
-          top: 20px;
-          right: 20px;
-          background: #ef4444;
-          color: white;
-          padding: 12px 16px;
-          border-radius: 6px;
-          z-index: 10000;
-          max-width: 300px;
-        `;
-          fallbackDiv.textContent = 'An error occurred. Please try again.';
-          document.body.appendChild(fallbackDiv);
-          setTimeout(() => {
-            if (fallbackDiv.parentNode) {
-              fallbackDiv.parentNode.removeChild(fallbackDiv);
-            }
-          }, 5000);
         });
     }
   }

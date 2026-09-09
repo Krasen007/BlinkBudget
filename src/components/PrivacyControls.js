@@ -4,6 +4,8 @@
  * Provides user interface for privacy settings and consent management
  */
 
+import { COLORS } from '../utils/constants.js';
+
 // Notification system to replace alerts
 function showNotification(message, type = 'info') {
   const notification = document.createElement('div');
@@ -25,16 +27,16 @@ function showNotification(message, type = 'info') {
 
   switch (type) {
     case 'success':
-      notification.style.background = '#10b981';
+      notification.style.background = COLORS.SUCCESS;
       break;
     case 'error':
-      notification.style.background = '#ef4444';
+      notification.style.background = COLORS.ERROR;
       break;
     case 'warning':
-      notification.style.background = '#f59e0b';
+      notification.style.background = COLORS.WARNING;
       break;
     default:
-      notification.style.background = '#3b82f6';
+      notification.style.background = COLORS.INFO;
   }
 
   document.body.appendChild(notification);
@@ -81,7 +83,7 @@ function showConfirmation(message) {
     buttonsDiv.innerHTML = `
       <button id="confirm-yes" style="
         padding: 0.5rem 1rem;
-        background: #ef4444;
+        background: COLORS.ERROR;
         color: white;
         border: none;
         border-radius: 0.375rem;

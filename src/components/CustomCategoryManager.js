@@ -7,6 +7,7 @@
 import { CustomCategoryService } from '../core/custom-category-service.js';
 import { ButtonComponent } from './Button.js';
 import { Router } from '../core/router.js';
+import { showErrorToast } from '../utils/toast-notifications.js';
 
 export const CustomCategoryManager = ({
   onCategoryChange,
@@ -741,18 +742,7 @@ export const CustomCategoryManager = ({
       if (!validation.valid) {
         console.error('Validation errors:', validation.errors);
         // Show validation error in a user-friendly way
-        const errorDiv = document.createElement('div');
-        errorDiv.style.cssText = `
-          background: #ef4444;
-          color: white;
-          padding: var(--spacing-sm);
-          border-radius: var(--radius-sm);
-          margin-bottom: var(--spacing-sm);
-          font-size: var(--font-size-sm);
-        `;
-        errorDiv.textContent = validation.errors.join(', ');
-        form.insertBefore(errorDiv, form.firstChild);
-        setTimeout(() => errorDiv.remove(), 5000);
+        showErrorToast(validation.errors.join(', '));
         return;
       }
 
@@ -769,18 +759,7 @@ export const CustomCategoryManager = ({
       } catch (error) {
         console.error('Error saving category:', error);
         // Show error in a user-friendly way
-        const errorDiv = document.createElement('div');
-        errorDiv.style.cssText = `
-          background: #ef4444;
-          color: white;
-          padding: var(--spacing-sm);
-          border-radius: var(--radius-sm);
-          margin-bottom: var(--spacing-sm);
-          font-size: var(--font-size-sm);
-        `;
-        errorDiv.textContent = error.message || 'Failed to save category';
-        form.insertBefore(errorDiv, form.firstChild);
-        setTimeout(() => errorDiv.remove(), 5000);
+        showErrorToast(error.message || 'Failed to save category');
       }
     }
   }
@@ -913,22 +892,7 @@ export const CustomCategoryManager = ({
       }
     } catch (error) {
       console.error('Error moving category:', error);
-      const errorDiv = document.createElement('div');
-      errorDiv.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #ef4444;
-        color: white;
-        padding: var(--spacing-sm);
-        border-radius: var(--radius-sm);
-        z-index: 10000;
-        font-size: var(--font-size-sm);
-        max-width: 300px;
-      `;
-      errorDiv.textContent = 'Error moving category. Please try again.';
-      document.body.appendChild(errorDiv);
-      setTimeout(() => errorDiv.remove(), 5000);
+      showErrorToast('Error moving category. Please try again.');
     }
   }
 

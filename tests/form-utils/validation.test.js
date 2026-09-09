@@ -6,7 +6,6 @@ import {
   validateAmount,
   validateCategory,
   validateTransferAccount,
-  validateTransactionForm,
   validateLength,
   showFieldError,
   showContainerError,
@@ -178,97 +177,6 @@ describe('Form Validation Utilities', () => {
     test('accepts null or undefined values', () => {
       expect(validateLength(null, 10, 'Field').valid).toBe(true);
       expect(validateLength(undefined, 10, 'Field').valid).toBe(true);
-    });
-  });
-
-  describe('validateTransactionForm', () => {
-    test('validates complete expense transaction', () => {
-      const data = {
-        amount: '100',
-        type: 'expense',
-        category: 'Food',
-      };
-
-      const result = validateTransactionForm(data);
-      expect(result.valid).toBe(true);
-      expect(result.errors).toEqual({});
-    });
-
-    test('validates complete income transaction', () => {
-      const data = {
-        amount: '500',
-        type: 'income',
-        category: 'Salary',
-      };
-
-      const result = validateTransactionForm(data);
-      expect(result.valid).toBe(true);
-      expect(result.errors).toEqual({});
-    });
-
-    test('validates complete transfer transaction', () => {
-      const data = {
-        amount: '200',
-        type: 'transfer',
-        toAccountId: 'account-123',
-      };
-
-      const result = validateTransactionForm(data);
-      expect(result.valid).toBe(true);
-      expect(result.errors).toEqual({});
-    });
-
-    test('validates transaction with note within length limit', () => {
-      const data = {
-        amount: '100',
-        type: 'expense',
-        category: 'Food',
-        note: 'Valid note',
-      };
-
-      const result = validateTransactionForm(data);
-      expect(result.valid).toBe(true);
-    });
-
-    test('rejects transaction with note over length limit', () => {
-      const longNote = 'a'.repeat(256);
-      const data = {
-        amount: '100',
-        type: 'expense',
-        category: 'Food',
-        note: longNote,
-      };
-
-      const result = validateTransactionForm(data);
-      expect(result.valid).toBe(false);
-      expect(result.errors.note).toContain('too long');
-    });
-
-    test('collects multiple validation errors', () => {
-      const data = {
-        amount: '0', // Invalid amount
-        type: 'expense',
-        category: '', // Invalid category
-        note: 'a'.repeat(300), // Invalid note length
-      };
-
-      const result = validateTransactionForm(data);
-      expect(result.valid).toBe(false);
-      expect(result.errors.amount).toBeDefined();
-      expect(result.errors.category).toBeDefined();
-      expect(result.errors.note).toBeDefined();
-    });
-
-    test('validates transfer with missing destination account', () => {
-      const data = {
-        amount: '100',
-        type: 'transfer',
-        // Missing toAccountId
-      };
-
-      const result = validateTransactionForm(data);
-      expect(result.valid).toBe(false);
-      expect(result.errors.toAccountId).toBeDefined();
     });
   });
 

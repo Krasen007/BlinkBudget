@@ -5,24 +5,8 @@ Address the findings identified during the codebase audit against [ai-slop-inspe
 ## Proposed Changes
 
 ### Phase 1: DONE
----
 
-### Phase 2: Orphan File & Dead Export Pruning (🔴 High)
-
-#### [MODIFY] [validation.js](file:///f:/AI/repos/BlinkBudget/src/utils/form-utils/validation.js)
-
-- Remove unused composite validator export `validateTransactionForm`.
-
-#### [MODIFY] [success-feedback.js](file:///f:/AI/repos/BlinkBudget/src/utils/success-feedback.js)
-
-- Remove unused dead export `showSuccessCheckmark` and its helper `addSuccessStyles()`.
-- Remove module-scope side effect (`if (typeof document !== 'undefined') addSuccessStyles();`).
-
-#### [MODIFY] [touch-utils.js](file:///f:/AI/repos/BlinkBudget/src/utils/touch-utils.js)
-
-- Remove unused dead exports `addTouchFeedback`, `addTouchFeedbackClass`, and `addHoverEffects`.
-
----
+### Phase 2: Done
 
 ### Phase 3: Duplication, Indirection, and Token Cleanup (🟡 Medium / ⚪ Low)
 

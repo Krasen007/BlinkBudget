@@ -5,7 +5,6 @@
 import {
   prepareTransactionData,
   handleFormSubmit,
-  getDateSource,
 } from '../../src/utils/form-utils/submission.js';
 
 // Mock dependencies
@@ -49,31 +48,6 @@ global.document = {
 describe('Form Submission', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-  });
-
-  describe('getDateSource', () => {
-    test('returns external date input when provided', () => {
-      const externalInput = { type: 'date', value: '2024-01-15' };
-
-      const result = getDateSource(externalInput);
-
-      expect(result).toBe(externalInput);
-    });
-
-    test('creates fallback date input when none provided', () => {
-      const result = getDateSource();
-
-      expect(document.createElement).toHaveBeenCalledWith('input');
-      expect(result.type).toBe('date');
-      expect(result.value).toBe('2024-01-01'); // From getTodayISO mock
-    });
-
-    test('fallback date input has correct properties', () => {
-      const result = getDateSource();
-
-      expect(result.type).toBe('date');
-      expect(result.value).toBe('2024-01-01');
-    });
   });
 
   describe('prepareTransactionData', () => {

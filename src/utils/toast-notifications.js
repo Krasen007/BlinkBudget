@@ -76,28 +76,28 @@ function getToastConfig(type) {
     [TOAST_TYPES.SUCCESS]: {
       background: COLORS.SUCCESS,
       icon: '✅',
-      duration: TIMING.NOTIFICATION_SUCCESS || 3000,
+      duration: TIMING.NOTIFICATION_SUCCESS,
     },
     [TOAST_TYPES.ERROR]: {
       background: COLORS.ERROR,
       icon: '❌',
-      duration: TIMING.NOTIFICATION_ERROR || 5000,
+      duration: TIMING.NOTIFICATION_ERROR,
     },
     [TOAST_TYPES.WARNING]: {
       background: COLORS.WARNING,
       icon: '⚠️',
-      duration: TIMING.NOTIFICATION_WARNING || 4000,
+      duration: TIMING.NOTIFICATION_WARNING,
     },
     [TOAST_TYPES.INFO]: {
       background: COLORS.PRIMARY,
       icon: 'ℹ️',
-      duration: TIMING.NOTIFICATION_INFO || 3000,
+      duration: TIMING.NOTIFICATION_INFO,
     },
     [TOAST_TYPES.NEUTRAL]: {
       // Muted hint style — calm, non-alarming feedback (e.g. delete undo)
       background: COLORS.SURFACE,
       icon: '',
-      duration: TIMING.NOTIFICATION_INFO || 3000,
+      duration: TIMING.NOTIFICATION_INFO,
     },
   };
 
@@ -159,7 +159,7 @@ function createToastElement(message, type, options = {}) {
     actionButton.addEventListener('click', e => {
       e.preventDefault();
       e.stopPropagation();
-      removeToast(toastId);
+      removeToastById(toastId);
       onAction();
     });
     toast.appendChild(actionButton);
@@ -169,7 +169,7 @@ function createToastElement(message, type, options = {}) {
 
   // Event handlers
   const handleRemove = () => {
-    removeToast(toastId);
+    removeToastById(toastId);
   };
 
   closeButton.addEventListener('click', handleRemove);
@@ -183,7 +183,7 @@ function createToastElement(message, type, options = {}) {
   activeToasts.set(toastId, {
     element: toast,
     timeoutId: null,
-    removeFn: removeToast,
+    removeFn: removeToastById,
     onClose: options.onClose || null,
   });
 
@@ -204,42 +204,6 @@ function animateToastIn(toast) {
  * Animate toast out and remove
  * @param {string} toastId - Toast ID
  */
-function animateToastOut(toastId) {
-  const toastData = activeToasts.get(toastId);
-  if (!toastData) return;
-
-  const { element, timeoutId, onClose } = toastData;
-
-  // Clear auto-remove timeout
-  if (timeoutId) {
-    clearTimeout(timeoutId);
-  }
-
-  // Animate out using class
-  element.classList.remove('active');
-
-  // Remove after animation and call onClose callback
-  setTimeout(() => {
-    if (element.parentNode) {
-      element.parentNode.removeChild(element);
-    }
-    activeToasts.delete(toastId);
-
-    // Call onClose callback if provided
-    if (onClose && typeof onClose === 'function') {
-      onClose();
-    }
-  }, TIMING.ANIMATION_FAST);
-}
-
-/**
- * Remove toast notification
- * @param {string} toastId - Toast ID
- */
-function removeToast(toastId) {
-  animateToastOut(toastId);
-}
-
 /**
  * Show toast notification
  * @param {string} message - Toast message
@@ -270,7 +234,7 @@ export function showToast(message, type = TOAST_TYPES.INFO, options = {}) {
     const finalDuration = duration !== undefined ? duration : config.duration;
 
     const timeoutId = setTimeout(() => {
-      removeToast(toastId);
+      removeToastById(toastId);
     }, finalDuration);
 
     // Update toast data with timeout
@@ -343,7 +307,7 @@ export function clearAllToasts() {
   // Create snapshot of keys before removing to avoid mutation during iteration
   const toastIds = Array.from(activeToasts.keys());
   toastIds.forEach(toastId => {
-    removeToast(toastId);
+    removeToastById(toastId);
   });
 }
 
@@ -352,7 +316,24 @@ export function clearAllToasts() {
  * @param {string} toastId - Toast ID to remove
  */
 export function removeToastById(toastId) {
-  removeToast(toastId);
+  const toastData = activeToasts.get(toastId);
+  if (!toastData) return;
+
+  const { element, timeoutId, onClose } = toastData;
+
+  if (timeoutId) clearTimeout(timeoutId);
+
+  element.classList.remove('active');
+
+  setTimeout(() => {
+    if (element.parentNode) {
+      element.parentNode.removeChild(element);
+    }
+    activeToasts.delete(toastId);
+    if (onClose && typeof onClose === 'function') {
+      onClose();
+    }
+  }, TIMING.ANIMATION_FAST);
 }
 
 /**
