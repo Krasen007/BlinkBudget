@@ -541,6 +541,9 @@ export class AccountDeletionService {
         result.warnings.push(
           'Some verification checks failed - data may not be completely deleted'
         );
+        result.errors.push(
+          'Account deletion verification failed - data may not be completely deleted'
+        );
       }
     } catch (error) {
       step.status = 'failed';

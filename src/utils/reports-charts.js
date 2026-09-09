@@ -147,11 +147,13 @@ export async function createCategoryBreakdownChart(
   title.style.margin = '0';
   title.style.color = COLORS.TEXT_MAIN;
 
-  // Prepare chart data first
+  // Prepare chart data first — pie slices need non-negative values, so only
+  // positive-net categories go in the chart (refunds still show in Explore
+  // Categories cards below).
   const categoryData = currentData.categoryBreakdown;
-  const sortedCategories = [...(categoryData?.categories || [])].sort(
-    (a, b) => b.amount - a.amount
-  );
+  const sortedCategories = [...(categoryData?.categories || [])]
+    .filter(cat => cat.amount > 0)
+    .sort((a, b) => b.amount - a.amount);
 
   // Total amounts display
   const totalsContainer = document.createElement('div');

@@ -55,16 +55,17 @@ export const CategorySelector = (
   categoryGrid.style.gap = SPACING.MD;
   categoryGrid.style.marginTop = SPACING.MD;
 
-  // Only show categories with positive net amount — zero (expense = refund)
-  // or negative (refund-only) categories clutter the view.
-  const visibleCategories = [...currentData.categoryBreakdown.categories]
-    .filter(category => category.amount > 0)
-    .sort((a, b) => b.amount - a.amount);
+  // Show all categories including zero/negative net (refund-only or fully
+  // refunded). Filtering those out hides refund transactions from Explore
+  // Categories. CategoryCard already renders net-credit cards distinctly.
+  const visibleCategories = [...currentData.categoryBreakdown.categories].sort(
+    (a, b) => b.amount - a.amount
+  );
 
   if (visibleCategories.length === 0) {
     const emptyState = document.createElement('div');
     emptyState.textContent =
-      'No positive-net categories available for this period.';
+      'No categories available for this period.';
     emptyState.style.color = COLORS.TEXT_MUTED;
     emptyState.style.fontStyle = 'italic';
     emptyState.style.padding = `${SPACING.SM} 0`;
@@ -139,14 +140,12 @@ export const CategorySelector = (
     }
   });
 
-  const visibleTags = Object.values(tagBreakdown)
-    .filter(tag => tag.amount > 0)
-    .map(tag => {
+  const visibleTags = Object.values(tagBreakdown).map(tag => {
       return {
         ...tag,
         percentage:
           totalExpensesForPeriod > 0
-            ? (tag.amount / totalExpensesForPeriod) * 100
+            ? (Math.max(0, tag.amount) / totalExpensesForPeriod) * 100
             : 0,
       };
     });
