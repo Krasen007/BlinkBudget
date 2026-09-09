@@ -101,23 +101,6 @@ export const showContainerError = container => {
 };
 
 /**
- * Validate string length
- * @param {string} value - String to validate
- * @param {number} max - Maximum length
- * @param {string} fieldName - Field name for error message
- * @returns {Object} Validation result
- */
-export const validateLength = (value, max, fieldName) => {
-  if (value && value.length > max) {
-    return {
-      valid: false,
-      error: `${fieldName} is too long (max ${max} characters)`,
-    };
-  }
-  return { valid: true, error: null };
-};
-
-/**
  * Validate complete transaction form
  * @param {Object} data - Transaction data
  * @returns {Object} Validation result with errors object

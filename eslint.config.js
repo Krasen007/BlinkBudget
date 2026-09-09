@@ -1,5 +1,91 @@
 import js from '@eslint/js';
 import prettier from 'eslint-config-prettier';
+import unusedImports from 'eslint-plugin-unused-imports';
+
+const localRules = {
+  'no-empty-catch': {
+    meta: {
+      type: 'problem',
+      docs: {
+        description: 'disallow empty promise catch callbacks',
+      },
+      schema: [],
+    },
+    create(context) {
+      return {
+        CallExpression(node) {
+          const callee = node.callee;
+          const callback = node.arguments[0];
+
+          if (
+            callee.type !== 'MemberExpression' ||
+            callee.computed ||
+            callee.property.name !== 'catch' ||
+            !callback ||
+            !['ArrowFunctionExpression', 'FunctionExpression'].includes(
+              callback.type
+            ) ||
+            callback.body.type !== 'BlockStatement' ||
+            callback.body.body.length > 0
+          ) {
+            return;
+          }
+
+          context.report({
+            node: callback,
+            message:
+              'Empty .catch() callbacks must handle or report the error.',
+          });
+        },
+      };
+    },
+  },
+  'no-raw-style-values': {
+    meta: {
+      type: 'suggestion',
+      docs: {
+        description:
+          'disallow raw hex colors and pixel values in style assignments',
+      },
+      schema: [],
+    },
+    create(context) {
+      const rawStyleValue =
+        /(?:^|\s)(?:-?\d+(?:\.\d+)?px\b)|#[\da-fA-F]{3,8}\b/;
+
+      return {
+        AssignmentExpression(node) {
+          const left = node.left;
+
+          if (
+            left.type !== 'MemberExpression' ||
+            left.object.type !== 'MemberExpression' ||
+            left.object.computed ||
+            left.object.property.name !== 'style'
+          ) {
+            return;
+          }
+
+          const value =
+            node.right.type === 'Literal'
+              ? node.right.value
+              : node.right.type === 'TemplateLiteral' &&
+                  node.right.expressions.length === 0
+                ? node.right.quasis[0].value.cooked
+                : null;
+
+          if (typeof value === 'string' && rawStyleValue.test(value)) {
+            context.report({
+              node: node.right,
+              message:
+                'Use a design token or CSS variable instead of raw hex or px values in .style assignments.',
+            });
+          }
+        },
+      };
+    },
+  },
+};
 
 export default [
   {
@@ -21,6 +107,10 @@ export default [
   js.configs.recommended,
   prettier,
   {
+    plugins: {
+      local: { rules: localRules },
+      'unused-imports': unusedImports,
+    },
     languageOptions: {
       ecmaVersion: 2024,
       sourceType: 'module',
@@ -83,6 +173,10 @@ export default [
     rules: {
       // Code quality
       'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      'unused-imports/no-unused-imports': 'error',
+      'no-empty': 'error',
+      'local/no-empty-catch': 'error',
+      'local/no-raw-style-values': 'warn',
       // disabled for dev: 'no-console': 'warn',
       'no-debugger': 'error',
       'no-alert': 'warn',
@@ -135,6 +229,12 @@ export default [
         vi: 'readonly',
         global: 'readonly',
       },
+    },
+    rules: {
+      'unused-imports/no-unused-imports': 'off',
+      'no-empty': 'off',
+      'local/no-empty-catch': 'off',
+      'local/no-raw-style-values': 'off',
     },
   },
 ];

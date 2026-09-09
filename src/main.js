@@ -77,7 +77,9 @@ const initApp = () => {
       'Unable to sync — saved locally, will sync when online.';
     import('./utils/toast-notifications.js')
       .then(({ showWarningToast }) => showWarningToast(message))
-      .catch(() => {});
+      .catch(err => {
+        console.warn('[Main] Failed to show sync toast:', err);
+      });
   });
 
   // For returning users, render mobile nav immediately without waiting for Firebase auth

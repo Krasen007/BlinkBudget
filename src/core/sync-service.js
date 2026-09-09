@@ -181,7 +181,9 @@ export const SyncService = {
     // keep chain but swallow final rejection so it doesn't break subsequent chains
     this._pushChains.set(
       dataType,
-      newChain.catch(() => {})
+      newChain.catch(err => {
+        console.warn(`[Sync] Push failed for ${dataType}:`, err);
+      })
     );
     return newChain;
   },

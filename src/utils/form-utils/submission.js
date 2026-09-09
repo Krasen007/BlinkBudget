@@ -61,77 +61,54 @@ export const prepareTransactionData = formState => {
     externalDateInput = null,
   } = formState;
 
-  // Get date source - use external date input if provided, otherwise current time
-  const dateSource = getDateSource(externalDateInput);
   let timestamp;
 
+  // Combine the selected date with the time part of the existing timestamp,
+  // so editing a transaction keeps its original time of day.
   const preserveTimeFromExistingTimestamp = selectedDate => {
-    if (!externalDateInput || typeof externalDateInput !== 'object')
-      return null;
+    const existingTimestamp = externalDateInput?.dataset?.timestamp;
+    if (!selectedDate || selectedDate.includes('T')) return null;
 
-    const existingTimestamp = externalDateInput.dataset?.timestamp;
-    if (!existingTimestamp || typeof existingTimestamp !== 'string')
-      return null;
+    const tIndex = existingTimestamp?.indexOf('T');
+    if (tIndex === undefined || tIndex === -1) return null;
 
-    if (!selectedDate || typeof selectedDate !== 'string') return null;
-    if (selectedDate.includes('T')) return null;
-
-    const tIndex = existingTimestamp.indexOf('T');
-    if (tIndex === -1) return null;
-    const timePart = existingTimestamp.slice(tIndex + 1);
-    if (!timePart) return null;
-
-    const isoCandidate = `${selectedDate}T${timePart}`;
-    const parsed = new Date(isoCandidate);
-    if (isNaN(parsed.getTime())) return null;
-
-    return parsed.toISOString();
+    const parsed = new Date(
+      `${selectedDate}T${existingTimestamp.slice(tIndex + 1)}`
+    );
+    return isNaN(parsed.getTime()) ? null : parsed.toISOString();
   };
 
-  if (dateSource && dateSource.value) {
-    // Use the date from external input and combine with current time for precise timestamp
-    const selectedDate = dateSource.value;
+  const selectedDate = externalDateInput
+    ? externalDateInput.getDate
+      ? externalDateInput.getDate()
+      : externalDateInput.value
+    : getTodayISO();
 
-    const preserved = preserveTimeFromExistingTimestamp(selectedDate);
-    if (preserved) {
-      timestamp = preserved;
-    } else {
-      // Check if it's a full ISO timestamp or just a date
-      const parsedDate = new Date(selectedDate);
+  if (selectedDate) {
+    timestamp = preserveTimeFromExistingTimestamp(selectedDate);
 
-      if (!isNaN(parsedDate.getTime())) {
-        if (selectedDate.includes('T')) {
-          // Full timestamp provided, use it
-          timestamp = parsedDate.toISOString();
-        } else {
-          // Date only provided (YYYY-MM-DD), combine with current time
-          const now = new Date();
-          const [year, month, day] = selectedDate.split('-').map(Number);
+    if (!timestamp) {
+      // Date only (YYYY-MM-DD): combine with the current UTC time
+      const now = new Date();
+      const [year, month, day] = String(selectedDate).split('-').map(Number);
 
-          // Final sanity check for split parts
-          if (year && month && day) {
-            timestamp = new Date(
-              Date.UTC(
-                year,
-                month - 1,
-                day,
-                now.getUTCHours(),
-                now.getUTCMinutes(),
-                now.getUTCSeconds(),
-                now.getUTCMilliseconds()
-              )
-            ).toISOString();
-          } else {
-            timestamp = new Date().toISOString();
-          }
-        }
+      if (year && month && day) {
+        timestamp = new Date(
+          Date.UTC(
+            year,
+            month - 1,
+            day,
+            now.getUTCHours(),
+            now.getUTCMinutes(),
+            now.getUTCSeconds(),
+            now.getUTCMilliseconds()
+          )
+        ).toISOString();
       } else {
-        // Invalid date format, fallback to current time
         timestamp = new Date().toISOString();
       }
     }
   } else {
-    // Fallback to current time
     timestamp = new Date().toISOString();
   }
 
