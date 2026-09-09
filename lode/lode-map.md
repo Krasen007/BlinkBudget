@@ -22,7 +22,9 @@ lode/
 ├── product/
 │   └── three-clicks.md               # One Theory, feature filter, privacy, anti-goals
 ├── plans/
-│   └── roadmap.md                    # Open TODOs (mirrors todo/ at repo root)
+│   ├── roadmap.md                    # Open TODOs (mirrors todo/ at repo root)
+│   ├── ai-slop-report.md             # 23-finding audit of src/ transaction-flow files (Sep 2026)
+│   └── ai-slop-guide.md              # 8-rule inspection guide + procedure for auditing new files
 └── tmp/                              # git-ignored session scraps & handovers (never commit)
 ```
 
@@ -30,6 +32,7 @@ lode/
 
 | Task                | Files                                                                                                                     |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Code quality / slop cleanup | [plans/ai-slop-guide.md](plans/ai-slop-guide.md) → [plans/ai-slop-report.md](plans/ai-slop-report.md) |
 | New UI feature      | [practices.md](practices.md) → [ui/summary.md](ui/summary.md) → [ui/styling.md](ui/styling.md)                            |
 | Data/storage change | [data/data-model.md](data/data-model.md) → [data/sync.md](data/sync.md)                                                   |
 | Auth/routing change | [data/authentication.md](data/authentication.md) → [architecture/routing-and-views.md](architecture/routing-and-views.md) |

@@ -33,6 +33,15 @@ flowchart LR
 
 Supporting pieces: `utils/form-utils/` (amount-input, category-chips, type-toggle, keyboard, submission, validation, transaction-tags), `QuickAmountPresets`, `DateInput`, `MobileModal`.
 
+## TransactionForm — tag selector behaviour
+
+`TransactionForm` (`src/components/TransactionForm.js`) creates a `tagSelector` (`createTransactionTagSelector`) unconditionally for **both add and edit modes**. Tags are only meaningful for `expense` / `refund` types — `tagSelector.setTransactionType(type)` hides the selector automatically for `income` and `transfer`.
+
+- **Add mode** (`initialValues.id` absent): selector starts with no pre-selected tag; `applyExpenseTagToTransactionData(payload, tag, false)` writes `tags: [name]` when a tag is chosen, omits `tags` when none is selected.
+- **Edit mode** (`initialValues.id` present): selector pre-selects the existing tag via `getTransactionTagName(initialValues)`; `applyExpenseTagToTransactionData(payload, tag, true)` writes `tags: []` to explicitly clear a removed tag.
+- The type-toggle wrapper always calls `tagSelector.setTransactionType(type)` when the user switches between expense/income/refund/transfer, so visibility stays in sync.
+- Tag UI lives in `src/utils/form-utils/transaction-tags.js`: `createTransactionTagSelector`, `applyExpenseTagToTransactionData`, `getTransactionTagName`. Categories come from `CustomCategoryService.getCheckboxCategories()` (checkbox-type custom categories). CSS classes: `transaction-tag-selector`, `transaction-tag-option`, `transaction-tag-option--selected`, `transaction-tag-option__mark`, `transaction-tag-option__label`.
+
 ## Delete → Undo toast
 
 Deleting (EditView `onDelete`, DashboardView bulk delete) shows a **muted hint** pinned to the bottom edge — deletion is assumed intentional; the toast is a restore hint, not an alarm (5 s window, `TIMING.UNDO_TOAST`):
