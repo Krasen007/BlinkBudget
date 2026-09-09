@@ -60,14 +60,6 @@ export const TransactionService = {
   },
 
   /**
-   * Get all transactions (alias for getAll for API consistency)
-   * @returns {Array} List of transactions
-   */
-  getAllTransactions() {
-    return this.getAll();
-  },
-
-  /**
    * Add a new transaction
    * @param {Object} transaction - Transaction data
    * @returns {Object} Added transaction
@@ -371,7 +363,6 @@ export const TransactionService = {
   clear() {
     const transactions = this.getAll();
     const transactionCount = transactions.length;
-    localStorage.removeItem(TRANSACTIONS_KEY);
 
     this._persist([]);
 
@@ -391,8 +382,8 @@ export const TransactionService = {
       // this marker, but it runs inside a 300 ms debounce — too late.
       try {
         localStorage.setItem(`${TRANSACTIONS_KEY}_lastLocalUpdate`, 'pending');
-      } catch {
-        // ignore storage errors
+      } catch (err) {
+        console.warn('Failed to record local update marker for sync:', err);
       }
       SyncService.pushToCloudSafe(TRANSACTIONS_KEY, transactions);
     }

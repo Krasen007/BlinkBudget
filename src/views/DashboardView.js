@@ -262,8 +262,8 @@ export const DashboardView = (params = {}) => {
       const ids = _loadDismissedAnomalyIds();
       ids.add(id);
       sessionStorage.setItem(DISMISSED_ANOMALIES_KEY, JSON.stringify([...ids]));
-    } catch {
-      // Non-critical
+    } catch (e) {
+      console.warn('[DashboardView] Failed to save dismissed anomaly:', e);
     }
   };
   let selectedTransactionIds = new Set();
@@ -371,7 +371,9 @@ export const DashboardView = (params = {}) => {
                 message: `${removedEntries.length} transaction${removedEntries.length > 1 ? 's' : ''} deleted`,
               });
             })
-            .catch(() => {});
+            .catch(undoErr => {
+              console.error('Failed to load undo module:', undoErr);
+            });
         },
       });
     });

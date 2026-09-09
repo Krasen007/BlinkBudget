@@ -206,8 +206,8 @@ export const SyncService = {
       // Mark locally that a push is pending for this dataType so merge logic can prefer local edits
       try {
         localStorage.setItem(`${dataType}_lastLocalUpdate`, 'pending');
-      } catch {
-        /* ignore storage errors */
+      } catch (err) {
+        console.warn('[Sync] Failed to set pending local update marker:', err);
       }
       // Mark that we're writing to this dataType to prevent race conditions
       const writeId = Date.now();
@@ -248,8 +248,11 @@ export const SyncService = {
               `${dataType}_lastLocalUpdate`,
               String(Date.now())
             );
-          } catch {
-            // ignore storage errors
+          } catch (err) {
+            console.warn(
+              '[Sync] Failed to record push completion timestamp:',
+              err
+            );
           }
         }
       }, 1000); // 1 second should be enough for Firebase to process
@@ -266,8 +269,8 @@ export const SyncService = {
             timestamp: new Date().toISOString(),
           })
         );
-      } catch {
-        /* ignore storage errors */
+      } catch (err) {
+        console.warn('[Sync] Failed to save last_sync_error to storage:', err);
       }
 
       // Check if it's a network error
@@ -307,8 +310,11 @@ export const SyncService = {
       try {
         // Clear the pending marker so merges can proceed after an error
         localStorage.removeItem(`${dataType}_lastLocalUpdate`);
-      } catch {
-        // ignore storage errors
+      } catch (err) {
+        console.warn(
+          '[Sync] Failed to remove pending local update marker:',
+          err
+        );
       }
     }
   },

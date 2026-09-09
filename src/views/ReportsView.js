@@ -547,18 +547,10 @@ export const ReportsView = (params = {}) => {
         transactions = allTransactions;
       } catch (storageError) {
         console.error('Storage access error:', storageError);
-
-        try {
-          console.warn('[ReportsView] Attempting storage recovery...');
-          localStorage.removeItem('blinkbudget_transactions');
-          transactions = [];
-        } catch (recoveryError) {
-          console.error('Storage recovery failed:', recoveryError);
-          throw new Error(
-            'Unable to access transaction data. Please check your browser storage settings and try refreshing the page.',
-            { cause: recoveryError }
-          );
-        }
+        throw new Error(
+          'Unable to access transaction data. Please check your browser storage settings and try refreshing the page.',
+          { cause: storageError }
+        );
       }
 
       let analyticsData;
@@ -601,29 +593,23 @@ export const ReportsView = (params = {}) => {
       try {
         validateAnalyticsData(analyticsData);
       } catch (validationError) {
-        console.error('Analytics data validation failed:', validationError);
-
+        console.warn(
+          'Analytics data validation failed, attempting sanitization:',
+          validationError
+        );
         analyticsData = sanitizeAnalyticsData(analyticsData);
 
         try {
           validateAnalyticsData(analyticsData);
-        } catch (validationError) {
-          console.error('Analytics data validation failed:', validationError);
-
-          analyticsData = sanitizeAnalyticsData(analyticsData);
-
-          try {
-            validateAnalyticsData(analyticsData);
-          } catch (secondValidationError) {
-            console.error(
-              'Analytics data validation failed after sanitization:',
-              secondValidationError
-            );
-            throw new Error(
-              'The processed financial data appears to be invalid. Please try refreshing the page or contact support if the issue persists.',
-              { cause: secondValidationError }
-            );
-          }
+        } catch (sanitizationError) {
+          console.error(
+            'Analytics data validation failed after sanitization:',
+            sanitizationError
+          );
+          throw new Error(
+            'The processed financial data appears to be invalid. Please try refreshing the page or contact support if the issue persists.',
+            { cause: sanitizationError }
+          );
         }
       }
 

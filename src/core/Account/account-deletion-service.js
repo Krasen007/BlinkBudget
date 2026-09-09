@@ -423,9 +423,11 @@ export class AccountDeletionService {
             `${userTransactions.length} user transactions still exist`
           );
         }
-      } catch {
-        // Expected - service should fail after auth deletion
-        verificationResults.transactionCheck = true;
+      } catch (err) {
+        verificationResults.transactionCheck = false;
+        result.warnings.push(
+          `Could not verify transaction deletion: ${err?.message || String(err)}`
+        );
       }
 
       // Verify accounts are deleted
@@ -441,8 +443,11 @@ export class AccountDeletionService {
             `${userAccounts.length} user accounts still exist`
           );
         }
-      } catch {
-        verificationResults.accountCheck = true;
+      } catch (err) {
+        verificationResults.accountCheck = false;
+        result.warnings.push(
+          `Could not verify account deletion: ${err?.message || String(err)}`
+        );
       }
 
       // Verify goals are deleted
@@ -456,8 +461,11 @@ export class AccountDeletionService {
         if (userGoals.length > 0) {
           result.warnings.push(`${userGoals.length} user goals still exist`);
         }
-      } catch {
-        verificationResults.goalCheck = true;
+      } catch (err) {
+        verificationResults.goalCheck = false;
+        result.warnings.push(
+          `Could not verify goal deletion: ${err?.message || String(err)}`
+        );
       }
 
       // Verify investments are deleted
@@ -473,8 +481,11 @@ export class AccountDeletionService {
             `${userInvestments.length} user investments still exist`
           );
         }
-      } catch {
-        verificationResults.investmentCheck = true;
+      } catch (err) {
+        verificationResults.investmentCheck = false;
+        result.warnings.push(
+          `Could not verify investment deletion: ${err?.message || String(err)}`
+        );
       }
 
       // Verify budgets are deleted
@@ -490,8 +501,11 @@ export class AccountDeletionService {
             `${userBudgets.length} user budgets still exist`
           );
         }
-      } catch {
-        verificationResults.budgetCheck = true;
+      } catch (err) {
+        verificationResults.budgetCheck = false;
+        result.warnings.push(
+          `Could not verify budget deletion: ${err?.message || String(err)}`
+        );
       }
 
       // Verify settings are deleted

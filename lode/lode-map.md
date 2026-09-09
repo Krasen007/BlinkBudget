@@ -30,14 +30,14 @@ lode/
 
 ## Suggested reading by task
 
-| Task                | Files                                                                                                                     |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Code quality / slop cleanup | [plans/ai-slop-guide.md](plans/ai-slop-guide.md) → [plans/ai-slop-report.md](plans/ai-slop-report.md) |
-| New UI feature      | [practices.md](practices.md) → [ui/summary.md](ui/summary.md) → [ui/styling.md](ui/styling.md)                            |
-| Data/storage change | [data/data-model.md](data/data-model.md) → [data/sync.md](data/sync.md)                                                   |
-| Auth/routing change | [data/authentication.md](data/authentication.md) → [architecture/routing-and-views.md](architecture/routing-and-views.md) |
-| Performance work    | [architecture/routing-and-views.md](architecture/routing-and-views.md) → [ui/styling.md](ui/styling.md)                   |
-| Product decision    | [product/three-clicks.md](product/three-clicks.md) → [summary.md](summary.md)                                             |
+| Task                        | Files                                                                                                                     |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Code quality / slop cleanup | [plans/ai-slop-guide.md](plans/ai-slop-guide.md) → [plans/ai-slop-report.md](plans/ai-slop-report.md)                     |
+| New UI feature              | [practices.md](practices.md) → [ui/summary.md](ui/summary.md) → [ui/styling.md](ui/styling.md)                            |
+| Data/storage change         | [data/data-model.md](data/data-model.md) → [data/sync.md](data/sync.md)                                                   |
+| Auth/routing change         | [data/authentication.md](data/authentication.md) → [architecture/routing-and-views.md](architecture/routing-and-views.md) |
+| Performance work            | [architecture/routing-and-views.md](architecture/routing-and-views.md) → [ui/styling.md](ui/styling.md)                   |
+| Product decision            | [product/three-clicks.md](product/three-clicks.md) → [summary.md](summary.md)                                             |
 
 ## Non-lode docs (repo)
 

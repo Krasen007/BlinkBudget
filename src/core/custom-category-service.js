@@ -889,8 +889,11 @@ export const CustomCategoryService = {
         `${CUSTOM_CATEGORIES_KEY}_lastLocalUpdate`,
         'pending'
       );
-    } catch {
-      // ignore storage errors
+    } catch (err) {
+      console.warn(
+        'Failed to record category local update marker for sync:',
+        err
+      );
     }
   },
 };

@@ -1,12 +1,10 @@
-// Phase 2 changes:
 /**
  * TransactionForm Component
- * Refactored to use extracted utilities - now ~180 lines (down from 724)
  */
 
 import { AccountService } from '../core/Account/account-service.js';
 import { ClickTracker } from '../core/click-tracking-service.js';
-import { FONT_SIZES, COLORS } from '../utils/constants.js';
+import { FONT_SIZES, COLORS, TOUCH_TARGETS } from '../utils/constants.js';
 import { createSelect } from '../utils/dom-factory.js';
 import { createTypeToggleGroup } from '../utils/form-utils/type-toggle.js';
 import { createCategorySelector } from '../utils/form-utils/category-chips.js';
@@ -336,7 +334,7 @@ export const TransactionForm = ({
       okBtn.style.padding = 'var(--spacing-sm)';
       okBtn.style.fontSize = FONT_SIZES.BASE;
       okBtn.style.height = 'auto';
-      okBtn.style.minHeight = '44px'; // Accessible touch target
+      okBtn.style.minHeight = TOUCH_TARGETS.MIN_HEIGHT;
     }
 
     okBtn.addEventListener('click', submitForm);
@@ -353,9 +351,6 @@ export const TransactionForm = ({
         submitForm();
       }
     });
-
-    // Remove mobile-specific classes to match other buttons
-    okBtn.classList.remove('mobile-btn-primary', 'touch-target-primary');
 
     form.appendChild(okBtn);
 
@@ -381,7 +376,7 @@ export const TransactionForm = ({
         deleteBtn.style.padding = 'var(--spacing-sm)';
         deleteBtn.style.fontSize = FONT_SIZES.BASE;
         deleteBtn.style.height = 'auto';
-        deleteBtn.style.minHeight = '44px'; // Compact but clickable
+        deleteBtn.style.minHeight = TOUCH_TARGETS.MIN_HEIGHT;
       }
 
       // Remove hover effects (animations)
@@ -404,14 +399,9 @@ export const TransactionForm = ({
     // Click is sometimes needed on iOS to trigger keyboard if focus() is blocked
   };
 
-  // Try immediately
+  // Try immediately and after initial render cycle
   focusInput();
-
-  // Try after short delay (render cycle)
   setTimeout(focusInput, 150);
-
-  // Try one more time for slower devices
-  setTimeout(focusInput, 450);
 
   return form;
 };
