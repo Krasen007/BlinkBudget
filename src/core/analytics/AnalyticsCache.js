@@ -415,6 +415,23 @@ export class AnalyticsCache {
   }
 
   /**
+   * Invalidate cache entries that match a pattern (synchronous, no locking)
+   * @param {string} pattern - Substring to match against cache keys
+   * @returns {number} Number of entries invalidated
+   */
+  invalidateSync(pattern) {
+    let count = 0;
+    for (const key of this.cache.keys()) {
+      if (key.includes(pattern)) {
+        this.cache.delete(key);
+        this.cacheTimestamps.delete(key);
+        count++;
+      }
+    }
+    return count;
+  }
+
+  /**
    * Get cache statistics
    */
   getCacheStats() {

@@ -95,19 +95,23 @@ export const prepareTransactionData = formState => {
       timestamp = preserveTimeFromExistingTimestamp(selectedDate);
 
       if (!timestamp) {
-        // Date only (YYYY-MM-DD): combine with the current local time
+        // Date only (YYYY-MM-DD): combine with the current time using UTC
+        // so the calendar date is preserved in the ISO output regardless of
+        // the local timezone offset.
         const now = new Date();
         const [year, month, day] = String(selectedDate).split('-').map(Number);
 
         if (year && month && day) {
           timestamp = new Date(
-            year,
-            month - 1,
-            day,
-            now.getHours(),
-            now.getMinutes(),
-            now.getSeconds(),
-            now.getMilliseconds()
+            Date.UTC(
+              year,
+              month - 1,
+              day,
+              now.getUTCHours(),
+              now.getUTCMinutes(),
+              now.getUTCSeconds(),
+              now.getUTCMilliseconds()
+            )
           ).toISOString();
         } else {
           timestamp = new Date().toISOString();

@@ -306,6 +306,7 @@ export function sanitizeAnalyticsData(data) {
  */
 export function createMinimalAnalyticsData(transactions, timePeriod) {
   const filteredTransactions = transactions.filter(t => {
+    if (t.isGhost) return false;
     const transactionDate = new Date(t.date || t.timestamp);
     const startDate = new Date(timePeriod.startDate);
     const endDate = new Date(timePeriod.endDate);
@@ -449,6 +450,7 @@ export function generateMonthlyTrendData(transactions, topCategories) {
     topCategories.forEach(category => {
       const monthlySpending = transactions
         .filter(t => {
+          if (t.isGhost) return false;
           const tDate = new Date(t.date || t.timestamp);
           return (
             tDate >= monthStart &&

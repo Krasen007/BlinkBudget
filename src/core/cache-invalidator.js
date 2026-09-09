@@ -35,6 +35,12 @@ export const CacheInvalidator = {
 
       // When transactions change, invalidate forecasts and analytics
       if (key === STORAGE_KEYS.TRANSACTIONS) {
+        // Synchronous in-memory invalidation so same-tick reads see fresh data
+        analyticsCache.invalidateSync('analytics_');
+        analyticsCache.invalidateSync('forecast_');
+        analyticsCache.invalidateSync('financial_planning_data');
+        analyticsCache.invalidateSync('reports_preload_');
+        // Async full invalidation (incl. persistent storage) in background
         analyticsCache.invalidate('analytics_');
         analyticsCache.invalidate('forecast_');
         analyticsCache.invalidate('financial_planning_data');
