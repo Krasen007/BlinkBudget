@@ -64,26 +64,48 @@ export const prepareTransactionData = formState => {
       ? new Date().toISOString()
       : parsed.toISOString();
   } else {
-    timestamp = preserveTimeFromExistingTimestamp(selectedDate);
+    const dateOnlyMatch = String(selectedDate).match(
+      /^(\d{4})-(\d{2})-(\d{2})$/
+    );
+    const parsedDateOnly = dateOnlyMatch?.slice(1).map(Number);
+    const [year, month, day] = parsedDateOnly || [];
+    const utcDate = parsedDateOnly
+      ? new Date(Date.UTC(year, month - 1, day))
+      : null;
+    const isValidDateOnly =
+      Boolean(utcDate) &&
+      utcDate.getUTCFullYear() === year &&
+      utcDate.getUTCMonth() === month - 1 &&
+      utcDate.getUTCDate() === day;
 
-    if (!timestamp) {
+    if (!isValidDateOnly) {
+      timestamp = new Date().toISOString();
+    } else {
+      timestamp = preserveTimeFromExistingTimestamp(selectedDate);
+    }
+
+    if (!timestamp && isValidDateOnly) {
       // Date only (YYYY-MM-DD): combine with current UTC time so the
       // calendar date is preserved regardless of local timezone offset.
       const now = new Date();
-      const [year, month, day] = String(selectedDate).split('-').map(Number);
+      const combinedDate = new Date(
+        Date.UTC(
+          year,
+          month - 1,
+          day,
+          now.getUTCHours(),
+          now.getUTCMinutes(),
+          now.getUTCSeconds(),
+          now.getUTCMilliseconds()
+        )
+      );
 
-      if (year && month && day) {
-        timestamp = new Date(
-          Date.UTC(
-            year,
-            month - 1,
-            day,
-            now.getUTCHours(),
-            now.getUTCMinutes(),
-            now.getUTCSeconds(),
-            now.getUTCMilliseconds()
-          )
-        ).toISOString();
+      if (
+        combinedDate.getUTCFullYear() === year &&
+        combinedDate.getUTCMonth() === month - 1 &&
+        combinedDate.getUTCDate() === day
+      ) {
+        timestamp = combinedDate.toISOString();
       } else {
         timestamp = new Date().toISOString();
       }

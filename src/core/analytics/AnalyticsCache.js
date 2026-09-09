@@ -369,19 +369,35 @@ export class AnalyticsCache {
   }
 
   /**
-   * Invalidate cache entries that match a pattern
+   * Get all cached keys that match a pattern from memory and persistence.
    */
-  async invalidate(pattern) {
+  getMatchingKeys(pattern) {
+    const matchingKeys = new Set(
+      [...this.cache.keys()].filter(key => key.includes(pattern))
+    );
+    const cached = this._getFromStorage('analytics_cache');
+
+    if (cached && typeof cached === 'object') {
+      Object.keys(cached)
+        .filter(key => key.includes(pattern))
+        .forEach(key => matchingKeys.add(key));
+    }
+
+    return [...matchingKeys];
+  }
+
+  /**
+   * Invalidate cache entries that match a pattern
+   * @param {string} pattern - Substring to match against cache keys
+   * @param {string[]} [capturedKeys] - Keys captured before sync invalidation
+   */
+  async invalidate(pattern, capturedKeys = null) {
     await this._acquireLock();
 
     try {
-      const keysToDelete = [];
-
-      for (const key of this.cache.keys()) {
-        if (key.includes(pattern)) {
-          keysToDelete.push(key);
-        }
-      }
+      const keysToDelete =
+        capturedKeys ||
+        [...this.cache.keys()].filter(key => key.includes(pattern));
 
       // Remove from in-memory cache
       keysToDelete.forEach(key => {

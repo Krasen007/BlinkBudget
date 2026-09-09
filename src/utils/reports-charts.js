@@ -151,7 +151,8 @@ export async function createCategoryBreakdownChart(
   // positive-net categories go in the chart (refunds still show in Explore
   // Categories cards below).
   const categoryData = currentData.categoryBreakdown;
-  const sortedCategories = [...(categoryData?.categories || [])]
+  const allCategories = [...(categoryData?.categories || [])];
+  const sortedCategories = allCategories
     .filter(cat => cat.amount > 0)
     .sort((a, b) => b.amount - a.amount);
 
@@ -248,7 +249,7 @@ export async function createCategoryBreakdownChart(
   totalSpentLabel.style.marginBottom = '2px';
 
   const totalSpentValue = document.createElement('span');
-  const totalSpent = sortedCategories.reduce((sum, cat) => sum + cat.amount, 0);
+  const totalSpent = allCategories.reduce((sum, cat) => sum + cat.amount, 0);
   totalSpentValue.textContent = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'EUR',

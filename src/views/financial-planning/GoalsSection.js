@@ -597,10 +597,7 @@ function createGoalsList(chartRenderer, activeCharts, section) {
             variant: 'danger',
             onConfirm: async () => {
               try {
-                // Import StorageService dynamically
-                const { StorageService } = await StorageService.deleteGoal(
-                  goal.id
-                );
+                await StorageService.deleteGoal(goal.id);
 
                 // Refresh chart using helper
                 const updatedGoals = await StorageService.getGoals();

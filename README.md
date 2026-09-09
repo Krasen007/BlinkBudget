@@ -156,7 +156,6 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 - **Helpful tips on each section** | src/utils/tooltip-config.js:tooltip configuration
 - **Password visibility toggle** - An eye icon in password fields lets you reveal or hide the text as you type | src/views/LoginView.js:eye button with toggle logic | src/views/LoginView.js:password visibility toggle
 - **Top-tier Security** - Advanced XSS protection, strict URL validation, comprehensive privacy compliance, and regular security patches | src/utils/security-utils.js:safeJsonParse() | src/core/privacy-service.js:privacy controls
-- **Improved accessibility** with "Skip to Content" links, ARIA roles, proper form label associations, and keyboard support for all interactive elements | src/core/accessibility-service.js:accessibility helpers | src/components/TransactionForm.js:ARIA labels
 - **Functional component primitives** - A pure-factory Button component and DOM helpers for consistent UI behavior | src/components/Button.js:ButtonComponent | src/utils/dom-factory.js:createButton()
 - **Enhanced color schemes** with improved text contrast for better readability | src/utils/constants.js:COLOR definitions | src/styles/base.css:color scheme variables
 - **Improved Reports navigation** with filter preservation and breadcrumb indicators for quick category return | src/views/ReportsView.js:navigation state | src/utils/navigation-helper.js:breadcrumb navigation
