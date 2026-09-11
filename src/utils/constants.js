@@ -28,6 +28,7 @@ export const COLORS = {
   SURFACE: 'var(--color-surface)',
   SURFACE_HOVER: 'var(--color-surface-hover)',
   BORDER: 'var(--color-border)',
+  MUTED: 'var(--color-muted)',
   TEXT_MAIN: 'var(--color-text-main)',
   TEXT_MUTED: 'var(--color-text-muted)',
   BACKGROUND: 'var(--color-background)',

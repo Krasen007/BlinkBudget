@@ -41,12 +41,10 @@ export const prepareTransactionData = formState => {
     if (!selectedDate || selectedDate.includes('T')) return null;
     if (!existingTimestamp) return null;
 
-    const tIndex = existingTimestamp.indexOf('T');
-    if (tIndex === -1) return null;
-
-    const parsed = new Date(
-      `${selectedDate}T${existingTimestamp.slice(tIndex + 1)}`
+    const timePart = existingTimestamp.slice(
+      existingTimestamp.indexOf('T') + 1
     );
+    const parsed = new Date(`${selectedDate}T${timePart}`);
     return isNaN(parsed.getTime()) ? null : parsed.toISOString();
   };
 
@@ -85,7 +83,7 @@ export const prepareTransactionData = formState => {
 
     if (!timestamp && isValidDateOnly) {
       const now = new Date();
-      const combinedDate = new Date(
+      timestamp = new Date(
         Date.UTC(
           year,
           month - 1,
@@ -95,17 +93,7 @@ export const prepareTransactionData = formState => {
           now.getUTCSeconds(),
           now.getUTCMilliseconds()
         )
-      );
-
-      if (
-        combinedDate.getUTCFullYear() === year &&
-        combinedDate.getUTCMonth() === month - 1 &&
-        combinedDate.getUTCDate() === day
-      ) {
-        timestamp = combinedDate.toISOString();
-      } else {
-        timestamp = new Date().toISOString();
-      }
+      ).toISOString();
     }
   }
 

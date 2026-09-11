@@ -183,7 +183,6 @@ function createToastElement(message, type, options = {}) {
   activeToasts.set(toastId, {
     element: toast,
     timeoutId: null,
-    removeFn: removeToastById,
     onClose: options.onClose || null,
   });
 
@@ -200,10 +199,6 @@ function animateToastIn(toast) {
   toast.classList.add('active');
 }
 
-/**
- * Animate toast out and remove
- * @param {string} toastId - Toast ID
- */
 /**
  * Show toast notification
  * @param {string} message - Toast message

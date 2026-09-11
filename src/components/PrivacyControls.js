@@ -66,7 +66,7 @@ function showConfirmation(message) {
 
     const dialog = document.createElement('div');
     dialog.style.cssText = `
-      background: white;
+      background: ${COLORS.SURFACE};
       padding: 2rem;
       border-radius: 8px;
       max-width: 400px;
@@ -74,7 +74,7 @@ function showConfirmation(message) {
     `;
 
     const messageEl = document.createElement('p');
-    messageEl.style.cssText = 'margin-bottom: 1.5rem; color: #333;';
+    messageEl.style.cssText = `margin-bottom: 1.5rem; color: ${COLORS.TEXT_MAIN};`;
     messageEl.textContent = message;
 
     const buttonsDiv = document.createElement('div');
@@ -83,7 +83,7 @@ function showConfirmation(message) {
     buttonsDiv.innerHTML = `
       <button id="confirm-yes" style="
         padding: 0.5rem 1rem;
-        background: COLORS.ERROR;
+        background: ${COLORS.ERROR};
         color: white;
         border: none;
         border-radius: 0.375rem;
@@ -91,7 +91,7 @@ function showConfirmation(message) {
       ">Yes</button>
       <button id="confirm-no" style="
         padding: 0.5rem 1rem;
-        background: #6b7280;
+        background: ${COLORS.MUTED};
         color: white;
         border: none;
         border-radius: 0.375rem;

@@ -825,24 +825,7 @@ export const CustomCategoryManager = ({
               onCategoryChange && onCategoryChange();
             } catch (error) {
               console.error('Error deleting category:', error);
-              // Show generic error message (error details logged to console)
-              const errorDiv = document.createElement('div');
-              errorDiv.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #ef4444;
-            color: white;
-            padding: var(--spacing-sm);
-            border-radius: var(--radius-sm);
-            z-index: 10000;
-            font-size: var(--font-size-sm);
-            max-width: 300px;
-          `;
-              errorDiv.textContent =
-                'Failed to delete category. Please try again.';
-              document.body.appendChild(errorDiv);
-              setTimeout(() => errorDiv.remove(), 5000);
+              showErrorToast('Failed to delete category. Please try again.');
             }
           },
         });
