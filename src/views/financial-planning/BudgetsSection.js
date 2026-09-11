@@ -38,7 +38,7 @@ export const BudgetsSection = async planningData => {
   if (Array.isArray(planningData?.transactions)) {
     transactions = planningData.transactions;
   } else {
-    transactions = StorageService.getAllTransactions() || [];
+    transactions = StorageService.getAll() || [];
   }
 
   let manualMode = false;

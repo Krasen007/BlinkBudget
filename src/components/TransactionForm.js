@@ -36,7 +36,6 @@ export const TransactionForm = ({
   onCancel = null,
   onDelete = null,
 }) => {
-  // 1. Form setup
   const form = document.createElement('form');
   form.className = 'transaction-form mobile-optimized';
   form.style.display = 'flex';
@@ -49,7 +48,6 @@ export const TransactionForm = ({
     form.style.justifyContent = 'flex-start';
   }
 
-  // 2. Account Selection (Source)
   const accounts = AccountService.getAccounts();
   const defaultAccount = AccountService.getDefaultAccount();
   let currentAccountId = initialValues.accountId || defaultAccount.id;
@@ -96,12 +94,10 @@ export const TransactionForm = ({
 
   accountGroup.appendChild(accSelect);
 
-  // 3. Type Toggle
   const typeToggle = createTypeToggleGroup({
     initialType: initialValues.type || 'expense',
   });
 
-  // 4. Amount Input
   const amountState = createAmountInput({
     initialValue: initialValues.amount || '',
     externalDateInput,
@@ -125,7 +121,6 @@ export const TransactionForm = ({
 
   amountGroup.appendChild(amountInput);
 
-  // 5. Amount and Account Row
   const amountAccountRow = document.createElement('div');
   amountAccountRow.style.display = 'flex';
   amountAccountRow.style.gap = 'var(--spacing-sm)';
@@ -151,7 +146,6 @@ export const TransactionForm = ({
     );
   };
 
-  // 6. Category Selector
   const categorySelector = createCategorySelector({
     type: typeToggle.currentType(),
     accounts,
@@ -216,7 +210,6 @@ export const TransactionForm = ({
     );
   });
 
-  // 7. Note Field
   const noteField = document.createElement('textarea');
   noteField.id = 'transaction-note-input';
   noteField.className = 'form-input transaction-note-field';
@@ -227,7 +220,6 @@ export const TransactionForm = ({
   noteField.style.resize = 'vertical';
   noteField.classList.add('touch-target-secondary');
 
-  // 7. Layout Assembly
   form.appendChild(amountAccountRow);
 
   // Category Label
@@ -248,7 +240,6 @@ export const TransactionForm = ({
   // Add note field directly
   form.appendChild(noteField);
 
-  // 7.5. Cancel Button (for Add mode)
   if (showCancelButton && onCancel) {
     const cancelBtn = document.createElement('button');
     cancelBtn.textContent = 'Cancel';
@@ -269,7 +260,6 @@ export const TransactionForm = ({
     form.appendChild(cancelBtn);
   }
 
-  // 8. OK Button for Edit Mode (hidden on mobile)
   if (initialValues.id) {
     const isMobile = window.mobileUtils && window.mobileUtils.isMobile();
 
@@ -354,7 +344,6 @@ export const TransactionForm = ({
 
     form.appendChild(okBtn);
 
-    // 8.5. Delete Button (for Edit mode)
     if (onDelete) {
       const deleteBtn = document.createElement('button');
       deleteBtn.textContent = 'Delete Transaction';
@@ -387,13 +376,10 @@ export const TransactionForm = ({
     }
   }
 
-  // 9. Form submit prevention
   form.addEventListener('submit', e => e.preventDefault());
 
-  // 10. Keyboard handling
   setupFormKeyboardHandling(form, [amountInput, accSelect, noteField]);
 
-  // 11. Initial focus strategy for mobile keyboard
   const focusInput = () => {
     amountInput.focus({ preventScroll: true });
     // Click is sometimes needed on iOS to trigger keyboard if focus() is blocked

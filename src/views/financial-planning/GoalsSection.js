@@ -729,7 +729,7 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
 
   // Progressive unlock message — connects advanced features to the core logging habit
   try {
-    const txCount = (StorageService.getAllTransactions() || []).length;
+    const txCount = (StorageService.getAll() || []).length;
     const unlockCard = ProgressiveEmptyState({
       section: 'goals',
       transactionCount: txCount,
@@ -754,7 +754,7 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
   // Compute a projected goal suggestion from income vs expenses
   let projectedGoal = null;
   try {
-    const allTx = StorageService.getAllTransactions() || [];
+    const allTx = StorageService.getAll() || [];
     const income = allTx.filter(t => t.type === 'income' && !t.isGhost);
     const expenses = allTx.filter(
       t => (t.type === 'expense' || t.type === 'refund') && !t.isGhost
@@ -919,7 +919,7 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
 
   // Add goal recommendations based on spending patterns
   try {
-    const transactions = StorageService.getAllTransactions() || [];
+    const transactions = StorageService.getAll() || [];
     const recommendations =
       await SavingsGoalsService.getGoalRecommendations(transactions);
 

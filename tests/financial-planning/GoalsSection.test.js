@@ -35,7 +35,7 @@ vi.mock('../../src/utils/financial-planning-helpers.js', () => ({
 vi.mock('../../src/core/storage.js', () => ({
   StorageService: {
     getGoals: vi.fn(() => []),
-    getAllTransactions: vi.fn(() => []),
+    getAll: vi.fn(() => []),
     createGoal: vi.fn(),
     updateGoal: vi.fn(),
     deleteGoal: vi.fn(),

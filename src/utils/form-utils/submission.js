@@ -58,7 +58,6 @@ export const prepareTransactionData = formState => {
     : getTodayISO();
 
   if (String(selectedDate).includes('T')) {
-    // Full ISO timestamp: preserve exactly if valid
     const parsed = new Date(selectedDate);
     timestamp = isNaN(parsed.getTime())
       ? new Date().toISOString()
@@ -85,8 +84,6 @@ export const prepareTransactionData = formState => {
     }
 
     if (!timestamp && isValidDateOnly) {
-      // Date only (YYYY-MM-DD): combine with current UTC time so the
-      // calendar date is preserved regardless of local timezone offset.
       const now = new Date();
       const combinedDate = new Date(
         Date.UTC(

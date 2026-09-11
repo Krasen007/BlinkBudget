@@ -81,14 +81,6 @@ export const AddView = ({ accountId, amount } = {}) => {
       // Complete tracking and get metrics
       const metrics = ClickTracker.completeTransactionFlow();
 
-      // Log metrics for debugging (can be removed in production)
-      if (metrics) {
-        console.log(
-          `Transaction completed: ${metrics.clicks} clicks, ${metrics.duration.toFixed(1)}s`
-        );
-      }
-
-      // Add the transaction and get the full transaction object
       let newTransaction;
       try {
         newTransaction = TransactionService.add(data);

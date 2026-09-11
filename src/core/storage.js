@@ -35,7 +35,7 @@ export const StorageService = {
     AccountService.isAccountDuplicate(name, type, excludeId),
 
   // --- Transactions (delegated to TransactionService) ---
-  getAllTransactions: () => TransactionService.getAll(),
+  getAll: () => TransactionService.getAll(),
   add: transaction => TransactionService.add(transaction),
   get: id => TransactionService.get(id),
   update: (id, updates) => TransactionService.update(id, updates),

@@ -577,7 +577,7 @@ export const InvestmentsSection = async (_chartRenderer, _activeCharts) => {
   // Progressive unlock message — connects advanced features to the core logging habit
   try {
     const { StorageService: SS } = await import('../../core/storage.js');
-    const txCount = (SS.getAllTransactions() || []).length;
+    const txCount = (SS.getAll() || []).length;
     const unlockCard = ProgressiveEmptyState({
       section: 'investments',
       transactionCount: txCount,
