@@ -13,6 +13,7 @@ import {
 import { validateAmount, showFieldError } from './validation.js';
 import { ClickTracker } from '../../core/click-tracking-service.js';
 import { CustomCategoryService } from '../../core/custom-category-service.js';
+import { showErrorToast } from '../toast-notifications.js';
 
 /**
  * Create a single category/account chip
@@ -448,20 +449,9 @@ export const createCategorySelector = (options = {}) => {
                   });
                 } catch (e) {
                   console.error('Submit failed:', e);
-                  // Import toast notifications dynamically to avoid circular dependencies
-                  import('../toast-notifications.js')
-                    .then(({ showErrorToast }) => {
-                      showErrorToast(
-                        `Error submitting transaction: ${e.message}`,
-                        { duration: TIMING.NOTIFICATION_ERROR }
-                      );
-                    })
-                    .catch(importErr => {
-                      console.error(
-                        'Failed to load toast notifications:',
-                        importErr
-                      );
-                    });
+                  showErrorToast(`Error submitting transaction: ${e.message}`, {
+                    duration: TIMING.NOTIFICATION_ERROR,
+                  });
                 }
               }
 

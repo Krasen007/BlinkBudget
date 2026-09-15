@@ -12,6 +12,7 @@ import {
 } from '../utils/constants.js';
 import { createButton } from '../utils/dom-factory.js';
 import { markTransactionForHighlight } from '../utils/success-feedback.js';
+import { showErrorToast } from '../utils/toast-notifications.js';
 
 export const EditView = ({ id }) => {
   const container = document.createElement('div');
@@ -187,15 +188,7 @@ export const EditView = ({ id }) => {
           );
         }
         console.error('Failed to update transaction:', error);
-        import('../utils/toast-notifications.js')
-          .then(({ showErrorToast }) => {
-            showErrorToast('Failed to update transaction. Please try again.');
-          })
-          .catch(() => {
-            console.error(
-              'Failed to update transaction and toast system unavailable'
-            );
-          });
+        showErrorToast('Failed to update transaction. Please try again.');
         return;
       }
     },

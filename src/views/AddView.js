@@ -11,6 +11,7 @@ import {
 } from '../utils/constants.js';
 import { createButton } from '../utils/dom-factory.js';
 import { markTransactionForHighlight } from '../utils/success-feedback.js';
+import { showErrorToast } from '../utils/toast-notifications.js';
 
 export const AddView = ({ accountId, amount } = {}) => {
   // Start tracking the transaction flow
@@ -86,15 +87,7 @@ export const AddView = ({ accountId, amount } = {}) => {
         newTransaction = TransactionService.add(data);
       } catch (error) {
         console.error('Failed to add transaction:', error);
-        import('../utils/toast-notifications.js')
-          .then(({ showErrorToast }) => {
-            showErrorToast('Failed to add transaction. Please try again.');
-          })
-          .catch(() => {
-            console.error(
-              'Failed to add transaction and toast system unavailable'
-            );
-          });
+        showErrorToast('Failed to add transaction. Please try again.');
         return;
       }
 

@@ -18,6 +18,7 @@ import {
 } from '../utils/constants.js';
 import { setSelectedStyle } from '../utils/transaction-selection.js';
 import { highlightTransactionSuccess } from '../utils/success-feedback.js';
+import { showErrorToast } from '../utils/toast-notifications.js';
 
 export const TransactionListItem = ({
   transaction,
@@ -104,27 +105,11 @@ export const TransactionListItem = ({
       try {
         result = TransactionService.split(transaction.id);
         if (!result) {
-          import('../utils/toast-notifications.js')
-            .then(({ showErrorToast }) => {
-              showErrorToast('Failed to split transaction');
-            })
-            .catch(() => {
-              console.error(
-                'Failed to split transaction and toast system unavailable'
-              );
-            });
+          showErrorToast('Failed to split transaction');
           return;
         }
       } catch (error) {
-        import('../utils/toast-notifications.js')
-          .then(({ showErrorToast }) => {
-            showErrorToast(`Failed to split transaction: ${error.message}`);
-          })
-          .catch(() => {
-            console.error(
-              'Failed to split transaction and toast system unavailable'
-            );
-          });
+        showErrorToast(`Failed to split transaction: ${error.message}`);
         return;
       }
 
@@ -155,27 +140,11 @@ export const TransactionListItem = ({
       try {
         copied = TransactionService.copy(transaction.id);
         if (!copied) {
-          import('../utils/toast-notifications.js')
-            .then(({ showErrorToast }) => {
-              showErrorToast('Failed to copy transaction');
-            })
-            .catch(() => {
-              console.error(
-                'Failed to copy transaction and toast system unavailable'
-              );
-            });
+          showErrorToast('Failed to copy transaction');
           return;
         }
       } catch (error) {
-        import('../utils/toast-notifications.js')
-          .then(({ showErrorToast }) => {
-            showErrorToast(`Failed to copy transaction: ${error.message}`);
-          })
-          .catch(() => {
-            console.error(
-              'Failed to copy transaction and toast system unavailable'
-            );
-          });
+        showErrorToast(`Failed to copy transaction: ${error.message}`);
         return;
       }
 

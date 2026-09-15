@@ -9,8 +9,11 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { readFileSync, readdirSync } from 'fs';
+import { build } from 'vite';
+import { mkdtempSync, readFileSync, readdirSync, rmSync } from 'fs';
+import { tmpdir } from 'os';
 import { extname, join } from 'path';
+import viteConfig from '../../vite.config.js';
 
 import { TIMING } from '../../src/utils/constants.js';
 import {
@@ -69,19 +72,6 @@ const referencedTokens = () =>
         match => ({ token: match[1], file })
       )
     );
-
-// Tokens referenced by a stylesheet rule. Vite's production purgecss config
-// sets `variables: true`, so a custom property declared in tokens.css is kept
-// only while a surviving CSS rule references it — a JS-only reference (a
-// constant or an inline style string) does not keep it alive. That is how
-// `--font-size-md` disappeared from the built CSS.
-const tokensUsedInCss = new Set(
-  collectFiles(STYLES_DIR, '.css').flatMap(file =>
-    [...readFileSync(file, 'utf8').matchAll(/var\((--[a-z0-9-]+)/g)].map(
-      match => match[1]
-    )
-  )
-);
 
 const TOAST_DURATIONS = [
   [TOAST_TYPES.SUCCESS, TIMING.NOTIFICATION_SUCCESS],
@@ -146,12 +136,42 @@ describe('Design token contract', () => {
       expect(unresolved).toEqual([]);
     });
 
-    it('keeps every token used from JS alive through the production CSS purge', () => {
-      const atRisk = referencedTokens().filter(
-        ({ token }) => !tokensUsedInCss.has(token)
-      );
+    it('keeps every token used from JS alive through the production CSS purge', async () => {
+      const outputDir = mkdtempSync(join(tmpdir(), 'blinkbudget-css-'));
+      const originalNodeEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'production';
 
-      expect(atRisk).toEqual([]);
+      try {
+        await build({
+          ...viteConfig,
+          configFile: false,
+          mode: 'production',
+          plugins: viteConfig.plugins
+            .flat()
+            .filter(plugin => plugin.name !== 'vite-plugin-pwa:build'),
+          build: {
+            ...viteConfig.build,
+            outDir: outputDir,
+            emptyOutDir: true,
+          },
+        });
+
+        const productionCss = collectFiles(outputDir, '.css')
+          .map(file => readFileSync(file, 'utf8'))
+          .join('\n');
+        const atRisk = referencedTokens().filter(
+          ({ token }) => !productionCss.includes(token)
+        );
+
+        expect(atRisk).toEqual([]);
+      } finally {
+        if (originalNodeEnv === undefined) {
+          delete process.env.NODE_ENV;
+        } else {
+          process.env.NODE_ENV = originalNodeEnv;
+        }
+        rmSync(outputDir, { recursive: true, force: true });
+      }
     });
 
     it.each([

@@ -12,6 +12,7 @@ import { InstallService } from './core/install.js';
 import { CacheInvalidator } from './core/cache-invalidator.js';
 import { PrivacyService } from './core/privacy-service.js';
 import { config } from '../config/app.config.js';
+import { showWarningToast } from './utils/toast-notifications.js';
 import './core/mobile-utils.js'; // Initialize consolidated mobile utilities
 import './pwa.js'; // Register PWA service worker
 
@@ -75,11 +76,7 @@ const initApp = () => {
     const message =
       e.detail?.message ||
       'Unable to sync — saved locally, will sync when online.';
-    import('./utils/toast-notifications.js')
-      .then(({ showWarningToast }) => showWarningToast(message))
-      .catch(err => {
-        console.warn('[Main] Failed to show sync toast:', err);
-      });
+    showWarningToast(message);
   });
 
   // For returning users, render mobile nav immediately without waiting for Firebase auth

@@ -113,7 +113,7 @@ const xssPayloads = [
 
 #### Dependency Security
 
-- [ ] **Package Vulnerabilities**: Run `npm audit` for known vulnerabilities
+- [ ] **Package Vulnerabilities**: Run `yarn npm audit --all` for known vulnerabilities (same command the CI `security-audit` job blocks on)
 - [ ] **Firebase SDK Versions**: Ensure latest secure versions
 - [ ] **Third-party Scripts**: Audit any external dependencies
 - [ ] **Browser Compatibility**: Test security across browsers
@@ -121,9 +121,8 @@ const xssPayloads = [
 #### Test Commands
 
 ```bash
-npm audit
-npm audit fix
-npx snyk test
+yarn npm audit --all
+npx snyk test --severity-threshold=high
 ```
 
 ### 7. Identification and Authentication Failures (A07:2021)
@@ -194,12 +193,14 @@ npx snyk test
 
 ## Additional Security Tests
 
-### Mobile Security
+### Mobile / PWA Security
 
-- [ ] **Touch ID/Face ID**: Test biometric authentication
-- [ ] **App Transport Security**: Verify HTTPS enforcement
-- [ ] **Local Storage**: Test secure storage on mobile
-- [ ] **Deep Links**: Test custom URL scheme security
+> BlinkBudget ships as an installable PWA and an Android TWA. iOS-only items are marked N/A.
+
+- [ ] **Biometric Auth (Touch ID/Face ID)**: N/A — no biometric authentication is implemented (future consideration: WebAuthn/passkeys)
+- [ ] **HTTPS Enforcement**: Verify HTTPS everywhere and that the TWA disallows cleartext traffic (see A02)
+- [ ] **Local Storage on Mobile**: Verify sensitive-data handling in localStorage/IndexedDB on mobile browsers (see A02)
+- [ ] **Deep Links (App Links)**: Verify TWA App Links association via `public/.well-known/assetlinks.json` and that hash-based routes resolve from external links
 
 ### Performance & DoS
 
@@ -220,7 +221,7 @@ npx snyk test
 ### Tools Required
 
 ```bash
-# Security Testing Tools
+# Security Testing Tools (standalone global installs; npm -g is fine regardless of the project's yarn)
 npm install -g owasp-zap2
 npm install -g snyk
 npm install -g audit-ci
@@ -309,10 +310,7 @@ Dependabot (`.github/dependabot.yml`) provides weekly dependency update PRs; Dep
 
 ### Security Testing Schedule
 
-- **Daily**: Automated dependency scanning
-- **Weekly**: Automated security test suite
-- **Monthly**: Manual penetration testing
-- **Daily**: Automated dependency scanning
+- **Daily**: Automated dependency scanning (CI `security-audit` job + Dependabot)
 - **Weekly**: Automated security test suite
 - **Monthly**: Manual penetration testing
 - **Quarterly**: Full security audit / penetration test
@@ -320,7 +318,7 @@ Dependabot (`.github/dependabot.yml`) provides weekly dependency update PRs; Dep
 
 ## Current Testing Tools
 
-- **npm audit**: Built-in dependency vulnerability scanner
+- **yarn npm audit**: Built-in dependency vulnerability scanner (via Yarn; used by CI)
 - **Snyk**: Automated vulnerability monitoring (configured)
 - **Environment Validation**: `config/validate-env.cjs`
 - **Security Headers**: Configured in netlify.toml
@@ -358,5 +356,5 @@ Each security task has assigned ownership:
 - **Incident Response**: Participate in security incident response procedures
 - **Documentation**: Maintain security documentation and runbooks
 
-**Last Updated**: August 9, 2026  
-**Version**: 1.0
+**Last Updated**: September 15, 2026  
+**Version**: 1.1

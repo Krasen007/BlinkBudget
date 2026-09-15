@@ -7,6 +7,7 @@ import { getTodayISO } from '../date-utils.js';
 import { TIMING } from '../constants.js';
 import { sanitizeInput } from '../security-utils.js';
 import { applyExpenseTagToTransactionData } from './transaction-tags.js';
+import { showErrorToast } from '../toast-notifications.js';
 
 /**
  * Prepare transaction data for submission
@@ -142,16 +143,9 @@ export const handleFormSubmit = (transactionData, onSubmit, onError = null) => {
     if (onError) {
       onError(e, errorMessage);
     } else {
-      import('../toast-notifications.js')
-        .then(({ showErrorToast }) => {
-          showErrorToast(errorMessage, {
-            duration: TIMING.NOTIFICATION_ERROR,
-          });
-        })
-        .catch(importErr => {
-          console.error('Failed to load toast notifications:', importErr);
-          console.error('Original error:', errorMessage);
-        });
+      showErrorToast(errorMessage, {
+        duration: TIMING.NOTIFICATION_ERROR,
+      });
     }
   }
 };

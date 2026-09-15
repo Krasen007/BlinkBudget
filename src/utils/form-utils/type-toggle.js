@@ -11,7 +11,6 @@ import { TYPE_COLORS, COLORS, TOUCH_TARGETS } from '../constants.js';
  * @param {string} options.type - Transaction type (expense, income, transfer, refund)
  * @param {string} options.label - Button label
  * @param {Function} options.onClick - Click handler
- * @param {Function} options.updateState - State update function
  * @param {string} options.currentType - Currently selected type
  * @returns {HTMLButtonElement} Type toggle button
  */
@@ -40,20 +39,6 @@ const createTypeButton = options => {
   btn.style.whiteSpace = 'nowrap';
   btn.style.overflow = 'hidden';
   btn.style.textOverflow = 'ellipsis';
-
-  // State update function - will be called by parent
-  const updateButtonState = () => {
-    const currentTypeValue =
-      typeof currentType === 'function' ? currentType() : currentType;
-    const isActive = currentTypeValue === type;
-    const activeColor = TYPE_COLORS[type] || TYPE_COLORS.transfer;
-
-    btn.style.background = isActive ? activeColor : 'transparent';
-    btn.style.border = isActive
-      ? '1px solid transparent'
-      : '1px solid var(--color-border)';
-    btn.style.color = isActive ? 'white' : 'var(--color-text-muted)';
-  };
 
   // Click handler
   btn.addEventListener('click', () => {
@@ -107,9 +92,6 @@ const createTypeButton = options => {
       btn.style.boxShadow = 'none';
     }
   });
-
-  // Store update function on button
-  btn.updateState = updateButtonState;
 
   return btn;
 };
@@ -186,7 +168,6 @@ export const createTypeToggleGroup = (options = {}) => {
           onTypeChange(type);
         }
       },
-      updateState: updateAllButtons,
     });
 
     buttons[config.type] = btn;

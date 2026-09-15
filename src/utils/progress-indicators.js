@@ -154,4 +154,6 @@ export const addProgressStyles = () => {
   document.head.appendChild(style);
 };
 
-addProgressStyles();
+if (typeof document !== 'undefined') {
+  addProgressStyles();
+}

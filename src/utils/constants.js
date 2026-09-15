@@ -25,7 +25,7 @@ export const COLORS = {
   // purged from production CSS (no surviving rule references them), so the
   // charts must read the values from here — see todo/ai-slop-report.md.
   SUCCESS_RGB: '0, 179, 89',
-  ERROR_RGB: '255, 0, 0',
+  ERROR_RGB: '240, 66, 66',
 
   // CSS variable references (for consistency)
   PRIMARY: 'var(--color-primary)',
