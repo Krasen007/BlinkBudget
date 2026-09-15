@@ -128,6 +128,27 @@ export const prepareTransactionData = formState => {
 };
 
 /**
+ * Resolve a date string from a DateInput component, a plain input,
+ * or a fallback when neither is available. Shared by the transfer
+ * and category chip auto-submit paths.
+ * @param {Object|null} dateSource - External date input or null
+ * @returns {string} Date value (YYYY-MM-DD or ISO)
+ */
+export const resolveSubmitDateValue = dateSource => {
+  const source =
+    dateSource ||
+    (() => {
+      const fallback = document.createElement('input');
+      fallback.type = 'date';
+      fallback.value = new Date().toISOString().split('T')[0];
+      return fallback;
+    })();
+
+  if (source.getDate) return source.getDate();
+  return source.value || new Date().toISOString().split('T')[0];
+};
+
+/**
  * Handle form submission with error handling
  * @param {Object} transactionData - Prepared transaction data
  * @param {Function} onSubmit - Submit callback
@@ -138,14 +159,24 @@ export const handleFormSubmit = (transactionData, onSubmit, onError = null) => {
     onSubmit(transactionData);
   } catch (e) {
     console.error('Submit failed:', e);
-    const errorMessage = `Error submitting transaction: ${e.message}`;
+    const detail = e?.message ?? String(e);
+    const errorMessage = `Error submitting transaction: ${detail}`;
 
     if (onError) {
       onError(e, errorMessage);
-    } else {
+      return;
+    }
+
+    try {
       showErrorToast(errorMessage, {
         duration: TIMING.NOTIFICATION_ERROR,
       });
+    } catch (toastError) {
+      // Toast UI itself failed (should not happen with static imports,
+      // but keeps a submit failure visible instead of console-only).
+      console.error('Failed to show submit error toast:', toastError);
+      // eslint-disable-next-line no-alert
+      if (typeof alert === 'function') alert(errorMessage);
     }
   }
 };

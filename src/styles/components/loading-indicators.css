@@ -1,0 +1,53 @@
+/* Loading indicators — canonical spinner/float keyframes.
+ * Single source for @keyframes spin / float. JS no longer injects <style>
+ * tags; see enhanced-empty-states.js / progress-indicators.js / reports-ui.js.
+ */
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.progress-spinner {
+  border: 3px solid var(--color-border);
+  border-radius: 50%;
+  border-top-color: var(--color-primary);
+  animation: spin 1s linear infinite;
+}
+
+.empty-state__button:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@media (width <= 768px) {
+  .empty-state {
+    padding: var(--spacing-lg) var(--spacing-md) !important;
+    min-height: 300px !important;
+  }
+
+  .empty-state__secondary-actions {
+    flex-direction: column !important;
+    width: 100%;
+  }
+
+  .empty-state__button {
+    width: 100%;
+  }
+}

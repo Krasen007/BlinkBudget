@@ -67,6 +67,12 @@ vi.mock('../src/utils/financial-planning-helpers.js', () => ({
     note.innerHTML = `<p>${message}</p>`;
     return note;
   }),
+  formatCurrency: vi.fn(value =>
+    new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'EUR',
+    }).format(value)
+  ),
 }));
 
 //TODO: implement tests

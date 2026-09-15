@@ -7,6 +7,7 @@
 import { COLORS, SPACING, DIMENSIONS, CATEGORY_COLORS } from './constants.js';
 import { getChartColors } from '../core/chart-config.js';
 import { escapeHtml } from './security-utils.js';
+import { formatCurrency } from './financial-planning-helpers.js';
 import { Router } from '../core/router.js';
 import { NavigationState } from '../core/navigation-state.js';
 
@@ -77,10 +78,7 @@ function createCategoryTooltipConfig(detailsContainer) {
         const percentage =
           total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
 
-        const formattedValue = new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'EUR',
-        }).format(value);
+        const formattedValue = formatCurrency(value);
 
         // Create structured HTML for the details container
         // Security: All dynamic values are escaped using escapeHtml()
@@ -105,16 +103,73 @@ function createCategoryTooltipConfig(detailsContainer) {
         const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
         const percentage =
           total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
-        const formattedValue = new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'EUR',
-        }).format(value);
+        const formattedValue = formatCurrency(value);
 
         return `${label}: ${formattedValue} (${percentage}%)`;
       },
     },
   };
 }
+
+/**
+ * Create a clickable stat card that filters the dashboard.
+ * Shared by the category-breakdown totals and the income/expense summary.
+ */
+const createClickableStat = ({
+  label,
+  formattedValue,
+  color,
+  align = null,
+  labelMargin = SPACING.XXS,
+  valueSize = '1.25rem',
+  ariaLabel,
+  title,
+  onClick,
+}) => {
+  const container = document.createElement('div');
+  container.setAttribute('role', 'button');
+  container.setAttribute('tabindex', '0');
+  container.setAttribute('aria-label', ariaLabel);
+  if (align) {
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.alignItems = align;
+  }
+  container.style.cursor = 'pointer';
+  container.style.transition = 'opacity 0.2s ease';
+  container.title = title;
+
+  const labelEl = document.createElement('div');
+  labelEl.textContent = label;
+  labelEl.style.fontSize = '0.875rem';
+  labelEl.style.color = COLORS.TEXT_MUTED;
+  labelEl.style.marginBottom = labelMargin;
+  container.appendChild(labelEl);
+
+  const valueEl = document.createElement('div');
+  valueEl.textContent = formattedValue;
+  valueEl.style.fontSize = valueSize;
+  valueEl.style.fontWeight = 'bold';
+  valueEl.style.color = color;
+  container.appendChild(valueEl);
+
+  container.addEventListener('mouseenter', () => {
+    container.style.opacity = '0.7';
+  });
+  container.addEventListener('mouseleave', () => {
+    container.style.opacity = '1';
+  });
+
+  container.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      container.click();
+    }
+  });
+
+  container.addEventListener('click', onClick);
+  return container;
+};
 
 /**
  * Create interactive category breakdown pie chart
@@ -161,124 +216,39 @@ export async function createCategoryBreakdownChart(
   totalsContainer.style.gap = SPACING.MD;
   totalsContainer.style.textAlign = 'right';
 
-  // Total Income (Left side) - clickable to filter dashboard by income
-  const totalIncomeContainer = document.createElement('div');
-  totalIncomeContainer.setAttribute('role', 'button');
-  totalIncomeContainer.setAttribute('tabindex', '0');
-  totalIncomeContainer.setAttribute(
-    'aria-label',
-    'Filter dashboard by income transactions'
-  );
-  totalIncomeContainer.style.display = 'flex';
-  totalIncomeContainer.style.flexDirection = 'column';
-  totalIncomeContainer.style.alignItems = 'flex-start';
-  totalIncomeContainer.style.cursor = 'pointer';
-  totalIncomeContainer.style.transition = 'opacity 0.2s ease';
-  totalIncomeContainer.title =
-    'Click to filter dashboard by income transactions';
-
-  // Add keyboard handler for accessibility
-  totalIncomeContainer.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      totalIncomeContainer.click();
-    }
-  });
-
-  const totalIncomeLabel = document.createElement('span');
-  totalIncomeLabel.textContent = 'Total Income';
-  totalIncomeLabel.style.fontSize = '0.875rem';
-  totalIncomeLabel.style.color = COLORS.TEXT_MUTED;
-  totalIncomeLabel.style.marginBottom = SPACING.XXS;
-
-  const totalIncomeValue = document.createElement('span');
   const totalIncome = currentData.incomeVsExpenses?.totalIncome || 0;
-  totalIncomeValue.textContent = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'EUR',
-  }).format(totalIncome);
-  totalIncomeValue.style.fontSize = '1.25rem';
-  totalIncomeValue.style.fontWeight = 'bold';
-  totalIncomeValue.style.color = COLORS.INCOME_COLOR; // Green color for income
-
-  totalIncomeContainer.appendChild(totalIncomeLabel);
-  totalIncomeContainer.appendChild(totalIncomeValue);
-
-  totalIncomeContainer.addEventListener('mouseenter', () => {
-    totalIncomeContainer.style.opacity = '0.7';
-  });
-  totalIncomeContainer.addEventListener('mouseleave', () => {
-    totalIncomeContainer.style.opacity = '1';
-  });
-
-  totalIncomeContainer.addEventListener('click', () => {
-    NavigationState.saveDashboardTypeFilter('income');
-    // Also save the current time period to filter by the selected month
+  const totalSpent = allCategories.reduce((sum, cat) => sum + cat.amount, 0);
+  const savePeriodAndGo = () => {
     if (currentData.timePeriod) {
       NavigationState.saveDashboardTimePeriod(currentData.timePeriod);
     }
     Router.navigate('dashboard');
+  };
+
+  const totalIncomeContainer = createClickableStat({
+    label: 'Total Income',
+    formattedValue: formatCurrency(totalIncome),
+    color: COLORS.INCOME_COLOR,
+    align: 'flex-start',
+    ariaLabel: 'Filter dashboard by income transactions',
+    title: 'Click to filter dashboard by income transactions',
+    onClick: () => {
+      NavigationState.saveDashboardTypeFilter('income');
+      savePeriodAndGo();
+    },
   });
 
   // Total Spent (Right side) - clickable to filter dashboard by expenses
-  const totalSpentContainer = document.createElement('div');
-  totalSpentContainer.setAttribute('role', 'button');
-  totalSpentContainer.setAttribute('tabindex', '0');
-  totalSpentContainer.setAttribute(
-    'aria-label',
-    'Filter dashboard to the selected period (includes refunds)'
-  );
-  totalSpentContainer.style.display = 'flex';
-  totalSpentContainer.style.flexDirection = 'column';
-  totalSpentContainer.style.alignItems = 'flex-end';
-  totalSpentContainer.style.cursor = 'pointer';
-  totalSpentContainer.style.transition = 'opacity 0.2s ease';
-  totalSpentContainer.title =
-    'Click to filter dashboard to this period (includes refunds)';
-
-  const totalSpentLabel = document.createElement('span');
-  totalSpentLabel.textContent = 'Total Spent';
-  totalSpentLabel.style.fontSize = '0.875rem';
-  totalSpentLabel.style.color = COLORS.TEXT_MUTED;
-  totalSpentLabel.style.marginBottom = SPACING.XXS;
-
-  const totalSpentValue = document.createElement('span');
-  const totalSpent = allCategories.reduce((sum, cat) => sum + cat.amount, 0);
-  totalSpentValue.textContent = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'EUR',
-  }).format(totalSpent);
-  totalSpentValue.style.fontSize = '1.25rem';
-  totalSpentValue.style.fontWeight = 'bold';
-  totalSpentValue.style.color = COLORS.PRIMARY;
-
-  totalSpentContainer.appendChild(totalSpentLabel);
-  totalSpentContainer.appendChild(totalSpentValue);
-
-  totalSpentContainer.addEventListener('mouseenter', () => {
-    totalSpentContainer.style.opacity = '0.7';
-  });
-  totalSpentContainer.addEventListener('mouseleave', () => {
-    totalSpentContainer.style.opacity = '1';
-  });
-
-  // Add keyboard handler for accessibility
-  totalSpentContainer.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      totalSpentContainer.click();
-    }
-  });
-
-  totalSpentContainer.addEventListener('click', () => {
-    // Don't set a type filter - the total spent includes both expenses and refunds
-    // Setting type='expense' would exclude refunds, making the dashboard inconsistent
-    // with the "Total Spent" calculation which includes refunds as negative amounts
-    // Also save the current time period to filter by the selected month
-    if (currentData.timePeriod) {
-      NavigationState.saveDashboardTimePeriod(currentData.timePeriod);
-    }
-    Router.navigate('dashboard');
+  // Note: no type filter — total spent includes refunds, so filtering by
+  // type='expense' would exclude refunds and disagree with this total.
+  const totalSpentContainer = createClickableStat({
+    label: 'Total Spent',
+    formattedValue: formatCurrency(totalSpent),
+    color: COLORS.PRIMARY,
+    align: 'flex-end',
+    ariaLabel: 'Filter dashboard to the selected period (includes refunds)',
+    title: 'Click to filter dashboard to this period (includes refunds)',
+    onClick: savePeriodAndGo,
   });
 
   totalsContainer.appendChild(totalIncomeContainer);
@@ -466,14 +436,6 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   // Prepare chart data first
   const incomeExpenseData = currentData.incomeVsExpenses;
 
-  // Format currency values
-  const formatCurrency = amount => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'EUR',
-    }).format(amount);
-  };
-
   // Create details content as part of the section
   const detailsContent = document.createElement('div');
   detailsContent.style.display = 'grid';
@@ -483,109 +445,46 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   detailsContent.style.textAlign = 'center';
   detailsContent.style.marginBottom = SPACING.XS;
 
-  // Income div - clickable to filter dashboard by income
-  const incomeDiv = document.createElement('div');
-  incomeDiv.setAttribute('role', 'button');
-  incomeDiv.setAttribute('tabindex', '0');
-  incomeDiv.setAttribute(
-    'aria-label',
-    'Filter dashboard by income transactions'
-  );
-  incomeDiv.style.cursor = 'pointer';
-  incomeDiv.style.transition = 'opacity 0.2s ease';
-  incomeDiv.title = 'Click to filter dashboard by income transactions';
-
-  const incomeLabel = document.createElement('div');
-  incomeLabel.textContent = 'Income';
-  incomeLabel.style.fontSize = '0.875rem';
-  incomeLabel.style.color = 'var(--color-text-muted)';
-  incomeLabel.style.marginBottom = SPACING.XS;
-  incomeDiv.appendChild(incomeLabel);
-
-  const incomeValue = document.createElement('div');
-  incomeValue.textContent = formatCurrency(incomeExpenseData.totalIncome);
-  incomeValue.style.fontSize = '1.125rem';
-  incomeValue.style.fontWeight = 'bold';
-  incomeValue.style.color = COLORS.INCOME_COLOR;
-  incomeDiv.appendChild(incomeValue);
-
-  incomeDiv.addEventListener('mouseenter', () => {
-    incomeDiv.style.opacity = '0.7';
-  });
-  incomeDiv.addEventListener('mouseleave', () => {
-    incomeDiv.style.opacity = '1';
-  });
-
-  // Add keyboard handler for accessibility
-  incomeDiv.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      incomeDiv.click();
-    }
-  });
-
-  incomeDiv.addEventListener('click', () => {
+  const savePeriodAndGoIncome = () => {
     NavigationState.saveDashboardTypeFilter('income');
-    // Also save the current time period to filter by the selected month
     if (currentData.timePeriod) {
       NavigationState.saveDashboardTimePeriod(currentData.timePeriod);
     }
     Router.navigate('dashboard');
+  };
+  const savePeriodAndGoExpenses = () => {
+    // No type filter — expenses include refunds, so type='expense'
+    // would disagree with this total.
+    if (currentData.timePeriod) {
+      NavigationState.saveDashboardTimePeriod(currentData.timePeriod);
+    }
+    Router.navigate('dashboard');
+  };
+
+  // Income div - clickable to filter dashboard by income
+  const incomeDiv = createClickableStat({
+    label: 'Income',
+    formattedValue: formatCurrency(incomeExpenseData.totalIncome),
+    color: COLORS.INCOME_COLOR,
+    labelMargin: SPACING.XS,
+    valueSize: '1.125rem',
+    ariaLabel: 'Filter dashboard by income transactions',
+    title: 'Click to filter dashboard by income transactions',
+    onClick: savePeriodAndGoIncome,
   });
 
   detailsContent.appendChild(incomeDiv);
 
   // Expenses div - clickable to filter dashboard by expenses
-  const expensesDiv = document.createElement('div');
-  expensesDiv.setAttribute('role', 'button');
-  expensesDiv.setAttribute('tabindex', '0');
-  expensesDiv.setAttribute(
-    'aria-label',
-    'Filter dashboard to the selected period (includes refunds)'
-  );
-  expensesDiv.style.cursor = 'pointer';
-  expensesDiv.style.transition = 'opacity 0.2s ease';
-  expensesDiv.title =
-    'Click to filter dashboard to this period (includes refunds)';
-
-  const expensesLabel = document.createElement('div');
-  expensesLabel.textContent = 'Expenses';
-  expensesLabel.style.fontSize = '0.875rem';
-  expensesLabel.style.color = 'var(--color-text-muted)';
-  expensesLabel.style.marginBottom = SPACING.XS;
-  expensesDiv.appendChild(expensesLabel);
-
-  const expensesValue = document.createElement('div');
-  expensesValue.textContent = formatCurrency(incomeExpenseData.totalExpenses);
-  expensesValue.style.fontSize = '1.125rem';
-  expensesValue.style.fontWeight = 'bold';
-  expensesValue.style.color = 'var(--color-error)';
-  expensesDiv.appendChild(expensesValue);
-
-  expensesDiv.addEventListener('mouseenter', () => {
-    expensesDiv.style.opacity = '0.7';
-  });
-  expensesDiv.addEventListener('mouseleave', () => {
-    expensesDiv.style.opacity = '1';
-  });
-
-  // Add keyboard handler for accessibility
-  expensesDiv.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      expensesDiv.click();
-    }
-  });
-
-  expensesDiv.addEventListener('click', () => {
-    // Don't set a type filter - the total expenses includes both expenses and refunds
-    // Setting type='expense' would exclude refunds, making the dashboard inconsistent
-    // with the "Expenses" calculation which includes refunds as negative amounts
-    // Also save the current time period to filter by the selected month
-    if (currentData.timePeriod) {
-      NavigationState.saveDashboardTimePeriod(currentData.timePeriod);
-    }
-    Router.navigate('dashboard');
+  const expensesDiv = createClickableStat({
+    label: 'Expenses',
+    formattedValue: formatCurrency(incomeExpenseData.totalExpenses),
+    color: 'var(--color-error)',
+    labelMargin: SPACING.XS,
+    valueSize: '1.125rem',
+    ariaLabel: 'Filter dashboard to the selected period (includes refunds)',
+    title: 'Click to filter dashboard to this period (includes refunds)',
+    onClick: savePeriodAndGoExpenses,
   });
 
   detailsContent.appendChild(expensesDiv);

@@ -3,17 +3,11 @@
  * Creates category selection chips and transfer account chips
  */
 
-import {
-  SPACING,
-  FONT_SIZES,
-  TOUCH_TARGETS,
-  COLORS,
-  TIMING,
-} from '../constants.js';
-import { validateAmount, showFieldError } from './validation.js';
+import { SPACING, FONT_SIZES, TOUCH_TARGETS, COLORS } from '../constants.js';
+import { validateAmountField } from './validation.js';
+import { handleFormSubmit, resolveSubmitDateValue } from './submission.js';
 import { ClickTracker } from '../../core/click-tracking-service.js';
 import { CustomCategoryService } from '../../core/custom-category-service.js';
-import { showErrorToast } from '../toast-notifications.js';
 
 /**
  * Create a single category/account chip
@@ -277,41 +271,26 @@ export const createCategorySelector = (options = {}) => {
           color: 'var(--color-primary)',
           isSelected: selectedToAccount === acc.id,
           onClick: () => {
-            // Validate amount
-            let amountValidation = { valid: true, value: 0 };
-            if (amountInput) {
-              amountValidation = validateAmount(amountInput.value);
-              if (!amountValidation.valid) {
-                showFieldError(amountInput);
-                return;
-              }
-            }
+            const amountValidation = validateAmountField(amountInput);
+            if (!amountValidation.valid) return;
 
             selectedToAccount = acc.id;
 
             // Auto-submit for Transfer
             if (onSubmit && amountInput) {
-              const dateSource =
-                externalDateInput ||
-                (() => {
-                  const fallback = document.createElement('input');
-                  fallback.type = 'date';
-                  fallback.value = new Date().toISOString().split('T')[0];
-                  return fallback;
-                })();
+              const dateValue = resolveSubmitDateValue(externalDateInput);
 
-              const dateValue = dateSource.getDate
-                ? dateSource.getDate()
-                : dateSource.value || new Date().toISOString().split('T')[0];
-
-              onSubmit({
-                amount: amountValidation.value,
-                category: 'Transfer',
-                type: 'transfer',
-                accountId: currentSourceAccount,
-                toAccountId: selectedToAccount,
-                timestamp: new Date(dateValue).toISOString(),
-              });
+              handleFormSubmit(
+                {
+                  amount: amountValidation.value,
+                  category: 'Transfer',
+                  type: 'transfer',
+                  accountId: currentSourceAccount,
+                  toAccountId: selectedToAccount,
+                  timestamp: new Date(dateValue).toISOString(),
+                },
+                onSubmit
+              );
             }
 
             if (onSelect) {
@@ -401,15 +380,8 @@ export const createCategorySelector = (options = {}) => {
             isSelected: selectedCategory === cat,
             title: catDesc,
             onClick: () => {
-              // Validate amount
-              let amountValidation = { valid: true, value: 0 };
-              if (amountInput) {
-                amountValidation = validateAmount(amountInput.value);
-                if (!amountValidation.valid) {
-                  showFieldError(amountInput);
-                  return;
-                }
-              }
+              const amountValidation = validateAmountField(amountInput);
+              if (!amountValidation.valid) return;
 
               // Visual feedback - deselect all
               Array.from(container.children).forEach(c => {
@@ -425,34 +397,18 @@ export const createCategorySelector = (options = {}) => {
 
               // Auto-submit
               if (onSubmit && amountInput) {
-                try {
-                  const dateSource =
-                    externalDateInput ||
-                    (() => {
-                      const fallback = document.createElement('input');
-                      fallback.type = 'date';
-                      fallback.value = new Date().toISOString().split('T')[0];
-                      return fallback;
-                    })();
+                const dateValue = resolveSubmitDateValue(externalDateInput);
 
-                  const dateValue = dateSource.getDate
-                    ? dateSource.getDate()
-                    : dateSource.value ||
-                      new Date().toISOString().split('T')[0];
-
-                  onSubmit({
+                handleFormSubmit(
+                  {
                     amount: amountValidation.value,
                     category: selectedCategory,
                     type: currentType,
                     accountId: currentSourceAccount,
                     timestamp: new Date(dateValue).toISOString(),
-                  });
-                } catch (e) {
-                  console.error('Submit failed:', e);
-                  showErrorToast(`Error submitting transaction: ${e.message}`, {
-                    duration: TIMING.NOTIFICATION_ERROR,
-                  });
-                }
+                  },
+                  onSubmit
+                );
               }
 
               if (onSelect) {
@@ -502,15 +458,17 @@ export const createCategorySelector = (options = {}) => {
 
   // Listen for category updates elsewhere in the app and re-render
   const _onCategoriesUpdated = () => {
+    // Plain guards first: drop a stale selection before touching the DOM.
+    const available =
+      CustomCategoryService.getAllCategoryNames(currentType) || [];
+    if (selectedCategory && !available.includes(selectedCategory)) {
+      // Selected category was deleted or renamed; clear selection to avoid stale references
+      selectedCategory = null;
+      prioritizedCategory = null;
+    }
+    // A throwing render() in an event handler would break other listeners,
+    // so only this call stays guarded.
     try {
-      // Reconcile selectedCategory against current categories
-      const available =
-        CustomCategoryService.getAllCategoryNames(currentType) || [];
-      if (selectedCategory && !available.includes(selectedCategory)) {
-        // Selected category was deleted or renamed; clear selection to avoid stale references
-        selectedCategory = null;
-        prioritizedCategory = null;
-      }
       render();
     } catch (e) {
       console.error('Failed to re-render category selector:', e);

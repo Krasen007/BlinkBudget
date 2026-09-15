@@ -8,6 +8,47 @@
 // Chart.js renders on HTML Canvas, which doesn't understand CSS variables like `var(--color-success)`. When these variables were passed as chart colors, Canvas couldn't resolve them and defaulted to black.
 import { COLORS, SPACING, DIMENSIONS } from './constants.js';
 import { formatDateForDisplay } from './date-utils.js';
+import { formatCurrency } from './financial-planning-helpers.js';
+
+const createChartSection = ({ className, chartType, title, canvasId }) => {
+  const section = document.createElement('div');
+  section.className = `chart-section ${className}`;
+  section.setAttribute('data-chart-type', chartType);
+  section.style.background = COLORS.SURFACE;
+  section.style.borderRadius = 'var(--radius-lg)';
+  section.style.border = `1px solid ${COLORS.BORDER}`;
+  section.style.padding = SPACING.LG;
+  section.style.marginBottom = SPACING.LG;
+
+  const header = document.createElement('div');
+  header.style.display = 'flex';
+  header.style.justifyContent = 'space-between';
+  header.style.alignItems = 'center';
+  header.style.marginBottom = SPACING.MD;
+
+  const titleEl = document.createElement('h3');
+  titleEl.textContent = title;
+  titleEl.style.margin = '0';
+  titleEl.style.color = COLORS.TEXT_MAIN;
+  titleEl.style.fontSize = '1.125rem';
+  titleEl.style.fontWeight = '600';
+
+  header.appendChild(titleEl);
+  section.appendChild(header);
+
+  const chartDiv = document.createElement('div');
+  chartDiv.style.position = 'relative';
+  chartDiv.style.height = DIMENSIONS.CHART_HEIGHT_LINE;
+  chartDiv.style.marginBottom = SPACING.MD;
+
+  const canvas = document.createElement('canvas');
+  canvas.id = canvasId;
+  canvas.style.maxHeight = '100%';
+  chartDiv.appendChild(canvas);
+
+  section.appendChild(chartDiv);
+  return { section, chartDiv, canvas };
+};
 
 /**
  * Create projected balance line chart showing future account balances
@@ -21,42 +62,12 @@ export async function createProjectedBalanceChart(
   balanceProjections,
   options = {}
 ) {
-  const section = document.createElement('div');
-  section.className = 'chart-section projected-balance-section';
-  section.setAttribute('data-chart-type', 'projected-balance');
-  section.style.background = COLORS.SURFACE;
-  section.style.borderRadius = 'var(--radius-lg)';
-  section.style.border = `1px solid ${COLORS.BORDER}`;
-  section.style.padding = SPACING.LG;
-  section.style.marginBottom = SPACING.LG;
-
-  const header = document.createElement('div');
-  header.style.display = 'flex';
-  header.style.justifyContent = 'space-between';
-  header.style.alignItems = 'center';
-  header.style.marginBottom = SPACING.MD;
-
-  const title = document.createElement('h3');
-  title.textContent = options.title || 'Projected Account Balance';
-  title.style.margin = '0';
-  title.style.color = COLORS.TEXT_MAIN;
-  title.style.fontSize = '1.125rem';
-  title.style.fontWeight = '600';
-
-  header.appendChild(title);
-  section.appendChild(header);
-
-  const chartDiv = document.createElement('div');
-  chartDiv.style.position = 'relative';
-  chartDiv.style.height = DIMENSIONS.CHART_HEIGHT_LINE;
-  chartDiv.style.marginBottom = SPACING.MD;
-
-  const canvas = document.createElement('canvas');
-  canvas.id = 'projected-balance-chart';
-  canvas.style.maxHeight = '100%';
-  chartDiv.appendChild(canvas);
-
-  section.appendChild(chartDiv);
+  const { section, canvas } = createChartSection({
+    className: 'projected-balance-section',
+    chartType: 'projected-balance',
+    title: options.title || 'Projected Account Balance',
+    canvasId: 'projected-balance-chart',
+  });
 
   const labels = balanceProjections.map(projection => {
     const date = new Date(projection.period);
@@ -127,10 +138,7 @@ export async function createProjectedBalanceChart(
         callbacks: {
           label: function (context) {
             const value = context.parsed.y;
-            const formattedValue = new Intl.NumberFormat('en-US', {
-              style: 'currency',
-              currency: 'EUR',
-            }).format(value);
+            const formattedValue = formatCurrency(value);
             return `${context.dataset.label}: ${formattedValue}`;
           },
         },
@@ -184,42 +192,12 @@ export async function createGoalProgressChart(
   goals,
   options = {}
 ) {
-  const section = document.createElement('div');
-  section.className = 'chart-section goal-progress-section';
-  section.setAttribute('data-chart-type', 'goal-progress');
-  section.style.background = COLORS.SURFACE;
-  section.style.borderRadius = 'var(--radius-lg)';
-  section.style.border = `1px solid ${COLORS.BORDER}`;
-  section.style.padding = SPACING.LG;
-  section.style.marginBottom = SPACING.LG;
-
-  const header = document.createElement('div');
-  header.style.display = 'flex';
-  header.style.justifyContent = 'space-between';
-  header.style.alignItems = 'center';
-  header.style.marginBottom = SPACING.MD;
-
-  const title = document.createElement('h3');
-  title.textContent = options.title || 'Goal Progress';
-  title.style.margin = '0';
-  title.style.color = COLORS.TEXT_MAIN;
-  title.style.fontSize = '1.125rem';
-  title.style.fontWeight = '600';
-
-  header.appendChild(title);
-  section.appendChild(header);
-
-  const chartDiv = document.createElement('div');
-  chartDiv.style.position = 'relative';
-  chartDiv.style.height = DIMENSIONS.CHART_HEIGHT_LINE;
-  chartDiv.style.marginBottom = SPACING.MD;
-
-  const canvas = document.createElement('canvas');
-  canvas.id = 'goal-progress-chart';
-  canvas.style.maxHeight = '100%';
-  chartDiv.appendChild(canvas);
-
-  section.appendChild(chartDiv);
+  const { section, canvas } = createChartSection({
+    className: 'goal-progress-section',
+    chartType: 'goal-progress',
+    title: options.title || 'Goal Progress',
+    canvasId: 'goal-progress-chart',
+  });
 
   // Prepare chart data - horizontal bar chart showing progress
   const goalNames = goals.map(goal => goal.name);
@@ -273,14 +251,8 @@ export async function createGoalProgressChart(
             const goalIndex = context.dataIndex;
             const goal = goals[goalIndex];
             const progress = context.parsed.x;
-            const currentAmount = new Intl.NumberFormat('en-US', {
-              style: 'currency',
-              currency: 'EUR',
-            }).format(goal.currentSavings);
-            const targetAmount = new Intl.NumberFormat('en-US', {
-              style: 'currency',
-              currency: 'EUR',
-            }).format(goal.targetAmount);
+            const currentAmount = formatCurrency(goal.currentSavings);
+            const targetAmount = formatCurrency(goal.targetAmount);
 
             return [
               `Progress: ${progress.toFixed(1)}%`,
@@ -333,42 +305,12 @@ export async function createForecastComparisonChart(
   expenseForecasts,
   options = {}
 ) {
-  const section = document.createElement('div');
-  section.className = 'chart-section forecast-comparison-section';
-  section.setAttribute('data-chart-type', 'forecast-comparison');
-  section.style.background = COLORS.SURFACE;
-  section.style.borderRadius = 'var(--radius-lg)';
-  section.style.border = `1px solid ${COLORS.BORDER}`;
-  section.style.padding = SPACING.LG;
-  section.style.marginBottom = SPACING.LG;
-
-  const header = document.createElement('div');
-  header.style.display = 'flex';
-  header.style.justifyContent = 'space-between';
-  header.style.alignItems = 'center';
-  header.style.marginBottom = SPACING.MD;
-
-  const title = document.createElement('h3');
-  title.textContent = options.title || 'Income vs Expense Forecast';
-  title.style.margin = '0';
-  title.style.color = COLORS.TEXT_MAIN;
-  title.style.fontSize = '1.125rem';
-  title.style.fontWeight = '600';
-
-  header.appendChild(title);
-  section.appendChild(header);
-
-  const chartDiv = document.createElement('div');
-  chartDiv.style.position = 'relative';
-  chartDiv.style.height = DIMENSIONS.CHART_HEIGHT_LINE;
-  chartDiv.style.marginBottom = SPACING.MD;
-
-  const canvas = document.createElement('canvas');
-  canvas.id = 'forecast-comparison-chart';
-  canvas.style.maxHeight = '100%';
-  chartDiv.appendChild(canvas);
-
-  section.appendChild(chartDiv);
+  const { section, canvas } = createChartSection({
+    className: 'forecast-comparison-section',
+    chartType: 'forecast-comparison',
+    title: options.title || 'Income vs Expense Forecast',
+    canvasId: 'forecast-comparison-chart',
+  });
 
   const maxLength = Math.max(incomeForecasts.length, expenseForecasts.length);
   const labels = [];
@@ -433,10 +375,7 @@ export async function createForecastComparisonChart(
         callbacks: {
           label: function (context) {
             const value = context.parsed.y;
-            const formattedValue = new Intl.NumberFormat('en-US', {
-              style: 'currency',
-              currency: 'EUR',
-            }).format(value);
+            const formattedValue = formatCurrency(value);
             return `${context.dataset.label}: ${formattedValue}`;
           },
         },
@@ -501,26 +440,17 @@ function createBalanceSummary(balanceProjections) {
   const stats = [
     {
       label: 'Current Balance',
-      value: new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'EUR',
-      }).format(currentBalance),
+      value: formatCurrency(currentBalance),
       color: currentBalance >= 0 ? 'hsl(150, 70%, 45%)' : 'hsl(0, 75%, 60%)',
     },
     {
       label: 'Projected Change',
-      value: new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'EUR',
-      }).format(change),
+      value: formatCurrency(change),
       color: change >= 0 ? 'hsl(150, 70%, 45%)' : 'hsl(0, 75%, 60%)',
     },
     {
       label: 'Lowest Point',
-      value: new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'EUR',
-      }).format(lowestBalance),
+      value: formatCurrency(lowestBalance),
       color: lowestBalance >= 0 ? 'hsl(150, 70%, 45%)' : 'hsl(0, 75%, 60%)',
     },
   ];
@@ -609,14 +539,8 @@ function createGoalDetails(goals) {
     progressText.style.marginBottom = SPACING.XXS;
 
     const amounts = document.createElement('div');
-    const currentFormatted = new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'EUR',
-    }).format(goal.currentSavings);
-    const targetFormatted = new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'EUR',
-    }).format(goal.targetAmount);
+    const currentFormatted = formatCurrency(goal.currentSavings);
+    const targetFormatted = formatCurrency(goal.targetAmount);
     amounts.textContent = `${currentFormatted} / ${targetFormatted}`;
     amounts.style.fontSize = '0.75rem';
     amounts.style.color = 'hsl(220, 10%, 75%)';

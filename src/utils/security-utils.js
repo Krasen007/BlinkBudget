@@ -24,7 +24,9 @@ export const sanitizeInput = (input, maxLength = 255) => {
 
     return sanitized;
   } catch {
-    // Fallback to simple regex if DOMParser fails
+    // Intentionally silent: DOMParser is unavailable in this environment,
+    // so fall back to a regex strip. Callers already receive a sanitized
+    // string, so there is nothing actionable to log here.
     const sanitized = input.replace(/<[^>]*>?/gm, '');
     if (sanitized.length > maxLength) {
       return sanitized.substring(0, maxLength);

@@ -407,42 +407,9 @@ export function getProgressiveUnlockMessage(sectionOrCount, countParam) {
 
 /**
  * Add floating animation CSS
+ * @deprecated Styles now live in `src/styles/components/loading-indicators.css`.
+ * Kept as a no-op for backward compatibility.
  */
 export function addEmptyStateStyles() {
-  const styleId = 'empty-state-styles';
-  if (document.getElementById(styleId)) return;
-
-  const style = document.createElement('style');
-  style.id = styleId;
-  style.textContent = `
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-    }
-    
-    .empty-state__button:focus {
-      outline: 2px solid ${COLORS.PRIMARY};
-      outline-offset: 2px;
-    }
-    
-    @media (max-width: 768px) {
-      .empty-state {
-        padding: ${SPACING.LG} ${SPACING.MD} !important;
-        min-height: ${DIMENSIONS.PLACEHOLDER_MIN_HEIGHT} !important;
-      }
-      
-      .empty-state__secondary-actions {
-        flex-direction: column !important;
-        width: 100%;
-      }
-      
-      .empty-state__button {
-        width: 100%;
-      }
-    }
-  `;
-
-  document.head.appendChild(style);
+  return;
 }
-
-addEmptyStateStyles();

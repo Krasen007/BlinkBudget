@@ -7,6 +7,7 @@
 
 import { trendService } from '../core/analytics/TrendService.js';
 import { getChartColors } from '../core/chart-config.js';
+import { formatCurrency } from './financial-planning-helpers.js';
 
 /**
  * Prepare chart data for inflation trends visualization
@@ -133,10 +134,7 @@ export const getChartOptions = (chartType = 'line') => {
                 : null;
 
             // Format currency value
-            const currencyValue = new Intl.NumberFormat('en-US', {
-              style: 'currency',
-              currency: 'EUR',
-            }).format(value);
+            const currencyValue = formatCurrency(value);
 
             // Build tooltip line
             let tooltipText = `${dataset.category || dataset.label}: ${currencyValue}`;

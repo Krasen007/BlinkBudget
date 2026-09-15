@@ -114,7 +114,7 @@ export function createSectionContainer(id, title, icon) {
  * @returns {string} The formatted currency string
  */
 export function formatCurrency(value, currency = 'EUR') {
-  return new Intl.NumberFormat('en-EU', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currency,
   }).format(value);

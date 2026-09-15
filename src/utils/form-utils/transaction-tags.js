@@ -61,6 +61,37 @@ const syncTagOptionStates = (container, selectedTag) => {
   });
 };
 
+const buildTagOption = ({ name, color, selected, onToggle }) => {
+  const option = document.createElement('label');
+  option.className = 'transaction-tag-option';
+  option.style.setProperty('--tag-color', color || 'var(--color-primary)');
+
+  const input = document.createElement('input');
+  input.type = 'checkbox';
+  input.className = 'transaction-tag-option__input';
+  input.name = 'transaction-tag';
+  input.value = name;
+  input.checked = selected;
+
+  const mark = document.createElement('span');
+  mark.className = 'transaction-tag-option__mark';
+  mark.style.setProperty('--tag-color', color || 'var(--color-primary)');
+
+  const text = document.createElement('span');
+  text.className = 'transaction-tag-option__label';
+  text.textContent = name;
+
+  option.addEventListener('click', e => {
+    e.preventDefault();
+    onToggle();
+  });
+
+  option.appendChild(input);
+  option.appendChild(mark);
+  option.appendChild(text);
+  return option;
+};
+
 export const createTransactionTagSelector = ({ initialTag = null } = {}) => {
   let selectedTag = initialTag || null;
 
@@ -80,36 +111,17 @@ export const createTransactionTagSelector = ({ initialTag = null } = {}) => {
     if (!flagCategories.length) {
       if (selectedTag) {
         container.hidden = false;
-        const option = document.createElement('label');
-        option.className =
-          'transaction-tag-option transaction-tag-option--selected';
-        option.style.setProperty('--tag-color', 'var(--color-primary)');
-
-        const input = document.createElement('input');
-        input.type = 'checkbox';
-        input.className = 'transaction-tag-option__input';
-        input.name = 'transaction-tag';
-        input.value = selectedTag;
-        input.checked = true;
-
-        const mark = document.createElement('span');
-        mark.className = 'transaction-tag-option__mark';
-        mark.style.setProperty('--tag-color', 'var(--color-primary)');
-
-        const text = document.createElement('span');
-        text.className = 'transaction-tag-option__label';
-        text.textContent = selectedTag;
-
-        option.addEventListener('click', e => {
-          e.preventDefault();
-          selectedTag = null;
-          render();
-        });
-
-        option.appendChild(input);
-        option.appendChild(mark);
-        option.appendChild(text);
-        container.appendChild(option);
+        container.appendChild(
+          buildTagOption({
+            name: selectedTag,
+            color: 'var(--color-primary)',
+            selected: true,
+            onToggle: () => {
+              selectedTag = null;
+              render();
+            },
+          })
+        );
       } else {
         container.hidden = true;
       }
@@ -119,45 +131,21 @@ export const createTransactionTagSelector = ({ initialTag = null } = {}) => {
     container.hidden = false;
 
     flagCategories.forEach(category => {
-      const option = document.createElement('label');
-      option.className = 'transaction-tag-option';
-      option.style.setProperty(
-        '--tag-color',
-        category.color || 'var(--color-primary)'
+      container.appendChild(
+        buildTagOption({
+          name: category.name,
+          color: category.color,
+          selected: selectedTag === category.name,
+          onToggle: () => {
+            if (selectedTag === category.name) {
+              selectedTag = null;
+            } else {
+              selectedTag = category.name;
+            }
+            syncTagOptionStates(container, selectedTag);
+          },
+        })
       );
-
-      const input = document.createElement('input');
-      input.type = 'checkbox';
-      input.className = 'transaction-tag-option__input';
-      input.name = 'transaction-tag';
-      input.value = category.name;
-      input.checked = selectedTag === category.name;
-
-      const mark = document.createElement('span');
-      mark.className = 'transaction-tag-option__mark';
-      mark.style.setProperty(
-        '--tag-color',
-        category.color || 'var(--color-primary)'
-      );
-
-      const text = document.createElement('span');
-      text.className = 'transaction-tag-option__label';
-      text.textContent = category.name;
-
-      option.addEventListener('click', e => {
-        e.preventDefault();
-        if (selectedTag === category.name) {
-          selectedTag = null;
-        } else {
-          selectedTag = category.name;
-        }
-        syncTagOptionStates(container, selectedTag);
-      });
-
-      option.appendChild(input);
-      option.appendChild(mark);
-      option.appendChild(text);
-      container.appendChild(option);
     });
 
     syncTagOptionStates(container, selectedTag);

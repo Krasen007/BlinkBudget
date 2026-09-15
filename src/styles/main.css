@@ -14,6 +14,7 @@
 @import './components/webapp-components.css';
 @import './components/enhanced-button.css';
 @import './components/enhanced-input.css';
+@import './components/loading-indicators.css';
 @import './components/performance-accessibility.css';
 
 /* 4. Mobile-specific styles (depends on tokens, base, components) */

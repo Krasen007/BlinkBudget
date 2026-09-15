@@ -228,6 +228,7 @@ export default [
         afterAll: 'readonly',
         vi: 'readonly',
         global: 'readonly',
+        process: 'readonly',
       },
     },
     rules: {

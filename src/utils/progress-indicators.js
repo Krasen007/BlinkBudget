@@ -131,29 +131,9 @@ export const hideProgressIndicator = operationId => {
 
 /**
  * CSS for spinner animation
+ * @deprecated Styles now live in `src/styles/components/loading-indicators.css`.
+ * Kept as a no-op for backward compatibility.
  */
 export const addProgressStyles = () => {
-  const styleId = 'progress-indicator-styles';
-  if (document.getElementById(styleId)) return;
-
-  const style = document.createElement('style');
-  style.id = styleId;
-  style.textContent = `
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    .progress-spinner {
-      border: 3px solid var(--color-border);
-      border-radius: 50%;
-      border-top-color: var(--color-primary);
-      animation: spin 1s linear infinite;
-    }
-  `;
-  document.head.appendChild(style);
+  return;
 };
-
-if (typeof document !== 'undefined') {
-  addProgressStyles();
-}

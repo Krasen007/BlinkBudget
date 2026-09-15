@@ -91,19 +91,36 @@ export const validateLength = (value, maxLength, fieldName = 'Field') => {
   };
 };
 
-/**
- * Show validation error on a field
- * @param {HTMLElement} element - Element to show error on
- * @param {string} errorMessage - Error message (optional)
- */
-export const showFieldError = (element, _errorMessage = null) => {
-  // Visual error feedback
+const flashErrorBorder = element => {
   element.style.border = `1px solid ${COLORS.ERROR}`;
 
   // Auto-clear error after timeout
   setTimeout(() => {
     element.style.border = `1px solid ${COLORS.BORDER}`;
   }, TIMING.ANIMATION_NORMAL * 10); // 2 seconds
+};
+
+/**
+ * Validate an amount input, flashing the field on failure
+ * Shared by the transfer and category chip paths so the
+ * "validate amount → showFieldError → return" block lives once.
+ * @param {HTMLInputElement|null} amountInput - Amount input (null = no validation)
+ * @returns {{valid: boolean, value: number|null}} Validation result
+ */
+export const validateAmountField = amountInput => {
+  if (!amountInput) return { valid: true, value: 0 };
+  const result = validateAmount(amountInput.value);
+  if (!result.valid) showFieldError(amountInput);
+  return result;
+};
+
+/**
+ * Show validation error on a field
+ * @param {HTMLElement} element - Element to show error on
+ * @param {string} errorMessage - Error message (optional)
+ */
+export const showFieldError = (element, _errorMessage = null) => {
+  flashErrorBorder(element);
 
   // Focus the element
   if (element.focus) {
@@ -116,9 +133,5 @@ export const showFieldError = (element, _errorMessage = null) => {
  * @param {HTMLElement} container - Container to show error on
  */
 export const showContainerError = container => {
-  container.style.border = `1px solid ${COLORS.ERROR}`;
-
-  setTimeout(() => {
-    container.style.border = `1px solid ${COLORS.BORDER}`;
-  }, TIMING.ANIMATION_NORMAL * 10);
+  flashErrorBorder(container);
 };

@@ -102,19 +102,7 @@ export function createLoadingState() {
     children: [spinner, loadingText, progressContainer, progressText],
   });
 
-  // Ensure style is added
-  if (!document.querySelector('#loading-spinner-styles')) {
-    const style = document.createElement('style');
-    style.id = 'loading-spinner-styles';
-    style.textContent = `
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
-        `;
-    document.head.appendChild(style);
-  }
-
+  // Spinner keyframes live in `src/styles/components/loading-indicators.css`.
   return loadingEl;
 }
 

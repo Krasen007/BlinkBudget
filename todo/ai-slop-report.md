@@ -754,3 +754,43 @@ Net diff (committed): 25 files, +129 / −888. Uncommitted on top: `type-toggle.
 2. **Phase 3:** Rule 7 (shared submit helper first — it unblocks the toast-import normalisation), Rule 8 + `@keyframes spin` ×6 consolidation into `src/styles/`, Rule 9 duplications (stat cards, currency formatters, chart scaffold, tag options, validation pair, date formatters, validation blocks), Rule 2 toast-import fallback, Rule 10 `_onCategoriesUpdated` (low).
 3. **Deferred structural (unchanged):** three Rule 14 file splits and the barrel quarantine — explicit follow-up commits, never bundled.
 4. **Carried-over decisions:** `PrivacyControls.js` token migration, dead `.time-period-btn` rules, `vite.config.js` token safelist option.
+
+---
+
+## Phase 3 remediation (landed 2026-09-15, on top of `7ab40b0`)
+
+Scope was taken from the traceability table: every Phase 3 row (Rule 7 shared helper + toast normalisation, Rule 8 style injection + `@keyframes spin`, all Rule 9 duplications, Rule 2 toast fallback, Rule 10 try/catch). The `7ab40b0` head had already normalised the toast dynamic imports to static imports, so that half of Rule 7 is closed by verification rather than new edits.
+
+### Landed fixes
+
+| #   | Finding (report ref)                                                                 | Change                                                                                                                                                                                                                                                                                                                                                       | Files |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --- |
+| 1   | Rule 7 silent `catch {` in sanitizer | Intentional-fallback comment added; no log (hot path, callers already get a sanitized string). | `src/utils/security-utils.js` |
+| 2   | Rule 7 `submission.js` vs `category-chips.js` duplicated submit/error path | New `resolveSubmitDateValue()` + `validateAmountField()` shared helpers; both transfer and category auto-submit paths now call `handleFormSubmit(payload, onSubmit)`. Transfer path gains error handling it lacked; category path drops its bespoke try/catch. | `submission.js`, `form-utils/validation.js`, `form-utils/category-chips.js` |
+| 3   | Rule 7 mixed toast-import strategy | Closed by `7ab40b0`: repo-wide `rg toast-notifications` shows 12 static imports, 0 dynamic `import()`. No new edits. | `main.js`, `TransactionListItem.js`, `AddView.js`, `EditView.js`, etc. (prior commit) |
+| 4   | Rule 8 load-time `<style>` injection + Rule 9 `@keyframes spin` ×6 | New `src/styles/components/loading-indicators.css` (canonical `@keyframes spin`, `@keyframes float`, `.progress-spinner`, empty-state focus + responsive) imported from `main.css`. `addEmptyStateStyles()` / `addProgressStyles()` are backward-compat no-ops; `reports-ui.js` per-call injection and `LoadingView.js` inline `<style>` removed. Component-CSS duplicates (`webapp-components`, `inflation-trends`, `enhanced-button`) left — identical definitions, no visual effect. | `styles/components/loading-indicators.css` (new), `styles/main.css`, `enhanced-empty-states.js`, `progress-indicators.js`, `reports-ui.js`, `components/LoadingView.js` |
+| 5   | Rule 9 clickable stat cards ×4 (~200 lines) | New `createClickableStat({ label, formattedValue, color, align, labelMargin, valueSize, ariaLabel, title, onClick })`; 4 blocks collapsed, shared `savePeriodAndGo` handlers preserve navigation (income saves type filter + period; spent/expenses save period only). | `src/utils/reports-charts.js` (−~150) |
+| 6   | Rule 9 currency formatters ×5 + 18 inline | `financial-planning-helpers.formatCurrency` locale fixed `en-EU` → `en-US` (matches the 18 inline sites; `en-EU` is not a valid BCP47 tag). `reports-charts.js`, `financial-planning-charts.js`, `inflation-chart-utils.js` import and reuse it for all default 2-decimal sites; axis-tick callbacks with `minimumFractionDigits: 0` kept inline (intentional different formatting). Local `formatCurrency` shadow in `reports-charts.js` deleted. | `financial-planning-helpers.js`, `reports-charts.js`, `financial-planning-charts.js`, `inflation-chart-utils.js` |
+| 7   | Rule 9 chart scaffold ×3 | New `createChartSection({ className, chartType, title, canvasId })`; all three builders delegate. | `src/utils/financial-planning-charts.js` |
+| 8   | Rule 9 `showFieldError` vs `showContainerError` + amount-validation blocks ×2 | Internal `flashErrorBorder()` shared by both exports (behaviour identical, tests unchanged); new `validateAmountField(amountInput)` collapses the two `validateAmount + showFieldError + return` blocks. | `form-utils/validation.js`, `form-utils/category-chips.js` |
+| 9   | Rule 9 tag-option construction ×2 | New `buildTagOption({ name, color, selected, onToggle })`; fallback and normal branches delegate (offline placeholder preserves selected value). | `form-utils/transaction-tags.js` |
+| 10  | Rule 9 two date formatters | Already closed by Phase 2: `financial-planning-helpers.formatDate` is gone (file now exports only `createUsageNote`, `createPlaceholder`, `createSectionContainer`, `formatCurrency`, `safeParseDate`); `date-utils.js` is the single owner. No new edits. | — |
+| 11  | Rule 2 toast-import fallback | `handleFormSubmit` keeps `console.error` + `showErrorToast`, now wrapped so a throwing toast falls back to `alert()` (with `no-alert` disable). Static imports make chunk-failure impossible; the `alert` covers the residual toast-UI-throws case. Non-`Error` throws use `e?.message ?? String(e)` instead of `undefined`. | `form-utils/submission.js` |
+| 12  | Rule 10 `_onCategoriesUpdated` try/catch | Guards hoisted out of `try`; only `render()` stays guarded with a comment (event-handler safety for other listeners). | `form-utils/category-chips.js` |
+
+### Phase 3 verification evidence
+
+- **Lint:** `npx eslint src/utils src/components/LoadingView.js` → **0 problems** (one interim `no-alert` warning silenced with an inline disable; the fallback is the report's requested `alert`). `npx eslint src` → **0 errors**, 106 warnings, all in files untouched by any phase (components/views outside `src/utils`).
+- **Format:** `npx prettier --check` over every touched file → clean (one `category-chips.js` reformat via `--write`, no logic change).
+- **Tests:** `tests/form-utils` + `design-tokens` + `chart-integration` → **213/213**; `reports-view` + `transaction-form` + `transaction-undo` → **13/13**.
+- **Build:** `yarn run build` → ✓ built.
+- **Dead-code sweep:** `rg toast-notifications` → 12 static imports, 0 dynamic; `rg "new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' })"` under `src/utils` → only the intentional 0-decimal axis ticks + `chart-utils.js` USD + the single canonical `financial-planning-helpers.js` definition.
+
+### Phase 3 rows now closed in the traceability table
+
+- Rule 7 inconsistencies → **landed** (shared helper first, then toast normalisation verified).
+- Rule 8 load-time injection + Rule 9 `@keyframes spin` ×6 → **landed** (JS injections removed; canonical CSS added; pre-existing component-CSS duplicates left as harmless identicals).
+- Rule 9 duplications (stat cards, currency, scaffold, tag options, validation pair, validation blocks) → **landed**; date formatters → **already closed by Phase 2**.
+- Rule 2 toast-import fallback → **landed** (static imports + alert fallback).
+- Rule 10 `_onCategoriesUpdated` → **landed** (low priority, guards hoisted).
+- Deliberately still open (unchanged): Rule 14 splits, barrel quarantine, and the carried-over decisions (`PrivacyControls.js` tokens, dead `.time-period-btn` rules, `vite.config.js` safelist).

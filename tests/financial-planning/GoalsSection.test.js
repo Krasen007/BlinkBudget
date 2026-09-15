@@ -29,6 +29,12 @@ vi.mock('../../src/utils/financial-planning-helpers.js', () => ({
   safeParseDate: vi.fn(date =>
     date ? new Date(date).toISOString().slice(0, 10) : ''
   ),
+  formatCurrency: vi.fn(value =>
+    new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'EUR',
+    }).format(value)
+  ),
 }));
 
 // Mock StorageService at the top level
