@@ -108,7 +108,7 @@ export const DateFormatSection = ({
     const manualSection = document.createElement('div');
     manualSection.style.marginTop = SPACING.MD;
     manualSection.style.paddingTop = SPACING.MD;
-    manualSection.style.borderTop = '1px solid var(--border)';
+    manualSection.style.borderTop = '1px solid var(--color-border)';
 
     const manualLabel = document.createElement('label');
     manualLabel.textContent = 'Manually select date format:';

@@ -53,11 +53,9 @@ export const showProgressIndicator = (
   spinner.style.cssText = `
     width: 32px;
     height: 32px;
-    border: 3px solid var(--color-primary);
+    border: 3px solid var(--color-border);
     border-radius: 50%;
     border-top-color: var(--color-primary);
-    border-right-color: var(--color-primary);
-    border-bottom-color: var(--color-primary);
     animation: spin 1s linear infinite;
     margin: 0 auto ${SPACING.MD} 0;
   `;
@@ -160,11 +158,9 @@ export const addProgressStyles = () => {
     }
     
     .progress-spinner {
-      border: 3px solid var(--color-primary);
+      border: 3px solid var(--color-border);
       border-radius: 50%;
       border-top-color: var(--color-primary);
-      border-right-color: var(--color-primary);
-      border-bottom-color: var(--color-primary);
       animation: spin 1s linear infinite;
     }
   `;

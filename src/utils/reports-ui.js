@@ -203,7 +203,7 @@ export function showErrorState(errorState, customMessage, onRetry) {
   retryButton.style.border = `1px solid ${COLORS.PRIMARY}`;
   retryButton.style.borderRadius = 'var(--radius-md)';
   retryButton.style.cursor = 'pointer';
-  retryButton.style.fontSize = 'var(--font-size-md)';
+  retryButton.style.fontSize = 'var(--font-size-base)';
   retryButton.style.fontWeight = '500';
   retryButton.addEventListener('click', () => {
     if (onRetry) onRetry();
@@ -219,7 +219,7 @@ export function showErrorState(errorState, customMessage, onRetry) {
   dashboardButton.style.border = 'none';
   dashboardButton.style.borderRadius = 'var(--radius-md)';
   dashboardButton.style.cursor = 'pointer';
-  dashboardButton.style.fontSize = 'var(--font-size-md)';
+  dashboardButton.style.fontSize = 'var(--font-size-base)';
   dashboardButton.style.fontWeight = '500';
   dashboardButton.addEventListener('click', () => Router.navigate('dashboard'));
 

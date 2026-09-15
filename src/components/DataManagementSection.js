@@ -347,7 +347,7 @@ export const DataManagementSection = () => {
     padding: SPACING.MD,
     fontSize: FONT_SIZES.BASE,
     borderColor: 'var(--color-warning)',
-    color: 'var(--color-warning-light)',
+    color: 'var(--color-warning)',
     background: 'rgba(255, 255, 255, 0.05)',
   });
 
@@ -420,8 +420,8 @@ export const DataManagementSection = () => {
     minHeight: TOUCH_TARGETS.MIN_HEIGHT,
     padding: SPACING.MD,
     fontSize: FONT_SIZES.BASE,
-    borderColor: 'var(--color-danger)',
-    color: 'var(--color-danger-light)',
+    borderColor: 'var(--color-error)',
+    color: 'var(--color-error-light)',
     background: 'rgba(255, 255, 255, 0.05)',
   });
 
@@ -505,7 +505,7 @@ export const DataManagementSection = () => {
     padding: SPACING.MD,
     fontSize: FONT_SIZES.BASE,
     borderColor: 'var(--color-info)',
-    color: 'var(--color-info-light)',
+    color: 'var(--color-info)',
     background: 'rgba(255, 255, 255, 0.05)',
   });
 

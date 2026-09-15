@@ -20,11 +20,11 @@ export const COLORS = {
   WARNING: 'var(--color-warning)',
   INFO: 'var(--color-info)',
   INCOME_COLOR: 'var(--color-success)',
-  INCOME_COLOR_RGB: 'var(--color-success-rgb)',
 
   // CSS variable references (for consistency)
   PRIMARY: 'var(--color-primary)',
   PRIMARY_LIGHT: 'var(--color-primary-light)',
+  PRIMARY_DARK: 'var(--color-primary-dark)',
   SURFACE: 'var(--color-surface)',
   SURFACE_HOVER: 'var(--color-surface-hover)',
   BORDER: 'var(--color-border)',
@@ -172,6 +172,7 @@ export const SPACING = {
   MD: '12px', // 0.75rem
   LG: '16px', // 1rem
   XL: '24px', // 1.5rem
+  XXXL: '48px', // 3rem — matches --spacing-3xl
 };
 
 // Timing values (in milliseconds)
@@ -185,6 +186,11 @@ export const TIMING = {
   INITIAL_LOAD_DELAY: 100,
   UNDO_TOAST: 1000, // window to undo a transaction delete
   RECENT_TRANSACTION_LIMIT: 300000, // 5 * 60 * 1000 = 5 minutes in milliseconds
+  // Toast auto-dismiss durations
+  NOTIFICATION_SUCCESS: 3000,
+  NOTIFICATION_ERROR: 5000, // errors stay longer so they can be read
+  NOTIFICATION_WARNING: 4000,
+  NOTIFICATION_INFO: 3000,
 };
 
 // Z-index layers
@@ -220,6 +226,7 @@ export const FONT_SIZES = {
   TITLE_DESKTOP: 'var(--font-size-2xl)',
   BASE: 'var(--font-size-base)',
   SM: 'var(--font-size-sm)',
+  MD: 'var(--font-size-base)',
   LG: 'var(--font-size-lg)',
   XL: 'var(--font-size-xl)',
   BUTTON_LARGE: '1.1rem',

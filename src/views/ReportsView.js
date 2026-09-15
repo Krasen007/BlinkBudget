@@ -807,7 +807,7 @@ export const ReportsView = (params = {}) => {
         fallbackWarning.style.padding = SPACING.SM;
         fallbackWarning.style.background = 'rgba(251, 191, 36, 0.1)';
         fallbackWarning.style.border = '1px solid rgba(251, 191, 36, 0.3)';
-        fallbackWarning.style.borderRadius = 'var(--radius-xs)';
+        fallbackWarning.style.borderRadius = 'var(--radius-sm)';
         fallbackWarning.style.color = '#92400e';
         fallbackWarning.style.fontSize = '0.875rem';
         fallbackWarning.style.marginBottom = SPACING.XS;

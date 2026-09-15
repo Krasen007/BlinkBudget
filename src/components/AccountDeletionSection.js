@@ -22,7 +22,7 @@ export const AccountDeletionSection = () => {
   title.style.fontWeight = '600';
   title.style.marginTop = SPACING.LG;
   title.style.marginBottom = SPACING.XS;
-  title.style.color = 'var(--color-danger)';
+  title.style.color = 'var(--color-error)';
 
   const description = document.createElement('p');
   description.textContent =
@@ -39,7 +39,7 @@ export const AccountDeletionSection = () => {
   // Warning box
   const warningBox = document.createElement('div');
   warningBox.style.backgroundColor = 'rgba(220, 38, 38, 0.1)';
-  warningBox.style.border = '1px solid var(--color-danger)';
+  warningBox.style.border = '1px solid var(--color-error)';
   warningBox.style.borderRadius = '8px';
   warningBox.style.padding = SPACING.MD;
   warningBox.style.marginBottom = SPACING.MD;
@@ -47,7 +47,7 @@ export const AccountDeletionSection = () => {
   const warningTitle = document.createElement('div');
   warningTitle.textContent = '⚠️ Warning: Irreversible Action';
   warningTitle.style.fontWeight = '600';
-  warningTitle.style.color = 'var(--color-danger)';
+  warningTitle.style.color = 'var(--color-error)';
   warningTitle.style.marginBottom = SPACING.XS;
 
   const warningText = document.createElement('div');
@@ -66,7 +66,7 @@ export const AccountDeletionSection = () => {
 
   // Data summary (loaded dynamically)
   const dataSummaryBox = document.createElement('div');
-  dataSummaryBox.style.backgroundColor = 'var(--color-background-secondary)';
+  dataSummaryBox.style.backgroundColor = 'var(--color-surface-hover)';
   dataSummaryBox.style.borderRadius = '8px';
   dataSummaryBox.style.padding = SPACING.MD;
   dataSummaryBox.style.marginBottom = SPACING.MD;
@@ -227,8 +227,8 @@ export const AccountDeletionSection = () => {
     minHeight: TOUCH_TARGETS.MIN_HEIGHT,
     padding: SPACING.MD,
     fontSize: FONT_SIZES.BASE,
-    borderColor: 'var(--color-danger)',
-    color: 'var(--color-danger-light)',
+    borderColor: 'var(--color-error)',
+    color: 'var(--color-error-light)',
     background: 'rgba(220, 38, 38, 0.1)',
     fontWeight: '600',
   });
@@ -239,7 +239,7 @@ export const AccountDeletionSection = () => {
   const helpText = document.createElement('div');
   helpText.innerHTML = `
     <div style="margin-top: ${SPACING.MD}; padding-top: ${SPACING.MD}; border-top: 1px solid var(--color-border);">
-      <p style="font-size: ${FONT_SIZES.XS}; color: var(--color-text-tertiary); line-height: 1.5; margin: 0;">
+      <p style="font-size: ${FONT_SIZES.XS}; color: var(--color-text-muted); line-height: 1.5; margin: 0;">
         <strong>Need help?</strong> Open GitHub issue for assistance with account deletion or data export requests.
       </p>
     </div>

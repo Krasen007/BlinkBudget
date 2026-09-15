@@ -112,7 +112,7 @@ export const AccountSection = () => {
         const errorText = document.createElement('span');
         errorText.style.cssText = `
           display: block;
-          color: var(--color-danger, #ef4444);
+          color: var(--color-error, #ef4444);
           font-size: var(--font-size-sm);
           margin-bottom: var(--spacing-md);
           min-height: 20px;
@@ -124,7 +124,7 @@ export const AccountSection = () => {
         nameInput.addEventListener('focus', () => {
           nameInput.style.borderColor =
             nameInput.getAttribute('aria-invalid') === 'true'
-              ? 'var(--color-danger, #ef4444)'
+              ? 'var(--color-error, #ef4444)'
               : 'var(--color-primary)';
           nameInput.style.outline = 'none';
           nameInput.style.boxShadow =
@@ -136,7 +136,7 @@ export const AccountSection = () => {
         nameInput.addEventListener('blur', () => {
           nameInput.style.borderColor =
             nameInput.getAttribute('aria-invalid') === 'true'
-              ? 'var(--color-danger, #ef4444)'
+              ? 'var(--color-error, #ef4444)'
               : 'var(--color-border)';
           nameInput.style.boxShadow = 'none';
         });
@@ -225,7 +225,7 @@ export const AccountSection = () => {
 
             if (!accountName) {
               nameInput.setAttribute('aria-invalid', 'true');
-              nameInput.style.borderColor = 'var(--color-danger, #ef4444)';
+              nameInput.style.borderColor = 'var(--color-error, #ef4444)';
               errorText.textContent = 'Account name is required';
               errorText.style.opacity = '1';
               nameInput.focus();
@@ -476,7 +476,7 @@ export const AccountSection = () => {
             const errorText = document.createElement('span');
             errorText.style.cssText = `
               display: block;
-              color: var(--color-danger, #ef4444);
+              color: var(--color-error, #ef4444);
               font-size: var(--font-size-sm);
               margin-bottom: var(--spacing-md);
               min-height: 20px;
@@ -488,7 +488,7 @@ export const AccountSection = () => {
             nameInput.addEventListener('focus', () => {
               nameInput.style.borderColor =
                 nameInput.getAttribute('aria-invalid') === 'true'
-                  ? 'var(--color-danger, #ef4444)'
+                  ? 'var(--color-error, #ef4444)'
                   : 'var(--color-primary)';
               nameInput.style.outline = 'none';
               nameInput.style.boxShadow =
@@ -500,7 +500,7 @@ export const AccountSection = () => {
             nameInput.addEventListener('blur', () => {
               nameInput.style.borderColor =
                 nameInput.getAttribute('aria-invalid') === 'true'
-                  ? 'var(--color-danger, #ef4444)'
+                  ? 'var(--color-error, #ef4444)'
                   : 'var(--color-border)';
               nameInput.style.boxShadow = 'none';
             });
@@ -592,7 +592,7 @@ export const AccountSection = () => {
 
                 if (!accountName) {
                   nameInput.setAttribute('aria-invalid', 'true');
-                  nameInput.style.borderColor = 'var(--color-danger, #ef4444)';
+                  nameInput.style.borderColor = 'var(--color-error, #ef4444)';
                   errorText.textContent = 'Account name is required';
                   errorText.style.opacity = '1';
                   nameInput.focus();

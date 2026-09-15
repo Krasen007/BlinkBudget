@@ -3,7 +3,7 @@
 How to audit BlinkBudget source files for the lazy patterns AI coding tools leave behind.
 Use this before and after any AI-assisted session that touches `src/`.
 
-See [ai-slop-report.md](ai-slop-report.md) for the initial audit results (September 2026).
+Save to [ai-slop-report.md](ai-slop-report.md) for the initial audit results.
 
 ---
 
@@ -11,9 +11,9 @@ See [ai-slop-report.md](ai-slop-report.md) for the initial audit results (Septem
 
 Run these first — they're the ones most likely to hide an actual bug rather than just look untidy:
 
-1. **Swallowed errors** (#2)
-2. **Dead / overly defensive guards** (#3)
-3. **Try/catch as control flow** (#10)
+1. **Swallowed errors**
+2. **Dead / overly defensive guards**
+3. **Try/catch as control flow**
 
 Everything else is worth doing but is lower stakes if a session runs short.
 
@@ -101,10 +101,6 @@ Comments that restate what the adjacent code already says.
 2. `grep -r "functionName" src/` to find all callsites.
 3. If zero callsites outside the file itself, it is dead.
 
-**In this codebase:** `getAllTransactions`, `validateTransactionForm`, `showSuccessCheckmark` are the reference examples.
-
-> **Note:** `getAllTransactions` also appears in #6 as a zero-logic wrapper around `getAll`. These aren't contradictory — it's both unused _and_ a passthrough — but if you're scanning quickly, don't mistake the repeat mention for a typo.
-
 **Deleting a whole orphan file is a bigger claim than deleting one dead function — verify accordingly before it goes in a plan:**
 
 1. Grep the **filename** across `*.js` (the standard procedure above).
@@ -139,8 +135,6 @@ Comments that restate what the adjacent code already says.
 
 **Check:** count lines of logic (not counting JSDoc). If the body is a single expression and the wrapper adds no error handling, no transformation, and no caching, it is indirection for its own sake.
 
-**In this codebase:** `removeToast → animateToastOut`, `removeToastById → removeToast`, `getAllTransactions → getAll` are the reference examples.
-
 ---
 
 ### 7. Inconsistent error-handling patterns 🟡 Medium
@@ -152,8 +146,6 @@ Comments that restate what the adjacent code already says.
 - Dynamic imports sometimes wrapped in try/catch, sometimes chained
 
 **Check:** for any error pattern in a file you are editing, search for the same pattern in sibling files in the same directory. If they differ without reason, normalize them.
-
-**In this codebase:** `AddView.js` vs `EditView.js` error handling is the reference example.
 
 ---
 
@@ -167,7 +159,6 @@ Comments that restate what the adjacent code already says.
 
 **Check:** look at the module scope (outside any function) of every file you audit. Nothing should touch the DOM or register listeners at import time unless it is `main.js` or a deliberate plugin.
 
-**In this codebase:** `addSuccessStyles()` in `success-feedback.js` is the reference example (though it is called from `showSuccessCheckmark`, which is itself dead — so the side effect only fires if someone calls the dead export).
 
 ---
 
@@ -266,28 +257,6 @@ Not everything that looks like slop is slop. Before writing something up in the 
 
 ---
 
-## What's automatable vs. what needs judgment
-
-Some of this can be caught by tooling instead of a manual read every time:
-
-| Rule                          | Automatable? | Tooling                                                                                            |
-| ----------------------------- | ------------ | -------------------------------------------------------------------------------------------------- |
-| #2 Swallowed errors           | Partial      | ESLint `no-empty`, custom rule for empty `.catch()`                                                |
-| #3 Dead/defensive guards      | No           | Requires tracing data flow — manual                                                                |
-| #4 Dead/unreachable code      | Yes          | `knip`, `ts-prune`, or `eslint-plugin-unused-imports` for unused exports                           |
-| #5 Hardcoded values           | Yes          | ESLint `no-magic-numbers`, a custom rule against raw hex/`px` in `.style.`                         |
-| #6 Indirection                | No           | Judgment call on whether a wrapper "adds" anything                                                 |
-| #7 Inconsistent patterns      | No           | Requires cross-file comparison — manual                                                            |
-| #8 Load-time side effects     | Partial      | Custom lint rule flagging top-level DOM calls                                                      |
-| #9 Duplicated logic           | Partial      | `jscpd` (copy-paste detector) flags candidates; still needs a human to confirm                     |
-| #10 Try/catch as control flow | No           | Manual — requires understanding intent                                                             |
-| #11 Stale comments            | No           | Manual (an LLM pass diffing comment vs. code can help but isn't reliable enough to automate fully) |
-| #12 Type-safety theater       | Yes          | ESLint `@typescript-eslint/no-explicit-any`, `no-non-null-assertion`                               |
-| #13 React-specific            | Partial      | `eslint-plugin-react-hooks` catches dependency-array issues; `key={index}` needs manual review     |
-
-Wiring up the "Yes" rows as lint rules means future audits only need to manually cover #3, #6, #7, #9, #10, #11, and #13 — cutting the surface area roughly in half.
-
----
 
 ## `ai-slop-report.md` schema
 
