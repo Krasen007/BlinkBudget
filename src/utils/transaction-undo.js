@@ -14,7 +14,7 @@ import { markTransactionForHighlight } from './success-feedback.js';
 import { TIMING } from './constants.js';
 import { showUndoToast } from './toast-notifications.js';
 
-const UNDO_TOAST_DURATION = TIMING.UNDO_TOAST || 5000;
+const UNDO_TOAST_DURATION = TIMING.UNDO_TOAST;
 
 /**
  * Notify the user about a delete and offer Undo for a limited window.

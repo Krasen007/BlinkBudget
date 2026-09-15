@@ -9,6 +9,8 @@ global.window = {
   mobileUtils: {
     hapticFeedback: vi.fn(),
   },
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
 };
 
 // Mock document for DOM operations

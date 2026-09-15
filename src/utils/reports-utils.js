@@ -8,35 +8,6 @@
 import { formatDateForDisplay } from './date-utils.js';
 
 /**
- * Get current week time period
- */
-export function getCurrentWeekPeriod() {
-  const now = new Date();
-  const startOfWeek = new Date(now);
-
-  // Adjust to Monday start (ISO style: Monday=1, ..., Sunday=0)
-  // Logic: now.getDay() returns 0 for Sunday.
-  // If today is Sunday (0), we need to go back 6 days.
-  // If today is Monday (1), we stay here (0 days).
-  // If today is Tuesday (2), we go back 1 day.
-  const day = now.getDay();
-  const diff = now.getDate() - day + (day === 0 ? -6 : 1);
-  startOfWeek.setDate(diff);
-  startOfWeek.setHours(0, 0, 0, 0);
-
-  const endOfWeek = new Date(startOfWeek);
-  endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday
-  endOfWeek.setHours(23, 59, 59, 999);
-
-  return {
-    type: 'weekly',
-    startDate: startOfWeek,
-    endDate: endOfWeek,
-    label: 'This Week',
-  };
-}
-
-/**
  * Get today's time period
  */
 export function getTodayPeriod() {
@@ -52,23 +23,6 @@ export function getTodayPeriod() {
     startDate: startOfDay,
     endDate: endOfDay,
     label: 'Today',
-  };
-}
-
-/**
- * Get last month time period
- */
-export function getLastMonthPeriod() {
-  const now = new Date();
-  const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-  endOfLastMonth.setHours(23, 59, 59, 999);
-
-  return {
-    type: 'monthly',
-    startDate: lastMonth,
-    endDate: endOfLastMonth,
-    label: 'Last Month',
   };
 }
 
@@ -104,23 +58,6 @@ export function getCurrentQuarterPeriod() {
     startDate: startOfQuarter,
     endDate: endOfQuarter,
     label: 'This Quarter',
-  };
-}
-
-/**
- * Get current year time period
- */
-export function getCurrentYearPeriod() {
-  const now = new Date();
-  const startOfYear = new Date(now.getFullYear(), 0, 1);
-  const endOfYear = new Date(now.getFullYear(), 11, 31);
-  endOfYear.setHours(23, 59, 59, 999);
-
-  return {
-    type: 'yearly',
-    startDate: startOfYear,
-    endDate: endOfYear,
-    label: 'This Year',
   };
 }
 
@@ -355,115 +292,4 @@ export function createMinimalAnalyticsData(transactions, timePeriod) {
     },
     isMinimal: true,
   };
-}
-
-/**
- * Validate and clean transaction data
- */
-export function validateAndCleanTransactions(transactions) {
-  const cleanedTransactions = [];
-  const errors = [];
-
-  transactions.forEach((transaction, index) => {
-    try {
-      // Check required fields
-      if (!transaction.id) {
-        errors.push(`Transaction ${index}: Missing ID`);
-        return;
-      }
-
-      if (typeof transaction.amount !== 'number' || isNaN(transaction.amount)) {
-        errors.push(`Transaction ${transaction.id}: Invalid amount`);
-        return;
-      }
-
-      if (!transaction.date && !transaction.timestamp) {
-        errors.push(`Transaction ${transaction.id}: Missing date/timestamp`);
-        return;
-      }
-
-      // Clean and normalize transaction
-      const cleanedTransaction = {
-        id: transaction.id,
-        amount: Math.abs(transaction.amount), // Ensure positive amount
-        type: transaction.type || 'expense', // Default to expense
-        category: transaction.category || 'Uncategorized',
-        description: transaction.description || '',
-        date: transaction.date || transaction.timestamp,
-        timestamp: transaction.timestamp || transaction.date,
-        accountId: transaction.accountId || 'main',
-      };
-
-      // Validate date
-      const transactionDate = new Date(cleanedTransaction.date);
-      if (isNaN(transactionDate.getTime())) {
-        errors.push(`Transaction ${transaction.id}: Invalid date format`);
-        return;
-      }
-
-      cleanedTransactions.push(cleanedTransaction);
-    } catch (error) {
-      errors.push(`Transaction ${index}: ${error.message}`);
-    }
-  });
-
-  // Log errors but don't fail completely unless we have no valid transactions
-  if (errors.length > 0) {
-    console.warn('Transaction validation errors:', errors);
-  }
-
-  if (cleanedTransactions.length === 0 && transactions.length > 0) {
-    throw new Error(
-      'No valid transactions found. Please check your transaction data.'
-    );
-  }
-
-  return cleanedTransactions;
-}
-
-/**
- * Generate monthly trend data for category trends chart
- */
-export function generateMonthlyTrendData(transactions, topCategories) {
-  const months = [];
-  const categoryData = {};
-
-  // Initialize category data
-  topCategories.forEach(cat => {
-    categoryData[cat.name] = [];
-  });
-
-  // Generate last 6 months
-  for (let i = 5; i >= 0; i--) {
-    const date = new Date();
-    date.setMonth(date.getMonth() - i);
-    const monthKey = date.toLocaleDateString('en-US', {
-      month: 'short',
-      year: 'numeric',
-    });
-    months.push(monthKey);
-
-    // Calculate spending for each category in this month
-    const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
-    const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-
-    topCategories.forEach(category => {
-      const monthlySpending = transactions
-        .filter(t => {
-          if (t.isGhost) return false;
-          const tDate = new Date(t.date || t.timestamp);
-          return (
-            tDate >= monthStart &&
-            tDate <= monthEnd &&
-            (t.category || 'Uncategorized') === category.name &&
-            t.type === 'expense'
-          );
-        })
-        .reduce((sum, t) => sum + (t.amount || 0), 0);
-
-      categoryData[category.name].push(monthlySpending);
-    });
-  }
-
-  return { months, categoryData };
 }

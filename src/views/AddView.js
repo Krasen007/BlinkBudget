@@ -79,7 +79,7 @@ export const AddView = ({ accountId, amount } = {}) => {
       ClickTracker.recordClick();
 
       // Complete tracking and get metrics
-      const metrics = ClickTracker.completeTransactionFlow();
+      ClickTracker.completeTransactionFlow();
 
       let newTransaction;
       try {

@@ -1,4 +1,3 @@
-// Detailed chart implementations follow below.
 /**
  * Financial Planning Chart Components
  *
@@ -7,7 +6,7 @@
  */
 
 // Chart.js renders on HTML Canvas, which doesn't understand CSS variables like `var(--color-success)`. When these variables were passed as chart colors, Canvas couldn't resolve them and defaulted to black.
-import { COLORS, SPACING } from './constants.js';
+import { COLORS, SPACING, DIMENSIONS } from './constants.js';
 import { formatDateForDisplay } from './date-utils.js';
 
 /**
@@ -31,7 +30,6 @@ export async function createProjectedBalanceChart(
   section.style.padding = SPACING.LG;
   section.style.marginBottom = SPACING.LG;
 
-  // Section header
   const header = document.createElement('div');
   header.style.display = 'flex';
   header.style.justifyContent = 'space-between';
@@ -48,10 +46,9 @@ export async function createProjectedBalanceChart(
   header.appendChild(title);
   section.appendChild(header);
 
-  // Chart container
   const chartDiv = document.createElement('div');
   chartDiv.style.position = 'relative';
-  chartDiv.style.height = '350px';
+  chartDiv.style.height = DIMENSIONS.CHART_HEIGHT_LINE;
   chartDiv.style.marginBottom = SPACING.MD;
 
   const canvas = document.createElement('canvas');
@@ -61,7 +58,6 @@ export async function createProjectedBalanceChart(
 
   section.appendChild(chartDiv);
 
-  // Prepare chart data
   const labels = balanceProjections.map(projection => {
     const date = new Date(projection.period);
     return date.toLocaleDateString('en-US', {
@@ -197,7 +193,6 @@ export async function createGoalProgressChart(
   section.style.padding = SPACING.LG;
   section.style.marginBottom = SPACING.LG;
 
-  // Section header
   const header = document.createElement('div');
   header.style.display = 'flex';
   header.style.justifyContent = 'space-between';
@@ -214,10 +209,9 @@ export async function createGoalProgressChart(
   header.appendChild(title);
   section.appendChild(header);
 
-  // Chart container
   const chartDiv = document.createElement('div');
   chartDiv.style.position = 'relative';
-  chartDiv.style.height = '350px';
+  chartDiv.style.height = DIMENSIONS.CHART_HEIGHT_LINE;
   chartDiv.style.marginBottom = SPACING.MD;
 
   const canvas = document.createElement('canvas');
@@ -348,7 +342,6 @@ export async function createForecastComparisonChart(
   section.style.padding = SPACING.LG;
   section.style.marginBottom = SPACING.LG;
 
-  // Section header
   const header = document.createElement('div');
   header.style.display = 'flex';
   header.style.justifyContent = 'space-between';
@@ -365,10 +358,9 @@ export async function createForecastComparisonChart(
   header.appendChild(title);
   section.appendChild(header);
 
-  // Chart container
   const chartDiv = document.createElement('div');
   chartDiv.style.position = 'relative';
-  chartDiv.style.height = '350px';
+  chartDiv.style.height = DIMENSIONS.CHART_HEIGHT_LINE;
   chartDiv.style.marginBottom = SPACING.MD;
 
   const canvas = document.createElement('canvas');
@@ -378,7 +370,6 @@ export async function createForecastComparisonChart(
 
   section.appendChild(chartDiv);
 
-  // Prepare chart data
   const maxLength = Math.max(incomeForecasts.length, expenseForecasts.length);
   const labels = [];
 
@@ -497,7 +488,7 @@ function createBalanceSummary(balanceProjections) {
   container.style.padding = SPACING.MD;
   container.style.background = 'var(--color-background)';
   container.style.borderRadius = 'var(--radius-md)';
-  container.style.border = '1px solid var(--color-border)';
+  container.style.border = `1px solid ${COLORS.BORDER}`;
 
   const currentBalance = balanceProjections[0]?.projectedBalance || 0;
   const finalBalance =
@@ -572,7 +563,7 @@ function createGoalDetails(goals) {
   container.style.padding = SPACING.MD;
   container.style.background = 'var(--color-background)';
   container.style.borderRadius = 'var(--radius-md)';
-  container.style.border = '1px solid var(--color-border)';
+  container.style.border = `1px solid ${COLORS.BORDER}`;
 
   goals.forEach(goal => {
     const goalDiv = document.createElement('div');
@@ -589,7 +580,7 @@ function createGoalDetails(goals) {
     goalName.textContent = goal.name;
     goalName.style.fontWeight = '600';
     goalName.style.color = 'hsl(0, 0%, 100%)';
-    goalName.style.marginBottom = '2px';
+    goalName.style.marginBottom = SPACING.XXS;
 
     const targetDate = document.createElement('div');
     targetDate.textContent = `Target: ${formatDateForDisplay(goal.targetDate)}`;
@@ -615,7 +606,7 @@ function createGoalDetails(goals) {
         : progress >= 50
           ? 'hsl(250, 84%, 60%)'
           : 'hsl(0, 75%, 60%)';
-    progressText.style.marginBottom = '2px';
+    progressText.style.marginBottom = SPACING.XXS;
 
     const amounts = document.createElement('div');
     const currentFormatted = new Intl.NumberFormat('en-US', {

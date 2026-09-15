@@ -98,6 +98,7 @@ export function prepareBarChartData(
     const val = item[valueKey];
     return typeof val === 'number' ? Math.abs(val) : 0;
   });
+
   return {
     labels,
     datasets: [
@@ -105,49 +106,6 @@ export function prepareBarChartData(
         label: datasetLabel,
         data: values,
         // Colors will be added by ChartRenderer
-      },
-    ],
-  };
-}
-
-/**
- * Prepare data for line charts from time series data
- * @param {Array} timeSeriesData - Array of {date, value} objects
- * @param {string} label - Dataset label
- * @returns {Object} Chart.js compatible data structure
- */
-export function prepareLineChartData(timeSeriesData, label = 'Amount') {
-  if (!timeSeriesData || timeSeriesData.length === 0) {
-    return {
-      labels: ['No data'],
-      datasets: [
-        {
-          label,
-          data: [0],
-          fill: false,
-        },
-      ],
-    };
-  }
-
-  const labels = timeSeriesData.map(item => {
-    const date = new Date(item.date);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-    });
-  });
-
-  const data = timeSeriesData.map(item => item.value || 0);
-
-  return {
-    labels,
-    datasets: [
-      {
-        label,
-        data,
-        fill: false,
-        // Colors and styling will be added by ChartRenderer
       },
     ],
   };
@@ -179,93 +137,6 @@ export function calculatePercentages(categoryData) {
     ...item,
     percentage: Math.abs(item.amount || 0) / total,
   }));
-}
-
-/**
- * Sort category data by amount (descending)
- * @param {Array} categoryData - Array of category objects
- * @returns {Array} Sorted array
- */
-export function sortByAmount(categoryData) {
-  if (!categoryData || categoryData.length === 0) {
-    return [];
-  }
-
-  return [...categoryData].sort(
-    (a, b) => Math.abs(b.amount || 0) - Math.abs(a.amount || 0)
-  );
-}
-
-/**
- * Group small categories into "Other" category
- * @param {Array} categoryData - Array of category objects
- * @param {number} threshold - Minimum percentage to show separately (default: 0.05 = 5%)
- * @param {number} maxCategories - Maximum number of categories to show (default: 8)
-export function groupSmallCategories(categoryData, threshold = 0.05, maxCategories = 8) {
-  if (!categoryData || categoryData.length === 0) {
-    return [];
-  }
-
-  const dataWithPercentages = calculatePercentages(categoryData);
-  const sorted = sortByAmount(dataWithPercentages);
-  
-  // Separate categories above and below threshold
-  const aboveThreshold = sorted.filter(item => item.percentage >= threshold);
-  const belowThreshold = sorted.filter(item => item.percentage < threshold);
-
-  // If categories above threshold fit within limit, return them with grouped below-threshold
-  if (aboveThreshold.length <= maxCategories - 1) {
-    if (belowThreshold.length > 0) {
-      const otherTotal = belowThreshold.reduce((sum, item) => sum + Math.abs(item.amount || 0), 0);
-      const total = sorted.reduce((sum, item) => sum + Math.abs(item.amount || 0), 0);
-      aboveThreshold.push({
-        category: 'Other',
-        amount: otherTotal,
-        percentage: otherTotal / total,
-        count: belowThreshold.length
-      });
-    }
-    return aboveThreshold;
-  }
-
-  // Take the top categories
-  const topCategories = aboveThreshold.slice(0, maxCategories - 1);
-  const otherCategories = [...aboveThreshold.slice(maxCategories - 1), ...belowThreshold];
-
-  // Group remaining categories into "Other"
-  if (otherCategories.length > 0) {
-    const otherTotal = otherCategories.reduce((sum, item) => sum + Math.abs(item.amount || 0), 0);
-    const total = sorted.reduce((sum, item) => sum + Math.abs(item.amount || 0), 0);
-    
-    topCategories.push({
-      category: 'Other',
-      amount: otherTotal,
-      percentage: otherTotal / total,
-      count: otherCategories.length
-    });
-  }
-
-  return topCategories;
-}  return topCategories;
-}
-
-/**
- * Create empty state data for charts when no data is available
- * @param {string} message - Message to display
- * @returns {Object} Chart.js compatible empty state data
- */
-export function createEmptyStateData(message = 'No data available') {
-  return {
-    labels: [message],
-    datasets: [
-      {
-        data: [1],
-        backgroundColor: ['#f0f0f0'],
-        borderColor: ['#d0d0d0'],
-        borderWidth: 1,
-      },
-    ],
-  };
 }
 
 /**

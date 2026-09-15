@@ -74,12 +74,4 @@ export function getCopyString(path, params = {}) {
   return value;
 }
 
-export function getCopySection(section) {
-  if (COPY_STRINGS[section]) {
-    return COPY_STRINGS[section];
-  }
-  console.warn(`Copy section not found: ${section}`);
-  return {};
-}
-
 export default COPY_STRINGS;

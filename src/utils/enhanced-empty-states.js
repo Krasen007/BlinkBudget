@@ -5,7 +5,13 @@
  * to guide users when they have no data
  */
 
-import { COLORS, SPACING, FONT_SIZES } from './constants.js';
+import {
+  COLORS,
+  SPACING,
+  FONT_SIZES,
+  TIMING,
+  DIMENSIONS,
+} from './constants.js';
 
 /**
  * Empty state scenarios
@@ -175,7 +181,6 @@ export function createEnhancedEmptyState(scenario, options = {}) {
   const container = document.createElement('div');
   container.className = `empty-state empty-state--${scenario} ${compact ? 'empty-state--compact' : ''}`;
 
-  // Container styles
   Object.assign(container.style, {
     display: 'flex',
     flexDirection: 'column',
@@ -187,10 +192,9 @@ export function createEnhancedEmptyState(scenario, options = {}) {
     color: COLORS.TEXT_MUTED,
     opacity: '0',
     transform: 'translateY(20px)',
-    transition: `opacity ${300}ms ease-out, transform ${300}ms ease-out`,
+    transition: `opacity ${TIMING.ANIMATION_NORMAL}ms ease-out, transform ${TIMING.ANIMATION_NORMAL}ms ease-out`,
   });
 
-  // Icon container
   const iconContainer = document.createElement('div');
   iconContainer.className = 'empty-state__icon';
   Object.assign(iconContainer.style, {
@@ -201,7 +205,6 @@ export function createEnhancedEmptyState(scenario, options = {}) {
   });
   iconContainer.textContent = icons.emoji;
 
-  // Title
   const title = document.createElement('h3');
   title.className = 'empty-state__title';
   title.textContent = titleOverride || content.title;
@@ -220,14 +223,13 @@ export function createEnhancedEmptyState(scenario, options = {}) {
     margin: `0 0 ${SPACING.LG} 0`,
     fontSize: FONT_SIZES.MD,
     lineHeight: '1.5',
-    maxWidth: '400px',
+    maxWidth: DIMENSIONS.CONTENT_MAX_WIDTH,
   });
 
   container.appendChild(iconContainer);
   container.appendChild(title);
   container.appendChild(message);
 
-  // Primary action button
   if (content.primaryAction) {
     const primaryButton = createActionButton(content.primaryAction, 'primary');
     container.appendChild(primaryButton);
@@ -262,7 +264,7 @@ export function createEnhancedEmptyState(scenario, options = {}) {
       marginTop: SPACING.XL,
       padding: `${SPACING.MD} ${SPACING.LG}`,
       backgroundColor: `color-mix(in srgb, ${COLORS.SURFACE} 12.5%, transparent)`,
-      borderRadius: '8px',
+      borderRadius: 'var(--radius-md)',
       border: `1px solid color-mix(in srgb, ${COLORS.BORDER} 12.5%, transparent)`,
     });
 
@@ -314,7 +316,7 @@ export function createEnhancedEmptyState(scenario, options = {}) {
       backgroundColor: isPrimary ? COLORS.PRIMARY : 'transparent',
       color: isPrimary ? 'white' : COLORS.PRIMARY,
       cursor: 'pointer',
-      transition: `all ${200}ms ease`,
+      transition: `all ${TIMING.ANIMATION_FAST}ms ease`,
       textDecoration: 'none',
     });
 
@@ -343,7 +345,6 @@ export function createEnhancedEmptyState(scenario, options = {}) {
     return button;
   }
 
-  // Animate in - Force reflow before changing styles to ensure transition runs
   void container.offsetHeight;
   container.style.opacity = '1';
   container.style.transform = 'translateY(0)';
@@ -405,22 +406,6 @@ export function getProgressiveUnlockMessage(sectionOrCount, countParam) {
 }
 
 /**
- * Update empty state with new scenario
- * @param {HTMLElement} container - Container element
- * @param {string} scenario - New scenario
- * @param {Object} options - Configuration options
- */
-export function updateEmptyState(container, scenario, options = {}) {
-  if (!container || !(container instanceof HTMLElement)) {
-    console.warn('updateEmptyState: Invalid container element');
-    return;
-  }
-  container.innerHTML = '';
-  const newEmptyState = createEnhancedEmptyState(scenario, options);
-  container.appendChild(newEmptyState);
-}
-
-/**
  * Add floating animation CSS
  */
 export function addEmptyStateStyles() {
@@ -443,7 +428,7 @@ export function addEmptyStateStyles() {
     @media (max-width: 768px) {
       .empty-state {
         padding: ${SPACING.LG} ${SPACING.MD} !important;
-        min-height: 300px !important;
+        min-height: ${DIMENSIONS.PLACEHOLDER_MIN_HEIGHT} !important;
       }
       
       .empty-state__secondary-actions {
@@ -460,7 +445,4 @@ export function addEmptyStateStyles() {
   document.head.appendChild(style);
 }
 
-// Initialize styles when module is imported (browser only)
-if (typeof document !== 'undefined') {
-  addEmptyStateStyles();
-}
+addEmptyStateStyles();

@@ -159,7 +159,6 @@ Comments that restate what the adjacent code already says.
 
 **Check:** look at the module scope (outside any function) of every file you audit. Nothing should touch the DOM or register listeners at import time unless it is `main.js` or a deliberate plugin.
 
-
 ---
 
 ### 9. Duplicated logic instead of reuse 🟡 Medium
@@ -256,7 +255,6 @@ Not everything that looks like slop is slop. Before writing something up in the 
 7. **Be suspicious of a clean sweep.** If a full audit produces zero findings marked "false positive" or "intentional," do one more pass looking specifically for reasons each item might be there on purpose before finalizing the report. A 100% slop hit rate across dozens of findings is itself a signal you're pattern-matching too fast rather than actually evaluating each one.
 
 ---
-
 
 ## `ai-slop-report.md` schema
 

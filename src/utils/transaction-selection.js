@@ -4,6 +4,8 @@
  * circular import (component <-> view). Keeps selection styling in one place.
  */
 
+import { COLORS } from './constants.js';
+
 /**
  * Apply or remove selected styling to a transaction item
  * @param {HTMLElement} item - The transaction list item element
@@ -11,8 +13,9 @@
  */
 export const setSelectedStyle = (item, isSelected) => {
   if (isSelected) {
-    item.style.background = 'rgba(59, 130, 246, 0.12)';
-    item.style.borderLeft = '3px solid var(--color-primary)';
+    item.style.background =
+      'color-mix(in srgb, var(--color-primary) 12%, transparent)';
+    item.style.borderLeft = `3px solid ${COLORS.PRIMARY}`;
   } else {
     item.style.background = '';
     item.style.borderLeft = '';

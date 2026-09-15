@@ -10,6 +10,15 @@ import { Router } from '../core/router.js';
 import { dom } from './dom-factory.js';
 import { escapeHtml } from './security-utils.js';
 
+// Translucent semantic tints (rgba() literals replaced per design-token rule;
+// color-mix() over the base token keeps dev and prod identical)
+const WARNING_TINT =
+  'color-mix(in srgb, var(--color-warning) 10%, transparent)';
+const WARNING_BORDER =
+  'color-mix(in srgb, var(--color-warning) 30%, transparent)';
+const ERROR_TINT = 'color-mix(in srgb, var(--color-error) 10%, transparent)';
+const ERROR_BORDER = 'color-mix(in srgb, var(--color-error) 30%, transparent)';
+
 /**
  * Create loading state component with progress indicator
  */
@@ -107,31 +116,6 @@ export function createLoadingState() {
   }
 
   return loadingEl;
-}
-
-/**
- * Update loading progress for large datasets
- */
-export function updateLoadingProgress(loadingState, progress, message) {
-  const progressContainer = loadingState.querySelector('.progress-container');
-  const progressBar = loadingState.querySelector('.progress-bar');
-  const progressText = loadingState.querySelector('.progress-text');
-  const loadingText = loadingState.querySelector('p');
-
-  if (progress > 0 && progress < 100) {
-    // Show progress bar for progressive loading
-    progressContainer.style.display = 'block';
-    progressText.style.display = 'block';
-
-    progressBar.style.width = `${progress}%`;
-    progressText.textContent = `${progress}% - ${message}`;
-    loadingText.textContent = 'Processing your financial data...';
-  } else if (progress >= 100) {
-    // Hide progress bar when complete
-    progressContainer.style.display = 'none';
-    progressText.style.display = 'none';
-    loadingText.textContent = 'Preparing your reports...';
-  }
 }
 
 /**
@@ -293,8 +277,8 @@ export function showUnsupportedBrowserError(container, missingFeatures) {
  */
 export function showBrowserWarning(container, limitedFeatures) {
   const warning = document.createElement('div');
-  warning.style.background = 'rgba(251, 191, 36, 0.1)';
-  warning.style.border = '1px solid rgba(251, 191, 36, 0.3)';
+  warning.style.background = WARNING_TINT;
+  warning.style.border = `1px solid ${WARNING_BORDER}`;
   warning.style.borderRadius = 'var(--radius-md)';
   warning.style.padding = SPACING.MD;
   warning.style.margin = `${SPACING.XS} 0`;
@@ -340,8 +324,8 @@ export function showPerformanceWarning(container, processingTime) {
 
   const warning = dom.div({
     style: {
-      background: 'rgba(251, 191, 36, 0.1)',
-      border: '1px solid rgba(251, 191, 36, 0.3)',
+      background: WARNING_TINT,
+      border: `1px solid ${WARNING_BORDER}`,
       borderRadius: 'var(--radius-md)',
       padding: SPACING.MD,
       margin: `${SPACING.XS} 0`,
@@ -393,8 +377,8 @@ export function showChartRenderingWarning(container, failedCharts) {
   const failedChartNames = failedCharts.map(chart => chart.name).join(', ');
   const warning = dom.div({
     style: {
-      background: 'rgba(239, 68, 68, 0.1)',
-      border: '1px solid rgba(239, 68, 68, 0.3)',
+      background: ERROR_TINT,
+      border: `1px solid ${ERROR_BORDER}`,
       borderRadius: 'var(--radius-md)',
       padding: SPACING.MD,
       margin: `${SPACING.XS} 0`,

@@ -5,7 +5,7 @@
  * These utilities handle common UI element creation and formatting.
  */
 
-import { COLORS, SPACING } from './constants.js';
+import { COLORS, SPACING, DIMENSIONS } from './constants.js';
 
 /**
  * Create a section usage note element
@@ -42,7 +42,7 @@ export function createPlaceholder(title, description, icon) {
   placeholder.style.border = `2px dashed ${COLORS.BORDER}`;
   placeholder.style.borderRadius = 'var(--radius-lg)';
   placeholder.style.textAlign = 'center';
-  placeholder.style.minHeight = '300px';
+  placeholder.style.minHeight = DIMENSIONS.PLACEHOLDER_MIN_HEIGHT;
 
   const iconDiv = document.createElement('div');
   iconDiv.setAttribute('aria-hidden', 'true');
@@ -63,7 +63,7 @@ export function createPlaceholder(title, description, icon) {
   descDiv.style.margin = '0';
   descDiv.style.fontSize = '0.875rem';
   descDiv.style.color = COLORS.TEXT_MUTED;
-  descDiv.style.maxWidth = '400px';
+  descDiv.style.maxWidth = DIMENSIONS.CONTENT_MAX_WIDTH;
   descDiv.style.lineHeight = '1.5';
 
   placeholder.appendChild(iconDiv);
@@ -108,65 +108,6 @@ export function createSectionContainer(id, title, icon) {
 }
 
 /**
- * Calculate current balance from transactions
- * @param {Array} transactions - Array of transaction objects
- * @returns {number} The current balance
- */
-export function calculateCurrentBalance(transactions) {
-  return transactions.reduce((balance, t) => {
-    if (t.type === 'income') {
-      return balance + t.amount;
-    } else if (t.type === 'expense') {
-      return balance - t.amount;
-    }
-    return balance;
-  }, 0);
-}
-
-/**
- * Calculate average monthly expenses from recent transactions
- * @param {Array} transactions - Array of transaction objects
- * @param {number} monthsBack - Number of months to look back (default: 3)
- * @returns {number} The average monthly expenses
- */
-export function calculateMonthlyExpenses(transactions, monthsBack = 3) {
-  const now = new Date();
-  const startDate = new Date(now.getFullYear(), now.getMonth() - monthsBack, 1);
-
-  const recentTransactions = transactions.filter(
-    t => new Date(t.timestamp) >= startDate
-  );
-
-  if (recentTransactions.length === 0) {
-    return 0;
-  }
-
-  const recentExpenses = recentTransactions
-    .filter(t => t.type === 'expense')
-    .reduce((sum, t) => sum + t.amount, 0);
-
-  const monthsOfData = Math.max(
-    1,
-    (now - startDate) / (1000 * 60 * 60 * 24 * 30)
-  );
-
-  return recentExpenses / monthsOfData;
-}
-
-/**
- * Calculate savings rate as a percentage
- * @param {number} totalIncome - Total income amount
- * @param {number} totalExpenses - Total expenses amount
- * @returns {number} The savings rate percentage
- */
-export function calculateSavingsRate(totalIncome, totalExpenses) {
-  if (totalIncome <= 0) {
-    return 0;
-  }
-  return ((totalIncome - totalExpenses) / totalIncome) * 100;
-}
-
-/**
  * Format currency value
  * @param {number} value - The value to format
  * @param {string} currency - The currency code (default: 'EUR')
@@ -177,17 +118,6 @@ export function formatCurrency(value, currency = 'EUR') {
     style: 'currency',
     currency: currency,
   }).format(value);
-}
-
-/**
- * Format date with options
- * @param {Date|string} date - The date to format
- * @param {Object} options - Intl.DateTimeFormat options
- * @returns {string} The formatted date string
- */
-export function formatDate(date, options = {}) {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return dateObj.toLocaleDateString('en-US', options);
 }
 
 /**

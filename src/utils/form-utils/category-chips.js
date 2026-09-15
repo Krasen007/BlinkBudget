@@ -3,7 +3,13 @@
  * Creates category selection chips and transfer account chips
  */
 
-import { SPACING, FONT_SIZES, TOUCH_TARGETS } from '../constants.js';
+import {
+  SPACING,
+  FONT_SIZES,
+  TOUCH_TARGETS,
+  COLORS,
+  TIMING,
+} from '../constants.js';
 import { validateAmount, showFieldError } from './validation.js';
 import { ClickTracker } from '../../core/click-tracking-service.js';
 import { CustomCategoryService } from '../../core/custom-category-service.js';
@@ -37,7 +43,7 @@ const createCategoryChip = options => {
   }
 
   // Base styles
-  chip.style.border = '1px solid var(--color-border)';
+  chip.style.border = `1px solid ${COLORS.BORDER}`;
   chip.style.transition = 'all 0.2s ease';
   chip.style.borderRadius = 'var(--radius-lg)';
 
@@ -52,7 +58,6 @@ const createCategoryChip = options => {
   chip.style.justifyContent = 'center';
   chip.style.textAlign = 'center';
   chip.style.whiteSpace = 'nowrap';
-  chip.style.overflow = 'hidden';
   chip.style.overflow = 'hidden';
   chip.style.textOverflow = 'ellipsis';
   // scrollSnapAlign is now handled in the render loop for paging
@@ -86,7 +91,7 @@ const createCategoryChip = options => {
     () => {
       if (!isSelected) {
         chip.style.boxShadow = 'none';
-        chip.style.border = '1px solid var(--color-border)';
+        chip.style.border = `1px solid ${COLORS.BORDER}`;
       }
     },
     { passive: true }
@@ -97,7 +102,7 @@ const createCategoryChip = options => {
     () => {
       if (!isSelected) {
         chip.style.boxShadow = 'none';
-        chip.style.border = '1px solid var(--color-border)';
+        chip.style.border = `1px solid ${COLORS.BORDER}`;
       }
     },
     { passive: true }
@@ -114,7 +119,7 @@ const createCategoryChip = options => {
 
   chip.addEventListener('mouseleave', () => {
     if (!isSelected) {
-      chip.style.border = '1px solid var(--color-border)';
+      chip.style.border = `1px solid ${COLORS.BORDER}`;
       chip.style.color = 'var(--color-text-muted)';
       chip.style.boxShadow = 'none';
     }
@@ -148,14 +153,15 @@ const createCategoryContainer = () => {
   container.style.gridTemplateColumns = 'none';
   container.style.gridTemplateRows = 'repeat(2, 1fr)';
   container.style.gridAutoFlow = 'column';
-  container.style.gridAutoColumns =
-    'calc((100% - var(--spacing-sm) * 2) / 3 - 1px)';
+  // Column width compensates for the container's 1px border
+  const CHIP_GRID_BORDER_ALLOWANCE = '1px';
+  container.style.gridAutoColumns = `calc((100% - var(--spacing-sm) * 2) / 3 - ${CHIP_GRID_BORDER_ALLOWANCE})`;
   container.style.gap = SPACING.SM;
   container.style.padding = SPACING.SM;
   container.style.boxSizing = 'border-box';
   container.style.borderRadius = 'var(--radius-md)';
   container.style.background = 'var(--color-surface)';
-  container.style.border = '1px solid var(--color-border)';
+  container.style.border = `1px solid ${COLORS.BORDER}`;
   container.style.overflowX = 'auto';
   container.style.overflowY = 'hidden';
   container.style.webkitOverflowScrolling = 'touch';
@@ -270,7 +276,6 @@ export const createCategorySelector = (options = {}) => {
           color: 'var(--color-primary)',
           isSelected: selectedToAccount === acc.id,
           onClick: () => {
-            // Validate amount
             // Validate amount
             let amountValidation = { valid: true, value: 0 };
             if (amountInput) {
@@ -396,7 +401,6 @@ export const createCategorySelector = (options = {}) => {
             title: catDesc,
             onClick: () => {
               // Validate amount
-              // Validate amount
               let amountValidation = { valid: true, value: 0 };
               if (amountInput) {
                 amountValidation = validateAmount(amountInput.value);
@@ -409,7 +413,7 @@ export const createCategorySelector = (options = {}) => {
               // Visual feedback - deselect all
               Array.from(container.children).forEach(c => {
                 if (c.classList.contains('category-chip')) {
-                  if (c.updateState) c.updateState(false);
+                  c.updateState(false);
                 }
               });
 
@@ -449,10 +453,7 @@ export const createCategorySelector = (options = {}) => {
                     .then(({ showErrorToast }) => {
                       showErrorToast(
                         `Error submitting transaction: ${e.message}`,
-                        {
-                          duration: 5000,
-                          persistent: false,
-                        }
+                        { duration: TIMING.NOTIFICATION_ERROR }
                       );
                     })
                     .catch(importErr => {
@@ -526,12 +527,7 @@ export const createCategorySelector = (options = {}) => {
     }
   };
 
-  if (
-    typeof window !== 'undefined' &&
-    typeof window.addEventListener === 'function'
-  ) {
-    window.addEventListener('categories-updated', _onCategoriesUpdated);
-  }
+  window.addEventListener('categories-updated', _onCategoriesUpdated);
 
   return {
     container: categoryGroup,
@@ -550,12 +546,7 @@ export const createCategorySelector = (options = {}) => {
     setSourceAccount,
     render,
     cleanup: () => {
-      if (
-        typeof window !== 'undefined' &&
-        typeof window.removeEventListener === 'function'
-      ) {
-        window.removeEventListener('categories-updated', _onCategoriesUpdated);
-      }
+      window.removeEventListener('categories-updated', _onCategoriesUpdated);
     },
   };
 };

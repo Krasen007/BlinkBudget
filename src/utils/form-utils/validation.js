@@ -102,7 +102,7 @@ export const showFieldError = (element, _errorMessage = null) => {
 
   // Auto-clear error after timeout
   setTimeout(() => {
-    element.style.border = '1px solid var(--color-border)';
+    element.style.border = `1px solid ${COLORS.BORDER}`;
   }, TIMING.ANIMATION_NORMAL * 10); // 2 seconds
 
   // Focus the element
@@ -119,6 +119,6 @@ export const showContainerError = container => {
   container.style.border = `1px solid ${COLORS.ERROR}`;
 
   setTimeout(() => {
-    container.style.border = '1px solid var(--color-border)';
+    container.style.border = `1px solid ${COLORS.BORDER}`;
   }, TIMING.ANIMATION_NORMAL * 10);
 };

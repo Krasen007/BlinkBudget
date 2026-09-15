@@ -3,7 +3,7 @@
  * Creates transaction type toggle buttons (expense, income, transfer, refund)
  */
 
-import { TYPE_COLORS } from '../constants.js';
+import { TYPE_COLORS, COLORS, TOUCH_TARGETS } from '../constants.js';
 
 /**
  * Create a type toggle button
@@ -23,12 +23,12 @@ const createTypeButton = options => {
   btn.textContent = label;
   btn.className = 'btn type-toggle-btn';
   btn.style.flex = '1';
-  btn.style.border = '1px solid var(--color-border)';
+  btn.style.border = `1px solid ${COLORS.BORDER}`;
   btn.style.transition = 'all 0.2s ease';
   btn.style.borderRadius = 'var(--radius-lg)';
 
   // Compact sizing for single row layout
-  btn.style.minHeight = '56px'; // Match TOUCH_TARGETS.MIN_HEIGHT
+  btn.style.minHeight = TOUCH_TARGETS.MIN_HEIGHT;
   btn.style.padding = 'var(--spacing-sm) var(--spacing-md)'; // Smaller horizontal padding
   btn.style.margin = '0'; // Grid handles spacing
   btn.style.fontSize = '0.9rem'; // Slightly smaller font for better fit
@@ -90,7 +90,7 @@ const createTypeButton = options => {
     const currentTypeValue =
       typeof currentType === 'function' ? currentType() : currentType;
     if (currentTypeValue !== type) {
-      btn.style.border = '1px solid var(--color-text-muted)';
+      btn.style.border = `1px solid ${COLORS.TEXT_MUTED}`;
       btn.style.backgroundColor = 'var(--color-surface-hover)';
       btn.style.color = 'var(--color-text-main)';
       btn.style.boxShadow = 'none';
@@ -101,7 +101,7 @@ const createTypeButton = options => {
     const currentTypeValue =
       typeof currentType === 'function' ? currentType() : currentType;
     if (currentTypeValue !== type) {
-      btn.style.border = '1px solid var(--color-border)';
+      btn.style.border = `1px solid ${COLORS.BORDER}`;
       btn.style.backgroundColor = 'transparent';
       btn.style.color = 'var(--color-text-muted)';
       btn.style.boxShadow = 'none';

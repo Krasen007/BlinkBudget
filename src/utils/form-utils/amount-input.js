@@ -25,8 +25,7 @@ export const createAmountInput = (options = {}) => {
   input.id = 'transaction-amount-input';
   input.name = 'amount';
   input.type = 'text'; // Use text allow both comma and dot
-  input.value = initialValue || '';
-  // input.step = '0.01'; // Not needed for text input
+  input.value = initialValue ?? '';
   input.required = true;
   input.autocomplete = 'off';
 
@@ -196,7 +195,7 @@ export const createAmountInput = (options = {}) => {
    * @param {string|number} value - Value to set
    */
   const setValue = value => {
-    input.value = value || '';
+    input.value = value ?? '';
     lastHadMinus = (value && String(value).startsWith('-')) || false;
   };
 

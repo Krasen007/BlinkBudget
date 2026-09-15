@@ -20,20 +20,3 @@ export const debounce = (func, wait) => {
     timeout = setTimeout(later, wait);
   };
 };
-
-/**
- * Throttle function for scroll/resize events
- * @param {Function} func - Function to throttle
- * @param {number} limit - Time limit in milliseconds
- * @returns {Function} Throttled function
- */
-export const throttle = (func, limit) => {
-  let inThrottle;
-  return function (...args) {
-    if (!inThrottle) {
-      func.apply(this, args);
-      inThrottle = true;
-      setTimeout(() => (inThrottle = false), limit);
-    }
-  };
-};

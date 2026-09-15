@@ -20,6 +20,12 @@ export const COLORS = {
   WARNING: 'var(--color-warning)',
   INFO: 'var(--color-info)',
   INCOME_COLOR: 'var(--color-success)',
+  // RGB component triples for Canvas/Chart.js rgba() strings. The matching
+  // CSS custom properties (--color-success-rgb / --color-error-rgb) are
+  // purged from production CSS (no surviving rule references them), so the
+  // charts must read the values from here — see todo/ai-slop-report.md.
+  SUCCESS_RGB: '0, 179, 89',
+  ERROR_RGB: '255, 0, 0',
 
   // CSS variable references (for consistency)
   PRIMARY: 'var(--color-primary)',
@@ -167,6 +173,7 @@ export const TOUCH_TARGETS = {
 
 // Spacing values (for JavaScript usage - actual pixel values)
 export const SPACING = {
+  XXS: '2px', // half-step for tight component internals
   XS: '4px', // 0.25rem
   SM: '8px', // 0.5rem
   MD: '12px', // 0.75rem
@@ -196,6 +203,7 @@ export const TIMING = {
 // Z-index layers
 export const Z_INDEX = {
   MODAL_OVERLAY: 1000,
+  PROGRESS_INDICATOR: 9999, // above all app surfaces, incl. modals
   DATE_INPUT_OVERLAY: 2,
   DEFAULT: 1,
 };
@@ -206,6 +214,14 @@ export const DIMENSIONS = {
   MODAL_MAX_WIDTH: '400px',
   MODAL_MAX_WIDTH_SMALL: '350px',
   CONTAINER_MAX_WIDTH: '600px',
+  CHART_HEIGHT_PIE: '300px',
+  CHART_HEIGHT_LINE: '350px',
+  CHART_HEIGHT_BAR: '400px',
+  LEGEND_ITEM_PADDING: '6px 14px',
+  LEGEND_SWATCH_SIZE: '10px',
+  PLACEHOLDER_MIN_HEIGHT: '300px',
+  CONTENT_MAX_WIDTH: '400px',
+  PROGRESS_INDICATOR_MIN_WIDTH: '300px',
   MIN_LIST_HEIGHT: 200,
   MIN_CATEGORY_HEIGHT: 140,
   IDEAL_CATEGORY_HEIGHT: 250,

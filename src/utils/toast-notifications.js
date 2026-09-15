@@ -132,18 +132,15 @@ function createToastElement(message, type, options = {}) {
     icon.textContent = config.icon;
   }
 
-  // Message
   const messageElement = document.createElement('div');
   messageElement.className = 'toast-message';
   messageElement.textContent = message;
 
-  // Close button
   const closeButton = document.createElement('button');
   closeButton.className = 'toast-close';
   closeButton.textContent = '×';
   closeButton.setAttribute('aria-label', 'Close notification');
 
-  // Assemble toast
   if (icon) {
     toast.appendChild(icon);
   }
@@ -167,7 +164,6 @@ function createToastElement(message, type, options = {}) {
 
   toast.appendChild(closeButton);
 
-  // Event handlers
   const handleRemove = () => {
     removeToastById(toastId);
   };
@@ -329,12 +325,4 @@ export function removeToastById(toastId) {
       onClose();
     }
   }, TIMING.ANIMATION_FAST);
-}
-
-/**
- * Get count of active toasts
- * @returns {number} Number of active toasts
- */
-export function getActiveToastCount() {
-  return activeToasts.size;
 }

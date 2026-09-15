@@ -81,7 +81,7 @@ export const createInput = (options = {}) => {
       id,
       name,
       placeholder,
-      value: value || '',
+      value: value ?? '',
       readOnly,
       ...(autocomplete !== null && { autocomplete }),
       ...attributes,
@@ -128,31 +128,6 @@ export const createSelect = (options = {}) => {
   }
 
   return select;
-};
-
-export const createFlexContainer = (options = {}) => {
-  const {
-    direction = 'row',
-    justify = 'flex-start',
-    align = 'stretch',
-    gap = '0',
-    className = '',
-    style = {},
-    children = [],
-  } = options;
-
-  return createElement('div', {
-    className,
-    style: {
-      display: 'flex',
-      flexDirection: direction,
-      justifyContent: justify,
-      alignItems: align,
-      gap,
-      ...style,
-    },
-    children,
-  });
 };
 
 export const createButton = (options = {}) => {

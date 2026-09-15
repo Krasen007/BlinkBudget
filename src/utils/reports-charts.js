@@ -4,10 +4,8 @@
  * Chart creation and rendering functions for reports view.
  */
 
-import { COLORS, SPACING, CATEGORY_COLORS } from './constants.js';
+import { COLORS, SPACING, DIMENSIONS, CATEGORY_COLORS } from './constants.js';
 import { getChartColors } from '../core/chart-config.js';
-import { TransactionService } from '../core/transaction-service.js';
-import { generateMonthlyTrendData } from './reports-utils.js';
 import { escapeHtml } from './security-utils.js';
 import { Router } from '../core/router.js';
 import { NavigationState } from '../core/navigation-state.js';
@@ -135,7 +133,6 @@ export async function createCategoryBreakdownChart(
   section.style.borderRadius = 'var(--radius-lg)';
   section.style.padding = SPACING.MD;
 
-  // Section header
   const header = document.createElement('div');
   header.style.display = 'flex';
   header.style.justifyContent = 'space-between';
@@ -156,7 +153,6 @@ export async function createCategoryBreakdownChart(
     .filter(cat => cat.amount > 0)
     .sort((a, b) => b.amount - a.amount);
 
-  // Total amounts display
   const totalsContainer = document.createElement('div');
   totalsContainer.style.display = 'flex';
   totalsContainer.style.flexDirection = 'row';
@@ -193,7 +189,7 @@ export async function createCategoryBreakdownChart(
   totalIncomeLabel.textContent = 'Total Income';
   totalIncomeLabel.style.fontSize = '0.875rem';
   totalIncomeLabel.style.color = COLORS.TEXT_MUTED;
-  totalIncomeLabel.style.marginBottom = '2px';
+  totalIncomeLabel.style.marginBottom = SPACING.XXS;
 
   const totalIncomeValue = document.createElement('span');
   const totalIncome = currentData.incomeVsExpenses?.totalIncome || 0;
@@ -208,7 +204,6 @@ export async function createCategoryBreakdownChart(
   totalIncomeContainer.appendChild(totalIncomeLabel);
   totalIncomeContainer.appendChild(totalIncomeValue);
 
-  // Add hover effect
   totalIncomeContainer.addEventListener('mouseenter', () => {
     totalIncomeContainer.style.opacity = '0.7';
   });
@@ -216,7 +211,6 @@ export async function createCategoryBreakdownChart(
     totalIncomeContainer.style.opacity = '1';
   });
 
-  // Add click handler to filter dashboard by income
   totalIncomeContainer.addEventListener('click', () => {
     NavigationState.saveDashboardTypeFilter('income');
     // Also save the current time period to filter by the selected month
@@ -246,7 +240,7 @@ export async function createCategoryBreakdownChart(
   totalSpentLabel.textContent = 'Total Spent';
   totalSpentLabel.style.fontSize = '0.875rem';
   totalSpentLabel.style.color = COLORS.TEXT_MUTED;
-  totalSpentLabel.style.marginBottom = '2px';
+  totalSpentLabel.style.marginBottom = SPACING.XXS;
 
   const totalSpentValue = document.createElement('span');
   const totalSpent = allCategories.reduce((sum, cat) => sum + cat.amount, 0);
@@ -261,7 +255,6 @@ export async function createCategoryBreakdownChart(
   totalSpentContainer.appendChild(totalSpentLabel);
   totalSpentContainer.appendChild(totalSpentValue);
 
-  // Add hover effect
   totalSpentContainer.addEventListener('mouseenter', () => {
     totalSpentContainer.style.opacity = '0.7';
   });
@@ -277,7 +270,6 @@ export async function createCategoryBreakdownChart(
     }
   });
 
-  // Add click handler to filter dashboard by expenses and refunds
   totalSpentContainer.addEventListener('click', () => {
     // Don't set a type filter - the total spent includes both expenses and refunds
     // Setting type='expense' would exclude refunds, making the dashboard inconsistent
@@ -346,9 +338,7 @@ export async function createCategoryBreakdownChart(
     ],
   };
 
-  // Create initial pie chart with responsive legend
-  // Final chart sizing and spacing
-  chartDiv.style.height = '300px'; // More compact to avoid empty space
+  chartDiv.style.height = DIMENSIONS.CHART_HEIGHT_PIE; // More compact to avoid empty space
   chartDiv.style.marginBottom = SPACING.XS;
 
   const currentChart = await chartRenderer.createPieChart(canvas, chartData, {
@@ -366,7 +356,6 @@ export async function createCategoryBreakdownChart(
     },
   });
 
-  // Create custom legend
   const legendContainer = document.createElement('div');
   legendContainer.className = 'chartjs-legend';
   legendContainer.style.marginTop = SPACING.XS;
@@ -390,17 +379,18 @@ export async function createCategoryBreakdownChart(
     item.setAttribute('aria-label', `Toggle visibility for ${label}`);
     item.style.display = 'flex';
     item.style.alignItems = 'center';
-    item.style.gap = '8px';
-    item.style.padding = '6px 14px';
-    item.style.background = 'rgba(255, 255, 255, 0.05)';
+    item.style.gap = SPACING.SM;
+    item.style.padding = DIMENSIONS.LEGEND_ITEM_PADDING;
+    item.style.background =
+      'color-mix(in srgb, var(--color-text-main) 5%, transparent)';
     item.style.borderRadius = 'var(--radius-md)';
     item.style.cursor = 'pointer';
     item.style.fontSize = '0.8125rem';
     item.style.transition = 'all 0.2s ease';
 
     const colorBox = document.createElement('span');
-    colorBox.style.width = '10px';
-    colorBox.style.height = '10px';
+    colorBox.style.width = DIMENSIONS.LEGEND_SWATCH_SIZE;
+    colorBox.style.height = DIMENSIONS.LEGEND_SWATCH_SIZE;
     colorBox.style.borderRadius = '50%';
     colorBox.style.backgroundColor = datasets.backgroundColor[i];
 
@@ -509,7 +499,7 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   incomeLabel.textContent = 'Income';
   incomeLabel.style.fontSize = '0.875rem';
   incomeLabel.style.color = 'var(--color-text-muted)';
-  incomeLabel.style.marginBottom = '4px';
+  incomeLabel.style.marginBottom = SPACING.XS;
   incomeDiv.appendChild(incomeLabel);
 
   const incomeValue = document.createElement('div');
@@ -519,7 +509,6 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   incomeValue.style.color = COLORS.INCOME_COLOR;
   incomeDiv.appendChild(incomeValue);
 
-  // Add hover effect
   incomeDiv.addEventListener('mouseenter', () => {
     incomeDiv.style.opacity = '0.7';
   });
@@ -535,7 +524,6 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
     }
   });
 
-  // Add click handler to filter dashboard by income
   incomeDiv.addEventListener('click', () => {
     NavigationState.saveDashboardTypeFilter('income');
     // Also save the current time period to filter by the selected month
@@ -564,7 +552,7 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   expensesLabel.textContent = 'Expenses';
   expensesLabel.style.fontSize = '0.875rem';
   expensesLabel.style.color = 'var(--color-text-muted)';
-  expensesLabel.style.marginBottom = '4px';
+  expensesLabel.style.marginBottom = SPACING.XS;
   expensesDiv.appendChild(expensesLabel);
 
   const expensesValue = document.createElement('div');
@@ -574,7 +562,6 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   expensesValue.style.color = 'var(--color-error)';
   expensesDiv.appendChild(expensesValue);
 
-  // Add hover effect
   expensesDiv.addEventListener('mouseenter', () => {
     expensesDiv.style.opacity = '0.7';
   });
@@ -590,7 +577,6 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
     }
   });
 
-  // Add click handler to filter dashboard by expenses and refunds
   expensesDiv.addEventListener('click', () => {
     // Don't set a type filter - the total expenses includes both expenses and refunds
     // Setting type='expense' would exclude refunds, making the dashboard inconsistent
@@ -610,7 +596,7 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   netBalanceLabel.textContent = 'Net Balance';
   netBalanceLabel.style.fontSize = '0.875rem';
   netBalanceLabel.style.color = 'var(--color-text-muted)';
-  netBalanceLabel.style.marginBottom = '4px';
+  netBalanceLabel.style.marginBottom = SPACING.XS;
   netBalanceDiv.appendChild(netBalanceLabel);
 
   const netBalanceValue = document.createElement('div');
@@ -627,7 +613,6 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
 
   section.appendChild(detailsContent);
 
-  // Chart container
   const chartDiv = document.createElement('div');
   chartDiv.style.position = 'relative';
   chartDiv.style.width = '100%';
@@ -639,21 +624,19 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   const canvas = document.createElement('canvas');
   canvas.id = 'income-expense-chart';
   canvas.style.width = '100%';
-  canvas.style.height = '400px';
+  canvas.style.height = DIMENSIONS.CHART_HEIGHT_BAR;
   canvas.style.maxWidth = '100%';
   canvas.style.display = 'block';
   chartDiv.appendChild(canvas);
   section.appendChild(chartDiv);
 
   // Resolve theme variables to concrete colors for Canvas rendering
-  const incomeBg =
-    resolveCssVarColor('--color-success-rgb', 0.8) || 'rgba(0,179,89,0.8)';
-  const expensesBg =
-    resolveCssVarColor('--color-error-rgb', 0.8) || 'rgba(255,0,0,0.8)';
+  const incomeBg = `rgba(${COLORS.SUCCESS_RGB}, 0.8)`;
+  const expensesBg = `rgba(${COLORS.ERROR_RGB}, 0.8)`;
   const netBg =
     incomeExpenseData.netBalance >= 0
-      ? resolveCssVarColor('--color-success-rgb', 0.6) || 'rgba(0,179,89,0.6)'
-      : resolveCssVarColor('--color-error-rgb', 0.6) || 'rgba(255,0,0,0.6)';
+      ? `rgba(${COLORS.SUCCESS_RGB}, 0.6)`
+      : `rgba(${COLORS.ERROR_RGB}, 0.6)`;
 
   const incomeBorder =
     resolveCssVarColor('--color-success', 1) || 'hsl(150, 100%, 35%)';
@@ -709,172 +692,6 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
 
   return { section, chart };
 }
-
-/**
- * Create category trends over time chart
- */
-export async function createCategoryTrendsChart(
-  chartRenderer,
-  currentData,
-  categoryColorMap
-) {
-  // Get historical data for trends
-  const allTransactions = TransactionService.getAll();
-
-  // Check if we have enough historical data (at least 3 months)
-  const oldestTransaction = allTransactions.reduce((oldest, transaction) => {
-    const transactionDate = new Date(transaction.date || transaction.timestamp);
-    return transactionDate < oldest ? transactionDate : oldest;
-  }, new Date());
-
-  // Calculate months more accurately using calendar months
-  const now = new Date();
-  const monthsOfData =
-    (now.getFullYear() - oldestTransaction.getFullYear()) * 12 +
-    (now.getMonth() - oldestTransaction.getMonth());
-
-  if (monthsOfData < 3) {
-    // Render informative message instead of null
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'chart-section';
-    messageDiv.style.cssText = `
-      text-align: center;
-      padding: ${SPACING.XL};
-      color: ${COLORS.TEXT_MUTED};
-      font-size: 0.875rem;
-      line-height: 1.5;
-      background: ${COLORS.SURFACE};
-      border-radius: var(--radius-lg);
-    `;
-
-    const icon = document.createElement('div');
-    icon.style.cssText = `
-      font-size: 2rem;
-      margin-bottom: ${SPACING.XS};
-    `;
-    icon.textContent = '📈';
-
-    const title = document.createElement('h3');
-    title.textContent = 'Category Trends';
-    title.style.cssText = `
-      margin: 0 0 ${SPACING.XS} 0;
-      color: ${COLORS.TEXT_MAIN};
-      font-weight: 600;
-    `;
-
-    const message = document.createElement('p');
-    message.textContent = `Category trends will appear here after ${3 - monthsOfData} more month${3 - monthsOfData === 1 ? '' : 's'} of transaction data. Trends need at least 3 months of history to show meaningful patterns.`;
-    message.style.cssText = `
-      margin: 0;
-      line-height: 1.6;
-    `;
-
-    messageDiv.appendChild(icon);
-    messageDiv.appendChild(title);
-    messageDiv.appendChild(message);
-
-    return { section: messageDiv, chart: null };
-  }
-
-  const section = document.createElement('div');
-  section.className = 'chart-section';
-  section.style.background = COLORS.SURFACE;
-  section.style.borderRadius = 'var(--radius-lg)';
-  section.style.padding = SPACING.MD;
-
-  const title = document.createElement('h3');
-  title.textContent = 'Category Trends Over Time';
-  title.style.margin = `0 0 ${SPACING.XS} 0`;
-  title.style.color = COLORS.TEXT_MAIN;
-  section.appendChild(title);
-
-  const chartDiv = document.createElement('div');
-  chartDiv.style.position = 'relative';
-  chartDiv.style.height = '350px';
-
-  const canvas = document.createElement('canvas');
-  canvas.id = 'category-trends-chart';
-  chartDiv.appendChild(canvas);
-  section.appendChild(chartDiv);
-
-  // Generate monthly data for top 6 categories
-  const topCategories = currentData.categoryBreakdown.categories.slice(0, 99);
-  const monthlyData = generateMonthlyTrendData(allTransactions, topCategories);
-
-  // Filter out the current month to avoid incomplete data skewing the chart
-  const currentMonthKey = now.toLocaleDateString('en-US', {
-    month: 'short',
-    year: 'numeric',
-  });
-
-  const filteredMonths = monthlyData.months.filter(
-    month => month !== currentMonthKey
-  );
-  const filteredCategoryData = {};
-
-  topCategories.forEach(category => {
-    filteredCategoryData[category.name] = (
-      monthlyData.categoryData[category.name] || []
-    ).filter((_value, index) => monthlyData.months[index] !== currentMonthKey);
-  });
-
-  const chartData = {
-    labels: filteredMonths,
-    datasets: topCategories.map((category, index) => ({
-      label: category.name,
-      data: filteredCategoryData[category.name] || [],
-      borderColor:
-        categoryColorMap.get(category.name) ||
-        getChartColors(topCategories.length)[index],
-      backgroundColor: (
-        categoryColorMap.get(category.name) ||
-        getChartColors(topCategories.length)[index]
-      )
-        .replace(')', ', 0.1)')
-        .replace('hsl', 'hsla'),
-      borderWidth: 3,
-      fill: false,
-      tension: 0.4,
-      hidden: index >= 6, // Hide categories beyond the top 6 to prevent clutter, but keep in legend
-    })),
-  };
-
-  const chart = await chartRenderer.createLineChart(canvas, chartData, {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top',
-      },
-    },
-  });
-
-  return { section, chart };
-}
-
-/**
- * Helper functions for chart creation
- */
-// function createToggleButton(text, active = false) {
-//   const button = document.createElement('button');
-//   button.textContent = text;
-//   button.style.padding = `${SPACING.XS} ${SPACING.SM}`;
-//   button.style.border = `1px solid ${COLORS.BORDER}`;
-//   button.style.borderRadius = 'var(--radius-sm)';
-//   button.style.background = active ? COLORS.PRIMARY : 'transparent';
-//   button.style.color = active ? 'white' : COLORS.TEXT_MAIN;
-//   button.style.cursor = 'pointer';
-//   button.style.fontSize = '0.875rem';
-//   button.style.transition = 'all 0.2s ease';
-
-//   if (active) {
-//     button.classList.add('active');
-//   }
-
-//   return button;
-// }
-
-// Migrated import to top
 
 /**
  * Get a deterministic color for a category

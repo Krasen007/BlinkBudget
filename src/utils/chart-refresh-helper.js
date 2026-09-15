@@ -46,14 +46,3 @@ export async function refreshChart({
     throw err; // Re-throw so caller can handle if needed
   }
 }
-
-/**
- * Refresh multiple charts in sequence
- * @param {Array<Object>} chartConfigs - Array of chart configurations
- * @returns {Promise<void>}
- */
-export async function refreshCharts(chartConfigs) {
-  for (const config of chartConfigs) {
-    await refreshChart(config);
-  }
-}

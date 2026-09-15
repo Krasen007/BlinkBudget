@@ -3,7 +3,7 @@
  * Provides loading and progress indicators for async operations
  */
 
-import { SPACING, FONT_SIZES } from './constants.js';
+import { SPACING, FONT_SIZES, Z_INDEX, DIMENSIONS } from './constants.js';
 
 const activeIndicators = new Map();
 
@@ -39,15 +39,14 @@ export const showProgressIndicator = (
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 9999;
+    z-index: ${Z_INDEX.PROGRESS_INDICATOR};
     background: rgba(0, 0, 0, 0.8);
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     padding: ${SPACING.LG};
-    min-width: 300px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: ${DIMENSIONS.PROGRESS_INDICATOR_MIN_WIDTH};
+    box-shadow: var(--shadow-lg);
   `;
 
-  // Create spinner
   const spinner = document.createElement('div');
   spinner.className = 'progress-spinner';
   spinner.style.cssText = `
@@ -60,12 +59,11 @@ export const showProgressIndicator = (
     margin: 0 auto ${SPACING.MD} 0;
   `;
 
-  // Create message
   const messageEl = document.createElement('div');
   messageEl.className = 'progress-message';
   messageEl.textContent = message;
   messageEl.style.cssText = `
-    color: var(--color-text);
+    color: var(--color-text-main);
     font-size: ${FONT_SIZES.SM};
     text-align: center;
     margin-bottom: ${SPACING.SM};
@@ -73,13 +71,13 @@ export const showProgressIndicator = (
 
   // Create cancel button (if enabled)
   let cancelButton = null;
-  if (options && options.onCancel !== undefined) {
+  if (options.onCancel !== undefined) {
     cancelButton = document.createElement('button');
     cancelButton.textContent = 'Cancel';
     cancelButton.style.cssText = `
       background: transparent;
-      border: 1px solid var(--color-text);
-      color: var(--color-text);
+      border: 1px solid var(--color-text-main);
+      color: var(--color-text-main);
       padding: ${SPACING.XS} ${SPACING.SM};
       border-radius: 4px;
       cursor: pointer;
@@ -88,37 +86,26 @@ export const showProgressIndicator = (
     `;
 
     cancelButton.addEventListener('click', () => {
-      if (options && options.onCancel) {
+      if (options.onCancel) {
         options.onCancel();
         hideProgressIndicator(operationId);
       }
     });
   }
 
-  // Assemble indicator
   indicatorContainer.appendChild(spinner);
   indicatorContainer.appendChild(messageEl);
   if (cancelButton) {
     indicatorContainer.appendChild(cancelButton);
   }
 
-  // Add to container and track
   container.appendChild(indicatorContainer);
   activeIndicators.set(operationId, indicatorContainer);
 
-  // Auto-hide after timeout
-  const hideIndicator = () => {
-    const indicator = activeIndicators.get(operationId);
-    if (indicator && indicator.parentNode) {
-      indicator.parentNode.removeChild(indicator);
-      activeIndicators.delete(operationId);
-    }
-  };
-
-  setTimeout(hideIndicator, timeout);
+  setTimeout(() => hideProgressIndicator(operationId), timeout);
 
   return {
-    hide: hideIndicator,
+    hide: () => hideProgressIndicator(operationId),
     update: newMessage => {
       const messageEl = indicatorContainer.querySelector('.progress-message');
       if (messageEl) {
@@ -167,7 +154,4 @@ export const addProgressStyles = () => {
   document.head.appendChild(style);
 };
 
-// Initialize styles when module is imported
-if (typeof document !== 'undefined') {
-  addProgressStyles();
-}
+addProgressStyles();
