@@ -304,7 +304,7 @@ export function createPrivacyControls() {
       max-width: 800px;
       margin: 0 auto;
       padding: 2rem;
-      background: var(--bg-primary);
+      background: var(--color-surface);
       border-radius: 12px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
@@ -315,25 +315,25 @@ export function createPrivacyControls() {
     }
 
     .privacy-header h2 {
-      color: var(--text-primary);
+      color: var(--color-text-main);
       margin-bottom: 0.5rem;
     }
 
     .privacy-header p {
-      color: var(--text-secondary);
+      color: var(--color-text-muted);
       margin: 0;
     }
 
     .privacy-section {
       margin-bottom: 2rem;
       padding: 1.5rem;
-      background: var(--bg-secondary);
+      background: var(--color-background);
       border-radius: 8px;
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--color-border);
     }
 
     .privacy-section h3 {
-      color: var(--text-primary);
+      color: var(--color-text-main);
       margin-bottom: 1rem;
       font-size: 1.1rem;
     }
@@ -357,13 +357,13 @@ export function createPrivacyControls() {
 
     .consent-label strong, .mode-label strong {
       display: block;
-      color: var(--text-primary);
+      color: var(--color-text-main);
       margin-bottom: 0.25rem;
     }
 
     .consent-label small, .mode-label small {
       display: block;
-      color: var(--text-secondary);
+      color: var(--color-text-muted);
       line-height: 1.4;
     }
 
@@ -380,16 +380,16 @@ export function createPrivacyControls() {
     }
 
     .retention-item label {
-      color: var(--text-primary);
+      color: var(--color-text-main);
       font-weight: 500;
     }
 
     .retention-item select {
       padding: 0.5rem;
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--color-border);
       border-radius: 4px;
-      background: var(--bg-primary);
-      color: var(--text-primary);
+      background: var(--color-surface);
+      color: var(--color-text-main);
     }
 
     .privacy-modes {
@@ -410,7 +410,7 @@ export function createPrivacyControls() {
       gap: 1rem;
       margin-top: 2rem;
       padding-top: 2rem;
-      border-top: 1px solid var(--border-color);
+      border-top: 1px solid var(--color-border);
     }
 
     .btn {
@@ -423,31 +423,31 @@ export function createPrivacyControls() {
     }
 
     .btn-primary {
-      background: var(--primary-color);
+      background: var(--color-primary);
       color: white;
     }
 
     .btn-primary:hover {
-      background: var(--primary-hover);
+      background: var(--color-primary-dark);
     }
 
     .btn-secondary {
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
-      border: 1px solid var(--border-color);
+      background: transparent;
+      color: var(--color-text-main);
+      border: 1px solid var(--color-border);
     }
 
     .btn-secondary:hover {
-      background: var(--bg-hover);
+      background: var(--color-surface-hover);
     }
 
     .btn-warning {
-      background: var(--warning-color);
+      background: var(--color-warning);
       color: white;
     }
 
     .btn-warning:hover {
-      background: var(--warning-hover);
+      background: var(--color-warning-dark);
     }
 
     @media(max-width: 768px) {

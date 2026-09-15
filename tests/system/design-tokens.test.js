@@ -13,7 +13,6 @@ import { build } from 'vite';
 import { mkdtempSync, readFileSync, readdirSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { extname, join } from 'path';
-import viteConfig from '../../vite.config.js';
 
 import { TIMING } from '../../src/utils/constants.js';
 import {
@@ -25,12 +24,11 @@ import {
 const SRC_DIR = 'src';
 const STYLES_DIR = 'src/styles';
 
-// Files with pre-existing undefined-token debt, recorded by the round-1 audit's
-// verification sweep (see todo/ai-slop-report.md, "Round-1 addendum"). These use
-// a foreign token vocabulary that no stylesheet declares, so every one of their
-// var() values is silently invalid. Remove a file from this list once migrated —
-// the list must not grow.
-const KNOWN_TOKEN_DEBT = ['src/components/PrivacyControls.js'];
+// Files with pre-existing undefined-token debt (see todo/ai-slop-report.md,
+// "Round-1 addendum"). A file lands here only while it uses a foreign token
+// vocabulary that no stylesheet declares. `PrivacyControls.js` was migrated
+// and removed — the list is empty and must not grow.
+const KNOWN_TOKEN_DEBT = [];
 
 /**
  * Recursively collect every file with the given extension under a directory
@@ -142,6 +140,13 @@ describe('Design token contract', () => {
       process.env.NODE_ENV = 'production';
 
       try {
+        // NOTE: vite.config.js chooses its plugins (purgecss, cssnano) from
+        // NODE_ENV at import time, so a static import evaluated under the
+        // test runner's env would build *without* purging and this test
+        // would pass vacuously. Re-import after setting NODE_ENV so the
+        // build under test really purges.
+        vi.resetModules();
+        const { default: viteConfig } = await import('../../vite.config.js');
         await build({
           ...viteConfig,
           configFile: false,

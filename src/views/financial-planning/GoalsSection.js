@@ -1060,5 +1060,3 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
 
   return section;
 };
-
-// ...

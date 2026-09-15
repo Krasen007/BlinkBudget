@@ -201,18 +201,32 @@ export default defineConfig({
                 content: ['./index.html', './src/**/*.js', './src/**/*.html'],
                 defaultExtractor: content =>
                   content.match(/[\w-/:]+(?<!:)/g) || [],
-                safelist: [
-                  /^(flex|grid|hidden|block|inline|absolute|relative|fixed|sticky)/,
-                  /^(active|disabled|loading|error|success|warning|info)/,
-                  /^mobile-/,
-                  /^toast-/,
-                  /^(fade|slide|bounce|pulse|spin)/,
-                  /:hover/,
-                  /:focus/,
-                  /:active/,
-                  /^(sm|md|lg|xl):/,
-                  /^(checked|invalid|valid)/,
-                ],
+                safelist: {
+                  // Class/selector safelist (unchanged, now under `standard`).
+                  standard: [
+                    /^(flex|grid|hidden|block|inline|absolute|relative|fixed|sticky)/,
+                    /^(active|disabled|loading|error|success|warning|info)/,
+                    /^mobile-/,
+                    /^toast-/,
+                    /^(fade|slide|bounce|pulse|spin)/,
+                    /:hover/,
+                    /:focus/,
+                    /:active/,
+                    /^(sm|md|lg|xl):/,
+                    /^(checked|invalid|valid)/,
+                  ],
+                  // Semantic token families referenced from JS inline styles.
+                  // Keeps declared tokens alive through the purge so a JS-only
+                  // `var(--color-x)` reference can never silently resolve to
+                  // nothing in production (see todo/ai-slop-report.md). ~1 KB.
+                  variables: [/^--(color|font|spacing|radius|shadow)/],
+                  // JS-driven animations: `spin`/`float` are applied from JS
+                  // inline styles, so no surviving CSS rule references them
+                  // and the purge drops the keyframes (`float` was missing
+                  // from production until this entry). `standard` above does
+                  // not cover keyframe names — this list does.
+                  keyframes: [/^(spin|float)$/],
+                },
                 variables: true,
                 keyframes: true,
                 fontFace: true,

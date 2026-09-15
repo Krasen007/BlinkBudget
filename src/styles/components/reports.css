@@ -371,20 +371,6 @@
       var(--spacing-xl) + env(safe-area-inset-bottom, 0px)
     ) !important;
   }
-
-  /* Time period selector mobile adjustments */
-  .time-period-buttons {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-xs);
-  }
-
-  .time-period-btn {
-    padding: var(--spacing-sm) var(--spacing-md);
-    font-size: var(--font-size-sm);
-    white-space: normal;
-    text-align: center;
-    line-height: 1.2;
-  }
 }
 
 /* Tablet optimizations */
@@ -392,38 +378,12 @@
   .charts-section {
     margin-bottom: var(--spacing-md);
   }
-
-  /* Time period selector tablet adjustments */
-  .time-period-buttons {
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-sm);
-  }
-
-  .time-period-btn {
-    padding: var(--spacing-md) var(--spacing-lg);
-    font-size: var(--font-size-base);
-    white-space: nowrap;
-    line-height: normal;
-  }
 }
 
 /* Desktop optimizations */
 @media (width >= 1024px) {
   .charts-section {
     margin-bottom: var(--spacing-md);
-  }
-
-  /* Time period selector desktop adjustments */
-  .time-period-buttons {
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-md);
-  }
-
-  .time-period-btn {
-    padding: var(--spacing-md) var(--spacing-xl);
-    font-size: var(--font-size-base);
-    white-space: nowrap;
-    line-height: normal;
   }
 }
 
