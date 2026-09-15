@@ -73,7 +73,7 @@ This file tracks only what is still open. Project guideline: files under 500 lin
 
 - `PrivacyControls.js` — migrated; `KNOWN_TOKEN_DEBT` empty. No follow-up.
 - `.time-period-btn` rules — deleted. No follow-up.
-- Token safelist — landed. No follow-up unless a *new* token family
+- Token safelist — landed. No follow-up unless a _new_ token family
   (outside `color|font|spacing|radius|shadow`) gets JS consumers; the
   design-tokens guard test (now non-vacuous) will catch it.
 - Manual QA for the slop phases themselves — covered at each phase; only the

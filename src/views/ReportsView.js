@@ -190,12 +190,10 @@ export const ReportsView = (params = {}) => {
     showBrowserWarning(container, browserSupport.limitedFeatures);
   }
 
-  // Preload Chart.js
   preloadChartJS().catch(error => {
     console.warn('[ReportsView] Chart.js preloading failed:', error);
   });
 
-  // State management
   let currentTimePeriod =
     parsePeriodFromParams(params) ||
     NavigationState.restoreTimePeriod() ||
@@ -222,11 +220,9 @@ export const ReportsView = (params = {}) => {
     return timeoutId;
   }
 
-  // Create header Container
   const headerContainer = createHeader();
   container.appendChild(headerContainer);
 
-  // Main content area
   const content = document.createElement('div');
   content.className = 'view-content';
   content.id = 'reports-content';
@@ -739,7 +735,6 @@ export const ReportsView = (params = {}) => {
       chartContainer.appendChild(skeleton);
     };
 
-    // Create skeleton for each section
     createAndAppendSkeleton('budgetSummary', 'budget-summary', '120px');
     createAndAppendSkeleton('categoryBreakdown', 'category-breakdown', '300px');
     createAndAppendSkeleton('categorySelector', 'category-selector', '400px');
@@ -805,11 +800,13 @@ export const ReportsView = (params = {}) => {
         const fallbackWarning = document.createElement('div');
         fallbackWarning.className = 'fallback-warning';
         fallbackWarning.style.padding = SPACING.SM;
-        fallbackWarning.style.background = 'rgba(251, 191, 36, 0.1)';
-        fallbackWarning.style.border = '1px solid rgba(251, 191, 36, 0.3)';
+        fallbackWarning.style.background =
+          'var(--color-warning-bg, rgba(251, 191, 36, 0.1))';
+        fallbackWarning.style.border =
+          '1px solid var(--color-warning-border, rgba(251, 191, 36, 0.3))';
         fallbackWarning.style.borderRadius = 'var(--radius-sm)';
-        fallbackWarning.style.color = '#92400e';
-        fallbackWarning.style.fontSize = '0.875rem';
+        fallbackWarning.style.color = 'var(--color-warning-text, #92400e)';
+        fallbackWarning.style.fontSize = 'var(--font-size-sm)';
         fallbackWarning.style.marginBottom = SPACING.XS;
         // Security: Static string, not user input
         fallbackWarning.textContent =

@@ -23,7 +23,8 @@ export class TrendService {
       } else {
         this.persistedData = { lastAnalysisDate: null };
       }
-    } catch {
+    } catch (error) {
+      console.warn('[TrendService] Failed to load persisted data:', error);
       this.persistedData = { lastAnalysisDate: null };
     }
   }

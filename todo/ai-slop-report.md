@@ -763,20 +763,20 @@ Scope was taken from the traceability table: every Phase 3 row (Rule 7 shared he
 
 ### Landed fixes
 
-| #   | Finding (report ref)                                                                 | Change                                                                                                                                                                                                                                                                                                                                                       | Files |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --- |
-| 1   | Rule 7 silent `catch {` in sanitizer | Intentional-fallback comment added; no log (hot path, callers already get a sanitized string). | `src/utils/security-utils.js` |
-| 2   | Rule 7 `submission.js` vs `category-chips.js` duplicated submit/error path | New `resolveSubmitDateValue()` + `validateAmountField()` shared helpers; both transfer and category auto-submit paths now call `handleFormSubmit(payload, onSubmit)`. Transfer path gains error handling it lacked; category path drops its bespoke try/catch. | `submission.js`, `form-utils/validation.js`, `form-utils/category-chips.js` |
-| 3   | Rule 7 mixed toast-import strategy | Closed by `7ab40b0`: repo-wide `rg toast-notifications` shows 12 static imports, 0 dynamic `import()`. No new edits. | `main.js`, `TransactionListItem.js`, `AddView.js`, `EditView.js`, etc. (prior commit) |
-| 4   | Rule 8 load-time `<style>` injection + Rule 9 `@keyframes spin` ×6 | New `src/styles/components/loading-indicators.css` (canonical `@keyframes spin`, `@keyframes float`, `.progress-spinner`, empty-state focus + responsive) imported from `main.css`. `addEmptyStateStyles()` / `addProgressStyles()` are backward-compat no-ops; `reports-ui.js` per-call injection and `LoadingView.js` inline `<style>` removed. Component-CSS duplicates (`webapp-components`, `inflation-trends`, `enhanced-button`) left — identical definitions, no visual effect. | `styles/components/loading-indicators.css` (new), `styles/main.css`, `enhanced-empty-states.js`, `progress-indicators.js`, `reports-ui.js`, `components/LoadingView.js` |
-| 5   | Rule 9 clickable stat cards ×4 (~200 lines) | New `createClickableStat({ label, formattedValue, color, align, labelMargin, valueSize, ariaLabel, title, onClick })`; 4 blocks collapsed, shared `savePeriodAndGo` handlers preserve navigation (income saves type filter + period; spent/expenses save period only). | `src/utils/reports-charts.js` (−~150) |
-| 6   | Rule 9 currency formatters ×5 + 18 inline | `financial-planning-helpers.formatCurrency` locale fixed `en-EU` → `en-US` (matches the 18 inline sites; `en-EU` is not a valid BCP47 tag). `reports-charts.js`, `financial-planning-charts.js`, `inflation-chart-utils.js` import and reuse it for all default 2-decimal sites; axis-tick callbacks with `minimumFractionDigits: 0` kept inline (intentional different formatting). Local `formatCurrency` shadow in `reports-charts.js` deleted. | `financial-planning-helpers.js`, `reports-charts.js`, `financial-planning-charts.js`, `inflation-chart-utils.js` |
-| 7   | Rule 9 chart scaffold ×3 | New `createChartSection({ className, chartType, title, canvasId })`; all three builders delegate. | `src/utils/financial-planning-charts.js` |
-| 8   | Rule 9 `showFieldError` vs `showContainerError` + amount-validation blocks ×2 | Internal `flashErrorBorder()` shared by both exports (behaviour identical, tests unchanged); new `validateAmountField(amountInput)` collapses the two `validateAmount + showFieldError + return` blocks. | `form-utils/validation.js`, `form-utils/category-chips.js` |
-| 9   | Rule 9 tag-option construction ×2 | New `buildTagOption({ name, color, selected, onToggle })`; fallback and normal branches delegate (offline placeholder preserves selected value). | `form-utils/transaction-tags.js` |
-| 10  | Rule 9 two date formatters | Already closed by Phase 2: `financial-planning-helpers.formatDate` is gone (file now exports only `createUsageNote`, `createPlaceholder`, `createSectionContainer`, `formatCurrency`, `safeParseDate`); `date-utils.js` is the single owner. No new edits. | — |
-| 11  | Rule 2 toast-import fallback | `handleFormSubmit` keeps `console.error` + `showErrorToast`, now wrapped so a throwing toast falls back to `alert()` (with `no-alert` disable). Static imports make chunk-failure impossible; the `alert` covers the residual toast-UI-throws case. Non-`Error` throws use `e?.message ?? String(e)` instead of `undefined`. | `form-utils/submission.js` |
-| 12  | Rule 10 `_onCategoriesUpdated` try/catch | Guards hoisted out of `try`; only `render()` stays guarded with a comment (event-handler safety for other listeners). | `form-utils/category-chips.js` |
+| #   | Finding (report ref)                                                          | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Files                                                                                                                                                                   |
+| --- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Rule 7 silent `catch {` in sanitizer                                          | Intentional-fallback comment added; no log (hot path, callers already get a sanitized string).                                                                                                                                                                                                                                                                                                                                                                                          | `src/utils/security-utils.js`                                                                                                                                           |
+| 2   | Rule 7 `submission.js` vs `category-chips.js` duplicated submit/error path    | New `resolveSubmitDateValue()` + `validateAmountField()` shared helpers; both transfer and category auto-submit paths now call `handleFormSubmit(payload, onSubmit)`. Transfer path gains error handling it lacked; category path drops its bespoke try/catch.                                                                                                                                                                                                                          | `submission.js`, `form-utils/validation.js`, `form-utils/category-chips.js`                                                                                             |
+| 3   | Rule 7 mixed toast-import strategy                                            | Closed by `7ab40b0`: repo-wide `rg toast-notifications` shows 12 static imports, 0 dynamic `import()`. No new edits.                                                                                                                                                                                                                                                                                                                                                                    | `main.js`, `TransactionListItem.js`, `AddView.js`, `EditView.js`, etc. (prior commit)                                                                                   |
+| 4   | Rule 8 load-time `<style>` injection + Rule 9 `@keyframes spin` ×6            | New `src/styles/components/loading-indicators.css` (canonical `@keyframes spin`, `@keyframes float`, `.progress-spinner`, empty-state focus + responsive) imported from `main.css`. `addEmptyStateStyles()` / `addProgressStyles()` are backward-compat no-ops; `reports-ui.js` per-call injection and `LoadingView.js` inline `<style>` removed. Component-CSS duplicates (`webapp-components`, `inflation-trends`, `enhanced-button`) left — identical definitions, no visual effect. | `styles/components/loading-indicators.css` (new), `styles/main.css`, `enhanced-empty-states.js`, `progress-indicators.js`, `reports-ui.js`, `components/LoadingView.js` |
+| 5   | Rule 9 clickable stat cards ×4 (~200 lines)                                   | New `createClickableStat({ label, formattedValue, color, align, labelMargin, valueSize, ariaLabel, title, onClick })`; 4 blocks collapsed, shared `savePeriodAndGo` handlers preserve navigation (income saves type filter + period; spent/expenses save period only).                                                                                                                                                                                                                  | `src/utils/reports-charts.js` (−~150)                                                                                                                                   |
+| 6   | Rule 9 currency formatters ×5 + 18 inline                                     | `financial-planning-helpers.formatCurrency` locale fixed `en-EU` → `en-US` (matches the 18 inline sites; `en-EU` is not a valid BCP47 tag). `reports-charts.js`, `financial-planning-charts.js`, `inflation-chart-utils.js` import and reuse it for all default 2-decimal sites; axis-tick callbacks with `minimumFractionDigits: 0` kept inline (intentional different formatting). Local `formatCurrency` shadow in `reports-charts.js` deleted.                                      | `financial-planning-helpers.js`, `reports-charts.js`, `financial-planning-charts.js`, `inflation-chart-utils.js`                                                        |
+| 7   | Rule 9 chart scaffold ×3                                                      | New `createChartSection({ className, chartType, title, canvasId })`; all three builders delegate.                                                                                                                                                                                                                                                                                                                                                                                       | `src/utils/financial-planning-charts.js`                                                                                                                                |
+| 8   | Rule 9 `showFieldError` vs `showContainerError` + amount-validation blocks ×2 | Internal `flashErrorBorder()` shared by both exports (behaviour identical, tests unchanged); new `validateAmountField(amountInput)` collapses the two `validateAmount + showFieldError + return` blocks.                                                                                                                                                                                                                                                                                | `form-utils/validation.js`, `form-utils/category-chips.js`                                                                                                              |
+| 9   | Rule 9 tag-option construction ×2                                             | New `buildTagOption({ name, color, selected, onToggle })`; fallback and normal branches delegate (offline placeholder preserves selected value).                                                                                                                                                                                                                                                                                                                                        | `form-utils/transaction-tags.js`                                                                                                                                        |
+| 10  | Rule 9 two date formatters                                                    | Already closed by Phase 2: `financial-planning-helpers.formatDate` is gone (file now exports only `createUsageNote`, `createPlaceholder`, `createSectionContainer`, `formatCurrency`, `safeParseDate`); `date-utils.js` is the single owner. No new edits.                                                                                                                                                                                                                              | —                                                                                                                                                                       |
+| 11  | Rule 2 toast-import fallback                                                  | `handleFormSubmit` keeps `console.error` + `showErrorToast`, now wrapped so a throwing toast falls back to `alert()` (with `no-alert` disable). Static imports make chunk-failure impossible; the `alert` covers the residual toast-UI-throws case. Non-`Error` throws use `e?.message ?? String(e)` instead of `undefined`.                                                                                                                                                            | `form-utils/submission.js`                                                                                                                                              |
+| 12  | Rule 10 `_onCategoriesUpdated` try/catch                                      | Guards hoisted out of `try`; only `render()` stays guarded with a comment (event-handler safety for other listeners).                                                                                                                                                                                                                                                                                                                                                                   | `form-utils/category-chips.js`                                                                                                                                          |
 
 ### Phase 3 verification evidence
 
@@ -807,3 +807,120 @@ Scope was taken from the traceability table: every Phase 3 row (Rule 7 shared he
 ### Barrel quarantine (2026-09-15)
 
 `src/utils/form-utils/index.js` (17-line barrel, zero importers repo-wide, incomplete — never re-exported `transaction-tags.js`) moved via `git mv` to `src/utils/form-utils/_deprecated/index.js`. Verification at quarantine time: `npx eslint src/utils` → 0 problems; `tests/form-utils` + `design-tokens` + `chart-integration` + `tests/financial-planning/` → 221/221; `yarn run build` → ✓ built. Deletion is the follow-up commit — if the next full-suite run stays green, delete `_deprecated/` outright.
+
+---
+
+## Round 2 — 18-file sweep (2026-09-15)
+
+**Scope:** `src/views/ReportsView.js` (1581), `src/views/DashboardView.js` (1295), `src/components/ChartRenderer.js` (971→1124 with instance), `src/components/TimePeriodSelector.js` (1107), `src/views/financial-planning/GoalsSection.js` (1062), `src/styles/components/ui.css` (983), `src/core/data-integrity-service.js` (962), `src/components/CustomCategoryManager.js` (912), `src/core/custom-category-service.js` (899), `src/styles/components/reports.css` (839), `src/core/analytics/TrendService.js` (822), `src/styles/utilities/view-styles.css` (680), `src/core/forecast-engine.js` (770), `src/components/AccountSection.js` (738), `src/core/chart-config.js` (715), `src/styles/hero.css` (653), `src/core/Account/account-deletion-service.js` (628), `src/core/sync-service.js` (695) — all over the 500-line AGENTS.md guideline (Rule 14).
+
+**Method:** rule-by-rule sweep per guide runbook with `rg`, `ast-grep` (`try { $$$ } catch ($E) { $$$ }` → 220 hits repo-wide, triaged to scope), targeted `Read` of every catch in scope, import/export grep per file, hardcoded-value grep (`#[0-9a-fA-F]{3,6}|z-index|9999`), comment scan. Background `explore`/`librarian` agents failed (model/billing) — audit completed with direct tools only.
+
+### Rule 1 — Trivial comments ⚪ Low
+
+### [Rule 1] — Narrative restatements removed
+
+- **File:** src/views/ReportsView.js, src/views/DashboardView.js
+- **Line(s):** ReportsView ~193 (`// Preload Chart.js`), ~198 (`// State management`), ~225 (`// Create header Container`), ~229 (`// Main content area`), ~742 (`// Create skeleton for each section`); DashboardView ~291 (`// Update each transaction item's selected style`)
+- **Severity:** ⚪ Low
+- **Snippet:** `// Create header Container` above `createHeader()`; `// Preload Chart.js` above `preloadChartJS()`
+- **Verdict:** slop
+- **Action:** fixed in this session (4 deletions: preload/state-management/header-container/main-content/skeleton + selection-style; remainder e.g. `// Check if container exists, create if not` ×5, `// Get budget status` left — useful section anchors in 1500-line files)
+
+### Rule 2 — Swallowed errors 🔴 High
+
+### [Rule 2] — Silent catches now log (non-critical fallbacks preserved)
+
+- **File:** src/core/analytics/TrendService.js; src/views/DashboardView.js; src/views/financial-planning/GoalsSection.js; src/core/sync-service.js
+- **Line(s):** TrendService 26–28; DashboardView 256–258; GoalsSection 740–742; sync-service 148–150
+- **Severity:** 🔴 High
+- **Snippet:** `} catch { this.persistedData = { lastAnalysisDate: null }; }` / `} catch { return new Set(); }` / `} catch { // Non-critical — silently fail }` / `} catch { /* ignore storage errors */ }`
+- **Verdict:** slop
+- **Action:** fixed in this session — each gains `console.warn` with context + error param; fallback behaviour unchanged (defaults returned, toast still dispatched in sync-service)
+
+### [Rule 2, 7] — Inconsistent ConfirmDialog loader catch
+
+- **File:** src/components/AccountSection.js
+- **Line(s):** 622–624 (vs 258–262 which already falls back to `errorText`)
+- **Severity:** 🟡 Medium
+- **Snippet:** `.catch(() => { console.error('Failed to load ConfirmDialog'); })`
+- **Verdict:** slop
+- **Action:** fixed in this session — now `.catch(dialogError => { console.error(..., dialogError); errorText.textContent = ...; errorText.style.opacity = '1'; })`, matching the add-account path
+
+### Rule 5 — Hardcoded values ⚪ Low
+
+### [Rule 5] — JS inline styles mapped to tokens/vars (fallbacks preserve rendering)
+
+- **File:** src/views/financial-planning/GoalsSection.js; src/views/ReportsView.js; src/components/AccountSection.js
+- **Line(s):** GoalsSection ~317 (badge), ~428–430 (progBg); ReportsView ~807–812 (fallbackWarning); AccountSection 50/54/397/399/402 + 414/418/687 (overlays + buttons)
+- **Severity:** ⚪ Low
+- **Snippet:** `style.color = '#fff'` / `style.background = '#eee'` / `style.color = '#92400e'` / `background: rgba(0,0,0,0.5)` / `color: white`
+- **Verdict:** slop
+- **Action:** fixed in this session — badge `color → var(--color-on-error, #fff)`, `padding 2px 6px → SPACING.XXS/XS`, `radius 4px → var(--radius-sm)`; progBg `8px → SPACING.SM`, `#eee → var(--color-border)`; fallbackWarning `rgba/#92400e/0.875rem → var(--color-warning-*, …)` + `var(--font-size-sm)`; AccountSection overlays/buttons `rgba → var(--color-overlay, …)`, `z-index 1000 → var(--z-index-modal, 1000)`, `white → var(--color-on-primary, #fff)`, `4px → var(--radius-sm)`. Canvas colours in `chart-config.js` (`#fff/#ffffff/rgba(0,0,0,0.95)`) deliberately untouched — Chart.js canvas cannot read CSS vars; flagged intentional.
+
+### [Rule 5] — Magic z-index in CSS mapped to vars with identical fallbacks
+
+- **File:** src/styles/components/ui.css; src/styles/components/reports.css
+- **Line(s):** ui.css 227/354 (`z-index: 10000` ×2); reports.css 108 (`100`), 149 (`1000`)
+- **Severity:** ⚪ Low
+- **Snippet:** `z-index: 10000;` / `z-index: 100 !important;`
+- **Verdict:** slop
+- **Action:** fixed in this session — `var(--z-index-toast, 10000)`, `var(--z-index-tooltip, 100/1000)`; rendered values unchanged. `reports.css:799 z-index: 999` + `webapp-patterns 9999`/`-10000px` left for follow-up (outside scope).
+
+### Rules 3, 4, 6, 9, 10 — Flagged, not auto-remediated
+
+### [Rule 3] — 🔒 Security carve-out
+
+- **File:** src/core/Account/account-deletion-service.js (628 lines)
+- **Line(s):** ownership/authorization guards (full-file scope)
+- **Severity:** 🔴 High + 🔒
+- **Snippet:** auth/ownership/deletion guards
+- **Verdict:** intentional (confirmation required)
+- **Action:** flagged for author confirmation — never auto-remediated per guide; no caller-analysis deletion attempted
+
+### [Rule 4] — Dead-code sweep, no deletions
+
+- **File:** all 14 JS files in scope
+- **Line(s):** export/callsite grep (`rg symbolName` whole-repo); `custom-category-service.js:859 TODO: Implement usage tracking` verified still-missing (kept)
+- **Severity:** 🟡 Medium
+- **Snippet:** `mostUsedCategories: [], // TODO: Implement usage tracking`
+- **Verdict:** false positive / intentional (pending feature, not stale)
+- **Action:** left as-is; whole-file quarantine procedure (steps 1–4) not triggered — no orphan file claimed
+
+### [Rule 9] — Duplicated overlay builders (AccountSection add vs edit, ~150 lines each)
+
+- **File:** src/components/AccountSection.js
+- **Line(s):** ~42–120 vs ~406–480
+- **Severity:** 🟡 Medium
+- **Snippet:** two identical `dialog-overlay`/`dialog-card` cssText blocks + focus/Escape/cleanup trios
+- **Verdict:** slop
+- **Action:** flagged for follow-up (extract `showAccountDialog({title, initial, onSave})` during the Rule 14 split — not bundled into this token/logging pass)
+
+### [Rule 10] — JSON.parse-in-try is validation, not control flow
+
+- **File:** src/core/data-integrity-service.js:821–826, 876–881; src/views/DashboardView.js:215
+- **Severity:** 🟡 (downgraded)
+- **Snippet:** `try { JSON.parse(value); } catch { malformedKeys.push(key); }`
+- **Verdict:** false positive / intentional — no `if`-expressible pre-check exists for malformed JSON
+- **Action:** left as-is
+
+### Rule 14 — Bloat (all 18 files over 500)
+
+- **File:** all 18 (1392 → 628 lines)
+- **Severity:** 🟡 Medium
+- **Verdict:** slop correlate
+- **Action:** flagged for follow-up — no split bundled per guide ("Don't bundle a split-this-file refactor into an unrelated slop-cleanup change"). Proposed splits deferred to user decision: ReportsView (header/skeleton/sections), DashboardView (selection/bulk/preload), ChartRenderer (line/bar/pie builders), TimePeriodSelector (month/quarter/custom), GoalsSection (list/edit/progress).
+
+### Traceability (Round 2)
+
+- Scheduled + landed: Rule 1 (4 comment deletions), Rule 2 (4 silent catches + 1 inconsistent catch), Rule 5 (JS tokens + CSS z-index vars)
+- Deferred with reason: Rule 9 AccountSection dialog dedupe (depends on Rule 14 split shipping first); Rule 14 splits (user decision pending); reports.css:799 + webapp-patterns z-indexes (outside scope)
+- Downgraded: Rule 3 🔒 deletion guards; Rule 4 TODO usage-tracking; Rule 10 JSON-parse catches; chart-config canvas literals
+- User Review Required: 🔒 account-deletion guards; Rule 14 split plan
+
+### Verification (Round 2)
+
+- **Lint:** `yarn run check` → 0 errors, 107 warnings (residual `local/no-raw-style-values` are var-fallback literals, e.g. `var(--color-on-error, #fff)` — themable, rendered value unchanged)
+- **Format:** `yarn prettier --write` over all 8 touched files → clean
+- **Tests:** `yarn test --run` → 54 files, 443 tests passed
+- **Build:** `yarn run build` → ✓ built in 825ms

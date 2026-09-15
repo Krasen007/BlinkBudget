@@ -145,8 +145,11 @@ export const SyncService = {
                   timestamp: new Date().toISOString(),
                 })
               );
-            } catch {
-              /* ignore storage errors */
+            } catch (storageError) {
+              console.warn(
+                '[Sync] Failed to persist last_sync_error:',
+                storageError
+              );
             }
             window.dispatchEvent(
               new CustomEvent('sync-error', {

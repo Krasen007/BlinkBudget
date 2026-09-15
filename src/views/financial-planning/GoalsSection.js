@@ -314,10 +314,10 @@ function createGoalsList(chartRenderer, activeCharts, section) {
           warningBadge.className = 'warning-badge';
           warningBadge.textContent = 'Overdue';
           warningBadge.style.background = COLORS.ERROR;
-          warningBadge.style.color = '#fff';
+          warningBadge.style.color = 'var(--color-on-error, #fff)';
           warningBadge.style.fontSize = '0.7rem';
-          warningBadge.style.padding = '2px 6px';
-          warningBadge.style.borderRadius = '4px';
+          warningBadge.style.padding = `${SPACING.XXS} ${SPACING.XS}`;
+          warningBadge.style.borderRadius = 'var(--radius-sm)';
           titleContainer.appendChild(warningBadge);
         }
 
@@ -425,9 +425,9 @@ function createGoalsList(chartRenderer, activeCharts, section) {
 
         const progBg = document.createElement('div');
         progBg.className = 'progress-bar-bg';
-        progBg.style.height = '8px';
-        progBg.style.background = '#eee';
-        progBg.style.borderRadius = '4px';
+        progBg.style.height = SPACING.SM;
+        progBg.style.background = 'var(--color-border)';
+        progBg.style.borderRadius = 'var(--radius-sm)';
         progBg.style.overflow = 'hidden';
 
         const progFill = document.createElement('div');
@@ -737,8 +737,8 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
     if (unlockCard) {
       section.appendChild(unlockCard);
     }
-  } catch {
-    // Non-critical — silently fail
+  } catch (error) {
+    console.warn('[GoalsSection] Progressive unlock check failed:', error);
   }
 
   // Load goals from StorageService (Firebase handles offline automatically)

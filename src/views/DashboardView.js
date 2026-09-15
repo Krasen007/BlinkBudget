@@ -253,7 +253,11 @@ export const DashboardView = (params = {}) => {
       return new Set(
         JSON.parse(sessionStorage.getItem(DISMISSED_ANOMALIES_KEY) || '[]')
       );
-    } catch {
+    } catch (error) {
+      console.warn(
+        '[DashboardView] Failed to parse dismissed anomalies:',
+        error
+      );
       return new Set();
     }
   };
@@ -288,7 +292,6 @@ export const DashboardView = (params = {}) => {
    * Updates item highlight styles, the count label, and the sum label in-place.
    */
   const updateSelectionUI = () => {
-    // Update each transaction item's selected style
     const items = content.querySelectorAll('.transaction-list-item');
     items.forEach(item => {
       const txId = item.dataset.transactionId;

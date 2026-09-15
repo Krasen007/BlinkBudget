@@ -1,5 +1,5 @@
 /* Loading indicators — canonical spinner/float keyframes.
- * Single source for @keyframes spin / float. JS no longer injects <style>
+ * Single source for @keyframes spin / float. JS no longer injects \3c style>
  * tags; see enhanced-empty-states.js / progress-indicators.js / reports-ui.js.
  */
 

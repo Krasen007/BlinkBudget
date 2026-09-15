@@ -47,11 +47,11 @@ export const AccountSection = () => {
           left: 0;
           width: 100%;
           height: 100%;
-          background: rgba(0, 0, 0, 0.5);
+          background: var(--color-overlay, rgba(0, 0, 0, 0.5));
           display: flex;
           align-items: center;
           justify-content: center;
-          z-index: 1000;
+          z-index: var(--z-index-modal, 1000);
         `;
 
         const card = document.createElement('div');
@@ -394,9 +394,9 @@ export const AccountSection = () => {
         renameBtn.style.cssText = `
           padding: ${SPACING.XS} ${SPACING.SM};
           background: ${COLORS.PRIMARY};
-          color: white;
+          color: var(--color-on-primary, #fff);
           border: none;
-          border-radius: 4px;
+          border-radius: var(--radius-sm);
           font-size: ${FONT_SIZES.SM};
           cursor: pointer;
           min-height: 32px;
@@ -411,11 +411,11 @@ export const AccountSection = () => {
               left: 0;
               width: 100%;
               height: 100%;
-              background: rgba(0, 0, 0, 0.5);
+              background: var(--color-overlay, rgba(0, 0, 0, 0.5));
               display: flex;
               align-items: center;
               justify-content: center;
-              z-index: 1000;
+              z-index: var(--z-index-modal, 1000);
             `;
 
             const card = document.createElement('div');
@@ -619,8 +619,14 @@ export const AccountSection = () => {
                         message: 'Failed to update account. Please try again.',
                       });
                     })
-                    .catch(() => {
-                      console.error('Failed to load ConfirmDialog');
+                    .catch(dialogError => {
+                      console.error(
+                        'Failed to load ConfirmDialog:',
+                        dialogError
+                      );
+                      errorText.textContent =
+                        'Failed to update account. Please try again.';
+                      errorText.style.opacity = '1';
                     });
                 }
               },
@@ -681,9 +687,9 @@ export const AccountSection = () => {
         deleteBtn.style.cssText = `
           padding: ${SPACING.XS} ${SPACING.SM};
           background: ${COLORS.DANGER};
-          color: white;
+          color: var(--color-on-primary, #fff);
           border: none;
-          border-radius: 4px;
+          border-radius: var(--radius-sm);
           font-size: ${FONT_SIZES.SM};
           cursor: pointer;
           min-height: 32px;
