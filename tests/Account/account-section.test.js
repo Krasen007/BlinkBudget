@@ -173,6 +173,51 @@ describe('AccountSection Component Display', () => {
     expect(typeEl.textContent).toBe('Checking Account');
   });
 
+  it('preserves balance and creation date when editing an existing account', async () => {
+    const { AccountService } =
+      await import('../../src/core/Account/account-service.js');
+    const { AccountSection } =
+      await import('../../src/components/AccountSection.js');
+    const account = {
+      id: 'existing-account',
+      name: 'Main Checking',
+      type: 'checking',
+      balance: 125.5,
+      createdAt: '2020-01-02T10:00:00.000Z',
+      updatedAt: '2020-01-02T10:00:00.000Z',
+    };
+    AccountService.getAccounts.mockReturnValue([account]);
+    AccountService.saveAccount.mockClear();
+    vi.useFakeTimers();
+
+    try {
+      document.body.appendChild(AccountSection());
+      Array.from(document.querySelectorAll('button'))
+        .find(button => button.textContent === 'Edit')
+        .click();
+      vi.runOnlyPendingTimers();
+
+      const dialog = document.querySelector('[role="dialog"]');
+      dialog.querySelector('input').value = 'Renamed Savings';
+      dialog.querySelector('select').value = 'savings';
+      Array.from(dialog.querySelectorAll('button'))
+        .find(button => button.textContent === 'Save Changes')
+        .click();
+
+      expect(AccountService.saveAccount).toHaveBeenCalledTimes(1);
+      expect(AccountService.saveAccount).toHaveBeenCalledWith({
+        ...account,
+        name: 'Renamed Savings',
+        type: 'savings',
+        updatedAt: expect.any(String),
+      });
+      expect(document.querySelector('[role="dialog"]')).toBeNull();
+    } finally {
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    }
+  });
+
   it('shows "Other" when account.type is missing', async () => {
     const accountModule =
       await import('../../src/core/Account/account-service.js');

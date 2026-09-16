@@ -604,8 +604,6 @@ export const AccountSection = () => {
                     ...account,
                     name: sanitizeInput(accountName),
                     type: accountType,
-                    balance: 0,
-                    createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString(),
                   });
                   renderAccounts();
