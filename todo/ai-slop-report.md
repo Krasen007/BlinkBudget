@@ -8,6 +8,8 @@
 
 **Implementation update — 2026-09-17:** Phase A is complete. Phase B's approved scope is complete: C07, C12 (including the author-approved global XS token), ordinary C16 diagnostics, C20 read-only details/copy, and a scoped C13 radius replacement. C13 remains partially open for other raw values. Phase C's C18 navigation refactor is complete in the working tree; C22 file splitting remains deferred. Destructive-flow safeguards and the other author-review gates remain unchanged.
 
+**Latest follow-up — 2026-09-17:** C14 getter consolidation, C09 orphan-component retirement, C10 unused privacy-UI retirement, and C19 returned-failure handling are implemented in the working tree. The user's C08 getter bullet overlaps C14; the actual C08 unused-export candidates remain untouched. C10 retirement includes removing its README advertising while preserving the underlying privacy service. C11 remains unchanged: history shows the empty listener was left after removing debugging logs, but no iOS/native-picker QA was available. Earlier status entries below are historical and do not supersede this update.
+
 Line references and finding snippets describe the baseline, not the updated source. The C17-only -2 line shift no longer locates all sites after subsequent edits.
 
 ## Rule 1 — Narrative comments
@@ -101,7 +103,7 @@ Line references and finding snippets describe the baseline, not the updated sour
 - **Severity:** 🟡 Medium
 - **Snippet:** `export const SectionContainer`; `export const EmergencyFundCard`.
 - **Verdict:** possibly intentional — confirm with author. Filename/symbol searches show no production importer. Overview uses its local `createEmergencyFundCard`; its test mocks the unused module. SectionContainer is distinct from the active utility `createSectionContainer`. Dynamic imports under src use literal paths, with no computed component registry found; documentation/count references remain.
-- **Action:** flagged for follow-up under User Review Required. If retirement is approved, quarantine before deletion and perform the guide's dedicated verification gate. No files moved or deleted.
+- **Action:** retired in the author-requested follow-up (2026-09-17, uncommitted). Both modules were moved outside the repository to a temporary quarantine before verification. Removed the obsolete EmergencyFundCard mock and added coverage of Overview's active local emergency-fund renderer; Overview tests passed 2/2. Whole-repo reference checks found no production importers; production build passed with the modules absent. The active `createSectionContainer` utility and Overview renderer remain unchanged.
 
 ### C10 — Privacy UI has no production importer 🔒
 
@@ -110,7 +112,7 @@ Line references and finding snippets describe the baseline, not the updated sour
 - **Severity:** 🟡 Medium; security-sensitive privacy/retention UI
 - **Snippet:** `createPrivacyControls()` / `initializePrivacyControls(container)`.
 - **Verdict:** possibly intentional — confirm with author. Both exported names occur only here; README advertises the UI, and recent cleanup migrated its styles. This is stronger evidence of a wiring/product decision than permission to delete it. Its initialization promise also has no rejection handler; local confirmation/notification implementations duplicate shared facilities and hardcode z-index 10000 (lines 10–125).
-- **Action:** flagged for author confirmation. Decide whether to wire up, retain, or retire the module before addressing its secondary maintenance issues; no security guard removal proposed.
+- **Action:** author explicitly selected retirement of the unused UI and its advertised documentation while preserving the privacy service. Removed the module from the repository into temporary quarantine and removed the two README feature claims referencing it (2026-09-17, uncommitted). No production imports remain; build passed with it absent. `f:\AI\repos\BlinkBudget\src\core\privacy-service.js` is unchanged. No retention cleanup, settings reset, consent migration, or user-data deletion was performed. Module-specific C13/C22 work is superseded by retirement; no privacy-UI runtime tests or browser QA were available.
 
 ### C11 — Empty date-input listener and misleading fix comment
 
@@ -151,7 +153,7 @@ Line references and finding snippets describe the baseline, not the updated sour
 - **Severity:** 🟡 Medium
 - **Snippet:** `isExpanded: () => expanded` and `getExpandedState: () => expanded`.
 - **Verdict:** possibly intentional — confirm with author. Both return exactly the same value, but tests explicitly exercise both APIs; neither may be called dead solely from application grep. Introduced together in `286672c1`.
-- **Action:** flagged for follow-up under User Review Required; consolidation would be an API/test change.
+- **Action:** completed in the 2026-09-17 getter-consolidation follow-up (uncommitted). Retained `isExpanded` and removed `getExpandedState`; the contract test now verifies the removed alias is absent and `isExpanded` tracks collapse/expand. No production callers were found. Storage fallback, persistence, keyboard handling, and the argument-adapting factory are unchanged. Targeted tests passed 17/17 twice (including a verbose rerun, exit 0); scoped ESLint passed with four existing style warnings, Prettier and diff checks passed, and production build including PWA generation passed. No browser QA or full-suite run was performed. Repository-wide `yarn run check` failed at ESLint with two pre-existing `AlertDialog` no-undef errors in untouched `f:\AI\repos\BlinkBudget\src\components\AccountSection.js:719` and `f:\AI\repos\BlinkBudget\src\components\BackupRestoreSection.js:149` (107 warnings); subsequent check stages did not run.
 
 ## Rule 7 — Inconsistent failure reporting
 
@@ -208,7 +210,7 @@ No direct DOM/listener/timer side effects found at component module scope. The s
 - **Severity:** 🟡 Medium (downgraded)
 - **Snippet:** `else { throw new Error('Deletion failed: ...'); }` after checking success/requiresReauth.
 - **Verdict:** possibly intentional — confirm with author. Failure is known before throwing, but catch centralizes feedback/reset for a destructive workflow. Not swallowed and not justification to weaken reauthentication.
-- **Action:** flagged for author confirmation. Keep existing safeguards.
+- **Action:** implemented after the author's follow-up request (2026-09-17, uncommitted). Returned ordinary failures log a message and call shared failure feedback/reset directly; genuine exceptions still use catch with the original error diagnostic. Success, cancellation, reauthentication/logout, redirects, and all service-side safeguards are unchanged. Six mocked-service regressions at `f:\AI\repos\BlinkBudget\tests\components\account-deletion-section.test.js` pass. Tests isolate the installed final-confirmation handler from ButtonComponent's separate summary listener; they are not end-to-end click-flow QA. C06's secondary error-dialog import failure remains unresolved and unchanged.
 
 Ordinary JSON parsing, browser storage, chart constructors, and persistence catches are legitimate exceptional failure handling, not automatically rule-10 violations.
 

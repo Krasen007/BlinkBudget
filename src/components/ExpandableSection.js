@@ -203,7 +203,6 @@ export const ExpandableSection = ({
       contentContainer.innerHTML = '';
       if (newContent) contentContainer.appendChild(newContent);
     },
-    getExpandedState: () => expanded,
   };
 };
 

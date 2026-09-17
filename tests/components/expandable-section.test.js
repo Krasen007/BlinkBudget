@@ -160,12 +160,17 @@ describe('ExpandableSection Component', () => {
       expect(section.content.innerHTML).toContain('New content');
     });
 
-    it('should have getExpandedState method', () => {
+    it('should expose isExpanded as the single expanded-state getter', () => {
       const section = ExpandableSection({
         title: 'Test Section',
         defaultExpanded: true,
       });
-      expect(section.getExpandedState()).toBe(true);
+      expect(section).not.toHaveProperty('getExpandedState');
+      expect(section.isExpanded()).toBe(true);
+      section.collapse();
+      expect(section.isExpanded()).toBe(false);
+      section.expand();
+      expect(section.isExpanded()).toBe(true);
     });
   });
 });

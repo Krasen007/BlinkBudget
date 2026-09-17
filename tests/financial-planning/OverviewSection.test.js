@@ -49,19 +49,6 @@ vi.mock('../../src/components/financial-planning/StatsCard.js', () => ({
   }),
 }));
 
-vi.mock('../../src/components/financial-planning/EmergencyFundCard.js', () => ({
-  EmergencyFundCard: vi.fn(assessment => {
-    const card = document.createElement('div');
-    card.className = 'emergency-fund-card';
-    card.innerHTML = `
-      <h4>Emergency Fund</h4>
-      <div class="assessment">${assessment.status}</div>
-      <div class="recommendation">${assessment.recommendation}</div>
-    `;
-    return card;
-  }),
-}));
-
 vi.mock('../../src/utils/financial-planning-helpers.js', () => ({
   createSectionContainer: vi.fn((id, title, icon) => {
     const section = document.createElement('section');
@@ -124,10 +111,12 @@ describe('OverviewSection', () => {
     expect(placeholder).toBeTruthy();
   });
 
-  // Removed failing tests:
-  // - should create overview section with correct structure
-  // - should include usage note with helpful information
-  // - should include emergency fund assessment
-  // - should handle empty transactions gracefully
-  // - should format currency values correctly
+  it('renders the active emergency fund card without the retired module', () => {
+    const section = OverviewSection({ transactions: [] });
+    expect(section.querySelectorAll('.stats-card')).toHaveLength(4);
+    const card = section.querySelector('.card');
+    expect(card).not.toBeNull();
+    expect(card.textContent).toContain('Emergency Fund');
+    expect(card.textContent).toContain('insufficient expense data');
+  });
 });

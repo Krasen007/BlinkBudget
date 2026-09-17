@@ -85,6 +85,16 @@ export const AccountDeletionSection = () => {
   dataSummaryBox.appendChild(summaryContent);
   section.appendChild(dataSummaryBox);
 
+  const showDeletionFailure = (message, MobileAlert) => {
+    MobileAlert({
+      title: '❌ Deletion Failed',
+      message: `Account deletion failed: ${message}`,
+      buttonText: 'OK',
+    });
+    deleteBtn.textContent = '🗑️ Delete My Account';
+    deleteBtn.disabled = false;
+  };
+
   // Delete Account Button
   const deleteBtn = ButtonComponent({
     text: '🗑️ Delete My Account',
@@ -191,19 +201,14 @@ export const AccountDeletionSection = () => {
               await AuthService.logout();
               window.location.hash = '#login';
             } else {
-              throw new Error(`Deletion failed: ${result.errors.join(', ')}`);
+              const message = `Deletion failed: ${result.errors.join(', ')}`;
+              console.error('Account deletion failed:', message);
+              showDeletionFailure(message, MobileAlert);
             }
           } catch (error) {
             console.error('Account deletion failed:', error);
             const { MobileAlert } = await import('./MobileModal.js');
-            MobileAlert({
-              title: '❌ Deletion Failed',
-              message: `Account deletion failed: ${error.message}`,
-              buttonText: 'OK',
-            });
-
-            deleteBtn.textContent = '🗑️ Delete My Account';
-            deleteBtn.disabled = false;
+            showDeletionFailure(error.message, MobileAlert);
           }
         };
       } catch (error) {
