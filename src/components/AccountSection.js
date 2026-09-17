@@ -345,7 +345,7 @@ export const AccountSection = () => {
         emptyState.textContent =
           'No accounts yet. Add your first account above.';
         accountListContainer.appendChild(emptyState);
-        return;
+        return true;
       }
 
       accounts.forEach(account => {
@@ -727,7 +727,19 @@ export const AccountSection = () => {
       });
     } catch (error) {
       console.error('Error loading accounts:', error);
+      const message = document.createElement('p');
+      message.setAttribute('role', 'alert');
+      message.textContent =
+        'Unable to display accounts. Retry loading the list; this will not repeat any saved changes.';
+      const retry = ButtonComponent({
+        text: 'Retry',
+        variant: 'secondary',
+        onClick: () => renderAccounts(),
+      });
+      accountListContainer.replaceChildren(message, retry);
+      return false;
     }
+    return true;
   };
 
   // Initial render
