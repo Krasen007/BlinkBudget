@@ -109,6 +109,7 @@ export const TransactionListItem = ({
           return;
         }
       } catch (error) {
+        console.error('Failed to split transaction:', error);
         showErrorToast(`Failed to split transaction: ${error.message}`);
         return;
       }
@@ -144,6 +145,7 @@ export const TransactionListItem = ({
           return;
         }
       } catch (error) {
+        console.error('Failed to copy transaction:', error);
         showErrorToast(`Failed to copy transaction: ${error.message}`);
         return;
       }

@@ -5,6 +5,7 @@
 
 import { SettingsService } from '../core/settings-service.js';
 import { SPACING, FONT_SIZES, DATE_FORMATS } from '../utils/constants.js';
+import { showErrorToast } from '../utils/toast-notifications.js';
 
 // Auto-detect date format from device locale
 function detectDateFormat() {
@@ -149,6 +150,7 @@ export const DateFormatSection = ({
       const newFormat = select.value;
       try {
         SettingsService.saveSetting('dateFormat', newFormat);
+        currentFormat = newFormat;
         console.log('[DateFormatSection] Date format changed to:', newFormat);
         // Dispatch event to notify other components
         window.dispatchEvent(
@@ -157,7 +159,9 @@ export const DateFormatSection = ({
           })
         );
       } catch (error) {
+        select.value = currentFormat;
         console.error('[DateFormatSection] Failed to save date format:', error);
+        showErrorToast('Failed to save date format. Please try again.');
       }
     });
 

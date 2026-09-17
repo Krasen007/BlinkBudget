@@ -7,6 +7,7 @@ import { ButtonComponent } from './Button.js';
 import { Router } from '../core/router.js';
 import { AuthService } from '../core/auth-service.js';
 import { InstallService } from '../core/install.js';
+import { showToast, TOAST_TYPES } from '../utils/toast-notifications.js';
 import { SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
 
 export const GeneralSection = () => {
@@ -56,9 +57,20 @@ export const GeneralSection = () => {
         }
       } else {
         // Show manual instructions
-        import('./ConfirmDialog.js').then(({ PWAInstructionsDialog }) => {
-          PWAInstructionsDialog();
-        });
+        import('./ConfirmDialog.js')
+          .then(({ PWAInstructionsDialog }) => {
+            PWAInstructionsDialog();
+          })
+          .catch(error => {
+            console.error(
+              '[GeneralSection] Failed to load install instructions:',
+              error
+            );
+            showToast(
+              'Unable to load installation instructions. Please try again.',
+              TOAST_TYPES.ERROR
+            );
+          });
       }
     },
   });

@@ -4,6 +4,7 @@
  */
 
 import { ButtonComponent } from './Button.js';
+import { IntegrityReport } from './IntegrityReport.js';
 import { DateInput } from './DateInput.js';
 import { TransactionService } from '../core/transaction-service.js';
 import {
@@ -239,14 +240,13 @@ export const DataManagementSection = () => {
             title: '⚠️ Data Issues Found',
             message: `Found ${result.issues.length} data issues. ${result.summary.failedChecks} checks failed. Please review your data.`,
             buttonText: 'View Details',
+            onConfirm: () => {
+              const details = IntegrityReport(result);
+              section.querySelector('.integrity-report')?.remove();
+              integrityBtn.after(details);
+              details.focus();
+            },
           });
-
-          // Show detailed report in console for now
-          console.group('Data Integrity Report');
-          console.log('Summary:', result.summary);
-          console.log('Issues:', result.issues);
-          console.log('Recommendations:', result.recommendations);
-          console.groupEnd();
         } else {
           const { MobileAlert } = await import('./MobileModal.js');
           MobileAlert({

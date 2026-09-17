@@ -241,6 +241,7 @@ export const FONT_SIZES = {
   TITLE_MOBILE: 'var(--font-size-xl)',
   TITLE_DESKTOP: 'var(--font-size-2xl)',
   BASE: 'var(--font-size-base)',
+  XS: 'var(--font-size-xs)',
   SM: 'var(--font-size-sm)',
   MD: 'var(--font-size-base)',
   LG: 'var(--font-size-lg)',

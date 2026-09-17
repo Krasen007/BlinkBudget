@@ -40,7 +40,7 @@ export const BackupRestoreSection = () => {
   Object.assign(metadataContainer.style, {
     backgroundColor: 'var(--color-surface)',
     padding: SPACING.MD,
-    borderRadius: '8px',
+    borderRadius: 'var(--radius-md)',
     marginBottom: SPACING.MD,
     border: '1px solid var(--color-border)',
   });

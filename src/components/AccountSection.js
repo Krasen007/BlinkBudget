@@ -255,7 +255,8 @@ export const AccountSection = () => {
                     message: 'Failed to add account. Please try again.',
                   });
                 })
-                .catch(() => {
+                .catch(importError => {
+                  console.error('Error loading account error dialog:', importError);
                   errorText.textContent =
                     'Failed to add account. Please try again.';
                   errorText.style.opacity = '1';
@@ -370,7 +371,7 @@ export const AccountSection = () => {
         accountName.textContent = account.name;
         accountName.style.cssText = `
           font-weight: 500;
-          color: ${COLORS.TEXT_PRIMARY};
+          color: ${COLORS.TEXT_MAIN};
           margin-bottom: 2px;
         `;
 
@@ -684,7 +685,7 @@ export const AccountSection = () => {
         deleteBtn.textContent = 'Delete';
         deleteBtn.style.cssText = `
           padding: ${SPACING.XS} ${SPACING.SM};
-          background: ${COLORS.DANGER};
+          background: ${COLORS.ERROR};
           color: var(--color-on-primary, #fff);
           border: none;
           border-radius: var(--radius-sm);

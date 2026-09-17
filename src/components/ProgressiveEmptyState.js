@@ -75,21 +75,20 @@ export const ProgressiveEmptyState = ({
     return null; // Feature is fully unlocked
   }
 
-  const fontSm = FONT_SIZES?.SM || '0.875rem';
-  const fontMd = FONT_SIZES?.MD || '1rem';
-  const fontLg = FONT_SIZES?.LG || '1.125rem';
+  const fontSm = FONT_SIZES.SM;
+  const fontMd = FONT_SIZES.MD;
+  const fontLg = FONT_SIZES.LG;
 
-  const spaceXs = SPACING?.XS || '4px';
-  const spaceSm = SPACING?.SM || '8px';
-  const spaceMd = SPACING?.MD || '16px';
+  const spaceXs = SPACING.XS;
+  const spaceSm = SPACING.SM;
+  const spaceMd = SPACING.MD;
 
-  const colorPrimary = COLORS?.PRIMARY || '#3b82f6';
-  const colorSurface = COLORS?.SURFACE || 'var(--color-surface)';
-  const colorSurfaceHover =
-    COLORS?.SURFACE_HOVER || 'var(--color-surface-hover)';
-  const colorBorder = COLORS?.BORDER || 'var(--color-border)';
-  const colorTextMain = COLORS?.TEXT_MAIN || 'var(--color-text-main)';
-  const colorTextMuted = COLORS?.TEXT_MUTED || 'var(--color-text-muted)';
+  const colorPrimary = COLORS.PRIMARY;
+  const colorSurface = COLORS.SURFACE;
+  const colorSurfaceHover = COLORS.SURFACE_HOVER;
+  const colorBorder = COLORS.BORDER;
+  const colorTextMain = COLORS.TEXT_MAIN;
+  const colorTextMuted = COLORS.TEXT_MUTED;
 
   const remaining = Math.max(0, threshold - transactionCount);
   const progressPercent = Math.min(

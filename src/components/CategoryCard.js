@@ -147,7 +147,7 @@ export const CategoryCard = (
 
     if (budget.isExceeded) {
       budgetEl.style.background = 'rgba(239, 68, 68, 0.1)';
-      budgetEl.style.color = COLORS.DANGER;
+      budgetEl.style.color = COLORS.ERROR;
       const actual = typeof budget?.actual === 'number' ? budget.actual : 0;
       const amountLimit =
         typeof budget?.amountLimit === 'number' ? budget.amountLimit : 0;
