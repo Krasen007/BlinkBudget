@@ -218,8 +218,19 @@ export const TimePeriodSelector = (options = {}) => {
   // Create custom date range selector (initially hidden)
   const customRangeContainer = createCustomRangeSelector();
 
+  // Navigation status message — lives outside the custom-range panel so
+  // arrow-navigation errors stay visible when that panel is hidden
+  const navigationMessage = document.createElement('div');
+  navigationMessage.className = 'navigation-message';
+  navigationMessage.setAttribute('role', 'alert');
+  navigationMessage.style.display = 'none';
+  navigationMessage.style.fontSize = FONT_SIZES.SM;
+  navigationMessage.style.textAlign = 'center';
+  navigationMessage.style.marginTop = SPACING.XS;
+
   // Assemble the component
   container.appendChild(buttonsContainer);
+  container.appendChild(navigationMessage);
   if (showCustomRange) {
     container.appendChild(customRangeContainer);
   }
@@ -342,21 +353,21 @@ export const TimePeriodSelector = (options = {}) => {
           button.dataset.monthOffset = newOffset.toString();
           const newPeriod = getSpecificMonthPeriod(newOffset);
           updateRightArrowVisibility(rightArrow, newOffset, period.key);
-          handleMonthNavigation(newPeriod);
+          handleNavigation('lastMonth', newPeriod, 'month');
         } else if (period.key === 'quarter') {
           const currentOffset = parseInt(button.dataset.quarterOffset || '0');
           const newOffset = currentOffset - 1;
           button.dataset.quarterOffset = newOffset.toString();
           const newPeriod = getSpecificQuarterPeriod(newOffset);
           updateRightArrowVisibility(rightArrow, newOffset, period.key);
-          handleQuarterNavigation(newPeriod);
+          handleNavigation('quarter', newPeriod, 'quarter');
         } else if (period.key === 'year') {
           const currentOffset = parseInt(button.dataset.yearOffset || '0');
           const newOffset = currentOffset - 1;
           button.dataset.yearOffset = newOffset.toString();
           const newPeriod = getSpecificYearPeriod(newOffset);
           updateRightArrowVisibility(rightArrow, newOffset);
-          handleYearNavigation(newPeriod);
+          handleNavigation('year', newPeriod, 'year');
         }
       });
 
@@ -369,21 +380,21 @@ export const TimePeriodSelector = (options = {}) => {
           button.dataset.monthOffset = newOffset.toString();
           const newPeriod = getSpecificMonthPeriod(newOffset);
           updateRightArrowVisibility(rightArrow, newOffset);
-          handleMonthNavigation(newPeriod);
+          handleNavigation('lastMonth', newPeriod, 'month');
         } else if (period.key === 'quarter') {
           const currentOffset = parseInt(button.dataset.quarterOffset || '0');
           const newOffset = currentOffset + 1;
           button.dataset.quarterOffset = newOffset.toString();
           const newPeriod = getSpecificQuarterPeriod(newOffset);
           updateRightArrowVisibility(rightArrow, newOffset);
-          handleQuarterNavigation(newPeriod);
+          handleNavigation('quarter', newPeriod, 'quarter');
         } else if (period.key === 'year') {
           const currentOffset = parseInt(button.dataset.yearOffset || '0');
           const newOffset = currentOffset + 1;
           button.dataset.yearOffset = newOffset.toString();
           const newPeriod = getSpecificYearPeriod(newOffset);
           updateRightArrowVisibility(rightArrow, newOffset);
-          handleYearNavigation(newPeriod);
+          handleNavigation('year', newPeriod, 'year');
         }
       });
 
@@ -593,62 +604,31 @@ export const TimePeriodSelector = (options = {}) => {
     return start1 === start2 && end1 === end2;
   }
 
-  /**
-   * Handle month navigation
-   */
-  function handleMonthNavigation(newPeriod) {
-    try {
-      // Validate the period
-      if (!validateTimePeriod(newPeriod)) {
-        showValidationError('Invalid time period selected');
-        return;
-      }
-
-      // Update state
-      currentPeriod = newPeriod;
-
-      // Update UI - set Last Month button as active
-      setActiveButton(periodButtons.get('lastMonth'));
-      hideCustomRangeSelector();
-
-      // Update the Last Month button label to show the actual month
-      const lastMonthButton = periodButtons.get('lastMonth');
-      const labelSpan = lastMonthButton.querySelector('.tab-label');
-      if (labelSpan) {
-        labelSpan.textContent = newPeriod.label;
-      }
-
-      // Notify parent component but with a flag to prevent full recreation
-      if (onChange) {
-        onChange(currentPeriod, { isNavigation: true });
-      }
-    } catch (error) {
-      console.error('Error navigating to month:', error);
-      showValidationError('Error navigating to month');
-    }
+  function showNavigationError(message) {
+    navigationMessage.textContent = message;
+    navigationMessage.style.display = 'block';
   }
 
   /**
-   * Handle quarter navigation
+   * Apply month, quarter, or year navigation without recreating the selector.
    */
-  function handleQuarterNavigation(newPeriod) {
+  function handleNavigation(buttonKey, newPeriod, unitLabel) {
+    const button = periodButtons.get(buttonKey);
     try {
-      // Validate the period
       if (!validateTimePeriod(newPeriod)) {
-        showValidationError('Invalid time period selected');
+        showNavigationError('Invalid time period selected');
         return;
       }
 
       // Update state
       currentPeriod = newPeriod;
 
-      // Update UI - set Quarter button as active
-      setActiveButton(periodButtons.get('quarter'));
+      // Update UI
+      setActiveButton(button);
       hideCustomRangeSelector();
 
-      // Update the Quarter button label to show the actual quarter
-      const quarterButton = periodButtons.get('quarter');
-      const labelSpan = quarterButton.querySelector('.tab-label');
+      // Update the button label to show the navigated period
+      const labelSpan = button.querySelector('.tab-label');
       if (labelSpan) {
         labelSpan.textContent = newPeriod.label;
       }
@@ -658,43 +638,8 @@ export const TimePeriodSelector = (options = {}) => {
         onChange(currentPeriod, { isNavigation: true });
       }
     } catch (error) {
-      console.error('Error navigating to quarter:', error);
-      showValidationError('Error navigating to quarter');
-    }
-  }
-
-  /**
-   * Handle year navigation
-   */
-  function handleYearNavigation(newPeriod) {
-    try {
-      // Validate the period
-      if (!validateTimePeriod(newPeriod)) {
-        showValidationError('Invalid time period selected');
-        return;
-      }
-
-      // Update state
-      currentPeriod = newPeriod;
-
-      // Update UI - set Year button as active
-      setActiveButton(periodButtons.get('year'));
-      hideCustomRangeSelector();
-
-      // Update the Year button label to show the actual year
-      const yearButton = periodButtons.get('year');
-      const labelSpan = yearButton.querySelector('.tab-label');
-      if (labelSpan) {
-        labelSpan.textContent = newPeriod.label;
-      }
-
-      // Notify parent component but with a flag to prevent full recreation
-      if (onChange) {
-        onChange(currentPeriod, { isNavigation: true });
-      }
-    } catch (error) {
-      console.error('Error navigating to year:', error);
-      showValidationError('Error navigating to year');
+      console.error(`Error navigating to ${unitLabel}:`, error);
+      showNavigationError(`Error navigating to ${unitLabel}`);
     }
   }
 
@@ -935,6 +880,8 @@ export const TimePeriodSelector = (options = {}) => {
    * Set active button state - match FinancialPlanningView styling
    */
   function setActiveButton(activeButton) {
+    navigationMessage.textContent = '';
+    navigationMessage.style.display = 'none';
     // Reset all buttons
     periodButtons.forEach(button => {
       button.style.background = COLORS.SURFACE;

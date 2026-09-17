@@ -4,9 +4,11 @@
 
 **Method:** rule-by-rule regex/AST sweeps, all 37 catch clauses plus five promise catches, named-export references across the repository, module initializers, comment inventory, token-member validation, sibling comparison, and focused source/test/blame inspection. Mechanical coverage includes every component; deeper manual reads/history checks concentrate on reported candidates, not an exhaustive semantic proof of every line. No TypeScript/React: rules 12/13 do not apply. No TODO/FIXME/HACK markers found. Local/remote-tracking branches were listed; live PRs and unpublished plans were not checked. Unused APIs are candidates, not deletion authorization.
 
-**Summary:** error-feedback gaps, unused APIs, undefined tokens, duplicated UI logic, stale comments, and eight oversized modules. One account-edit field overwrite was reproduced and fixed with a red/green regression test. No security-sensitive findings were remediated. The pre-existing deletion of `f:\AI\repos\BlinkBudget\todo\.~lock.codebase-line-count.csv#` was left untouched.
+**Summary (original audit):** error-feedback gaps, unused APIs, undefined tokens, duplicated UI logic, stale comments, and eight oversized modules. One account-edit field overwrite was reproduced and fixed with a red/green regression test. No security-sensitive findings were remediated during that audit. The pre-existing deletion of `f:\AI\repos\BlinkBudget\todo\.~lock.codebase-line-count.csv#` was left untouched.
 
-Line references use the baseline. Removing two lines from AccountSection shifts subsequent references by -2.
+**Implementation update — 2026-09-17:** Phase A is complete. Phase B's approved scope is complete: C07, C12 (including the author-approved global XS token), ordinary C16 diagnostics, C20 read-only details/copy, and a scoped C13 radius replacement. C13 remains partially open for other raw values. Phase C's C18 navigation refactor is complete in the working tree; C22 file splitting remains deferred. Destructive-flow safeguards and the other author-review gates remain unchanged.
+
+Line references and finding snippets describe the baseline, not the updated source. The C17-only -2 line shift no longer locates all sites after subsequent edits.
 
 ## Rule 1 — Narrative comments
 
@@ -28,7 +30,7 @@ Line references use the baseline. Removing two lines from AccountSection shifts 
 - **Severity:** 🔴 High
 - **Snippet:** `catch (error) { console.error('Error loading accounts:', error); }`
 - **Verdict:** slop. The list is cleared before rendering; callers cannot distinguish failed rendering from completion. Save handlers subsequently close their dialogs. No inline error, retry, or propagation.
-- **Action:** flagged for follow-up; phase A. Report rendering failure without implying a successful write failed.
+- **Action:** completed in Phase A (`fc0165c`). Render failures replace blank/partial content with an inline `role="alert"` message and Retry button. Rendering returns a success/failure boolean; retry only reloads the list and never repeats a successful write. Regression coverage: initial failure, partial-render recovery, and successful save followed by failed refresh in `f:\AI\repos\BlinkBudget\tests\Account\account-section-errors.test.js`.
 
 ### C03 — Failed date-format save looks saved
 
@@ -37,7 +39,7 @@ Line references use the baseline. Removing two lines from AccountSection shifts 
 - **Severity:** 🔴 High
 - **Snippet:** `SettingsService.saveSetting('dateFormat', newFormat)` followed by console-only catch.
 - **Verdict:** slop. SettingsView enables manual selection. Storage writes can throw; selection is not reverted and no user feedback appears. Unlike initial auto-detection, this is an explicit save operation. Blame: `0aa8e7db`.
-- **Action:** flagged for follow-up; phase A. Test throwing save, feedback, and selection rollback.
+- **Action:** completed in Phase A (`8449709`). Failed manual saves revert the select to the last successfully saved format and show an error toast; failed saves do not dispatch a date-format change event. Initial auto-detection behavior is unchanged. Regression: `f:\AI\repos\BlinkBudget\tests\components\date-format-section.test.js`.
 
 ### C04 — Failed dialog loads silently stop restore/delete actions 🔒
 
@@ -57,7 +59,7 @@ Line references use the baseline. Removing two lines from AccountSection shifts 
 - **Severity:** 🔴 High
 - **Snippet:** `console.error('Failed to create chart:', error.message); return null;`
 - **Verdict:** slop. Loading errors reject; construction errors fulfill null. InflationTrends' error UI handles rejection, not null. An isolated Node reproduction using the actual class body and a throwing ChartJS constructor printed `CHART FAILURE fulfilled: null`. Not a real-canvas browser test.
-- **Action:** flagged for follow-up; phase A. Choose one failure contract and check every caller.
+- **Action:** completed in Phase A (`181b9ff`). Adopted the author-selected rejection contract: pie/bar/line construction errors log and rethrow instead of fulfilling null. Callers were checked; NetBalanceChart and Top Movers now have visible fallbacks, and InflationTrends' existing rejection UI is exercised with a throwing constructor. Tests: `f:\AI\repos\BlinkBudget\tests\components\chart-renderer-contract.test.js`, `f:\AI\repos\BlinkBudget\tests\components\chart-construction-fallback.test.js`, and `f:\AI\repos\BlinkBudget\tests\components\inflation-trends-construction-failure.test.js`. Mocked-constructor coverage is not real-canvas browser QA.
 
 ### C06 — Recovery depends on another unguarded import 🔒
 
@@ -79,7 +81,7 @@ Line references use the baseline. Removing two lines from AccountSection shifts 
 - **Severity:** ⚪ Low
 - **Snippet:** `SPACING?.MD || '16px'`; `COLORS?.PRIMARY || '#3b82f6'`.
 - **Verdict:** slop. All referenced properties exist now; static ESM import failure cannot be recovered by optional chaining. The dead MD fallback also disagrees with the actual 12px token. Blame inspected (`657adc84`, `7d5f6ffc`); existing component tests pass.
-- **Action:** flagged for follow-up; phase B. Use direct tokens; do not infer that every optional property guard is dead.
+- **Action:** completed in Phase B (`8449709`). Guaranteed imported spacing, font, and color tokens are accessed directly; optional guards for genuine input variability remain. Existing coverage: `f:\AI\repos\BlinkBudget\tests\components\ProgressiveEmptyState.test.js`.
 
 ## Rule 4 — Unused code candidates
 
@@ -129,7 +131,7 @@ Line references use the baseline. Removing two lines from AccountSection shifts 
 - **Severity:** 🟡 Medium (invalid styling, not established financial-data corruption)
 - **Snippet:** `COLORS.TEXT_PRIMARY`, `COLORS.DANGER`, `FONT_SIZES.XS`.
 - **Verdict:** slop. AST member checks against the actual constants confirm two absent color keys and one absent font-size key at seven sites. CSS token tests pass because these are JS object-member errors, not undeclared `var(...)` references. `FONT_SIZES.MD` and `--color-text` DO exist now; older audit claims must not be repeated.
-- **Action:** flagged for follow-up; phase B, except the AccountDeletionSection presentation site is explicitly deferred for review with deletion UI. Add generic JS-token contract coverage, not just CSS-token scans.
+- **Action:** completed in Phase B (`8449709`). Replaced missing color members with `COLORS.TEXT_MAIN` / `COLORS.ERROR` and defined `FONT_SIZES.XS = 'var(--font-size-xs)'`. The author explicitly approved the global XS presentation fix, including AccountDeletionSection help text and an additional reference in `f:\AI\repos\BlinkBudget\src\views\LoginView.js` outside the original component scope. No deletion/auth behavior changed. Generic JavaScript-token contract coverage added at `f:\AI\repos\BlinkBudget\tests\system\javascript-design-tokens.test.js`.
 
 ### C13 — Raw values bypass existing dimensions, spacing, and layers
 
@@ -138,7 +140,7 @@ Line references use the baseline. Removing two lines from AccountSection shifts 
 - **Severity:** ⚪ Low
 - **Snippet:** `borderRadius: '8px'`; `max-width: 400px`; `zIndex: '10000'`.
 - **Verdict:** slop for duplicate semantic values: shared radius/dimension/layer tokens exist. Scoped ESLint finds 71 warnings across components, but these are signals, not 71 confirmed bugs; it misses some Object.assign/config literals and flags harmless values such as 0px too. Canvas colors need resolved color strings, not direct CSS var substitutions.
-- **Action:** flagged for follow-up; phase B for ordinary presentation. Privacy/deletion surfaces deferred to their review gate. Do not bulk-replace every numeric literal.
+- **Action:** partially completed in Phase B (`8449709`): BackupRestoreSection metadata radius now uses `var(--radius-md)` instead of `8px`. This scoped presentation change does not resolve all raw-value sites: account-dialog dimensions and other ordinary presentation cleanup remain open; privacy/deletion presentation remains review-gated. No blanket numeric replacement or canvas-color substitution was performed.
 
 ## Rule 6 — Redundant API indirection
 
@@ -162,7 +164,7 @@ C04–C06 already cover shared rule-2/rule-7 issues; they are not duplicated her
 - **Severity:** 🟡 Medium
 - **Snippet:** `import('./ConfirmDialog.js').then(({ PWAInstructionsDialog }) => ...)`.
 - **Verdict:** slop. Neither awaited/returned nor caught: a rejected import leaves the install click with no feedback. Adjacent settings components at least log their failed imports.
-- **Action:** flagged for follow-up; phase A. Report failure without claiming installation succeeded.
+- **Action:** completed in Phase A (`8449709`). Failed instructions imports and dialog construction now log diagnostics and show an error toast without claiming installation succeeded. Tests: `f:\AI\repos\BlinkBudget\tests\components\general-section.test.js` and `f:\AI\repos\BlinkBudget\tests\components\general-section-import-failure.test.js`; the latter rejects the module factory during dynamic import.
 
 ### C16 — Visible errors without consistent diagnostic logging
 
@@ -171,7 +173,7 @@ C04–C06 already cover shared rule-2/rule-7 issues; they are not duplicated her
 - **Severity:** ⚪ Low
 - **Snippet:** `.catch(() => { errorText.textContent = ...; })`; `showErrorToast(...)` without logging.
 - **Verdict:** slop only for diagnostic inconsistency. These are NOT empty catches: users receive errors and execution stops appropriately. The add-account outer catch already logs the original save failure; only its secondary import failure lacks diagnostics.
-- **Action:** flagged for follow-up; phase B for add/copy/split diagnostics; backup-restore diagnostic changes deferred to C04 review.
+- **Action:** ordinary add/copy/split diagnostics completed in Phase B (`8449709`). Added logging for the secondary account-error-dialog import failure and thrown transaction copy/split errors, preserving existing user feedback. Backup-restore diagnostic changes remain deferred to C04 review; C16 is not closed for that restricted site.
 
 ## Rule 8 — Module-load side effects
 
@@ -195,7 +197,7 @@ No direct DOM/listener/timer side effects found at component module scope. The s
 - **Severity:** 🟡 Medium
 - **Snippet:** validate → assign currentPeriod → set active button → hide range → update label → onChange.
 - **Verdict:** slop. Month/quarter/year bodies differ mainly in button key and message. Blame shows month handler introduced in `bb795fa3`; sibling bodies retain the same structure. Their error message is inside the range container they just hid, so caught callback errors may not be visible.
-- **Action:** flagged for follow-up; phase C. Extract a parameterized handler, keep errors outside hidden range controls, and test all three navigation types.
+- **Action:** completed in Phase C in the working tree (not yet committed). One parameterized `handleNavigation` serves all six month/quarter/year arrow call sites. Errors use a sibling `role="alert"` element outside the hidden custom-range panel, and activating a period clears stale errors. Date calculations, offsets, and the navigation callback flag are unchanged. Six regression cases in `f:\AI\repos\BlinkBudget\tests\components\time-period-selector.test.js` cover navigation plus callback-failure visibility and recovery across all three period types. No file splitting was performed.
 
 ## Rule 10 — Exceptions as control flow
 
@@ -219,7 +221,7 @@ Ordinary JSON parsing, browser storage, chart constructors, and persistence catc
 - **Severity:** 🟡 Medium
 - **Snippet:** `buttonText: 'View Details'` plus `// Show detailed report in console for now`.
 - **Verdict:** slop. MobileAlert's button dismisses the dialog; no details view opens. Comment accurately describes the workaround, but the user-facing promise is incomplete rather than a TODO already implemented.
-- **Action:** flagged for follow-up; phase B, read-only diagnostic display/copy only. Data modification requires separate review.
+- **Action:** completed in Phase B (`8449709`). View Details now inserts and focuses a local, read-only `IntegrityReport` with summary, issues, and recommendations rendered through `textContent`. Copy Report requires an explicit click, warns about personal financial information, and provides visible clipboard-failure feedback. No data repair or recovery behavior changed. Implementation: `f:\AI\repos\BlinkBudget\src\components\IntegrityReport.js`; tests: `f:\AI\repos\BlinkBudget\tests\components\integrity-report.test.js`.
 
 ### C21 — “Silently ignore” above warning log
 
@@ -239,7 +241,7 @@ Ordinary JSON parsing, browser storage, chart constructors, and persistence catc
 - **Severity:** 🟡 Medium
 - **Snippet:** physical line-count inventory (blank lines included).
 - **Verdict:** slop against size convention; size alone is not evidence of a runtime bug.
-- **Action:** flagged for follow-up; separate structural phase, not bundled into behavior fixes. PrivacyControls deferred pending C10 review.
+- **Action:** deferred. Phase C implemented C18 only; none of the eight oversized modules has been split as part of this follow-up. Keep structural work separate from behavior fixes. PrivacyControls remains gated by C10. The table below is the historical baseline inventory, not current line counts.
 
 | File (under the absolute directory above) |      Baseline lines |
 | ----------------------------------------- | ------------------: |
@@ -267,25 +269,46 @@ Initial PowerShell Measure-Object counts omitted empty lines; this table uses ph
 
 ## Traceable follow-up plan
 
-Proposal only, not authorization for further edits. References C01–C22 resolve to the exact file/line entries above; grouped entries explicitly defer restricted sites.
+Status as of 2026-09-17. References C01–C22 retain the original audit locations above. Remaining proposals are not authorization for further edits.
 
-- **Completed:** C17 (two-line fix plus regression).
-- **Phase A — visible failures:** C02, C03, C05, C15. Add failing-path tests first.
-- **Phase B — tokens/diagnostics:** C07, C12 ordinary UI, C13 ordinary presentation, C16 add/copy/split diagnostics, C20 read-only diagnostic copy.
-- **Phase C — reuse/structure:** C18 and C22 ordinary modules, separate from behavior fixes. C22 PrivacyControls deferred to C10.
-- **Cosmetic phase:** C01, C21.
-- **User Review Required:** C04, C06, C08, C09, C10, C11, C14, C19. Also defer C12 AccountDeletionSection styling, C13 privacy/deletion presentation, C16 backup logging, and C22 PrivacyControls splitting to corresponding review decisions. No whole-file deletion, data wipe, migration, or auth/ownership/destructive-flow change scheduled automatically.
+- **Original fix completed:** C17 (`c620e73`, two-line fix plus regression).
+- **Phase A — complete:** C02 (`fc0165c`), C05 (`181b9ff`), C03 and C15 (`8449709`). Visible failure feedback and targeted regressions are implemented.
+- **Phase B — approved scope complete (`8449709`):** C07 direct tokens; C12 missing-token fixes, including the author-approved global `FONT_SIZES.XS` definition affecting AccountDeletionSection help text and the additional LoginView reference; C16 add/copy/split diagnostics; C20 read-only details and explicit copy. C13 received a scoped radius replacement but remains open for other raw values; this is not completion of all presentation cleanup.
+- **Phase C — partially complete:** C18 shared navigation handler and visible error/recovery feedback are implemented and tested in the working tree, not yet committed. C22 file splitting remains deferred, including PrivacyControls pending C10.
+- **Cosmetic phase — pending:** C01, C21. Incidental comment removal during C18 does not close C01 across its other sites.
+- **User Review Required — unchanged except C12 approval:** C04, C06, C08, C09, C10, C11, C14, C19; C13 privacy/deletion presentation, C16 backup logging, and C22 PrivacyControls splitting remain gated. The approved C12 font token is presentation-only; no confirmation, reauthentication, ownership, deletion, or recovery safeguards were changed. No whole-file deletion, data wipe, migration, or destructive-flow change is authorized by this status update.
 
 For each future phase: targeted tests covering every touched file, lint, format, and production build. Concrete UI QA: simulate failed date-format save and confirm rollback/error text; simulate chart construction failure and confirm visible fallback; navigate month/quarter/year and check labels/errors; click integrity details and check its actual behavior. For C17, edit an account with nonzero balance and old createdAt, save, and check preservation after reload. Browser/storage QA remains unperformed; regression checks component-to-service payload with mocked service.
 
 ## Verification performed
 
+### Original audit and C17 (historical)
+
+The counts and warnings below describe the original audit, not a fresh run of the current tree.
+
 - Baseline: 104 tests passed across 14 targeted files.
 - New account regression: failed before fix (18 passed / one failed), then passed after fix (19/19), including a separate verbose rerun confirming the exact regression.
 - After fix: 105 tests passed across the same 14 files using component, account-section, transaction-form, and chart-integration targets.
-- Design-token suite: 12/12 passed, including production CSS-purge build. Seven JS-token references in C12 remain outside its present coverage.
+- Design-token suite: 12/12 passed, including production CSS-purge build. At that point, the seven JS-token references in C12 were outside its coverage; the Phase B update below supersedes that limitation.
 - Scoped ESLint over components and the edited test: zero errors, 71 existing warnings.
 - Prettier check over edited JavaScript/test: passed.
 - Production build: passed, including PWA generation.
 - Canvas integration limitation: jsdom reports no canvas context; the chart cleanup test returns early. Green tests do not establish real-canvas rendering/cleanup correctness.
-- No full test suite or manual browser run performed. No commit created.
+- No full test suite or manual browser run was performed during the original audit; no commit was created in that audit session. C17 was subsequently committed as `c620e73`.
+
+### Phase A/B implementation
+
+- Implementation is committed in `fc0165c`, `181b9ff`, and `8449709`.
+- C02/C03/C15 checkpoint: 25 tests passed across five targeted files, including the original account tests and new failure-path regressions. C02 account targets alone passed 22/22.
+- Chart follow-up checkpoint: 46 targeted tests passed; repository `yarn run check` and production build including PWA generation passed after formatting the chart fallback test.
+- Phase B adds JavaScript-token contract coverage as well as tests for read-only integrity details/copy and ordinary diagnostics. C12 is no longer only covered by CSS-token scans.
+- These are implementation-session verification results, not a claim that the full suite or browser QA was run. Chart constructor failures are tested with mocks; real-canvas rendering/cleanup remains unverified.
+
+### Phase C — C18
+
+- `f:\AI\repos\BlinkBudget\tests\components\time-period-selector.test.js`: 6/6 tests passed, covering month/quarter/year navigation and visible callback-error feedback followed by successful recovery. The targeted suite was rerun while preparing this report and again passed 6/6.
+- Scoped ESLint, Prettier, diff checks, and production build including PWA generation passed for the C18 implementation.
+- Repository-wide `yarn run check` was blocked by formatting issues in five untouched files. Those files were left unchanged; the earlier Phase A/B check success must not be read as a clean current-tree check.
+- C18 source and regression test remain uncommitted. C22 was not implemented. No manual browser/storage QA or full-suite run was performed.
+
+This report update changes documentation only; it does not implement additional fixes or create a commit.
