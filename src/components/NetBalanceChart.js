@@ -364,6 +364,7 @@ export async function createNetBalanceChart() {
     fallback.setAttribute('role', 'status');
     fallback.textContent =
       'Unable to render net balance chart. Please try refreshing this section.';
+    legendContainer.remove();
     chartDiv.replaceChildren(fallback);
   }
 

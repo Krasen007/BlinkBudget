@@ -714,8 +714,12 @@ export const AccountSection = () => {
                 },
               });
             })
-            .catch(error => {
+                        .catch(error => {
               console.error('Error loading ConfirmDialog:', error);
+              AlertDialog({
+                message:
+                  'Unable to open the deletion confirmation dialog. Operation cancelled; no data was changed.',
+              });
             });
         });
 

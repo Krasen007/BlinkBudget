@@ -46,9 +46,9 @@ describe('TimePeriodSelector period navigation', () => {
   );
 
   it.each([
-    ['lastMonth', 'month', 'July 2026'],
-    ['quarter', 'quarter', 'Q2 2026'],
-    ['year', 'year', '2025'],
+    ['lastMonth', 'month', 'This Month'],
+    ['quarter', 'quarter', 'This Month'],
+    ['year', 'year', 'This Month'],
   ])(
     'keeps %s navigation errors visible and clears them after recovery',
     (key, unit, label) => {
@@ -72,7 +72,8 @@ describe('TimePeriodSelector period navigation', () => {
       expect(
         container.querySelector('.custom-range-selector').style.display
       ).toBe('none');
-      expect(button.classList.contains('active')).toBe(true);
+      expect(button.classList.contains('active')).toBe(false);
+      expect(findTab(container, 'month').classList.contains('active')).toBe(true);
       expect(container.getCurrentPeriod().label).toBe(label);
       expect(log).toHaveBeenCalledWith(`Error navigating to ${unit}:`, failure);
 

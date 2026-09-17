@@ -217,6 +217,8 @@ export const DataManagementSection = () => {
     text: '🔍 Data Integrity Check',
     variant: 'secondary',
     onClick: async () => {
+      section.querySelector('.integrity-report')?.remove();
+
       try {
         integrityBtn.disabled = true;
         integrityBtn.textContent = '🔍 Checking...';
