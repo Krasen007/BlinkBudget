@@ -19,7 +19,7 @@ Line references and finding snippets describe the baseline, not the updated sour
 - **Severity:** ⚪ Low
 - **Snippet:** `// Update state` above `currentPeriod = newPeriod`; `// Connect label to input`; `// Add spacing`.
 - **Verdict:** slop. Retain comments explaining timezones, accessibility, and lifecycle constraints.
-- **Action:** flagged for follow-up; cosmetic phase.
+- **Action:** completed in the cosmetic phase (2026-09-17, uncommitted). Removed elementary DOM/state narration across all three listed files, retaining accessibility, date/timestamp, lifecycle, and recovery context. C11's native-picker listener and its comments remain unchanged. Executable-code equivalence against HEAD was verified for all four cosmetic-phase components.
 
 ## Rule 2 — Silent failures
 
@@ -230,7 +230,7 @@ Ordinary JSON parsing, browser storage, chart constructors, and persistence catc
 - **Severity:** ⚪ Low
 - **Snippet:** `// Silently ignore localStorage read errors` followed by `console.warn(...)`.
 - **Verdict:** slop only in wording. Runtime fallback is useful and must remain.
-- **Action:** flagged for follow-up; cosmetic phase.
+- **Action:** completed in the cosmetic phase (2026-09-17, uncommitted). The comment now explains retaining the default expanded state when storage is unavailable; the warning log and runtime fallback are unchanged.
 
 ## Rule 14 — File-size convention
 
@@ -275,7 +275,7 @@ Status as of 2026-09-17. References C01–C22 retain the original audit location
 - **Phase A — complete:** C02 (`fc0165c`), C05 (`181b9ff`), C03 and C15 (`8449709`). Visible failure feedback and targeted regressions are implemented.
 - **Phase B — approved scope complete (`8449709`):** C07 direct tokens; C12 missing-token fixes, including the author-approved global `FONT_SIZES.XS` definition affecting AccountDeletionSection help text and the additional LoginView reference; C16 add/copy/split diagnostics; C20 read-only details and explicit copy. C13 received a scoped radius replacement but remains open for other raw values; this is not completion of all presentation cleanup.
 - **Phase C — partially complete:** C18 shared navigation handler and visible error/recovery feedback are implemented and tested in the working tree, not yet committed. C22 file splitting remains deferred, including PrivacyControls pending C10.
-- **Cosmetic phase — pending:** C01, C21. Incidental comment removal during C18 does not close C01 across its other sites.
+- **Cosmetic phase — complete (uncommitted):** C01 comment cleanup across TimePeriodSelector, DateInput, and DataManagementSection; C21 fallback-comment correction in ExpandableSection. Executable code is unchanged; all author-review gates below remain in place.
 - **User Review Required — unchanged except C12 approval:** C04, C06, C08, C09, C10, C11, C14, C19; C13 privacy/deletion presentation, C16 backup logging, and C22 PrivacyControls splitting remain gated. The approved C12 font token is presentation-only; no confirmation, reauthentication, ownership, deletion, or recovery safeguards were changed. No whole-file deletion, data wipe, migration, or destructive-flow change is authorized by this status update.
 
 For each future phase: targeted tests covering every touched file, lint, format, and production build. Concrete UI QA: simulate failed date-format save and confirm rollback/error text; simulate chart construction failure and confirm visible fallback; navigate month/quarter/year and check labels/errors; click integrity details and check its actual behavior. For C17, edit an account with nonzero balance and old createdAt, save, and check preservation after reload. Browser/storage QA remains unperformed; regression checks component-to-service payload with mocked service.
@@ -311,4 +311,11 @@ The counts and warnings below describe the original audit, not a fresh run of th
 - Repository-wide `yarn run check` was blocked by formatting issues in five untouched files. Those files were left unchanged; the earlier Phase A/B check success must not be read as a clean current-tree check.
 - C18 source and regression test remain uncommitted. C22 was not implemented. No manual browser/storage QA or full-suite run was performed.
 
-This report update changes documentation only; it does not implement additional fixes or create a commit.
+### Cosmetic phase — C01/C21 (2026-09-17)
+
+- Removed elementary DOM/state narration in the three C01 components and corrected C21 wording. This phase changes source comments/whitespace and this report only; no commit was created.
+- All four edited components passed individual `node --check` syntax checks. Terser output with compression, mangling, and comments disabled was identical before/after against HEAD for each component, confirming executable-code equivalence.
+- Targeted tests passed 31/31 across `f:\AI\repos\BlinkBudget\tests\components\time-period-selector.test.js` (6), `f:\AI\repos\BlinkBudget\tests\components\date-input.test.js` (7), `f:\AI\repos\BlinkBudget\tests\components\expandable-section.test.js` (17), and `f:\AI\repos\BlinkBudget\tests\components\integrity-report.test.js` (1, exercises DataManagementSection).
+- The initial Yarn invocation failed during Vitest collection (undefined runner config/current suite; no tests executed). Running the same targets directly with Node and the installed Vitest CLI from the canonical `F:\AI\repos\BlinkBudget` path passed. No test/configuration changes were needed.
+- Scoped ESLint passed with zero errors and four existing raw-style warnings in ExpandableSection. Source Prettier checks, diff checks, and production build including PWA generation passed.
+- No full-suite run, repository-wide check, or manual browser/storage QA was performed for this comment-only phase. C11's native-picker listener and comments, storage fallback/logging, and all confirmation, reauthentication, ownership, deletion, and recovery behavior remain unchanged. C22 splitting remains deferred.

@@ -44,7 +44,6 @@ export const DateInput = (options = {}) => {
   // Double-check that it's not readonly
   realDate.readOnly = false;
 
-  // Initialize with today's date or provided value
   const initialDate = value
     ? typeof value === 'string'
       ? value.includes('T')
@@ -60,10 +59,8 @@ export const DateInput = (options = {}) => {
     container.dataset.timestamp = value;
   }
 
-  // Connect label to input
   label.setAttribute('for', inputId);
 
-  // Handle value changes
   realDate.addEventListener('change', e => {
     if (onChange) {
       onChange(e.target.value);
@@ -75,11 +72,9 @@ export const DateInput = (options = {}) => {
     // Let the native behavior handle the click - don't interfere
   });
 
-  // Build the component structure
   container.appendChild(label);
   container.appendChild(realDate);
 
-  // Expose methods for external consumption
   container.getDate = () => {
     // Return the current date value (date-only format YYYY-MM-DD)
     return realDate.value;

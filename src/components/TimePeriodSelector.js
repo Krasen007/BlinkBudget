@@ -95,12 +95,10 @@ export const TimePeriodSelector = (options = {}) => {
   container.style.width = '100%';
   container.style.flexShrink = '0';
 
-  // State management
   let currentPeriod = initialPeriod;
   let customStartDate = null;
   let customEndDate = null;
 
-  // Create main selector buttons container
   const buttonsContainer = document.createElement('nav');
 
   buttonsContainer.setAttribute('role', 'tablist');
@@ -120,7 +118,6 @@ export const TimePeriodSelector = (options = {}) => {
   `;
   document.head.appendChild(style);
 
-  // Define available time periods
   const periods = [
     { key: 'month', label: 'This Month', getValue: getCurrentMonthPeriod },
     {
@@ -141,7 +138,6 @@ export const TimePeriodSelector = (options = {}) => {
     },
   ];
 
-  // Helper functions for arrow navigation
   function createArrow(direction) {
     const arrow = document.createElement('span');
     arrow.innerHTML = direction === 'left' ? '←' : '→';
@@ -202,12 +198,10 @@ export const TimePeriodSelector = (options = {}) => {
     }
   }
 
-  // Add custom period option if enabled
   if (showCustomRange) {
     periods.push({ key: 'custom', label: 'Custom Range', getValue: null });
   }
 
-  // Create period buttons
   const periodButtons = new Map();
   periods.forEach(period => {
     const button = createPeriodButton(period);
@@ -215,7 +209,6 @@ export const TimePeriodSelector = (options = {}) => {
     buttonsContainer.appendChild(button);
   });
 
-  // Create custom date range selector (initially hidden)
   const customRangeContainer = createCustomRangeSelector();
 
   // Navigation status message — lives outside the custom-range panel so
@@ -228,7 +221,6 @@ export const TimePeriodSelector = (options = {}) => {
   navigationMessage.style.textAlign = 'center';
   navigationMessage.style.marginTop = SPACING.XS;
 
-  // Assemble the component
   container.appendChild(buttonsContainer);
   container.appendChild(navigationMessage);
   if (showCustomRange) {
@@ -239,7 +231,6 @@ export const TimePeriodSelector = (options = {}) => {
    * Create a period selection button
    */
   function createPeriodButton(period) {
-    // Map period types to button keys
     const typeToKeyMap = {
       daily: 'today',
       monthly: 'month',
@@ -249,11 +240,9 @@ export const TimePeriodSelector = (options = {}) => {
       custom: 'custom',
     };
 
-    // Set active state for initial period
     // For monthly periods, we need to check if it's last month vs current month
     let initialKey;
     if (initialPeriod.type === 'monthly') {
-      // Check if this is last month by comparing dates
       const now = new Date();
       const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
@@ -275,7 +264,6 @@ export const TimePeriodSelector = (options = {}) => {
     button.className = 'view-tab'; // Standardized class
     button.dataset.period = period.key;
 
-    // Initialize offsets for navigatable buttons
     if (period.key === 'lastMonth') {
       button.dataset.monthOffset = '-1';
     } else if (period.key === 'quarter') {
@@ -295,12 +283,10 @@ export const TimePeriodSelector = (options = {}) => {
     const labelSpan = document.createElement('span');
     labelSpan.className = 'tab-label';
 
-    // Set initial label for Last Month, Quarter, and Year buttons
     if (period.key === 'lastMonth') {
       labelSpan.textContent =
         period.key === initialKey ? initialPeriod.label : 'Last Month';
     } else if (period.key === 'quarter') {
-      // Get current quarter label
       const now = new Date();
       const currentQuarter = Math.floor(now.getMonth() / 3);
       const quarterLabels = ['Q1', 'Q2', 'Q3', 'Q4'];
@@ -314,7 +300,6 @@ export const TimePeriodSelector = (options = {}) => {
       labelSpan.textContent = period.label;
     }
 
-    // Add arrow for Last Month, Quarter, and Year buttons
     if (
       period.key === 'lastMonth' ||
       period.key === 'quarter' ||
@@ -398,7 +383,6 @@ export const TimePeriodSelector = (options = {}) => {
         }
       });
 
-      // Text container
       const textContainer = document.createElement('span');
       textContainer.style.display = 'block';
       textContainer.appendChild(labelSpan);
@@ -446,7 +430,6 @@ export const TimePeriodSelector = (options = {}) => {
     customContainer.style.borderRadius = 'var(--radius-lg)';
     customContainer.style.marginTop = SPACING.SM;
 
-    // Title
     const title = document.createElement('h4');
     title.textContent = 'Select Custom Date Range';
     title.style.margin = '0';
@@ -454,7 +437,6 @@ export const TimePeriodSelector = (options = {}) => {
     title.style.color = COLORS.TEXT_MAIN;
     title.style.textAlign = 'center';
 
-    // Date inputs container
     const dateInputsContainer = document.createElement('div');
     dateInputsContainer.style.display = 'flex';
     dateInputsContainer.style.gap = SPACING.MD;
@@ -462,7 +444,6 @@ export const TimePeriodSelector = (options = {}) => {
     dateInputsContainer.style.justifyContent = 'center';
     dateInputsContainer.style.flexWrap = 'wrap';
 
-    // Start date input
     const startDateContainer = document.createElement('div');
     startDateContainer.style.display = 'flex';
     startDateContainer.style.flexDirection = 'column';
@@ -491,14 +472,12 @@ export const TimePeriodSelector = (options = {}) => {
     startDateContainer.appendChild(startLabel);
     startDateContainer.appendChild(startDateInput);
 
-    // Separator
     const separator = document.createElement('div');
     separator.textContent = '—';
     separator.style.color = COLORS.TEXT_MUTED;
     separator.style.fontSize = FONT_SIZES.LG;
     separator.style.margin = `0 ${SPACING.SM}`;
 
-    // End date input
     const endDateContainer = document.createElement('div');
     endDateContainer.style.display = 'flex';
     endDateContainer.style.flexDirection = 'column';
@@ -526,7 +505,6 @@ export const TimePeriodSelector = (options = {}) => {
     endDateContainer.appendChild(endLabel);
     endDateContainer.appendChild(endDateInput);
 
-    // Action buttons
     const actionsContainer = document.createElement('div');
     actionsContainer.style.display = 'flex';
     actionsContainer.style.gap = SPACING.SM;
@@ -558,7 +536,6 @@ export const TimePeriodSelector = (options = {}) => {
     cancelButton.style.fontSize = FONT_SIZES.SM;
     cancelButton.addEventListener('click', cancelCustomRange);
 
-    // Validation message
     const validationMessage = document.createElement('div');
     validationMessage.className = 'validation-message';
     validationMessage.style.display = 'none';
@@ -566,7 +543,6 @@ export const TimePeriodSelector = (options = {}) => {
     validationMessage.style.textAlign = 'center';
     validationMessage.style.marginTop = SPACING.XS;
 
-    // Assemble custom range selector
     dateInputsContainer.appendChild(startDateContainer);
     dateInputsContainer.appendChild(separator);
     dateInputsContainer.appendChild(endDateContainer);
@@ -579,7 +555,6 @@ export const TimePeriodSelector = (options = {}) => {
     customContainer.appendChild(validationMessage);
     customContainer.appendChild(actionsContainer);
 
-    // Store references for later use
     customContainer._startDateInput = startDateInput;
     customContainer._endDateInput = endDateInput;
     customContainer._applyButton = applyButton;
@@ -595,7 +570,6 @@ export const TimePeriodSelector = (options = {}) => {
     if (!period1 || !period2) return false;
     if (period1.type !== period2.type) return false;
 
-    // For predefined periods, compare start and end dates
     const start1 = new Date(period1.startDate).getTime();
     const end1 = new Date(period1.endDate).getTime();
     const start2 = new Date(period2.startDate).getTime();
@@ -620,14 +594,11 @@ export const TimePeriodSelector = (options = {}) => {
         return;
       }
 
-      // Update state
       currentPeriod = newPeriod;
 
-      // Update UI
       setActiveButton(button);
       hideCustomRangeSelector();
 
-      // Update the button label to show the navigated period
       const labelSpan = button.querySelector('.tab-label');
       if (labelSpan) {
         labelSpan.textContent = newPeriod.label;
@@ -649,30 +620,25 @@ export const TimePeriodSelector = (options = {}) => {
   function handlePredefinedPeriodSelection(period) {
     try {
       const newPeriod = period.getValue();
-
-      // Validate the period
       if (!validateTimePeriod(newPeriod)) {
         showValidationError('Invalid time period selected');
         return;
       }
 
-      // Check if the selected period is the same as current period
+      // Re-selecting the active period must not fire another onChange
       if (isSamePeriod(currentPeriod, newPeriod)) {
-        // Same period selected, just ensure UI is correct but don't trigger change
         setActiveButton(periodButtons.get(period.key));
         hideCustomRangeSelector();
         return;
       }
 
-      // Update state
       currentPeriod = newPeriod;
 
-      // Update UI
       const button = periodButtons.get(period.key);
       setActiveButton(button);
       hideCustomRangeSelector();
 
-      // Update button label if it's a navigatable period (Last Month, Quarter, or This Year)
+      // Navigatable buttons display the specific period they moved to
       if (
         period.key === 'lastMonth' ||
         period.key === 'quarter' ||
@@ -684,7 +650,6 @@ export const TimePeriodSelector = (options = {}) => {
         }
       }
 
-      // Notify parent component
       if (onChange) {
         onChange(currentPeriod);
       }
@@ -701,7 +666,7 @@ export const TimePeriodSelector = (options = {}) => {
     setActiveButton(periodButtons.get('custom'));
     showCustomRangeSelector();
 
-    // Initialize with current period dates if available
+    // Pre-fill the range with the period currently shown
     if (currentPeriod && currentPeriod.startDate && currentPeriod.endDate) {
       customRangeContainer._startDateInput.setDate(
         dateToISO(currentPeriod.startDate)
@@ -738,7 +703,6 @@ export const TimePeriodSelector = (options = {}) => {
     const applyButton = customRangeContainer._applyButton;
     const validationMessage = customRangeContainer._validationMessage;
 
-    // Clear previous validation state
     validationMessage.style.display = 'none';
     applyButton.disabled = true;
 
@@ -746,7 +710,6 @@ export const TimePeriodSelector = (options = {}) => {
       return; // Wait for both dates to be selected
     }
 
-    // Validate date range
     if (customStartDate > customEndDate) {
       showValidationError('Start date must be before end date');
       return;
@@ -760,7 +723,6 @@ export const TimePeriodSelector = (options = {}) => {
       return;
     }
 
-    // Check for future dates
     const today = new Date();
     today.setHours(23, 59, 59, 999);
     if (customEndDate > today) {
@@ -768,7 +730,6 @@ export const TimePeriodSelector = (options = {}) => {
       return;
     }
 
-    // All validations passed
     applyButton.disabled = false;
     hideValidationError();
   }
@@ -783,7 +744,6 @@ export const TimePeriodSelector = (options = {}) => {
     }
 
     try {
-      // Create custom period object
       const customPeriod = {
         type: 'custom',
         startDate: new Date(customStartDate),
@@ -791,26 +751,20 @@ export const TimePeriodSelector = (options = {}) => {
         label: `${formatDate(dateToISO(customStartDate))} - ${formatDate(dateToISO(customEndDate))}`,
       };
 
-      // Set end date to end of day
+      // Include the entire final day in the selected range.
       customPeriod.endDate.setHours(23, 59, 59, 999);
 
-      // Validate the custom period
       if (!validateTimePeriod(customPeriod)) {
         showValidationError('Invalid custom date range');
         return;
       }
 
-      // Update state
       currentPeriod = customPeriod;
 
-      // Update button label to show selected range
       const customButton = periodButtons.get('custom');
       customButton.textContent = customPeriod.label;
-
-      // Hide custom range selector
       hideCustomRangeSelector();
 
-      // Notify parent component
       if (onChange) {
         onChange(currentPeriod);
       }
@@ -826,7 +780,6 @@ export const TimePeriodSelector = (options = {}) => {
   function cancelCustomRange() {
     hideCustomRangeSelector();
 
-    // Reset custom button label
     const customButton = periodButtons.get('custom');
     customButton.textContent = 'Custom Range';
 
@@ -840,7 +793,6 @@ export const TimePeriodSelector = (options = {}) => {
       if (previousButton) {
         setActiveButton(previousButton);
       } else {
-        // Default to current month
         handlePredefinedPeriodSelection(periods.find(p => p.key === 'month'));
       }
     }
@@ -852,7 +804,6 @@ export const TimePeriodSelector = (options = {}) => {
   function showCustomRangeSelector() {
     customRangeContainer.style.display = 'flex';
 
-    // Animate in
     customRangeContainer.style.opacity = '0';
     customRangeContainer.style.transform = 'translateY(-10px)';
 
@@ -882,7 +833,6 @@ export const TimePeriodSelector = (options = {}) => {
   function setActiveButton(activeButton) {
     navigationMessage.textContent = '';
     navigationMessage.style.display = 'none';
-    // Reset all buttons
     periodButtons.forEach(button => {
       button.style.background = COLORS.SURFACE;
       button.style.color = COLORS.TEXT_MAIN;
@@ -890,7 +840,6 @@ export const TimePeriodSelector = (options = {}) => {
       button.classList.remove('active');
     });
 
-    // Set active button
     activeButton.style.background = COLORS.PRIMARY;
     activeButton.style.color = 'white';
     activeButton.setAttribute('aria-selected', 'true');
@@ -926,12 +875,10 @@ export const TimePeriodSelector = (options = {}) => {
     const startDate = new Date(period.startDate);
     const endDate = new Date(period.endDate);
 
-    // Check for valid dates
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
       return false;
     }
 
-    // Check date order
     if (startDate > endDate) {
       return false;
     }
@@ -948,7 +895,6 @@ export const TimePeriodSelector = (options = {}) => {
     // No need to update button styles - they're already responsive by design
   }
 
-  // Add responsive listener
   window.addEventListener('resize', updateResponsiveLayout);
 
   // Cleanup function
@@ -962,13 +908,11 @@ export const TimePeriodSelector = (options = {}) => {
     if (validateTimePeriod(period)) {
       currentPeriod = period;
 
-      // Update UI to reflect the new period
       const matchingPeriod = periods.find(p => p.key === period.type);
       if (matchingPeriod) {
         setActiveButton(periodButtons.get(matchingPeriod.key));
       } else {
         // Handle custom monthly periods (like February, etc.)
-        // Check if this is a monthly period that's not the current month
         if (period.type === 'monthly') {
           const now = new Date();
           const currentMonthStart = new Date(
@@ -983,25 +927,20 @@ export const TimePeriodSelector = (options = {}) => {
             periodStart.getFullYear() !== currentMonthStart.getFullYear() ||
             periodStart.getMonth() !== currentMonthStart.getMonth()
           ) {
-            // Calculate month offset from current month
             const yearDiff = periodStart.getFullYear() - now.getFullYear();
             const monthDiff = periodStart.getMonth() - now.getMonth();
             const totalMonthOffset = yearDiff * 12 + monthDiff;
 
-            // Activate the Last Month button
             setActiveButton(periodButtons.get('lastMonth'));
 
-            // Update the Last Month button label
             const lastMonthButton = periodButtons.get('lastMonth');
             const labelSpan = lastMonthButton.querySelector('.tab-label');
             if (labelSpan) {
               labelSpan.textContent = period.label;
             }
 
-            // Update the month offset
             lastMonthButton.dataset.monthOffset = totalMonthOffset.toString();
 
-            // Update arrow visibility
             const rightArrow = lastMonthButton.querySelector('.arrow-right');
             if (rightArrow) {
               updateRightArrowVisibility(
@@ -1012,31 +951,25 @@ export const TimePeriodSelector = (options = {}) => {
             }
           }
         } else if (period.type === 'quarterly') {
-          // Handle custom quarterly periods
           const now = new Date();
           const currentQuarter = Math.floor(now.getMonth() / 3);
           const periodStart = new Date(period.startDate);
           const periodQuarter = Math.floor(periodStart.getMonth() / 3);
 
-          // Calculate quarter offset from current quarter
           const yearDiff = periodStart.getFullYear() - now.getFullYear();
           const quarterDiff = periodQuarter - currentQuarter;
           const totalQuarterOffset = yearDiff * 4 + quarterDiff;
 
-          // Activate the Quarter button
           setActiveButton(periodButtons.get('quarter'));
 
-          // Update the Quarter button label
           const quarterButton = periodButtons.get('quarter');
           const labelSpan = quarterButton.querySelector('.tab-label');
           if (labelSpan) {
             labelSpan.textContent = period.label;
           }
 
-          // Update the quarter offset
           quarterButton.dataset.quarterOffset = totalQuarterOffset.toString();
 
-          // Update arrow visibility
           const rightArrow = quarterButton.querySelector('.arrow-right');
           if (rightArrow) {
             updateRightArrowVisibility(

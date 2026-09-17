@@ -34,7 +34,6 @@ export const DataManagementSection = () => {
   });
   section.appendChild(title);
 
-  // Date Range Container
   const dateRangeContainer = document.createElement('div');
   dateRangeContainer.className = 'mobile-date-range-form';
   Object.assign(dateRangeContainer.style, {
@@ -44,7 +43,6 @@ export const DataManagementSection = () => {
     marginBottom: SPACING.LG,
   });
 
-  // Helper to create date input with label
   const createDateField = (labelText, initialValue, id) => {
     const wrapper = document.createElement('div');
     wrapper.className = 'mobile-date-input-wrapper';
@@ -54,7 +52,6 @@ export const DataManagementSection = () => {
       value: initialValue,
       showLabel: false, // We render our own label above
     });
-    // Override width to fill container
     Object.assign(dateComp.style, {
       width: '100%',
       marginRight: '0',
@@ -111,7 +108,6 @@ export const DataManagementSection = () => {
         return;
       }
 
-      // Generate CSV
       const headers = ['Date', 'Type', 'Category', 'Amount'];
       const rows = transactions.map(t => [
         formatDateForDisplay(t.timestamp),
@@ -163,7 +159,6 @@ export const DataManagementSection = () => {
     variant: 'secondary',
     onClick: async () => {
       try {
-        // Show loading state
         emergencyBtn.disabled = true;
         emergencyBtn.textContent = '⏳ Exporting...';
 
@@ -195,7 +190,6 @@ export const DataManagementSection = () => {
           buttonText: 'OK',
         });
       } finally {
-        // Reset button state
         emergencyBtn.disabled = false;
         emergencyBtn.textContent = '⚠️ Emergency JSON Export';
       }
@@ -215,18 +209,15 @@ export const DataManagementSection = () => {
 
   section.appendChild(emergencyBtn);
 
-  // Add spacing
   const spacing = document.createElement('div');
   spacing.style.marginBottom = SPACING.SM;
   section.appendChild(spacing);
 
-  // Data Integrity Check Button
   const integrityBtn = ButtonComponent({
     text: '🔍 Data Integrity Check',
     variant: 'secondary',
     onClick: async () => {
       try {
-        // Show loading state
         integrityBtn.disabled = true;
         integrityBtn.textContent = '🔍 Checking...';
 
@@ -264,7 +255,6 @@ export const DataManagementSection = () => {
           buttonText: 'OK',
         });
       } finally {
-        // Reset button state
         integrityBtn.disabled = false;
         integrityBtn.textContent = '🔍 Data Integrity Check';
       }
@@ -284,18 +274,15 @@ export const DataManagementSection = () => {
 
   section.appendChild(integrityBtn);
 
-  // Add spacing
   const spacing2 = document.createElement('div');
   spacing2.style.marginBottom = SPACING.SM;
   section.appendChild(spacing2);
 
-  // Data Cleanup Button
   const cleanupBtn = ButtonComponent({
     text: '🔧 Fix Data Issues',
     variant: 'secondary',
     onClick: async () => {
       try {
-        // Show loading state
         cleanupBtn.disabled = true;
         cleanupBtn.textContent = '🔧 Fixing...';
 
@@ -310,7 +297,6 @@ export const DataManagementSection = () => {
             buttonText: 'Great!',
           });
 
-          // Show details in console
           console.group('Data Cleanup Results');
           console.log('Fixed:', result.fixed);
           console.log('Errors:', result.errors);
@@ -333,7 +319,6 @@ export const DataManagementSection = () => {
           buttonText: 'OK',
         });
       } finally {
-        // Reset button state
         cleanupBtn.disabled = false;
         cleanupBtn.textContent = '🔧 Fix Data Issues';
       }
@@ -353,18 +338,15 @@ export const DataManagementSection = () => {
 
   section.appendChild(cleanupBtn);
 
-  // Add spacing
   const spacing3 = document.createElement('div');
   spacing3.style.marginBottom = SPACING.SM;
   section.appendChild(spacing3);
 
-  // Emergency Recovery Button
   const recoveryBtn = ButtonComponent({
     text: '🚨 Emergency Recovery',
     variant: 'secondary',
     onClick: async () => {
       try {
-        // Show loading state
         recoveryBtn.disabled = true;
         recoveryBtn.textContent = '🚨 Recovering...';
 
@@ -379,7 +361,6 @@ export const DataManagementSection = () => {
             buttonText: 'Great!',
           });
 
-          // Show details in console
           console.group('Emergency Recovery Results');
           console.log('Success:', result.success);
           console.log('Data Restored:', result.dataRestored);
@@ -407,7 +388,6 @@ export const DataManagementSection = () => {
           buttonText: 'OK',
         });
       } finally {
-        // Reset button state
         recoveryBtn.disabled = false;
         recoveryBtn.textContent = '🚨 Emergency Recovery';
       }
@@ -427,18 +407,15 @@ export const DataManagementSection = () => {
 
   section.appendChild(recoveryBtn);
 
-  // Add spacing
   const spacing4 = document.createElement('div');
   spacing4.style.marginBottom = SPACING.SM;
   section.appendChild(spacing4);
 
-  // Restore from Backup Button
   const restoreBtn = ButtonComponent({
     text: '📂 Restore from Backup',
     variant: 'secondary',
     onClick: async () => {
       try {
-        // Show loading state
         restoreBtn.disabled = true;
         restoreBtn.textContent = '📂 Restoring...';
 
@@ -491,7 +468,6 @@ export const DataManagementSection = () => {
           buttonText: 'OK',
         });
       } finally {
-        // Reset button state
         restoreBtn.disabled = false;
         restoreBtn.textContent = '📂 Restore from Backup';
       }

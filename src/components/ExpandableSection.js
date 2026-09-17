@@ -20,7 +20,7 @@ export const ExpandableSection = ({
         expanded = stored === 'true';
       }
     } catch (error) {
-      // Silently ignore localStorage read errors, use default value
+      // Keep the default expanded state when storage is unavailable.
       console.warn(
         `[ExpandableSection] Failed to read localStorage key "${storageKey}":`,
         error
