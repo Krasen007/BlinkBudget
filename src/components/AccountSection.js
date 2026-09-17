@@ -4,6 +4,7 @@
  */
 
 import { ButtonComponent } from './Button.js';
+import { showErrorToast } from '../utils/toast-notifications.js';
 import { AccountService } from '../core/Account/account-service.js';
 import { generateId } from '../utils/id-utils.js';
 import {
@@ -256,7 +257,10 @@ export const AccountSection = () => {
                   });
                 })
                 .catch(importError => {
-                  console.error('Error loading account error dialog:', importError);
+                  console.error(
+                    'Error loading account error dialog:',
+                    importError
+                  );
                   errorText.textContent =
                     'Failed to add account. Please try again.';
                   errorText.style.opacity = '1';
@@ -714,12 +718,11 @@ export const AccountSection = () => {
                 },
               });
             })
-                        .catch(error => {
+            .catch(error => {
               console.error('Error loading ConfirmDialog:', error);
-              AlertDialog({
-                message:
-                  'Unable to open the deletion confirmation dialog. Operation cancelled; no data was changed.',
-              });
+              showErrorToast(
+                'Unable to open the deletion confirmation dialog. Operation cancelled; no data was changed.'
+              );
             });
         });
 

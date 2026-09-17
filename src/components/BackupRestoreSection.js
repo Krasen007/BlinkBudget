@@ -4,6 +4,7 @@
  */
 
 import { ButtonComponent } from './Button.js';
+import { showErrorToast } from '../utils/toast-notifications.js';
 import { SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
 import { BackupService } from '../core/backup-service.js';
 import { SettingsService } from '../core/settings-service.js';
@@ -144,12 +145,11 @@ export const BackupRestoreSection = () => {
             },
           });
         })
-                .catch(error => {
+        .catch(error => {
           console.error('Error loading ConfirmDialog:', error);
-          AlertDialog({
-            message:
-              'Unable to open the restore confirmation dialog. Operation cancelled; no data was changed.',
-          });
+          showErrorToast(
+            'Unable to open the restore confirmation dialog. Operation cancelled; no data was changed.'
+          );
         });
     },
   });

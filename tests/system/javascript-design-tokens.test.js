@@ -7,13 +7,23 @@ import * as constants from '../../src/utils/constants.js';
 const collect = directory =>
   readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
     const path = join(directory, entry.name);
-    return entry.isDirectory() ? collect(path) : path.endsWith('.js') ? [path] : [];
+    return entry.isDirectory()
+      ? collect(path)
+      : path.endsWith('.js')
+        ? [path]
+        : [];
   });
 
 it('defines every statically referenced member of imported design-token objects', () => {
   const names = new Set([
-    'COLORS', 'FONT_SIZES', 'SPACING', 'DIMENSIONS', 'TIMING',
-    'Z_INDEX', 'TOUCH_TARGETS', 'BREAKPOINTS',
+    'COLORS',
+    'FONT_SIZES',
+    'SPACING',
+    'DIMENSIONS',
+    'TIMING',
+    'Z_INDEX',
+    'TOUCH_TARGETS',
+    'BREAKPOINTS',
   ]);
   const linter = new Linter();
   const failures = [];
@@ -30,16 +40,31 @@ it('defines every statically referenced member of imported design-token objects'
                   ImportDeclaration(node) {
                     if (!node.source.value.endsWith('/constants.js')) return;
                     for (const specifier of node.specifiers) {
-                      if (specifier.type === 'ImportSpecifier' && names.has(specifier.imported.name)) {
-                        imports.set(specifier.local.name, specifier.imported.name);
+                      if (
+                        specifier.type === 'ImportSpecifier' &&
+                        names.has(specifier.imported.name)
+                      ) {
+                        imports.set(
+                          specifier.local.name,
+                          specifier.imported.name
+                        );
                       }
                     }
                   },
                   MemberExpression(node) {
                     const name = imports.get(node.object.name);
-                    const key = node.computed ? node.property.value : node.property.name;
-                    if (name && typeof key === 'string' && !Object.hasOwn(constants[name], key)) {
-                      context.report({ node, message: `Undefined token ${name}.${key}` });
+                    const key = node.computed
+                      ? node.property.value
+                      : node.property.name;
+                    if (
+                      name &&
+                      typeof key === 'string' &&
+                      !Object.hasOwn(constants[name], key)
+                    ) {
+                      context.report({
+                        node,
+                        message: `Undefined token ${name}.${key}`,
+                      });
                     }
                   },
                 };
@@ -50,7 +75,9 @@ it('defines every statically referenced member of imported design-token objects'
       },
       rules: { 'contract/tokens': 'error' },
     });
-    failures.push(...messages.map(message => `${file}:${message.line}: ${message.message}`));
+    failures.push(
+      ...messages.map(message => `${file}:${message.line}: ${message.message}`)
+    );
   }
   expect(failures).toEqual([]);
 });

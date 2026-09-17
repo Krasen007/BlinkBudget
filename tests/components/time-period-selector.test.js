@@ -73,7 +73,9 @@ describe('TimePeriodSelector period navigation', () => {
         container.querySelector('.custom-range-selector').style.display
       ).toBe('none');
       expect(button.classList.contains('active')).toBe(false);
-      expect(findTab(container, 'month').classList.contains('active')).toBe(true);
+      expect(findTab(container, 'month').classList.contains('active')).toBe(
+        true
+      );
       expect(container.getCurrentPeriod().label).toBe(label);
       expect(log).toHaveBeenCalledWith(`Error navigating to ${unit}:`, failure);
 

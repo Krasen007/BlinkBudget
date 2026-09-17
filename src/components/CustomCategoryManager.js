@@ -830,7 +830,7 @@ export const CustomCategoryManager = ({
           },
         });
       })
-            .catch(error => {
+      .catch(error => {
         console.error('Error loading ConfirmDialog:', error);
         showErrorToast(
           'Unable to open the deletion confirmation dialog. Operation cancelled; no data was changed.'

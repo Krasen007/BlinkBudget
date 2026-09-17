@@ -20,7 +20,9 @@ const button = (root, text) =>
   [...root.querySelectorAll('button')].find(el => el.textContent === text);
 
 afterEach(() => {
-  document.querySelectorAll('.mobile-modal-overlay').forEach(el => el.closeModal());
+  document
+    .querySelectorAll('.mobile-modal-overlay')
+    .forEach(el => el.closeModal());
   document.body.replaceChildren();
   delete navigator.clipboard;
   vi.restoreAllMocks();
@@ -55,11 +57,15 @@ it('opens read-only details and reports copy success and failure without changin
   expect(writeText).not.toHaveBeenCalled();
 
   button(report, 'Copy Report').click();
-  await vi.waitFor(() => expect(report.textContent).toContain('Report copied.'));
+  await vi.waitFor(() =>
+    expect(report.textContent).toContain('Report copied.')
+  );
   expect(JSON.parse(writeText.mock.calls[0][0])).toEqual(result);
   writeText.mockRejectedValueOnce(new Error('Permission denied'));
   button(report, 'Copy Report').click();
-  await vi.waitFor(() => expect(report.textContent).toContain('Unable to copy report'));
+  await vi.waitFor(() =>
+    expect(report.textContent).toContain('Unable to copy report')
+  );
   expect(button(report, 'Copy Report').disabled).toBe(false);
   expect(button(section, '🔍 Data Integrity Check').disabled).toBe(false);
   expect(JSON.stringify(result)).toBe(original);
