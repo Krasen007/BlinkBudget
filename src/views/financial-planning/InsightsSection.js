@@ -21,6 +21,7 @@ import { InsightsGenerator } from '../../core/insights-generator.js';
 import { InflationTrends } from '../../components/InflationTrends.js';
 import { createNetBalanceChart } from '../../components/NetBalanceChart.js';
 import { ProgressiveEmptyState } from '../../components/ProgressiveEmptyState.js';
+import { showChartFallback } from '../../components/ChartRenderer.js';
 
 /**
  * Helper function to get transaction amount with consistent refund handling
@@ -154,9 +155,25 @@ function createTopMoversSection(
         { title: 'Top Movers' }
       )
       .then(chart => {
-        if (chart) activeCharts.set('insights-top-movers', chart);
+        if (chart) {
+          activeCharts.set('insights-top-movers', chart);
+        } else {
+          showChartFallback(
+            topChartDiv,
+            'Unable to display the top movers chart. Please try refreshing this section.'
+          );
+        }
       })
-      .catch(err => console.error('Top movers chart error', err));
+      .catch(error => {
+        console.error(
+          '[InsightsSection] Failed to create top movers chart:',
+          error
+        );
+        showChartFallback(
+          topChartDiv,
+          'Unable to display the top movers chart. Please try refreshing this section.'
+        );
+      });
   }
 
   // Header with title and navigation

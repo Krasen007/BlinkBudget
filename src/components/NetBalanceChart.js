@@ -359,12 +359,12 @@ export async function createNetBalanceChart() {
     section._chart = chart;
   } catch (error) {
     console.error('[NetBalanceChart] Failed to create chart:', error);
-    const errorMsg = document.createElement('div');
-    errorMsg.style.textAlign = 'center';
-    errorMsg.style.padding = SPACING.MD;
-    errorMsg.style.color = COLORS.ERROR;
-    errorMsg.textContent = 'Unable to render net balance chart.';
-    section.appendChild(errorMsg);
+    const fallback = document.createElement('div');
+    fallback.className = 'chart-fallback';
+    fallback.setAttribute('role', 'status');
+    fallback.textContent =
+      'Unable to render net balance chart. Please try refreshing this section.';
+    chartDiv.replaceChildren(fallback);
   }
 
   return section;

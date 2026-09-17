@@ -981,3 +981,17 @@
   background: var(--color-text-surface);
   color: var(--color-text-main);
 }
+
+/* Chart failure fallback (C05) — shown when a chart cannot be constructed */
+.chart-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 120px;
+  padding: var(--spacing-md);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}

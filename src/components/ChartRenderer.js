@@ -16,6 +16,25 @@ import {
   createThemedChartOptions,
 } from '../core/chart-config.js';
 
+/**
+ * Replace a chart container's contents with a visible, user-facing fallback.
+ * Used when a chart cannot be loaded or constructed so users never see a
+ * silently blank chart area. Presentation-only: no data is modified.
+ * @param {HTMLElement} container - Element that held (or will hold) the canvas
+ * @param {string} [message] - Optional custom message
+ */
+export function showChartFallback(
+  container,
+  message = 'Unable to load chart. Please try refreshing this section.'
+) {
+  if (!container) return;
+  const fallback = document.createElement('div');
+  fallback.className = 'chart-fallback';
+  fallback.setAttribute('role', 'status');
+  fallback.textContent = message;
+  container.replaceChildren(fallback);
+}
+
 export class ChartRenderer {
   constructor() {
     this.activeCharts = new Map(); // Track active chart instances for cleanup
@@ -128,8 +147,8 @@ export class ChartRenderer {
       this.activeCharts.set(canvasElement.id, chart);
       return chart;
     } catch (error) {
-      console.error('Failed to create chart:', error.message);
-      return null;
+      console.error('[ChartRenderer] Failed to create pie chart:', error);
+      throw error;
     }
   }
 
@@ -209,8 +228,8 @@ export class ChartRenderer {
       this.activeCharts.set(canvasElement.id, chart);
       return chart;
     } catch (error) {
-      console.error('Failed to create chart:', error.message);
-      return null;
+      console.error('[ChartRenderer] Failed to create bar chart:', error);
+      throw error;
     }
   }
 
@@ -320,8 +339,8 @@ export class ChartRenderer {
       this.activeCharts.set(canvasElement.id, chart);
       return chart;
     } catch (error) {
-      console.error('Failed to create chart:', error.message);
-      return null;
+      console.error('[ChartRenderer] Failed to create line chart:', error);
+      throw error;
     }
   }
 
