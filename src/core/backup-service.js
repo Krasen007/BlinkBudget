@@ -289,18 +289,23 @@ export const BackupService = {
 
   /**
    * Collect all user data into export sections.
+   * @returns {Object} Export sections plus a `warnings` list naming any
+   * section that fell back to a default (currently only budgets).
    */
   _collectExportData() {
     const wrap = items => ({
       count: Array.isArray(items) ? items.length : 0,
       items: Array.isArray(items) ? items : [],
     });
+    const warnings = [];
 
     let budgets;
     try {
       budgets = BudgetService.getAll();
-    } catch {
+    } catch (error) {
+      console.warn('[Backup] budgets unavailable for export:', error);
       budgets = [];
+      warnings.push('budgets');
     }
 
     return {
@@ -314,6 +319,7 @@ export const BackupService = {
           : []
       ),
       settings: SettingsService.getAllSettings() || {},
+      warnings,
     };
   },
 
@@ -387,9 +393,13 @@ export const BackupService = {
 
     try {
       const data = this._collectExportData();
-      const integrity = this._generateIntegrityChecksums(data);
+      const { warnings = [], ...sections } = data;
+      const integrity = this._generateIntegrityChecksums(sections);
       const dataCount =
-        EXPORT_SECTIONS.reduce((sum, s) => sum + (data[s]?.count || 0), 0) || 0;
+        EXPORT_SECTIONS.reduce(
+          (sum, s) => sum + (sections[s]?.count || 0),
+          0
+        ) || 0;
 
       const payload = {
         meta: {
@@ -398,14 +408,16 @@ export const BackupService = {
           createdAt: new Date().toISOString(),
           reason,
           dataCount,
+          partial: warnings.length > 0,
+          warnings,
         },
-        data,
+        data: sections,
         integrity,
       };
 
       const size =
         format === 'csv'
-          ? this._downloadFile(this._convertToCSV(data), 'csv')
+          ? this._downloadFile(this._convertToCSV(sections), 'csv')
           : this._downloadFile(payload, 'json');
 
       return {
@@ -415,6 +427,8 @@ export const BackupService = {
         format,
         dataCount,
         downloadUrl: null,
+        partial: warnings.length > 0,
+        warnings,
       };
     } catch (error) {
       console.error('[Backup] Emergency export failed:', error);

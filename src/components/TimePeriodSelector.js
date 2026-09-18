@@ -594,6 +594,13 @@ export const TimePeriodSelector = (options = {}) => {
         return;
       }
 
+      // Notify first: if the consumer rejects the navigation, keep the
+      // previous period, label, offset, and active button untouched so an
+      // error never leaves the selector showing a period nobody owns.
+      if (onChange) {
+        onChange(newPeriod, { isNavigation: true });
+      }
+
       currentPeriod = newPeriod;
 
       setActiveButton(button);
@@ -605,9 +612,6 @@ export const TimePeriodSelector = (options = {}) => {
       }
 
       // Notify parent component but with a flag to prevent full recreation
-      if (onChange) {
-        onChange(currentPeriod, { isNavigation: true });
-      }
     } catch (error) {
       console.error(`Error navigating to ${unitLabel}:`, error);
       showNavigationError(`Error navigating to ${unitLabel}`);

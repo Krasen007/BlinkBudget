@@ -230,7 +230,8 @@ const InsightsGenerator = {
           });
         }
       });
-    } catch {
+    } catch (error) {
+      console.warn('[InsightsGenerator] Budget insights failed:', error);
       // Budget insights are additive; never fail insight generation
     }
 

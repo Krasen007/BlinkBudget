@@ -19,26 +19,55 @@ export const AccountService = {
   getAccounts() {
     const data = localStorage.getItem(ACCOUNTS_KEY);
     if (!data) {
-      // Initialize default account if none exist
-      const defaultAccount = {
-        id: DEFAULTS.ACCOUNT_ID,
-        name: DEFAULTS.ACCOUNT_NAME,
-        type: DEFAULTS.ACCOUNT_TYPE,
-        isDefault: true,
-        timestamp: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      localStorage.setItem(ACCOUNTS_KEY, JSON.stringify([defaultAccount]));
-      return [defaultAccount];
+      return this._seedDefaultAccount();
     }
 
     try {
       const accounts = safeJsonParse(data);
-      return this._cleanAccounts(accounts);
+      // safeJsonParse returns null on corrupt JSON instead of throwing —
+      // a bare `accounts.length` read below would TypeError, so reseed here.
+      if (!Array.isArray(accounts)) {
+        throw new Error(
+          '[AccountService] Accounts data is not an array; reseeding default.'
+        );
+      }
+      const cleaned = this._cleanAccounts(accounts);
+      // Cleaning can legitimately empty the list (all duplicates); never
+      // hand an empty array upward — downstream `.id` reads would throw.
+      if (cleaned.length === 0) {
+        return this._seedDefaultAccount();
+      }
+      return cleaned;
     } catch (error) {
       console.error('[AccountService] Failed to parse accounts data:', error);
-      return [];
+      return this._seedDefaultAccount();
     }
+  },
+
+  /**
+   * Seed and persist the default account, returning it as a list.
+   * Single funnel so every recovery path produces the identical shape.
+   * @returns {Array} List containing the default account
+   */
+  _seedDefaultAccount() {
+    const defaultAccount = this._buildDefaultAccount();
+    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify([defaultAccount]));
+    return [defaultAccount];
+  },
+
+  /**
+   * Build a fresh default account object.
+   * @returns {Object} Default account
+   */
+  _buildDefaultAccount() {
+    return {
+      id: DEFAULTS.ACCOUNT_ID,
+      name: DEFAULTS.ACCOUNT_NAME,
+      type: DEFAULTS.ACCOUNT_TYPE,
+      isDefault: true,
+      timestamp: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
   },
 
   /**
@@ -119,7 +148,13 @@ export const AccountService = {
    */
   getDefaultAccount() {
     const accounts = this.getAccounts();
-    return accounts.find(a => a.isDefault) || accounts[0];
+    // getAccounts() now guarantees a non-empty list, but keep the fallback
+    // so a future refactor can never reintroduce the `.id`-on-undefined crash.
+    return (
+      accounts.find(a => a.isDefault) ||
+      accounts[0] ||
+      this._seedDefaultAccount()[0]
+    );
   },
 
   /**
@@ -206,15 +241,7 @@ export const AccountService = {
 
     // Ensure at least one account exists
     if (cleanedAccounts.length === 0) {
-      const defaultAccount = {
-        id: DEFAULTS.ACCOUNT_ID,
-        name: DEFAULTS.ACCOUNT_NAME,
-        type: DEFAULTS.ACCOUNT_TYPE,
-        isDefault: true,
-        timestamp: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      cleanedAccounts.push(defaultAccount);
+      cleanedAccounts.push(this._buildDefaultAccount());
     }
 
     // Ensure only one default account
