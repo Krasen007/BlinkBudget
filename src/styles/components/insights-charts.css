@@ -1,0 +1,521 @@
+/**
+ * Insights Charts Component Styles
+ *
+ * Financial Planning → Insights dashboard. Every rule is built from the shared
+ * BlinkBudget design tokens (tokens.css) and the global patterns from ui.css
+ * (.card look, .view-select look, .chart-fallback) so these cards are visually
+ * identical to the rest of the app:
+ *
+ * - Summary KPI bar (Net Worth, Income, Expense)
+ * - Expense Donut card with center total and paginated tag list
+ * - Trend card with diverging Income vs Expense bars and Net line
+ * - Timeline card with month / year cumulative spending comparison
+ * - Top Movers and Daily Expenses detail cards (insights-movers-timeline.js)
+ *
+ * Layout rules:
+ * - Fluid by default: the summary bar goes 1 → 3 columns, every chart stacks
+ *   full width (the app view caps at 600px, so 2-up charts would shrink to
+ *   ~290px and break readability on phones and desktop alike).
+ * - Canvas wrappers use clamp()-based heights so charts keep a readable
+ *   aspect ratio on any viewport without ever exceeding the app width.
+ */
+
+/* Summary KPI bar */
+
+.insights-summary-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+@media --sm {
+  .insights-summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media --md {
+  .insights-summary-grid {
+    gap: var(--spacing-md);
+  }
+}
+
+.insights-stat-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  min-height: var(--touch-target-min);
+  transition: none; /* Blazing fast */
+}
+
+.insights-stat-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  min-width: 0;
+}
+
+.insights-stat-icon {
+  font-size: var(--font-size-base);
+  line-height: 1;
+}
+
+.insights-stat-label {
+  overflow: hidden;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.insights-stat-value {
+  overflow-wrap: anywhere;
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-text-main);
+  font-variant-numeric: tabular-nums;
+}
+
+.insights-stat-value.value-networth {
+  color: var(--color-success);
+}
+
+.insights-stat-value.value-income {
+  color: var(--color-success);
+}
+
+.insights-stat-value.value-expense {
+  color: var(--color-error);
+}
+
+/* Charts grid — single column matches the app width (view-container caps at
+   600px). Two side-by-side charts inside 600px would each shrink to ~290px
+   and become unreadable, especially on phones, so every chart stacks full
+   width just like the rest of the app. */
+
+.insights-charts-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Insights card shell — the shared .card pattern plus the insights layout.
+   Inherits .card for background / border / radius / shadow; this rule only
+   adds the vertical stacking the charts need. */
+
+.insights-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.insights-card:focus-within {
+  border-color: var(--color-border-strong);
+}
+
+.insights-card-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.insights-card-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.insights-card-title {
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--color-text-main);
+  text-transform: uppercase;
+  text-overflow: ellipsis;
+}
+
+.insights-card-subtitle {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.insights-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-left: auto;
+}
+
+/* Month navigation group inside a card header */
+
+.insights-nav-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+/* Compact select — same construction as the global .view-select */
+
+.insights-select {
+  min-height: var(--touch-target-min);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-main);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+  max-width: 100%;
+}
+
+.insights-select:hover {
+  border-color: var(--color-border-strong);
+}
+
+.insights-select:focus-visible {
+  border-color: var(--color-primary);
+  outline: 2px solid var(--focus-color);
+  outline-offset: 2px;
+}
+
+/* Icon button (chart export) */
+
+.insights-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  padding: 0;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.insights-icon-btn:hover {
+  color: var(--color-text-main);
+  background: var(--color-surface-hover);
+}
+
+.insights-icon-btn:focus-visible {
+  outline: 2px solid var(--focus-color);
+  outline-offset: 2px;
+}
+
+/* Month navigation button (shared by the month-based insights charts) */
+
+.insights-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  min-height: var(--touch-target-min);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-main);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.insights-nav-btn:hover:not(:disabled) {
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-strong);
+}
+
+.insights-nav-btn:focus-visible {
+  outline: 2px solid var(--focus-color);
+  outline-offset: 2px;
+}
+
+.insights-nav-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Chart areas — always 100% of the card width, never wider than the app.
+   Height is fluid via clamp(): shorter on phones, taller on desktop, so the
+   canvas keeps a readable aspect ratio at every app width. */
+
+.insights-chart-area {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  height: clamp(200px, 52vw, 320px);
+  overflow: hidden;
+}
+
+/* Short charts (Top Movers bars, Daily Expenses preview) */
+
+.insights-chart-area--compact {
+  height: clamp(180px, 44vw, 230px);
+}
+
+.insights-chart-area canvas {
+  width: 100% !important;
+  max-width: 100%;
+  height: 100% !important;
+}
+
+/* Donut chart & center total */
+
+.donut-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  height: clamp(190px, 46vw, 240px);
+  margin: 0 auto;
+}
+
+.donut-center-total {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  user-select: none;
+}
+
+.donut-center-amount {
+  font-size: clamp(1.05rem, 3.4vw, 1.35rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-text-main);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Empty / no-data state used by every insights chart */
+
+.insights-chart-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  text-align: center;
+}
+
+/* Expense category table (donut drill-down list) */
+
+.expense-tag-table {
+  width: 100%;
+  margin-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-border);
+}
+
+.expense-tag-header {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-xs) var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.expense-tag-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  border-bottom: 1px solid rgb(255 255 255 / 4%);
+  transition: background-color var(--transition-fast);
+}
+
+.expense-tag-row:hover {
+  background: var(--color-surface-hover);
+  border-radius: var(--radius-sm);
+}
+
+/* Placeholder row when the selected period has no expenses */
+
+.expense-tag-row--empty {
+  justify-content: center;
+  color: var(--color-text-muted);
+}
+
+.tag-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  min-width: 0;
+}
+
+.tag-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tag-name {
+  overflow: hidden;
+  font-weight: 500;
+  color: var(--color-text-main);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tag-amount {
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--color-error);
+  font-variant-numeric: tabular-nums;
+}
+
+.expense-tag-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-xs) var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.see-all-btn {
+  padding: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.see-all-btn:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.see-all-btn:focus-visible {
+  outline: 2px solid var(--focus-color);
+  outline-offset: 2px;
+}
+
+/* Card title accents (Trend card: Income vs Expense) */
+
+.trend-title-prefix {
+  color: var(--color-text-main);
+}
+
+.trend-title-income {
+  color: var(--color-success);
+}
+
+.trend-title-vs {
+  font-weight: 400;
+  color: var(--color-text-muted);
+  text-transform: lowercase;
+}
+
+.trend-title-expense {
+  color: var(--color-error);
+}
+
+/* Timeline subtitle doubles as the chart legend (colors match the series) */
+
+.timeline-subtitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin: 0;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
+.timeline-current-period {
+  color: var(--color-error);
+}
+
+.timeline-vs {
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.timeline-prior-period {
+  color: var(--color-text-muted);
+}
+
+/* Detail cards shared with the legacy Top Movers / Daily Expenses sections.
+   These now carry the shared .card class in JS, so this only keeps the
+   section rhythm (vertical margin) and the tighter daily subtitle. */
+
+.insights-top-movers,
+.insights-daily-timeline {
+  margin: var(--spacing-md) 0;
+}
+
+.insights-daily-timeline .insights-card-subtitle {
+  margin-bottom: 0;
+}
+
+/* Very small screens: keep the charts usable edge-to-edge. The actions row
+   wraps under the title instead of squeezing, so selects and nav buttons
+   stay tappable. */
+
+@media (width <= 360px) {
+  .insights-card-actions {
+    gap: var(--spacing-xs);
+    margin-left: 0;
+    width: 100%;
+  }
+}

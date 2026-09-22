@@ -68,6 +68,7 @@ async function loadChartJSModules() {
       Legend,
       // Chart controllers
       PieController,
+      DoughnutController,
       BarController,
       LineController,
       // Fill plugin for area fills
@@ -94,6 +95,7 @@ async function loadChartJSModules() {
 
       // Controllers
       PieController, // For pie charts
+      DoughnutController, // For doughnut charts
       BarController, // For bar charts
       LineController // For line charts
     );
@@ -111,6 +113,7 @@ async function loadChartJSModules() {
       Legend,
       Filler,
       PieController,
+      DoughnutController,
       BarController,
       LineController,
     };

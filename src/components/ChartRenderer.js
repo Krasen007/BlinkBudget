@@ -153,6 +153,103 @@ export class ChartRenderer {
   }
 
   /**
+   * Create a doughnut chart for category breakdowns with center cutout
+   * @param {HTMLCanvasElement} canvasElement - Canvas element to render chart
+   * @param {Object} data - Chart data in Chart.js format
+   * @param {Object} options - Custom chart options
+   * @returns {Promise<Chart>} Chart.js instance
+   */
+  async createDoughnutChart(canvasElement, data, options = {}) {
+    // Destroy any existing chart on this canvas first
+    this.destroyChart(canvasElement.id);
+
+    const { ChartJS } = await this.ensureChartJSLoaded();
+    const chartOptions = createThemedChartOptions('pie', {
+      cutout: options.cutout || '68%',
+      ...options,
+      onHover: (event, activeElements, chart) => {
+        this.handleChartHover(event, activeElements, chart);
+      },
+      onClick: (event, activeElements, chart) => {
+        this.handleChartClick(event, activeElements, chart, 'doughnut');
+      },
+    });
+
+    if (
+      data.datasets &&
+      data.datasets[0] &&
+      !data.datasets[0].backgroundColor
+    ) {
+      const colors = getChartColors(data.labels.length, false, 'solid');
+      data.datasets[0].backgroundColor = colors;
+      data.datasets[0].borderColor = '#ffffff';
+      data.datasets[0].borderWidth = 2;
+    }
+
+    try {
+      const chart = new ChartJS(canvasElement, {
+        type: 'doughnut',
+        data,
+        options: chartOptions,
+      });
+
+      this.addKeyboardNavigation(chart);
+      if (options.title) {
+        this.addChartTitle(canvasElement, options.title);
+      }
+      this.addEntranceAnimation(chart, 'pie');
+
+      this.activeCharts.set(canvasElement.id, chart);
+      return chart;
+    } catch (error) {
+      console.error('[ChartRenderer] Failed to create doughnut chart:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create a mixed chart (diverging bars + line) with custom scales
+   * @param {HTMLCanvasElement} canvasElement - Canvas element to render chart
+   * @param {Object} data - Chart data with per-dataset types ('bar', 'line')
+   * @param {Object} options - Custom chart options
+   * @returns {Promise<Chart>} Chart.js instance
+   */
+  async createMixedChart(canvasElement, data, options = {}) {
+    // Destroy any existing chart on this canvas first
+    this.destroyChart(canvasElement.id);
+
+    const { ChartJS } = await this.ensureChartJSLoaded();
+    const chartOptions = createThemedChartOptions('bar', {
+      ...options,
+      onHover: (event, activeElements, chart) => {
+        this.handleChartHover(event, activeElements, chart);
+      },
+      onClick: (event, activeElements, chart) => {
+        this.handleChartClick(event, activeElements, chart, 'mixed');
+      },
+    });
+
+    try {
+      const chart = new ChartJS(canvasElement, {
+        type: 'bar',
+        data,
+        options: chartOptions,
+      });
+
+      this.addKeyboardNavigation(chart);
+      if (options.title) {
+        this.addChartTitle(canvasElement, options.title);
+      }
+
+      this.activeCharts.set(canvasElement.id, chart);
+      return chart;
+    } catch (error) {
+      console.error('[ChartRenderer] Failed to create mixed chart:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Create a bar chart for comparisons with enhanced BlinkBudget styling
    * @param {HTMLCanvasElement} canvasElement - Canvas element to render chart
    * @param {Object} data - Chart data in Chart.js format
