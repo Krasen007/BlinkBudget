@@ -3,9 +3,10 @@
  *
  * Displays:
  * - Header: "ТЕНДЕНЦИЯ • ДОХОД vs РАЗХОД" with grain selector ("МЕСЕЦ" default / "ГОДИНА") and export button
- * - Diverging Bar Chart with:
- *   - Green bars pointing UP for Income
- *   - Red/coral bars pointing DOWN for Expenses
+ * - Single-column diverging Bar Chart with:
+ *   - Green bar pointing UP for Income and red/coral bar pointing DOWN for
+ *     Expenses sharing the same column per period (stacked on one stack so
+ *     both stay centered on the zero line)
  *   - Cyan line overlay for Net (Income - Expense)
  */
 
@@ -223,6 +224,7 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
           type: 'bar',
           label: 'Доход',
           data: income,
+          stack: 'trend',
           backgroundColor: INSIGHTS_CHART_COLORS.incomeFill,
           borderColor: INSIGHTS_CHART_COLORS.income,
           borderWidth: 1,
@@ -238,6 +240,7 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
           type: 'bar',
           label: 'Разход',
           data: expense.map(v => -v),
+          stack: 'trend',
           backgroundColor: INSIGHTS_CHART_COLORS.expenseFill,
           borderColor: INSIGHTS_CHART_COLORS.expense,
           borderWidth: 1,
@@ -252,6 +255,8 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
       ],
     };
 
+    const baseScales = createInsightsScales();
+
     chartRenderer
       .createMixedChart(canvas, chartData, {
         responsive: true,
@@ -260,7 +265,17 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
           mode: 'index',
           intersect: false,
         },
-        scales: createInsightsScales(),
+        scales: {
+          ...baseScales,
+          x: {
+            ...baseScales.x,
+            stacked: true,
+          },
+          y: {
+            ...baseScales.y,
+            stacked: true,
+          },
+        },
         plugins: {
           legend: {
             display: false, // the styled card title acts as the legend

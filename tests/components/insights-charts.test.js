@@ -284,6 +284,52 @@ describe('Insights Charts Components', () => {
 
       card.cleanup();
     });
+
+    it('stacks income and expenses in the same centered column per period', () => {
+      const mockRenderer = {
+        createMixedChart: vi.fn().mockResolvedValue({}),
+        destroyChart: vi.fn(),
+      };
+
+      const transactions = [
+        {
+          id: 'tx-income',
+          amount: 1000,
+          category: 'Заплата',
+          type: 'income',
+          timestamp: '2026-03-15T10:00:00.000Z',
+        },
+        {
+          id: 'tx-expense',
+          amount: 400,
+          category: 'Храна',
+          type: 'expense',
+          timestamp: '2026-03-16T10:00:00.000Z',
+        },
+      ];
+
+      const card = TrendBarChartCard({
+        transactions,
+        chartRenderer: mockRenderer,
+      });
+
+      const [, chartData, chartOptions] =
+        mockRenderer.createMixedChart.mock.calls[0];
+      const incomeDataset = chartData.datasets.find(d => d.label === 'Доход');
+      const expenseDataset = chartData.datasets.find(
+        d => d.label === 'Разход'
+      );
+
+      // Both bar datasets share one stack so Chart.js draws a single centered
+      // column per period: income up from zero, expenses down from zero.
+      expect(incomeDataset.stack).toBe('trend');
+      expect(expenseDataset.stack).toBe('trend');
+      expect(expenseDataset.data[0]).toBe(-400);
+      expect(chartOptions.scales.x.stacked).toBe(true);
+      expect(chartOptions.scales.y.stacked).toBe(true);
+
+      card.cleanup();
+    });
   });
 
   describe('Timeline YoY Card', () => {
