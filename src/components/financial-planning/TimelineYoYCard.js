@@ -8,7 +8,7 @@
  * - YEAR: year of the selected month vs the previous year, month by month
  *
  * In MONTH grain the card also renders the shared month navigation, so every
- * month-based insights chart (Top Movers, Daily Expenses, Inflation Trends)
+ * month-based insights chart (Top Movers, Inflation Trends)
  * stays in sync when the user browses months.
  */
 

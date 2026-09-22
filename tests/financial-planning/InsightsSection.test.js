@@ -93,7 +93,6 @@ describe('InsightsSection', () => {
       element.querySelector('.timeline-yoy-card .timeline-subtitle')
     ).not.toBeNull();
     expect(element.querySelector('.insights-top-movers')).not.toBeNull();
-    expect(element.querySelector('.insights-daily-timeline')).not.toBeNull();
 
     cleanup();
   });

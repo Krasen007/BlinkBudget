@@ -6,7 +6,7 @@
  * - Expense Donut chart with category breakdown list
  * - Trend Diverging Bar Chart (Income vs Expense with Net line)
  * - Timeline YoY cumulative spending comparison
- * - Top Movers and Daily Expenses timeline
+ * - Top Movers
  * - Personal Inflation Trends
  * - Net Balance Over Time
  */
@@ -23,10 +23,7 @@ import { InsightsSummaryBar } from '../../components/financial-planning/Insights
 import { ExpenseDonutCard } from '../../components/financial-planning/ExpenseDonutCard.js';
 import { TrendBarChartCard } from '../../components/financial-planning/TrendBarChartCard.js';
 import { TimelineYoYCard } from '../../components/financial-planning/TimelineYoYCard.js';
-import {
-  createTopMoversSection,
-  createTimelineSection,
-} from './insights-movers-timeline.js';
+import { createTopMoversSection } from './insights-movers-timeline.js';
 
 /**
  * Insights Section Component
@@ -117,7 +114,7 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
 
   section.appendChild(chartsGrid);
 
-  // 3. Top Movers & Daily Expenses (detailed month drill-down)
+  // 3. Top Movers (detailed month drill-down)
   const { topContainer, renderTopMovers } = createTopMoversSection(
     planningData,
     chartRenderer,
@@ -125,14 +122,6 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
     sharedMonthState
   );
   section.appendChild(topContainer);
-
-  const { timelineDiv, renderTimelineChart } = createTimelineSection(
-    transactions,
-    chartRenderer,
-    activeCharts,
-    sharedMonthState
-  );
-  section.appendChild(timelineDiv);
 
   // 4. Personal Inflation Trends
   const inflationTrendsComponent = InflationTrends(
@@ -151,7 +140,6 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
   // Set up synchronized navigation for month-based sections
   sharedMonthState.onNavigate = () => {
     renderTopMovers();
-    renderTimelineChart();
     timelineYoYCard.render();
     if (inflationTrendsComponent.render) {
       inflationTrendsComponent.render();
