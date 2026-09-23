@@ -2,7 +2,7 @@
  * TrendBarChartCard Component
  *
  * Displays:
- * - Header: "ТЕНДЕНЦИЯ • ДОХОД vs РАЗХОД" with grain selector ("МЕСЕЦ" default / "ГОДИНА") and export button
+ * - Header: "Trend Income vs Expense" with grain selector ("МЕСЕЦ" default / "ГОДИНА") and export button
  * - Single-column diverging Bar Chart with:
  *   - Green bar pointing UP for Income and red/coral bar pointing DOWN for
  *     Expenses sharing the same column per period (stacked on one stack so
@@ -11,6 +11,7 @@
  */
 
 import { formatMetricNumber } from './InsightsSummaryBar.js';
+import { showChartFallback } from '../ChartRenderer.js';
 import {
   INSIGHTS_CHART_COLORS,
   createInsightsScales,
@@ -118,10 +119,10 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
   const title = document.createElement('h3');
   title.className = 'insights-card-title';
   title.innerHTML = `
-    <span class="trend-title-prefix">ТЕНДЕНЦИЯ • </span>
-    <span class="trend-title-income">ДОХОД</span>
+    <span class="trend-title-prefix">Trend </span>
+    <span class="trend-title-income">Income</span>
     <span class="trend-title-vs"> vs </span>
-    <span class="trend-title-expense">РАЗХОД</span>
+    <span class="trend-title-expense">Expense</span>
   `;
   titleGroup.appendChild(title);
   header.appendChild(titleGroup);
@@ -203,7 +204,7 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
         },
         {
           type: 'bar',
-          label: 'Доход',
+          label: 'Income',
           data: income,
           stack: 'trend',
           backgroundColor: INSIGHTS_CHART_COLORS.incomeFill,
@@ -219,7 +220,7 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
         },
         {
           type: 'bar',
-          label: 'Разход',
+          label: 'Expense',
           data: expense.map(v => -v),
           stack: 'trend',
           backgroundColor: INSIGHTS_CHART_COLORS.expenseFill,
@@ -267,11 +268,11 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
               label: context => {
                 const rawVal = context.raw || 0;
                 const absFormatted = formatMetricNumber(Math.abs(rawVal));
-                if (context.dataset.label === 'Доход') {
-                  return ` Доход: + ${absFormatted}`;
+                if (context.dataset.label === 'Income') {
+                  return ` Income: + ${absFormatted}`;
                 }
-                if (context.dataset.label === 'Разход') {
-                  return ` Разход: - ${absFormatted}`;
+                if (context.dataset.label === 'Expense') {
+                  return ` Expense: - ${absFormatted}`;
                 }
                 const sign = rawVal >= 0 ? '+' : '-';
                 return ` Нетно: ${sign} ${absFormatted}`;

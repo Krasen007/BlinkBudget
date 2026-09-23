@@ -164,7 +164,7 @@ export const ExpenseDonutCard = ({
     listHeader.className = 'expense-tag-header';
     listHeader.innerHTML = `
       <span>TAG</span>
-      <span>РАЗХОД</span>
+      <span>Expense</span>
     `;
     tableContainer.appendChild(listHeader);
 

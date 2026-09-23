@@ -13,6 +13,7 @@
  */
 
 import { INSIGHTS_CHART_COLORS } from './insights-chart-theme.js';
+import { showChartFallback } from '../ChartRenderer.js';
 
 const MONTH_LABELS = [
   'Jan',

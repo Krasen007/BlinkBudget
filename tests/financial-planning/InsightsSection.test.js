@@ -119,7 +119,9 @@ describe('InsightsSection', () => {
       new Map()
     );
 
-    const prevBtn = element.querySelector('.timeline-yoy-card .insights-nav-btn');
+    const prevBtn = element.querySelector(
+      '.timeline-yoy-card .insights-nav-btn'
+    );
     prevBtn.click();
 
     const previousMonthLabel = dateInMonth(-1, 1).toLocaleDateString('en-US', {

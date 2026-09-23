@@ -311,21 +311,25 @@ export async function createCategoryBreakdownChart(
   chartDiv.style.height = DIMENSIONS.CHART_HEIGHT_PIE; // More compact to avoid empty space
   chartDiv.style.marginBottom = SPACING.XS;
 
-  const currentChart = await chartRenderer.createDoughnutChart(canvas, chartData, {
-    cutout: '60%',
-    responsive: true,
-    maintainAspectRatio: true,
-    aspectRatio: window.innerWidth < 768 ? 1.5 : 2, // Wider aspect ratio for better legend placement
-    layout: {
-      padding: 10,
-    },
-    plugins: {
-      legend: {
-        display: false, // Use custom HTML legend below
+  const currentChart = await chartRenderer.createDoughnutChart(
+    canvas,
+    chartData,
+    {
+      cutout: '60%',
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: window.innerWidth < 768 ? 1.5 : 2, // Wider aspect ratio for better legend placement
+      layout: {
+        padding: 10,
       },
-      tooltip: createCategoryTooltipConfig(detailsContainer),
-    },
-  });
+      plugins: {
+        legend: {
+          display: false, // Use custom HTML legend below
+        },
+        tooltip: createCategoryTooltipConfig(detailsContainer),
+      },
+    }
+  );
 
   const legendContainer = document.createElement('div');
   legendContainer.className = 'chartjs-legend';

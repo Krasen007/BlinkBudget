@@ -129,8 +129,8 @@ describe('Insights Charts Components', () => {
       expect(
         bar.element.querySelector('.insights-stat-label').textContent
       ).toBe('NET WORTH');
-      expect(bar.element.textContent).toContain('ДОХОД');
-      expect(bar.element.textContent).toContain('РАЗХОД');
+      expect(bar.element.textContent).toContain('Income');
+      expect(bar.element.textContent).toContain('Expense');
       expect(bar.element.querySelectorAll('.insights-stat-card').length).toBe(
         3
       );
@@ -256,8 +256,8 @@ describe('Insights Charts Components', () => {
       });
 
       expect(card.element.textContent).toContain('ТЕНДЕНЦИЯ');
-      expect(card.element.textContent).toContain('ДОХОД');
-      expect(card.element.textContent).toContain('РАЗХОД');
+      expect(card.element.textContent).toContain('Income');
+      expect(card.element.textContent).toContain('Expense');
       expect(card.element.querySelector('select')).not.toBeNull();
 
       card.cleanup();
@@ -315,10 +315,8 @@ describe('Insights Charts Components', () => {
 
       const [, chartData, chartOptions] =
         mockRenderer.createMixedChart.mock.calls[0];
-      const incomeDataset = chartData.datasets.find(d => d.label === 'Доход');
-      const expenseDataset = chartData.datasets.find(
-        d => d.label === 'Разход'
-      );
+      const incomeDataset = chartData.datasets.find(d => d.label === 'Income');
+      const expenseDataset = chartData.datasets.find(d => d.label === 'Expense');
 
       // Both bar datasets share one stack so Chart.js draws a single centered
       // column per period: income up from zero, expenses down from zero.

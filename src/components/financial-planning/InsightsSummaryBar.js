@@ -3,8 +3,8 @@
  *
  * Displays the top summary KPI metrics matching BlinkBudget's card design:
  * - NET WORTH (All-time available balance / net worth)
- * - ДОХОД (Income for the active period)
- * - РАЗХОД (Expenses for the active period)
+ * - Income (Income for the active period)
+ * - Expense (Expenses for the active period)
  */
 
 /**
@@ -183,13 +183,13 @@ export const InsightsSummaryBar = ({
       }),
       createStatCard({
         icon: '📈',
-        label: 'ДОХОД',
+        label: 'Income',
         value: incomeFormatted,
         valueClass: 'value-income',
       }),
       createStatCard({
         icon: '📉',
-        label: 'РАЗХОД',
+        label: 'Expense',
         value: expenseFormatted,
         valueClass: 'value-expense',
       })

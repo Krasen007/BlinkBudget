@@ -335,24 +335,36 @@ export const TimePeriodSelector = (options = {}) => {
         if (period.key === 'lastMonth') {
           const currentOffset = parseInt(button.dataset.monthOffset || '-1');
           const newOffset = currentOffset - 1;
-          button.dataset.monthOffset = newOffset.toString();
           const newPeriod = getSpecificMonthPeriod(newOffset);
-          updateRightArrowVisibility(rightArrow, newOffset, period.key);
-          handleNavigation('lastMonth', newPeriod, 'month');
+          handleNavigation('lastMonth', newPeriod, 'month', {
+            offset: currentOffset,
+            nextOffset: newOffset,
+            rightArrow,
+            offsetKey: 'monthOffset',
+            arrowPeriodKey: period.key,
+          });
         } else if (period.key === 'quarter') {
           const currentOffset = parseInt(button.dataset.quarterOffset || '0');
           const newOffset = currentOffset - 1;
-          button.dataset.quarterOffset = newOffset.toString();
           const newPeriod = getSpecificQuarterPeriod(newOffset);
-          updateRightArrowVisibility(rightArrow, newOffset, period.key);
-          handleNavigation('quarter', newPeriod, 'quarter');
+          handleNavigation('quarter', newPeriod, 'quarter', {
+            offset: currentOffset,
+            nextOffset: newOffset,
+            rightArrow,
+            offsetKey: 'quarterOffset',
+            arrowPeriodKey: period.key,
+          });
         } else if (period.key === 'year') {
           const currentOffset = parseInt(button.dataset.yearOffset || '0');
           const newOffset = currentOffset - 1;
-          button.dataset.yearOffset = newOffset.toString();
           const newPeriod = getSpecificYearPeriod(newOffset);
-          updateRightArrowVisibility(rightArrow, newOffset);
-          handleNavigation('year', newPeriod, 'year');
+          handleNavigation('year', newPeriod, 'year', {
+            offset: currentOffset,
+            nextOffset: newOffset,
+            rightArrow,
+            offsetKey: 'yearOffset',
+            arrowPeriodKey: undefined,
+          });
         }
       });
 
@@ -362,24 +374,36 @@ export const TimePeriodSelector = (options = {}) => {
         if (period.key === 'lastMonth') {
           const currentOffset = parseInt(button.dataset.monthOffset || '-1');
           const newOffset = currentOffset + 1;
-          button.dataset.monthOffset = newOffset.toString();
           const newPeriod = getSpecificMonthPeriod(newOffset);
-          updateRightArrowVisibility(rightArrow, newOffset);
-          handleNavigation('lastMonth', newPeriod, 'month');
+          handleNavigation('lastMonth', newPeriod, 'month', {
+            offset: currentOffset,
+            nextOffset: newOffset,
+            rightArrow,
+            offsetKey: 'monthOffset',
+            arrowPeriodKey: undefined,
+          });
         } else if (period.key === 'quarter') {
           const currentOffset = parseInt(button.dataset.quarterOffset || '0');
           const newOffset = currentOffset + 1;
-          button.dataset.quarterOffset = newOffset.toString();
           const newPeriod = getSpecificQuarterPeriod(newOffset);
-          updateRightArrowVisibility(rightArrow, newOffset);
-          handleNavigation('quarter', newPeriod, 'quarter');
+          handleNavigation('quarter', newPeriod, 'quarter', {
+            offset: currentOffset,
+            nextOffset: newOffset,
+            rightArrow,
+            offsetKey: 'quarterOffset',
+            arrowPeriodKey: undefined,
+          });
         } else if (period.key === 'year') {
           const currentOffset = parseInt(button.dataset.yearOffset || '0');
           const newOffset = currentOffset + 1;
-          button.dataset.yearOffset = newOffset.toString();
           const newPeriod = getSpecificYearPeriod(newOffset);
-          updateRightArrowVisibility(rightArrow, newOffset);
-          handleNavigation('year', newPeriod, 'year');
+          handleNavigation('year', newPeriod, 'year', {
+            offset: currentOffset,
+            nextOffset: newOffset,
+            rightArrow,
+            offsetKey: 'yearOffset',
+            arrowPeriodKey: undefined,
+          });
         }
       });
 
@@ -589,26 +613,46 @@ export const TimePeriodSelector = (options = {}) => {
 
   /**
    * Apply month, quarter, or year navigation without recreating the selector.
+   * @param {string} buttonKey - Period button key ('lastMonth' | 'quarter' | 'year')
+   * @param {Object} newPeriod - Target time period
+   * @param {string} unitLabel - Unit name for error messages
+   * @param {Object} [nav] - Pre-mutation navigation state captured by the arrow
+   *   handler before it computes the new offset. Carries the prior `offset`,
+   *   the candidate `nextOffset`, the button's `rightArrow` element, the
+   *   `offsetKey` dataset key, and the `arrowPeriodKey` originally passed to
+   *   `updateRightArrowVisibility` (right-arrow clicks historically omit it).
    */
-  function handleNavigation(buttonKey, newPeriod, unitLabel) {
+  function handleNavigation(buttonKey, newPeriod, unitLabel, nav = null) {
     const button = periodButtons.get(buttonKey);
     // Snapshot the selector state so a rejected navigation (consumer throws
     // or an invalid period) restores the exact previous period, active tab,
     // label, and offset instead of surfacing an error banner with the wrong
     // tab highlighted.
     const previousPeriod = currentPeriod;
-    const previousActiveButton = container.querySelector(
-      '.view-tab.active'
-    );
+    const previousActiveButton = container.querySelector('.view-tab.active');
     const previousLabel = button
       .querySelector('.tab-label')
       ?.textContent?.slice();
     const previousOffset =
+      nav?.offset ??
       button.dataset.monthOffset ??
       button.dataset.quarterOffset ??
       button.dataset.yearOffset;
+    // Restore the offset dataset + right-arrow visibility to a given value,
+    // preserving the exact updateRightArrowVisibility call shape the arrow
+    // handler used on the success path.
+    const restoreOffsetUI = offsetValue => {
+      if (!nav) return;
+      button.dataset[nav.offsetKey] = offsetValue.toString();
+      updateRightArrowVisibility(
+        nav.rightArrow,
+        offsetValue,
+        nav.arrowPeriodKey
+      );
+    };
     try {
       if (!validateTimePeriod(newPeriod)) {
+        if (nav) restoreOffsetUI(nav.offset);
         showNavigationError('Invalid time period selected');
         return;
       }
@@ -621,6 +665,8 @@ export const TimePeriodSelector = (options = {}) => {
       }
 
       currentPeriod = newPeriod;
+
+      if (nav) restoreOffsetUI(nav.nextOffset);
 
       setActiveButton(button);
       hideCustomRangeSelector();
@@ -639,7 +685,9 @@ export const TimePeriodSelector = (options = {}) => {
           labelSpan.textContent = previousLabel;
         }
       }
-      if (previousOffset === undefined) {
+      if (nav) {
+        restoreOffsetUI(nav.offset);
+      } else if (previousOffset === undefined) {
         delete button.dataset.monthOffset;
         delete button.dataset.quarterOffset;
         delete button.dataset.yearOffset;
