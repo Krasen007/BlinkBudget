@@ -67,6 +67,75 @@
   line-height: 1.2;
 }
 
+/* Recurring & Subscriptions card */
+
+.insights-recurring-list {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.recurring-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) 0;
+  border-bottom: 1px solid rgb(255 255 255 / 4%);
+  min-width: 0;
+}
+
+.recurring-row:last-child {
+  border-bottom: none;
+}
+
+.recurring-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.recurring-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.recurring-name {
+  overflow: hidden;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-main);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recurring-meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.recurring-right {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.recurring-amount {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text-main);
+  font-variant-numeric: tabular-nums;
+}
+
+.recurring-next {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
 /* Charts grid — single column matches the app width (view-container caps at
    600px). Two side-by-side charts inside 600px would each shrink to ~290px
    and become unreadable, especially on phones, so every chart stacks full

@@ -95,6 +95,7 @@ describe('InsightsSection', () => {
     ).not.toBeNull();
     expect(element.querySelector('.insights-top-movers')).not.toBeNull();
     expect(element.querySelector('.insights-takeaways')).not.toBeNull();
+    expect(element.querySelector('.insights-recurring')).not.toBeNull();
     expect(
       element.querySelectorAll('.insights-takeaways-list .insight-card').length
     ).toBeGreaterThan(0);

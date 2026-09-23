@@ -8,6 +8,8 @@
  *     Expenses sharing the same column per period (stacked on one stack so
  *     both stay centered on the zero line)
  *   - Cyan line overlay for Net (Income - Expense)
+ *   - Amber dashed line (right axis) for Savings Rate (Net ÷ Income)
+ *     with anomaly flags for statistically unusual expenses in tooltips
  */
 
 import { formatMetricNumber } from '../../utils/financial-planning-helpers.js';
@@ -17,12 +19,14 @@ import {
   createInsightsScales,
   createInsightsTooltipCallbacks,
 } from './insights-chart-theme.js';
+import { AnomalyService } from '../../core/analytics/AnomalyService.js';
 
 /**
  * Aggregate trend data by year or month
  * @param {Array} transactions
  * @param {'year' | 'month'} grain
- * @returns {{ labels: string[], income: number[], expense: number[], net: number[] }}
+ * @returns {{ labels: string[], income: number[], expense: number[],
+ *   net: number[], rate: (number|null)[], periodKeys: string[] }}
  */
 export function aggregateTrendData(transactions = [], grain = 'year') {
   const buckets = new Map();
@@ -34,10 +38,12 @@ export function aggregateTrendData(transactions = [], grain = 'year') {
 
     let key;
     let sortKey;
+    let periodKey;
     if (grain === 'year') {
       const yr = date.getFullYear();
       key = String(yr);
       sortKey = yr;
+      periodKey = String(yr);
     } else {
       const yr = date.getFullYear();
       const mo = date.getMonth();
@@ -57,10 +63,17 @@ export function aggregateTrendData(transactions = [], grain = 'year') {
       ];
       key = `${monthNames[mo]} ${String(yr).slice(-2)}`;
       sortKey = yr * 100 + mo;
+      periodKey = `${yr}-${String(mo + 1).padStart(2, '0')}`;
     }
 
     if (!buckets.has(key)) {
-      buckets.set(key, { sortKey, label: key, income: 0, expense: 0 });
+      buckets.set(key, {
+        sortKey,
+        label: key,
+        periodKey,
+        income: 0,
+        expense: 0,
+      });
     }
 
     const item = buckets.get(key);
@@ -90,8 +103,13 @@ export function aggregateTrendData(transactions = [], grain = 'year') {
   const net = data.map(
     (d, i) => Math.round((income[i] - expense[i]) * 100) / 100
   );
+  // Savings rate per bucket (% of income kept); null when there is no income
+  const rate = data.map((d, i) =>
+    income[i] > 0 ? Math.round((net[i] / income[i]) * 100) : null
+  );
+  const periodKeys = data.map(d => d.periodKey);
 
-  return { labels, income, expense, net };
+  return { labels, income, expense, net, rate, periodKeys };
 }
 
 /**
@@ -172,10 +190,9 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
   }
 
   function render() {
-    const { labels, income, expense, net } = aggregateTrendData(
-      currentTransactions,
-      currentGrain
-    );
+    const { labels, income, expense, net, rate, periodKeys } =
+      aggregateTrendData(currentTransactions, currentGrain);
+    const markers = AnomalyService.buildPeriodMarkers(currentTransactions);
 
     if (!chartRenderer) return;
 
@@ -189,6 +206,21 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
     const chartData = {
       labels,
       datasets: [
+        {
+          type: 'line',
+          label: 'Savings Rate',
+          data: rate,
+          yAxisID: 'rate',
+          borderColor: INSIGHTS_CHART_COLORS.savingsRate,
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          borderDash: [6, 4],
+          tension: 0.3,
+          pointRadius: 2,
+          pointHoverRadius: 5,
+          pointBackgroundColor: INSIGHTS_CHART_COLORS.savingsRate,
+          order: 0,
+        },
         {
           type: 'line',
           label: 'Net',
@@ -257,6 +289,19 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
             ...baseScales.y,
             stacked: true,
           },
+          // Secondary axis for the savings-rate line (percent)
+          rate: {
+            position: 'right',
+            beginAtZero: true,
+            grid: {
+              drawOnChartArea: false,
+            },
+            ticks: {
+              color: INSIGHTS_CHART_COLORS.axisText,
+              maxTicksLimit: 5,
+              callback: value => `${value}%`,
+            },
+          },
         },
         plugins: {
           legend: {
@@ -267,6 +312,9 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
               ...createInsightsTooltipCallbacks(),
               label: context => {
                 const rawVal = context.raw || 0;
+                if (context.dataset.label === 'Savings Rate') {
+                  return ` Savings Rate: ${Math.round(rawVal)}%`;
+                }
                 const absFormatted = formatMetricNumber(Math.abs(rawVal));
                 if (context.dataset.label === 'Income') {
                   return ` Income: + ${absFormatted}`;
@@ -276,6 +324,19 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
                 }
                 const sign = rawVal >= 0 ? '+' : '-';
                 return ` Net: ${sign} ${absFormatted}`;
+              },
+              // Replaces the default "% of total" line (meaningless for time
+              // series) with an anomaly flag for the hovered period
+              afterBody: items => {
+                const index = items && items.length ? items[0].dataIndex : -1;
+                const periodKey = periodKeys[index];
+                if (!periodKey || !markers.count) return '';
+                const count =
+                  currentGrain === 'month'
+                    ? markers.byMonth.get(periodKey)
+                    : markers.byYear.get(periodKey);
+                if (!count) return '';
+                return `⚠ ${count} unusual expense${count > 1 ? 's' : ''}`;
               },
             },
           },

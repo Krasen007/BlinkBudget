@@ -105,6 +105,69 @@ describe('Insights Charts Components', () => {
     });
   });
 
+  describe('Trend savings rate & period keys', () => {
+    const rateTxs = [
+      {
+        id: 'rate-income',
+        amount: 1000,
+        type: 'income',
+        timestamp: '2026-03-05T12:00:00.000Z',
+      },
+      {
+        id: 'rate-exp1',
+        amount: 400,
+        type: 'expense',
+        timestamp: '2026-03-10T12:00:00.000Z',
+      },
+      {
+        id: 'rate-exp2',
+        amount: 200,
+        type: 'expense',
+        timestamp: '2026-04-02T12:00:00.000Z',
+      },
+    ];
+
+    it('computes rate = net ÷ income and YYYY-MM keys for month grain', () => {
+      const { rate, periodKeys } = aggregateTrendData(rateTxs, 'month');
+
+      expect(periodKeys).toEqual(['2026-03', '2026-04']);
+      // March: kept 600 of 1000 → 60%; April: no income → null (gap)
+      expect(rate).toEqual([60, null]);
+    });
+
+    it('computes YYYY keys and a single rate for year grain', () => {
+      const { rate, periodKeys } = aggregateTrendData(rateTxs, 'year');
+
+      expect(periodKeys).toEqual(['2026']);
+      expect(rate).toEqual([40]); // kept 400 of 1000 → 40%
+    });
+  });
+
+  describe('Timeline anomaly tooltip', () => {
+    it('passes an anomaly-aware afterBody callback to the chart', () => {
+      const mockRenderer = {
+        createLineChart: vi.fn().mockResolvedValue({}),
+        destroyChart: vi.fn(),
+      };
+
+      const card = TimelineYoYCard({
+        transactions: mockTransactions,
+        chartRenderer: mockRenderer,
+      });
+
+      expect(mockRenderer.createLineChart).toHaveBeenCalled();
+      const options = mockRenderer.createLineChart.mock.calls[0][2];
+      const { afterBody } = options.plugins.tooltip.callbacks;
+      expect(typeof afterBody).toBe('function');
+      // No unusual transactions in the fixture → empty string keeps the
+      // default "% of total" line hidden
+      expect(afterBody([{ dataIndex: 0 }])).toBe('');
+      expect(afterBody([])).toBe('');
+
+      card.cleanup();
+    });
+  });
+
   describe('Trend Bar Chart Card', () => {
     it('aggregates trend data by year with diverging income, expense, and net line', () => {
       const { labels, income, expense, net } = aggregateTrendData(

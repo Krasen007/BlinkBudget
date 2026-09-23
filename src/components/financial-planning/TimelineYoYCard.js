@@ -14,6 +14,7 @@
 
 import { INSIGHTS_CHART_COLORS } from './insights-chart-theme.js';
 import { showChartFallback } from '../ChartRenderer.js';
+import { AnomalyService } from '../../core/analytics/AnomalyService.js';
 
 const MONTH_LABELS = [
   'Jan',
@@ -414,6 +415,7 @@ export const TimelineYoYCard = ({
     priorData,
     currentLabel,
     priorLabel,
+    anomalyByIndex = null,
   }) {
     if (!chartRenderer) return;
 
@@ -457,6 +459,19 @@ export const TimelineYoYCard = ({
           plugins: {
             legend: {
               display: false, // the styled subtitle acts as the legend
+            },
+            tooltip: {
+              callbacks: {
+                // Flags days/months containing statistically unusual
+                // expenses; returns '' so the default (and meaningless for
+                // cumulative series) "% of total" line stays hidden.
+                afterBody: items => {
+                  if (!anomalyByIndex || !items || !items.length) return '';
+                  const count = anomalyByIndex.get(items[0].dataIndex);
+                  if (!count) return '';
+                  return `⚠ ${count} unusual expense${count > 1 ? 's' : ''}`;
+                },
+              },
             },
           },
         }
@@ -503,6 +518,30 @@ export const TimelineYoYCard = ({
     const referenceDate = getSelectedMonth(sharedMonthState);
     updateNavVisibility();
 
+    // Unusual-expense markers for the hovered period (shared by both grains)
+    const markers = AnomalyService.buildPeriodMarkers(currentTransactions);
+    const buildMonthAnomalyIndex = () => {
+      const index = new Map();
+      for (const [dayKey, count] of markers.byDay) {
+        const [y, m, d] = dayKey.split('-').map(Number);
+        if (
+          y === referenceDate.getFullYear() &&
+          m === referenceDate.getMonth() + 1
+        ) {
+          index.set(d - 1, count);
+        }
+      }
+      return index;
+    };
+    const buildYearAnomalyIndex = year => {
+      const index = new Map();
+      for (const [monthKey, count] of markers.byMonth) {
+        const [y, m] = monthKey.split('-').map(Number);
+        if (y === year) index.set(m - 1, count);
+      }
+      return index;
+    };
+
     if (currentGrain === GRAINS.MONTH) {
       const {
         labels,
@@ -530,6 +569,7 @@ export const TimelineYoYCard = ({
         priorData: priorCumulative,
         currentLabel: targetLabel,
         priorLabel,
+        anomalyByIndex: buildMonthAnomalyIndex(),
       });
       return;
     }
@@ -557,6 +597,7 @@ export const TimelineYoYCard = ({
       priorData: priorCumulative,
       currentLabel: String(targetYear),
       priorLabel: String(priorYear),
+      anomalyByIndex: buildYearAnomalyIndex(targetYear),
     });
   }
 

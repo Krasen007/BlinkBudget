@@ -20,6 +20,7 @@ export const INSIGHTS_CHART_COLORS = {
   expense: 'hsl(0, 85%, 60%)', // --color-error
   expenseFill: `rgba(${COLORS.ERROR_RGB}, 0.65)`,
   net: 'hsl(198, 93%, 60%)', // bright cyan so the Net line pops over the bars
+  savingsRate: 'hsl(43, 96%, 53%)', // amber dashed line (secondary % axis)
   netBalance: 'hsl(150, 100%, 35%)', // monthly net balance line (income hue)
   netBalanceFill: 'hsla(150, 100%, 35%, 0.1)',
   netWorth: 'hsl(250, 84%, 60%)', // cumulative net worth line (unique hue)

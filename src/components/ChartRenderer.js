@@ -342,30 +342,43 @@ export class ChartRenderer {
     this.destroyChart(canvasElement.id);
 
     const { ChartJS } = await this.ensureChartJSLoaded();
-    const chartOptions = createChartOptions({
-      ...options,
-      scales: {
-        y: {
-          beginAtZero: true,
-          grid: {
-            color: 'rgba(0, 0, 0, 0.1)',
-          },
-          ticks: {
-            callback: function (value) {
-              return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'EUR',
-                minimumFractionDigits: 0,
-              }).format(value);
-            },
-          },
+
+    // Merge caller-provided scales/tooltips over the line defaults instead of
+    // dropping them (previously the explicit literals below won every time,
+    // so custom tooltip callbacks and themed scales were silently ignored).
+    const defaultTooltip = defaultChartOptions().plugins.tooltip || {};
+    const userTooltip = options.plugins?.tooltip || {};
+    const userScales = options.scales || {};
+    const defaultScales = {
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: 'rgba(0, 0, 0, 0.1)',
         },
-        x: {
-          grid: {
-            color: 'rgba(0, 0, 0, 0.05)',
+        ticks: {
+          callback: function (value) {
+            return new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: 'EUR',
+              minimumFractionDigits: 0,
+            }).format(value);
           },
         },
       },
+      x: {
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)',
+        },
+      },
+    };
+    const scales = { ...userScales };
+    for (const axis of ['x', 'y']) {
+      scales[axis] = { ...defaultScales[axis], ...(userScales[axis] || {}) };
+    }
+
+    const chartOptions = createChartOptions({
+      ...options,
+      scales,
       elements: {
         line: {
           tension: 0.4, // Smooth curves
@@ -378,8 +391,10 @@ export class ChartRenderer {
       plugins: {
         ...options.plugins,
         tooltip: {
-          ...defaultChartOptions().plugins.tooltip,
+          ...defaultTooltip,
+          ...userTooltip,
           callbacks: {
+            ...(defaultTooltip.callbacks || {}),
             label: context => {
               const label = context.dataset.label || '';
               const value = context.parsed.y;
@@ -390,6 +405,7 @@ export class ChartRenderer {
 
               return `${label}: ${formattedValue}`;
             },
+            ...(userTooltip.callbacks || {}),
           },
         },
       },

@@ -7,6 +7,7 @@
  * - Timeline YoY cumulative spending comparison
  * - Top Movers (biggest month-over-month spending changes)
  * - Personal Inflation Trends
+ * - Recurring & Subscriptions (detected recurring expenses)
  * - Net Balance Over Time
  */
 
@@ -22,6 +23,7 @@ import { TrendBarChartCard } from '../../components/financial-planning/TrendBarC
 import { TimelineYoYCard } from '../../components/financial-planning/TimelineYoYCard.js';
 import { createTopMoversSection } from './insights-movers-timeline.js';
 import { createTakeawaysSection } from './insights-takeaways.js';
+import { createRecurringCard } from './insights-recurring.js';
 
 /**
  * Insights Section Component
@@ -46,7 +48,7 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
 
   section.appendChild(
     createUsageNote(
-      'Key takeaways, spending trends, month-over-month movers, personal inflation, and net balance — everything you need to spot patterns and plan the month ahead.'
+      'Key takeaways, spending trends, month-over-month movers, personal inflation, recurring charges, and net balance — everything you need to spot patterns and plan the month ahead.'
     )
   );
 
@@ -121,7 +123,10 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
   );
   section.appendChild(inflationTrendsComponent.element);
 
-  // 4. Net Balance Over Time chart (async — appended when ready, never after teardown)
+  // 4. Recurring & Subscriptions (static — not month-scoped)
+  section.appendChild(createRecurringCard(planningData));
+
+  // 5. Net Balance Over Time chart (async — appended when ready, never after teardown)
   createNetBalanceChart(transactions, chartRenderer).then(entry => {
     if (!isSectionActive) {
       entry.cleanup();

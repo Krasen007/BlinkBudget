@@ -536,21 +536,23 @@ Object.assign(AnomalyService, {
 
     const rawUnusual = expenseTransactions.filter(t => t.amount > threshold);
 
-    // Final guard: if refunds in the same category bring net spending per
-    // transaction back below the threshold, suppress the alert.
+    // Final guard: if refunds in the same category bring the flagged
+    // expense's net spending back below the threshold, suppress the alert.
+    // (Comparing the category *average* against mean+3σ here could never
+    // pass, which silently disabled all unusual-transaction alerts.)
+    const refundsByCategory = Object.create(null);
+    baselineTransactions
+      .filter(t => t.type === 'refund')
+      .forEach(t => {
+        const cat = t.category || 'Uncategorized';
+        refundsByCategory[cat] =
+          (refundsByCategory[cat] || 0) + Math.abs(t.amount ?? 0);
+      });
+
     const unusualTransactions = rawUnusual.filter(tx => {
-      const sameCategory = baselineTransactions.filter(
-        other => other.category === tx.category
-      );
-      const netExpenseSum = sameCategory.reduce((sum, t) => {
-        const raw = Math.abs(t.amount ?? 0);
-        return sum + (t.type === 'refund' ? -raw : raw);
-      }, 0);
-      const expenseCount = sameCategory.filter(
-        t => t.type === 'expense'
-      ).length;
-      const netAvg = expenseCount > 0 ? netExpenseSum / expenseCount : 0;
-      return netAvg > threshold;
+      const cat = tx.category || 'Uncategorized';
+      const netSpike = Math.abs(tx.amount ?? 0) - (refundsByCategory[cat] || 0);
+      return netSpike > threshold;
     });
 
     return unusualTransactions.map(transaction => ({
@@ -569,5 +571,56 @@ Object.assign(AnomalyService, {
             : 'N/A',
       },
     }));
+  },
+
+  /**
+   * Build per-day / per-month / per-year counts of unusual transactions so
+   * chart tooltips can flag the periods that contain them.
+   * Ghost transactions are excluded before detection.
+   * @param {Array} transactions - Raw transactions
+   * @returns {{ count: number, ids: Set<string>, byDay: Map<string, number>,
+   *   byMonth: Map<string, number>, byYear: Map<string, number> }}
+   */
+  buildPeriodMarkers(transactions = []) {
+    const empty = {
+      count: 0,
+      ids: new Set(),
+      byDay: new Map(),
+      byMonth: new Map(),
+      byYear: new Map(),
+    };
+    if (!Array.isArray(transactions) || transactions.length === 0) {
+      return empty;
+    }
+
+    const unusual = this.detectUnusualTransactions(
+      transactions.filter(t => !t.isGhost)
+    );
+    if (unusual.length === 0) return empty;
+
+    const pad = value => String(value).padStart(2, '0');
+    const markers = {
+      count: 0,
+      ids: new Set(),
+      byDay: new Map(),
+      byMonth: new Map(),
+      byYear: new Map(),
+    };
+    const bump = (map, key) => map.set(key, (map.get(key) || 0) + 1);
+
+    for (const tx of unusual) {
+      const date = new Date(tx.date || tx.timestamp);
+      if (isNaN(date.getTime())) continue;
+      const year = String(date.getFullYear());
+      const month = `${year}-${pad(date.getMonth() + 1)}`;
+      const day = `${month}-${pad(date.getDate())}`;
+      markers.ids.add(tx.id);
+      markers.count += 1;
+      bump(markers.byYear, year);
+      bump(markers.byMonth, month);
+      bump(markers.byDay, day);
+    }
+
+    return markers;
   },
 });
