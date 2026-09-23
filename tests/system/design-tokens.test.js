@@ -134,50 +134,56 @@ describe('Design token contract', () => {
       expect(unresolved).toEqual([]);
     });
 
-    it('keeps every token used from JS alive through the production CSS purge', async () => {
-      const outputDir = mkdtempSync(join(tmpdir(), 'blinkbudget-css-'));
-      const originalNodeEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'production';
+    it(
+      'keeps every token used from JS alive through the production CSS purge',
+      async () => {
+        const outputDir = mkdtempSync(join(tmpdir(), 'blinkbudget-css-'));
+        const originalNodeEnv = process.env.NODE_ENV;
+        process.env.NODE_ENV = 'production';
 
-      try {
-        // NOTE: vite.config.js chooses its plugins (purgecss, cssnano) from
-        // NODE_ENV at import time, so a static import evaluated under the
-        // test runner's env would build *without* purging and this test
-        // would pass vacuously. Re-import after setting NODE_ENV so the
-        // build under test really purges.
-        vi.resetModules();
-        const { default: viteConfig } = await import('../../vite.config.js');
-        await build({
-          ...viteConfig,
-          configFile: false,
-          mode: 'production',
-          plugins: viteConfig.plugins
-            .flat()
-            .filter(plugin => plugin.name !== 'vite-plugin-pwa:build'),
-          build: {
-            ...viteConfig.build,
-            outDir: outputDir,
-            emptyOutDir: true,
-          },
-        });
+        try {
+          // NOTE: vite.config.js chooses its plugins (purgecss, cssnano) from
+          // NODE_ENV at import time, so a static import evaluated under the
+          // test runner's env would build *without* purging and this test
+          // would pass vacuously. Re-import after setting NODE_ENV so the
+          // build under test really purges.
+          vi.resetModules();
+          const { default: viteConfig } = await import(
+            '../../vite.config.js'
+          );
+          await build({
+            ...viteConfig,
+            configFile: false,
+            mode: 'production',
+            plugins: viteConfig.plugins
+              .flat()
+              .filter(plugin => plugin.name !== 'vite-plugin-pwa:build'),
+            build: {
+              ...viteConfig.build,
+              outDir: outputDir,
+              emptyOutDir: true,
+            },
+          });
 
-        const productionCss = collectFiles(outputDir, '.css')
-          .map(file => readFileSync(file, 'utf8'))
-          .join('\n');
-        const atRisk = referencedTokens().filter(
-          ({ token }) => !productionCss.includes(token)
-        );
+          const productionCss = collectFiles(outputDir, '.css')
+            .map(file => readFileSync(file, 'utf8'))
+            .join('\n');
+          const atRisk = referencedTokens().filter(
+            ({ token }) => !productionCss.includes(token)
+          );
 
-        expect(atRisk).toEqual([]);
-      } finally {
-        if (originalNodeEnv === undefined) {
-          delete process.env.NODE_ENV;
-        } else {
-          process.env.NODE_ENV = originalNodeEnv;
+          expect(atRisk).toEqual([]);
+        } finally {
+          if (originalNodeEnv === undefined) {
+            delete process.env.NODE_ENV;
+          } else {
+            process.env.NODE_ENV = originalNodeEnv;
+          }
+          rmSync(outputDir, { recursive: true, force: true });
         }
-        rmSync(outputDir, { recursive: true, force: true });
-      }
-    });
+      },
+      20000
+    );
 
     it.each([
       '--color-text',

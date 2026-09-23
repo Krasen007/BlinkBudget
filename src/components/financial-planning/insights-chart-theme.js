@@ -5,8 +5,8 @@
  * the section (Trend, Timeline, Top Movers) uses the same palette and axis
  * styling.
  *
- * Canvas rendering cannot resolve CSS custom properties — a `var(--token)`
- * string is silently ignored by the 2D context — so the palette below mirrors
+ * Canvas rendering cannot resolve CSS custom properties — a CSS variable
+ * reference string is silently ignored by the 2D context — so the palette below mirrors
  * the BlinkBudget design tokens in src/styles/tokens.css as literal HSL values,
  * exactly like src/core/chart-config.js does for its default scales.
  */

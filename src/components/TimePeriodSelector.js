@@ -410,6 +410,10 @@ export const TimePeriodSelector = (options = {}) => {
     if (period.key === initialKey) {
       button.style.background = COLORS.PRIMARY;
       button.style.color = 'white';
+      button.classList.add('active');
+      button.setAttribute('aria-selected', 'true');
+    } else {
+      button.setAttribute('aria-selected', 'false');
     }
 
     return button;
@@ -588,6 +592,21 @@ export const TimePeriodSelector = (options = {}) => {
    */
   function handleNavigation(buttonKey, newPeriod, unitLabel) {
     const button = periodButtons.get(buttonKey);
+    // Snapshot the selector state so a rejected navigation (consumer throws
+    // or an invalid period) restores the exact previous period, active tab,
+    // label, and offset instead of surfacing an error banner with the wrong
+    // tab highlighted.
+    const previousPeriod = currentPeriod;
+    const previousActiveButton = container.querySelector(
+      '.view-tab.active'
+    );
+    const previousLabel = button
+      .querySelector('.tab-label')
+      ?.textContent?.slice();
+    const previousOffset =
+      button.dataset.monthOffset ??
+      button.dataset.quarterOffset ??
+      button.dataset.yearOffset;
     try {
       if (!validateTimePeriod(newPeriod)) {
         showNavigationError('Invalid time period selected');
@@ -613,6 +632,27 @@ export const TimePeriodSelector = (options = {}) => {
 
       // Notify parent component but with a flag to prevent full recreation
     } catch (error) {
+      currentPeriod = previousPeriod;
+      if (previousLabel !== undefined) {
+        const labelSpan = button.querySelector('.tab-label');
+        if (labelSpan) {
+          labelSpan.textContent = previousLabel;
+        }
+      }
+      if (previousOffset === undefined) {
+        delete button.dataset.monthOffset;
+        delete button.dataset.quarterOffset;
+        delete button.dataset.yearOffset;
+      } else if (buttonKey === 'lastMonth') {
+        button.dataset.monthOffset = previousOffset;
+      } else if (buttonKey === 'quarter') {
+        button.dataset.quarterOffset = previousOffset;
+      } else if (buttonKey === 'year') {
+        button.dataset.yearOffset = previousOffset;
+      }
+      if (previousActiveButton) {
+        setActiveButton(previousActiveButton);
+      }
       console.error(`Error navigating to ${unitLabel}:`, error);
       showNavigationError(`Error navigating to ${unitLabel}`);
     }
