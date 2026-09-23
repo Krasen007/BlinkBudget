@@ -2,8 +2,6 @@
  * Insights Section - Advanced Analytics
  *
  * Displays financial insights:
- * - Top Summary Metrics (Net Worth, Income, Expense)
- * - Expense Donut chart with category breakdown list
  * - Trend Diverging Bar Chart (Income vs Expense with Net line)
  * - Timeline YoY cumulative spending comparison
  * - Top Movers
@@ -19,8 +17,6 @@ import {
 import { InflationTrends } from '../../components/InflationTrends.js';
 import { createNetBalanceChart } from '../../components/NetBalanceChart.js';
 import { ProgressiveEmptyState } from '../../components/ProgressiveEmptyState.js';
-import { InsightsSummaryBar } from '../../components/financial-planning/InsightsSummaryBar.js';
-import { ExpenseDonutCard } from '../../components/financial-planning/ExpenseDonutCard.js';
 import { TrendBarChartCard } from '../../components/financial-planning/TrendBarChartCard.js';
 import { TimelineYoYCard } from '../../components/financial-planning/TimelineYoYCard.js';
 import { createTopMoversSection } from './insights-movers-timeline.js';
@@ -78,26 +74,9 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
 
   const transactions = planningData.transactions;
 
-  // 1. Top Summary KPI Bar (Net Worth, Income, Expense) — opens on this month
-  const summaryBar = InsightsSummaryBar({
-    transactions,
-    initialPeriod: 'this-month',
-  });
-  section.appendChild(summaryBar.element);
-
-  // 2. Main Visual Charts Grid (Expense Donut, Trend, Timeline YoY)
+  // 1. Main Visual Charts Grid (Trend, Timeline YoY)
   const chartsGrid = document.createElement('div');
   chartsGrid.className = 'insights-charts-grid';
-
-  const expenseCard = ExpenseDonutCard({
-    transactions,
-    chartRenderer,
-    initialPeriod: 'this-month',
-    onPeriodChange: period => {
-      summaryBar.update(period);
-    },
-  });
-  chartsGrid.appendChild(expenseCard.element);
 
   const trendCard = TrendBarChartCard({
     transactions,
@@ -114,7 +93,7 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
 
   section.appendChild(chartsGrid);
 
-  // 3. Top Movers (detailed month drill-down)
+  // 2. Top Movers (detailed month drill-down)
   const { topContainer, renderTopMovers } = createTopMoversSection(
     planningData,
     chartRenderer,
@@ -123,7 +102,7 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
   );
   section.appendChild(topContainer);
 
-  // 4. Personal Inflation Trends
+  // 3. Personal Inflation Trends
   const inflationTrendsComponent = InflationTrends(
     planningData,
     chartRenderer,
@@ -132,7 +111,7 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
   );
   section.appendChild(inflationTrendsComponent.element);
 
-  // 5. Net Balance Over Time chart
+  // 4. Net Balance Over Time chart
   createNetBalanceChart().then(netBalanceChart => {
     section.appendChild(netBalanceChart);
   });
@@ -149,7 +128,6 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
   // Cleanup handler
   const cleanup = () => {
     sharedMonthState.onNavigate = null;
-    if (expenseCard.cleanup) expenseCard.cleanup();
     if (trendCard.cleanup) trendCard.cleanup();
     if (timelineYoYCard.cleanup) timelineYoYCard.cleanup();
     if (inflationTrendsComponent.cleanup) {

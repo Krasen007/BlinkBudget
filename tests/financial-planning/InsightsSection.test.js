@@ -74,18 +74,16 @@ describe('InsightsSection', () => {
     vi.clearAllMocks();
   });
 
-  it('renders the KPI bar, chart cards and month drill-down cards', () => {
+  it('renders the chart cards and month drill-down cards without the duplicate summary bar', () => {
     const { element, cleanup } = InsightsSection(
       { transactions: buildTransactions() },
       createChartRenderer(),
       new Map()
     );
 
-    expect(element.querySelector('.insights-summary-grid')).not.toBeNull();
-    expect(element.querySelectorAll('.insights-stat-card').length).toBe(3);
-    expect(
-      element.querySelector('.expense-donut-card .donut-wrapper')
-    ).not.toBeNull();
+    expect(element.querySelector('.insights-summary-grid')).toBeNull();
+    expect(element.querySelectorAll('.insights-stat-card').length).toBe(0);
+    expect(element.querySelector('.expense-donut-card')).toBeNull();
     expect(
       element.querySelector('.trend-bar-card .insights-chart-area')
     ).not.toBeNull();
@@ -105,19 +103,11 @@ describe('InsightsSection', () => {
     );
 
     expect(
-      element.querySelector('.expense-donut-card .insights-select').value
-    ).toBe('this-month');
-    expect(
       element.querySelector('.trend-bar-card .insights-select').value
     ).toBe('month');
     expect(
       element.querySelector('.timeline-yoy-card .insights-select').value
     ).toBe('month');
-
-    // KPI bar counts only the current month expenses
-    expect(
-      element.querySelector('.insights-stat-value.value-expense').textContent
-    ).toBe('- 160.50');
 
     cleanup();
   });
