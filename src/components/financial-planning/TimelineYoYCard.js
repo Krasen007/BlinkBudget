@@ -285,8 +285,8 @@ export const TimelineYoYCard = ({
   grainSelect.className = 'insights-select view-select';
   grainSelect.setAttribute('aria-label', 'Select timeline granularity');
   grainSelect.innerHTML = `
-    <option value="month">МЕСЕЦ</option>
-    <option value="year">ГОДИНА</option>
+    <option value="month">Month</option>
+    <option value="year">Year</option>
   `;
   grainSelect.value = currentGrain;
   grainSelect.addEventListener('change', () => {

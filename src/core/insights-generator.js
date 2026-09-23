@@ -46,6 +46,56 @@ const InsightsGenerator = {
     }));
   },
 
+  // Net expense totals per category for a set of transactions.
+  // Same rules as topMovers: income/transfer/ghost excluded, refunds subtracted.
+  // @returns {Map<string, number>} category name -> net total
+  categoryExpenseTotals(transactions) {
+    const totals = new Map();
+    if (!Array.isArray(transactions)) return totals;
+    for (const tx of transactions) {
+      if (tx.type === 'income' || tx.type === 'transfer' || tx.isGhost)
+        continue;
+      const cat = tx.category || 'Uncategorized';
+      const amt =
+        typeof tx.amount === 'number' ? tx.amount : Number(tx.amount) || 0;
+      const adjusted = tx.type === 'refund' ? -Math.abs(amt) : Math.abs(amt);
+      totals.set(cat, (totals.get(cat) || 0) + adjusted);
+    }
+    return totals;
+  },
+
+  // Biggest category spending changes between two periods ("movers").
+  // Categories are unioned so one that disappeared last month still shows up
+  // as a large negative mover, and a brand new one as a positive mover.
+  // Returns timelineComparison entries sorted by |absoluteChange| desc.
+  categoryMovers(currentTransactions, previousTransactions, n = 6) {
+    const current = this.categoryExpenseTotals(currentTransactions);
+    const previous = this.categoryExpenseTotals(previousTransactions);
+    const categories = new Set([...current.keys(), ...previous.keys()]);
+
+    const currentSeries = [];
+    const previousSeries = [];
+    for (const category of categories) {
+      currentSeries.push({
+        period: category,
+        value: current.get(category) || 0,
+      });
+      previousSeries.push({
+        period: category,
+        value: previous.get(category) || 0,
+      });
+    }
+
+    return (
+      this.timelineComparison(currentSeries, previousSeries)
+        .filter(mover => mover.absoluteChange !== 0)
+        .sort((a, b) => Math.abs(b.absoluteChange) - Math.abs(a.absoluteChange))
+        .slice(0, n)
+        // timelineComparison keys entries by `period` — expose `category` too
+        .map(mover => ({ ...mover, category: mover.period }))
+    );
+  },
+
   // Compare two time series (arrays of {period, value}) and return differences
   // Returns array of {period, current, previous, absoluteChange, percentChange}
   timelineComparison(currentSeries, previousSeries) {

@@ -6,6 +6,16 @@ import { ChartRenderer } from '../../src/components/ChartRenderer.js';
 vi.mock('../../src/core/insights-generator.js', () => ({
   InsightsGenerator: {
     topMovers: vi.fn(() => [{ category: 'Groceries', total: 250 }]),
+    categoryMovers: vi.fn(() => [
+      {
+        category: 'Groceries',
+        current: 0,
+        previous: 250,
+        absoluteChange: -250,
+        percentChange: -100,
+      },
+    ]),
+    generateSpendingInsights: vi.fn(() => []),
   },
 }));
 
@@ -36,7 +46,7 @@ describe('Visible fallbacks when chart construction fails (C05)', () => {
       new Error('Constructor exploded')
     );
 
-    const section = await createNetBalanceChart();
+    const { element: section } = await createNetBalanceChart();
 
     expect(section.querySelector('.chart-fallback')).not.toBeNull();
     expect(section.textContent).toContain('Unable to render net balance chart');

@@ -19,7 +19,6 @@ import {
 } from '../utils/inflation-chart-utils.js';
 import { InsightsGenerator } from '../core/insights-generator.js';
 import { generateId } from '../utils/id-utils.js';
-import { SPACING } from '../utils/constants.js';
 
 export const InflationTrends = (
   data,
@@ -28,15 +27,9 @@ export const InflationTrends = (
   sharedMonthState = null
 ) => {
   const container = document.createElement('div');
-  container.className = 'inflation-trends';
-  // Matches the NetBalanceChart card style exactly (background / radius / padding / margins / gap / border)
-  container.style.background = 'var(--color-surface)';
-  container.style.borderRadius = 'var(--radius-md)';
-  container.style.padding = SPACING.MD;
-  container.style.marginTop = SPACING.MD;
-  container.style.marginBottom = SPACING.MD;
-  container.style.gap = SPACING.MD;
-  container.style.border = '1px solid var(--color-border)';
+  // Shared insights card shell — background / border / radius come from
+  // .card, vertical rhythm from .inflation-trends (inflation-trends.css).
+  container.className = 'card insights-card inflation-trends';
 
   const instanceId = generateId();
 
@@ -50,17 +43,11 @@ export const InflationTrends = (
   // Chart container — top spacing is provided by the card header (like NetBalanceChart)
   const chartContainer = document.createElement('div');
   chartContainer.className = 'inflation-chart';
-  chartContainer.style.position = 'relative';
-  chartContainer.style.width = '100%';
-  chartContainer.style.height = '300px';
-  chartContainer.style.marginTop = '0';
 
   // Create canvas element with unique ID
   const canvasId = `inflation-trends-chart-${instanceId}`;
   const canvas = document.createElement('canvas');
   canvas.id = canvasId;
-  canvas.style.width = '100%';
-  canvas.style.height = '100%';
   chartContainer.appendChild(canvas);
 
   /**
@@ -302,13 +289,10 @@ export const InflationTrends = (
   const title = document.createElement('h3');
   title.textContent = 'Personal Inflation Trends';
   title.className = 'inflation-title';
-  title.style.margin = '0 0 4px 0';
 
   const subtitle = document.createElement('p');
   subtitle.textContent = 'See how your personal spending prices are changing';
-  subtitle.style.margin = '0';
-  subtitle.style.fontSize = '0.8125rem';
-  subtitle.style.color = 'var(--color-text-muted)';
+  subtitle.className = 'inflation-subtitle';
 
   titleWrapper.appendChild(title);
   titleWrapper.appendChild(subtitle);

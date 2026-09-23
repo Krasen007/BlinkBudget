@@ -1,14 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import {
-  calculateSummaryMetrics,
-  filterTransactionsByPeriod,
-  formatMetricNumber,
-  InsightsSummaryBar,
-} from '../../src/components/financial-planning/InsightsSummaryBar.js';
-import {
-  aggregateCategoryExpenses,
-  ExpenseDonutCard,
-} from '../../src/components/financial-planning/ExpenseDonutCard.js';
+import { formatMetricNumber } from '../../src/utils/financial-planning-helpers.js';
 import {
   aggregateTrendData,
   TrendBarChartCard,
@@ -99,67 +90,6 @@ describe('Insights Charts Components', () => {
     });
   });
 
-  describe('Summary Metrics & Filtering', () => {
-    it('calculates net worth, income, and expenses accurately', () => {
-      const stats = calculateSummaryMetrics(mockTransactions, 'this-year');
-      expect(stats.income).toBe(5566.87);
-      expect(stats.expense).toBeCloseTo(4716.87, 2);
-      expect(stats.netWorth).toBeCloseTo(9566.87 - (4716.87 + 3500.0), 2);
-    });
-
-    it('filters transactions by period', () => {
-      const all = filterTransactionsByPeriod(mockTransactions, 'all-time');
-      expect(all.length).toBe(9);
-
-      const lastYear = filterTransactionsByPeriod(
-        mockTransactions,
-        'last-year'
-      );
-      // If current year is 2026, last year is 2025
-      expect(
-        lastYear.every(
-          t =>
-            new Date(t.timestamp).getFullYear() === new Date().getFullYear() - 1
-        )
-      ).toBe(true);
-    });
-
-    it('creates InsightsSummaryBar DOM element with expected labels', () => {
-      const bar = InsightsSummaryBar({ transactions: mockTransactions });
-      expect(
-        bar.element.querySelector('.insights-stat-label').textContent
-      ).toBe('NET WORTH');
-      expect(bar.element.textContent).toContain('Income');
-      expect(bar.element.textContent).toContain('Expense');
-      expect(bar.element.querySelectorAll('.insights-stat-card').length).toBe(
-        3
-      );
-    });
-
-    it('defaults the KPI bar to the current month', () => {
-      const currentMonthTx = [
-        {
-          id: 'tx-now',
-          amount: 50,
-          type: 'expense',
-          timestamp: new Date().toISOString(),
-        },
-        {
-          id: 'tx-old',
-          amount: 500,
-          type: 'expense',
-          timestamp: '2024-01-05T10:00:00.000Z',
-        },
-      ];
-
-      const bar = InsightsSummaryBar({ transactions: currentMonthTx });
-      // Only the transaction from the current month is counted as an expense
-      expect(bar.element.querySelector('.value-expense').textContent).toBe(
-        '- 50.00'
-      );
-    });
-  });
-
   describe('Insights chart theme', () => {
     it('uses canvas-safe colors (no CSS variables) and currency axis formatting', () => {
       Object.values(INSIGHTS_CHART_COLORS).forEach(color => {
@@ -172,59 +102,6 @@ describe('Insights Charts Components', () => {
       expect(scales.y.beginAtZero).toBe(true);
       expect(scales.y.ticks.maxTicksLimit).toBe(5);
       expect(scales.y.ticks.callback(1200)).toBe('€1,200');
-    });
-  });
-
-  describe('Expense Donut Card', () => {
-    it('aggregates expenses by category sorted descending', () => {
-      const thisYearTx = mockTransactions.filter(
-        t => new Date(t.timestamp).getFullYear() === 2026
-      );
-      const categories = aggregateCategoryExpenses(thisYearTx);
-
-      expect(categories[0].name).toBe('Кредит');
-      expect(categories[0].amount).toBe(1191.13);
-      expect(categories[1].name).toBe('Храна');
-      expect(categories[1].amount).toBe(1168.05);
-      expect(categories[2].name).toBe('Други');
-      expect(categories[2].amount).toBe(1090.31);
-      expect(categories[0].color).toBeDefined();
-    });
-
-    it('renders category rows and handles SEE ALL toggle', () => {
-      const mockRenderer = {
-        createDoughnutChart: vi.fn().mockResolvedValue({}),
-        destroyChart: vi.fn(),
-      };
-
-      const card = ExpenseDonutCard({
-        transactions: mockTransactions,
-        chartRenderer: mockRenderer,
-        initialPeriod: 'all-time',
-      });
-
-      expect(
-        card.element.querySelector('.insights-card-title').textContent
-      ).toBe('EXPENSE');
-      expect(card.element.querySelector('.donut-center-amount')).not.toBeNull();
-
-      // Check rows rendered
-      const rows = card.element.querySelectorAll('.expense-tag-row');
-      expect(rows.length).toBe(5); // Default PAGE_SIZE is 5
-
-      const toggleBtn = card.element.querySelector('.see-all-btn');
-      expect(toggleBtn).not.toBeNull();
-      expect(toggleBtn.textContent).toContain('SEE ALL');
-
-      // Click SEE ALL
-      toggleBtn.click();
-      const expandedRows = card.element.querySelectorAll('.expense-tag-row');
-      expect(expandedRows.length).toBeGreaterThan(5);
-      expect(card.element.querySelector('.see-all-btn').textContent).toContain(
-        'SHOW LESS'
-      );
-
-      card.cleanup();
     });
   });
 
@@ -255,7 +132,7 @@ describe('Insights Charts Components', () => {
         chartRenderer: mockRenderer,
       });
 
-      expect(card.element.textContent).toContain('ТЕНДЕНЦИЯ');
+      expect(card.element.textContent).toContain('Trend');
       expect(card.element.textContent).toContain('Income');
       expect(card.element.textContent).toContain('Expense');
       expect(card.element.querySelector('select')).not.toBeNull();
@@ -316,7 +193,9 @@ describe('Insights Charts Components', () => {
       const [, chartData, chartOptions] =
         mockRenderer.createMixedChart.mock.calls[0];
       const incomeDataset = chartData.datasets.find(d => d.label === 'Income');
-      const expenseDataset = chartData.datasets.find(d => d.label === 'Expense');
+      const expenseDataset = chartData.datasets.find(
+        d => d.label === 'Expense'
+      );
 
       // Both bar datasets share one stack so Chart.js draws a single centered
       // column per period: income up from zero, expenses down from zero.

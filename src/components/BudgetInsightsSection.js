@@ -21,7 +21,7 @@ export const InsightsSection = currentData => {
   section.style.padding = SPACING.MD;
 
   const title = document.createElement('h3');
-  title.textContent = 'Financial Insights';
+  title.textContent = 'Spending Insights';
   title.style.margin = `0 0 ${SPACING.XS} 0`;
   title.style.color = COLORS.TEXT_MAIN;
   section.appendChild(title);

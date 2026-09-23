@@ -89,6 +89,9 @@ export const FinancialPlanningView = (params = {}) => {
   let currentSection = params.section || 'overview';
   let isLoading = false;
   let planningData = null;
+  // Cleanup for the active section (e.g. Insights charts) — invoked on every
+  // section switch and on view teardown so chart instances never leak.
+  let activeSectionCleanup = null;
 
   // Initialize calculation engines
   const forecastEngine = new ForecastEngine();
@@ -255,6 +258,10 @@ export const FinancialPlanningView = (params = {}) => {
    * Render the content for the selected section
    */
   async function renderSection(sectionId) {
+    if (typeof activeSectionCleanup === 'function') {
+      activeSectionCleanup();
+      activeSectionCleanup = null;
+    }
     content.innerHTML = '';
 
     // Add section panel attributes
@@ -337,6 +344,7 @@ export const FinancialPlanningView = (params = {}) => {
       activeCharts
     );
     content.appendChild(insightsResult.element);
+    activeSectionCleanup = insightsResult.cleanup;
   }
 
   /**
@@ -584,6 +592,11 @@ export const FinancialPlanningView = (params = {}) => {
   // Cleanup function
   container.cleanup = () => {
     isCancelled = true;
+
+    if (typeof activeSectionCleanup === 'function') {
+      activeSectionCleanup();
+      activeSectionCleanup = null;
+    }
 
     if (backgroundRefreshTimeout) {
       if ('requestIdleCallback' in window) {

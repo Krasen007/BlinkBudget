@@ -2,9 +2,10 @@
  * Insights Section - Advanced Analytics
  *
  * Displays financial insights:
+ * - Key Takeaways (top textual insights for the selected month)
  * - Trend Diverging Bar Chart (Income vs Expense with Net line)
  * - Timeline YoY cumulative spending comparison
- * - Top Movers
+ * - Top Movers (biggest month-over-month spending changes)
  * - Personal Inflation Trends
  * - Net Balance Over Time
  */
@@ -20,6 +21,7 @@ import { ProgressiveEmptyState } from '../../components/ProgressiveEmptyState.js
 import { TrendBarChartCard } from '../../components/financial-planning/TrendBarChartCard.js';
 import { TimelineYoYCard } from '../../components/financial-planning/TimelineYoYCard.js';
 import { createTopMoversSection } from './insights-movers-timeline.js';
+import { createTakeawaysSection } from './insights-takeaways.js';
 
 /**
  * Insights Section Component
@@ -44,7 +46,7 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
 
   section.appendChild(
     createUsageNote(
-      'Insights highlight spending trends, category breakdowns, and timeline comparisons. Use these charts to discover patterns and optimize your budget.'
+      'Key takeaways, spending trends, month-over-month movers, personal inflation, and net balance — everything you need to spot patterns and plan the month ahead.'
     )
   );
 
@@ -73,6 +75,14 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
   }
 
   const transactions = planningData.transactions;
+
+  // Guards the async NetBalanceChart append against section teardown
+  let isSectionActive = true;
+  let netBalanceEntry = null;
+
+  // 0. Key Takeaways — top textual insights for the selected month
+  const takeaways = createTakeawaysSection(planningData, sharedMonthState);
+  section.appendChild(takeaways.element);
 
   // 1. Main Visual Charts Grid (Trend, Timeline YoY)
   const chartsGrid = document.createElement('div');
@@ -111,13 +121,19 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
   );
   section.appendChild(inflationTrendsComponent.element);
 
-  // 4. Net Balance Over Time chart
-  createNetBalanceChart().then(netBalanceChart => {
-    section.appendChild(netBalanceChart);
+  // 4. Net Balance Over Time chart (async — appended when ready, never after teardown)
+  createNetBalanceChart(transactions, chartRenderer).then(entry => {
+    if (!isSectionActive) {
+      entry.cleanup();
+      return;
+    }
+    netBalanceEntry = entry;
+    section.appendChild(entry.element);
   });
 
   // Set up synchronized navigation for month-based sections
   sharedMonthState.onNavigate = () => {
+    takeaways.render();
     renderTopMovers();
     timelineYoYCard.render();
     if (inflationTrendsComponent.render) {
@@ -127,7 +143,12 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
 
   // Cleanup handler
   const cleanup = () => {
+    isSectionActive = false;
     sharedMonthState.onNavigate = null;
+    if (netBalanceEntry) {
+      netBalanceEntry.cleanup();
+      netBalanceEntry = null;
+    }
     if (trendCard.cleanup) trendCard.cleanup();
     if (timelineYoYCard.cleanup) timelineYoYCard.cleanup();
     if (inflationTrendsComponent.cleanup) {

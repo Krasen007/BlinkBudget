@@ -2,7 +2,7 @@
  * TrendBarChartCard Component
  *
  * Displays:
- * - Header: "Trend Income vs Expense" with grain selector ("МЕСЕЦ" default / "ГОДИНА") and export button
+ * - Header: "Trend Income vs Expense" with grain selector ("Month" default / "Year") and export button
  * - Single-column diverging Bar Chart with:
  *   - Green bar pointing UP for Income and red/coral bar pointing DOWN for
  *     Expenses sharing the same column per period (stacked on one stack so
@@ -10,7 +10,7 @@
  *   - Cyan line overlay for Net (Income - Expense)
  */
 
-import { formatMetricNumber } from './InsightsSummaryBar.js';
+import { formatMetricNumber } from '../../utils/financial-planning-helpers.js';
 import { showChartFallback } from '../ChartRenderer.js';
 import {
   INSIGHTS_CHART_COLORS,
@@ -130,14 +130,14 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
   const actions = document.createElement('div');
   actions.className = 'insights-card-actions';
 
-  // Grain Selector — МЕСЕЦ (this month) is the default
+  // Grain Selector — Month (this month) is the default
   // Grain toggle — compact variant of the global .view-select
   const grainSelect = document.createElement('select');
   grainSelect.className = 'insights-select view-select';
   grainSelect.setAttribute('aria-label', 'Select trend grouping grain');
   grainSelect.innerHTML = `
-    <option value="month">МЕСЕЦ</option>
-    <option value="year">ГОДИНА</option>
+    <option value="month">Month</option>
+    <option value="year">Year</option>
   `;
   grainSelect.value = currentGrain;
   grainSelect.addEventListener('change', () => {
@@ -191,7 +191,7 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
       datasets: [
         {
           type: 'line',
-          label: 'Нетно',
+          label: 'Net',
           data: net,
           borderColor: INSIGHTS_CHART_COLORS.net,
           backgroundColor: 'transparent',
@@ -275,7 +275,7 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
                   return ` Expense: - ${absFormatted}`;
                 }
                 const sign = rawVal >= 0 ? '+' : '-';
-                return ` Нетно: ${sign} ${absFormatted}`;
+                return ` Net: ${sign} ${absFormatted}`;
               },
             },
           },

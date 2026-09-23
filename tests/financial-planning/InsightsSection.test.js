@@ -11,7 +11,10 @@ import { InsightsSection } from '../../src/views/financial-planning/InsightsSect
 // NetBalanceChart reads persisted transactions, which are not available in the
 // jsdom test environment — substitute it with a stub element.
 vi.mock('../../src/components/NetBalanceChart.js', () => ({
-  createNetBalanceChart: vi.fn(async () => document.createElement('div')),
+  createNetBalanceChart: vi.fn(async () => ({
+    element: document.createElement('div'),
+    cleanup: vi.fn(),
+  })),
 }));
 
 const now = new Date();
@@ -91,6 +94,13 @@ describe('InsightsSection', () => {
       element.querySelector('.timeline-yoy-card .timeline-subtitle')
     ).not.toBeNull();
     expect(element.querySelector('.insights-top-movers')).not.toBeNull();
+    expect(element.querySelector('.insights-takeaways')).not.toBeNull();
+    expect(
+      element.querySelectorAll('.insights-takeaways-list .insight-card').length
+    ).toBeGreaterThan(0);
+    expect(
+      element.querySelectorAll('.insights-takeaways-list .insight-card').length
+    ).toBeLessThanOrEqual(3);
 
     cleanup();
   });

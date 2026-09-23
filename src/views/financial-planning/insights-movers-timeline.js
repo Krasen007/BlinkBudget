@@ -1,10 +1,18 @@
 /**
- * Top Movers legacy section
+ * Top Movers section
  * Extracted from InsightsSection.js to maintain file size constraints (<500 lines)
+ *
+ * Shows the categories whose spending changed the most vs the previous month
+ * (signed bars: green = spent less, red = spent more).
  */
 
 import { InsightsGenerator } from '../../core/insights-generator.js';
 import { showChartFallback } from '../../components/ChartRenderer.js';
+import { formatMetricNumber } from '../../utils/financial-planning-helpers.js';
+import {
+  INSIGHTS_CHART_COLORS,
+  createInsightsTooltipCallbacks,
+} from '../../components/financial-planning/insights-chart-theme.js';
 
 /**
  * Create top movers analysis
@@ -43,7 +51,12 @@ export function createTopMoversSection(
   function renderTopMovers() {
     const monthOffset = sharedMonthState.offset;
     const monthData = getMonthData(monthOffset);
-    const topMovers = InsightsGenerator.topMovers(monthData.transactions, 6);
+    const previousMonthData = getMonthData(monthOffset - 1);
+    const movers = InsightsGenerator.categoryMovers(
+      monthData.transactions,
+      previousMonthData.transactions,
+      6
+    );
 
     const existingList = topContainer.querySelector('.top-movers-list');
     const existingChart = topContainer.querySelector('.top-movers-chart');
@@ -85,19 +98,68 @@ export function createTopMoversSection(
     const topChartDiv = document.createElement('div');
     topChartDiv.className =
       'top-movers-chart insights-chart-area insights-chart-area--compact';
+    topContainer.appendChild(topChartDiv);
+
+    // Nothing changed between the two months → show a hint instead of a chart
+    if (movers.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'insights-chart-empty';
+      empty.textContent = 'No spending changes recorded for this month.';
+      topChartDiv.appendChild(empty);
+      return;
+    }
+
     const topCanvas = document.createElement('canvas');
     topCanvas.id = 'insights-top-movers-chart';
     topChartDiv.appendChild(topCanvas);
-    topContainer.appendChild(topChartDiv);
 
-    const topLabels = topMovers.map(t => t.category);
-    const topData = topMovers.map(t => Math.abs(t.total));
+    const topLabels = movers.map(mover => mover.category);
+    // Signed deltas: positive = spent more than last month (red),
+    // negative = spent less (green)
+    const topData = movers.map(mover => mover.absoluteChange);
+    const topColors = movers.map(mover =>
+      mover.absoluteChange > 0
+        ? INSIGHTS_CHART_COLORS.expense
+        : INSIGHTS_CHART_COLORS.income
+    );
 
     chartRenderer
-      .createBarChart(topCanvas, {
-        labels: topLabels,
-        datasets: [{ label: 'Amount', data: topData }],
-      })
+      .createBarChart(
+        topCanvas,
+        {
+          labels: topLabels,
+          datasets: [
+            {
+              label: 'Change vs previous month',
+              data: topData,
+              backgroundColor: topColors,
+            },
+          ],
+        },
+        {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                ...createInsightsTooltipCallbacks(),
+                label: context => {
+                  const delta = context.raw || 0;
+                  const mover = movers[context.dataIndex];
+                  const direction = delta >= 0 ? '+' : '-';
+                  const trend = delta >= 0 ? '↑' : '↓';
+                  const pct =
+                    mover && isFinite(mover.percentChange)
+                      ? `${Math.abs(mover.percentChange).toFixed(0)}%`
+                      : 'new';
+                  return ` ${direction} ${formatMetricNumber(delta)} (${trend} ${pct}) vs prev month`;
+                },
+              },
+            },
+          },
+        }
+      )
       .then(chart => {
         if (chart) {
           activeCharts.set('insights-top-movers', chart);
@@ -132,7 +194,7 @@ export function createTopMoversSection(
 
   const topSubtitle = document.createElement('p');
   topSubtitle.className = 'insights-card-subtitle';
-  topSubtitle.textContent = 'Categories with the highest spending this month';
+  topSubtitle.textContent = 'Biggest spending changes vs the previous month';
 
   topTitleWrapper.appendChild(topTitle);
   topTitleWrapper.appendChild(topSubtitle);

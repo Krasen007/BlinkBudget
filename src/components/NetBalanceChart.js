@@ -8,9 +8,14 @@
  * Requirements: 7.5 - Financial insights and visualizations
  */
 
-import { COLORS, SPACING } from '../utils/constants.js';
 import { TransactionService } from '../core/transaction-service.js';
-import { ChartRenderer } from './ChartRenderer.js';
+import { ChartRenderer, showChartFallback } from './ChartRenderer.js';
+import { formatCurrency } from '../utils/financial-planning-helpers.js';
+import {
+  INSIGHTS_CHART_COLORS,
+  createInsightsScales,
+  createInsightsTooltipCallbacks,
+} from './financial-planning/insights-chart-theme.js';
 
 /**
  * Get the start of a month for a given date
@@ -141,61 +146,66 @@ function calculateNetWorth(transactions, endDate) {
 
 /**
  * Create the Net Balance over time chart section
- * Shows last 6 months of net balance (end of month) and net worth (start of month)
- * @returns {Promise<HTMLElement>} The chart section element
+ * Shows the last 5 completed months of net balance (end of month) and net
+ * worth (end of month).
+ * @param {Array} [transactions=null] - Transactions to chart; falls back to
+ *   TransactionService when omitted
+ * @param {Object} [renderer=null] - Chart renderer; falls back to a private one
+ * @returns {Promise<{ element: HTMLElement, cleanup: Function }>}
  */
-export async function createNetBalanceChart() {
+export async function createNetBalanceChart(
+  transactions = null,
+  renderer = null
+) {
   const section = document.createElement('div');
-  section.className = 'chart-section net-balance-chart-section';
+  // Shared insights card shell (background / border / radius from .card)
+  section.className = 'card insights-card net-balance-card';
   section.setAttribute('data-chart-type', 'net-balance');
-  section.style.background = 'var(--color-surface)';
-  section.style.borderRadius = 'var(--radius-md)';
-  section.style.padding = SPACING.MD;
-  section.style.marginTop = SPACING.MD;
-  section.style.marginBottom = SPACING.MD;
-  section.style.gap = SPACING.MD;
-  section.style.border = '1px solid var(--color-border)';
 
-  // Section header
+  const chartRenderer = renderer || new ChartRenderer();
+  let chartInstance = null;
+
+  const cleanup = () => {
+    if (chartInstance) {
+      chartRenderer.destroyChart(chartInstance);
+      chartInstance = null;
+    }
+  };
+
+  // Section header — shared insights card markup
   const header = document.createElement('div');
-  header.style.display = 'flex';
-  header.style.justifyContent = 'space-between';
-  header.style.alignItems = 'center';
-  header.style.marginBottom = SPACING.MD;
+  header.className = 'insights-card-header';
 
   const titleWrapper = document.createElement('div');
+  titleWrapper.className = 'insights-card-title-group';
 
   const title = document.createElement('h3');
+  title.className = 'insights-card-title';
   title.textContent = 'Net Balance Over Time';
-  title.style.margin = '0 0 4px 0';
-  title.style.color = COLORS.TEXT_MAIN;
 
   const subtitle = document.createElement('p');
+  subtitle.className = 'insights-card-subtitle';
   subtitle.textContent =
-    'Last 5 completed months — Net balance earned vs net worth accumulated by month end';
-  subtitle.style.margin = '0';
-  subtitle.style.fontSize = '0.8125rem';
-  subtitle.style.color = COLORS.TEXT_MUTED;
+    'Last 5 completed months — net earned vs net worth accumulated by month end';
 
   titleWrapper.appendChild(title);
   titleWrapper.appendChild(subtitle);
   header.appendChild(titleWrapper);
   section.appendChild(header);
 
-  // Get all transactions
-  const allTransactions = TransactionService.getAll();
+  // Prefer the section's cached transactions; fall back to storage
+  const allTransactions = Array.isArray(transactions)
+    ? transactions
+    : TransactionService.getAll();
 
   if (!allTransactions || allTransactions.length === 0) {
     // Show empty state
-    const emptyState = document.createElement('div');
-    emptyState.style.textAlign = 'center';
-    emptyState.style.padding = SPACING.XL;
-    emptyState.style.color = COLORS.TEXT_MUTED;
-    emptyState.style.fontSize = '0.875rem';
+    const emptyState = document.createElement('p');
+    emptyState.className = 'insights-empty-note';
     emptyState.textContent =
       'Add transactions to see your net balance trend over time.';
     section.appendChild(emptyState);
-    return section;
+    return { element: section, cleanup };
   }
 
   // Generate last 6 months of data
@@ -230,45 +240,34 @@ export async function createNetBalanceChart() {
     months.push(monthDate);
   }
 
-  // Chart container
+  // Chart container — fluid height + canvas sizing from insights-charts.css
   const chartDiv = document.createElement('div');
-  chartDiv.style.position = 'relative';
-  chartDiv.style.width = '100%';
-  chartDiv.style.height = '300px';
+  chartDiv.className = 'insights-chart-area';
 
   const canvas = document.createElement('canvas');
   canvas.id = 'net-balance-chart';
-  canvas.style.width = '100%';
-  canvas.style.height = '100%';
   chartDiv.appendChild(canvas);
   section.appendChild(chartDiv);
 
   // Legend
   const legendContainer = document.createElement('div');
-  legendContainer.style.display = 'flex';
-  legendContainer.style.justifyContent = 'center';
-  legendContainer.style.gap = SPACING.XL;
-  legendContainer.style.marginTop = SPACING.SM;
-  legendContainer.style.flexWrap = 'wrap';
+  legendContainer.className = 'insights-legend';
 
   // Net Balance legend item
   const netBalanceLegend = createLegendItem(
     'Net Balance (End of Month)',
-    'hsl(150, 70%, 45%)'
+    INSIGHTS_CHART_COLORS.netBalance
   );
   legendContainer.appendChild(netBalanceLegend);
 
   // Net Worth legend item
   const netWorthLegend = createLegendItem(
     'Net Worth (End of Month)',
-    'hsl(250, 84%, 60%)'
+    INSIGHTS_CHART_COLORS.netWorth
   );
   legendContainer.appendChild(netWorthLegend);
 
   section.appendChild(legendContainer);
-
-  // Create the chart
-  const chartRenderer = new ChartRenderer();
 
   const chartData = {
     labels,
@@ -276,28 +275,28 @@ export async function createNetBalanceChart() {
       {
         label: 'Net Balance (End of Month)',
         data: netBalanceData,
-        borderColor: 'hsl(150, 70%, 45%)',
-        backgroundColor: 'hsla(150, 70%, 45%, 0.1)',
+        borderColor: INSIGHTS_CHART_COLORS.netBalance,
+        backgroundColor: INSIGHTS_CHART_COLORS.netBalanceFill,
         borderWidth: 3,
         fill: true,
         tension: 0.4,
         pointRadius: 5,
         pointHoverRadius: 7,
-        pointBackgroundColor: 'hsl(150, 70%, 45%)',
+        pointBackgroundColor: INSIGHTS_CHART_COLORS.netBalance,
         pointBorderColor: '#fff',
         pointBorderWidth: 2,
       },
       {
         label: 'Net Worth (End of Month)',
         data: netWorthData,
-        borderColor: 'hsl(250, 84%, 60%)',
-        backgroundColor: 'hsla(250, 84%, 60%, 0.1)',
+        borderColor: INSIGHTS_CHART_COLORS.netWorth,
+        backgroundColor: INSIGHTS_CHART_COLORS.netWorthFill,
         borderWidth: 3,
         fill: true,
         tension: 0.4,
         pointRadius: 5,
         pointHoverRadius: 7,
-        pointBackgroundColor: 'hsl(250, 84%, 60%)',
+        pointBackgroundColor: INSIGHTS_CHART_COLORS.netWorth,
         pointBorderColor: '#fff',
         pointBorderWidth: 2,
       },
@@ -312,91 +311,57 @@ export async function createNetBalanceChart() {
         mode: 'index',
         intersect: false,
       },
-      scales: {
-        y: {
-          beginAtZero: true,
-          grid: {
-            color: 'hsla(240, 5%, 65%, 0.15)',
-          },
-          ticks: {
-            callback: function (value) {
-              return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'EUR',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-              }).format(value);
-            },
-          },
-        },
-        x: {
-          grid: {
-            display: false,
-          },
-        },
-      },
+      scales: createInsightsScales(),
       plugins: {
         legend: {
           display: false, // Using custom legend
         },
         tooltip: {
           callbacks: {
-            label: function (context) {
+            ...createInsightsTooltipCallbacks(),
+            label: context => {
               const label = context.dataset.label || '';
-              const value = context.parsed.y;
-              const formattedValue = new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'EUR',
-              }).format(value);
-              return `${label}: ${formattedValue}`;
+              return ` ${label}: ${formatCurrency(context.parsed.y)}`;
             },
           },
         },
       },
     });
 
-    // Store chart reference for cleanup
-    section._chart = chart;
+    // Keep the instance for cleanup()
+    chartInstance = chart;
   } catch (error) {
     console.error('[NetBalanceChart] Failed to create chart:', error);
-    const fallback = document.createElement('div');
-    fallback.className = 'chart-fallback';
-    fallback.setAttribute('role', 'status');
-    fallback.textContent =
-      'Unable to render net balance chart. Please try refreshing this section.';
     legendContainer.remove();
-    chartDiv.replaceChildren(fallback);
+    showChartFallback(
+      chartDiv,
+      'Unable to render net balance chart. Please try refreshing this section.'
+    );
   }
 
-  return section;
+  return { element: section, cleanup };
 }
 
 /**
  * Create a legend item element
- * @param {string} label
- * @param {string} color
+ * @param {string} label - Legend text
+ * @param {string} color - Dot color
  * @returns {HTMLElement}
  */
 function createLegendItem(label, color) {
   const item = document.createElement('div');
-  item.style.display = 'flex';
-  item.style.alignItems = 'center';
-  item.style.gap = '8px';
-  item.style.fontSize = '0.8125rem';
-  item.style.color = COLORS.TEXT_MUTED;
+  item.className = 'insights-legend-item';
 
   const dot = document.createElement('span');
-  dot.style.width = '10px';
-  dot.style.height = '10px';
-  dot.style.borderRadius = '50%';
-  dot.style.backgroundColor = color;
-  dot.style.flexShrink = '0';
+  dot.className = 'insights-legend-dot';
+  dot.setAttribute('aria-hidden', 'true');
+  dot.style.backgroundColor = color; // dynamic palette value → inline is fine
 
   const text = document.createElement('span');
+  text.className = 'insights-legend-text';
   text.textContent = label;
 
-  item.appendChild(dot);
-  item.appendChild(text);
+  item.append(dot, text);
 
   return item;
 }

@@ -121,6 +121,19 @@ export function formatCurrency(value, currency = 'EUR') {
 }
 
 /**
+ * Format a metric number with comma thousands separators and two decimals.
+ * Returns the absolute value — the surrounding UI conveys the sign.
+ * @param {number} num - The number to format
+ * @returns {string} Formatted number (e.g. "1,976.81")
+ */
+export function formatMetricNumber(num) {
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Math.abs(num));
+}
+
+/**
  * Safely parse a date and return ISO date string
  * @param {Date|string} date - The date to parse
  * @returns {string} ISO date string (YYYY-MM-DD) or empty string if invalid

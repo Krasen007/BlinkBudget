@@ -2,8 +2,8 @@
  * Insights Chart Theme
  *
  * Shared Chart.js theming for the Financial Insights cards so every chart in
- * the section (Trend, Timeline, Top Movers) uses the same palette and axis
- * styling.
+ * the section (Trend, Timeline, Top Movers, Net Balance) uses the same palette
+ * and axis styling.
  *
  * Canvas rendering cannot resolve CSS custom properties — a CSS variable
  * reference string is silently ignored by the 2D context — so the palette below mirrors
@@ -20,6 +20,10 @@ export const INSIGHTS_CHART_COLORS = {
   expense: 'hsl(0, 85%, 60%)', // --color-error
   expenseFill: `rgba(${COLORS.ERROR_RGB}, 0.65)`,
   net: 'hsl(198, 93%, 60%)', // bright cyan so the Net line pops over the bars
+  netBalance: 'hsl(150, 100%, 35%)', // monthly net balance line (income hue)
+  netBalanceFill: 'hsla(150, 100%, 35%, 0.1)',
+  netWorth: 'hsl(250, 84%, 60%)', // cumulative net worth line (unique hue)
+  netWorthFill: 'hsla(250, 84%, 60%, 0.1)',
   previousPeriod: 'hsl(240, 5%, 55%)', // muted series for the prior period
   surface: 'hsl(240, 10%, 10%)', // --color-surface (donut slice separators)
   surfaceHover: 'hsl(240, 10%, 15%)', // --color-surface-hover (empty state)
