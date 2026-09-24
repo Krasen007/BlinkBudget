@@ -60,16 +60,6 @@ export const ViewPreloader = {
   },
 
   /**
-   * Get a cached module (alias for getCachedView, for use with components)
-   * Caches both views and components for instant loading
-   * @param {string} name - The name/identifier for the module
-   * @returns {Object|null} The cached module or null if not cached
-   */
-  getCachedModule(name) {
-    return this.getCachedView(name);
-  },
-
-  /**
    * Check if a view is cached
    * @param {string} name - The name/identifier for the view
    * @returns {boolean}
