@@ -458,13 +458,6 @@ export class AnalyticsCache {
   }
 
   /**
-   * Get cache statistics (alias for compatibility)
-   */
-  getStats() {
-    return this.getCacheStats();
-  }
-
-  /**
    * Clear all cached results
    */
   clearCache() {
