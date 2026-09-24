@@ -43,6 +43,55 @@ function resolveCssVarColor(varName, alpha) {
 }
 
 /**
+ * Compute original vs. visible percentages for a pie/doughnut tooltip.
+ *
+ * Toggling a legend item calls chart.toggleDataVisibility(), which hides the
+ * slice without altering the underlying data array — so a plain value / total
+ * calculation always yields the original percentage. This helper derives both
+ * numbers: the original share of the full dataset and the recalculated share
+ * of only the still-visible slices.
+ *
+ * @param {Object} chart - Chart.js instance (exposes .data and getDataVisibility)
+ * @param {number} datasetIndex - Index of the hovered dataset
+ * @param {number} dataIndex - Index of the hovered data point
+ * @returns {{originalPercentage: string, visiblePercentage: string, hasHiddenCategories: boolean}}
+ */
+function computeCategoryPercentages(chart, datasetIndex, dataIndex) {
+  const dataset = chart?.data?.datasets?.[datasetIndex];
+  const values = Array.isArray(dataset?.data) ? dataset.data : [];
+  const value = Number(values[dataIndex]) || 0;
+
+  let originalTotal = 0;
+  let visibleTotal = 0;
+  let hiddenCount = 0;
+
+  values.forEach((val, i) => {
+    const amount = Number(val) || 0;
+    originalTotal += amount;
+
+    // Fall back to "visible" when the API is unavailable (e.g. plain mocks)
+    const isVisible =
+      typeof chart?.getDataVisibility !== 'function' ||
+      chart.getDataVisibility(i);
+
+    if (isVisible) {
+      visibleTotal += amount;
+    } else {
+      hiddenCount += 1;
+    }
+  });
+
+  const toPercentage = (numerator, total) =>
+    total > 0 ? ((numerator / total) * 100).toFixed(1) : '0.0';
+
+  return {
+    originalPercentage: toPercentage(value, originalTotal),
+    visiblePercentage: toPercentage(value, visibleTotal),
+    hasHiddenCategories: hiddenCount > 0,
+  };
+}
+
+/**
  * Create tooltip configuration for category charts
  */
 function createCategoryTooltipConfig(detailsContainer) {
@@ -74,11 +123,22 @@ function createCategoryTooltipConfig(detailsContainer) {
         const index = tooltip.dataPoints[0].dataIndex;
         const value = dataPoint.data[index];
         const label = context.chart.data.labels[index];
-        const total = dataPoint.data.reduce((sum, val) => sum + val, 0);
-        const percentage =
-          total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+        const { originalPercentage, visiblePercentage, hasHiddenCategories } =
+          computeCategoryPercentages(
+            context.chart,
+            tooltip.dataPoints[0].datasetIndex,
+            index
+          );
 
         const formattedValue = formatCurrency(value);
+
+        // When categories are disabled via the legend the chart redraws
+        // without them, so show the original percentage next to the
+        // recalculated (visible-only) percentage. Only plain numeric
+        // strings reach the markup, each escaped through escapeHtml().
+        const percentageCell = hasHiddenCategories
+          ? `<span style="opacity: 0.7;" title="Original percentage (all categories)">${escapeHtml(originalPercentage)}%</span><span aria-hidden="true" style="margin: 0 4px;">→</span><span style="font-weight: 600; color: var(--color-primary);" title="Percentage of visible categories">${escapeHtml(visiblePercentage)}%</span>`
+          : `${escapeHtml(originalPercentage)}%`;
 
         // Create structured HTML for the details container
         // Security: All dynamic values are escaped using escapeHtml()
@@ -91,7 +151,7 @@ function createCategoryTooltipConfig(detailsContainer) {
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; font-size: 0.85em; color: var(--color-text-muted);">
                             <span>Percentage</span>
-                            <span>${escapeHtml(String(percentage))}%</span>
+                            <span>${percentageCell}</span>
                         </div>
                     `;
       }
@@ -100,12 +160,18 @@ function createCategoryTooltipConfig(detailsContainer) {
       label: function (context) {
         const label = context.label || '';
         const value = context.parsed;
-        const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
-        const percentage =
-          total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+        const { originalPercentage, visiblePercentage, hasHiddenCategories } =
+          computeCategoryPercentages(
+            context.chart,
+            context.datasetIndex,
+            context.dataIndex
+          );
         const formattedValue = formatCurrency(value);
+        const percentageText = hasHiddenCategories
+          ? `${originalPercentage}% → ${visiblePercentage}%`
+          : `${originalPercentage}%`;
 
-        return `${label}: ${formattedValue} (${percentage}%)`;
+        return `${label}: ${formattedValue} (${percentageText})`;
       },
     },
   };
