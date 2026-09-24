@@ -340,21 +340,4 @@ export class FilteringService {
     summary.count = summary.descriptions.length;
     return summary;
   }
-
-  /**
-   * Clear all filters
-   * @returns {Object} Empty filter object
-   */
-  static clearFilters() {
-    return {
-      dateRange: null,
-      categories: [],
-      categoryFilterType: 'include',
-      amountRange: null,
-      types: [],
-      accounts: [],
-      searchText: '',
-      caseSensitive: false,
-    };
-  }
 }
