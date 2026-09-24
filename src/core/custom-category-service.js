@@ -819,48 +819,6 @@ export const CustomCategoryService = {
   },
 
   /**
-   * Get category statistics
-   * @returns {Object} Category statistics
-   */
-  getStatistics() {
-    const customCategories = this.getAll();
-    const systemCategories = this.getSystemCategories();
-
-    // Deduplicate by name to avoid double counting migrated categories
-    const allUniqueNames = new Set([
-      ...customCategories.map(c => c.name.toLowerCase()),
-      ...systemCategories.map(c => c.name.toLowerCase()),
-    ]);
-
-    const uniqueExpense = new Set([
-      ...customCategories
-        .filter(c => c.type === 'expense')
-        .map(c => c.name.toLowerCase()),
-      ...systemCategories
-        .filter(c => c.type === 'expense')
-        .map(c => c.name.toLowerCase()),
-    ]);
-
-    const uniqueIncome = new Set([
-      ...customCategories
-        .filter(c => c.type === 'income')
-        .map(c => c.name.toLowerCase()),
-      ...systemCategories
-        .filter(c => c.type === 'income')
-        .map(c => c.name.toLowerCase()),
-    ]);
-
-    return {
-      totalCategories: allUniqueNames.size,
-      customCategories: customCategories.length,
-      systemCategories: systemCategories.length, // Raw count of system definitions
-      expenseCategories: uniqueExpense.size,
-      incomeCategories: uniqueIncome.size,
-      mostUsedCategories: [], // TODO: Implement usage tracking
-    };
-  },
-
-  /**
    * Private helper to persist categories
    */
   _persist(categories, sync = true) {

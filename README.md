@@ -76,7 +76,7 @@ BlinkBudget turns your 3-click data into actionable insights using statistical h
 
 #### **Spending Intelligence**
 
-- **Category Usage Frequency Analysis** - Track how often you use each category | src/core/custom-category-service.js:getStatistics() | src/core/analytics-engine.js:generateSpendingInsights()
+- **Category Usage Frequency Analysis** - Track how often you use each category | src/core/analytics/category-usage-service.js:getMostFrequentCategories() | src/core/analytics-engine.js:generateSpendingInsights()
 - **Top Movers Analysis** - Discover your biggest spending changes month-over-month | src/core/analytics/ComparisonService.js:getPersonalBenchmarking() | src/core/insights-generator.js:topMovers
 - **Historical Timeline Comparisons** - Compare current spending to previous periods | src/core/analytics/ComparisonService.js:comparePeriodsSpending() | src/core/analytics-engine.js:historical comparisons
 
