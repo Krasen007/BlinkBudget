@@ -76,7 +76,7 @@ describe('InsightsGenerator', () => {
 
   it('ignores sub-half-cent category changes when ranking movers', () => {
     const current = [
-      { id: 1, category: 'Food', amount: 50.00, type: 'expense' },
+      { id: 1, category: 'Food', amount: 50.0, type: 'expense' },
     ];
     const previous = [
       { id: 2, category: 'Food', amount: 50.004, type: 'expense' },

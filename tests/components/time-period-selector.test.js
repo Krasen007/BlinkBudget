@@ -133,7 +133,9 @@ describe('TimePeriodSelector period navigation', () => {
     });
 
     expect(todayButton.dataset.dayOffset).toBe('-1');
-    expect(todayButton.querySelector('.tab-label').textContent).toBe('Yesterday');
+    expect(todayButton.querySelector('.tab-label').textContent).toBe(
+      'Yesterday'
+    );
     expect(container.getCurrentPeriod().label).toBe('Yesterday');
   });
 });

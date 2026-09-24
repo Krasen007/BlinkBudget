@@ -385,7 +385,10 @@ export class ChartRenderer {
     });
     const scales = { ...userScales };
     for (const axis of ['x', 'y']) {
-      scales[axis] = mergeScaleConfig(defaultScales[axis], userScales[axis] || {});
+      scales[axis] = mergeScaleConfig(
+        defaultScales[axis],
+        userScales[axis] || {}
+      );
     }
 
     const chartOptions = createChartOptions({
