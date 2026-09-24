@@ -7,11 +7,7 @@
  * Requirements: 9.2 - Performance optimization with lazy loading
  */
 
-import {
-  loadChartJS,
-  isChartJSReady,
-  getChartJSModules,
-} from './chart-loader.js';
+import { loadChartJS, getChartJSModules } from './chart-loader.js';
 
 // Chart.js modules will be loaded lazily
 
@@ -324,9 +320,9 @@ export const accessibleColors = {
  * @returns {Promise<Object>} Promise that resolves to Chart.js modules
  */
 export async function getChartJS() {
-  if (isChartJSReady()) {
-    const modules = getChartJSModules();
-    return modules.ChartJS;
+  const cached = getChartJSModules();
+  if (cached) {
+    return cached.ChartJS;
   }
 
   const modules = await loadChartJS();
@@ -338,8 +334,9 @@ export async function getChartJS() {
  * @returns {Promise<Object>} Promise that resolves to all Chart.js modules
  */
 export async function initializeChartJS() {
-  if (isChartJSReady()) {
-    return getChartJSModules();
+  const cached = getChartJSModules();
+  if (cached) {
+    return cached;
   }
 
   const modules = await loadChartJS();

@@ -130,14 +130,6 @@ async function loadChartJSModules() {
 }
 
 /**
- * Check if Chart.js is already loaded
- * @returns {boolean} True if Chart.js is loaded
- */
-export function isChartJSReady() {
-  return isChartJSLoaded && chartJSModules !== null;
-}
-
-/**
  * Get Chart.js modules if already loaded, otherwise return null
  * @returns {Object|null} Chart.js modules or null if not loaded
  */
