@@ -12,6 +12,7 @@ import { formatCurrency } from '../../utils/financial-planning-helpers.js';
 import { CATEGORY_COLORS } from '../../utils/constants.js';
 
 const MAX_ROWS = 8;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 /**
  * Human-readable cadence label for an interval in days
@@ -67,9 +68,21 @@ export function createRecurringCard(planningData, now = new Date()) {
   header.appendChild(titleGroup);
   card.appendChild(header);
 
-  const recurring = RecurringDetector.detectRecurring(
+  const detected = RecurringDetector.detectRecurring(
     planningData?.transactions || []
-  ).slice(0, MAX_ROWS);
+  );
+
+  // detectRecurring sorts by nextDate ascending, so items overdue by more
+  // than one interval (likely cancelled subscriptions) would otherwise come
+  // first and crowd active entries out at the MAX_ROWS limit. Keep eligible
+  // upcoming items first (still most-imminent first), then the stale ones.
+  const nowMs = now.getTime();
+  const isStale = item =>
+    item.nextDate.getTime() < nowMs - item.intervalDays * MS_PER_DAY;
+  const recurring = [
+    ...detected.filter(item => !isStale(item)),
+    ...detected.filter(isStale),
+  ].slice(0, MAX_ROWS);
 
   if (recurring.length === 0) {
     const empty = document.createElement('p');

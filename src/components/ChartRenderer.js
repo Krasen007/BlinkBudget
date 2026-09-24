@@ -700,8 +700,8 @@ export class ChartRenderer {
       }).format(value),
     };
 
-    // For pie charts, calculate percentage
-    if (chartType === 'pie') {
+    // For pie and doughnut charts, calculate percentage
+    if (chartType === 'pie' || chartType === 'doughnut') {
       const total = dataset.data.reduce((sum, val) => sum + val, 0);
       clickData.percentage = ((value / total) * 100).toFixed(1);
     }

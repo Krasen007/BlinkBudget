@@ -63,6 +63,24 @@ describe('AnomalyService.detectUnusualTransactions', () => {
     expect(AnomalyService.detectUnusualTransactions(txs)).toHaveLength(0);
   });
 
+  it('does not let refunds outside the window after the expense suppress it', () => {
+    const txs = buildSpikeFixture()
+      .filter(tx => tx.id !== 'spike')
+      .concat([
+        expense('spike', 900, new Date(2026, 5, 20, 12).toISOString()),
+        {
+          id: 'r1',
+          amount: 70,
+          category: 'Shopping',
+          type: 'refund',
+          // 42 days after the spike — outside the 30-day refund window
+          timestamp: new Date(2026, 7, 1, 12).toISOString(),
+        },
+      ]);
+
+    expect(AnomalyService.detectUnusualTransactions(txs)).toHaveLength(1);
+  });
+
   it('needs a minimum number of expenses before flagging anything', () => {
     expect(
       AnomalyService.detectUnusualTransactions(buildSpikeFixture().slice(0, 3))
@@ -79,6 +97,26 @@ describe('AnomalyService.buildPeriodMarkers', () => {
     expect(markers.byDay.get('2026-06-15')).toBe(1);
     expect(markers.byMonth.get('2026-06')).toBe(1);
     expect(markers.byYear.get('2026')).toBe(1);
+  });
+
+  it('compares each category on its own instead of across categories', () => {
+    // The €600 Shopping spike is a clear outlier within Shopping but would be
+    // invisible against a cross-category baseline dominated by €5000 Travel.
+    const txs = buildSpikeFixture().concat(
+      [1, 2, 3, 4, 5, 6].map(i =>
+        expense(
+          `big${i}`,
+          5000,
+          new Date(2026, 5, i, 12).toISOString(),
+          'Travel'
+        )
+      )
+    );
+
+    const markers = AnomalyService.buildPeriodMarkers(txs);
+
+    expect(markers.ids.has('spike')).toBe(true);
+    expect(markers.count).toBe(1); // only the Shopping spike, not Travel
   });
 
   it('ignores ghost transactions', () => {

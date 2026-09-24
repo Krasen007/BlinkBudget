@@ -509,7 +509,7 @@ Object.assign(AnomalyService, {
     const baselineTransactions = category
       ? transactions.filter(
           t =>
-            t.category === category &&
+            (t.category || 'Uncategorized') === category &&
             (t.type === 'expense' || t.type === 'refund')
         )
       : transactions.filter(t => t.type === 'expense' || t.type === 'refund');
@@ -536,22 +536,37 @@ Object.assign(AnomalyService, {
 
     const rawUnusual = expenseTransactions.filter(t => t.amount > threshold);
 
-    // Final guard: if refunds in the same category bring the flagged
-    // expense's net spending back below the threshold, suppress the alert.
+    // Final guard: if refunds tied to the flagged expense bring its net
+    // spending back below the threshold, suppress the alert. A refund counts
+    // only in the same category within a bounded window after the expense
+    // (the data model has no refund-to-expense link field), so unrelated
+    // refunds elsewhere in a busy category can no longer silence valid
+    // alerts.
     // (Comparing the category *average* against mean+3σ here could never
     // pass, which silently disabled all unusual-transaction alerts.)
-    const refundsByCategory = Object.create(null);
-    baselineTransactions
+    const REFUND_WINDOW_MS = 30 * 24 * 60 * 60 * 1000; // 30-day return window
+    const refunds = baselineTransactions
       .filter(t => t.type === 'refund')
-      .forEach(t => {
-        const cat = t.category || 'Uncategorized';
-        refundsByCategory[cat] =
-          (refundsByCategory[cat] || 0) + Math.abs(t.amount ?? 0);
-      });
+      .map(t => ({
+        category: t.category || 'Uncategorized',
+        time: new Date(t.date || t.timestamp).getTime(),
+        amount: Math.abs(t.amount ?? 0),
+      }));
 
     const unusualTransactions = rawUnusual.filter(tx => {
       const cat = tx.category || 'Uncategorized';
-      const netSpike = Math.abs(tx.amount ?? 0) - (refundsByCategory[cat] || 0);
+      const expenseTime = new Date(tx.date || tx.timestamp).getTime();
+      let refundTotal = 0;
+      if (!isNaN(expenseTime)) {
+        const windowEnd = expenseTime + REFUND_WINDOW_MS;
+        for (const refund of refunds) {
+          if (refund.category !== cat) continue;
+          if (isNaN(refund.time)) continue;
+          if (refund.time < expenseTime || refund.time > windowEnd) continue;
+          refundTotal += refund.amount;
+        }
+      }
+      const netSpike = Math.abs(tx.amount ?? 0) - refundTotal;
       return netSpike > threshold;
     });
 
@@ -593,8 +608,14 @@ Object.assign(AnomalyService, {
       return empty;
     }
 
-    const unusual = this.detectUnusualTransactions(
-      transactions.filter(t => !t.isGhost)
+    // Detect per category (ghosts excluded) and merge, so each anomaly is
+    // compared only against transactions of the same category.
+    const nonGhost = transactions.filter(t => !t.isGhost);
+    const categories = new Set(
+      nonGhost.map(t => t.category || 'Uncategorized')
+    );
+    const unusual = [...categories].flatMap(category =>
+      this.detectUnusualTransactions(nonGhost, { category })
     );
     if (unusual.length === 0) return empty;
 

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { formatMetricNumber } from '../../src/utils/financial-planning-helpers.js';
 import {
   aggregateTrendData,
@@ -144,6 +144,17 @@ describe('Insights Charts Components', () => {
   });
 
   describe('Timeline anomaly tooltip', () => {
+    beforeEach(() => {
+      // Pin "now" inside the fixture's date range (Jan 2025 – Aug 2026) so
+      // the default month view has data and the chart actually renders.
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-06-15T12:00:00.000Z'));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers(); // runs even if the test below fails
+    });
+
     it('passes an anomaly-aware afterBody callback to the chart', () => {
       const mockRenderer = {
         createLineChart: vi.fn().mockResolvedValue({}),

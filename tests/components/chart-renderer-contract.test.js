@@ -60,3 +60,33 @@ describe('ChartRenderer construction failures (C05)', () => {
     ).rejects.toThrow('network down');
   });
 });
+
+describe('ChartRenderer.handleChartClick percentage', () => {
+  it('includes percentage on doughnut slice clicks, like pie', () => {
+    const renderer = new ChartRenderer();
+    const canvas = document.createElement('canvas');
+    const chart = {
+      canvas,
+      data: {
+        labels: ['Food', 'Rent'],
+        datasets: [{ label: 'Spending', data: [25, 75] }],
+      },
+    };
+
+    let clickData = null;
+    canvas.addEventListener('chartSegmentClick', event => {
+      clickData = event.detail;
+    });
+
+    renderer.handleChartClick(
+      {},
+      [{ datasetIndex: 0, index: 0 }],
+      chart,
+      'doughnut'
+    );
+
+    expect(clickData).not.toBeNull();
+    expect(clickData.label).toBe('Food');
+    expect(clickData.percentage).toBe('25.0');
+  });
+});
