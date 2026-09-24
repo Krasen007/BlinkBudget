@@ -371,9 +371,21 @@ export class ChartRenderer {
         },
       },
     };
+    const mergeScaleConfig = (defaultScale = {}, userScale = {}) => ({
+      ...defaultScale,
+      ...userScale,
+      grid: {
+        ...(defaultScale.grid || {}),
+        ...(userScale.grid || {}),
+      },
+      ticks: {
+        ...(defaultScale.ticks || {}),
+        ...(userScale.ticks || {}),
+      },
+    });
     const scales = { ...userScales };
     for (const axis of ['x', 'y']) {
-      scales[axis] = { ...defaultScales[axis], ...(userScales[axis] || {}) };
+      scales[axis] = mergeScaleConfig(defaultScales[axis], userScales[axis] || {});
     }
 
     const chartOptions = createChartOptions({
@@ -1008,8 +1020,8 @@ export class ChartRenderer {
 
     let announcement = `${label}: ${formattedValue}`;
 
-    // Add percentage for pie charts
-    if (chart.config.type === 'pie') {
+    // Add percentage for pie and doughnut charts
+    if (chart.config.type === 'pie' || chart.config.type === 'doughnut') {
       const total = chart.data.datasets[0].data.reduce(
         (sum, val) => sum + val,
         0
@@ -1062,7 +1074,7 @@ export class ChartRenderer {
     let description = `This ${chartType} chart shows `;
 
     // Add summary based on chart type
-    if (chartType === 'pie') {
+    if (chartType === 'pie' || chartType === 'doughnut') {
       const total = dataset.data.reduce((sum, val) => sum + val, 0);
       description += `spending breakdown across ${labels.length} categories. `;
 

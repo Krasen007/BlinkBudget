@@ -120,4 +120,20 @@ describe('TimePeriodSelector period navigation', () => {
     expect(todayButton.dataset.dayOffset).toBe('0');
     expect(container.getCurrentPeriod().label).toBe('Today');
   });
+
+  it('restores a daily label from the recalculated offset instead of stale period data', () => {
+    const container = TimePeriodSelector();
+    const todayButton = findTab(container, 'today');
+
+    container.setPeriod({
+      type: 'daily',
+      startDate: new Date('2026-09-14T00:00:00.000Z'),
+      endDate: new Date('2026-09-14T23:59:59.999Z'),
+      label: 'This is stale label text',
+    });
+
+    expect(todayButton.dataset.dayOffset).toBe('-1');
+    expect(todayButton.querySelector('.tab-label').textContent).toBe('Yesterday');
+    expect(container.getCurrentPeriod().label).toBe('Yesterday');
+  });
 });

@@ -89,4 +89,33 @@ describe('ChartRenderer.handleChartClick percentage', () => {
     expect(clickData.label).toBe('Food');
     expect(clickData.percentage).toBe('25.0');
   });
+
+  it('announces doughnut segment percentages for keyboard focus', () => {
+    const renderer = new ChartRenderer();
+    const chart = {
+      config: { type: 'doughnut' },
+      data: {
+        labels: ['Food', 'Rent'],
+        datasets: [{ data: [25, 75] }],
+      },
+      setActiveElements: vi.fn(),
+      update: vi.fn(),
+    };
+
+    const announceSpy = vi
+      .spyOn(renderer, 'announceToScreenReader')
+      .mockImplementation(() => {});
+
+    renderer.focusSegment(chart, 0);
+
+    expect(chart.setActiveElements).toHaveBeenCalled();
+    expect(announceSpy).toHaveBeenCalledWith(
+      expect.stringContaining('25.0% of total'),
+      'polite'
+    );
+    expect(renderer.generateChartDescription(chart)).toContain(
+      'doughnut chart shows'
+    );
+    expect(renderer.generateChartDescription(chart)).toContain('Food at 25.0%');
+  });
 });

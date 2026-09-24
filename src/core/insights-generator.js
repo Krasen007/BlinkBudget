@@ -88,7 +88,7 @@ const InsightsGenerator = {
 
     return (
       this.timelineComparison(currentSeries, previousSeries)
-        .filter(mover => mover.absoluteChange !== 0)
+        .filter(mover => Math.abs(mover.absoluteChange) >= 0.005)
         .sort((a, b) => Math.abs(b.absoluteChange) - Math.abs(a.absoluteChange))
         .slice(0, n)
         // timelineComparison keys entries by `period` — expose `category` too

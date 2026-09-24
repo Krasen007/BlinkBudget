@@ -73,4 +73,17 @@ describe('InsightsGenerator', () => {
     const gym = movers.find(m => m.category === 'Gym');
     expect(gym.absoluteChange).toBe(-50);
   });
+
+  it('ignores sub-half-cent category changes when ranking movers', () => {
+    const current = [
+      { id: 1, category: 'Food', amount: 50.00, type: 'expense' },
+    ];
+    const previous = [
+      { id: 2, category: 'Food', amount: 50.004, type: 'expense' },
+    ];
+
+    const movers = InsightsGenerator.categoryMovers(current, previous, 5);
+
+    expect(movers).toHaveLength(0);
+  });
 });

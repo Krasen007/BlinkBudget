@@ -353,8 +353,14 @@ export const TimePeriodSelector = (options = {}) => {
       labelSpan.textContent =
         period.key === initialKey ? initialPeriod.label : 'This Year';
     } else if (period.key === 'today') {
+      const dayOffset =
+        initialPeriod.type === 'daily'
+          ? getDayOffsetFromDate(initialPeriod.startDate)
+          : 0;
       labelSpan.textContent =
-        period.key === initialKey ? initialPeriod.label : period.label;
+        period.key === initialKey
+          ? getSpecificDayPeriod(dayOffset).label
+          : getSpecificDayPeriod(dayOffset).label;
     } else {
       labelSpan.textContent = period.label;
     }
@@ -1168,13 +1174,15 @@ export const TimePeriodSelector = (options = {}) => {
           // Daily periods always land on the Today tab
           const dayOffset = getDayOffsetFromDate(period.startDate);
           const todayButton = periodButtons.get('today');
+          const resolvedLabel = getSpecificDayPeriod(dayOffset).label;
           setActiveButton(todayButton);
 
           const labelSpan = todayButton.querySelector('.tab-label');
           if (labelSpan) {
-            labelSpan.textContent = period.label;
+            labelSpan.textContent = resolvedLabel;
           }
 
+          currentPeriod = { ...period, label: resolvedLabel };
           todayButton.dataset.dayOffset = dayOffset.toString();
           const rightArrow = todayButton.querySelector('.arrow-right');
           if (rightArrow) {
