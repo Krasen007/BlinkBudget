@@ -23,6 +23,7 @@ describe('TimePeriodSelector period navigation', () => {
     ['lastMonth', 'monthOffset', -1, 'July 2026', 'August 2026'],
     ['quarter', 'quarterOffset', 0, 'Q2 2026', 'Q3 2026'],
     ['year', 'yearOffset', 0, '2025', '2026'],
+    ['today', 'dayOffset', 0, 'Yesterday', 'Today'],
   ])(
     'navigates %s via arrows, updating state, label, and offset',
     (key, offsetKey, initialOffset, backLabel, forwardLabel) => {
@@ -49,6 +50,7 @@ describe('TimePeriodSelector period navigation', () => {
     ['lastMonth', 'month', 'This Month'],
     ['quarter', 'quarter', 'This Month'],
     ['year', 'year', 'This Month'],
+    ['today', 'day', 'This Month'],
   ])(
     'keeps %s navigation errors visible and clears them after recovery',
     (key, unit, label) => {
@@ -85,4 +87,37 @@ describe('TimePeriodSelector period navigation', () => {
       expect(message.textContent).toBe('');
     }
   );
+
+  it('keeps the forward arrow hidden at today and shown for past days', () => {
+    const onChange = vi.fn();
+    const container = TimePeriodSelector({ onChange });
+    const todayButton = findTab(container, 'today');
+    const rightArrow = findArrow(todayButton, 'right');
+
+    expect(rightArrow.style.display).toBe('none');
+
+    findArrow(todayButton, 'left').click();
+    expect(rightArrow.style.display).toBe('flex');
+
+    findArrow(todayButton, 'right').click();
+    expect(rightArrow.style.display).toBe('none');
+  });
+
+  it('re-anchors day navigation when the Today tab is re-selected', () => {
+    const onChange = vi.fn();
+    const container = TimePeriodSelector({ onChange });
+    const todayButton = findTab(container, 'today');
+
+    findArrow(todayButton, 'left').click();
+    expect(todayButton.querySelector('.tab-label').textContent).toBe(
+      'Yesterday'
+    );
+
+    todayButton.click();
+    expect(onChange).toHaveBeenCalledTimes(2);
+    expect(onChange.mock.calls[1][0].label).toBe('Today');
+    expect(todayButton.querySelector('.tab-label').textContent).toBe('Today');
+    expect(todayButton.dataset.dayOffset).toBe('0');
+    expect(container.getCurrentPeriod().label).toBe('Today');
+  });
 });

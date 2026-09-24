@@ -8,7 +8,11 @@
 
 import { COLORS, SPACING, FONT_SIZES } from '../utils/constants.js';
 import { DateInput } from './DateInput.js';
-import { formatDate, dateToISO } from '../utils/date-utils.js';
+import {
+  formatDate,
+  formatDateForDisplay,
+  dateToISO,
+} from '../utils/date-utils.js';
 import {
   getCurrentMonthPeriod,
   getCurrentQuarterPeriod,
@@ -76,6 +80,52 @@ function getSpecificYearPeriod(yearsOffset = 0) {
     startDate: startOfYear,
     endDate: endOfYear,
     label: targetYear.toString(),
+  };
+}
+
+/**
+ * Whole-day offset between a date and today (0 = today, -1 = yesterday, ...)
+ * @param {Date|string} date - Reference date
+ * @returns {number} Whole days between the date and today
+ */
+function getDayOffsetFromDate(date) {
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const targetStart = new Date(date);
+  targetStart.setHours(0, 0, 0, 0);
+  return Math.round((targetStart - todayStart) / 86400000);
+}
+
+/**
+ * Get a specific day period (for navigation)
+ */
+function getSpecificDayPeriod(daysOffset = 0) {
+  const now = new Date();
+  const targetDate = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + daysOffset
+  );
+
+  const startOfDay = new Date(targetDate);
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(targetDate);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  let label;
+  if (daysOffset === 0) {
+    label = 'Today';
+  } else if (daysOffset === -1) {
+    label = 'Yesterday';
+  } else {
+    label = formatDateForDisplay(targetDate);
+  }
+
+  return {
+    type: 'daily',
+    startDate: startOfDay,
+    endDate: endOfDay,
+    label,
   };
 }
 
@@ -270,6 +320,12 @@ export const TimePeriodSelector = (options = {}) => {
       button.dataset.quarterOffset = '0';
     } else if (period.key === 'year') {
       button.dataset.yearOffset = '0';
+    } else if (period.key === 'today') {
+      const initialDayOffset =
+        initialPeriod.type === 'daily'
+          ? getDayOffsetFromDate(initialPeriod.startDate)
+          : 0;
+      button.dataset.dayOffset = initialDayOffset.toString();
     }
 
     button.setAttribute('role', 'tab');
@@ -296,6 +352,9 @@ export const TimePeriodSelector = (options = {}) => {
     } else if (period.key === 'year') {
       labelSpan.textContent =
         period.key === initialKey ? initialPeriod.label : 'This Year';
+    } else if (period.key === 'today') {
+      labelSpan.textContent =
+        period.key === initialKey ? initialPeriod.label : period.label;
     } else {
       labelSpan.textContent = period.label;
     }
@@ -303,7 +362,8 @@ export const TimePeriodSelector = (options = {}) => {
     if (
       period.key === 'lastMonth' ||
       period.key === 'quarter' ||
-      period.key === 'year'
+      period.key === 'year' ||
+      period.key === 'today'
     ) {
       // Add relative position to the parent button so the absolute arrow docks cleanly to the button's bounds
       button.style.position = 'relative';
@@ -317,7 +377,7 @@ export const TimePeriodSelector = (options = {}) => {
       const leftArrow = createArrow('left');
       const rightArrow = createArrow('right');
 
-      // Right arrow starts hidden (we start at offset -1 for month, 0 for year/quarter)
+      // Right arrow starts hidden (offset -1 for month, 0 for year/quarter/today)
       const initialMonthOffset = period.key === 'lastMonth' ? -1 : 0;
       const initialQuarterOffset = 0;
       const initialYearOffset = 0;
@@ -326,7 +386,9 @@ export const TimePeriodSelector = (options = {}) => {
           ? initialMonthOffset
           : period.key === 'quarter'
             ? initialQuarterOffset
-            : initialYearOffset;
+            : period.key === 'today'
+              ? parseInt(button.dataset.dayOffset || '0', 10)
+              : initialYearOffset;
       updateRightArrowVisibility(rightArrow, initialOffset, period.key);
 
       // Left arrow click — go further back
@@ -365,6 +427,17 @@ export const TimePeriodSelector = (options = {}) => {
             offsetKey: 'yearOffset',
             arrowPeriodKey: undefined,
           });
+        } else if (period.key === 'today') {
+          const currentOffset = parseInt(button.dataset.dayOffset || '0');
+          const newOffset = currentOffset - 1;
+          const newPeriod = getSpecificDayPeriod(newOffset);
+          handleNavigation('today', newPeriod, 'day', {
+            offset: currentOffset,
+            nextOffset: newOffset,
+            rightArrow,
+            offsetKey: 'dayOffset',
+            arrowPeriodKey: period.key,
+          });
         }
       });
 
@@ -402,6 +475,17 @@ export const TimePeriodSelector = (options = {}) => {
             nextOffset: newOffset,
             rightArrow,
             offsetKey: 'yearOffset',
+            arrowPeriodKey: undefined,
+          });
+        } else if (period.key === 'today') {
+          const currentOffset = parseInt(button.dataset.dayOffset || '0');
+          const newOffset = currentOffset + 1;
+          const newPeriod = getSpecificDayPeriod(newOffset);
+          handleNavigation('today', newPeriod, 'day', {
+            offset: currentOffset,
+            nextOffset: newOffset,
+            rightArrow,
+            offsetKey: 'dayOffset',
             arrowPeriodKey: undefined,
           });
         }
@@ -612,8 +696,8 @@ export const TimePeriodSelector = (options = {}) => {
   }
 
   /**
-   * Apply month, quarter, or year navigation without recreating the selector.
-   * @param {string} buttonKey - Period button key ('lastMonth' | 'quarter' | 'year')
+   * Apply month, quarter, year, or day navigation without recreating the selector.
+   * @param {string} buttonKey - Period button key ('lastMonth' | 'quarter' | 'year' | 'today')
    * @param {Object} newPeriod - Target time period
    * @param {string} unitLabel - Unit name for error messages
    * @param {Object} [nav] - Pre-mutation navigation state captured by the arrow
@@ -734,11 +818,21 @@ export const TimePeriodSelector = (options = {}) => {
       if (
         period.key === 'lastMonth' ||
         period.key === 'quarter' ||
-        period.key === 'year'
+        period.key === 'year' ||
+        period.key === 'today'
       ) {
         const labelSpan = button.querySelector('.tab-label');
         if (labelSpan) {
           labelSpan.textContent = newPeriod.label;
+        }
+      }
+
+      // Re-selecting Today re-anchors day navigation at the current day
+      if (period.key === 'today') {
+        button.dataset.dayOffset = '0';
+        const rightArrow = button.querySelector('.arrow-right');
+        if (rightArrow) {
+          updateRightArrowVisibility(rightArrow, 0, 'today');
         }
       }
 
@@ -1069,6 +1163,22 @@ export const TimePeriodSelector = (options = {}) => {
               totalQuarterOffset,
               'quarter'
             );
+          }
+        } else if (period.type === 'daily') {
+          // Daily periods always land on the Today tab
+          const dayOffset = getDayOffsetFromDate(period.startDate);
+          const todayButton = periodButtons.get('today');
+          setActiveButton(todayButton);
+
+          const labelSpan = todayButton.querySelector('.tab-label');
+          if (labelSpan) {
+            labelSpan.textContent = period.label;
+          }
+
+          todayButton.dataset.dayOffset = dayOffset.toString();
+          const rightArrow = todayButton.querySelector('.arrow-right');
+          if (rightArrow) {
+            updateRightArrowVisibility(rightArrow, dayOffset, 'today');
           }
         }
       }

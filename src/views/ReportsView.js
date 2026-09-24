@@ -470,8 +470,22 @@ export const ReportsView = (params = {}) => {
           return null; // Other historical months don't have URL parameters
         }
       }
-      case 'daily':
-        return 'today';
+      case 'daily': {
+        // Only the actual current day maps to a URL parameter; days reached
+        // via the Today arrows are historical (like historical months).
+        const now = new Date();
+        const todayStart = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate()
+        );
+        const periodStart = new Date(timePeriod.startDate);
+        const isToday =
+          periodStart.getFullYear() === todayStart.getFullYear() &&
+          periodStart.getMonth() === todayStart.getMonth() &&
+          periodStart.getDate() === todayStart.getDate();
+        return isToday ? 'today' : null;
+      }
       case 'quarterly':
         return 'quarter';
       case 'yearly':
