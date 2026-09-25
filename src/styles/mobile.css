@@ -144,13 +144,6 @@
   transform: scale(0.98);
 }
 
-/* Mobile Prompt Styles */
-.mobile-prompt-content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-}
-
 /* Mobile Bottom Sheet Styles */
 .mobile-bottom-sheet-overlay {
   position: fixed;
