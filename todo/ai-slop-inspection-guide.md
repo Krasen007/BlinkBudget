@@ -23,6 +23,12 @@ Everything else is worth doing but is lower stakes if a session runs short.
 - 🟡 **Medium** — hurts maintainability, causes drift between files, or wastes reviewer time
 - ⚪ **Low** — cosmetic; harmless but worth cleaning up
 
+**Assign severity from the code you read, not from the report's framing.** Findings routinely
+read more severe than they are. "The original error is lost" and "the user is never told what
+went wrong" are both error-handling gaps, but only the first implies lost diagnosability — a
+round that mis-ranks its own findings will either panic the author or hide the real one.
+Rank by consequence: silent **data loss** > silent **feedback loss** > silent **console noise**.
+
 Independent of severity, a finding can also carry:
 
 - 🔒 **Security-sensitive** — touches authentication, authorization, ownership, or data deletion. A "no other caller reaches this" grep result is never sufficient grounds to remove one of these — see the carve-out under rule #3, the false-positive checklist, and the implementation-plan gate near the end of this guide. A 🔒 finding is never auto-remediated in the same pass it was discovered in.
@@ -44,6 +50,15 @@ Comments that restate what the adjacent code already says.
 - "Can be removed in production" — it never was
 
 **Check:** read each comment; if removing it loses zero information, it's slop.
+
+⚠️ **A comment describing a past fix is evidence, not noise.** A line like `// Handle click to
+show picker (fixes issues where appearance:none hides the trigger)` sitting above an _empty_
+handler matches this rule's "restates the condition" signal exactly — and reading it is what
+_proves_ the handler is dead, because the `appearance:none` approach it worked around was later
+abandoned and the CSS now forces `appearance: auto`. Before deleting a comment that names a bug
+or claims to fix one, check whether that fix is still in place. If the comment is the last
+record of _why_ the code looks strange, it is archaeology: report it under #11 (stale), not #1
+(trivial), because deleting it removes a pointer to where a regression would reappear.
 
 ---
 
@@ -107,6 +122,7 @@ Comments that restate what the adjacent code already says.
 2. Grep the file's **exported symbol names** (class/service names, not just the filename) across the _whole_ repo, including non-`.js` files — `.html`, `.json`, `README`/`AGENTS.md`. A service can be referenced by name in a manifest or config without ever being imported by path.
 3. Grep for **computed dynamic imports** — `import()` calls using a template literal or a variable instead of a string literal. A literal-filename grep misses a file loaded via a route-to-module map; check `router.js` and any lazy-loader-style registries specifically.
 4. **Quarantine before you delete.** Move the file to a `_deprecated/` folder (or a scratch branch) instead of deleting it outright, then run the full test suite and the production build. If nothing breaks, delete for real in a follow-up commit. This costs one extra step and catches whatever steps 1–3 missed.
+5. **Re-grep after the deletion — removals cascade, and the cascade is not local.** Deleting a function orphans its import; deleting its last consumer orphans whatever _that_ imported; and deleting that can orphan a CSS rule. One real chain from a single round: removing `PromptDialog` orphaned the `MobilePrompt` import → which revealed `MobilePrompt` itself had zero callers → removing it orphaned `.mobile-prompt-content` in `mobile.css`. Do not assume the cascade stopped at the call site you edited.
 
 ---
 
@@ -122,6 +138,38 @@ Comments that restate what the adjacent code already says.
 **Check:** search for `px` in inline `.style.` assignments; check that anything numeric maps to a constant or CSS variable.
 
 **In this codebase:** `COLORS`, `SPACING`, `TOUCH_TARGETS`, `FONT_SIZES`, `TIMING` in `src/utils/constants.js` are the design tokens. Any hardcoded value that duplicates one of these is slop.
+
+Four refinements that this rule needs in practice:
+
+**a) A `var(--token, fallback)` whose token does not exist is a hardcoded value in costume.**
+This is the easiest miss in the whole rule, because the line _looks_ tokenised and greps clean.
+`z-index: var(--z-index-modal, 1000)` was in `AccountSection.js` while `--z-index-modal` was
+defined in **no CSS file at all** — the `1000` fallback always won. Any time you see a
+`var(--x, <literal>)` fallback, grep the stylesheets for `--x:` before believing the site is
+compliant. Report these separately from plain literals: the literal is load-bearing and the
+author may well prefer to keep it (author declined this one, correctly — adding a z-index scale
+is a design-system change with global stacking implications, not a cleanup).
+
+**b) Convert only when an existing token has the _exact_ same value.** The signal above says
+"duplicates one of these" — the operative test is stricter than "similar". `max-width: 500px`
+had no matching token; "fixing" it would mean _inventing_ `--modal-max-width-lg`, which is design
+work that does not belong in a slop pass. `max-width: 400px` did match `--modal-max-width`
+(exactly 400px), so that one was a true cleanup. Report the no-match cases as _"no token exists"_,
+separately from the convertible ones, and let the author decide whether a token should be designed.
+
+**c) Not every raw value is slop — some are deliberate strategy.** `pwa.js` builds its
+update-available dialog with a fallback on _every_ colour (`var(--color-surface, #1a1a1a)`)
+because it can render before `tokens.css` is guaranteed to be applied. Swapping its
+`max-width: 400px` for a bare `var(--modal-max-width)` would drop the declaration entirely when
+the token is absent, and adding a fallback just re-creates the literal. Ask _why_ the raw value is
+there before converting it.
+
+**d) A `var(--token)` added in JS can be stripped by the production CSS purge.** The stylesheet
+is purged against the build output, so a token referenced only from JavaScript can disappear from
+the shipped CSS. This repo already guards it: `tests/system/design-tokens.test.js` contains
+_"keeps every token used from JS alive through the production CSS purge"_. When you add a
+`var(--token)` inside a `.style` assignment, run that suite and say in the commit that it covers
+the purge — it turns "should be fine" into a verified claim.
 
 ---
 
@@ -158,6 +206,23 @@ Comments that restate what the adjacent code already says.
 - A `<style>` tag injected in a `const` initializer
 
 **Check:** look at the module scope (outside any function) of every file you audit. Nothing should touch the DOM or register listeners at import time unless it is `main.js` or a deliberate plugin.
+
+**Standard remediation shape** (two real instances, both landed): strip the side effect, keep the
+export, and move the trigger to an explicit init call in `main.js` _before_ the first read of the
+global it publishes. Three details that matter:
+
+1. **Wrap the init in `try`/`catch`** using the same convention as the other `init()` calls in
+   `main.js`. The pre-existing `window.x?.` optional-chaining guards are what make the app survive
+   a failed init — and they only help if the failure is caught rather than aborting module
+   evaluation, which is what a top-level throw does today.
+2. **Verify the order claim, don't assume it.** ES module imports all evaluate before any of the
+   importing module's body, and `<script type="module">` is deferred, so `document.readyState` is
+   already `interactive` when `main.js` runs. That means an init which defers on
+   `readyState === 'loading'` still publishes synchronously — behaviour is preserved. Check this in
+   the code rather than reasoning that moving the call "obviously" keeps the timing.
+3. **Grep for other readers of the global before moving anything.** Every read must be inside a
+   function and guarded; a read at module scope anywhere in the graph would have depended on the
+   old import-time ordering.
 
 ---
 
@@ -242,12 +307,70 @@ Not a slop pattern by itself, but a strong correlate of it: files that outgrow w
 
 ---
 
+## Testing traps specific to this repo
+
+These are not slop patterns, but they decide whether a fix is actually _covered_, and a change
+that looks tested can be structurally untestable by the suite you reach for.
+
+### 1. A file-scoped `vi.mock` permanently removes a code path from that suite
+
+Mocks are hoisted and apply to the whole test file, not to one test. So a suite that mocks a
+module to make _other_ behaviour testable can quietly make your change unreachable:
+
+- `tests/components/integrity-report.test.js` mocks `data-integrity-service`, which makes it the
+  **only** suite able to render `DataManagementSection` at all.
+- `tests/components/backup-restore-section.test.js` mocks `ConfirmDialog` with a **throwing**
+  factory. That is the right call for its own test (a dialog chunk that won't load), but it means
+  the suite can never reach the `onConfirm` handler where the C16 restore-failure fix lives.
+
+**Check before you extend an existing suite:** does any file-level `vi.mock` in it exclude the
+code you changed? If so, a regression test belongs in a _new_ file whose mocks allow the path —
+that is what `tests/components/backup-restore-failure-logging.test.js` exists for, loading the
+dialog chunk normally and invoking `ConfirmDialog.mock.calls[0][0].onConfirm()` directly.
+
+### 2. Prove the regression test actually regresses
+
+A green test proves nothing until you have seen it fail. Revert the fix, run the test, confirm it
+fails for the _right reason_, restore. This is cheap and it catches the two failure modes that
+otherwise survive to review: a test that passes without the fix (asserting nothing), and a test
+that fails for an incidental reason (wrong mechanism, so it would keep passing after a real
+regression). For the C06 fix the reverted run produced:
+
+```
+AssertionError: promise rejected "Error: [vitest] There was an error when mocking a module"
+  instead of resolving
+```
+
+which is precisely the user-facing symptom the fix addresses — "the user is told nothing" — rather
+than an incidental mismatch.
+
+### 3. A rejected import in a `vi.mock` factory arrives wrapped
+
+Vitest replaces the error thrown by a failing mock factory with its own wrapper and preserves the
+original on `cause`. Asserting on `error.message` alone will fail for the wrong reason. Unwrap
+before asserting identity:
+
+```js
+const errorText = e =>
+  [e?.message, e?.cause?.message].filter(Boolean).join(' | ');
+```
+
+### 4. ESLint directives are single-line
+
+`eslint-disable-next-line` skips exactly **one** line. A three-line explanatory comment above it
+makes "next line" resolve to _another comment_, so the suppressed rule still fires **and** you
+pick up an `Unused eslint-disable directive` warning on top. Put the reason on one line directly
+above the offending statement and let the fuller justification live in the file header.
+
+---
+
 ## Before you flag it: false-positive checklist
 
 Not everything that looks like slop is slop. Before writing something up in the report, check:
 
 1. **Security- or ownership-related? Stop — don't run this checklist to decide whether to remove it.** See the 🔒 carve-out under rule #3. Flag for author confirmation and move on; no amount of grep confidence changes the answer.
 2. **Confirm with grep, not memory.** "This looks unused" is a hypothesis, not a finding — actually run the search.
+   - **Then ask whether it's _unreferenced_ or _provably_ dead** — they need different evidence. An empty function body (`() => { /* comment only */ }`) is a _proof_: it cannot do anything, so removing it cannot change behaviour on any runtime, and no device testing or `git blame` can overturn that. Grep-zero-callsites is weaker — it only means _this repo_ doesn't call it. A finding that says "check iOS behaviour before removing" has mis-filed a proof as a hypothesis, and gating it on a device test just manufactures a delay. Rule the two categories differently.
 3. **Check git blame / PR context** for the surrounding lines. A guard added deliberately in a bug-fix commit is not the same as one an AI tool left behind reflexively.
 4. **Check if it's covered by a test.** A "dead" branch that's exercised by a test suite is either not dead, or the test itself is stale — note which.
 5. **Consider forward-looking code.** A guard or parameter that doesn't fire _yet_ may be there for an in-progress feature or an upcoming caller — check open branches/PRs before deleting.
@@ -271,6 +394,20 @@ To keep audits comparable across sessions, every finding in the report should fo
 ```
 
 Group findings by rule number within the report so repeat offenders (e.g. every file that has the same #7 inconsistency) are easy to spot across sessions.
+
+⚠️ **Line numbers are a hint, not an instruction — re-derive them at execution time.** They decay
+the moment anything else in the file moves, and they mislead in a specific, expensive way: the
+plan _looks_ precise, so the executor stops searching. Every stale number this round was found by
+re-grepping instead of reading:
+
+- A Phase D comment listed once actually appeared **twice** in `view-preloader.js`, the second
+  occurrence in a function the plan never mentioned.
+- C06's "report sites" pointed at lines 258/327/401/485; the real catch blocks were 251/315/384/464.
+- C22 listed `ChartRenderer.js` at 1268 lines; it was 1271.
+- C11 cited `DateInput.js` L70–73; the listener was L71–73.
+
+Budget a search step per finding. "The cited lines don't contain this" is a finding about the
+report, and the right response is to re-locate the code — not to conclude the finding was closed.
 
 **One write-up per issue, not one per rule it matches.** If a single code block satisfies more than one rule — e.g. a `catch` that both swallows an error (#2) _and_ uses the exception as control flow (#10) — write it up once with `**Rule #:** 2, 10` rather than duplicating the snippet under two headers. Otherwise the executive-summary counts overstate how many distinct problems exist.
 
@@ -314,7 +451,18 @@ A finding that silently disappears between report and plan is the most common wa
 **Verification plan, minimum bar:**
 
 - Run the automated tests covering every file touched — not just the ones tied to the highest-severity fix.
+- **Re-read the code before implementing the prescribed fix, and re-rank the severity.** A report
+  describes a defect's _apparent_ mechanism, and that description can be wrong in a way that turns
+  the fix into a no-op. C06 was written as "the catch blocks import the dialog before reporting the
+  failure, so the original error is lost" — reading the source showed `console.error` already ran
+  first, so the diagnostic was never lost. The real defect was narrower: the secondary `await
+import()` sat _inside_ the catch, so a failed dialog chunk threw while handling the original
+  error, leaving the user with no feedback and an unhandled rejection. Implement that, not the
+  description. If the mechanism in the report doesn't survive contact with the code, stop and
+  re-scope the finding before writing any of it.
+- **Prove each regression test fails without its fix** — see [Testing traps](#testing-traps-specific-to-this-repo). Revert, run, confirm it fails for the right reason, restore.
 - Run lint/format/build once per phase, not only at the very end, so a bad phase-1 change doesn't get buried under phase-2 and phase-3 diffs on top of it.
+- **Re-grep for newly orphaned code after every deletion** — see rule #4 step 5. Cascades are the norm, not the exception.
 - For any UI-visible fix (error toasts, post-error navigation, focus behavior), write the manual QA step as a concrete user action ("click delete, confirm the undo toast appears and dismissing it does not re-delete") rather than "verify the flow works."
 
 ---
