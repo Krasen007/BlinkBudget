@@ -14,8 +14,9 @@ re-greps clean, 43/43 tests, `yarn run fix` + `yarn run build` green.
 **Phase D — landed in two batches**: `3f08c23` cleared every listed line, `f39483c`
 cleared the remainder. Full suite 76 files / 536 tests, `yarn run check` +
 `yarn run fix` + `yarn run build` green after each commit.
-**C06 `ca0cf68` and C08 `3a4401d` — both landed.** See §3 for what changed, including a
-correction to C06's original premise. Now 77 files / 538 tests, eslint 0 errors.
+**C06 `ca0cf68`, C08 `3a4401d`, A3 `d8c74b6`, C16 `91b29ba`, C11 `fe3abea` — all
+landed.** See §2 and §3 for the details and corrections. Now 79 files / 544 tests,
+eslint 0 errors, check/fix/build green after every commit.
 Components C01, C02, C03, C04, C05, C07, C09, C10, C12, C14, C15, C17, C18, C19, C20, C21.
 
 Standing verification bar for every item: targeted Vitest for each touched file →
@@ -60,26 +61,18 @@ choice rather than restating the next line.
 
 ---
 
-## 2. A3 follow-up — surface the partial-export warning in the UI
+## 2. A3 follow-up — surface the partial-export warning in the UI — **LANDED `d8c74b6`**
 
-`_collectExportData()` now sets `warnings`, and `createEmergencyExport()` threads it onto
-the result (`src/core/backup-service.js` L411–412, L426–427), but the **export** path
-never reads it.
+Done. The success branch now derives the missing-section list from `result.warnings`
+and switches to a "⚠️ Export Partially Complete" title naming what could not be
+included. Deliberately still a _success_ — transactions and accounts are always
+captured, and the todo's own rule holds: an empty "successful" backup is worse than
+an error, so this must never become a failure path.
 
-- `src/components/DataManagementSection.js` L168–175 always shows
-  `"Your emergency data file has been downloaded. File size: ..."` even when
-  `result.partial === true` / `result.warnings` contains `'budgets'`.
-- ⚠️ **Do not be misled by the `console.error('Warnings:', result.warnings)` at
-  `DataManagementSection.js` L381** — that belongs to the `performEmergencyRecovery()`
-  path, a different method. A `grep warnings src/` hits it and makes this item look
-  already-done. Re-verified 2026-09-25: the item is still open.
-- Change: when `result.warnings` is non-empty, show a "partial export — budgets
-  unavailable" (or equivalent) notice alongside the success message. Transactions/accounts
-  must stay unguarded — an empty "successful" backup is worse than an error.
-- Verify: extend `tests/core/phase-a-fallbacks.test.js` (or
-  `tests/components/backup-restore-section.test.js`) asserting the warning text; run
-  `tests/components/backup-restore-section.test.js`.
-- Manual QA: stub `BudgetService.getAll` to throw → emergency export → UI shows the partial warning, transaction/account data intact.
+New `tests/components/emergency-export-partial.test.js` covers this UI for the first
+time (it had no test at all). Four cases: partial names the missing section and keeps
+the size, healthy export stays plain, a legacy result object with no `warnings` field
+does not crash, and the genuine failure path is unchanged.
 
 ---
 
@@ -111,18 +104,27 @@ Regression test verified to be real: against the old code the handler _rejects_.
   deliberately (it is a usable mobile dialog primitive, and `MobileModal.js` is already
   a C22 split candidate). Worth a yes/no alongside C11.
 
-### C11 🔒 — empty date-input click listener
+**C11 `fe3abea` — LANDED; the 🔒 gate turned out to be unfounded.** The todo said "check
+iOS/native picker behavior before removing — no automated test can cover this". That
+rested on an assumption that does not hold:
 
-Still present at `src/components/DateInput.js` **L71–73** (todo said L70–73):
+1. The handler body was **empty**. `() => { /* comment only */ }` is a provable no-op;
+   removing a no-op cannot change behavior on any browser.
+2. `forms-dialogs.css:58–59` sets `.date-input-field { appearance: auto; cursor: pointer }`
+   — the native appearance the comment said was broken is **explicitly restored**, so the
+   native picker already opens on click.
+3. `DateInput.js:32` records the design change: "Native Date Input - Visible and styled
+   directly". The `appearance:none` approach was abandoned; the listener was a fossil.
 
-```js
-realDate.addEventListener('click', () => {
-  // Let the native behavior handle the click - don't interfere
-});
-```
+No `showPicker()` replacement added — that would be new behaviour, not a refactor.
 
-Blame traces it to date-input bug fixes, so browser-specific intent needs confirmation.
-**Check iOS/native picker behavior before removing** — no automated test can cover this.
+**C16 `91b29ba` — LANDED.** The `onConfirm` catch now logs
+`console.error('Restore from backup failed:', error)`; the existing `AlertDialog` is
+unchanged. Needed a _new_ test file: `backup-restore-section.test.js` mocks
+`ConfirmDialog` with a throwing factory, so it can never reach the handler this change
+lives in. `tests/components/backup-restore-failure-logging.test.js` loads the dialog
+chunk fine and drives the confirm callback. Two cases: failure logs + still alerts,
+success logs nothing.
 
 ### C13 (partial) — raw values still bypass existing tokens
 
@@ -133,12 +135,6 @@ Only the BackupRestoreSection metadata radius was converted. Still open:
 
 Constraints: no blanket numeric replacement; canvas colors need resolved color strings,
 not CSS vars; `PrivacyControls.js` sites are moot (module retired).
-
-### C16 (partial) — backup-restore diagnostic logging
-
-Ordinary add/copy/split diagnostics landed, but the restore-failure catch at
-`src/components/BackupRestoreSection.js` L142–144 shows an alert with no
-`console.error`/`console.warn`. Add the diagnostic while preserving existing user feedback.
 
 ### C22 (deferred) — split the oversized component modules
 
