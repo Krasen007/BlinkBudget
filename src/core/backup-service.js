@@ -50,7 +50,6 @@ export const BackupService = {
 
   handleVisibilityChange() {
     if (!document.hidden) {
-      console.log('[Backup] App became visible, checking for backup');
       setTimeout(() => {
         this.checkAndCreateBackup();
       }, 1000);
@@ -96,6 +95,14 @@ export const BackupService = {
         } catch {
           /* ignore storage errors */
         }
+        // Error contract (event -> listener -> user-visible feedback):
+        //   backup-operation { operation, status, error }
+        //     -> SettingsView.handleBackupOperation (console only) and
+        //        BackupRestoreSection.updateBackupMetadata, which re-reads
+        //        lastBackupDate so a failed backup correctly leaves it stale.
+        //   toast { message } -> main.js generic toast bridge -> showWarningToast.
+        //   Raw codes stay in console.error + localStorage
+        //   (`last_backup_error`); the user only ever sees the generic string.
         window.dispatchEvent(
           new CustomEvent('backup-operation', {
             detail: {
@@ -254,6 +261,14 @@ export const BackupService = {
       } catch {
         /* ignore storage errors */
       }
+      // Error contract (event -> listener -> user-visible feedback):
+      //   backup-operation { operation, status, error }
+      //     -> SettingsView.handleBackupOperation (console only) and
+      //        BackupRestoreSection.updateBackupMetadata.
+      //   toast { message } -> main.js generic toast bridge -> showWarningToast.
+      //   A non-empty `error` is also rethrown so direct callers can react;
+      //   the rethrown error message is the same generic user string, with the
+      //   original preserved as `cause`.
       const userMessage =
         'Unable to restore — please try again when online. Your local data is safe.';
       window.dispatchEvent(

@@ -22,7 +22,6 @@ export const ViewPreloader = {
    * @param {Function} importFn - The dynamic import function
    */
   async preloadView(name, importFn) {
-    // Skip if already cached or already preloading
     if (this.cache.has(name)) {
       return this.cache.get(name);
     }
@@ -31,7 +30,6 @@ export const ViewPreloader = {
       return this.preloadPromises.get(name);
     }
 
-    // Create preload promise
     const promise = importFn()
       .then(module => {
         this.cache.set(name, module);
@@ -41,8 +39,12 @@ export const ViewPreloader = {
       })
       .catch(error => {
         this.preloadPromises.delete(name);
+        // Error contract: warn-only by design. Preloading is a pure latency
+        // optimization, so a failure emits NO window event and shows NO toast —
+        // that would punish the user for a failure they never asked for. The
+        // resolved `null` lets the caller fall back to a normal dynamic import,
+        // which surfaces its own error if that import also fails.
         console.warn(`[ViewPreloader] Failed to preload: ${name}`, error);
-        // Don't throw - allow fallback to regular import
         return null;
       });
 
@@ -76,7 +78,6 @@ export const ViewPreloader = {
   preloadAll() {
     console.log('[ViewPreloader] Starting background preload of all views...');
 
-    // Return a promise that resolves after all preloads complete
     return new Promise(resolve => {
       // Use setTimeout to not block initial render
       setTimeout(() => {

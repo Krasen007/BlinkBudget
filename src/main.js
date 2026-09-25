@@ -72,6 +72,16 @@ const initApp = () => {
 
   // Design by subtraction: generic toast bridge — UI never sees raw Firestore codes
   // Technical details stay in console + localStorage (last_sync_error / last_auth_error)
+  //
+  // This is the ONLY bridge for user-visible messages. Emitters that bypass it:
+  //   sync-error       -> no listener anywhere; extension point only. Its message
+  //                       is always duplicated on the sibling `toast` event.
+  //   sync-state       -> FinancialPlanningView.handleSyncState, which repaints the
+  //                       ".sync-status" chip instead of raising a toast.
+  //   backup-operation -> SettingsView (console only) and BackupRestoreSection
+  //                       (metadata refresh); each failure site dispatches its own
+  //                       `toast` separately.
+  //   ViewPreloader    -> intentionally silent (console.warn only).
   window.addEventListener('toast', e => {
     const message =
       e.detail?.message ||

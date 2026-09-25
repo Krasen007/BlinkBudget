@@ -37,11 +37,11 @@ export const SyncService = {
   lastPushTimes: new Map(), // Track last push time per dataType for rate limiting
   _debounceTimeouts: new Map(), // Track active debounces per dataType
   _conflictResolutionHandler: null,
-  isOnline: navigator.onLine, // NEW: Track connection status
+  isOnline: navigator.onLine,
   _pendingPullPromise: null, // Track pending pull to prevent duplicates
 
   async init() {
-    this.setupConnectionMonitoring(); // NEW: Setup connection monitoring
+    this.setupConnectionMonitoring();
 
     // Remove existing listener if any to avoid duplicates when `init()` is called multiple times
     if (this._conflictResolutionHandler) {
@@ -117,6 +117,13 @@ export const SyncService = {
    * emits `sync-error` + `toast` events.
    * Note: pushToCloud() currently never rejects (errors are handled in
    * _executePush), so the retry loop activates only if that changes.
+   *
+   * Error contract (event -> listener -> user-visible feedback):
+   *   sync-error { key, error } -> no listener in the app. Extension point
+   *     only; the user-facing text always rides on the sibling `toast`.
+   *   toast { message } -> main.js generic toast bridge -> showWarningToast.
+   *   The raw Firebase code stays in console.error + localStorage
+   *   (`last_sync_error`); neither ever reaches the UI.
    */
   pushToCloudSafe(dataType, data, retries = 3) {
     const attemptPush = async () => {
@@ -192,7 +199,17 @@ export const SyncService = {
   },
 
   /**
-   * Internal method to execute the actual push to Firestore
+   * Internal method to execute the actual push to Firestore.
+   *
+   * Error contract (event -> listener -> user-visible feedback):
+   *   sync-state { dataType, state, timestamp, isNetworkError? }
+   *     -> FinancialPlanningView.handleSyncState repaints the
+   *        ".sync-status" chip; state 'error' shows
+   *        "Sync error (<dataType>)". No toast is raised here.
+   *   toast { message } -> main.js generic toast bridge -> showWarningToast.
+   *   Unlike pushToCloudSafe(), this path never rethrows: the failure is
+   *   swallowed after console.error + `last_sync_error`, so `sync-error` is
+   *   NOT emitted from here.
    */
   async _executePush(dataType, data, userId) {
     // Rate limiting: Ensure at least 1 second between actual network calls
