@@ -23,6 +23,7 @@ export const loadMobileAlert = async () => {
       error
     );
     return ({ title, message }) =>
+      // eslint-disable-next-line no-alert -- last-resort feedback, see header
       window.alert([title, message].filter(Boolean).join('\n\n'));
   }
 };
