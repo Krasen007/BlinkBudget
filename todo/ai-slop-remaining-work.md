@@ -15,8 +15,8 @@ re-greps clean, 43/43 tests, `yarn run fix` + `yarn run build` green.
 cleared the remainder. Full suite 76 files / 536 tests, `yarn run check` +
 `yarn run fix` + `yarn run build` green after each commit.
 **C06 `ca0cf68`, C08 `3a4401d`, A3 `d8c74b6`, C16 `91b29ba`, C11 `fe3abea`, C13 `09d5825`,
-4.1 `e4ba827`, 5.2 `f978d0f` — all landed.** See §2–§5. 79 files / 544 tests, eslint
-`src/utils` 0 problems, check/fix/build green after every commit.
+4.1 `e4ba827`, 5.2 `f978d0f`, 5.3 `ca6cac1` — all landed.** See §2–§5.
+79 files / 544 tests, eslint `src/utils` 0 problems, check/fix/build green every commit.
 Components C01, C02, C03, C04, C05, C07, C09, C10, C12, C14, C15, C17, C18, C19, C20, C21.
 
 Standing verification bar for every item: targeted Vitest for each touched file →
@@ -268,13 +268,17 @@ Re-audited against the current tree before touching anything:
   `TransactionForm.js`, `TransactionList.js`, `AddView.js`, `form-utils/amount-input.js`,
   `form-utils/category-chips.js`.
 
-### 5.3 Still needs a yes/no
+### 5.3 Resolved — z-index scale declined, MobilePrompt deleted
 
-- **`--z-index-modal`** (`AccountSection.js:55,423`) — referenced but never defined in any
-  CSS file, so the `1000` fallback always wins. See §3; fixing it means adding a z-index
-  scale, a design-system call.
-- **`MobilePrompt`** (`MobileModal.js:205`) — unused export since C08 removed
-  `PromptDialog`, its only consumer.
+- **`--z-index-modal`** (`AccountSection.js:55,423`) — **author said no.** The token is
+  referenced but never defined in any CSS file, so the `1000` fallback always wins, and
+  the raw literal stays. Deliberate: adding a z-index scale to `tokens.css` is a
+  design-system change with global stacking implications, and the fallback already
+  produces the intended value. Not a defect — just an undocumented magic number.
+- **`MobilePrompt`** (`MobileModal.js:205`) — **deleted `ca6cac1`.** C08 removed
+  `PromptDialog`, its only consumer. Removing it also orphaned `.mobile-prompt-content`
+  in `mobile.css`, deleted in the same commit. A good example of deletions cascading:
+  always re-grep after a removal instead of assuming the cascade stopped at the call site.
 
 ---
 
