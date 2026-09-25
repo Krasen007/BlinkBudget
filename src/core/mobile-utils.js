@@ -2,6 +2,11 @@
  * Mobile Utilities - Consolidated mobile handling
  * Combines viewport management, keyboard detection, device detection,
  * and form optimization into a single focused module
+ *
+ * Importing this module has no side effects. Call `MobileUtils.initialize()`
+ * once at startup to publish the `window.mobileUtils` singleton that the rest
+ * of the app reads; the `window.mobileUtils?.` guards elsewhere are what keep
+ * the app working when initialization is skipped or fails.
  */
 
 export class MobileUtils {
@@ -599,7 +604,6 @@ export class MobileUtils {
   }
 }
 
-// Auto-initialize when module is imported
-MobileUtils.initialize();
-
+// No auto-initialize here: see the module header. main.js calls
+// MobileUtils.initialize() explicitly before its first window.mobileUtils read.
 export default MobileUtils;

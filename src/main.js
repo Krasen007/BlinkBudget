@@ -13,8 +13,16 @@ import { CacheInvalidator } from './core/cache-invalidator.js';
 import { PrivacyService } from './core/privacy-service.js';
 import { config } from '../config/app.config.js';
 import { showWarningToast } from './utils/toast-notifications.js';
-import './core/mobile-utils.js'; // Initialize consolidated mobile utilities
+import MobileUtils from './core/mobile-utils.js';
 import './pwa.js'; // Register PWA service worker
+
+// Publishes window.mobileUtils. Must run before the first read below
+// (initMobileNav / the onResponsiveChange hook / the auth_hint early nav).
+try {
+  MobileUtils.initialize();
+} catch (error) {
+  console.warn('[Main] Failed to initialize mobile utilities:', error);
+}
 
 try {
   InstallService.init();

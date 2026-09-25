@@ -491,9 +491,13 @@ export class EnvValidator {
 // Global validator instance
 export const envValidator = new EnvValidator();
 
-// Auto-validate on import
-if (typeof window !== 'undefined') {
-  const result = envValidator.validateForProduction();
+// Importing this module has no side effects on purpose: the auto-validate
+// block that used to live here ran on every import, so pulling the module into
+// a test, the dev server, or a build step logged "Validating environment
+// variables..." and dumped errors the importer never asked for. Call
+// runProductionValidation() explicitly where the report is actually wanted.
+export const runProductionValidation = (validator = envValidator) => {
+  const result = validator.validateForProduction();
 
   if (!result.isValid) {
     console.error(
@@ -506,4 +510,6 @@ if (typeof window !== 'undefined') {
       console.error('🚨 Production environment has validation errors!');
     }
   }
-}
+
+  return result;
+};
