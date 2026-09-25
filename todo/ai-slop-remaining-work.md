@@ -14,6 +14,8 @@ re-greps clean, 43/43 tests, `yarn run fix` + `yarn run build` green.
 **Phase D — landed in two batches**: `3f08c23` cleared every listed line, `f39483c`
 cleared the remainder. Full suite 76 files / 536 tests, `yarn run check` +
 `yarn run fix` + `yarn run build` green after each commit.
+**C06 `ca0cf68` and C08 `3a4401d` — both landed.** See §3 for what changed, including a
+correction to C06's original premise. Now 77 files / 538 tests, eslint 0 errors.
 Components C01, C02, C03, C04, C05, C07, C09, C10, C12, C14, C15, C17, C18, C19, C20, C21.
 
 Standing verification bar for every item: targeted Vitest for each touched file →
@@ -83,38 +85,35 @@ never reads it.
 
 ## 3. Components — open 🔒 author-review gates and partial findings
 
-### C06 🔒 — secondary import failure replaces the original error
+**C06 `ca0cf68` — LANDED, but the original premise was wrong.** The todo said the
+catch blocks reported the dialog import _before_ the original error, "so the original
+error is lost". Re-read in source: `console.error` already ran first, so the diagnostic
+always survived. The real defect was smaller — the secondary `await import()` sat
+_inside_ the catch, so when MobileModal failed to load (offline, chunk evicted by a
+deploy) it threw **while handling** the original error: no dialog rendered and the
+rejection escaped unhandled. Net user impact was "silent failure to inform", not
+"masked error". Fixed via a shared `src/utils/mobile-alert.js` → `loadMobileAlert()`,
+which returns the real dialog or a `window.alert` stand-in. 7 error-path sites
+converted (`AccountDeletionSection` L211/L217, `DataManagementSection`
+L187/L254/L318/L387/L467); the 13 happy-path imports deliberately untouched.
+Regression test verified to be real: against the old code the handler _rejects_.
 
-Catch blocks still do `await import('./MobileModal.js')` _before_ reporting the original
-failure; if that second import rejects, the original error is lost.
+**C08 `3a4401d` — LANDED (author approved).** Deleted 7 confirmed-dead exports:
+`createExpandableSection`, `PromptDialog`, `SavingsGoalCard`, and ChartRenderer's
+`updateChart` / `resizeChart` / `addTouchOptimizations` / `addLoadingAnimation` /
+`removeLoadingAnimation`. Re-verified definition-only before deleting (zero callers in
+`src/` _and_ `tests/`, no internal `this.x()` calls). Also dropped the resulting dead
+`updateChart: vi.fn()` stub keys from the two `mockChartRenderer` objects.
+`getActiveCharts` and `MobileBackButton` preserved as instructed.
 
-- `src/components/AccountDeletionSection.js` L208–211 and L214–216.
-- `src/components/DataManagementSection.js` L184–186, L251–253, and the sibling
-  emergency-export/integrity catches (report sites: L188–200, L258–270, L327–339, L401–413, L485–497).
-
-Change: report/log the original error **first**, then attempt the secondary dialog import
-inside its own guard so its failure cannot mask the original. Preserve deletion/recovery
-semantics — never bypass confirmation as a fallback.
-
-- Verify: `npx vitest run tests/components/account-deletion-section.test.js tests/components/integrity-report.test.js`
-  (`integrity-report.test.js` is the only suite exercising `DataManagementSection`) — add a
-  regression where the `MobileModal` import rejects.
-
-### C08 🔒 — unused exported APIs (decision required, then delete)
-
-Whole-repo searches still find definitions only, no application callers:
-
-- `createExpandableSection` — `src/components/ExpandableSection.js` (~L209); zero call sites.
-- `PromptDialog` — `src/components/ConfirmDialog.js` L161–245.
-- `SavingsGoalCard` — `src/components/ui/ActionCard.js` L282–332.
-- ChartRenderer: `addTouchOptimizations` (L569), `updateChart`, `resizeChart`, loading helpers.
-
-Do **not** delete `getActiveCharts` (integration tests exercise it) or `MobileBackButton`
-(has real tests). Confirm intent with the author first — unused APIs are not proven defects.
+- ➕ **New candidate, not yet triaged:** `MobilePrompt` (`src/components/MobileModal.js`
+  L205) is now an unused export — `PromptDialog` was its only consumer. Left in place
+  deliberately (it is a usable mobile dialog primitive, and `MobileModal.js` is already
+  a C22 split candidate). Worth a yes/no alongside C11.
 
 ### C11 🔒 — empty date-input click listener
 
-Still present at `src/components/DateInput.js` L70–73:
+Still present at `src/components/DateInput.js` **L71–73** (todo said L70–73):
 
 ```js
 realDate.addEventListener('click', () => {
@@ -143,11 +142,12 @@ Ordinary add/copy/split diagnostics landed, but the restore-failure catch at
 
 ### C22 (deferred) — split the oversized component modules
 
-Still over the 500-line guideline (current physical counts):
+Still over the 500-line guideline (current physical counts, re-measured 2026-09-25 —
+`ChartRenderer` was listed as 1268 but was actually 1271 before C08 trimmed it):
 
 | File                                                   | Lines |
 | ------------------------------------------------------ | ----: |
-| `src/components/ChartRenderer.js`                      |  1268 |
+| `src/components/ChartRenderer.js`                      |  1125 |
 | `src/components/TimePeriodSelector.js`                 |  1197 |
 | `src/components/CustomCategoryManager.js`              |   915 |
 | `src/components/AccountSection.js`                     |   759 |
@@ -155,7 +155,8 @@ Still over the 500-line guideline (current physical counts):
 | `src/components/MobileModal.js`                        |   552 |
 | `src/components/TransactionListItem.js`                |   534 |
 
-Keep structural splits in their own commits, separate from behavior fixes.
+`TimePeriodSelector.js` is now the largest. Keep structural splits in their own commits,
+separate from behavior fixes.
 
 ---
 
