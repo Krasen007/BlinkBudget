@@ -156,20 +156,17 @@ export const ViewPreloader = {
    * Pulls all data types and preloads planning data cache
    */
   async preloadCloudData() {
-    // Skip if already preloaded
     if (this.dataPreloaded) {
       console.log('[ViewPreloader] Cloud data already preloaded');
       return;
     }
 
-    // Return existing promise if already in flight
     if (this.cloudPreloadPromise) {
       return this.cloudPreloadPromise;
     }
 
     console.log('[ViewPreloader] Starting cloud data preload...');
 
-    // Create preload promise
     const promise = (async () => {
       try {
         const userId = AuthService.getUserId();

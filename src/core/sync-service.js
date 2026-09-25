@@ -647,7 +647,6 @@ export const SyncService = {
     });
   },
 
-  // NEW: Connection monitoring methods
   setupConnectionMonitoring() {
     window.addEventListener('online', () => {
       this.isOnline = true;
