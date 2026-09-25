@@ -67,11 +67,6 @@ export const DateInput = (options = {}) => {
     }
   });
 
-  // Handle click to show picker (fixes issues where appearance:none hides the trigger)
-  realDate.addEventListener('click', () => {
-    // Let the native behavior handle the click - don't interfere
-  });
-
   container.appendChild(label);
   container.appendChild(realDate);
 
