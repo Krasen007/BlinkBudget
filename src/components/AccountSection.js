@@ -66,7 +66,7 @@ export const AccountSection = () => {
           border: 1px solid var(--color-border);
           padding: var(--spacing-lg);
           border-radius: var(--radius-lg);
-          max-width: 400px;
+          max-width: var(--modal-max-width);
           width: 90%;
           max-height: 80vh;
           overflow-y: auto;
@@ -434,7 +434,7 @@ export const AccountSection = () => {
               border: 1px solid var(--color-border);
               padding: var(--spacing-lg);
               border-radius: var(--radius-lg);
-              max-width: 400px;
+              max-width: var(--modal-max-width);
               width: 90%;
               max-height: 80vh;
               overflow-y: auto;

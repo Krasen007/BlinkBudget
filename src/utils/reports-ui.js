@@ -152,7 +152,7 @@ export function showErrorState(errorState, customMessage, onRetry) {
 
   message.innerHTML = `
         <h3 style="margin: 0 0 ${SPACING.XS} 0; color: ${COLORS.ERROR};">${escapeHtml(errorTitle)}</h3>
-        <p style="margin: 0; max-width: 400px; line-height: 1.5; color: ${COLORS.TEXT_MUTED};">
+        <p style="margin: 0; max-width: var(--modal-max-width); line-height: 1.5; color: ${COLORS.TEXT_MUTED};">
             ${escapeHtml(errorDescription)}
         </p>
     `;
