@@ -6,6 +6,7 @@
 import { ButtonComponent } from './Button.js';
 import { SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
 import { AuthService } from '../core/auth-service.js';
+import { loadMobileAlert } from '../utils/mobile-alert.js';
 
 export const AccountDeletionSection = () => {
   const section = document.createElement('div');
@@ -207,13 +208,13 @@ export const AccountDeletionSection = () => {
             }
           } catch (error) {
             console.error('Account deletion failed:', error);
-            const { MobileAlert } = await import('./MobileModal.js');
+            const MobileAlert = await loadMobileAlert();
             showDeletionFailure(error.message, MobileAlert);
           }
         };
       } catch (error) {
         console.error('Failed to load account deletion service:', error);
-        const { MobileAlert } = await import('./MobileModal.js');
+        const MobileAlert = await loadMobileAlert();
         MobileAlert({
           title: '❌ Error',
           message: `Failed to initialize deletion process: ${error.message}`,

@@ -19,6 +19,7 @@ import {
   formatDateForDisplay,
 } from '../utils/date-utils.js';
 import { showWarningToast } from '../utils/toast-notifications.js';
+import { loadMobileAlert } from '../utils/mobile-alert.js';
 
 export const DataManagementSection = () => {
   const section = document.createElement('div');
@@ -183,7 +184,7 @@ export const DataManagementSection = () => {
         }
       } catch (error) {
         console.error('Emergency export failed:', error);
-        const { MobileAlert } = await import('./MobileModal.js');
+        const MobileAlert = await loadMobileAlert();
         MobileAlert({
           title: 'Export Failed',
           message: `An unexpected error occurred: ${error.message}`,
@@ -250,7 +251,7 @@ export const DataManagementSection = () => {
         }
       } catch (error) {
         console.error('Data integrity check failed:', error);
-        const { MobileAlert } = await import('./MobileModal.js');
+        const MobileAlert = await loadMobileAlert();
         MobileAlert({
           title: 'Check Failed',
           message: `Integrity check failed: ${error.message}`,
@@ -314,7 +315,7 @@ export const DataManagementSection = () => {
         }
       } catch (error) {
         console.error('Data cleanup failed:', error);
-        const { MobileAlert } = await import('./MobileModal.js');
+        const MobileAlert = await loadMobileAlert();
         MobileAlert({
           title: 'Cleanup Failed',
           message: `Data cleanup failed: ${error.message}`,
@@ -383,7 +384,7 @@ export const DataManagementSection = () => {
         }
       } catch (error) {
         console.error('Emergency recovery failed:', error);
-        const { MobileAlert } = await import('./MobileModal.js');
+        const MobileAlert = await loadMobileAlert();
         MobileAlert({
           title: 'Recovery Failed',
           message: `Emergency recovery failed: ${error.message}`,
@@ -463,7 +464,7 @@ export const DataManagementSection = () => {
         }
       } catch (error) {
         console.error('Backup restore failed:', error);
-        const { MobileAlert } = await import('./MobileModal.js');
+        const MobileAlert = await loadMobileAlert();
         MobileAlert({
           title: 'Restore Failed',
           message: `Backup restore failed: ${error.message}`,
