@@ -14,9 +14,9 @@ re-greps clean, 43/43 tests, `yarn run fix` + `yarn run build` green.
 **Phase D — landed in two batches**: `3f08c23` cleared every listed line, `f39483c`
 cleared the remainder. Full suite 76 files / 536 tests, `yarn run check` +
 `yarn run fix` + `yarn run build` green after each commit.
-**C06 `ca0cf68`, C08 `3a4401d`, A3 `d8c74b6`, C16 `91b29ba`, C11 `fe3abea` — all
-landed.** See §2 and §3 for the details and corrections. Now 79 files / 544 tests,
-eslint 0 errors, check/fix/build green after every commit.
+**C06 `ca0cf68`, C08 `3a4401d`, A3 `d8c74b6`, C16 `91b29ba`, C11 `fe3abea`, C13 `09d5825`,
+4.1 `e4ba827`, 5.2 `f978d0f` — all landed.** See §2–§5. 79 files / 544 tests, eslint
+`src/utils` 0 problems, check/fix/build green after every commit.
 Components C01, C02, C03, C04, C05, C07, C09, C10, C12, C14, C15, C17, C18, C19, C20, C21.
 
 Standing verification bar for every item: targeted Vitest for each touched file →
@@ -76,7 +76,31 @@ does not crash, and the genuine failure path is unchanged.
 
 ---
 
-## 3. Components — open 🔒 author-review gates and partial findings
+## 3. Components — C13 landed; only C22 remains
+
+**C13 `09d5825` — LANDED (partial).** Converted `AccountSection.js` L69 and L437
+(`max-width: 400px` → `var(--modal-max-width)`) plus one swept site,
+`reports-ui.js:155`. `--modal-max-width` is already `400px` (`tokens.css:154`) and
+`.dialog-card` already uses it (`forms-dialogs.css:577`), so the inline copy was
+redundant. Zero visual change.
+
+Sweep rule used: **convert only where an existing token has the exact same value.**
+Deliberately left raw, with reasons:
+
+- `CustomCategoryManager.js:506` `max-width: 500px` — no 500px token exists; converting
+  means inventing one, which is design work, not cleanup.
+- `pwa.js:44` `max-width: 400px` — that dialog is deliberately built with fallbacks
+  (`var(--color-surface, #1a1a1a)` etc.) because it can render before `tokens.css` is
+  guaranteed. A bare `var()` with no definition drops the declaration entirely; a
+  fallback just reintroduces the literal.
+- `AccountSection.js:55,423` `var(--z-index-modal, 1000)` — ⚠️ **the token is never
+  defined in any CSS file**, so the `1000` fallback always wins. A raw value wearing a
+  token costume. Fixing it means adding a z-index scale to `tokens.css`, a
+  design-system call with global stacking implications. **Still open — needs a yes/no.**
+- `pwa.js:33` `z-index: 10000` — same reasoning, raw layer value, no token.
+
+`design-tokens.test.js` covers "keeps every token used from JS alive through the
+production CSS purge", so the new `var()` references are provably not stripped.
 
 **C06 `ca0cf68` — LANDED, but the original premise was wrong.** The todo said the
 catch blocks reported the dialog import _before_ the original error, "so the original
@@ -126,16 +150,6 @@ lives in. `tests/components/backup-restore-failure-logging.test.js` loads the di
 chunk fine and drives the confirm callback. Two cases: failure logs + still alerts,
 success logs nothing.
 
-### C13 (partial) — raw values still bypass existing tokens
-
-Only the BackupRestoreSection metadata radius was converted. Still open:
-
-- `src/components/AccountSection.js` **L69** and **L437** — `max-width: 400px` (account-dialog dimensions).
-- Sweep the remaining ordinary presentation sites for dimension/radius/layer tokens.
-
-Constraints: no blanket numeric replacement; canvas colors need resolved color strings,
-not CSS vars; `PrivacyControls.js` sites are moot (module retired).
-
 ### C22 (deferred) — split the oversized component modules
 
 Still over the 500-line guideline (current physical counts, re-measured 2026-09-25 —
@@ -156,16 +170,14 @@ separate from behavior fixes.
 
 ---
 
-## 4. File splits from the post-cleanup runbook (none of the four landed)
+## 4. File splits — 4.1 LANDED, the three splits still open
 
-### 4.1 Delete the quarantined barrel (trivial, do first)
+### 4.1 Delete the quarantined barrel — **LANDED `e4ba827`**
 
-- `src/utils/form-utils/_deprecated/` still exists (`index.js`, 17 lines, zero importers).
-- Delete the whole `_deprecated/` directory.
-- Verify: `npx eslint src/utils` → 0 problems;
-  `npx vitest run tests/form-utils tests/system/design-tokens.test.js tests/integration/chart-integration.test.js`;
-  `yarn run build`.
-- Own commit: `chore: delete quarantined form-utils barrel`.
+Deleted `src/utils/form-utils/_deprecated/index.js` (17 lines). A whole-tree search for
+`_deprecated` returned no hits, and the directory held nothing else. Nothing was lost —
+the barrel only re-exported modules still imported directly. eslint `src/utils` 0
+problems, 213 targeted tests, build green.
 
 ### 4.2 Split `src/utils/reports-charts.js` — now **710 lines** (was 639)
 
@@ -209,24 +221,60 @@ the split unchanged.
 
 ---
 
-## 5. Author decisions required (no code lands without explicit approval)
+## 5. Author decisions — 5.1 answered, 5.2 actioned
 
-1. **`BudgetService` userId filter** (`src/core/budget-service.js` L23–27) — report verdict:
-   intentional IDOR protection. Recommended: keep as-is. Needs a recorded yes/no.
-2. **Whole-file deletions** — re-audited against the current tree; the original candidates
-   need correcting:
-   - `src/core/env-validator.js` — **real orphan**, zero importers outside itself. The Phase C2
-     gate is now **cleared** (`1fdbc75`): the auto-validate block is gone and its reporting
-     logic is exported as `runProductionValidation()`. Deliberately **no `main.js` importer was
-     added** — adding one would defeat the purpose, since runtime config comes from
-     `config/app.config.js`, not env vars. So the file still has zero callers, and deleting it
-     is now a clean, zero-behaviour-change call. **Needs a recorded yes/no.**
-   - `src/core/savings-goals-service.js` — **NOT an orphan.** `src/views/financial-planning/GoalsSection.js`
-     L26 and L924 import and call it, and `tests/financial-planning/GoalsSection.test.js` mocks it.
-     The plan's premise ("GoalsSection uses StorageService directly") is stale — **do not delete**.
-   - `src/core/click-tracking-service.js` — **NOT dead.** Production importers:
-     `TransactionForm.js`, `TransactionList.js`, `AddView.js`, `form-utils/amount-input.js`,
-     `form-utils/category-chips.js`. **Do not delete.**
+### 5.1 `BudgetService` userId filter — **ANSWERED: keep as-is (no change made)**
+
+`src/core/budget-service.js` L23–27:
+
+```js
+// IDOR Protection: Filter by current userId
+const currentUserId = AuthService.getUserId();
+if (!currentUserId) return [];
+return budgets.filter(b => !b.userId || b.userId === currentUserId);
+```
+
+**What it does.** All budgets live under one localStorage key, so on a device that has
+hosted more than one account they are interleaved. This filter makes `getAll()` return
+only the signed-in user's rows, and fails closed (`return []`) when nobody is signed in.
+
+**Verdict: intentional and correct. Keep as-is.** Three reasons:
+
+- It is defence in depth, and costs one `.filter()` on data already in memory.
+- It fails _closed_. The `if (!currentUserId) return []` guard means a signed-out or
+  mid-auth-resolution read returns nothing rather than everything.
+- Its real value is **shared-device account switching**, which is the one scenario where
+  another account's budgets would otherwise surface. Note the honest limit: localStorage
+  is per-browser, so this is not a protection against a remote attacker reading someone
+  else's storage — it never was, and cannot be.
+
+**The one soft spot, left deliberately:** `!b.userId` keeps _un-tagged_ legacy budgets
+visible to whoever is signed in. That is a necessary migration allowance for pre-auth
+data, but it means an untagged row is not attributable. Tightening it (dropping the
+`!b.userId` clause) would hide any budget written before tagging existed, so it is a
+data-migration question, not a cleanup. **No change made — this is the recorded verdict.**
+
+### 5.2 Whole-file deletions — **DONE `f978d0f`: one orphan deleted, two kept**
+
+Re-audited against the current tree before touching anything:
+
+- `src/core/env-validator.js` — **real orphan, deleted.** 515 lines, zero callers. A
+  whole-tree search across `.js/.cjs/.mjs/.json/.html/.md` found only five hits, all
+  self-referential. `config/validate-env.cjs` (`yarn validate-env`) is a separate
+  Node-side predeploy check that never imported it, so that script is unaffected.
+- `src/core/savings-goals-service.js` — **NOT an orphan, kept.** Imported by
+  `views/financial-planning/GoalsSection.js` and mocked in its test.
+- `src/core/click-tracking-service.js` — **NOT dead, kept.** Five production importers:
+  `TransactionForm.js`, `TransactionList.js`, `AddView.js`, `form-utils/amount-input.js`,
+  `form-utils/category-chips.js`.
+
+### 5.3 Still needs a yes/no
+
+- **`--z-index-modal`** (`AccountSection.js:55,423`) — referenced but never defined in any
+  CSS file, so the `1000` fallback always wins. See §3; fixing it means adding a z-index
+  scale, a design-system call.
+- **`MobilePrompt`** (`MobileModal.js:205`) — unused export since C08 removed
+  `PromptDialog`, its only consumer.
 
 ---
 
