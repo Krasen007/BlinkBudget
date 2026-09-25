@@ -1,9 +1,5 @@
 import { ButtonComponent } from './Button.js';
-import {
-  MobileConfirmDialog,
-  MobileAlert,
-  MobilePrompt,
-} from './MobileModal.js';
+import { MobileConfirmDialog, MobileAlert } from './MobileModal.js';
 import { COLORS } from '../utils/constants.js';
 
 /**
@@ -153,92 +149,6 @@ export const AlertDialog = ({
   overlay.appendChild(card);
 
   document.body.appendChild(overlay);
-};
-
-/**
- * Standard Prompt Dialog
- */
-export const PromptDialog = ({
-  title,
-  message,
-  initialValue = '',
-  placeholder = '',
-  onSave,
-  onCancel,
-}) => {
-  if (window.mobileUtils?.isMobile()) {
-    return MobilePrompt({
-      title,
-      message,
-      initialValue,
-      placeholder,
-      onSave,
-      onCancel,
-    });
-  }
-
-  // Desktop implementation
-  const overlay = document.createElement('div');
-  overlay.className = 'dialog-overlay';
-
-  const card = document.createElement('div');
-  card.className = 'dialog-card';
-
-  const titleEl = document.createElement('h3');
-  titleEl.textContent = title;
-  titleEl.style.marginBottom = 'var(--spacing-md)';
-  titleEl.style.textAlign = 'center';
-
-  const text = document.createElement('p');
-  text.textContent = message || '';
-  if (message) text.style.marginBottom = 'var(--spacing-md)';
-  text.style.textAlign = 'center';
-
-  const input = document.createElement('input');
-  input.type = 'text';
-  input.value = initialValue;
-  input.placeholder = placeholder;
-  input.style.width = '100%';
-  input.style.padding = 'var(--spacing-md)';
-  input.style.marginBottom = 'var(--spacing-lg)';
-  input.style.borderRadius = 'var(--radius-md)';
-  input.style.border = '1px solid var(--color-border)';
-
-  const btnGroup = document.createElement('div');
-  btnGroup.style.display = 'flex';
-  btnGroup.style.gap = 'var(--spacing-md)';
-
-  const cancelBtn = ButtonComponent({
-    text: 'Cancel',
-    variant: 'secondary',
-    onClick: () => {
-      document.body.removeChild(overlay);
-      if (onCancel) onCancel();
-    },
-  });
-  cancelBtn.style.flex = '1';
-
-  const saveBtn = ButtonComponent({
-    text: 'Save',
-    variant: 'primary',
-    onClick: () => {
-      document.body.removeChild(overlay);
-      onSave(input.value);
-    },
-  });
-  saveBtn.style.flex = '1';
-
-  btnGroup.appendChild(cancelBtn);
-  btnGroup.appendChild(saveBtn);
-
-  card.appendChild(titleEl);
-  if (message) card.appendChild(text);
-  card.appendChild(input);
-  card.appendChild(btnGroup);
-  overlay.appendChild(card);
-
-  document.body.appendChild(overlay);
-  setTimeout(() => input.focus(), 100);
 };
 
 /**

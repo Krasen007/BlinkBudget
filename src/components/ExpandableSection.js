@@ -206,14 +206,4 @@ export const ExpandableSection = ({
   };
 };
 
-export const createExpandableSection = (title, content, options = {}) => {
-  return ExpandableSection({
-    title,
-    content,
-    defaultExpanded: options.defaultExpanded || false,
-    storageKey: options.storageKey || null,
-    icon: options.icon || null,
-  });
-};
-
 export default ExpandableSection;

@@ -473,21 +473,6 @@ export class ChartRenderer {
   }
 
   /**
-   * Update an existing chart with new data
-   * @param {Chart} chartInstance - Chart.js instance to update
-   * @param {Object} newData - New data to display
-   */
-  updateChart(chartInstance, newData) {
-    if (!chartInstance) return;
-
-    // Update data
-    chartInstance.data = newData;
-
-    // Trigger re-render with animation
-    chartInstance.update('active');
-  }
-
-  /**
    * Destroy a chart instance and clean up resources
    * @param {Chart|string} chartInstanceOrId - Chart instance or canvas ID
    */
@@ -553,113 +538,6 @@ export class ChartRenderer {
     if (chart) {
       chart.destroy();
     }
-  }
-
-  /**
-   * Resize a chart to fit its container
-   * @param {Chart} chartInstance - Chart.js instance to resize
-   */
-  resizeChart(chartInstance) {
-    if (chartInstance) {
-      chartInstance.resize();
-    }
-  }
-
-  /**
-   * Add touch-specific optimizations for mobile devices
-   * @param {Chart} chartInstance - Chart.js instance
-   */
-  addTouchOptimizations(chartInstance) {
-    const canvas = chartInstance.canvas;
-    if (!canvas) return;
-
-    // Allow scrolling while preventing zoom and other gestures that interfere with chart interaction
-    canvas.style.touchAction = 'pan-y';
-
-    // Add touch feedback
-    let touchStartTime = 0;
-    let touchMoved = false;
-
-    const touchStartHandler = _event => {
-      touchStartTime = Date.now();
-      touchMoved = false;
-
-      // Add visual feedback for touch
-      canvas.style.opacity = '0.9';
-    };
-
-    const touchMoveHandler = _event => {
-      touchMoved = true;
-      canvas.style.opacity = '1';
-
-      // Clear tooltips immediately when scrolling/moving interaction starts
-      if (chartInstance) {
-        chartInstance.setActiveElements([]);
-        chartInstance.update('none');
-      }
-    };
-
-    const touchEndHandler = event => {
-      const touchDuration = Date.now() - touchStartTime;
-      canvas.style.opacity = '1';
-
-      // Only trigger chart interaction for quick taps (not scrolls)
-      if (!touchMoved && touchDuration < 300) {
-        // Get touch position relative to canvas
-        const touch = event.changedTouches[0];
-
-        // Create synthetic mouse event for Chart.js
-        const syntheticEvent = {
-          type: 'click',
-          clientX: touch.clientX,
-          clientY: touch.clientY,
-          target: canvas,
-          preventDefault: () => {},
-          stopPropagation: () => {},
-        };
-
-        // Get elements at touch position
-        const elements = chartInstance.getElementsAtEventForMode(
-          syntheticEvent,
-          'nearest',
-          { intersect: true },
-          false
-        );
-
-        if (elements.length > 0) {
-          // Trigger click handler
-          if (chartInstance.options.onClick) {
-            chartInstance.options.onClick(
-              syntheticEvent,
-              elements,
-              chartInstance
-            );
-          }
-        }
-      }
-    };
-
-    // Add touch event listeners
-    // Remove existing handlers first to prevent duplicates
-    if (canvas._touchHandlers) {
-      canvas.removeEventListener(
-        'touchstart',
-        canvas._touchHandlers.touchstart
-      );
-      canvas.removeEventListener('touchmove', canvas._touchHandlers.touchmove);
-      canvas.removeEventListener('touchend', canvas._touchHandlers.touchend);
-    }
-
-    canvas.addEventListener('touchstart', touchStartHandler, { passive: true });
-    canvas.addEventListener('touchmove', touchMoveHandler, { passive: true });
-    canvas.addEventListener('touchend', touchEndHandler, { passive: true });
-
-    // Store handlers for cleanup
-    canvas._touchHandlers = {
-      touchstart: touchStartHandler,
-      touchmove: touchMoveHandler,
-      touchend: touchEndHandler,
-    };
   }
 
   /**
@@ -1196,30 +1074,6 @@ export class ChartRenderer {
 
     // Update canvas aria-labelledby
     canvasElement.setAttribute('aria-labelledby', titleElement.id);
-  }
-
-  /**
-   * Add simplified loading animation to chart container
-   * @param {HTMLElement} container - Chart container element
-   * @param {string} message - Loading message
-   */
-  addLoadingAnimation(container, _message = 'Loading chart...') {
-    if (!container) return;
-
-    // Add loading class for CSS animations
-    container.classList.add('loading');
-
-    return null; // Simplified - no overlay needed
-  }
-
-  /**
-   * Remove loading animation from chart container
-   * @param {HTMLElement} container - Chart container element
-   */
-  removeLoadingAnimation(container) {
-    if (!container) return;
-
-    container.classList.remove('loading');
   }
 
   /**

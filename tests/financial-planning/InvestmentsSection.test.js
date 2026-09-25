@@ -82,7 +82,6 @@ describe('InvestmentsSection', () => {
       createBarChart: vi.fn(),
       createLineChart: vi.fn(),
       destroy: vi.fn(),
-      updateChart: vi.fn(),
     };
 
     vi.clearAllMocks();
