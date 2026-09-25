@@ -169,9 +169,20 @@ export const DataManagementSection = () => {
         if (result.success) {
           // Dynamic import to avoid circular dependencies
           const { MobileAlert } = await import('./MobileModal.js');
+          const sizeKB = (result.size / 1024).toFixed(1);
+          // Transactions and accounts are always captured, so a partial export is
+          // still a usable safety net and must NOT be reported as a failure.
+          // But a plain "Successful" would have the user trust a file that is
+          // quietly missing a section, so name what could not be included.
+          const missing = (result.warnings || []).join(', ');
+          const isPartial = result.partial || missing.length > 0;
           MobileAlert({
-            title: 'Export Successful',
-            message: `Your emergency data file has been downloaded. File size: ${(result.size / 1024).toFixed(1)}KB`,
+            title: isPartial
+              ? '⚠️ Export Partially Complete'
+              : 'Export Successful',
+            message: isPartial
+              ? `Your emergency data file has been downloaded. File size: ${sizeKB}KB. Partial export — could not include: ${missing}.`
+              : `Your emergency data file has been downloaded. File size: ${sizeKB}KB`,
             buttonText: 'Got it',
           });
         } else {
