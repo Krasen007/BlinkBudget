@@ -140,6 +140,11 @@ export const BackupRestoreSection = () => {
                   message: `Successfully restored app state from backup.`,
                 });
               } catch (error) {
+                // The alert alone left nothing to diagnose: a restore that
+                // failed server-side reached the user as a bare string and
+                // vanished on dismiss. Keep the user-facing feedback, and
+                // leave the technical detail in the console.
+                console.error('Restore from backup failed:', error);
                 AlertDialog({ message: `Restore failed: ${error.message}` });
               }
             },
