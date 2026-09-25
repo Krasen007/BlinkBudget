@@ -127,14 +127,21 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
   section.appendChild(createRecurringCard(planningData));
 
   // 5. Net Balance Over Time chart (async — appended when ready, never after teardown)
-  createNetBalanceChart(transactions, chartRenderer).then(entry => {
-    if (!isSectionActive) {
-      entry.cleanup();
-      return;
-    }
-    netBalanceEntry = entry;
-    section.appendChild(entry.element);
-  });
+  createNetBalanceChart(transactions, chartRenderer)
+    .then(entry => {
+      if (!isSectionActive) {
+        entry.cleanup();
+        return;
+      }
+      netBalanceEntry = entry;
+      section.appendChild(entry.element);
+    })
+    .catch(error => {
+      console.error(
+        '[InsightsSection] Net Balance chart failed to load:',
+        error
+      );
+    });
 
   // Set up synchronized navigation for month-based sections
   sharedMonthState.onNavigate = () => {

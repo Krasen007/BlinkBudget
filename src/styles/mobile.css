@@ -271,10 +271,6 @@
   /* Remove transition animation */
 }
 
-.mobile-nav-item.active .mobile-nav-icon {
-  /* Remove transform animation */
-}
-
 .mobile-nav-label {
   font-size: var(--font-size-xs);
   font-weight: 500;

@@ -21,6 +21,21 @@ import {
 import { showWarningToast } from '../utils/toast-notifications.js';
 import { loadMobileAlert } from '../utils/mobile-alert.js';
 
+async function loadMobileAlertWithFallback() {
+  try {
+    const { MobileAlert } = await import('./MobileModal.js');
+    return MobileAlert;
+  } catch (error) {
+    console.warn('MobileAlert import failed; using fallback dialog.', error);
+    try {
+      return await loadMobileAlert();
+    } catch (fallbackError) {
+      console.error('Fallback mobile alert failed to load:', fallbackError);
+      return null;
+    }
+  }
+}
+
 export const DataManagementSection = () => {
   const section = document.createElement('div');
   section.className = 'card mobile-settings-card';
@@ -159,6 +174,8 @@ export const DataManagementSection = () => {
     text: '⚠️ Emergency JSON Export',
     variant: 'secondary',
     onClick: async () => {
+      const MobileAlert = await loadMobileAlertWithFallback();
+
       try {
         emergencyBtn.disabled = true;
         emergencyBtn.textContent = '⏳ Exporting...';
@@ -167,16 +184,10 @@ export const DataManagementSection = () => {
         const result = await BackupService.createEmergencyExport();
 
         if (result.success) {
-          // Dynamic import to avoid circular dependencies
-          const { MobileAlert } = await import('./MobileModal.js');
           const sizeKB = (result.size / 1024).toFixed(1);
-          // Transactions and accounts are always captured, so a partial export is
-          // still a usable safety net and must NOT be reported as a failure.
-          // But a plain "Successful" would have the user trust a file that is
-          // quietly missing a section, so name what could not be included.
           const missing = (result.warnings || []).join(', ');
           const isPartial = result.partial || missing.length > 0;
-          MobileAlert({
+          MobileAlert?.({
             title: isPartial
               ? '⚠️ Export Partially Complete'
               : 'Export Successful',
@@ -186,8 +197,7 @@ export const DataManagementSection = () => {
             buttonText: 'Got it',
           });
         } else {
-          const { MobileAlert } = await import('./MobileModal.js');
-          MobileAlert({
+          MobileAlert?.({
             title: 'Export Failed',
             message: `Failed to export data: ${result.error}`,
             buttonText: 'OK',
@@ -195,8 +205,7 @@ export const DataManagementSection = () => {
         }
       } catch (error) {
         console.error('Emergency export failed:', error);
-        const MobileAlert = await loadMobileAlert();
-        MobileAlert({
+        MobileAlert?.({
           title: 'Export Failed',
           message: `An unexpected error occurred: ${error.message}`,
           buttonText: 'OK',
@@ -229,6 +238,7 @@ export const DataManagementSection = () => {
     text: '🔍 Data Integrity Check',
     variant: 'secondary',
     onClick: async () => {
+      const MobileAlert = await loadMobileAlertWithFallback();
       section.querySelector('.integrity-report')?.remove();
 
       try {
@@ -240,8 +250,7 @@ export const DataManagementSection = () => {
         const result = await dataIntegrityService.performIntegrityCheck();
 
         if (result.summary.corruptionDetected) {
-          const { MobileAlert } = await import('./MobileModal.js');
-          MobileAlert({
+          MobileAlert?.({
             title: '⚠️ Data Issues Found',
             message: `Found ${result.issues.length} data issues. ${result.summary.failedChecks} checks failed. Please review your data.`,
             buttonText: 'View Details',
@@ -253,8 +262,7 @@ export const DataManagementSection = () => {
             },
           });
         } else {
-          const { MobileAlert } = await import('./MobileModal.js');
-          MobileAlert({
+          MobileAlert?.({
             title: '✅ Data Integrity OK',
             message: `All ${result.summary.totalChecks} checks passed. Your data is healthy!`,
             buttonText: 'Great!',
@@ -262,8 +270,7 @@ export const DataManagementSection = () => {
         }
       } catch (error) {
         console.error('Data integrity check failed:', error);
-        const MobileAlert = await loadMobileAlert();
-        MobileAlert({
+        MobileAlert?.({
           title: 'Check Failed',
           message: `Integrity check failed: ${error.message}`,
           buttonText: 'OK',
@@ -296,6 +303,8 @@ export const DataManagementSection = () => {
     text: '🔧 Fix Data Issues',
     variant: 'secondary',
     onClick: async () => {
+      const MobileAlert = await loadMobileAlertWithFallback();
+
       try {
         cleanupBtn.disabled = true;
         cleanupBtn.textContent = '🔧 Fixing...';
@@ -304,8 +313,7 @@ export const DataManagementSection = () => {
         const result = await BackupService.fixTransactionDataIssues();
 
         if (result.fixed > 0) {
-          const { MobileAlert } = await import('./MobileModal.js');
-          MobileAlert({
+          MobileAlert?.({
             title: '✅ Data Fixed',
             message: `Successfully fixed ${result.fixed} data issues. ${result.errors} errors occurred.`,
             buttonText: 'Great!',
@@ -317,8 +325,7 @@ export const DataManagementSection = () => {
           console.log('Details:', result.details);
           console.groupEnd();
         } else {
-          const { MobileAlert } = await import('./MobileModal.js');
-          MobileAlert({
+          MobileAlert?.({
             title: 'ℹ️ No Issues Found',
             message: 'No data issues were found that needed fixing.',
             buttonText: 'OK',
@@ -326,8 +333,7 @@ export const DataManagementSection = () => {
         }
       } catch (error) {
         console.error('Data cleanup failed:', error);
-        const MobileAlert = await loadMobileAlert();
-        MobileAlert({
+        MobileAlert?.({
           title: 'Cleanup Failed',
           message: `Data cleanup failed: ${error.message}`,
           buttonText: 'OK',
@@ -360,6 +366,8 @@ export const DataManagementSection = () => {
     text: '🚨 Emergency Recovery',
     variant: 'secondary',
     onClick: async () => {
+      const MobileAlert = await loadMobileAlertWithFallback();
+
       try {
         recoveryBtn.disabled = true;
         recoveryBtn.textContent = '🚨 Recovering...';
@@ -368,8 +376,7 @@ export const DataManagementSection = () => {
         const result = await BackupService.performEmergencyRecovery();
 
         if (result.success) {
-          const { MobileAlert } = await import('./MobileModal.js');
-          MobileAlert({
+          MobileAlert?.({
             title: '✅ Recovery Successful',
             message: `Recovered ${result.dataRestored.transactions} transactions and ${result.dataRestored.accounts} accounts.`,
             buttonText: 'Great!',
@@ -381,8 +388,7 @@ export const DataManagementSection = () => {
           console.log('Steps:', result.steps);
           console.groupEnd();
         } else {
-          const { MobileAlert } = await import('./MobileModal.js');
-          MobileAlert({
+          MobileAlert?.({
             title: '⚠️ Recovery Failed',
             message: `Recovery failed with ${result.errors.length} errors. Check console for details.`,
             buttonText: 'OK',
@@ -395,8 +401,7 @@ export const DataManagementSection = () => {
         }
       } catch (error) {
         console.error('Emergency recovery failed:', error);
-        const MobileAlert = await loadMobileAlert();
-        MobileAlert({
+        MobileAlert?.({
           title: 'Recovery Failed',
           message: `Emergency recovery failed: ${error.message}`,
           buttonText: 'OK',

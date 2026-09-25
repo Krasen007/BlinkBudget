@@ -104,6 +104,33 @@ function parsePeriodFromParams(params) {
         label: `${lastMonthStart.toLocaleString('default', { month: 'long' })} ${lastMonthStart.getFullYear()}`,
       };
     }
+    case 'day':
+    case 'daily': {
+      const selectedDate = params.date || params.day;
+      if (!selectedDate) {
+        return getTodayPeriod();
+      }
+
+      const [year, month, day] = String(selectedDate).split('-').map(Number);
+      if (!year || !month || !day) {
+        return getTodayPeriod();
+      }
+
+      const startDate = new Date(year, month - 1, day);
+      const endDate = new Date(startDate);
+      endDate.setHours(23, 59, 59, 999);
+
+      return {
+        type: 'daily',
+        startDate,
+        endDate,
+        label: startDate.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        }),
+      };
+    }
     case 'today':
       return getTodayPeriod();
     case 'quarter':
@@ -419,10 +446,36 @@ export const ReportsView = (params = {}) => {
 
     NavigationState.saveTimePeriod(newTimePeriod);
 
-    // Navigate with query parameter for period
-    const periodParam = getPeriodParamFromTimePeriod(newTimePeriod);
-    if (periodParam) {
-      Router.navigate('reports', { period: periodParam });
+    const routeParams = {};
+    if (newTimePeriod.type === 'daily') {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const periodStart = new Date(newTimePeriod.startDate);
+      const isToday =
+        periodStart.getFullYear() === todayStart.getFullYear() &&
+        periodStart.getMonth() === todayStart.getMonth() &&
+        periodStart.getDate() === todayStart.getDate();
+      if (isToday) {
+        routeParams.period = 'today';
+      } else {
+        routeParams.period = 'day';
+        routeParams.date = [
+          periodStart.getFullYear(),
+          String(periodStart.getMonth() + 1).padStart(2, '0'),
+          String(periodStart.getDate()).padStart(2, '0'),
+        ].join('-');
+      }
+    } else {
+      const periodParam = getPeriodParamFromTimePeriod(newTimePeriod);
+      if (periodParam) {
+        routeParams.period = periodParam;
+      }
+    }
+
+    if (Object.keys(routeParams).length > 0) {
+      Router.navigate('reports', routeParams);
+    } else {
+      Router.navigate('reports');
     }
 
     // If this is a navigation action, only reload data without recreating the header

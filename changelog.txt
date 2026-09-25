@@ -1,20 +1,71 @@
 # Changelog
 
-## [1.49.0] - 2026-09-01
+## [1.49] - 2026-09-25
+
+A release focused on making the Insights experience more honest and more
+useful, plus a batch of correctness fixes around refunds, accounts, and
+error reporting.
 
 ### Added
 
-- **Undo for Deleted Transactions** - Accidentally deleted a transaction? An undo toast appears at the bottom of the screen, giving you a chance to restore it. Works for both single deletions and bulk deletions.
+- **Savings Rate on the Trend chart** - A new amber dashed line tracks your savings
+  rate on its own percentage axis, so you can see whether the money you keep
+  actually grows month over month.
+- **Unusual spending flags in chart tooltips** - Hovering a month or a day now
+  tells you how many outlier expenses it contained, instead of a percentage that
+  made no sense for a time series.
+- **Recurring & Subscriptions card** - BlinkBudget spots fixed-price, regular
+  spending (rent, subscriptions, memberships) and lists each one with its
+  cadence, amount, and the next expected date.
+- **Key Takeaways strip** - The three most relevant insights for the month you
+  are browsing, ranked by severity, so you do not have to read every card.
+- **Today tab arrows in Reports** - The Today period now has the same
+  left/right navigation as This Month, Last Month, This Quarter and This Year,
+  letting you step back to Yesterday and beyond.
+- **Both percentages in category tooltips** - When you hide categories in a
+  chart, the tooltip shows the original share and the recalculated share, so the
+  remaining numbers still add up to something meaningful.
+- **Data Integrity Report in Settings** - A quick, readable summary of what the
+  app found when it last checked your stored data.
+- **Honest export feedback** - If a backup was only partially assembled, the
+  dialog now says so and names what is missing, instead of claiming success.
+- **Tags on the Add Transaction form** - Pick a tag while logging, without
+  having to open an existing transaction first.
 
 ### Fixed
 
-- **Toast Position** - Undo toast now appears at the bottom of the screen for better visibility and accessibility
-- **Firestore Error Messages** - Raw `firestore/*` error messages are no longer shown to users
-- **Category Label Mutation** - Fixed a bug where category labels could be accidentally mutated
-- **UI Fixes** - Multiple UI fixes and polish across the application
-- **General Bug Fixes** - Various stability improvements
+- **Refunds now appear in Reports** - They were saved correctly but then hidden
+  from the report charts, so refund-heavy months looked emptier than they were.
+- **Editing an account no longer wipes it** - Saving an account used to reset its
+  balance and creation date. Both are now preserved, with a regression test.
+- **Tags render offline** - Transaction labels disappeared without an internet
+  connection; they now come from local data.
+- **Charts fail visibly** - If a chart cannot be built, you get a readable
+  fallback message instead of a blank card.
+- **Account list failures are recoverable** - A rendering error now shows an
+  inline alert with a Retry button rather than an empty list, and Retry never
+  re-saves your data behind your back.
+- **Error dialogs always reach you** - If the dialog bundle fails to load, a
+  fallback still shows the message instead of failing silently.
+- **Restore failures are logged** - A failed restore now leaves a real trace in
+  the console alongside the alert you already saw.
+- **Chart memory leak closed** - Charts are now destroyed when you switch
+  financial-planning sections, so long sessions no longer accumulate dead
+  charts.
 
 ### Changed
 
-- **Cloud Sync Reliability** - All domain services now use `pushToCloudSafe` for safer and more reliable cloud synchronization
-- **Code Quality** - Refactored code following best practices and removed duplicate subsystems
+- **Trend chart is easier to read** - Income (green) and expenses (red) are
+  drawn as one centered column per period instead of two side-by-side bars.
+- **Removed duplicate Insights surfaces** - The repeated KPI summary bar and the
+  overlapping Daily Expenses section are gone, leaving one clear view.
+- **Clearer naming** - The Reports section is now "Spending Insights", so the app
+  no longer has two different screens called "Financial Insights".
+- **Fully English charts** - All chart titles and labels are English, with
+  consistent currency formatting shared across the app.
+- **Top Movers show real movement** - Signed month-over-month deltas (green for
+  spending less, red for spending more) with a tooltip explaining the change.
+- **Cleanup under the hood** - ESLint was updated to a flat config, unused
+  subsystems and duplicate helpers were removed, and date normalization was
+  consolidated so a restored backup behaves exactly like a fresh load.
+

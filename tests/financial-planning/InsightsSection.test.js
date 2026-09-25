@@ -146,4 +146,30 @@ describe('InsightsSection', () => {
 
     cleanup();
   });
+
+  it('logs a rejected NetBalanceChart loading failure without crashing the section', async () => {
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const createNetBalanceChartMock = vi.mocked(
+      (await import('../../src/components/NetBalanceChart.js'))
+        .createNetBalanceChart
+    );
+    createNetBalanceChartMock.mockRejectedValueOnce(
+      new Error('chart exploded')
+    );
+
+    const { cleanup } = InsightsSection(
+      { transactions: buildTransactions() },
+      createChartRenderer(),
+      new Map()
+    );
+
+    await vi.waitFor(() => {
+      expect(log).toHaveBeenCalledWith(
+        '[InsightsSection] Net Balance chart failed to load:',
+        expect.any(Error)
+      );
+    });
+
+    cleanup();
+  });
 });

@@ -357,10 +357,15 @@ export const TimePeriodSelector = (options = {}) => {
         initialPeriod.type === 'daily'
           ? getDayOffsetFromDate(initialPeriod.startDate)
           : 0;
-      labelSpan.textContent =
-        period.key === initialKey
-          ? getSpecificDayPeriod(dayOffset).label
-          : getSpecificDayPeriod(dayOffset).label;
+      const resolvedLabel = getSpecificDayPeriod(dayOffset).label;
+      labelSpan.textContent = resolvedLabel;
+      if (initialPeriod.type === 'daily') {
+        currentPeriod = {
+          ...initialPeriod,
+          ...getSpecificDayPeriod(dayOffset),
+          label: resolvedLabel,
+        };
+      }
     } else {
       labelSpan.textContent = period.label;
     }

@@ -37,14 +37,15 @@ vi.mock('../../src/core/chart-loader.js', () => ({
 }));
 
 vi.mock('../../src/components/TimePeriodSelector.js', () => ({
-  TimePeriodSelector: () => {
+  TimePeriodSelector: vi.fn((options = {}) => {
     const el = document.createElement('div');
     el.className = 'time-period-selector';
     el.updatePeriod = vi.fn();
     el.setPeriod = vi.fn();
     el.cleanup = vi.fn();
+    el.options = options;
     return el;
-  },
+  }),
 }));
 
 vi.mock('../../src/core/transaction-service.js', () => ({
@@ -171,6 +172,7 @@ vi.mock('../../src/core/budget-planner.js', () => ({
 }));
 
 import { ReportsView } from '../../src/views/ReportsView.js';
+import { TimePeriodSelector } from '../../src/components/TimePeriodSelector.js';
 
 describe('ReportsView skeleton loading', () => {
   beforeEach(() => {
@@ -213,5 +215,24 @@ describe('ReportsView skeleton loading', () => {
     await Promise.resolve();
 
     expect(chartContainer.querySelectorAll('.skeleton-loader').length).toBe(5);
+  });
+
+  it('restores a selected historical day from URL params instead of resetting to the current month', () => {
+    const initialHash = window.location.hash;
+    window.location.hash = 'reports?period=day&date=2026-09-14';
+
+    ReportsView({ period: 'day', date: '2026-09-14' });
+
+    const selectorCalls = vi.mocked(TimePeriodSelector).mock.calls;
+    expect(selectorCalls.length).toBeGreaterThan(0);
+    const initializer = selectorCalls.at(-1)[0];
+    expect(initializer.initialPeriod.type).toBe('daily');
+
+    const startDate = new Date(initializer.initialPeriod.startDate);
+    expect(startDate.getFullYear()).toBe(2026);
+    expect(startDate.getMonth()).toBe(8);
+    expect(startDate.getDate()).toBe(14);
+
+    window.location.hash = initialHash;
   });
 });

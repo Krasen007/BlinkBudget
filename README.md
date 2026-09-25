@@ -39,9 +39,12 @@
 - **Custom Category Management**: Create, edit, and manage your own expense categories for personalized tracking | src/components/CustomCategoryManager.js:CustomCategoryManager() | src/core/custom-category-service.js:CustomCategoryService
 - **Category Reordering**: Organize your expense categories in a way that works best for you. Reordering now respects filtered views — arrow-move reorders only the currently visible categories and persists that order. Previously it reordered across all categories (including hidden types), so moves inside a filtered view often had no visible effect | src/core/custom-category-service.js:reorder() | src/components/CustomCategoryManager.js:arrow-move handlers
 - **Tags System**: Add custom tags to transactions for flexible organization and analysis beyond categories. Features a 3-state filter — tap once to include transactions with the tag, tap twice to exclude them (shows the tag crossed out), tap a third time to restore the default state. Tags are now supported on all transaction types including refunds | src/utils/form-utils/transaction-tags.js:createTransactionTagSelector() | src/utils/form-utils/transaction-tags.js:applyExpenseTagToTransactionData() | src/views/DashboardView.js:tag filtering
+- **Tags while logging** - Pick a tag directly on the Add Transaction form, no need to open an existing transaction to tag it | src/components/TransactionForm.js:tag selector integration | src/utils/form-utils/transaction-tags.js:createTransactionTagSelector()
+- **Tags work offline** - Transaction labels are resolved from local data, so they still render with no internet connection | src/utils/form-utils/transaction-tags.js:getTransactionTagName() | src/components/TransactionListItem.js:tag label rendering
 - **Streamlined transaction indicators**: Simplified notifications and indicators for different transaction types:
   - **Refunds** are marked with an ↑ arrow to indicate money coming back | src/components/TransactionListItem.js:sign assignment for refund type
   - **Transfers** are marked with a ⇆ arrow to indicate money moving between accounts | src/components/TransactionListItem.js:sign assignment for transfer type
+- **Refunds show up in Reports** - Refunds were always saved and counted correctly, but were then filtered out before the report charts were drawn, so refund-heavy months looked emptier than they really were | src/utils/reports-charts.js:category chart data | src/core/analytics/AnalyticsCache.js:invalidate()
 - **Smart categorization**: Visual category chips for easy identification:
   - Food & Groceries, Dining & Coffee, Housing & Bills
   - Transportation, Leisure & Shopping, Personal Care
@@ -54,6 +57,8 @@
 - **Integrated category filtering** between Reports and Dashboard views for consistent analysis across all sections | src/views/ReportsView.js:category filter sync | src/views/DashboardView.js:category filter sync
 - **Smart time period navigation** with dynamic labels showing specific months and years | src/views/DashboardView.js:time navigation | src/utils/date-utils.js:date formatting
 - **Quarter-based navigation** for reports — Quickly jump between Q1, Q2, Q3, and Q4 periods when viewing reports for faster period switching | src/components/TimePeriodSelector.js:handleQuarterNavigation | src/utils/reports-utils.js:quarter helpers
+- **Day-level navigation for Today** - The Today period now carries the same `← →` arrows as This Month, Last Month, This Quarter and This Year, so you can step back to Yesterday and the days before it | src/components/TimePeriodSelector.js:TimePeriodSelector() | src/views/ReportsView.js:time period state
+- **Honest category percentages** - When you hide categories in a report chart, the tooltip shows both the original share and the recalculated share, so the remaining numbers still make sense | src/utils/reports-charts.js:category chart tooltips
 - **Transaction Split** - Hold transaction to split in two | src/core/transaction-service.js:split()
 - **Duplicate transactions** - Long-press any transaction in the dashboard to duplicate it instantly | src/core/transaction-service.js:copy()
 - **Enter to save in edit mode** - Pressing Enter while editing a transaction now automatically saves it, matching the behavior in reports | src/components/TransactionForm.js:TransactionForm | src/components/TransactionForm.js:Enter key handler
@@ -77,8 +82,10 @@ BlinkBudget turns your 3-click data into actionable insights using statistical h
 #### **Spending Intelligence**
 
 - **Category Usage Frequency Analysis** - Track how often you use each category | src/core/analytics/category-usage-service.js:getMostFrequentCategories() | src/core/analytics-engine.js:generateSpendingInsights()
-- **Top Movers Analysis** - Discover your biggest spending changes month-over-month | src/core/analytics/ComparisonService.js:getPersonalBenchmarking() | src/core/insights-generator.js:topMovers
+- **Top Movers Analysis** - Discover your biggest spending changes month-over-month, shown as signed deltas (green for spending less, red for spending more) with a tooltip explaining exactly what changed | src/core/insights-generator.js:categoryMovers() | src/core/insights-generator.js:categoryExpenseTotals() | src/views/financial-planning/insights-movers-timeline.js:createTopMoversSection()
 - **Historical Timeline Comparisons** - Compare current spending to previous periods | src/core/analytics/ComparisonService.js:comparePeriodsSpending() | src/core/analytics-engine.js:historical comparisons
+- **Recurring & Subscriptions Detection** - BlinkBudget spots fixed-price, regular spending such as rent, subscriptions and memberships, then lists each one with its cadence, amount and next expected date, so nothing quietly drains your balance | src/core/recurring-detector.js:RecurringDetector:detectRecurring() | src/views/financial-planning/insights-recurring.js:createRecurringCard()
+- **Key Takeaways** - The three most relevant insights for the month you are browsing, ranked by severity, so you get the point without reading every card | src/views/financial-planning/insights-takeaways.js:createTakeawaysSection() | src/core/insights-generator.js:insight generation
 
 #### **Budget Optimization**
 
@@ -92,11 +99,13 @@ BlinkBudget turns your 3-click data into actionable insights using statistical h
 - **Unusual Spending Alerts** - Automatic detection of atypical transactions | src/core/analytics/AnomalyService.js:detectAnomalies() | src/core/analytics/AnomalyService.js:AnomalyService.detectUnusualTransactions()
 - **Large Transaction Warnings** - Notifications for purchases outside your normal range | src/core/analytics/AnomalyService.js:detectSpendingSpikes() | src/core/analytics-engine.js:transaction validation
 - **Enhanced Anomaly Detection** - Improved AnomalyService with better spending pattern analysis and more accurate alerts | src/core/analytics/AnomalyService.js:enhanced detection logic
+- **Unusual Spending Flags in Chart Tooltips** - Hovering a month or a day in the Trend and Timeline charts tells you how many outlier expenses that period contained, instead of a "percentage of total" that means nothing for a time series | src/core/analytics/AnomalyService.js:buildPeriodMarkers() | src/components/financial-planning/TrendBarChartCard.js:TrendBarChartCard() | src/components/financial-planning/TimelineYoYCard.js:TimelineYoYCard()
 
 #### **Personal Finance Metrics**
 
 - **Personal Inflation Rate** - Track how inflation affects your specific spending | src/components/InflationTrends.js:InflationTrends() | src/utils/inflation-chart-utils.js:calculatePersonalInflation()
 - **Savings Rate Tracking** - Monitor your savings performance over time | src/core/savings-goals-service.js:calculateSingleGoalProgress() | src/core/analytics/MetricsService.js:savings calculations
+- **Savings Rate on the Trend Chart** - An amber dashed line plots your savings rate on its own percentage axis, so you can see whether the money you actually keep grows month over month | src/components/financial-planning/TrendBarChartCard.js:aggregateTrendData() | src/components/financial-planning/TrendBarChartCard.js:TrendBarChartCard()
 
 ### Financial Planning & Insights
 
@@ -138,6 +147,9 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 - **Budget Recommendations** - Statistical suggestions for optimization | src/components/BudgetSuggestion.js:BudgetSuggestion() | src/views/financial-planning/InsightsSection.js:recommendations display
 - **Personal Inflation Trends** - Track how inflation affects your personal finances | src/components/InflationTrends.js:InflationTrends() | src/views/financial-planning/InsightsSection.js:inflation trends
 - **Unusual Spending Detection** - Automatic alerts for atypical transactions | src/core/analytics/AnomalyService.js:detectAnomalies() | src/views/financial-planning/InsightsSection.js:anomaly alerts
+- **Clearer Trend Chart** - Income (green) and expenses (red) are drawn as a single centered column per month or year instead of two side-by-side bars, which makes the net position obvious at a glance | src/components/financial-planning/TrendBarChartCard.js:TrendBarChartCard()
+- **Year-over-Year Timeline** - A cumulative timeline card compares this year against the last, so you can see exactly where you stand relative to your own history | src/components/financial-planning/TimelineYoYCard.js:calculateYoYCumulative() | src/components/financial-planning/TimelineYoYCard.js:TimelineYoYCard()
+- **One Clear Insights View** - The duplicated KPI summary bar and the Daily Expenses section that overlapped the Timeline card have been removed, and the Reports counterpart is now titled "Spending Insights" so no two screens share a name | src/views/financial-planning/InsightsSection.js:InsightsSection() | src/components/financial-planning/TrendBarChartCard.js:TrendBarChartCard()
 
 #### **Budgets Section**
 
@@ -167,6 +179,7 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 - **Restore from last backup** replaces current data with the backup (warning shown). | src/core/backup-service.js:restoreBackup() | src/components/BackupRestoreSection.js:restore confirmation
 - **Offline safe**: backup skips when offline; restore requires internet. | src/core/backup-service.js:offline safety check | src/components/NetworkStatus.js:connection status
 - **User feedback** via custom events showing start, success, and failure. | src/core/backup-service.js:backup event dispatch | src/utils/toast-notifications.js:backup feedback
+- **Failures are logged** - A restore that fails server-side now writes the real error to the console alongside the alert, so nothing is lost once the dialog is dismissed | src/components/BackupRestoreSection.js:BackupRestoreSection() | src/core/backup-service.js:restoreBackup()
 
 ### Data Management & Sync
 
@@ -185,6 +198,7 @@ BlinkBudget provides robust data management with cloud synchronization and local
 - **CSV Export** - Spreadsheet-compatible export for analysis | src/components/DataManagementSection.js:CSV export handler | src/core/backup-service.js:\_convertToCSV()
 - **Selective Export** - Export specific date ranges or categories | src/components/DataManagementSection.js:date-range export handler | src/core/backup-service.js:createEmergencyExport()
 - **Import Validation** - Safe import with data integrity checks | src/components/DataManagementSection.js:import handler | src/core/data-integrity-service.js:import validation
+- **Honest Export Feedback** - If a backup could only be assembled partially, the dialog now reports "Export Partially Complete" and names the missing sections instead of claiming full success, so you never trust a file that quietly lost your budgets | src/components/DataManagementSection.js:DataManagementSection() | src/core/backup-service.js:createEmergencyExport()
 
 #### **Account Management**
 
@@ -234,6 +248,8 @@ BlinkBudget delivers exceptional performance with modern web technologies:
 - **Incremental Rendering** - Progressive content loading for smooth UX | src/views/DashboardView.js:preloadReportsData() | src/components/TransactionList.js:progressive loading
 - **Background Data Refresh** - Automatic updates without blocking the UI | src/core/sync-service.js:triggerBackgroundSync() | src/views/DashboardView.js:background refresh
 - **Performance Monitoring** - Built-in performance tracking and optimization | src/core/analytics-engine.js:performance tracking | Performance metrics collection
+- **No Leaked Charts** - Chart instances are destroyed when you switch financial-planning sections or leave the view, so long sessions no longer pile up dead charts in memory | src/components/NetBalanceChart.js:createNetBalanceChart() | src/views/FinancialPlanningView.js:renderSection
+- **Visible Chart Failures** - If a chart cannot be constructed, you get a readable fallback message instead of a blank card, so a broken chart is never mistaken for "no data" | src/components/ChartRenderer.js:showChartFallback() | src/components/ChartRenderer.js:ChartRenderer
 
 #### **Progressive Web App Features**
 
@@ -265,6 +281,10 @@ BlinkBudget delivers exceptional performance with modern web technologies:
 - **Account management** - Add, edit, delete accounts | src/components/AccountSection.js:AccountSection() | src/core/Account/account-service.js:account operations
 - **Date format preferences** (US, ISO, EU formats) applied consistently across transaction lists, CSV exports, goal dates, and filter summaries. A note in Settings explains that the date picker itself follows the browser/OS locale | src/core/settings-service.js:saveSetting() | src/utils/date-utils.js:date formatting
 - **Data export/import** capabilities | src/components/DataManagementSection.js:DataManagementSection() | src/core/backup-service.js:createEmergencyExport()/restoreBackup()
+- **Data Integrity Report** - A quick, readable summary of what the app found the last time it checked your stored data, so you can spot problems before they surprise you | src/components/IntegrityReport.js:IntegrityReport() | src/core/data-integrity-service.js:validateTransaction()
+- **Editing an account preserves it** - Saving an account no longer resets its balance or its creation date; both are kept, covered by a regression test | src/components/AccountSection.js:AccountSection() | src/core/Account/account-service.js:updateAccount()
+- **Recoverable account list** - If the account list fails to render you get an inline alert with a Retry button instead of a blank panel, and Retry only re-reads the list rather than re-saving your data | src/components/AccountSection.js:AccountSection()
+- **Error messages always arrive** - If the modal bundle fails to load, a shared fallback still surfaces the message, so an error is never swallowed by a failed dialog import | src/utils/mobile-alert.js:loadMobileAlert() | src/components/AccountDeletionSection.js:AccountDeletionSection()
 - **Transaction editing** with validation | src/views/EditView.js:EditView() | src/utils/form-utils/validation.js:edit validation
 - **Simplified feedback system** - Direct GitHub issues link for bug reports and suggestions | src/views/SettingsView.js:feedback system | GitHub integration
 
