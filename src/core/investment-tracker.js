@@ -248,6 +248,45 @@ export class InvestmentTracker {
   }
 
   /**
+   * Rehydrate the Date fields on stored/imported investments and drop any
+   * entry whose purchaseDate cannot be parsed.
+   *
+   * Shared by _loadInvestments() (localStorage read) and
+   * batchSetInvestments() (restore) so both paths apply identical date
+   * rules — a restored backup must never admit an investment that the very
+   * next page load would silently discard.
+   *
+   * @param {Array} investments - Raw investment records
+   * @returns {Array} Normalized investments with validated Date fields
+   */
+  _normalizeInvestments(investments) {
+    return investments
+      .map(investment => {
+        const pd = investment.purchaseDate
+          ? new Date(investment.purchaseDate)
+          : null;
+        const ca = investment.createdAt ? new Date(investment.createdAt) : null;
+        const ua = investment.updatedAt ? new Date(investment.updatedAt) : null;
+
+        return {
+          ...investment,
+          purchaseDate: pd && !isNaN(pd.getTime()) ? pd : null,
+          createdAt: ca && !isNaN(ca.getTime()) ? ca : new Date(),
+          updatedAt: ua && !isNaN(ua.getTime()) ? ua : new Date(),
+        };
+      })
+      .filter(investment => {
+        if (!investment.purchaseDate) {
+          console.warn(
+            `[InvestmentTracker] Skipping investment ${investment.symbol || 'unknown'} due to invalid purchaseDate`
+          );
+          return false;
+        }
+        return true;
+      });
+  }
+
+  /**
    * Load investments from localStorage
    * @returns {Array} Array of investments
    */
@@ -258,35 +297,7 @@ export class InvestmentTracker {
 
       const investments = safeJsonParse(stored);
 
-      // Convert date strings back to Date objects (with validation)
-      return investments
-        .map(investment => {
-          const pd = investment.purchaseDate
-            ? new Date(investment.purchaseDate)
-            : null;
-          const ca = investment.createdAt
-            ? new Date(investment.createdAt)
-            : null;
-          const ua = investment.updatedAt
-            ? new Date(investment.updatedAt)
-            : null;
-
-          return {
-            ...investment,
-            purchaseDate: pd && !isNaN(pd.getTime()) ? pd : null,
-            createdAt: ca && !isNaN(ca.getTime()) ? ca : new Date(),
-            updatedAt: ua && !isNaN(ua.getTime()) ? ua : new Date(),
-          };
-        })
-        .filter(investment => {
-          if (!investment.purchaseDate) {
-            console.warn(
-              `Skipping investment ${investment.symbol} due to invalid purchaseDate`
-            );
-            return false;
-          }
-          return true;
-        });
+      return this._normalizeInvestments(investments);
     } catch (error) {
       console.error('Error loading investments:', error);
       return [];
@@ -331,31 +342,7 @@ export class InvestmentTracker {
       );
     }
 
-    // Normalize date fields for each investment with validation
-    const normalizedInvestments = investments
-      .map(investment => {
-        const pd = investment.purchaseDate
-          ? new Date(investment.purchaseDate)
-          : null;
-        const ca = investment.createdAt ? new Date(investment.createdAt) : null;
-        const ua = investment.updatedAt ? new Date(investment.updatedAt) : null;
-
-        return {
-          ...investment,
-          purchaseDate: pd && !isNaN(pd.getTime()) ? pd : null,
-          createdAt: ca && !isNaN(ca.getTime()) ? ca : new Date(),
-          updatedAt: ua && !isNaN(ua.getTime()) ? ua : new Date(),
-        };
-      })
-      .filter(investment => {
-        if (!investment.purchaseDate) {
-          console.warn(
-            `[InvestmentTracker] Skipping investment ${investment.symbol || 'unknown'} due to invalid purchaseDate`
-          );
-          return false;
-        }
-        return true;
-      });
+    const normalizedInvestments = this._normalizeInvestments(investments);
 
     console.log(
       `[InvestmentTracker] Setting ${normalizedInvestments.length} investments`

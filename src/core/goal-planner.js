@@ -543,6 +543,35 @@ export class GoalPlanner {
   }
 
   /**
+   * Convert a goal's stored date fields back to Date objects.
+   *
+   * Shared by _loadGoals() (localStorage read) and batchSetGoals() (restore).
+   * The two callers differ deliberately, hence the flag: a restore backfills
+   * a missing field with "now" so a partial backup still yields a goal the UI
+   * can render, whereas a load preserves the stored value verbatim — including
+   * the Invalid Date that `new Date(undefined)` produces — rather than
+   * inventing a date the user's own record never had.
+   *
+   * @param {Object} goal - Raw goal carrying ISO-string date fields
+   * @param {boolean} fallbackToNow - Replace a missing field with the current
+   *   date instead of letting it become an Invalid Date
+   * @returns {Object} Copy of the goal with Date-typed date fields
+   */
+  _normalizeDates(goal, fallbackToNow = false) {
+    const toDate = value => {
+      if (value) return new Date(value);
+      return fallbackToNow ? new Date() : new Date(value);
+    };
+
+    return {
+      ...goal,
+      targetDate: toDate(goal.targetDate),
+      createdDate: toDate(goal.createdDate),
+      updatedDate: toDate(goal.updatedDate),
+    };
+  }
+
+  /**
    * Load goals from localStorage
    * @returns {Array} Array of goals
    */
@@ -553,13 +582,7 @@ export class GoalPlanner {
 
       const goals = safeJsonParse(stored);
 
-      // Convert date strings back to Date objects
-      return goals.map(goal => ({
-        ...goal,
-        targetDate: new Date(goal.targetDate),
-        createdDate: new Date(goal.createdDate),
-        updatedDate: new Date(goal.updatedDate),
-      }));
+      return goals.map(goal => this._normalizeDates(goal));
     } catch (error) {
       console.error('Error loading goals:', error);
       return [];
@@ -619,13 +642,7 @@ export class GoalPlanner {
         }
         return true;
       })
-      .map(goal => ({
-        ...goal,
-        // Convert date strings to Date objects
-        targetDate: goal.targetDate ? new Date(goal.targetDate) : new Date(),
-        createdDate: goal.createdDate ? new Date(goal.createdDate) : new Date(),
-        updatedDate: goal.updatedDate ? new Date(goal.updatedDate) : new Date(),
-      }));
+      .map(goal => this._normalizeDates(goal, true));
 
     console.log(`[GoalPlanner] Setting ${cleanedGoals.length} validated goals`);
     this.goals = cleanedGoals;
