@@ -31,8 +31,44 @@ vi.mock('../../src/components/DashboardStatsCard.js', () => ({
 // and hands the async invalidate() the keys captured beforehand — otherwise it
 // re-derives them from the already-emptied in-memory map and would silently skip
 // the persistent layer.
+//
+// The global `localStorage` from tests/setup.js is a spy stub: setItem records
+// the call but stores nothing, and getItem always returns undefined. These
+// assertions read the persistent layer back, so they need a real store — the
+// same LocalStorageMock the other storage-reading suites install.
+class LocalStorageMock {
+  constructor() {
+    this.store = {};
+  }
+
+  clear() {
+    this.store = {};
+  }
+
+  getItem(key) {
+    return this.store[key] ?? null;
+  }
+
+  setItem(key, value) {
+    this.store[key] = String(value);
+  }
+
+  removeItem(key) {
+    delete this.store[key];
+  }
+
+  get length() {
+    return Object.keys(this.store).length;
+  }
+
+  key(index) {
+    return Object.keys(this.store)[index] ?? null;
+  }
+}
+
 describe('DashboardView auth-switch cache invalidation', () => {
   const CACHE_KEY = 'financial_planning_preload';
+  const PERSISTENT_KEY = 'blinkbudget_analytics_analytics_cache';
 
   const dispatchAuthChange = user => {
     window.dispatchEvent(
@@ -40,8 +76,20 @@ describe('DashboardView auth-switch cache invalidation', () => {
     );
   };
 
+  // Read the persistent layer straight off disk, deliberately: this asserts on
+  // the bytes that survive an auth switch, not on an in-memory structure.
+  // AnalyticsCache._setInStorage wraps everything in a
+  // { data, timestamp, version, ttl } envelope, so the per-key map lives at
+  // `.data` — asserting on the top level would pass/fail for reasons that have
+  // nothing to do with invalidation.
+  const readPersistedKeys = () => {
+    const raw = localStorage.getItem(PERSISTENT_KEY);
+    return raw ? JSON.parse(raw).data : null;
+  };
+
   beforeEach(() => {
     vi.restoreAllMocks();
+    global.localStorage = new LocalStorageMock();
     localStorage.clear();
     analyticsCache.clearAll();
     vi.spyOn(TransactionService, 'getAll').mockReturnValue([]);
@@ -70,9 +118,7 @@ describe('DashboardView auth-switch cache invalidation', () => {
     const el = DashboardView();
 
     await vi.waitFor(() => {
-      const raw = localStorage.getItem('blinkbudget_analytics_analytics_cache');
-      const parsed = raw ? JSON.parse(raw) : null;
-      expect(parsed?.[CACHE_KEY]).toBeDefined();
+      expect(readPersistedKeys()?.[CACHE_KEY]).toBeDefined();
     });
 
     dispatchAuthChange({ displayName: 'Sam' });
@@ -80,9 +126,7 @@ describe('DashboardView auth-switch cache invalidation', () => {
     expect(invalidateSpy).toHaveBeenCalledWith(CACHE_KEY, [CACHE_KEY]);
 
     await vi.waitFor(() => {
-      const raw = localStorage.getItem('blinkbudget_analytics_analytics_cache');
-      const parsed = raw ? JSON.parse(raw) : null;
-      expect(parsed?.[CACHE_KEY]).toBeUndefined();
+      expect(readPersistedKeys()?.[CACHE_KEY]).toBeUndefined();
     });
 
     if (el.cleanup) el.cleanup();

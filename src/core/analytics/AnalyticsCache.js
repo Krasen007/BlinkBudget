@@ -29,7 +29,16 @@ export class AnalyticsCache {
   }
 
   /**
-   * Acquire mutex lock for persistent storage operations
+   * Acquire mutex lock for persistent storage operations.
+   *
+   * Deliberately returns undefined. This used to `return this._lockPromise`,
+   * which made every `await this._acquireLock()` a self-deadlock: the promise
+   * only settles in _releaseLock(), and _releaseLock() only runs in the
+   * caller's `finally` — i.e. only after the await that can never complete.
+   * The lock then stayed held for the lifetime of the instance, so every later
+   * persistent write and every invalidate() queued behind it forever, and the
+   * previous user's planning data was never removed from localStorage.
+   * A mutex hands out ownership; it is not itself a thing to await.
    */
   async _acquireLock() {
     // Wait for any existing lock to be released
@@ -41,8 +50,6 @@ export class AnalyticsCache {
     this._lockPromise = new Promise(resolve => {
       this._lockResolve = resolve;
     });
-
-    return this._lockPromise;
   }
 
   /**
@@ -266,12 +273,14 @@ export class AnalyticsCache {
     result,
     ttl = this.PERSISTENT_CACHE_DURATION
   ) {
-    // Read existing persistent data first without acquiring lock
-    const cached = this._getFromStorage('analytics_cache') || {};
-
     await this._acquireLock();
 
     try {
+      // Read *inside* the lock. Reading before acquiring made this a
+      // read-modify-write race: two concurrent writers both read the same
+      // snapshot and the second clobbered the first, silently dropping a key.
+      const cached = this._getFromStorage('analytics_cache') || {};
+
       const updated = {
         ...cached,
         [key]: {
