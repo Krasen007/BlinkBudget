@@ -693,7 +693,12 @@
 }
 
 .advanced-settings-section--closing {
-  animation: slideUp 0.3s ease forwards;
+  /* Keeps the panel rendered for the length of the exit animation; the view
+     drops this class when the animation ends, which reverts to the base
+     `display: none`. Without `display: block` the section was hidden by
+     `.advanced-settings-section` before the animation could ever play. */
+  display: block;
+  animation: slideUpOut 0.3s ease forwards;
 }
 
 @keyframes slideDown {
@@ -708,7 +713,12 @@
   }
 }
 
-@keyframes slideUp {
+/* Named `slideUpOut`, NOT `slideUp`: `mobile.css` already owns `slideUp` as its
+   modal entrance, and `main.css` imports mobile.css after this file, so a shared
+   name resolved to the entrance keyframes instead of these. The exit variant was
+   then dropped from the production bundle entirely and the close animation never
+   ran. See todo/ai-slop-report.md #4.1. */
+@keyframes slideUpOut {
   from {
     opacity: 1;
     transform: translateY(0);

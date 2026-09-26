@@ -13,7 +13,12 @@ import { AccountDeletionSection } from '../components/AccountDeletionSection.js'
 import { escapeHtml } from '../utils/security-utils.js';
 import { SecuritySection } from '../components/SecuritySection.js';
 import { FeedbackLink } from '../components/FeedbackLink.js';
-import { SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
+import {
+  SPACING,
+  TOUCH_TARGETS,
+  FONT_SIZES,
+  TIMING,
+} from '../utils/constants.js';
 import { DateFormatSection } from '../components/DateFormatSection.js';
 import { SettingsService } from '../core/settings-service.js';
 import {
@@ -137,9 +142,20 @@ export const SettingsView = () => {
   const advancedSettingsSection = document.createElement('div');
   advancedSettingsSection.className = 'advanced-settings-section';
 
+  // Set while a close animation is in flight. The close is deferred so the exit
+  // animation is visible: `--closing` holds the panel displayed, and dropping
+  // the class afterwards reverts to the base `display: none`. The handle lets a
+  // re-open cancel the pending hide instead of having a stale timer cut short a
+  // later close animation.
+  let advancedSettingsCloseTimer = null;
+
   const toggleAdvancedSettings = () => {
     advancedSettingsVisible = !advancedSettingsVisible;
     if (advancedSettingsVisible) {
+      if (advancedSettingsCloseTimer !== null) {
+        clearTimeout(advancedSettingsCloseTimer);
+        advancedSettingsCloseTimer = null;
+      }
       advancedSettingsSection.classList.add(
         'advanced-settings-section--visible'
       );
@@ -158,11 +174,12 @@ export const SettingsView = () => {
       advancedToggleIcon.classList.remove('advanced-toggle__icon--expanded');
 
       // Wait for animation to complete, then hide
-      setTimeout(() => {
+      advancedSettingsCloseTimer = setTimeout(() => {
         advancedSettingsSection.classList.remove(
           'advanced-settings-section--closing'
         );
-      }, 300);
+        advancedSettingsCloseTimer = null;
+      }, TIMING.ANIMATION_NORMAL);
     }
     advancedToggleContainer.setAttribute(
       'aria-expanded',
