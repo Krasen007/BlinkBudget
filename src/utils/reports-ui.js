@@ -12,9 +12,9 @@ import { escapeHtml } from './security-utils.js';
 
 // Translucent semantic tints (rgba() literals replaced per design-token rule;
 // color-mix() over the base token keeps dev and prod identical)
-const WARNING_TINT =
+export const WARNING_TINT =
   'color-mix(in srgb, var(--color-warning) 10%, transparent)';
-const WARNING_BORDER =
+export const WARNING_BORDER =
   'color-mix(in srgb, var(--color-warning) 30%, transparent)';
 const ERROR_TINT = 'color-mix(in srgb, var(--color-error) 10%, transparent)';
 const ERROR_BORDER = 'color-mix(in srgb, var(--color-error) 30%, transparent)';

@@ -291,5 +291,8 @@ export function createMinimalAnalyticsData(transactions, timePeriod) {
       timePeriod,
     },
     isMinimal: true,
+    // Consumed by ReportsView to render the "simplified calculations" banner.
+    // Without this flag a silent fallback shows approximate figures as real.
+    isFallback: true,
   };
 }

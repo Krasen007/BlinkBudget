@@ -15,8 +15,28 @@ import { BudgetProgress } from '../../components/BudgetProgress.js';
 import { BudgetSummaryCard } from '../../components/BudgetSummaryCard.js';
 import { BudgetPlanner } from '../../core/budget-planner.js';
 import { ProgressiveEmptyState } from '../../components/ProgressiveEmptyState.js';
+import { showErrorToast } from '../../utils/toast-notifications.js';
 
 const MIN_TRANSACTIONS_FOR_SUGGESTIONS = 30;
+
+/**
+ * Run a StorageService write, reporting failures to the user.
+ * Without this a failed save reaches the user as a silent no-op — or, for the
+ * async handlers, as an unhandled rejection with no message at all.
+ * @param {() => void} write
+ * @param {string} description - What failed, e.g. 'save budget'
+ * @returns {boolean} true when the write succeeded
+ */
+const attemptWrite = (write, description) => {
+  try {
+    write();
+    return true;
+  } catch (err) {
+    console.error(`[BudgetsSection] Failed to ${description}:`, err);
+    showErrorToast(`Failed to ${description}. Please try again.`);
+    return false;
+  }
+};
 
 /**
  * Create budgets management section
@@ -84,10 +104,15 @@ export const BudgetsSection = async planningData => {
     if (suggestions.length > 0) {
       const suggestionsContainer = BudgetSuggestionsContainer(suggestions, {
         onAccept: async suggestion => {
-          StorageService.saveBudget({
-            categoryName: suggestion.category,
-            amountLimit: suggestion.suggestedAmount,
-          });
+          const saved = attemptWrite(
+            () =>
+              StorageService.saveBudget({
+                categoryName: suggestion.category,
+                amountLimit: suggestion.suggestedAmount,
+              }),
+            'save budget'
+          );
+          if (!saved) return;
           // Remove from suggestions and re-render
           suggestions = suggestions.filter(
             s => s.category !== suggestion.category
@@ -104,10 +129,15 @@ export const BudgetsSection = async planningData => {
               initialLimit: suggestion.suggestedAmount,
               onSave: limit => {
                 if (limit && limit > 0) {
-                  StorageService.saveBudget({
-                    categoryName: suggestion.category,
-                    amountLimit: limit,
-                  });
+                  const saved = attemptWrite(
+                    () =>
+                      StorageService.saveBudget({
+                        categoryName: suggestion.category,
+                        amountLimit: limit,
+                      }),
+                    'save budget'
+                  );
+                  if (!saved) return;
                 }
                 suggestions = suggestions.filter(
                   s => s.category !== suggestion.category
@@ -250,12 +280,23 @@ export const BudgetsSection = async planningData => {
             onSave: limit => {
               if (limit === 0 || limit === null) {
                 const existing = StorageService.getBudgetByCategory(cat.name);
-                if (existing) StorageService.deleteBudget(existing.id);
+                if (existing) {
+                  const removed = attemptWrite(
+                    () => StorageService.deleteBudget(existing.id),
+                    'remove budget'
+                  );
+                  if (!removed) return;
+                }
               } else {
-                StorageService.saveBudget({
-                  categoryName: cat.name,
-                  amountLimit: limit,
-                });
+                const saved = attemptWrite(
+                  () =>
+                    StorageService.saveBudget({
+                      categoryName: cat.name,
+                      amountLimit: limit,
+                    }),
+                  'save budget'
+                );
+                if (!saved) return;
               }
               render();
             },
@@ -273,7 +314,11 @@ export const BudgetsSection = async planningData => {
             confirmText: 'Delete',
             variant: 'danger',
             onConfirm: () => {
-              StorageService.deleteBudget(cat.budget.id);
+              const deleted = attemptWrite(
+                () => StorageService.deleteBudget(cat.budget.id),
+                'delete budget'
+              );
+              if (!deleted) return;
               render();
             },
           });
@@ -297,10 +342,15 @@ export const BudgetsSection = async planningData => {
             initialLimit: suggestedLimit,
             onSave: limit => {
               if (limit && limit > 0) {
-                StorageService.saveBudget({
-                  categoryName: cat.name,
-                  amountLimit: limit,
-                });
+                const saved = attemptWrite(
+                  () =>
+                    StorageService.saveBudget({
+                      categoryName: cat.name,
+                      amountLimit: limit,
+                    }),
+                  'save budget'
+                );
+                if (!saved) return;
               }
               render();
             },

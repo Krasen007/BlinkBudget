@@ -13,6 +13,7 @@ import {
 } from '../../utils/financial-planning-helpers.js';
 import { createEnhancedEmptyState } from '../../utils/enhanced-empty-states.js';
 import { ProgressiveEmptyState } from '../../components/ProgressiveEmptyState.js';
+import { showErrorToast } from '../../utils/toast-notifications.js';
 
 /**
  * Create investment form controls
@@ -167,6 +168,7 @@ function createInvestmentFormControls() {
       invForm.style.display = 'none';
     } catch (err) {
       console.error('Failed to save investment', err);
+      showErrorToast('Failed to save investment. Please try again.');
     }
   });
 
@@ -499,6 +501,7 @@ function createInvestmentsList() {
               refreshInvestmentsList();
             } catch (err) {
               console.error('Failed to update investment', err);
+              showErrorToast('Failed to update investment. Please try again.');
             }
           });
         });

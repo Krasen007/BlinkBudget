@@ -199,6 +199,7 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
       dateError.style.display = 'none';
     } catch (err) {
       console.error('Failed to save goal', err);
+      showErrorToast('Failed to save goal. Please try again.');
     }
   });
 
@@ -580,6 +581,7 @@ function createGoalsList(chartRenderer, activeCharts, section) {
               refreshGoalsList();
             } catch (err) {
               console.error('Failed to update goal', err);
+              showErrorToast('Failed to update goal. Please try again.');
             }
           });
         });
@@ -613,8 +615,8 @@ function createGoalsList(chartRenderer, activeCharts, section) {
                 // Refresh the list
                 await refreshGoalsList();
               } catch (err) {
-                // Show error notification to user and log once
-                showErrorToast('Failed to delete goal. Please try again.', err);
+                console.error('Failed to delete goal', err);
+                showErrorToast('Failed to delete goal. Please try again.');
               }
             },
           });
@@ -1030,6 +1032,7 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
             }
           } catch (err) {
             console.error('Failed to create goal from recommendation:', err);
+            showErrorToast('Failed to create goal. Please try again.');
           }
         });
 

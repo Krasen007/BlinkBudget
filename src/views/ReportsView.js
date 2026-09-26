@@ -53,6 +53,8 @@ import {
   showBrowserWarning,
   showPerformanceWarning,
   showChartRenderingWarning,
+  WARNING_TINT,
+  WARNING_BORDER,
 } from '../utils/reports-ui.js';
 
 import {
@@ -599,15 +601,9 @@ export const ReportsView = (params = {}) => {
       }
       // --- End cache check ---
 
-      let transactions;
+      let allTransactions;
       try {
-        const allTransactions = TransactionService.getAll();
-
-        if (!Array.isArray(allTransactions)) {
-          throw new Error('Invalid transaction data format - expected array');
-        }
-
-        transactions = allTransactions;
+        allTransactions = TransactionService.getAll();
       } catch (storageError) {
         console.error('Storage access error:', storageError);
         throw new Error(
@@ -615,6 +611,18 @@ export const ReportsView = (params = {}) => {
           { cause: storageError }
         );
       }
+
+      // Shape check stays outside the try: throwing here used to be caught by
+      // the same block and re-wrapped as a storage error, sending users to
+      // check browser settings when their storage was fine.
+      if (!Array.isArray(allTransactions)) {
+        console.error('Transaction data is not an array:', allTransactions);
+        throw new Error(
+          'Your saved transaction data is in an unexpected format. Please try refreshing the page.'
+        );
+      }
+
+      const transactions = allTransactions;
 
       let analyticsData;
       try {
@@ -867,15 +875,13 @@ export const ReportsView = (params = {}) => {
         const fallbackWarning = document.createElement('div');
         fallbackWarning.className = 'fallback-warning';
         fallbackWarning.style.padding = SPACING.SM;
-        fallbackWarning.style.background =
-          'var(--color-warning-bg, rgba(251, 191, 36, 0.1))';
-        fallbackWarning.style.border =
-          '1px solid var(--color-warning-border, rgba(251, 191, 36, 0.3))';
+        fallbackWarning.style.background = WARNING_TINT;
+        fallbackWarning.style.border = `1px solid ${WARNING_BORDER}`;
         fallbackWarning.style.borderRadius = 'var(--radius-sm)';
-        fallbackWarning.style.color = 'var(--color-warning-text, #92400e)';
+        fallbackWarning.style.color = 'var(--color-warning-dark)';
         fallbackWarning.style.fontSize = 'var(--font-size-sm)';
         fallbackWarning.style.marginBottom = SPACING.XS;
-        // Security: Static string, not user input
+        // Static string — textContent keeps it out of the HTML parser.
         fallbackWarning.textContent =
           '⚠️ Using simplified calculations due to data processing issues. Some advanced insights may not be available.';
         chartContainer.insertBefore(fallbackWarning, chartContainer.firstChild);
@@ -1208,13 +1214,9 @@ export const ReportsView = (params = {}) => {
               unusualData.averageAmount,
               () => {
                 // Navigate to Dashboard with transaction ID for highlighting
-                if (Router && typeof Router.navigate === 'function') {
-                  Router.navigate('dashboard', {
-                    highlightTransactionId: transaction.id,
-                  });
-                } else {
-                  console.warn('Router.navigate not available');
-                }
+                Router.navigate('dashboard', {
+                  highlightTransactionId: transaction.id,
+                });
               }
             );
             alertsSection.appendChild(alertCard);
