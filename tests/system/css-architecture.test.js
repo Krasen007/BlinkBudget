@@ -12,6 +12,15 @@ const collectStyleSheets = dir =>
     return entry.name.endsWith('.css') ? [entryPath] : [];
   });
 
+// Every file under a directory, recursively. Used to derive the corpus of class
+// names that JS/HTML can actually reference.
+const collectFiles = dir =>
+  readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
+    const entryPath = join(dir, entry.name);
+    if (entry.isDirectory()) return collectFiles(entryPath);
+    return [entryPath];
+  });
+
 // Normalise a keyframes body so two definitions compare by *meaning* rather than
 // by formatting: whitespace collapsed, declarations reordered, and the `from` /
 // `to` keywords canonicalised to their percentage equivalents. CSS defines
@@ -198,5 +207,94 @@ describe('CSS Architecture Foundation', () => {
     }
 
     expect(offenders).toEqual([]);
+  });
+
+  /**
+   * Regression guard for the #4.2 dead-selector purge.
+   *
+   * "No grep hits in any .js/.html" is NOT proof a selector is unused. This app
+   * builds class names at runtime from template literals — `toast-${type}`,
+   * `btn-${opts.size}`, `skeleton-${sectionName}` — so those selectors have no
+   * literal reference anywhere and a naive scan reports them dead. Acting on that
+   * scan would have deleted the background/colour rules behind every toast and
+   * button variant.
+   *
+   * The purge therefore excluded every selector whose name could be produced by
+   * an interpolation. This test makes that exclusion self-maintaining: it
+   * derives the runtime-constructed prefixes from the JS under src/ and fails
+   * if any stylesheet still defines a selector that has no literal reference
+   * *and* cannot be produced by a template literal. That is the exact set a
+   * future dead-CSS sweep would delete, so it is the set a human must look at.
+   *
+   * Related, and worth knowing when reading dist/: PurgeCSS drops many of these
+   * selectors from the production bundle anyway, because no surviving CSS rule
+   * or literal string references them. That is a pre-existing gap in the
+   * safelist in vite.config.js, unchanged by this purge — verified by building
+   * the pre-purge tree and getting the same counts.
+   */
+  it('only defines unreferenced selectors that a template literal can produce', () => {
+    const jsFiles = collectFiles('src').filter(file => file.endsWith('.js'));
+    const runtimePrefixes = new Set();
+
+    for (const file of jsFiles) {
+      const source = readFileSync(file, 'utf-8');
+      // `prefix-${expr}` — only the literal head is knowable statically.
+      for (const [, literal] of source.matchAll(/`([^`]*\$\{[^`]*`)/g)) {
+        const head = literal.split('${')[0].match(/([A-Za-z][\w-]*[-_])$/);
+        if (head) runtimePrefixes.add(head[1]);
+      }
+      for (const [, prefix] of source.matchAll(
+        /classList\.(?:add|remove|toggle)\(\s*'([a-z-]+[-_])/g
+      )) {
+        runtimePrefixes.add(prefix);
+      }
+    }
+
+    expect(runtimePrefixes.size).toBeGreaterThan(0);
+
+    // Every literal class name used anywhere outside CSS. Matching the token
+    // itself (rather than trying to parse className/classList idioms) is
+    // deliberately generous: a false "referenced" only weakens this guard,
+    // while a false "unreferenced" would demand a baseline entry for a live
+    // selector.
+    const referenced = new Set();
+    for (const file of [
+      ...collectFiles('src'),
+      ...collectFiles('tests'),
+      'index.html',
+    ]) {
+      if (!/\.(js|html)$/.test(file)) continue;
+      const source = readFileSync(file, 'utf-8');
+      for (const token of source.match(/[A-Za-z][\w-]*/g) || []) {
+        if (/^(?:[a-z][\w-]*)$/.test(token)) referenced.add(token);
+      }
+    }
+
+    // Selectors defined in CSS that nothing references literally.
+    const unreferenced = [];
+    for (const file of collectStyleSheets(stylesDir)) {
+      const css = readFileSync(file, 'utf-8').replace(/\/\*[\s\S]*?\*\//g, '');
+      const defined = new Set();
+      for (const block of css.match(/[^{}]+\{[^{}]*\}/g) || []) {
+        const selector = block.slice(0, block.indexOf('{'));
+        if (selector.trim().startsWith('@keyframes')) continue;
+        for (const [, name] of selector.matchAll(/\.(-?[_a-zA-Z][\w-]*)/g)) {
+          defined.add(name);
+        }
+      }
+      for (const name of defined) {
+        if (!referenced.has(name)) unreferenced.push(name);
+      }
+    }
+
+    // A selector with no literal reference is legitimate only if a template
+    // literal can still produce it at runtime. Anything else is either a live
+    // selector a purge nearly removed, or a genuinely dead rule — both need a
+    // human to look, which is exactly what this assertion forces.
+    const unexplained = unreferenced.filter(
+      name => ![...runtimePrefixes].some(prefix => name.startsWith(prefix))
+    );
+
+    expect([...new Set(unexplained)].sort()).toEqual([]);
   });
 });

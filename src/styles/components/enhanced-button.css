@@ -157,22 +157,6 @@
 }
 
 /* Button Loading Spinner */
-.btn-spinner {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 2;
-}
-
-.btn-spinner .spinner-inner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid transparent;
-  border-top: 2px solid currentColor;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
 
 /* Touch Active State */
 .btn-touch-active {
@@ -257,11 +241,6 @@
   .btn:active {
     transform: none;
   }
-
-  .btn-spinner .spinner-inner {
-    animation: none;
-    border-top-color: currentColor;
-  }
 }
 
 /* High Contrast Mode Support */
@@ -294,15 +273,6 @@
 }
 
 /* Button Animation Keyframes */
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
-}
 
 /* Loading State Animation */
 @keyframes btn-pulse {

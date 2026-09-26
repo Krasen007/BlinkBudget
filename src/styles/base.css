@@ -1,5 +1,4 @@
 /* Base Styles - Merged from reset, typography, and hero */
-/* Note: Font imports moved to index.html for better loading strategy */
 
 /* reset.css */
 *,
@@ -14,7 +13,7 @@ html,
 body {
   height: 100%;
   margin: 0;
-  overflow: hidden; /* Prevent body scroll, use container scroll */
+  overflow: hidden;
 }
 
 body {
@@ -43,7 +42,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  height: 100%; /* Force height to fill parent */
+  height: 100%;
 }
 
 /* Enforce minimum font size to prevent iOS Safari zoom on focus (WCAG 1.4.4) */
@@ -86,7 +85,6 @@ input[type='number'] {
 }
 
 @media print {
-  .mobile-only,
   .touch-target,
   .btn {
     display: none !important;
@@ -165,8 +163,6 @@ p {
     font-size: var(--font-size-xl);
   }
 }
-
-/* Hero styles moved to hero.css for conditional loading on landing page only */
 
 /* Accessibility */
 .visually-hidden {

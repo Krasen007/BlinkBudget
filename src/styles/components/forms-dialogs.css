@@ -163,14 +163,6 @@ select.input-select:focus {
   padding-right: calc(var(--spacing-md) + 24px);
 }
 
-.mobile-add-account-form {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-lg);
-  margin-top: var(--spacing-md);
-}
-
 .mobile-date-range-form {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -206,7 +198,6 @@ select.input-select:focus {
   text-align: center;
   margin-bottom: var(--spacing-xs);
   opacity: 0.8;
-  /* Remove transition animation */
 }
 
 .view-add .mobile-form-input[aria-label*='Transaction date']::after,
@@ -219,7 +210,6 @@ select.input-select:focus {
   width: 0;
   height: 2px;
   background: var(--color-primary);
-  /* Remove transition animation */
 }
 
 .view-add .mobile-form-input[aria-label*='Transaction date']:hover::after,
@@ -251,14 +241,6 @@ select.input-select:focus {
 
 .transaction-tag-selector[hidden] {
   display: none !important;
-}
-
-.transaction-tag-selector__title {
-  flex: 0 0 100%;
-  margin: 0;
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--color-text-muted);
 }
 
 .transaction-form .category-chip.btn {
@@ -577,26 +559,6 @@ select.input-select:focus {
   padding: 0;
 }
 
-.quick-amount-presets-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  margin-bottom: var(--spacing-xs);
-}
-
-.quick-amount-presets-label {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-  font-weight: 500;
-}
-
-.quick-amount-presets-hint {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-  opacity: 0.7;
-}
-
 .quick-amount-preset-btn {
   min-width: 60px;
   min-height: 44px;
@@ -634,18 +596,3 @@ select.input-select:focus {
 }
 
 /* Anti-Deterrent Micro-copy */
-.anti-deterrent-copy {
-  display: flex;
-  justify-content: center;
-  gap: var(--spacing-lg);
-  margin-top: var(--spacing-xs);
-  margin-bottom: var(--spacing-md);
-}
-
-.anti-deterrent-copy span {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-}

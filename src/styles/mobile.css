@@ -268,7 +268,6 @@
 .mobile-nav-icon {
   font-size: 1.25rem;
   margin-bottom: var(--spacing-xs);
-  /* Remove transition animation */
 }
 
 .mobile-nav-label {

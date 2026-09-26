@@ -1,6 +1,11 @@
-/* Loading indicators — canonical spinner/float keyframes.
- * Single source for @keyframes spin / float. JS no longer injects \3c style>
- * tags; see enhanced-empty-states.js / progress-indicators.js / reports-ui.js.
+/* Loading indicators — the single source of @keyframes spin and float.
+ *
+ * The other three copies of `spin` (webapp-components, enhanced-button,
+ * inflation-trends) were removed in the Round 2 cleanup, so this claim is now
+ * actually true. It matters: both names are applied from JS inline styles
+ * (progress-indicators.js, reports-ui.js, LoadingView.js), so PurgeCSS has no
+ * surviving CSS rule to trace and would drop them without the
+ * `safelist.keyframes` entry in vite.config.js.
  */
 
 @keyframes spin {
@@ -36,7 +41,7 @@
   outline-offset: 2px;
 }
 
-@media (width <= 768px) {
+@media (width <= 767px) {
   .empty-state {
     padding: var(--spacing-lg) var(--spacing-md) !important;
     min-height: 300px !important;

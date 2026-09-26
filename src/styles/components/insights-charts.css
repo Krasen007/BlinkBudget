@@ -247,33 +247,6 @@
 
 /* Icon button (chart export) */
 
-.insights-icon-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--touch-target-min);
-  height: var(--touch-target-min);
-  padding: 0;
-  color: var(--color-text-muted);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition:
-    background-color var(--transition-fast),
-    color var(--transition-fast);
-}
-
-.insights-icon-btn:hover {
-  color: var(--color-text-main);
-  background: var(--color-surface-hover);
-}
-
-.insights-icon-btn:focus-visible {
-  outline: 2px solid var(--focus-color);
-  outline-offset: 2px;
-}
-
 /* Month navigation button (shared by the month-based insights charts) */
 
 .insights-nav-btn {

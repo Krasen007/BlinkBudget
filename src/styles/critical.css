@@ -90,7 +90,9 @@ body {
 
 .view-header {
   flex-shrink: 0;
-  margin-bottom: var(--spacing-xs);
+  /* Fallback: this file must render before tokens.css arrives.
+     --spacing-xs is 0.25rem in tokens.css. */
+  margin-bottom: var(--spacing-xs, 0.25rem);
 }
 
 .view-title {
@@ -145,16 +147,7 @@ body {
   outline-offset: 2px;
 }
 
-/* Loading styles moved to webapp-components.css to avoid duplication */
-
 /* Critical form styles */
-.form-label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-text-main);
-  margin-bottom: 4px;
-}
 
 .view-select {
   width: 100%;

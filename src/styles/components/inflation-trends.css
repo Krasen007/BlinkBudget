@@ -3,9 +3,11 @@
  *
  * The card shell comes from .card + .insights-card (insights-charts.css);
  * this file only adds the inflation header, the fluid chart area, and state
- * messaging. Reuses global patterns from ui.css:
- * - .segmented-control: For chart toggles and periods (controls are no longer rendered — kept for reuse)
- * - .badge: For trend indicators
+ * messaging.
+ *
+ * The period/toggle controls this file used to style are no longer rendered —
+ * InflationTrends.test.js asserts `.inflation-controls` is absent — so those
+ * rules were removed rather than kept "for reuse".
  */
 
 .inflation-trends {
@@ -37,24 +39,7 @@
   color: var(--color-text-muted);
 }
 
-.inflation-controls {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
-}
-
-.selector-group {
-  display: flex;
-  gap: var(--spacing-md);
-  flex-wrap: wrap;
-  align-items: center;
-}
-
 /* Specific overrides for segmented-control within the component */
-.inflation-controls .segmented-control {
-  min-width: 0;
-}
 
 /* Chart Area — fluid height matches the other insights cards
    (.insights-chart-area uses the same clamp()) */
@@ -90,15 +75,6 @@
 }
 
 /* Animations */
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
 
 .inflation-chart.loading::before {
   content: '';
@@ -112,25 +88,10 @@
 }
 
 /* Responsive adjustments */
-@media (width <= 768px) {
+@media (width <= 767px) {
   .inflation-header {
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  .selector-group {
-    width: 100%;
-  }
-
-  .inflation-controls .segmented-control {
-    width: 100%;
-    overflow-x: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  .inflation-controls .segmented-control::-webkit-scrollbar {
-    display: none;
   }
 }
 

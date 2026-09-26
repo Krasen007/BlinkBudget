@@ -1,10 +1,5 @@
 /* Enhanced Input Component Styles - WebApp.md Input Pattern */
 
-.enhanced-input {
-  display: block;
-  width: 100%;
-}
-
 .input-container {
   display: flex;
   flex-direction: column;
@@ -202,7 +197,7 @@
 
 /* Input Types Specific Styles */
 .input-field[type='search'] {
-  padding-right: calc(var(--spacing-md) + 32px); /* Space for clear button */
+  padding-right: calc(var(--spacing-md) + 32px);
 }
 
 .input-field[type='password'] {
@@ -223,13 +218,11 @@
   }
 
   /* Input Validation States */
-  .input-field:focus:valid,
-  .input-field.user-valid {
+  .input-field:focus:valid {
     border-color: var(--color-success);
   }
 
-  .input-field:focus:invalid,
-  .input-field.user-invalid {
+  .input-field:focus:invalid {
     border-color: var(--color-error);
   }
 
@@ -297,21 +290,6 @@
   }
 
   /* Input Groups */
-  .input-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-lg);
-  }
-
-  .input-group-horizontal {
-    flex-direction: row;
-    align-items: flex-end;
-    gap: var(--spacing-md);
-  }
-
-  .input-group-horizontal .enhanced-input {
-    flex: 1;
-  }
 
   /* Input with Actions */
   .input-with-action {
