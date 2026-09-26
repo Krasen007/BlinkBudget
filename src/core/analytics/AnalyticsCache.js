@@ -440,6 +440,35 @@ export class AnalyticsCache {
   }
 
   /**
+   * Invalidate a pattern with correct ordering, for callers that must not
+   * await.
+   *
+   * `invalidate()` yields at its mutex before deleting anything, so an
+   * unawaited call leaves a window in which a same-tick read still sees the
+   * stale entry. Capturing the keys is equally mandatory: `invalidate()` derives
+   * its deletion set from the in-memory map, so calling it after
+   * `invalidateSync()` with no captured keys would re-derive an empty set and
+   * skip the persistent layer entirely.
+   *
+   * Callers that genuinely need to await the persistent pass should call
+   * `invalidate(pattern, getMatchingKeys(pattern))` themselves; this helper
+   * exists for the fire-and-forget write paths.
+   *
+   * @param {string} pattern - Substring to match against cache keys
+   * @returns {Promise<void>} Resolves when the persistent pass finishes
+   */
+  invalidateInBackground(pattern) {
+    const capturedKeys = this.getMatchingKeys(pattern);
+    this.invalidateSync(pattern);
+    return this.invalidate(pattern, capturedKeys).catch(error => {
+      console.warn(
+        `[AnalyticsCache] Failed to invalidate "${pattern}" in background:`,
+        error
+      );
+    });
+  }
+
+  /**
    * Invalidate cache entries that match a pattern (synchronous, no locking)
    * @param {string} pattern - Substring to match against cache keys
    * @returns {number} Number of entries invalidated

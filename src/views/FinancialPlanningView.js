@@ -77,7 +77,9 @@ function setCachedPlanningData(data) {
 }
 
 function clearPlanningCache() {
-  analyticsCache.invalidate(PLANNING_CACHE_KEY);
+  // Not invalidate(): it yields at its mutex, so loadPlanningData() on the very
+  // next line would re-read this same stale entry from the in-memory cache.
+  analyticsCache.invalidateInBackground(PLANNING_CACHE_KEY);
 }
 
 export const FinancialPlanningView = (params = {}) => {

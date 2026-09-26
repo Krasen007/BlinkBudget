@@ -66,7 +66,7 @@ export const StorageService = {
       metadata
     );
     // Invalidate related caches
-    analyticsCache.invalidate('portfolioSummary');
+    analyticsCache.invalidateInBackground('portfolioSummary');
     // Push updated investments to cloud (authoritative single-doc pattern)
     // Use safe, serialized push with retries (non-blocking)
     this._pushToCloudSafe(
@@ -80,7 +80,7 @@ export const StorageService = {
       symbol,
       currentPrice
     );
-    analyticsCache.invalidate('portfolioSummary');
+    analyticsCache.invalidateInBackground('portfolioSummary');
     this._pushToCloudSafe(
       STORAGE_KEYS.INVESTMENTS,
       this._investmentTracker.getAllInvestments()
@@ -89,7 +89,7 @@ export const StorageService = {
   },
   removeInvestment: function (symbol) {
     const res = this._investmentTracker.removeInvestment(symbol);
-    analyticsCache.invalidate('portfolioSummary');
+    analyticsCache.invalidateInBackground('portfolioSummary');
     this._pushToCloudSafe(
       STORAGE_KEYS.INVESTMENTS,
       this._investmentTracker.getAllInvestments()
@@ -98,7 +98,7 @@ export const StorageService = {
   },
   updateInvestment: function (id, updates) {
     const res = this._investmentTracker.updateInvestment(id, updates);
-    analyticsCache.invalidate('portfolioSummary');
+    analyticsCache.invalidateInBackground('portfolioSummary');
     this._pushToCloudSafe(
       STORAGE_KEYS.INVESTMENTS,
       this._investmentTracker.getAllInvestments()
@@ -135,7 +135,7 @@ export const StorageService = {
       goal.currentSavings || 0,
       goal.options || {}
     );
-    analyticsCache.invalidate('goalsSummary');
+    analyticsCache.invalidateInBackground('goalsSummary');
     this._pushToCloudSafe(STORAGE_KEYS.GOALS, this._goalPlanner.getAllGoals());
     return res;
   },
@@ -153,25 +153,25 @@ export const StorageService = {
       currentSavings,
       options
     );
-    analyticsCache.invalidate('goalsSummary');
+    analyticsCache.invalidateInBackground('goalsSummary');
     this._pushToCloudSafe(STORAGE_KEYS.GOALS, this._goalPlanner.getAllGoals());
     return res;
   },
   updateGoalProgress: function (goalId, newSavings) {
     const res = this._goalPlanner.updateGoalProgress(goalId, newSavings);
-    analyticsCache.invalidate('goalsSummary');
+    analyticsCache.invalidateInBackground('goalsSummary');
     this._pushToCloudSafe(STORAGE_KEYS.GOALS, this._goalPlanner.getAllGoals());
     return res;
   },
   deleteGoal: function (goalId) {
     const res = this._goalPlanner.deleteGoal(goalId);
-    analyticsCache.invalidate('goalsSummary');
+    analyticsCache.invalidateInBackground('goalsSummary');
     this._pushToCloudSafe(STORAGE_KEYS.GOALS, this._goalPlanner.getAllGoals());
     return res;
   },
   updateGoal: function (goalId, updates) {
     const res = this._goalPlanner.updateGoal(goalId, updates);
-    analyticsCache.invalidate('goalsSummary');
+    analyticsCache.invalidateInBackground('goalsSummary');
     this._pushToCloudSafe(STORAGE_KEYS.GOALS, this._goalPlanner.getAllGoals());
     return res;
   },

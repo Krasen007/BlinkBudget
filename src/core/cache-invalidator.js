@@ -29,30 +29,22 @@ export const CacheInvalidator = {
 
       // Clear related summary caches for planning data
       if (key === STORAGE_KEYS.INVESTMENTS || key === STORAGE_KEYS.GOALS) {
-        analyticsCache.invalidate('portfolioSummary');
-        analyticsCache.invalidate('goalsSummary');
+        analyticsCache.invalidateInBackground('portfolioSummary');
+        analyticsCache.invalidateInBackground('goalsSummary');
       }
 
       // When transactions change, invalidate forecasts and analytics
       if (key === STORAGE_KEYS.TRANSACTIONS) {
-        const capturedKeysByPattern = [
+        // invalidateInBackground() clears the in-memory map synchronously and
+        // passes the keys captured beforehand to the async pass, so same-tick
+        // reads see fresh data AND the persistent layer is still purged.
+        [
           'analytics_',
           'forecast_',
           'financial_planning_data',
           'reports_preload_',
-        ].map(pattern => ({
-          pattern,
-          keys: analyticsCache.getMatchingKeys(pattern),
-        }));
+        ].forEach(pattern => analyticsCache.invalidateInBackground(pattern));
 
-        // Synchronous in-memory invalidation so same-tick reads see fresh data
-        capturedKeysByPattern.forEach(({ pattern }) => {
-          analyticsCache.invalidateSync(pattern);
-        });
-        // Async full invalidation (incl. persistent storage) in background
-        capturedKeysByPattern.forEach(({ pattern, keys }) => {
-          analyticsCache.invalidate(pattern, keys);
-        });
         // Notify instances to clear their in-memory caches
         window.dispatchEvent(
           new CustomEvent('forecast-invalidate', {
@@ -63,7 +55,7 @@ export const CacheInvalidator = {
 
       // When accounts change, forecasts may be affected too
       if (key === STORAGE_KEYS.ACCOUNTS) {
-        analyticsCache.invalidate('forecast_');
+        analyticsCache.invalidateInBackground('forecast_');
         window.dispatchEvent(
           new CustomEvent('forecast-invalidate', {
             detail: { reason: 'accounts-updated', timestamp: Date.now() },
