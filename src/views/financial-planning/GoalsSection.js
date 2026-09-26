@@ -315,7 +315,11 @@ function createGoalsList(chartRenderer, activeCharts, section) {
           warningBadge.className = 'warning-badge';
           warningBadge.textContent = 'Overdue';
           warningBadge.style.background = COLORS.ERROR;
-          warningBadge.style.color = 'var(--color-on-error, #fff)';
+          // `var(--color-on-error, #fff)` looked tokenised but no stylesheet
+          // declares `--color-on-error`, so the literal always won. Use the
+          // literal honestly, matching the error-surface badge in
+          // FinancialPlanningView.js (COLORS.ERROR background + white text).
+          warningBadge.style.color = 'white';
           warningBadge.style.fontSize = '0.7rem';
           warningBadge.style.padding = `${SPACING.XXS} ${SPACING.XS}`;
           warningBadge.style.borderRadius = 'var(--radius-sm)';

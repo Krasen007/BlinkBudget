@@ -608,13 +608,15 @@ export const InvestmentsSection = async (_chartRenderer, _activeCharts) => {
   // Add total portfolio value and gain/loss
   let totalValue = 0;
   let totalGainLoss = 0;
+  let portfolioSummaryFailed = false;
   try {
     const { StorageService } = await import('../../core/storage.js');
     const summary = StorageService.calculatePortfolioSummary();
     totalValue = summary.totalValue || 0;
     totalGainLoss = summary.gainsLosses?.totalGainLoss || 0;
   } catch (err) {
-    console.warn('Error fetching portfolio summary:', err);
+    console.error('Error fetching portfolio summary:', err);
+    portfolioSummaryFailed = true;
   }
 
   const stats = document.createElement('div');
@@ -623,31 +625,45 @@ export const InvestmentsSection = async (_chartRenderer, _activeCharts) => {
   stats.style.gap = SPACING.MD;
   stats.style.marginBottom = SPACING.MD;
   stats.style.flexWrap = 'wrap';
-  const totalVal = document.createElement('div');
-  totalVal.className = 'total-portfolio-value';
-  totalVal.textContent = 'Total: ';
-  const valueSpan = document.createElement('span');
-  valueSpan.className = 'currency-value';
-  valueSpan.textContent = `${CURRENCY_SYMBOL}${totalValue.toFixed(2)}`;
-  totalVal.appendChild(valueSpan);
 
-  const gainLoss = document.createElement('div');
-  gainLoss.className = 'total-gain-loss';
-  const sign = totalGainLoss >= 0 ? '+' : '';
-  gainLoss.textContent = `Gain/Loss: ${sign}${CURRENCY_SYMBOL}${Math.abs(totalGainLoss).toFixed(2)}`;
-  gainLoss.style.color = totalGainLoss >= 0 ? COLORS.SUCCESS : COLORS.ERROR;
+  if (portfolioSummaryFailed) {
+    // A failure must not read as "Total: €0.00" — that is a plausible-looking
+    // wrong number, indistinguishable from a genuinely empty portfolio. The
+    // holdings list above is unaffected, so say so rather than showing figures.
+    const summaryError = document.createElement('div');
+    summaryError.className = 'portfolio-stats-error';
+    summaryError.textContent =
+      'Portfolio totals are unavailable. Your holdings are unaffected — try refreshing to see the summary.';
+    summaryError.style.color = COLORS.ERROR;
+    stats.appendChild(summaryError);
+    section.insertBefore(stats, controls);
+  } else {
+    const totalVal = document.createElement('div');
+    totalVal.className = 'total-portfolio-value';
+    totalVal.textContent = 'Total: ';
+    const valueSpan = document.createElement('span');
+    valueSpan.className = 'currency-value';
+    valueSpan.textContent = `${CURRENCY_SYMBOL}${totalValue.toFixed(2)}`;
+    totalVal.appendChild(valueSpan);
 
-  stats.appendChild(totalVal);
-  stats.appendChild(gainLoss);
-  section.insertBefore(stats, controls);
+    const gainLoss = document.createElement('div');
+    gainLoss.className = 'total-gain-loss';
+    const sign = totalGainLoss >= 0 ? '+' : '';
+    gainLoss.textContent = `Gain/Loss: ${sign}${CURRENCY_SYMBOL}${Math.abs(totalGainLoss).toFixed(2)}`;
+    gainLoss.style.color = totalGainLoss >= 0 ? COLORS.SUCCESS : COLORS.ERROR;
 
-  if (totalValue === 0) {
-    const placeholder = createPlaceholder(
-      'No Investments Yet',
-      'Start tracking your portfolio by adding your first investment holdings.',
-      '💰'
-    );
-    section.appendChild(placeholder);
+    stats.appendChild(totalVal);
+    stats.appendChild(gainLoss);
+    section.insertBefore(stats, controls);
+
+    if (totalValue === 0) {
+      const placeholder = createPlaceholder(
+        'No Investments Yet',
+        'Start tracking your portfolio by adding your first investment holdings.',
+        '💰'
+      );
+      section.appendChild(placeholder);
+    }
   }
 
   return section;

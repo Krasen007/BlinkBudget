@@ -168,72 +168,97 @@ export function checkBrowserSupport() {
 }
 
 /**
- * Validate analytics data structure
+ * Validate analytics data structure.
+ *
+ * Returns a result instead of throwing. Every failure mode below is a
+ * condition readable straight off the object, so a `throw` here was using the
+ * exception as control flow and forced the caller into a nested try/catch
+ * (see rule #10 in todo/ai-slop-report.md).
+ * @param {*} data - Candidate analytics payload
+ * @returns {{ valid: boolean, errors: string[] }} All problems found, not just the first
  */
 export function validateAnalyticsData(data) {
   if (!data || typeof data !== 'object') {
-    throw new Error('Analytics data is not an object');
+    return { valid: false, errors: ['Analytics data is not an object'] };
   }
 
+  const errors = [];
+
   if (!Array.isArray(data.transactions)) {
-    throw new Error('Analytics data missing transactions array');
+    errors.push('Analytics data missing transactions array');
   }
 
   if (
     !data.categoryBreakdown ||
     !Array.isArray(data.categoryBreakdown.categories)
   ) {
-    throw new Error('Analytics data missing category breakdown');
+    errors.push('Analytics data missing category breakdown');
   }
 
   if (
     !data.incomeVsExpenses ||
     typeof data.incomeVsExpenses.totalIncome !== 'number'
   ) {
-    throw new Error('Analytics data missing income vs expenses');
+    errors.push('Analytics data missing income vs expenses');
+  } else if (
+    [
+      data.incomeVsExpenses.totalIncome,
+      data.incomeVsExpenses.totalExpenses,
+      data.incomeVsExpenses.netBalance,
+    ].some(field => isNaN(field))
+  ) {
+    // Only reachable when the block exists — otherwise the NaN read above
+    // would itself throw.
+    errors.push('Analytics data contains invalid numeric values');
   }
 
-  // Check for NaN values
-  const numericFields = [
-    data.incomeVsExpenses.totalIncome,
-    data.incomeVsExpenses.totalExpenses,
-    data.incomeVsExpenses.netBalance,
-  ];
-
-  if (numericFields.some(field => isNaN(field))) {
-    throw new Error('Analytics data contains invalid numeric values');
-  }
+  return { valid: errors.length === 0, errors };
 }
 
 /**
- * Sanitize analytics data to fix common issues
+ * Repair the malformed shapes `validateAnalyticsData` reports.
+ *
+ * Never throws. This is the recovery path, and the previous version threw a
+ * TypeError on precisely the inputs it was written to repair
+ * (`sanitized.incomeVsExpenses.totalIncome` on a payload with no
+ * `incomeVsExpenses`), which defeated the validate → sanitize → validate retry.
+ * @param {*} data - Possibly-malformed analytics payload
+ * @returns {Object} A payload that always satisfies `validateAnalyticsData`
  */
 export function sanitizeAnalyticsData(data) {
-  // Create a deep copy to avoid modifying original
-  const sanitized = JSON.parse(JSON.stringify(data));
+  const source = data && typeof data === 'object' ? data : {};
+  const sanitized = JSON.parse(JSON.stringify(source));
 
-  // Fix NaN values
-  if (isNaN(sanitized.incomeVsExpenses.totalIncome)) {
-    sanitized.incomeVsExpenses.totalIncome = 0;
-  }
-  if (isNaN(sanitized.incomeVsExpenses.totalExpenses)) {
-    sanitized.incomeVsExpenses.totalExpenses = 0;
-  }
-  if (isNaN(sanitized.incomeVsExpenses.netBalance)) {
-    sanitized.incomeVsExpenses.netBalance =
-      sanitized.incomeVsExpenses.totalIncome -
-      sanitized.incomeVsExpenses.totalExpenses;
+  if (!Array.isArray(sanitized.transactions)) {
+    sanitized.transactions = [];
   }
 
-  // Fix category breakdown
-  if (!sanitized.categoryBreakdown.categories) {
+  if (!sanitized.categoryBreakdown) {
+    sanitized.categoryBreakdown = {};
+  }
+  if (!Array.isArray(sanitized.categoryBreakdown.categories)) {
     sanitized.categoryBreakdown.categories = [];
   }
-
   sanitized.categoryBreakdown.categories =
     sanitized.categoryBreakdown.categories.filter(
       cat => cat && typeof cat.amount === 'number' && !isNaN(cat.amount)
     );
+
+  const totals =
+    sanitized.incomeVsExpenses && typeof sanitized.incomeVsExpenses === 'object'
+      ? sanitized.incomeVsExpenses
+      : {};
+
+  if (typeof totals.totalIncome !== 'number' || isNaN(totals.totalIncome)) {
+    totals.totalIncome = 0;
+  }
+  if (typeof totals.totalExpenses !== 'number' || isNaN(totals.totalExpenses)) {
+    totals.totalExpenses = 0;
+  }
+  if (typeof totals.netBalance !== 'number' || isNaN(totals.netBalance)) {
+    totals.netBalance = totals.totalIncome - totals.totalExpenses;
+  }
+  sanitized.incomeVsExpenses = totals;
 
   return sanitized;
 }

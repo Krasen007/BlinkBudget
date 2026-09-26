@@ -222,4 +222,32 @@ describe('ReportsView approximate-data fallback', () => {
 
     expect(view.querySelector('.fallback-warning')).toBeNull();
   });
+
+  it('recovers a malformed payload via sanitize instead of erroring out', async () => {
+    // Analytics "succeeds" but returns a shape the validator rejects: totals
+    // are NaN and the category breakdown has no `categories` array. The view
+    // must repair it and still render, rather than surfacing an error state.
+    throwingEngine.generateSpendingInsights.mockImplementation(() => []);
+    throwingEngine.calculateCategoryBreakdown.mockImplementation(() => ({}));
+    throwingEngine.calculateIncomeVsExpenses.mockImplementation(() => ({
+      totalIncome: NaN,
+      totalExpenses: NaN,
+      netBalance: NaN,
+    }));
+
+    const view = ReportsView();
+    document.body.appendChild(view);
+
+    for (let i = 0; i < 12; i++) {
+      await Promise.resolve();
+    }
+
+    // The error state element is only appended to the container when an error
+    // is actually shown, so its absence proves the view recovered.
+    expect(view.querySelector('.error-state')).toBeNull();
+    // Charts rendered from the repaired payload...
+    expect(view.querySelector('.reports-chart-container')).not.toBeNull();
+    // ...and the data was not left malformed, so no fallback warning either.
+    expect(view.querySelector('.fallback-warning')).toBeNull();
+  });
 });

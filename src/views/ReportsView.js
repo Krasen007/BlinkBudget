@@ -657,29 +657,33 @@ export const ReportsView = (params = {}) => {
           );
         } catch (minimalDataError) {
           console.error('Minimal data fallback failed:', minimalDataError);
+          // Rethrowing the original keeps the user-facing message tied to the
+          // root cause, but `minimalDataError` — what actually went wrong last —
+          // used to vanish. Chain it so both survive for diagnosis.
+          analyticsError.fallbackError = minimalDataError;
           throw analyticsError;
         }
       }
 
-      try {
-        validateAnalyticsData(analyticsData);
-      } catch (validationError) {
+      // Validate, then repair, then re-validate. `validateAnalyticsData` reports
+      // rather than throws, so this reads as three straight-line steps instead of
+      // a try nested in a catch nested in a try.
+      const validation = validateAnalyticsData(analyticsData);
+      if (!validation.valid) {
         console.warn(
           'Analytics data validation failed, attempting sanitization:',
-          validationError
+          validation.errors
         );
         analyticsData = sanitizeAnalyticsData(analyticsData);
 
-        try {
-          validateAnalyticsData(analyticsData);
-        } catch (sanitizationError) {
+        const revalidation = validateAnalyticsData(analyticsData);
+        if (!revalidation.valid) {
           console.error(
             'Analytics data validation failed after sanitization:',
-            sanitizationError
+            revalidation.errors
           );
           throw new Error(
-            'The processed financial data appears to be invalid. Please try refreshing the page or contact support if the issue persists.',
-            { cause: sanitizationError }
+            'The processed financial data appears to be invalid. Please try refreshing the page or contact support if the issue persists.'
           );
         }
       }

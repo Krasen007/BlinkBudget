@@ -105,7 +105,10 @@ vi.mock('../../src/utils/reports-utils.js', async () => {
       missingFeatures: [],
       limitedFeatures: [],
     }),
-    validateAnalyticsData: () => ({ isValid: true }),
+    // Matches the `{ valid, errors }` contract in reports-utils.js. The old
+    // `{ isValid: true }` key left `valid` undefined, which the new call site
+    // reads as "failed" and would send every render down the sanitize path.
+    validateAnalyticsData: () => ({ valid: true, errors: [] }),
     sanitizeAnalyticsData: data => data,
     formatTimePeriod: () => 'Test Period',
     createMinimalAnalyticsData: () => ({ transactions: [], timePeriod: null }),
