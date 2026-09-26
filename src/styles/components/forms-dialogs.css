@@ -233,16 +233,6 @@ select.input-select:focus {
   width: 100%;
 }
 
-@media --sm {
-  .transaction-form.mobile-optimized {
-    min-height: calc(
-      100vh - 120px
-    ); /* Use fixed height instead of viewport variable */
-
-    justify-content: flex-start;
-  }
-}
-
 .transaction-form input,
 .transaction-form select,
 .transaction-form .input-select {
@@ -470,26 +460,6 @@ select.input-select:focus {
   color: var(--color-text-main);
 }
 
-@media --md {
-  .mobile-date-range-form {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-lg);
-    align-items: end;
-  }
-
-  .mobile-date-input-wrapper:last-child {
-    grid-column: span 2;
-  }
-}
-
-@media --sm {
-  input:focus {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-  }
-}
-
 @supports (-webkit-touch-callout: none) {
   input {
     appearance: none;
@@ -546,12 +516,6 @@ select.input-select:focus {
   grid-template-columns: repeat(4, 1fr);
   width: 100%;
   margin-bottom: var(--spacing-xs);
-}
-
-@media --sm {
-  .type-toggle-group {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 /* dialogs.css */
@@ -684,22 +648,4 @@ select.input-select:focus {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-}
-
-@media --sm {
-  .quick-amount-presets {
-    gap: var(--spacing-xs);
-  }
-
-  .quick-amount-preset-btn {
-    min-width: 50px;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: var(--font-size-sm);
-  }
-
-  .anti-deterrent-copy {
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    align-items: center;
-  }
 }

@@ -97,12 +97,6 @@ input[type='number'] {
   width: var(--spacing-xs);
 }
 
-@media --md {
-  ::-webkit-scrollbar {
-    width: var(--spacing-sm);
-  }
-}
-
 ::-webkit-scrollbar-track {
   background: var(--color-surface);
   border-radius: var(--radius-sm);
@@ -160,20 +154,6 @@ p {
   line-height: var(--line-height-relaxed);
   margin-bottom: var(--spacing-md);
   text-wrap: pretty;
-}
-
-@media --md {
-  h1 {
-    font-size: var(--font-size-4xl);
-  }
-
-  h2 {
-    font-size: var(--font-size-3xl);
-  }
-
-  p {
-    max-width: 65ch;
-  }
 }
 
 @media (orientation: landscape) and (height <= 500px) {

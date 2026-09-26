@@ -160,4 +160,43 @@ describe('CSS Architecture Foundation', () => {
     expect(closingRule).not.toBeNull();
     expect(closingRule[1]).toMatch(/(^|;)\s*display:\s*block/);
   });
+
+  /**
+   * Regression guard for todo/ai-slop-report.md #7.1 (Round 2), re-scoped from
+   * "consistency-only" to a real defect.
+   *
+   * `postcss-custom-media` only resolves the *parenthesised* reference form:
+   *
+   *   @media (--md) { ... }  ->  @media (min-width: 768px) { ... }   resolved
+   *   @media --md   { ... }  ->  @media --md { ... }                 passed through
+   *
+   * The paren-less form is not a recognised custom-media reference, so it
+   * survives into the production bundle as an invalid media query that browsers
+   * discard. 22 such blocks were shipping dead: desktop `h1`/`h2` never scaled
+   * up, the dashboard stat grid never went multi-column, and `.mobile-back-btn`
+   * was never hidden on desktop.
+   *
+   * Every file here is individually valid CSS, so ESLint, Stylelint and the
+   * rest of this suite stayed green throughout — only reading the concatenated
+   * production stylesheet reveals it. That is why the assertion is on the
+   * *source* form: the build's emitted text is minified and hashed, so pinning
+   * a dist artefact here would break on every rebuild. A source-level ban is
+   * the durable form of the same check.
+   */
+  it('never uses the paren-less custom media reference form', () => {
+    // Matches `@media --md {`, but not `@media (--md) {`.
+    const bareCustomMedia = /@media\s+--[\w-]+\s*\{/g;
+    const offenders = [];
+
+    for (const file of collectStyleSheets(stylesDir)) {
+      const css = readFileSync(file, 'utf-8');
+      let match;
+      while ((match = bareCustomMedia.exec(css)) !== null) {
+        const line = css.slice(0, match.index).split('\n').length;
+        offenders.push(`${file}:${line} -> ${match[0].trim()}`);
+      }
+    }
+
+    expect(offenders).toEqual([]);
+  });
 });

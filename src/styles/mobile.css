@@ -301,9 +301,3 @@
 .mobile-back-label {
   font-family: var(--font-body);
 }
-
-@media --md {
-  .mobile-back-btn {
-    display: none;
-  }
-}
