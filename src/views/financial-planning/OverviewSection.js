@@ -29,6 +29,28 @@ const RISK_THRESHOLDS = {
   },
 };
 
+// Risk-level surface styling. Tints are color-mix() over the same semantic token
+// used for the border (matching the pattern in utils/reports-ui.js), so a theme
+// change can never desynchronise fill from border.
+const RISK_LEVEL_STYLES = {
+  low: {
+    background: 'color-mix(in srgb, var(--color-success) 10%, transparent)',
+    border: COLORS.SUCCESS,
+  },
+  moderate: {
+    background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
+    border: COLORS.WARNING,
+  },
+  critical: {
+    background: 'color-mix(in srgb, var(--color-error) 10%, transparent)',
+    border: COLORS.ERROR,
+  },
+  unknown: {
+    background: 'color-mix(in srgb, var(--color-text-muted) 10%, transparent)',
+    border: COLORS.TEXT_MUTED,
+  },
+};
+
 /**
  * Assess emergency fund adequacy
  * @param {number} monthlyExpenses - Monthly expenses
@@ -413,27 +435,14 @@ function createEmergencyFundCard(assessment) {
     details.appendChild(detail);
   });
 
+  const riskStyle =
+    RISK_LEVEL_STYLES[assessment.riskLevel] ?? RISK_LEVEL_STYLES.unknown;
   const recommendation = document.createElement('div');
   recommendation.style.marginTop = SPACING.SM;
   recommendation.style.padding = SPACING.MD;
-  recommendation.style.background =
-    assessment.riskLevel === 'low'
-      ? 'rgba(34, 197, 94, 0.1)'
-      : assessment.riskLevel === 'moderate'
-        ? 'rgba(234, 179, 8, 0.1)'
-        : assessment.riskLevel === 'critical'
-          ? 'rgba(239, 68, 68, 0.1)'
-          : 'rgba(156, 163, 175, 0.1)';
+  recommendation.style.background = riskStyle.background;
   recommendation.style.borderRadius = 'var(--radius-md)';
-  recommendation.style.border = `1px solid ${
-    assessment.riskLevel === 'low'
-      ? COLORS.SUCCESS
-      : assessment.riskLevel === 'moderate'
-        ? COLORS.WARNING
-        : assessment.riskLevel === 'critical'
-          ? COLORS.ERROR
-          : COLORS.TEXT_MUTED
-  }`;
+  recommendation.style.border = `1px solid ${riskStyle.border}`;
   const recommendationLabel = document.createElement('div');
   recommendationLabel.style.fontSize = '0.75rem';
   recommendationLabel.style.color = COLORS.TEXT_MUTED;

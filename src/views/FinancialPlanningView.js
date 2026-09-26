@@ -355,10 +355,6 @@ export const FinancialPlanningView = (params = {}) => {
     content.appendChild(budgetsElement);
   }
 
-  // createStatsCard is now imported from StatsCard.js component
-
-  // createPlaceholder is now imported from financial-planning-helpers.js
-
   /**
    * Load local data first (instant), then optionally sync from cloud in background.
    * This ensures the view renders immediately without blocking on network calls.

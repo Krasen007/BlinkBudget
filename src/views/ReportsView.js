@@ -158,7 +158,6 @@ export const ReportsView = (params = {}) => {
   const container = document.createElement('div');
   container.className = 'view-reports view-container';
 
-  // ... remaining state logic ...
   const handleGlobalError = (error, context = 'Unknown') => {
     console.error(`[ReportsView] Global error in ${context}:`, error);
     showErrorState(
@@ -201,8 +200,6 @@ export const ReportsView = (params = {}) => {
       originalOnUnhandledRejection(event);
     }
   };
-
-  // ... (imports)
 
   // Initialize services
   const analyticsEngine = getAnalyticsEngine();
@@ -366,6 +363,8 @@ export const ReportsView = (params = {}) => {
     });
 
     // Create header container that includes both header and time period selector
+    // Padding is deliberately absent: the container itself carries no padding, and
+    // responsive layout relies on content gaps to match the app width.
     const headerContainer = document.createElement('div');
     headerContainer.className = 'view-header view-sticky view-header-container';
 
@@ -984,10 +983,6 @@ export const ReportsView = (params = {}) => {
     }
   }
 
-  /******************* UI OF APP ***********************************
-   * Render beautiful charts with progressive loading
-   */
-
   /**
    * Update budget summary section incrementally
    */
@@ -1361,13 +1356,6 @@ export const ReportsView = (params = {}) => {
     }
 
     // Layout updates for mobile
-
-    const headerContainer = container.querySelector(
-      '.reports-header-container'
-    );
-    if (headerContainer) {
-      // Padding removed - header container has no padding
-    }
 
     content.style.maxWidth = '100%';
     content.style.boxSizing = 'border-box';

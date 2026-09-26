@@ -94,13 +94,17 @@ export const SettingsView = () => {
   // Category Management Section
   const categoryManagementSection = document.createElement('div');
   categoryManagementSection.className = 'settings-section';
-  // Security: Static strings, escaped for safety
-  categoryManagementSection.innerHTML = `
-    <div class="settings-section-header">
-      <h3>${escapeHtml('🏷️ Category Management')}</h3>
-      <p>${escapeHtml('Organize and customize your transaction categories')}</p>
-    </div>
-  `;
+  // Static strings, so they are set via textContent rather than escaped for innerHTML.
+  const categoryHeader = document.createElement('div');
+  categoryHeader.className = 'settings-section-header';
+  const categoryTitle = document.createElement('h3');
+  categoryTitle.textContent = '🏷️ Category Management';
+  const categorySubtitle = document.createElement('p');
+  categorySubtitle.textContent =
+    'Organize and customize your transaction categories';
+  categoryHeader.appendChild(categoryTitle);
+  categoryHeader.appendChild(categorySubtitle);
+  categoryManagementSection.appendChild(categoryHeader);
   const manageCategoriesBtn = ButtonComponent({
     text: 'Manage Categories',
     variant: 'primary',
@@ -305,11 +309,12 @@ export const SettingsView = () => {
   // App Updates Section (under advanced settings)
   const updatesSection = document.createElement('div');
   updatesSection.className = 'settings-section';
-  updatesSection.innerHTML = `
-    <div class="settings-section-header">
-      <h3>${escapeHtml('🔄 App Updates')}</h3>
-    </div>
-  `;
+  const updatesHeader = document.createElement('div');
+  updatesHeader.className = 'settings-section-header';
+  const updatesTitle = document.createElement('h3');
+  updatesTitle.textContent = '🔄 App Updates';
+  updatesHeader.appendChild(updatesTitle);
+  updatesSection.appendChild(updatesHeader);
 
   const versionInfo = document.createElement('div');
   versionInfo.style.cssText = `

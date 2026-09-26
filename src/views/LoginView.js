@@ -21,6 +21,8 @@ const createPasswordResetModal = () => {
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    // No z-index token exists in the stylesheet (--z-index-modal is referenced
+    // elsewhere but never defined), so this literal stays until a real scale lands.
     zIndex: '1000',
     padding: SPACING.MD,
   });
@@ -30,11 +32,11 @@ const createPasswordResetModal = () => {
     backgroundColor: COLORS.SURFACE,
     borderRadius: 'var(--radius-lg)',
     padding: SPACING.XL,
-    maxWidth: '400px',
+    maxWidth: 'var(--modal-max-width)',
     width: '100%',
     maxHeight: '90vh',
     overflow: 'auto',
-    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+    boxShadow: 'var(--shadow-xl)',
   });
 
   const title = document.createElement('h3');
