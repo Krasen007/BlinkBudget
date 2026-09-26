@@ -173,9 +173,14 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
 
     try {
       // Import StorageService dynamically
-
       StorageService.createGoal(name, target, tdate, current, {});
+    } catch (err) {
+      console.error('Failed to save goal', err);
+      showErrorToast('Failed to save goal. Please try again.');
+      return;
+    }
 
+    try {
       // Refresh goals chart using helper
       const updatedGoals = StorageService.getGoals();
       await refreshChart({
@@ -198,8 +203,8 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
       currentError.style.display = 'none';
       dateError.style.display = 'none';
     } catch (err) {
-      console.error('Failed to save goal', err);
-      showErrorToast('Failed to save goal. Please try again.');
+      console.error('Failed to refresh goal chart', err);
+      showErrorToast('Goal saved, but the chart could not refresh.');
     }
   });
 

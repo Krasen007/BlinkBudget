@@ -11,7 +11,7 @@
 // Security relevance: invalidate() is how DashboardView drops user-specific
 // planning data on an auth switch. Deadlocked, it silently never ran, so the
 // previous user's goals stayed in localStorage on a shared device.
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { AnalyticsCache } from '../../src/core/analytics/AnalyticsCache.js';
 
 const PERSISTENT_KEY = 'blinkbudget_analytics_analytics_cache';
@@ -54,8 +54,12 @@ describe('AnalyticsCache persistent-layer mutex', () => {
   let cache;
 
   beforeEach(() => {
-    global.localStorage = new LocalStorageMock();
+    vi.stubGlobal('localStorage', new LocalStorageMock());
     cache = new AnalyticsCache();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('releases the lock so a second persistent write is not stranded', async () => {

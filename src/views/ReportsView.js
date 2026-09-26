@@ -615,9 +615,11 @@ export const ReportsView = (params = {}) => {
       // check browser settings when their storage was fine.
       if (!Array.isArray(allTransactions)) {
         console.error('Transaction data is not an array:', allTransactions);
-        throw new Error(
+        const error = new Error(
           'Your saved transaction data is in an unexpected format. Please try refreshing the page.'
         );
+        error.userFacingMessage = error.message;
+        throw error;
       }
 
       const transactions = allTransactions;
@@ -680,9 +682,11 @@ export const ReportsView = (params = {}) => {
             'Analytics data validation failed after sanitization:',
             revalidation.errors
           );
-          throw new Error(
+          const error = new Error(
             'The processed financial data appears to be invalid. Please try refreshing the page or contact support if the issue persists.'
           );
+          error.userFacingMessage = error.message;
+          throw error;
         }
       }
 
@@ -751,7 +755,9 @@ export const ReportsView = (params = {}) => {
       let userMessage =
         'An unexpected error occurred while loading your reports.';
 
-      if (error.message.includes('storage')) {
+      if (error?.userFacingMessage) {
+        userMessage = error.userFacingMessage;
+      } else if (error.message.includes('storage')) {
         userMessage =
           'There was a problem accessing your stored data. Please check your browser settings and try again.';
       } else if (error.message.includes('browser')) {

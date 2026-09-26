@@ -89,11 +89,15 @@ describe('DashboardView auth-switch cache invalidation', () => {
 
   beforeEach(() => {
     vi.restoreAllMocks();
-    global.localStorage = new LocalStorageMock();
+    vi.stubGlobal('localStorage', new LocalStorageMock());
     localStorage.clear();
     analyticsCache.clearAll();
     vi.spyOn(TransactionService, 'getAll').mockReturnValue([]);
     AuthService.user = { displayName: 'Alex' };
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('clears the in-memory planning cache synchronously, before render completes', () => {

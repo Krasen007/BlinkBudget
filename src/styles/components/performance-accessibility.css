@@ -100,7 +100,7 @@
     height: auto;
     overflow: visible;
     clip: auto;
-    clip-path: inset(50%);
+    clip-path: none;
   }
 }
 

@@ -57,17 +57,31 @@ describe('Chart.js Lazy Loading', () => {
   // while loadChartJSModules() had already logged it with timing — one failure,
   // two console entries, the outer one naming a cause two frames down.
   // Re-throwing is correct; the duplicate log was the defect.
-  it('does not log a load failure at the outer layer', async () => {
+  it('rejects when Chart.js import fails and logs the failure once', async () => {
+    const originalImport = vi.importActual;
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    // The outer catch is the only thing that was removed. Reaching it at all
-    // requires a rejecting load, so assert the observable contract instead:
-    // on the success path nothing is logged, and the module still reports
-    // loaded modules.
-    await expect(loadChartJS()).resolves.toBeDefined();
-    expect(getChartJSModules()).not.toBe(null);
-    expect(errorSpy).not.toHaveBeenCalled();
+    vi.resetModules();
+    vi.doMock('chart.js', () => {
+      throw new Error('simulated Chart.js import failure');
+    });
 
-    errorSpy.mockRestore();
+    try {
+      const { loadChartJS: loadChartJSWithFailure } =
+        await import('../../src/core/chart-loader.js');
+
+      await expect(loadChartJSWithFailure()).rejects.toThrow(
+        'Failed to load Chart.js'
+      );
+      expect(errorSpy).toHaveBeenCalledTimes(1);
+      expect(errorSpy.mock.calls[0][0]).toContain(
+        '[ChartLoader] Chart.js loading failed'
+      );
+    } finally {
+      vi.doUnmock('chart.js');
+      vi.importActual = originalImport;
+      errorSpy.mockRestore();
+      resetChartLoader();
+    }
   });
 });

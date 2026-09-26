@@ -441,7 +441,7 @@ correct call site rather than inventing one.
 standard error sweep finds nothing:
 
 ```bash
-rg -n "^\s*(?!await ).*\.(invalidate|clear|reset|load|save|set|delete)\(" src/   # requires PCRE2 (-P)
+rg -n -P "^\s*(?!await ).*\.(invalidate|clear|reset|load|save|set|delete)\(" src/
 rg -n "await " src/ | wc -l    # compare: async-looking calls vs awaited ones
 ```
 
@@ -617,8 +617,7 @@ you _did_ edit gets attributed to the line-ending churn and waved through.
 4. To normalise, `prettier --write` the affected files and confirm with `git diff --numstat` that
    the content delta is still only your intended edits.
 
-Long-term fix, if this bites a third time: add `* text=auto` to `.gitattributes`. That is a repo
-config change, not a slop cleanup, so raise it rather than doing it inside an audit.
+Long-term fix, if this bites a third time: configure Git or Prettier to enforce LF in the working tree even when `core.autocrlf` is enabled, e.g. a `.gitattributes` entry such as `* text=auto eol=lf` plus a Prettier `endOfLine: "lf"` setting. The current `* text=auto` recommendation alone does not guarantee LF in a checkout where `core.autocrlf` is on, so the repo still needs an explicit LF rule in the working tree rather than relying on platform conversion alone.
 
 ### 6. A shared test double that is a stub can make a test unpassable for any code
 
@@ -852,7 +851,7 @@ Use this when kicking off a new audit round — including a re-check after a rem
    - **Whether an orphan's job is already done elsewhere (rule #4)** — grep the _concept_, not the function name: `rg -n "accountId|orphan" src/`
    - Dynamic imports, to manually inspect for computed paths: `rg "import\(" src/`
    - Hardcoded design values: `rg "#[0-9a-fA-F]{3,6}|z-index:\s*[0-9]{3,}" src/`
-   - File length against convention: `find src -name "*.js" | xargs wc -l | sort -rn`
+   - File length against convention: `rg -l --glob "*.js" src | ForEach-Object { [int](Get-Content $_ | Measure-Object -Line).Lines } | Sort-Object -Descending`
 
    **For a CSS / build-pipeline scope (rule #16) — the source sweep is the wrong place to start.**
    Build and read the artefact first, then add these:
@@ -863,7 +862,7 @@ Use this when kicking off a new audit round — including a re-check after a rem
      `rg -n '\$\{' src/` — then read the enums/defaults that bound each prefix
    - A safelist that may be propping up dead code: read `vite.config.js`'s `purgecss.safelist`
    - Parse-check every stylesheet after a bulk edit rather than trusting brace matching:
-     `node -e "const p=require('postcss'),fs=require('fs');for(const f of process.argv.slice(1))p.parse(fs.readFileSync(f,'utf-8'),{from:f})" src/styles/**/*.css`
+     `node -e "const p=require('postcss'),fs=require('fs');for(const f of process.argv.slice(1))p.parse(fs.readFileSync(f,'utf-8'),{from:f})" $(Get-ChildItem -Path src -Recurse -Filter '*.css' | ForEach-Object { $_.FullName })`
 
 3. **Work rule-by-rule across the scope, not file-by-file.** Sweeping for one rule (every `catch` block in scope) before moving to the next keeps the pattern fresh and surfaces cross-file inconsistencies (rule #7) that a single-file read-through misses.
 4. **Apply the [false-positive checklist](#before-you-flag-it-false-positive-checklist) as you go**, not as a final pass over everything — checking git blame while the file is already open is cheaper than reopening thirty files at the end.
