@@ -68,11 +68,17 @@ describe('DashboardView auth-switch cache invalidation', () => {
     analyticsCache.set(CACHE_KEY, { goals: ['user-A-private-goal'] }, 60000);
 
     const el = DashboardView();
+
+    await vi.waitFor(() => {
+      const raw = localStorage.getItem('blinkbudget_analytics_analytics_cache');
+      const parsed = raw ? JSON.parse(raw) : null;
+      expect(parsed?.[CACHE_KEY]).toBeDefined();
+    });
+
     dispatchAuthChange({ displayName: 'Sam' });
 
     expect(invalidateSpy).toHaveBeenCalledWith(CACHE_KEY, [CACHE_KEY]);
 
-    // The persistent write is async; flush it and assert the stored entry is gone.
     await vi.waitFor(() => {
       const raw = localStorage.getItem('blinkbudget_analytics_analytics_cache');
       const parsed = raw ? JSON.parse(raw) : null;

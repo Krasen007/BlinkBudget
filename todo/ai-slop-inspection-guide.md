@@ -7,13 +7,14 @@ Save to [ai-slop-report.md](ai-slop-report.md) for the initial audit results.
 
 ---
 
-## Quick triage: if you only have time for three
+## Quick triage: if you only have time for four
 
 Run these first — they're the ones most likely to hide an actual bug rather than just look untidy:
 
 1. **Swallowed errors**
 2. **Dead / overly defensive guards**
 3. **Try/catch as control flow**
+4. **Async boundary bugs** (rule #15) — the highest-yield addition to this list
 
 Everything else is worth doing but is lower stakes if a session runs short.
 
@@ -76,6 +77,9 @@ record of _why_ the code looks strange, it is archaeology: report it under #11 (
 1. Does it log the error? (minimum bar)
 2. Does the user get any feedback?
 3. Does execution stop, or does it fall through?
+4. **Can it run at all?** If the guarded expression is an un-awaited `async` call, the `catch` never
+   fires — the error escapes as an unhandled rejection. This is the highest-value question in the
+   list and it is easy to skip, because the code _looks_ handled. See [rule #15A](#15-async-boundary-bugs--high).
 
 **In this codebase:** search `catch` in `src/views/` and `src/core/` first — those hold the most user-visible flows.
 
@@ -109,12 +113,42 @@ record of _why_ the code looks strange, it is archaeology: report it under #11 (
 - `classList.remove('some-class')` where the class is never added
 - `localStorage.removeItem(key)` immediately followed by `localStorage.setItem(key, ...)`
 - A composite utility function that no caller uses
+- **A `debounce`/`setTimeout`/listener wrapper whose body is empty apart from a comment** — check the
+  body is actually empty before treating the wrapper as infrastructure. One real instance: a
+  `debounce(() => { /* Shared title update etc */ }, TIMING.DEBOUNCE_RESIZE)` was registered as a
+  `resize` listener, called once at init, and removed in `cleanup()` — four pieces of lifecycle
+  plumbing, all of it invoking a function that could not do anything. The giveaway is the
+  **scaffolding ratio**: real plumbing surrounding no real work.
 
 **Check procedure:**
 
 1. Pick an exported function or method.
 2. `grep -r "functionName" src/` to find all callsites.
 3. If zero callsites outside the file itself, it is dead.
+
+⚠️ **Before writing up an orphan as "unreplaceable logic" or "lost knowledge", check whether an
+equivalent implementation already exists elsewhere.** The rule above proves a function is
+_uncalled_ — it says nothing about whether its job is done somewhere else, and "the detector was
+written and never invoked" reads as a strong justification for keeping it. In this round a dead
+`checkDataIntegrity()` in `ReportsView.js` was flagged 🔴 with the note that "the knowledge encoded
+in it is currently lost." It was not lost: `data-integrity-service.js` implemented the same
+orphaned-`accountId` detection, ran it across 7 checks, surfaced it behind a **🔍 Data Integrity
+Check** button, and covered it with 5 test files. It was also **better** — it added a severity
+field, iterated once instead of twice, and read through a different service layer. The orphan was a
+duplicate, and the finding's central argument for keeping it was false.
+
+The asymmetry is the lesson: "zero callers" is cheap to establish and easy to over-interpret, while
+"an equivalent already exists" takes one extra grep. Spend the extra grep. Search by
+**what the code does**, not by name — the two implementations here shared no identifiers:
+
+```bash
+rg -n "accountId" src/core/      # the concept, not the function name
+rg -n "integrity" src/           # the domain
+```
+
+When the equivalent turns out to exist, the correct write-up is the reverse of the one you were
+about to file: **a duplicate to delete, not unreplaceable logic to preserve.** Say so explicitly in
+the report so the next session doesn't re-derive the same false justification.
 
 **Deleting a whole orphan file is a bigger claim than deleting one dead function — verify accordingly before it goes in a plan:**
 
@@ -305,6 +339,88 @@ Not a slop pattern by itself, but a strong correlate of it: files that outgrow w
 
 **Check:** `wc -l` every file in the directory you're auditing; anything over the project's stated limit gets a note in the report even if no other numbered rule fires on it. Don't bundle a split-this-file refactor into an unrelated slop-cleanup change — call it out as its own follow-up.
 
+### 15. Async boundary bugs 🔴 High
+
+_Found in the `src/views/` round of 2026-09-26 and added to the guide afterwards. This is the
+one class the first fourteen rules structurally cannot see, because **the code in question has no
+`catch` block to find** — the existing error-handling sweep greps for `catch` and walks straight
+past it._
+
+**A) A `try`/`catch` wrapped around an `async` call catches nothing.**
+
+```js
+// Looks handled. Catches nothing — see below.
+try {
+  analyticsCache.invalidate('financial_planning_preload');
+} catch {
+  // ignore cache errors
+}
+```
+
+An `async` function never throws synchronously: it returns a promise that _rejects_. A `try`/`catch`
+around the call site cannot observe that. This is **strictly worse than having no `try`/`catch`**,
+because it reads as handled in review and converts a real failure into an **unhandled rejection** —
+the failure still happens, it just escapes the error path the author believed was covering it.
+
+**Check:** for every `try { ... } catch` in scope, is the guarded expression an `async` call with no
+`await` on it? If so, the `catch` is dead. The tell is a `catch` whose body cannot possibly run.
+
+**The correct shapes** are, in order of preference:
+
+```js
+// 1. Handle the rejection where the promise is created (this repo's house style)
+analyticsCache.invalidate(key).catch(error => console.warn('…', error));
+
+// 2. Make the caller async and await it, when ordering actually matters
+await analyticsCache.invalidate(key);
+```
+
+**B) Fire-and-forget async calls that should be ordered.**
+
+Calling an async function without `await` does not merely "lose" the result — it **yields before
+its work happens**, and everything synchronous after the call line runs first. If the async work
+guarded state that the synchronous code then reads, there is a real bug window.
+
+The instance from this round: `handleAuthChange` reset its preload flags, then called the async
+`invalidate()` and immediately called `renderDashboard()`. Because `invalidate()` awaits its mutex
+before deleting anything, the cache still held the **previous user's** planning data for the whole
+of the synchronous render. On a shared device that is a cross-user data bleed.
+
+**Check:** for each unawaited async call, ask what the next synchronous statement reads. If it
+reads state the async call was supposed to clear, that is a 🔴 race, not a style nit.
+
+**C) A sync/async pair where calling one before the other silently disables it.**
+
+This is the subtlest form, and it is the one the original finding missed. A cache API offered both
+`invalidateSync(pattern)` and `async invalidate(pattern, capturedKeys)`, and the async one derived
+its deletion set from the in-memory map:
+
+```js
+const keysToDelete = capturedKeys || [...this.cache.keys()].filter(…);
+```
+
+So the "obvious" fix — `invalidateSync(p)` followed by `invalidate(p)` — is a **no-op for the
+persistent layer**: the sync call empties the map, so the async call re-derives an empty key list
+and never touches persistent storage. The fix has to capture the keys _first_ and pass them in,
+which is the pattern the codebase already uses correctly in `cache-invalidator.js:38-55`.
+
+**Check:** when a codebase has both a sync and an async variant of the same operation, read the
+async one's body before chaining them. If it derives its work from state the sync one clears, order
+alone is not enough — look for a key-capture parameter, and copy the pattern from an existing
+correct call site rather than inventing one.
+
+**D) Grep for it.** Neither `catch` nor `.catch(` appears in the buggy form of (B), so the
+standard error sweep finds nothing:
+
+```bash
+rg -n "^\s*(?!await ).*\.(invalidate|clear|reset|load|save|set|delete)\(" src/   # requires PCRE2 (-P)
+rg -n "await " src/ | wc -l    # compare: async-looking calls vs awaited ones
+```
+
+If a helper is called in many places and awaited in none, that is a **contract** problem, not N
+separate findings — write it up once and note the count. In this round 13 call sites shared the
+unawaited pattern, and the right answer was "enforce the contract in one place," not 13 line edits.
+
 ---
 
 ## Testing traps specific to this repo
@@ -362,6 +478,31 @@ makes "next line" resolve to _another comment_, so the suppressed rule still fir
 pick up an `Unused eslint-disable directive` warning on top. Put the reason on one line directly
 above the offending statement and let the fuller justification live in the file header.
 
+### 5. `core.autocrlf` makes `prettier --check` fail on files you never touched
+
+This repo has `core.autocrlf=true`, no `text=auto` in `.gitattributes`, and Prettier configured
+`endOfLine: "lf"`. Any git operation that rewrites the working tree — `git stash` / `git stash pop`,
+a fresh checkout, some merges — silently rewrites those files to **CRLF**, after which
+`prettier --check` fails on every one of them.
+
+It is worse than cosmetic noise because it produces **false confidence in both directions**: a
+formatting failure appears on files whose content you never edited, which invites you to "fix" it
+with a blanket `prettier --write` and bury a real diff; and a genuine formatting problem in a file
+you _did_ edit gets attributed to the line-ending churn and waved through.
+
+**Check before believing a format failure:**
+
+1. `git --no-pager diff --numstat` — if a file you never edited is in the list, suspect CRLF.
+2. Stash and re-run `prettier --check` on the file. **If the pristine version also fails, it is
+   pre-existing, not yours** — that is the check that separates the two, and it is cheap.
+3. Note that `git stash` is itself the thing that causes it here. If you need a baseline, prefer
+   `git show HEAD:<path>` into a temp file (outside the repo) over stashing the working tree.
+4. To normalise, `prettier --write` the affected files and confirm with `git diff --numstat` that
+   the content delta is still only your intended edits.
+
+Long-term fix, if this bites a third time: add `* text=auto` to `.gitattributes`. That is a repo
+config change, not a slop cleanup, so raise it rather than doing it inside an audit.
+
 ---
 
 ## Before you flag it: false-positive checklist
@@ -373,9 +514,10 @@ Not everything that looks like slop is slop. Before writing something up in the 
    - **Then ask whether it's _unreferenced_ or _provably_ dead** — they need different evidence. An empty function body (`() => { /* comment only */ }`) is a _proof_: it cannot do anything, so removing it cannot change behaviour on any runtime, and no device testing or `git blame` can overturn that. Grep-zero-callsites is weaker — it only means _this repo_ doesn't call it. A finding that says "check iOS behaviour before removing" has mis-filed a proof as a hypothesis, and gating it on a device test just manufactures a delay. Rule the two categories differently.
 3. **Check git blame / PR context** for the surrounding lines. A guard added deliberately in a bug-fix commit is not the same as one an AI tool left behind reflexively.
 4. **Check if it's covered by a test.** A "dead" branch that's exercised by a test suite is either not dead, or the test itself is stale — note which.
-5. **Consider forward-looking code.** A guard or parameter that doesn't fire _yet_ may be there for an in-progress feature or an upcoming caller — check open branches/PRs before deleting.
+5. **Consider forward-looking code.** A guard or parameter that doesn't fire _yet_ may be there for an in-progress feature or an upcoming caller — check open branches/PRs before deleting. **An empty function body is different**: it is a proof (see #2 above), and no future feature justifies keeping a body that is empty _now_ — a feature that ships will bring its own implementation. The real question is whether to delete the scaffolding or fill it in, and that is the author's call, so it stays "User Review Required." In this round the author resolved it as "delete — we are not implementing this feature," which was the right resolution for a stub. Record the decision either way rather than leaving the code as a permanently open question.
 6. **When in doubt, downgrade rather than delete.** Flag it in the report as "possibly intentional — confirm with author" instead of silently removing it.
 7. **Be suspicious of a clean sweep.** If a full audit produces zero findings marked "false positive" or "intentional," do one more pass looking specifically for reasons each item might be there on purpose before finalizing the report. A 100% slop hit rate across dozens of findings is itself a signal you're pattern-matching too fast rather than actually evaluating each one.
+8. **Be equally suspicious of a report whose justifications are all airtight.** The inverse failure mode: if every finding arrives with a confident, well-argued rationale, spot-check the two most rhetorically persuasive ones against the code before filing them. "The knowledge encoded in it is currently lost" reads as unanswerable and would have prevented a deletion that turned out to be correct. Strong prose is a reason to verify harder, not to skip verification.
 
 ---
 
@@ -392,6 +534,28 @@ To keep audits comparable across sessions, every finding in the report should fo
 - **Verdict:** slop / false positive / intentional (confirmed with author)
 - **Action:** fixed in this session / flagged for follow-up / left as-is (reason)
 ```
+
+**Required for any 🔴 or any finding you propose to fix: `- **Mechanism verified against source:** …`**
+
+A finding's stated mechanism is a hypothesis until someone has read the implementation of every
+function it names. Two findings in the 2026-09-26 round stated a confidently-worded mechanism that
+the code contradicted, and in both cases the prescribed fix was a **no-op** that would have closed
+the ticket while leaving the defect intact:
+
+- A `catch {}` described as "may silently swallow a cache error" turned out to wrap an `async`
+  call, so the `catch` could never run (rule #15A). "Remove it" and "add a `console.warn` to it"
+  were both no-ops.
+- A dead detector described as holding "knowledge [that] is currently lost" turned out to be a
+  duplicate of a live, tested service (rule #4).
+
+Write this line **before** filing, naming the specific thing you read that makes the mechanism
+true — e.g. "verified `invalidate` is declared `async` at `AnalyticsCache.js:394`, so it returns a
+promise and cannot throw synchronously." If you cannot fill it in, the finding is not ready to
+file, and the thing you could not verify is exactly what the fix will get wrong.
+
+**Where a finding carries a recommended fix, treat the recommendation as untrusted.** Include it, but
+say so, and state the mechanism you verified alongside it. The author needs both: what you believe
+is wrong, and what you have actually confirmed.
 
 Group findings by rule number within the report so repeat offenders (e.g. every file that has the same #7 inconsistency) are easy to spot across sessions.
 
@@ -417,16 +581,17 @@ report, and the right response is to re-locate the code — not to conclude the 
 
 ## Recommended audit procedure for a new file
 
-1. **Read imports** — grep each import name in the file; flag any that are never used.
-2. **Read every catch/try block** — apply rules #2 and #10.
+1. **Read imports** — grep each import name in the file; flag any that are never used. Then re-grep the whole repo, not just this file: a symbol used only in a sibling view is not an orphan.
+2. **Read every catch/try block** — apply rules #2 and #10, **then rule #15A**: for each `try`, check whether the guarded expression is an un-awaited `async` call, in which case the `catch` cannot fire.
 3. **Read every comment** — apply rules #1 and #11. Delete trivial ones mentally; if more than ~30% of comments add no information (or are stale), flag the file.
 4. **Search for hardcoded values** — `px`, `#`, `rgba`, `z-index`, plain number literals in style assignments (rule #5).
-5. **Check exports** — for every exported name, grep for callsites outside the file (rule #4).
-6. **Read every wrapper function** — if the body is one expression, check whether the wrapper adds anything (rule #6); check for near-duplicate blocks nearby (rule #9).
-7. **Compare with sibling files** — open the closest related file and spot-check that the same pattern is used for the same problem (rule #7).
-8. **If TypeScript or React is in play** — run rules #12 and #13.
-9. **Before writing anything up** — run it through the [false-positive checklist](#before-you-flag-it-false-positive-checklist).
-10. **Log findings** using the [report schema](#ai-slop-reportmd-schema) above.
+5. **Check exports** — for every exported name, grep for callsites outside the file (rule #4), **then grep the concept** to see whether an equivalent implementation already exists elsewhere before calling the orphan irreplaceable.
+6. **Read every wrapper function** — if the body is one expression, check whether the wrapper adds anything (rule #6); check for near-duplicate blocks nearby (rule #9). An empty-bodied wrapper with real listener/cleanup plumbing around it is a scaffold, not infrastructure (rule #4 signal).
+7. **Audit the async boundary** — for every call to a function that is `async` in its own definition, check whether it is awaited and whether the next synchronous statement reads state it should have cleared (rule #15B). If the codebase has sync/async twins, read the async one before recommending an order (rule #15C).
+8. **Compare with sibling files** — open the closest related file and spot-check that the same pattern is used for the same problem (rule #7).
+9. **If TypeScript or React is in play** — run rules #12 and #13.
+10. **Before writing anything up** — run it through the [false-positive checklist](#before-you-flag-it-false-positive-checklist).
+11. **Log findings** using the [report schema](#ai-slop-reportmd-schema) above.
 
 ---
 
@@ -460,7 +625,26 @@ import()` sat _inside_ the catch, so a failed dialog chunk threw while handling 
   error, leaving the user with no feedback and an unhandled rejection. Implement that, not the
   description. If the mechanism in the report doesn't survive contact with the code, stop and
   re-scope the finding before writing any of it.
+- **Ask what a fix derived from a wrong premise would leave behind.** The 2026-09-26 round produced
+  the sharpest version of this: the finding said a `catch {}` could silently swallow a cache
+  error, and prescribed "remove the `catch`, or replace it with a `console.warn`." Both were
+  no-ops, because the guarded function was `async` and the `catch` could never run (rule #15A).
+  Implementing the prescription exactly would have deleted four lines, changed no behaviour, and
+  left the actual cross-user data bleed fully intact while the report showed the finding as
+  resolved. **When a report's mechanism doesn't hold up, the fix must be re-derived from the
+  mechanism you actually found — and the report's own recommendation is the least trustworthy part
+  of it.** Re-deriving it here also surfaced a third defect the original had missed entirely (the
+  sync/async ordering trap, rule #15C).
+- **Fix the contract, not the symptom, when a pattern repeats.** If the same wrong pattern appears
+  at many call sites, the finding is about the contract, not the lines. 13 call sites shared the
+  unawaited-invalidate pattern; the right move is to enforce the ordering in one place and record
+  the rest, not to hand-edit 13 sites inside a security fix.
 - **Prove each regression test fails without its fix** — see [Testing traps](#testing-traps-specific-to-this-repo). Revert, run, confirm it fails for the right reason, restore.
+- **Make the reverted failure message legible evidence.** A revert run that fails with
+  `AssertionError: expected { goals: [ 'user-A-private-goal' ] } to be null` proves the security
+  bug in one line, because the assertion data _is_ the leaked content. When fixing a security or
+  data-correctness issue, seed the regression test with recognisable sentinel data so the failure
+  output demonstrates the defect to a reviewer who wasn't present for the revert.
 - Run lint/format/build once per phase, not only at the very end, so a bad phase-1 change doesn't get buried under phase-2 and phase-3 diffs on top of it.
 - **Re-grep for newly orphaned code after every deletion** — see rule #4 step 5. Cascades are the norm, not the exception.
 - For any UI-visible fix (error toasts, post-error navigation, focus behavior), write the manual QA step as a concrete user action ("click delete, confirm the undo toast appears and dismissing it does not re-delete") rather than "verify the flow works."
@@ -474,7 +658,11 @@ Use this when kicking off a new audit round — including a re-check after a rem
 1. **Pick a scope.** A full `src/` sweep, a single phase's touched files, or just the directories a recent AI session modified. A post-remediation re-check only needs the files that actually changed, plus their sibling files (rule #7 needs a neighbor to compare against).
 2. **Standardize the search tool.** The first audit round mixed PowerShell (`Select-String`, `Get-ChildItem`) with plain regex searches; if the team works across shells, prefer `ripgrep` (`rg`) so results are reproducible regardless of who runs the audit:
    - All catch blocks: `rg "catch\s*\{|\.catch\(" src/`
+   - **Catches wrapped around async calls (rule #15A)** — the ones that can't fire: `rg -n -P "(?s)try\s*\{[^}]*?\b\w+\([^)]*\)\s*;?\s*\}\s*catch"` then read each for an un-awaited `async` call
+   - **Un-awaited async calls (rule #15B)** — `rg -n -P "^\s*(?!await\b|return\b).*\b(invalidate|clear|reset|load|save|set|delete|hydrate|refresh)\w*\(" src/`
+   - **Sync/async twins that can disable each other (rule #15C)** — `rg -n "Sync\b|invalidateSync|flushSync" src/`, then read the async counterpart's body for state it derives from what the sync call clears
    - Callsites of a symbol (then re-run against the _whole repo_, not just `src/`, before calling it dead — rule #4): `rg "symbolName"`
+   - **Whether an orphan's job is already done elsewhere (rule #4)** — grep the _concept_, not the function name: `rg -n "accountId|orphan" src/`
    - Dynamic imports, to manually inspect for computed paths: `rg "import\(" src/`
    - Hardcoded design values: `rg "#[0-9a-fA-F]{3,6}|z-index:\s*[0-9]{3,}" src/`
    - File length against convention: `find src -name "*.js" | xargs wc -l | sort -rn`
