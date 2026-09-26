@@ -37,7 +37,10 @@ export async function loadChartJS() {
     isChartJSLoaded = true;
     return chartJSModules;
   } catch (error) {
-    console.error('[ChartLoader] Failed to load Chart.js:', error);
+    // Re-throw so callers see a failure. The cause is already logged by
+    // loadChartJSModules(), which owns the timing measurement — logging the
+    // wrapper here too would double-report one failure, and the wrapper's
+    // message names a "ChartLoader" failure whose cause is a frame deeper.
     // Reset promise so we can retry
     chartJSPromise = null;
     throw error;

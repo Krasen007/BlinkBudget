@@ -146,8 +146,9 @@ export const AuthService = {
       // Clear rate limit on successful login
       clearRateLimit(email);
 
-      // Update profile in background
-      this._updateUserProfile(this.user).catch(console.warn);
+      this._updateUserProfile(this.user).catch(error =>
+        console.warn('[AuthService] Profile update failed:', error)
+      );
 
       return { user: this.user, error: null };
     } catch (error) {
@@ -208,8 +209,9 @@ export const AuthService = {
       this.user = Object.freeze({ ...userCredential.user });
       localStorage.setItem('auth_hint', 'true');
 
-      // Update profile in background
-      this._updateUserProfile(this.user).catch(console.warn);
+      this._updateUserProfile(this.user).catch(error =>
+        console.warn('[AuthService] Profile update failed:', error)
+      );
 
       return { user: this.user, error: null };
     } catch (error) {
@@ -283,8 +285,9 @@ export const AuthService = {
       this.user = Object.freeze({ ...userCredential.user });
       localStorage.setItem('auth_hint', 'true');
 
-      // Update profile in background
-      this._updateUserProfile(this.user).catch(console.warn);
+      this._updateUserProfile(this.user).catch(error =>
+        console.warn('[AuthService] Profile update failed:', error)
+      );
 
       return { user: this.user, error: null };
     } catch (error) {

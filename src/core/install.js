@@ -16,7 +16,8 @@ export const InstallService = {
    */
   init() {
     window.addEventListener('beforeinstallprompt', e => {
-      // Prevent Chrome 67 and earlier from automatically showing the prompt
+      // Required by the beforeinstallprompt spec: without preventDefault the
+      // browser shows its own mini-infobar and the event is never usable.
       e.preventDefault();
       // Stash the event so it can be triggered later.
       deferredPrompt = e;

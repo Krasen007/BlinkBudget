@@ -5,13 +5,17 @@
  * Integrates with budget tracking and financial planning.
  */
 
+// StorageService methods are synchronous, so these wrappers are too. They were
+// `async` over an `await import()` of a module GoalsSection already imports
+// statically, which forced an artificial promise on every caller for no gain.
+import { StorageService } from './storage.js';
+
 export class SavingsGoalsService {
   /**
    * Get all savings goals from storage
    * @returns {Array} Array of savings goals
    */
-  static async getSavingsGoals() {
-    const { StorageService } = await import('./storage.js');
+  static getSavingsGoals() {
     return StorageService.getGoals() || [];
   }
 
@@ -20,8 +24,7 @@ export class SavingsGoalsService {
    * @param {Object} goal - Goal object
    * @returns {Object} Saved goal
    */
-  static async saveSavingsGoal(goal) {
-    const { StorageService } = await import('./storage.js');
+  static saveSavingsGoal(goal) {
     return StorageService.addGoal(goal);
   }
 
@@ -29,8 +32,7 @@ export class SavingsGoalsService {
    * Delete a savings goal
    * @param {string} goalId - Goal ID to delete
    */
-  static async deleteSavingsGoal(goalId) {
-    const { StorageService } = await import('./storage.js');
+  static deleteSavingsGoal(goalId) {
     return StorageService.deleteGoal(goalId);
   }
 

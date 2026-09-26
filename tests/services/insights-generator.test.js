@@ -1,6 +1,85 @@
 import { describe, it, expect } from 'vitest';
 import { InsightsGenerator } from '../../src/core/insights-generator.js';
 
+// Phase 3 (#9.1): topMovers() and categoryExpenseTotals() shared ~80% of a
+// loop body and now both delegate to accumulateByCategory(). These tests pin
+// the shared rules so the dedup cannot silently change behaviour, and cover
+// categoryExpenseTotals(), which had no direct coverage before.
+describe('accumulateByCategory shared rules', () => {
+  const mixed = () => [
+    { id: 1, category: 'Food', amount: -20 },
+    { id: 2, category: 'Food', amount: -30 },
+    { id: 3, category: 'Rent', amount: -500 },
+    { id: 4, category: 'Salary', amount: 2000, type: 'income' },
+    { id: 5, category: 'Food', amount: 50, type: 'refund' },
+    { id: 6, category: 'Transfer-ish', amount: 999, type: 'transfer' },
+    { id: 7, category: 'Ghost', amount: 777, isGhost: true },
+    { id: 8, amount: 12 },
+  ];
+
+  it('excludes income, transfer and ghost rows from both outputs', () => {
+    const top = InsightsGenerator.topMovers(mixed(), 10);
+    const totals = InsightsGenerator.categoryExpenseTotals(mixed());
+    const categories = top.map(t => t.category);
+
+    expect(categories).not.toContain('Salary');
+    expect(categories).not.toContain('Transfer-ish');
+    expect(categories).not.toContain('Ghost');
+    expect(totals.has('Salary')).toBe(false);
+    expect(totals.has('Transfer-ish')).toBe(false);
+    expect(totals.has('Ghost')).toBe(false);
+  });
+
+  it('subtracts refunds so the total nets down', () => {
+    // 20 + 30 expenses, minus a 50 refund => 0 net for Food.
+    expect(InsightsGenerator.categoryExpenseTotals(mixed()).get('Food')).toBe(
+      0
+    );
+
+    const food = InsightsGenerator.topMovers(mixed(), 10).find(
+      t => t.category === 'Food'
+    );
+    expect(food.total).toBe(0);
+    expect(food.count).toBe(3);
+  });
+
+  it('takes absolute values regardless of sign', () => {
+    const totals = InsightsGenerator.categoryExpenseTotals(mixed());
+    expect(totals.get('Rent')).toBe(500);
+  });
+
+  it('groups uncategorised rows under a single label', () => {
+    const totals = InsightsGenerator.categoryExpenseTotals(mixed());
+    expect(totals.get('Uncategorized')).toBe(12);
+  });
+
+  it('coerces non-numeric amounts to zero', () => {
+    const totals = InsightsGenerator.categoryExpenseTotals([
+      { id: 1, category: 'Odd', amount: 'not-a-number' },
+      { id: 2, category: 'Odd', amount: '25' },
+    ]);
+    expect(totals.get('Odd')).toBe(25);
+  });
+
+  it('keeps the two methods in agreement on totals', () => {
+    const transactions = mixed();
+    const totals = InsightsGenerator.categoryExpenseTotals(transactions);
+    InsightsGenerator.topMovers(transactions, 100).forEach(item => {
+      expect(totals.get(item.category)).toBe(item.total);
+    });
+  });
+
+  it('returns empty results for a non-array, preserving each return shape', () => {
+    expect(InsightsGenerator.topMovers(null, 5)).toEqual([]);
+    expect(InsightsGenerator.categoryExpenseTotals(undefined).size).toBe(0);
+  });
+
+  it('sorts topMovers by absolute total descending', () => {
+    const top = InsightsGenerator.topMovers(mixed(), 3);
+    expect(top.map(t => t.category)).toEqual(['Rent', 'Uncategorized', 'Food']);
+  });
+});
+
 describe('InsightsGenerator', () => {
   it('returns top movers by category', () => {
     const transactions = [

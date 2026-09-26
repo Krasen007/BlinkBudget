@@ -135,10 +135,8 @@ export const BackupService = {
       transactions: TransactionService.getAll(),
       accounts: AccountService.getAccounts(),
       settings: SettingsService.getAllSettings(),
-      goals: goalPlanner?.getAllGoals ? goalPlanner.getAllGoals() : [],
-      investments: investmentTracker?.getAllInvestments
-        ? investmentTracker.getAllInvestments()
-        : [],
+      goals: goalPlanner.getAllGoals(),
+      investments: investmentTracker.getAllInvestments(),
     };
 
     const backupRef = doc(getDb(), 'users', userId, 'backups', 'daily_backup');

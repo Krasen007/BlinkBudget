@@ -9,35 +9,46 @@ import { AnomalyService } from './analytics/AnomalyService.js';
 import { BudgetPlanner } from './budget-planner.js';
 import { formatCurrency } from '../utils/financial-planning-helpers.js';
 
+/**
+ * Fold a transaction list into per-category expense totals.
+ *
+ * Single source of truth for the rules that topMovers() and
+ * categoryExpenseTotals() previously each restated: income, transfer and ghost
+ * transactions are excluded so they cannot skew expense analysis; refunds are
+ * subtracted (same adjustment as MetricsService.calculateCategoryBreakdown);
+ * and non-numeric amounts are coerced to 0.
+ *
+ * @param {Array} transactions - Transaction list
+ * @returns {Map<string, {category: string, total: number, count: number}>}
+ *   Accumulated entries, or an empty Map for a non-array input.
+ */
+const accumulateByCategory = transactions => {
+  const byCategory = new Map();
+  if (!Array.isArray(transactions)) return byCategory;
+
+  for (const tx of transactions) {
+    if (tx.type === 'income' || tx.type === 'transfer' || tx.isGhost) continue;
+
+    const category = tx.category || 'Uncategorized';
+    const amount =
+      typeof tx.amount === 'number' ? tx.amount : Number(tx.amount) || 0;
+    const adjusted =
+      tx.type === 'refund' ? -Math.abs(amount) : Math.abs(amount);
+
+    const entry = byCategory.get(category) || { category, total: 0, count: 0 };
+    entry.total += adjusted;
+    entry.count += 1;
+    byCategory.set(category, entry);
+  }
+
+  return byCategory;
+};
+
 const InsightsGenerator = {
   // transactions: array of {id, date, amount, category, account, type}
   // Returns top N movers by absolute amount (descending), excluding income, transfer, and ghost transactions.
   topMovers(transactions, n = 5) {
-    if (!Array.isArray(transactions)) return [];
-    const byCategory = new Map();
-    for (const tx of transactions) {
-      // Skip income and transfer transactions to prevent skewing expense analysis
-      if (tx.type === 'income' || tx.type === 'transfer' || tx.isGhost)
-        continue;
-
-      const cat = tx.category || 'Uncategorized';
-      const amt =
-        typeof tx.amount === 'number' ? tx.amount : Number(tx.amount) || 0;
-
-      // Handle refunds: subtract from total (same logic as MetricsService.calculateCategoryBreakdown)
-      const isRefund = tx.type === 'refund';
-      const adjustedAmount = isRefund ? -Math.abs(amt) : Math.abs(amt);
-
-      const entry = byCategory.get(cat) || {
-        category: cat,
-        total: 0,
-        count: 0,
-      };
-      entry.total += adjustedAmount;
-      entry.count += 1;
-      byCategory.set(cat, entry);
-    }
-    const arr = Array.from(byCategory.values());
+    const arr = Array.from(accumulateByCategory(transactions).values());
     arr.sort((a, b) => Math.abs(b.total) - Math.abs(a.total));
     return arr.slice(0, n).map(item => ({
       category: item.category,
@@ -47,19 +58,13 @@ const InsightsGenerator = {
   },
 
   // Net expense totals per category for a set of transactions.
-  // Same rules as topMovers: income/transfer/ghost excluded, refunds subtracted.
+  // Shares accumulateByCategory's rules: income/transfer/ghost excluded,
+  // refunds subtracted, amounts normalised.
   // @returns {Map<string, number>} category name -> net total
   categoryExpenseTotals(transactions) {
     const totals = new Map();
-    if (!Array.isArray(transactions)) return totals;
-    for (const tx of transactions) {
-      if (tx.type === 'income' || tx.type === 'transfer' || tx.isGhost)
-        continue;
-      const cat = tx.category || 'Uncategorized';
-      const amt =
-        typeof tx.amount === 'number' ? tx.amount : Number(tx.amount) || 0;
-      const adjusted = tx.type === 'refund' ? -Math.abs(amt) : Math.abs(amt);
-      totals.set(cat, (totals.get(cat) || 0) + adjusted);
+    for (const [category, entry] of accumulateByCategory(transactions)) {
+      totals.set(category, entry.total);
     }
     return totals;
   },
