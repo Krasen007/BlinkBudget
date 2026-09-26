@@ -190,13 +190,19 @@ export class AccountDeletionService {
       }
 
       // Delete investments
+      // StorageService, not the investmentTracker singleton: storage.js keeps
+      // its own InvestmentTracker instance and the write path
+      // (StorageService.addInvestment) mutates that one, so deleting through a
+      // second instance would overwrite localStorage with its stale copy.
       try {
-        const { InvestmentTracker } = await import('../investment-tracker.js');
-        const investments = InvestmentTracker.getAllInvestments();
+        const { StorageService } = await import('../storage.js');
+        const investments = StorageService.getInvestments();
 
         for (const investment of investments) {
-          InvestmentTracker.removeInvestment(investment.id);
-          result.dataDeleted.investments++;
+          // removeInvestment takes a symbol, not an id.
+          if (StorageService.removeInvestment(investment.symbol)) {
+            result.dataDeleted.investments++;
+          }
         }
       } catch (error) {
         result.warnings.push(`Investment deletion failed: ${error.message}`);
@@ -205,10 +211,12 @@ export class AccountDeletionService {
       // Delete budgets
       try {
         const { BudgetService } = await import('../budget-service.js');
+        const { StorageService } = await import('../storage.js');
         const budgets = BudgetService.getAll();
 
         for (const budget of budgets) {
-          BudgetService.deleteBudget(budget.id);
+          // BudgetService exposes delete(id); there is no deleteBudget on it.
+          StorageService.deleteBudget(budget.id);
           result.dataDeleted.budgets++;
         }
       } catch (error) {
@@ -470,8 +478,8 @@ export class AccountDeletionService {
 
       // Verify investments are deleted
       try {
-        const { InvestmentTracker } = await import('../investment-tracker.js');
-        const remainingInvestments = InvestmentTracker.getAllInvestments();
+        const { StorageService } = await import('../storage.js');
+        const remainingInvestments = StorageService.getInvestments();
         const userInvestments = remainingInvestments.filter(
           inv => !inv.userId || inv.userId === userId
         );
@@ -669,10 +677,8 @@ export class AccountDeletionService {
       summary.goals = goals.length;
 
       // Count investments
-      const { InvestmentTracker } = await import('../investment-tracker.js');
-      const investments = InvestmentTracker.getAllInvestments
-        ? InvestmentTracker.getAllInvestments()
-        : [];
+      const { StorageService } = await import('../storage.js');
+      const investments = StorageService.getInvestments();
       summary.investments = investments.length;
 
       // Count budgets

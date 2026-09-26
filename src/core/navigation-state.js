@@ -76,7 +76,7 @@ export const NavigationState = {
       const timePeriodData = safeJsonParse(savedData);
 
       // Validate the saved data
-      if (!timePeriodData.startDate || !timePeriodData.endDate) {
+      if (!timePeriodData?.startDate || !timePeriodData.endDate) {
         console.warn('[NavigationState] Invalid saved time period data');
         return null;
       }
@@ -417,7 +417,7 @@ export const NavigationState = {
       const timePeriodData = safeJsonParse(savedData);
 
       // Validate saved data
-      if (!timePeriodData.startDate || !timePeriodData.endDate) {
+      if (!timePeriodData?.startDate || !timePeriodData.endDate) {
         console.warn(
           '[NavigationState] Invalid saved dashboard time period data'
         );

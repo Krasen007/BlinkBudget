@@ -7,7 +7,7 @@ Save to [ai-slop-report.md](ai-slop-report.md) for the initial audit results.
 
 ---
 
-## Quick triage: if you only have time for four
+## Quick triage: if you only have time for five
 
 Run these first — they're the ones most likely to hide an actual bug rather than just look untidy:
 
@@ -15,6 +15,7 @@ Run these first — they're the ones most likely to hide an actual bug rather th
 2. **Dead / overly defensive guards**
 3. **Try/catch as control flow**
 4. **Async boundary bugs** (rule #15) — the highest-yield addition to this list
+5. **Build-pipeline defects** (rule #16) — code that lints clean and ships broken
 
 Everything else is worth doing but is lower stakes if a session runs short.
 
@@ -79,7 +80,7 @@ record of _why_ the code looks strange, it is archaeology: report it under #11 (
 3. Does execution stop, or does it fall through?
 4. **Can it run at all?** If the guarded expression is an un-awaited `async` call, the `catch` never
    fires — the error escapes as an unhandled rejection. This is the highest-value question in the
-   list and it is easy to skip, because the code _looks_ handled. See [rule #15A](#15-async-boundary-bugs--high).
+   list and it is easy to skip, because the code _looks_ handled. See [rule #15A](#15-async-boundary-bugs-high).
 
 **In this codebase:** search `catch` in `src/views/` and `src/core/` first — those hold the most user-visible flows.
 
@@ -125,6 +126,33 @@ record of _why_ the code looks strange, it is archaeology: report it under #11 (
 1. Pick an exported function or method.
 2. `grep -r "functionName" src/` to find all callsites.
 3. If zero callsites outside the file itself, it is dead.
+
+⚠️ **"Grep found nothing" is a hypothesis about _text_, not about _behaviour_. Names are routinely
+built at runtime, so the literal never appears in source and the code is very much alive.** This is
+the single most dangerous step in rule #4, because the grep genuinely returns zero and that is easy
+to mistake for proof. In this repo, `toast-${type}`, `btn-${opts.size}`, `skeleton-${sectionName}`
+and `input-${type}` are all assembled by template literals at runtime — so `toast-success`,
+`btn-small` and `skeleton-large` have **no literal reference anywhere**, and a naive dead-CSS
+purge deletes the background colour behind every toast and the sizing behind every button variant.
+
+**Before deleting anything a grep calls dead, answer three questions:**
+
+1. **Is any name composed at runtime?** Search for interpolation, not the name:
+   `rg -n '\$\{' src/` and look for it inside a class- or id-valued expression. Then enumerate the
+   **actual value set** from the source of truth — `TOAST_TYPES`, `BUTTON_DEFAULTS` — rather than
+   assuming. A prefix plus an unknown value set is _unbounded_; an enum is a closed set you can check.
+2. **Does a third party create the node?** `.chartjs-tooltip` is emitted by Chart.js at runtime
+   and appears nowhere in this repo. Check the library's own documented class names before calling
+   a class unreferenced.
+3. **Is the selector reachable at all?** For compound rules, check the _whole_ selector. A rule
+   like `.a11y-widget button.active` is dead when `.a11y-widget` is never applied, even though
+   `button` and `.active` are both live — the leading class gates the entire match. Same for
+   `.live-parent .dead-child`: a live parent does not make the rule reachable.
+
+The safe, durable form of this check is to **assert it in a test rather than trusting a one-off
+grep** — see `tests/system/css-architecture.test.js`, which derives the runtime-constructed
+prefixes from the JS and fails on any selector that is neither literally referenced nor
+template-producible. That way the next person's purge hits the same wall you did.
 
 ⚠️ **Before writing up an orphan as "unreplaceable logic" or "lost knowledge", check whether an
 equivalent implementation already exists elsewhere.** The rule above proves a function is
@@ -337,7 +365,7 @@ Not a slop pattern by itself, but a strong correlate of it: files that outgrow w
 - A file has visibly grown across several AI-assisted sessions without a matching refactor pass
 - A single file mixes more than one clear responsibility (a view that also defines validation, formatting, and API calls inline)
 
-**Check:** `wc -l` every file in the directory you're auditing; anything over the project's stated limit gets a note in the report even if no other numbered rule fires on it. Don't bundle a split-this-file refactor into an unrelated slop-cleanup change — call it out as its own follow-up.
+**Check:** `wc -l` every file in the directory you're auditing; anything over the project's stated limit gets a note in the report even if no other numbered rule fires on it. Don't bundle a split-this-file refactor into an unrelated slop-cleanup change — call it out inline in the same report as a corrective action.
 
 ### 15. Async boundary bugs 🔴 High
 
@@ -421,6 +449,95 @@ If a helper is called in many places and awaited in none, that is a **contract**
 separate findings — write it up once and note the count. In this round 13 call sites shared the
 unawaited pattern, and the right answer was "enforce the contract in one place," not 13 line edits.
 
+**E) A `return` of a promise the function itself resolves — a self-deadlock.**
+
+The most subtle variant found so far, and it is invisible to every other rule because it lives in
+the _return value_ rather than in a missing `await`. A hand-rolled mutex looked like this:
+
+```js
+async _acquireLock() {
+  while (this._lockPromise) await this._lockPromise;
+  this._lockPromise = new Promise(resolve => { this._lockResolve = resolve; });
+  return this._lockPromise;          // <-- awaits a promise only _releaseLock() settles
+}
+```
+
+The returned promise settles in `_releaseLock()`, and `_releaseLock()` runs in the caller's
+`finally` — i.e. only _after_ the `await this._acquireLock()` that can never complete. So the lock
+is taken on the first call and never released, and **every subsequent caller queues behind it
+forever**. A three-line probe confirms it instantly:
+
+```
+acquire #1: TIMED-OUT (never settled)   lockPromise held: true
+acquire #2: TIMED-OUT (never settled)
+acquire #3: TIMED-OUT (never settled)
+```
+
+**The tell:** a promise that the function creates _and_ returns, whose only resolver is a function
+the caller runs later. A mutex hands out **ownership**; it is not itself a thing to await.
+
+**Check:** for any `acquire`/`lock`/`reserve`/`next` helper, ask what its return value is awaited
+_for_. If the answer is "so I know I hold the lock", the contract is wrong. Also read the paired
+release path for a **read-modify-write outside the lock** — the same class had
+`const cached = readFromDisk()` placed _above_ `await this._acquireLock()`, which is a TOCTOU race
+even once the deadlock is fixed. Both defects shipped together and only the second one survives the
+first fix, so re-run the probe rather than declaring victory.
+
+---
+
+### 16. Build-pipeline defects 🔴 High
+
+_Found in the `src/styles/` round of 2026-09-26. Added after a finding filed as 🟡 "consistency
+only" turned out to be shipping 22 blocks of dead CSS to production. This class is structurally
+invisible to the other rules because **every tool you audit with reports the source as valid** —
+ESLint, Stylelint, Prettier and the full test suite were green the whole time._
+
+**A) A construct that is only recognised in one of its two spellings.**
+
+`postcss-custom-media` resolves the parenthesised reference and silently passes the other through:
+
+```
+@media (--md) { … }   ->  @media (min-width: 768px) { … }   resolved
+@media --md   { … }   ->  @media --md { … }                 verbatim, invalid, discarded
+```
+
+The paren-less form is not a recognised reference. It compiles without error, survives the build
+untouched, and reaches the browser as an **invalid media query that is thrown away** — so 22
+blocks were live in the repo and dead in production. Desktop `h1`/`h2` never scaled up, the
+dashboard stat grid never went multi-column, and a mobile-only back button was never hidden on
+desktop.
+
+**The generalisable lesson is not "watch your parentheses." It is that a build succeeding is not
+evidence that its output is valid.** Both round-2 🔴 findings (#4.1 and #7.1) were reachable only
+by reading `dist/`; neither was visible in source. For anything involving a custom at-rule, a
+preprocessor feature, a purge step, or a codemod:
+
+1. **Probe the tool in isolation** on a minimal input, both spellings, and diff the output.
+2. **Read the built artefact**, not the source. `Get-Content dist/assets/*.css` and grep for the
+   construct you expect the tool to have resolved. Anything still in source form is dead.
+3. **Assert on the source form in a test** — banning the spelling is cheaper and more durable than
+   asserting on a minified, content-hashed `dist` filename that changes on every unrelated rebuild.
+
+**B) An optimiser's safelist can keep genuinely dead code alive.**
+
+PurgeCSS drops rules nothing references. Its `safelist.standard` includes `/^(fade|slide|bounce|pulse|spin)/`,
+which matched the _keyframe name_ `loading-dot-bounce` and, transitively, kept the `.loading-dot`
+rules that no JS or HTML ever applied. So the code looked live in `dist/` and would have been
+protected from any cleanup — until the real consumer was established as absent, at which point the
+keyframe legitimately disappeared too.
+
+**Check:** when a purge drops something you expected to survive, ask whether a safelist was
+carrying it. And when auditing "live" code, confirm the liveness comes from a real consumer rather
+than an incidental name match — the two look identical in the artefact.
+
+**C) Verify a bulk edit with a parser, not with brace counting.**
+
+Regex- and brace-matching scripts silently corrupt CSS: unbalanced `}}`, orphaned at-rules, rules
+swallowed inside a `@media` body. Three hand-rolled passes produced malformed output that
+Stylelint caught only as cosmetic "empty block" noise, hiding the real damage. `postcss` is already
+a dependency — parse, walk the AST, mutate, re-serialise, then re-parse every touched file to
+confirm. Regex is fine for _finding_ candidates; it is not fine for _rewriting_ them.
+
 ---
 
 ## Testing traps specific to this repo
@@ -503,6 +620,56 @@ you _did_ edit gets attributed to the line-ending churn and waved through.
 Long-term fix, if this bites a third time: add `* text=auto` to `.gitattributes`. That is a repo
 config change, not a slop cleanup, so raise it rather than doing it inside an audit.
 
+### 6. A shared test double that is a stub can make a test unpassable for any code
+
+`tests/setup.js` replaces `global.localStorage` with bare `vi.fn()` spies. `setItem` records the
+call but stores nothing, and `getItem` returns `undefined` for **every** key, always. A test that
+writes to storage and then reads it back can therefore never pass — no matter what the application
+code does:
+
+```
+GET_AFTER_SET=undefined   GETITEM_IS_MOCK=true   SETITEM_CALLS=1
+```
+
+This is a different failure from a real regression, and it is easy to misdiagnose as one: the
+suite is red, the assertion names a real cache key, and the instinct is to go change the source.
+The suite's own siblings show the fix — `tests/core/data-integrity-categories.test.js` installs a
+real in-memory `LocalStorageMock` in `beforeEach` for exactly this reason.
+
+**Check:** when a test fails on a persistence or storage assertion, confirm the harness can express
+the assertion before touching the code. `setItem` then `getItem` in the same test answers it in one
+line. If the double is a stub, install a real implementation locally — don't modify the shared
+`setup.js` mock, which would change the baseline for every other suite.
+
+### 7. A pre-existing red test is a fact to establish, not a nuisance to route around
+
+A suite can be red before you touch anything. Establishing that costs one stash-and-run and saves
+a wrong attribution in the write-up. In this session `tests/views/dashboard-greeting.test.js` was
+already failing on `master`; the fix for it turned out to be a 🔴 cross-user data bleed plus a
+broken test double, and conflating that with the CSS work would have buried both.
+
+**Check:** `git stash push -- <paths you changed>`, re-run the suite, and record whether it still
+fails. Report it as pre-existing with the evidence. Note that `git stash` is what triggers the
+CRLF churn in trap #5, so re-run `prettier --write` on any file it touched.
+
+### 8. Diff the build against a baseline before blaming or trusting your own change
+
+After any bulk edit, "this selector is missing from `dist/`" is ambiguous — it may be your change,
+or it may have been purged before you started. Both readings look identical from inside the session.
+
+**Check:** build the pre-change tree and compare the same tokens. In this session the same sweep
+reported 15 selectors as "missing"; the baseline build showed 14 were **already** absent, and
+exactly one was genuinely lost — then traced to a class with no consumer, whose keyframes had been
+kept alive only by a safelist name-match. Without the baseline that would have been either a missed
+regression or a false alarm, and both would have been reported confidently.
+
+```bash
+git stash push -- src/styles/ ; yarn run build ; <grep the tokens> ; git stash pop
+```
+
+Prefer `git show HEAD:<path>` into a temp file outside the repo where you can, so the working tree
+is not disturbed (see trap #5).
+
 ---
 
 ## Before you flag it: false-positive checklist
@@ -518,6 +685,15 @@ Not everything that looks like slop is slop. Before writing something up in the 
 6. **When in doubt, downgrade rather than delete.** Flag it in the report as "possibly intentional — confirm with author" instead of silently removing it.
 7. **Be suspicious of a clean sweep.** If a full audit produces zero findings marked "false positive" or "intentional," do one more pass looking specifically for reasons each item might be there on purpose before finalizing the report. A 100% slop hit rate across dozens of findings is itself a signal you're pattern-matching too fast rather than actually evaluating each one.
 8. **Be equally suspicious of a report whose justifications are all airtight.** The inverse failure mode: if every finding arrives with a confident, well-argued rationale, spot-check the two most rhetorically persuasive ones against the code before filing them. "The knowledge encoded in it is currently lost" reads as unanswerable and would have prevented a deletion that turned out to be correct. Strong prose is a reason to verify harder, not to skip verification.
+9. **Apply the calibration in both directions, and record the correction.** A finding you _narrowed_ on re-derivation is the obvious case, and the one this guide already warns about. But the same discipline has to catch the opposite error, and there the pull is stronger, because an inflated severity is easier to live with than an understated one — it looks like diligence.
+
+   The instance: a finding was filed 🟡 "consistency-only" on the reasoning that _"`postcss-custom-media` accepts both and the production build compiles."_ The premise held exactly. The inference did not. Probing the plugin showed only one spelling is resolved, and the build shipped 22 blocks as invalid media queries that browsers discard. **The severity was wrong in the same report that had been praised for its rigour one page earlier.**
+
+   The failure mode is specific: **"the build succeeded" was accepted as evidence about the build's _output_.** A pipeline not erroring says nothing about whether what it emitted is valid. When a finding rests on a successful tool run, ask what the tool would have had to notice in order to fail — and if the answer is "the construct it was asked to transform," then a green run is not evidence.
+
+   Record the re-rank in the report rather than silently correcting the number, and add a line to the false-positive list. A round with zero mis-rated findings in **either** direction is a signal you are not re-deriving hard enough.
+
+10. **Ask whether the check you ran could have failed.** A verification that cannot fail is not a verification. "I grepped and found nothing" passes identically whether the code is dead or the grep is wrong; "I compared the pre-change build against the post-change build" can fail — and when it did, it revealed that 14 of the 15 apparently-missing selectors had been absent before the session started. Prefer checks that have a failure mode over checks that only ever confirm.
 
 ---
 
@@ -585,13 +761,24 @@ report, and the right response is to re-locate the code — not to conclude the 
 2. **Read every catch/try block** — apply rules #2 and #10, **then rule #15A**: for each `try`, check whether the guarded expression is an un-awaited `async` call, in which case the `catch` cannot fire.
 3. **Read every comment** — apply rules #1 and #11. Delete trivial ones mentally; if more than ~30% of comments add no information (or are stale), flag the file.
 4. **Search for hardcoded values** — `px`, `#`, `rgba`, `z-index`, plain number literals in style assignments (rule #5).
-5. **Check exports** — for every exported name, grep for callsites outside the file (rule #4), **then grep the concept** to see whether an equivalent implementation already exists elsewhere before calling the orphan irreplaceable.
+5. **Check exports** — for every exported name, grep for callsites outside the file (rule #4), **then grep the concept** to see whether an equivalent implementation already exists elsewhere before calling the orphan irreplaceable. Before deleting anything a grep calls dead, work through rule #4's three runtime-name questions.
 6. **Read every wrapper function** — if the body is one expression, check whether the wrapper adds anything (rule #6); check for near-duplicate blocks nearby (rule #9). An empty-bodied wrapper with real listener/cleanup plumbing around it is a scaffold, not infrastructure (rule #4 signal).
-7. **Audit the async boundary** — for every call to a function that is `async` in its own definition, check whether it is awaited and whether the next synchronous statement reads state it should have cleared (rule #15B). If the codebase has sync/async twins, read the async one before recommending an order (rule #15C).
+7. **Audit the async boundary** — for every call to a function that is `async` in its own definition, check whether it is awaited and whether the next synchronous statement reads state it should have cleared (rule #15B). If the codebase has sync/async twins, read the async one before recommending an order (rule #15C). For any lock/acquire helper, check what its return value is awaited _for_ (rule #15E).
 8. **Compare with sibling files** — open the closest related file and spot-check that the same pattern is used for the same problem (rule #7).
 9. **If TypeScript or React is in play** — run rules #12 and #13.
 10. **Before writing anything up** — run it through the [false-positive checklist](#before-you-flag-it-false-positive-checklist).
 11. **Log findings** using the [report schema](#ai-slop-reportmd-schema) above.
+
+**For a build-pipeline round (rule #16) — a different entry point entirely.** The procedure above
+is source-first. If the scope is CSS, a config file, or anything that passes through a preprocessor
+or purge step, add these before the rule-by-rule sweep:
+
+1. `yarn run build`, then read `dist/assets/*.css` (or the JS bundle) directly.
+2. Grep the artefact for every construct a tool claims to transform, and for constructs it should
+   have consumed. Anything still in source form is dead in production.
+3. Diff against a baseline build of the pre-change tree before attributing any difference to
+   yourself.
+4. Only then start the source sweep — and treat "the build compiled" as no evidence at all.
 
 ---
 
@@ -666,6 +853,18 @@ Use this when kicking off a new audit round — including a re-check after a rem
    - Dynamic imports, to manually inspect for computed paths: `rg "import\(" src/`
    - Hardcoded design values: `rg "#[0-9a-fA-F]{3,6}|z-index:\s*[0-9]{3,}" src/`
    - File length against convention: `find src -name "*.js" | xargs wc -l | sort -rn`
+
+   **For a CSS / build-pipeline scope (rule #16) — the source sweep is the wrong place to start.**
+   Build and read the artefact first, then add these:
+
+   - Constructs a tool should have consumed but didn't (still in source form = dead in production):
+     `rg -n "@media\s+--" dist/assets/*.css`
+   - Runtime-constructed class names, which is what makes a dead-CSS sweep unsafe:
+     `rg -n '\$\{' src/` — then read the enums/defaults that bound each prefix
+   - A safelist that may be propping up dead code: read `vite.config.js`'s `purgecss.safelist`
+   - Parse-check every stylesheet after a bulk edit rather than trusting brace matching:
+     `node -e "const p=require('postcss'),fs=require('fs');for(const f of process.argv.slice(1))p.parse(fs.readFileSync(f,'utf-8'),{from:f})" src/styles/**/*.css`
+
 3. **Work rule-by-rule across the scope, not file-by-file.** Sweeping for one rule (every `catch` block in scope) before moving to the next keeps the pattern fresh and surfaces cross-file inconsistencies (rule #7) that a single-file read-through misses.
 4. **Apply the [false-positive checklist](#before-you-flag-it-false-positive-checklist) as you go**, not as a final pass over everything — checking git blame while the file is already open is cheaper than reopening thirty files at the end.
 5. **Write the report** using the [schema](#ai-slop-reportmd-schema) above, grouped by rule number.

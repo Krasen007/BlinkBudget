@@ -1,621 +1,519 @@
 # AI Slop Report
 
-**Round 2 (OPEN):** [`src/styles/`](#round-2--srcstyles-open) — 19 CSS files · audited 2026-09-26
+**Round 3 (OPEN):** [`src/core/`](#round-3--srccore-open) — 46 `.js` files · audited 2026-09-26
 **Guide:** [`ai-slop-inspection-guide.md`](ai-slop-inspection-guide.md)
+
+> **Note on this file's git state.** `todo/ai-slop-report.md` was already deleted in the working tree
+> when this round began (unrelated to this audit). Round 2's content is intact in `HEAD`
+> (`git show HEAD:todo/ai-slop-report.md`). This file is a fresh Round 3; the Round 2 section was not
+> restored, to avoid silently reintroducing content the author removed. Restore it with
+> `git checkout HEAD -- todo/ai-slop-report.md` and merge if you want the history kept in one place.
 
 ---
 
-# Round 2 — `src/styles/` (OPEN)
+# Round 3 — `src/core/` (OPEN)
 
 **Audit date:** 2026-09-26 · **Guide:** [`ai-slop-inspection-guide.md`](ai-slop-inspection-guide.md)
-**Scope:** `src/styles/` — 19 `.css` files, ~5,600 lines (`main.css`, `base.css`, `critical.css`,
-`hero.css`, `mobile.css`, `tokens.css`, `components/` ×10, `utilities/` ×2)
-**Method:** Rule-by-rule sweep with `rg`, then per-finding line re-derivation, a repo-wide grep for
-every "dead" claim, and — for the headline finding — a **production build** (`yarn run build`) to read
-the actual shipped CSS rather than inferring cascade order from source.
+**Scope:** `src/core/` — 46 `.js` files, ~14,400 lines (incl. `Account/`, `analytics/`, `financial-planning/`)
+**Method:** Rule-by-rule sweep with `rg`, then per-finding line re-derivation, a repo-wide grep for every
+"dead" claim (filename + exported symbol + non-`.js` files), a computed-`import()` check, and — for both
+headline findings — a **throwaway Vitest probe** that was run, captured, and then deleted.
+
+**Baseline:** `yarn vitest run` → **574/574 passing (83 files)** on `master` before this round. Every
+finding below was found by reading code, not by a red test. No pre-existing failures to attribute.
 
 ---
 
 ## Executive summary
 
-The round found **one real, user-visible defect** that the source code does not reveal and that only
-a production build exposes, plus a large tail of duplication and design-token bypass.
+The round found **two real, user-visible defects that the test suite cannot see**, both in the
+"telemetry that nobody watches" tier of the codebase — which is exactly where an audit earns its keep,
+because nobody reviews `click-tracking-service.js` and everybody is relying on `account-deletion-service.js`.
 
-The headline finding is a **CSS `@keyframes` name collision** that silently kills the "close"
-animation on the Settings → Advanced Settings panel. It survives every static check: ESLint,
-Stylelint, Prettier and the whole Vitest suite are green, because every individual file is valid
-CSS. The defect only exists in the _combination_ of two files, and is invisible until you read the
-concatenated production stylesheet.
+The headline is that **GDPR account deletion does not delete budgets or investments, and the defect is
+swallowed into a `warnings` array** — so the flow still reports a specific, verified failure rather than
+lying. The second is that **a single corrupt `localStorage` value makes BlinkBudget silently stop
+saving the user's transactions**, because a throw in a click-counting service fires _before_ the
+`TransactionService.add()` that was supposed to record the expense. That is data loss, and it is the
+only finding in this report that reaches the top severity tier.
 
-| Bucket                      | Count | Notes                                                                 |
-| --------------------------- | ----- | --------------------------------------------------------------------- |
-| 🔴 High (real defect)       | 2     | #4.1 `@keyframes slideUp` collision; **#7.1 dead `@media --` blocks** |
-| 🟡 Medium                   | 6     | #4 duplicate keyframes, #9 duplicated rules, #14 bloat, #7 drift      |
-| ⚪ Low                      | 5     | #1/#11 tombstone comments, #5a phantom-token fallbacks                |
-| **User Review Required**    | 1     | #4.2 — the 233-selector dead-CSS purge (destructive; needs sign-off)  |
-| False positives (corrected) | 3     | Recorded below; each downgraded _after_ verification, not assumed     |
+| Bucket                      | Count | Notes                                                                                    |
+| --------------------------- | ----- | ---------------------------------------------------------------------------------------- |
+| 🔴 High (real defect)       | 2     | #4.1 deletion leaves data behind (🔒); #4.2 corrupt value stops transactions being saved |
+| 🟡 Medium                   | 8     | #4.3 listener leaks, #15.1 unawaited `invalidate` contract, #3.1 `null` history shape, … |
+| ⚪ Low                      | 4     | #5.1 dead `\|\|` fallback, #11.1 tombstone comment, #2.1/#2.2 logs, #7.2 unbound `catch` |
+| **User Review Required**    | 1     | #4.1 — 🔒 security-sensitive; never auto-remediated in the pass that found it            |
+| False positives (corrected) | 4     | Recorded below; each downgraded _after_ verification, not assumed                        |
 
-> **Phase 2 update (2026-09-26).** #7.1 has been **re-scoped 🟡 → 🔴** and **fixed**. It was filed as
-> "consistency-only" on the reasoning that the build compiles; that premise was true but the inference
-> was not. `postcss-custom-media` only resolves the _parenthesised_ form, so all 22 paren-less
-> `@media --sm` / `@media --md` blocks were shipping into `dist/` as invalid media queries that
-> browsers discard — desktop `h1`/`h2` never scaled up, the dashboard stat grid never went
-> multi-column, and `.mobile-back-btn` was never hidden on desktop. All 22 were **deleted** (author
-> decision), and a source-level guard now bans the form. See [#7.1](#71--two-spellings-of-the-custom-media-query-the-paren-less-form-is-dead-code-).
+> **Calibration note.** One finding was filed 🔴 on first pass and **re-ranked down** after
+> re-derivation — see [#4.3](#43--four-event-listeners-that-destroy-can-never-remove-) and the
+> "Re-ranks" section. The guide requires the correction be recorded rather than silently applied.
 
-### The one thing that matters
+---
 
-**`@keyframes slideUp` is defined twice with opposite meanings, and the wrong one wins.**
+## The one thing that matters
 
-`mobile.css:45` and `ui.css:711` both define `slideUp`. They are not variants — they are inverses:
+**A corrupt value in one telemetry key silently stops BlinkBudget from saving expenses.**
 
-| Definition      | `from`                         | `to`                            | Meaning               |
-| --------------- | ------------------------------ | ------------------------------- | --------------------- |
-| `ui.css:711`    | `opacity: 1; translateY(0)`    | `opacity: 0; translateY(-10px)` | **slide out / close** |
-| `mobile.css:45` | `opacity: 0; translateY(20px)` | `opacity: 1; translateY(0)`     | **slide in / open**   |
+`click-tracking-service.js` is a click counter. It has no bearing on whether a transaction is saved.
+But `AddView.js` calls it at line 83 — _before_ the `try { TransactionService.add(data) }` at line 86 —
+so any throw inside the counter aborts the submit handler before the user's expense is ever recorded.
+The trigger is a truncated `blinkbudget_click_tracking` value, which is entirely ordinary: the key is
+written by `saveHistory()` on every completed transaction and read back through `safeJsonParse`, whose
+**documented contract is to return `null` on malformed input**. The guard at line 135 checks whether the
+_raw string_ is falsy; it never checks the _parse result_.
 
-`main.css` imports `components/ui.css` at line 10 and `mobile.css` at line 22. For two `@keyframes`
-with the same name, **the last one in source order wins** — so `mobile.css`'s _entrance_ animation
-overrides `ui.css`'s _exit_ animation globally. `.advanced-settings-section--closing` asks for a
-close animation and silently receives an open one.
-
-I verified this in the shipped CSS rather than assuming it. From `dist/assets/index.DTRyOLIz.css`:
-
-```css
-.advanced-settings-section--closing {
-  animation: 0.3s forwards slideUp;
-}
-@keyframes slideUp {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-```
-
-The `ui.css` exit variant is **absent from production entirely** — PurgeCSS dropped it, because the
-only consumer of the _name_ `slideUp` is the rule it was supposed to animate, and the mobile modal
-also claims that name. The exit animation does not merely look wrong; the keyframes written for it
-no longer exist in the build.
-
-Note the _second_ `@keyframes slideUp` hit at offset 76345 in the build is `slideUpSheet`, a
-different, correctly-named animation — my first sweep's regex matched it as a prefix. Line numbers
-and naive greps decay; this is the guide's "re-derive, don't trust" rule applying to my own tooling.
-
-### Severity calibration (guide: "assign severity from the code you read")
-
-The impact is **feedback loss, not data loss**, so this is 🔴 but not the highest tier:
-
-- `SettingsView.js:152-158` adds `--closing` and removes `--visible` in the same tick.
-- `--visible` is the rule carrying `display: block`. The moment it is removed, the element reverts
-  to `.advanced-settings-section { display: none }` and the section disappears instantly.
-- The `setTimeout(..., 300)` that removes `--closing` then fires against an already-hidden element.
-
-So the user sees the panel **vanish with no animation at all** — the "close" motion is silently
-dead. The wrong-direction animation never actually plays, because the element is already
-`display: none` by the time it could. Reporting this as "the wrong animation plays" would overstate
-it; the accurate statement is **"the close animation never plays."**
-
-The `@keyframes` collision is the **root cause** and the thing worth fixing, because the day
-someone adds `display: block` to `--closing` (the obvious way to make the animation work), the panel
-will animate _inward_ on close while appearing to work. Fixing the name collision first is what makes
-that future fix safe.
+This is worth stating plainly because the consequence is inverted from what the code looks like: a
+**background metric** has become a **hard dependency of the core 3-click logging path**, and nothing in
+the code, the tests, or the type-free JS makes that dependency visible.
 
 ---
 
 ## Findings
 
+### Rule #2 — Swallowed errors
+
+#### #2.1 — Misleading diagnostic on a handled `safeJsonParse` null ⚪ Low
+
+- **File:** `src/core/navigation-state.js:76-103`
+- **Severity:** ⚪ Low
+- **Snippet:**
+  ```js
+  const timePeriodData = safeJsonParse(savedData);   // L76 — may be null
+  if (!timePeriodData.startDate || !timePeriodData.endDate) {   // L79 — TypeError when null
+  ```
+- **Mechanism verified against source:** `safeJsonParse` returns `null` on malformed input
+  (`security-utils.js:99-102`). L79 then dereferences it, throwing inside the `try` opened at L70, which
+  lands in the `catch` at L102. **The behaviour is correct** — the function returns `null` either way —
+  but the log reads `"[NavigationState] Failed to restore time period: TypeError: Cannot read properties
+of null"`, which points a future debugger at a restore bug when the real cause is one corrupt
+  `sessionStorage` value.
+- **Verdict:** slop (guard on the wrong variable, same family as #4.2) — but the failure mode is a
+  misleading log line, not a crash.
+- **Action:** **flagged for follow-up.** `if (!timePeriodData?.startDate …)`.
+
+#### #2.2 — Load failure logged twice, once as a wrapped error ⚪ Low
+
+- **File:** `src/core/chart-loader.js:39-44` and `120-129`
+- **Severity:** ⚪ Low
+- **Rule #:** 2, 7
+- **Verdict:** slop. `loadChartJSModules` logs the failure with timing at L122 and then throws a
+  **wrapped** `new Error('Failed to load Chart.js: …', { cause })` at L126; the caller's `catch` at L39
+  logs that wrapper again. One failure, two console entries, and the caller's log line names a
+  "ChartLoader" failure whose cause is two frames down. Re-throwing is correct here; the duplicate log is not.
+- **Action:** **flagged for follow-up.**
+
+### Rule #3 — Overly defensive / dead guards
+
+#### #3.1 — `InvestmentTracker.getAllInvestments ? … : []` masks the #4.1 bug 🟡 Medium
+
+- **File:** `src/core/Account/account-deletion-service.js:673-676`
+- **Severity:** 🟡 Medium
+- **Snippet:**
+  ```js
+  const investments = InvestmentTracker.getAllInvestments
+    ? InvestmentTracker.getAllInvestments()
+    : [];
+  ```
+- **Mechanism verified against source:** `InvestmentTracker.getAllInvestments` is `undefined` (class
+  static does not exist — see #4.1), so the ternary **always** takes the `[]` branch. Probe:
+  `PROBE_SUMMARY={"transactions":0,"accounts":1,"goals":0,"investments":0,"budgets":1,…}` — the user had
+  one investment seeded and the "data summary before deletion" screen told them **0**.
+- **Verdict:** slop, and it is the more interesting half of #4.1. Note the **inconsistency within one
+  file**: L195 calls the same missing static with **no** guard (throws → warning), while L673 guards it
+  (silently wrong answer). The guard is not dead in the harmless sense — it actively **converts a loud
+  failure into a wrong number** shown to the user on the deletion confirmation screen.
+- **Action:** **flagged for author confirmation** — folded into the 🔒 #4.1 work, not remediated here.
+
 ### Rule #4 — Dead / unreachable code
 
-#### #4.1 — `@keyframes slideUp` collision: the close animation is dead 🔴 High
+#### #4.1 — GDPR account deletion leaves budgets and investments in localStorage 🔴 High
 
-- **File:** `src/styles/components/ui.css:711-721` and `src/styles/mobile.css:45-55`
-- **Line(s):** `ui.css:711`, `mobile.css:45`; consumer `ui.css:696`; JS `SettingsView.js:150-165`
+- **File:** `src/core/Account/account-deletion-service.js`
+- **Line(s):** 194–203 (investments), 211 (budgets), 473–479 (investment verification), 673–676 (summary)
 - **Severity:** 🔴 High
+- **Rule #:** 4, 3, 2
 - **Snippet:**
-  ```css
-  /* ui.css:711 — intended: CLOSE */
-  @keyframes slideUp {
-    from {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    to {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-  }
-  /* mobile.css:45 — intended: OPEN, and it WINS */
-  @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+  ```js
+  const { InvestmentTracker } = await import('../investment-tracker.js');   // L194
+  const investments = InvestmentTracker.getAllInvestments();                // L195  ← not a static
+  for (const investment of investments) {
+    InvestmentTracker.removeInvestment(investment.id);                     // L198  ← not a static, wrong arg
+  ...
+  const { BudgetService } = await import('../budget-service.js');          // L207
+  BudgetService.deleteBudget(budget.id);                                   // L211  ← method is `delete`
   ```
-- **Mechanism verified against source:** `main.css:10` imports `components/ui.css`, `main.css:22`
-  imports `mobile.css` — ui.css first, mobile.css later. Confirmed by reading `main.css` in full.
-  Confirmed in the built artifact: `dist/assets/index.DTRyOLIz.css` contains exactly **one**
-  `@keyframes slideUp`, and it is the `mobile.css` body (`translateY(20px)`), at offset 73948. The
-  `ui.css` body (`translateY(-10px)`) is not present anywhere in the production stylesheet. The
-  consuming rule is present at offset 24693:
-  `.advanced-settings-section--closing{animation:.3s forwards slideUp}`.
-  Also read `SettingsView.js:140-171` to confirm `--visible` (which carries `display: block`) is
-  removed in the same tick that `--closing` is added — so the section is `display: none` before any
-  animation could be observed.
-- **Verdict:** slop
-- **Action:** **fixed in Phase 1 (2026-09-26)** — both halves, together:
-  1. `ui.css` — `@keyframes slideUp` renamed to `slideUpOut` (collides with `mobile.css`'s
-     entrance animation, so a shared name is what broke it).
-  2. `ui.css` — `.advanced-settings-section--closing` now declares `display: block`, so the
-     panel stays rendered while the exit animation plays. Without this the rename alone would
-     have been a no-op.
-  3. `SettingsView.js` — the close timer is tracked and cleared on re-open. This was not in the
-     original finding: adding `display: block` makes the previously-invisible race observable (a
-     stale timer could cut a later close animation short), so it had to land in the same change.
-  4. Magic `300` replaced with `TIMING.ANIMATION_NORMAL`, matching the existing `setTimeout`
-     house pattern.
-- **Verified:** production build now ships
-  `.advanced-settings-section--closing{animation:.3s forwards slideUpOut;display:block}` with
-  `@keyframes slideUpOut` present — previously the exit keyframes were absent from the bundle
-  entirely. Revert-tested: each of the three guards fails for its own reason without its fix.
-- **Guards added:** `tests/system/css-architecture.test.js` (conflicting-`@keyframes` names;
-  `--closing` must declare a display) and `tests/views/settings-advanced-toggle.test.js`
-  (deferred hide, timer cancellation, keyboard path).
-- **Note on the recommendation (guide: "treat the recommendation as untrusted"):** the obvious fix
-  — rename `ui.css`'s keyframes to `slideUpOut` — is _necessary but not sufficient_. It removes the
-  collision but does **not** make the animation visible, because the `display: none` reversion in
-  `SettingsView.js` is a second, independent defect. Fixing only the rename would close this ticket
-  and leave the panel still snapping shut with no motion — exactly the "no-op fix" failure the guide
-  warns about. Both must land together, and the JS half is a behaviour change that wants a human
-  decision (see User Review Required).
+- **Mechanism verified against source:** `InvestmentTracker` is exported as a **class**
+  (`investment-tracker.js:13`) whose `getAllInvestments` (`L177`) and `removeInvestment` (`L118`) are
+  **instance** methods; the only static export is the `investmentTracker` singleton (`L357`).
+  `BudgetService` is an **object literal** (`budget-service.js:14`) exposing `delete(id)` at `L71` — there
+  is no `deleteBudget` on it. The real bridge name is `StorageService.deleteBudget` (`storage.js:196`),
+  which is what `BudgetsSection.js:285,318` uses. A runtime probe confirmed all three as `undefined`:
+  ```
+  "InvestmentTracker.getAllInvestments": "undefined"
+  "InvestmentTracker.removeInvestment":   "undefined"
+  "BudgetService.deleteBudget":           "undefined"
+  "BudgetService.delete (real name)":     "function"
+  ```
+  And confirmed the **consequence**, not just the mechanism — with one budget and one investment seeded:
+  ```
+  PROBE_WARNINGS=["Investment deletion failed: InvestmentTracker.getAllInvestments is not a function",
+                  "Budget deletion failed: BudgetService.deleteBudget is not a function"]
+  PROBE_REMAINING_BUDGETS=[{"id":"b1","categoryName":"Food"}]   ← survived the "delete" step
+  ```
+- **Verdict:** slop — a wrong assumption about a module's shape, mechanically identical to the
+  `InvestmentTracker.getAllInvestments ? … : []` guard at L673 which the guide already names as a
+  reference example of a dead defensive guard. The same bug appears in four places (L195, L198, L211, L474).
+- **Consequence, stated accurately:** the failures are caught per-block and pushed to `result.warnings`,
+  so the user **is** eventually told — `stepVerifyDeletion` re-reads the data, finds the budget still
+  present, and pushes `"Account deletion verification failed"`. So this is **not** a silent failure and
+  **not** a false success report. It is: _the data the user asked to be permanently erased is not
+  erased_, and the user gets a generic verification-failure string instead of "your budget could not be
+  deleted". That is a data-retention failure against an explicit erasure request, which is why it stays
+  🔴 despite the user-visible signal existing.
+- **Action:** The fix is
+  `BudgetService.delete(budget.id)` and `investmentTracker.getAllInvestments()` /
+  `.removeInvestment(investment.symbol)` (note: **symbol**, not `id` — `removeInvestment` is documented at
+  `investment-tracker.js:118` as taking a symbol, so L198 has a _second_, independent bug behind the
+  first).
 
-#### #4.2 — 233 class selectors with no consumer anywhere 🟡 Medium
+#### #4.2 — A corrupt telemetry value stops transactions from being saved 🔴 High
 
-- **File:** all of `src/styles/`
-- **Line(s):** throughout
-- **Severity:** 🟡 Medium
-- **Method:** extracted all 552 distinct class selectors from the 19 stylesheets, then searched every
-  one against `src/**/*.js`, **all** `*.html` in the repo (including root `index.html`), and
-  `tests/**/*.js`. 233 matched nothing.
-- **Correction applied (guide false-positive checklist #2):** my first sweep searched only `src/` and
-  `tests/`, which produced **236** and wrongly flagged `skip-link` and `visually-hidden` as dead.
-  Both are used in root `index.html:57-58`. The corrected count is 233. Recorded because it is the
-  exact failure mode the guide describes — grep-zero-callsites is a hypothesis, and my first sweep's
-  number was wrong.
-- **Notable clusters:** `input-*` (31 selectors in `enhanced-input.css`), `view-*` (22 in
-  `view-styles.css`), `budget-recommendations-*` (7), `text-fluid-*` (8), `mobile-account-*` (6),
-  `a11y-*` (4), `lazy-*-placeholder` (3).
-- **Verdict:** slop (unused design-system surface), **but the remedy is destructive**
-- **Action:** **User Review Required** — flagged, not fixed. Deleting 233 selectors is a whole-tree
-  removal that cannot be proven safe by grep alone. This needs an author decision, not
-  auto-remediation.
-
-#### #4.3 — `integrity-report.css` is not in `main.css` — **FALSE POSITIVE**
-
-- **File:** `src/styles/components/integrity-report.css`
-- **Why it looked dead:** the only file in `src/styles/` absent from `main.css`'s import list, and
-  grepping the filename across `*.js` found only `IntegrityReport.js:1`, which imports it by path.
-- **Verdict:** **false positive.** `src/components/IntegrityReport.js:1` does
-  `import '../styles/components/integrity-report.css';`, so it loads on demand. Not dead, and
-  correctly excluded from the global bundle.
-- **Action:** left as-is (no change). Recorded so a future round does not re-flag it.
-
-#### #4.4 — `critical.css` is not imported by `main.css` — **FALSE POSITIVE**
-
-- **File:** `src/styles/critical.css`
-- **Verdict:** **false positive.** `index.html:29` loads it via
-  `<link rel="stylesheet" href="/src/styles/critical.css" />`, deliberately, before `main.css`.
-  That is the entire purpose of a critical-CSS file.
-- **Action:** left as-is. Recorded to prevent re-flagging.
-
-#### #4.5 — 4× duplicate `@keyframes spin` 🟡 Medium
-
-- **File:** `loading-indicators.css:6`, `webapp-components.css:123`, `inflation-trends.css:93`,
-  `enhanced-button.css:297`
-- **Severity:** 🟡 Medium
-- **Snippet:** all four are byte-identical — `0% { transform: rotate(0deg) }` /
-  `100% { transform: rotate(360deg) }`
-- **Verdict:** slop
-- **Action:** flagged for follow-up. Safe to delete three of the four — **with the caveat below.**
-- **Caveat (guide rule #4 steps 2-3):** `vite.config.js` purges the build with
-  `safelist: { keyframes: [/^(spin|float)$/] }`, and `src/utils/progress-indicators.js:58` and
-  `src/components/LoadingView.js:22` apply `animation: spin` from **JS**. A keyframe referenced only
-  from JS has no surviving CSS rule for PurgeCSS to trace, which is precisely why that safelist entry
-  exists — the comment in `vite.config.js` records that `float` was missing from production until it
-  was added. Removing the redundant copies is safe _because the safelist pins the name_, but the
-  equivalent implementation must be confirmed present first. Verified all four are identical, so the
-  copy in `loading-indicators.css` is a correct survivor.
-
-#### #4.6 — `@keyframes fadeIn` defined twice 🟡 Medium
-
-- **File:** `hero.css:538` and `forms-dialogs.css:589`
-- **Verdict:** slop (harmless duplicate — bodies are identical, so unlike #4.1 there is no behavioural
-  difference, but it is still two owners for one name)
-- **Action:** flagged for follow-up. Note `hero.css` is conditionally loaded (`LandingView.js:8`
-  imports it), so the two definitions do not always coexist; keeping both means the effective
-  definition depends on whether the landing page was ever visited.
-
-#### #4.7 — `.sr-only` defined 3× with a behavioural difference 🟡 Medium
-
-- **File:** `webapp-patterns.css:254`, `performance-accessibility.css:26`, `reports.css:805`
-- **Severity:** 🟡 Medium
-- **Snippet:** the first two use `clip: rect(0, 0, 0, 0)`; `reports.css:812` uses
-  `clip-path: inset(0)` and **omits** `clip`.
-- **Verdict:** slop
-- **Action:** flagged for follow-up. `.sr-only` is live — used at `ReportsView.js:562`,
-  `ChartRenderer.js:742` and `:1037`, `chart-config.js:706` — and `reports.css` is imported _after_
-  `webapp-patterns.css` in `main.css`, so its variant wins for every consumer. Not currently broken
-  (`clip-path: inset(0)` is the modern equivalent), but three owners for one accessibility primitive
-  is a maintenance hazard, and a `clip`/`clip-path` divergence is exactly the kind of thing that
-  silently regresses screen-reader behaviour later.
-
-### Rule #9 — Duplicated logic instead of reuse
-
-#### #9.1 — `.card` defined twice with conflicting values 🟡 Medium
-
-- **File:** `ui.css:191-203` and `webapp-patterns.css:58-65`
-- **Severity:** 🟡 Medium
+- **File:** `src/core/click-tracking-service.js`
+- **Line(s):** 18, 135, 59, 95, 124 · **Reachability:** `src/views/AddView.js:83`, `src/components/TransactionList.js:69,103`
+- **Severity:** 🔴 High
+- **Rule #:** 4, 2
 - **Snippet:**
-  ```css
-  /* ui.css:191 */
-  .card {
-    padding: var(--spacing-xl);
-    transition: var(--animation-interactive);
-    box-shadow: var(--shadow-md);
-  }
-  /* webapp-patterns */
-  .card {
-    padding: var(--card-padding-mobile);
-    transition: var(--transition-normal);
-    box-shadow: var(--shadow-card);
-  }
+  ```js
+  this.history = this.loadHistory();                 // L18  — constructor
+  ...
+  return stored ? safeJsonParse(stored) : [];        // L135 — guards the STRING, not the PARSE RESULT
+  ...
+  this.history.push(metrics);                        // L59  — throws when history === null
+  if (this.history.length === 0) {                   // L95  — throws when history === null
   ```
-- **Verdict:** slop
-- **Action:** flagged for follow-up. `webapp-patterns.css` is imported at `main.css:26`, after
-  `ui.css` at line 10, so it wins. Both also set `border-radius`, `border` and background, and
-  `ui.css:200` adds a `.card:hover` that `webapp-patterns.css` does not. Confirmed both survive into
-  production (three `.card{` matches in the built CSS). Whichever author is "right", the other
-  definition is misleading dead weight.
+- **Mechanism verified against source:** `safeJsonParse` returns `null` on malformed JSON —
+  `security-utils.js:99-102`, `catch { … return null; }`, and the JSDoc at `:67` states
+  _"The parsed object **or null if parsing fails**"_. The `? :` at L135 only substitutes the default when
+  `stored` is falsy; when `stored` is a corrupt **non-empty string**, the truthy branch runs and returns
+  `null`, which is assigned straight to `this.history`. A runtime probe with a single truncated value
+  (`'{"clicks":3,'`) confirmed:
+  ```
+  PROBE_HISTORY=null
+  PROBE_GET_AVERAGE=THREW: Cannot read properties of null (reading 'length')
+  PROBE_COMPLETE_FLOW=THREW: Cannot read properties of null (reading 'push')
+  ```
+- **Why this is 🔴 and not a nit:** the throw is not contained. `AddView.js` calls
+  `ClickTracker.completeTransactionFlow()` at **line 83**, and the `try { TransactionService.add(data) }`
+  that actually records the expense begins at **line 86**. The throw therefore propagates out of the
+  submit handler _before the user's transaction is written_. A user who logs one expense with a
+  truncated telemetry key **loses that expense**, and — because `completeTransactionFlow` is called
+  unconditionally at the top of `onSubmit`, not just on success — the next attempt throws at the same
+  place, so it is **not self-healing**. `TransactionList.js:69` throws too, so the list will not render.
+- **Verdict:** slop. The specific error is a guard that checks the wrong thing — the classic
+  "null check on a value that was already validated two lines above" shape, except validated against the
+  wrong variable.
+- **Action:** **flagged for follow-up** (not fixed this session — this round is audit-only; no source
+  files were modified). Fix is one line: `const parsed = safeJsonParse(stored); return Array.isArray(parsed) ? parsed : [];`
+  Regression test must go in a **new** file: `tests/setup.js` replaces `localStorage` with bare
+  `vi.fn()` spies whose `getItem` returns `undefined` for every key, so a suite that asserts on stored
+  history needs a real in-memory store installed locally (guide, testing trap #6). The revert run should
+  fail with the `Cannot read properties of null` TypeError, not an assertion mismatch.
 
-#### #9.2 — `.visually-hidden` defined twice 🟡 Medium
+#### #4.3 — Four event listeners that `destroy()` can never remove 🟡 Medium _(re-ranked down)_
 
-- **File:** `critical.css:222` and `base.css:192`
-- **Verdict:** intentional-ish, but undocumented — `critical.css` must stand alone before
-  `main.css` loads, so restating the base rule there is defensible. It is not byte-identical though:
-  `base.css:200` adds `clip-path: inset(50%)` which `critical.css` lacks.
-- **Action:** flagged for follow-up as a documented-duplication candidate rather than a deletion.
-  Both files should carry a one-line note saying the duplication is load-order-required, so a future
-  round does not "clean it up" and break first paint.
+- **File:** `src/core/mobile-utils.js`
+- **Line(s):** 65–68 + 76–80, 118–119 + 121–125, 151, 158 + 159–163; cleanup at 569–585
+- **Severity:** 🟡 Medium — **filed 🔴, re-ranked down after re-derivation**
+- **Rule #:** 4
+- **Snippet:**
+  ```js
+  window.visualViewport.addEventListener('scroll', this.handleViewportScroll.bind(this));  // L67
+  this.eventListeners.set('viewport-scroll', {                                           // L76
+    target: window.visualViewport, event: 'scroll',
+    handler: this.handleViewportScroll.bind(this),   // L79 — a DIFFERENT function object
+  });
+  ...
+  document.addEventListener('focusin', this.optimizeInput.bind(this));   // L151 — never stored at all
+  document.addEventListener('keydown', this.handleKeyDown.bind(this));   // L158
+  this.eventListeners.set('keydown', { handler: this.handleKeyDown.bind(this) });  // L162
+  ```
+- **Mechanism verified against source:** `Function.prototype.bind` returns a **new** object on every
+  call and is not memoised, so `x.bind(this)` at L67 and `x.bind(this)` at L79 are distinct references.
+  `destroy()` (L569–574) can only remove what is in `eventListeners`, so it removes the L79 copy and
+  leaves the L67 copy attached to `window.visualViewport` forever. Same defect at L158/L162 for `keydown`.
+  L151 is never recorded at all. Separately, L118–119 registers `handleOrientationChange` on **both**
+  `orientationchange` and `resize`, but L121 only records the `orientationchange` one — the `resize`
+  registration is also unreachable by `destroy()`.
+- **Why the severity was lowered:** the leak is real, but `MobileUtils.initialize()` is called exactly
+  once per page load, from `main.js:22`. Within a single SPA session the listeners accumulate once and
+  stop. This is **not** an unbounded in-session leak; it is a broken removal contract that only bites if
+  `initialize()` is ever called again. Reporting it as 🔴 would have overstated a latent defect as an
+  active one.
+- **Verdict:** slop. The cleanup scaffolding is genuine and the intent is clear — the giveaway is that
+  `initialize()` at L591–593 calls `destroy()` _specifically to avoid duplicate listeners_, so the
+  contract is load-bearing by the code's own admission, and it does not hold.
+- **Action:** **flagged for follow-up.** Fix is to bind once into a local (`const onScroll = this.handleViewportScroll.bind(this)`), register that, and store that same reference; add the L151 handler to the map.
 
-#### #9.3 — `.btn` base rule split across 3 files 🟡 Medium
+### Rule #5 — Hardcoded values / design-system bypass
 
-- **File:** `ui.css:40`, `enhanced-button.css:3`, `critical.css:110`
-- **Verdict:** slop-by-accumulation. Eight `.btn{` matches survive into production CSS. Same shape as
-  #9.1 and #4.1: several files each assert ownership of a global class.
-- **Action:** flagged for follow-up. This is the structural theme of the round — see "Theme" below.
+#### #5.1 — Dead `||` fallback over a token that exists with the identical value ⚪ Low
 
-### Rule #5 — Hardcoded values that bypass the design system
-
-#### #5.1 — Phantom tokens: `var(--x, fallback)` where `--x` is defined nowhere ⚪ Low
-
-- **File:** `ui.css:227`, `ui.css:354` (`--z-index-toast`); `reports.css:108`, `reports.css:149`
-  (`--z-index-tooltip`)
+- **File:** `src/core/click-tracking-service.js:133,148`
 - **Severity:** ⚪ Low
 - **Snippet:**
-  ```css
-  z-index: var(--z-index-toast, 10000); /* ui.css:227, ui.css:354 */
-  z-index: var(--z-index-tooltip, 100) !important; /* reports.css:108 */
-  z-index: var(--z-index-tooltip, 1000) !important; /* reports.css:149 */
+  ```js
+  STORAGE_KEYS.CLICK_TRACKING || 'blinkbudget_click_tracking';
   ```
-- **Mechanism verified against source:** searched every stylesheet and `index.html` for
-  `--z-index-toast` and `--z-index-tooltip` **definitions**. The only matches are these four
-  _usages_; no `--z-index-toast:` or `--z-index-tooltip:` declaration exists anywhere in the repo.
-  The fallback literal therefore always wins — the classic "tokenised but load-bearing literal"
-  from guide rule #5a.
-- **Verdict:** slop, but **per guide #5b/#5c this is a design decision, not a cleanup.** The author
-  previously declined an equivalent z-index finding for exactly this reason: introducing a z-index
-  scale has global stacking implications and is design work, not slop removal.
-- **Action:** left as-is (documented reason: a z-index scale must be designed, not retrofitted).
-  Worth noting `--overlay-z-index` / `--overlay-top-z-index` _do_ exist in `mobile.css:5-6`, so there
-  is already a partial scale — a future decision could unify, but that is a design task.
-- **Also note:** `reports.css:108` and `reports.css:149` use the **same token name with different
-  fallbacks** (100 vs 1000). Since the token is undefined, these two declarations disagree by 10×.
-  Whichever selector wins the cascade, the other is silently doing something different. That part is
-  a genuine inconsistency rather than a design choice.
+- **Mechanism verified against source:** `STORAGE_KEYS.CLICK_TRACKING` is defined at
+  `src/utils/constants.js:308` with the value `'blinkbudget_click_tracking'` — **the same string**. The
+  left operand is a non-empty literal, so the right operand is unreachable. This is the guide's rule #5
+  "fallback literals in `|| N` chains", and it is actively misleading: a reader greps the hardcoded
+  string, assumes the key might be undeclared, and misses that the token is the single source of truth.
+- **Verdict:** slop. **False-positive check applied:** I did _not_ assume the token existed — the guide
+  requires grepping for the definition, which is what surfaced `constants.js:308`. Had it been absent,
+  the fallback would have been load-bearing and correct to keep.
+- **Action:** **flagged for follow-up** — drop the `||` and use the token.
 
-#### #5.2 — Magic z-index literals across 8 files ⚪ Low
+### Rule #6 — Indirection with zero added logic
 
-- **File:** `webapp-patterns.css:179,229`; `performance-accessibility.css:13,206,239,316`;
-  `reports.css:791,799`; `webapp-components.css:76`; `forms-dialogs.css:568`; `mobile.css:225`;
-  `critical.css:243`
-- **Severity:** ⚪ Low
-- **Values seen:** `9999`, `1001`, `1000`, `999`, `100`
-- **Verdict:** slop per the letter of rule #5, **but** the guide's own refinement #5b applies: most of
-  these have **no matching token**, so "converting" them would mean _inventing_ a scale. Reported as
-  _no token exists_ rather than as convertible cleanup, per #5b.
-- **Action:** flagged as a single design-system follow-up (define or explicitly reject a z-index
-  scale), not a slop fix.
+#### #6.1 — Three `async` pass-throughs over synchronous storage 🟡 Medium
 
-#### #5.3 — Undefined tokens used inside `critical.css` ⚪ Low
-
-- **File:** `critical.css:123-124` (`--ease-out`), `critical.css:93` (`--spacing-xs`)
-- **Severity:** ⚪ Low
-- **Mechanism verified against source:** parsed every `var(--x)` **used** in `critical.css` and
-  compared against every `--x:` **declared** in that same file. `--ease-out` and `--spacing-xs` are
-  used but not declared there. Both _are_ declared in `tokens.css` (lines 221 and 122), which
-  `main.css` loads — so they resolve in a normal page load and the declarations are not broken.
-- **Verdict:** **false positive on impact, real observation on intent.** The `var(--ease-out, …)`
-  and the bare `var(--spacing-xs)` are deliberate critical-CSS self-containment choices (the file
-  must render before `tokens.css` arrives). The bare `var(--spacing-xs)` at line 93 is the one that
-  would genuinely fail during the critical window, since it has no fallback.
-- **Action:** flagged for author confirmation — add a fallback to `critical.css:93` or declare the
-  token locally. Low stakes; no user-visible symptom observed.
-
-#### #5.4 — Raw hex colours in the high-contrast block ⚪ Low
-
-- **File:** `performance-accessibility.css:77-87`
-- **Severity:** ⚪ Low
-- **Snippet:** `--color-background: #fff; --color-primary: #00f; --focus-color: #f00; …`
-- **Verdict:** intentional — a forced high-contrast palette that must bypass the HSL token system by
-  design. Same reasoning as guide #5c (some raw values are deliberate strategy).
-- **Action:** left as-is (reason recorded).
-
-### Rule #7 — Inconsistent patterns
-
-#### #7.1 — Two spellings of the custom media query: the paren-less form is dead code 🔴 High
-
-- **File:** `@media --md` (no parens) in `base.css:100,165`, `forms-dialogs.css:236,473,486,551,689`,
-  `mobile.css:305`, and 14 sites in `ui.css` — vs `@media (--md)` (parens) in
-  `enhanced-button.css:219`, `enhanced-input.css:237`, `performance-accessibility.css:352`,
-  `webapp-components.css:341`, `hero.css:571,636,700`, `view-styles.css`, `webapp-patterns.css`
-- **Severity:** 🔴 High — **re-scoped from 🟡 Medium; see the correction below**
-- **Verdict:** slop, and the slop was load-bearing dead code
-- **Correction to my own finding (guide rule #8 — do not trust the recommendation, or the
-  severity, that arrives with the report):** this was filed as "consistency-only" on the reasoning
-  that "`postcss-custom-media` accepts both and the production build compiles". **The premise held;
-  the inference did not.** I tested the plugin directly:
-
+- **File:** `src/core/savings-goals-service.js:13-35`
+- **Severity:** 🟡 Medium
+- **Snippet:**
+  ```js
+  static async getSavingsGoals() {
+    const { StorageService } = await import('./storage.js');
+    return StorageService.getGoals() || [];
+  }
   ```
-  @media --md   { .b { … } }  ->  @media --md   { .b { … } }            UNCHANGED
-  @media (--md) { .c { … } }  ->  @media (min-width: 768px) { .c { … } }   resolved
+- **Verdict:** slop. Three methods (`getSavingsGoals`, `saveSavingsGoal`, `deleteSavingsGoal`) each add a
+  dynamic import and nothing else. The `async` is not incidental: `StorageService.getGoals()` is
+  **synchronous** (`storage.js:127`), so the `async`/`await` here is a promise the caller must await for
+  no reason, propagating an artificial async boundary to `GoalsSection.js`. The only justification is
+  lazy-loading `storage.js`, which `GoalsSection` already imports directly.
+- **Action:** **flagged for follow-up** — drop `async`/`await` and keep the import, or inline.
+
+### Rule #7 — Inconsistent error-handling patterns
+
+#### #7.1 — Raw `JSON.parse` where the codebase standard is `safeJsonParse` 🟡 Medium
+
+- **File:** `src/core/amount-preset-service.js:26` (+ `:104`, `:166`)
+- **Severity:** 🟡 Medium
+- **Snippet:**
+  ```js
+  return data ? JSON.parse(data) : { amounts: {}, presets: [] };   // L26
+  ...
+  if (!presetsData.amounts[normalizedAmount]) {                    // L104
   ```
+- **Mechanism verified against source:** every other core service that parses storage uses
+  `safeJsonParse` — `account-service.js:26`, `budget-service.js:21`, `investment-tracker.js:298`,
+  `settings-service.js:30,51`, `sync-service.js:469,488`, `click-tracking-service.js:135`.
+  `amount-preset-service.js` is the outlier, and it is the **only one of these that has the same null
+  hole as #4.2**: a stored `"null"` makes `data` truthy, `JSON.parse` returns `null`, and L104
+  dereferences `presetsData.amounts` → TypeError inside `recordAmount`, reached from
+  `analytics-engine.js:135`. Not runtime-probed (the two share a mechanism, not a call site), so filed as
+  🟡 on the code read plus the shared root cause.
+- **Verdict:** slop. A sibling-file comparison (rule #7) is what surfaced this — one service in a
+  directory of nine that solves the same problem the hard way.
+- **Action:** **flagged for follow-up** — same one-line fix as #4.2.
 
-  The paren-less form is **not a recognised custom-media reference**. It is emitted verbatim, and
-  `@media --md` is an _invalid_ media query that browsers discard outright. Confirmed in the shipped
-  artefact before the fix — `dist/assets/index.LajpuDoe.css` contained **15 × `@media --sm`** and
-  **5 × `@media --md`**, against 8 correctly-resolved `(width>=768px)`. So "the build compiles" was
-  true and completely beside the point: the build compiled 22 blocks that render nothing.
+#### #7.2 — Unbound `console.warn` passed straight to `.catch()`, three times ⚪ Low
 
-- **User-visible symptom (feedback/layout loss, not data loss):** `h1`/`h2` never scale up above
-  768px (`base.css:165`); the dashboard stat grid never goes multi-column (`ui.css:561`);
-  `.mobile-back-btn` is never hidden on desktop (`mobile.css:305`); the date-range form never goes
-  two-column (`forms-dialogs.css:473`).
-- **Why every static check stayed green:** each file is individually valid CSS, and Stylelint accepts
-  the paren-less at-rule. The defect exists only in the _interaction_ between the source spelling and
-  the PostCSS plugin — the same blindness as #4.1, one layer up.
-- **Action:** **fixed in Phase 2 (2026-09-26)** — all 22 dead blocks **deleted** (author decision,
-  2026-09-26: "remove it, because it was wrong and not working"). Deleting rather than repairing was
-  chosen deliberately: these were mobile-first _progressive-enhancement_ blocks, and re-adding them
-  via the paren form would have activated a design nobody has ever seen, on a layout that has been
-  shipping without them. Removal restores the site to the behaviour it has actually been serving.
-- **Verified:** production build now ships **0** occurrences of `@media --` (was 20); source grep is
-  0 (was 22). `yarn run lint:css`, `prettier --check` and the full Vitest suite are clean.
-- **Guards added:** `tests/system/css-architecture.test.js` — "never uses the paren-less custom media
-  reference form". Revert-tested: reintroducing one `@media --sm` block fails with
-  `ui.css:496 -> @media --sm {`, naming file, line and construct. Deliberately asserted against
-  **source** rather than the `dist/` artefact, since dist filenames are content-hashed and would
-  break the test on every unrelated rebuild.
-- **Note for the next round:** this is the second finding in this report (#4.1) whose _severity came
-  from reading the built artefact_ rather than the source. Neither is reachable by a per-file linter.
-  Any future CSS round should read `dist/assets/*.css` before assigning severity to anything
-  involving the cascade or the build.
-
-#### #7.2 — Hand-written breakpoint literals that disagree by 1px ⚪ Low
-
-- **File:** `mobile.css:230` and `view-styles.css:477` use `(width <= 767px)`;
-  `inflation-trends.css:115`, `loading-indicators.css:39`, `reports.css:155,345,632` use
-  `(width <= 768px)`; `reports.css:377` uses `(width >= 769px)`; `hero.css:282` uses
-  `(width >= 768px)`
+- **File:** `src/core/auth-service.js:150,212,287`
 - **Severity:** ⚪ Low
-- **Note:** `tokens.css:14` defines `--md (min-width: 768px)`. So a 768px-wide viewport matches
-  _both_ `width <= 768px` and the `--md` custom media, and matches neither `width <= 767px` nor the
-  `width >= 769px` guards. At exactly 768px the stylesheets disagree with themselves.
-- **Verdict:** slop (hardcoded values that bypass the design system, rule #5)
-- **Action:** flagged for follow-up — replace with the custom media, or adopt one documented
-  literal. No user-visible defect confirmed at this width; medium-low stakes.
+- **Snippet:** `this._updateUserProfile(this.user).catch(console.warn);`
+- **Verdict:** slop. `console.warn` is passed **unbound**; it works in practice only because console
+  methods are bound in modern engines. The comment `// Update profile in background` is repeated
+  verbatim three times and, per rule #1, adds nothing the code does not already say. The error contract
+  is otherwise documented well at L112.
+- **Action:** **flagged for follow-up** — `.catch(err => console.warn('[AuthService] profile update:', err))`.
+
+### Rule #9 — Duplicated logic
+
+#### #9.1 — `topMovers` and `categoryExpenseTotals` are the same loop 🟡 Medium
+
+- **File:** `src/core/insights-generator.js:15-47` and `52-65`
+- **Severity:** 🟡 Medium
+- **Verdict:** slop. Both filter on `type === 'income' | 'transfer' | 'isGhost`, both normalise
+  `amount` the same way, both apply the same `refund → -Math.abs` adjustment — ~80% identical bodies
+  differing only in the accumulator shape (`{total,count}` object vs `Map<number>`). The file's own
+  comment at L50–51 says _"Same rules as topMovers"_, i.e. the duplication is acknowledged but not
+  factored. A shared `iterExpenseCategories(transactions)` generator would collapse both.
+- **Action:** **flagged for follow-up.**
+
+### Rule #11 / #1 — Stale and trivial comments
+
+#### #11.1 — Tombstone comment about a browser that predates the event ⚪ Low
+
+- **File:** `src/core/install.js:19` — `// Prevent Chrome 67 and earlier from automatically showing the prompt`
+- **Verdict:** stale. `beforeinstallprompt` shipped in Chrome 72; in Chrome 67 the event never fired, so
+  the handler could not have been about "Chrome 67 and earlier". The `e.preventDefault()` itself is
+  correct per spec. Under rule #1's archaeology caveat this is _not_ a candidate for deletion on the
+  "restates the code" basis — but the claim it makes is checkably false, so it is filed under #11.
+- **Action:** **flagged for follow-up** — rewrite to state the spec requirement.
+
+#### #11.2 — Fix-narrative comment with no ticket 🟡 Low
+
+- **File:** `src/core/savings-goals-service.js:87` — `// Fix monthlySavingRate calculation to use actual time span`
+- **Verdict:** per the guide's archaeology rule this is **evidence, not noise** — it is the only record of
+  _why_ the code below computes min/max timestamps instead of a naive average. **Do not delete.**
+  Recommend rewording to a rationale ("compute over the actual span, not a fixed 30 days") rather than
+  removal, since as written it reads as a changelog entry.
+- **Action:** **left as-is** (reason: archaeology — see above).
 
 ### Rule #14 — File / module bloat
 
-#### #14.1 — 5 of 19 stylesheets exceed the project's 500-line convention 🟡 Medium
+#### #14.1 — 12 of 46 core files exceed the 500-line guideline 🟡 Medium
 
-- **File / lines:** `components/ui.css` **860**, `components/reports.css` **729**,
-  `utilities/view-styles.css` **680**, `hero.css` **653**, `components/forms-dialogs.css` **619**
 - **Severity:** 🟡 Medium
-- **Convention:** `AGENTS.md:141` — "keep files under 500 lines"
-- **Verdict:** slop by project convention
-- **Action:** flagged as its own follow-up, **explicitly not bundled** into any cleanup, per the
-  guide's instruction not to mix a split-file refactor into unrelated slop work. `ui.css` at 860
-  lines is 172% of the limit and is the file implicated in three separate findings (#4.1, #9.1,
-  #9.3) — that correlation is the rule's point: bloat is a strong correlate of the duplication this
-  round actually found.
+- **Verdict:** per rule #14, flagged as its own follow-up and explicitly **not** bundled into a slop
+  cleanup. `AGENTS.md` sets 500 lines. Over the limit:
 
-### Rule #1 / #11 — Trivial and stale comments
+  | Lines | File                                  |
+  | ----: | ------------------------------------- |
+  |   962 | `data-integrity-service.js`           |
+  |   857 | `custom-category-service.js`          |
+  |   823 | `analytics/TrendService.js`           |
+  |   770 | `forecast-engine.js`                  |
+  |   714 | `sync-service.js`                     |
+  |   712 | `Account/account-deletion-service.js` |
+  |   712 | `chart-config.js`                     |
+  |   704 | `backup-service.js`                   |
+  |   655 | `goal-planner.js`                     |
+  |   647 | `analytics/AnomalyService.js`         |
+  |   615 | `navigation-state.js`                 |
+  |   609 | `mobile-utils.js`                     |
 
-#### #11.1 — 12 "moved to …" tombstone comments ⚪ Low
+- **Note:** `account-deletion-service.js` is where #4.1 lives, and its bulk is 20 near-identical
+  `try { … } catch (error) { result.warnings.push(...) }` blocks. The repetition is also why the bug
+  survived — each block is a near-copy, so a wrong method name in one is invisible in the other nineteen.
+- **Action:** **flagged for follow-up** — split as its own change, per rule #14.
 
-- **File:** `ui.css:119,130,144`; `webapp-patterns.css:67,75,77,414`; `base.css:2,189`;
-  `critical.css:148`; `reports.css:225,227,229`
-- **Snippet:** `/* Button hover styles moved to enhanced-button.css to avoid duplication */`
-- **Verdict:** slop. Each sits above a blank line where code used to be, describing a removal
-  rather than documenting anything. They will never again explain the current code.
-- **Action:** flagged for follow-up (bulk cosmetic delete, safe).
+### Rule #15 — Async boundary bugs
 
-#### #11.2 — `loading-indicators.css` header claims to be the single source; it is not 🟡 Medium
+#### #15.1 — `analyticsCache.invalidate()` is `async` and awaited nowhere — 12 call sites 🟡 Medium
 
-- **File:** `loading-indicators.css:1-4`
-- **Snippet:** `* Single source for @keyframes spin / float.`
-- **Verdict:** slop — and **actively misleading**, which is the #11 test rather than the #1 test.
-- **Mechanism verified against source:** the same `@keyframes spin` is defined in three other files
-  (#4.5). The header is the _last_ record of an intent the code no longer honours, so a future
-  session would reasonably trust it and be misled about where `spin` comes from.
-- **Action:** flagged for follow-up — either delete the three duplicates (#4.5) so the claim becomes
-  true, or correct the comment. Deleting the duplicates is the better fix.
-
-#### #11.3 — `inflation-trends.css` documents controls that no longer render 🟡 Medium
-
-- **File:** `inflation-trends.css:7`
-- **Snippet:** `- .segmented-control: For chart toggles and periods (controls are no longer rendered — kept for reuse)`
-- **Verdict:** stale, but **honest about being stale** — the parenthetical is doing real work.
-- **Action:** flagged for follow-up. The `.inflation-controls` / `.selector-group` /
-  `.segmented-control` rules this header refers to (lines 40-57, 121-134) are among the 233
-  unreferenced selectors from #4.2 — so "kept for reuse" describes rules nothing uses. Either the
-  comment or the rules should go; this is one decision, not two.
-
-### Rules not applicable
-
-- **#2, #10, #15 (swallowed errors, try/catch, async boundaries):** CSS contains no JS control flow —
-  no `catch`, no `async`, no promise. **Not applicable — not skipped.** The closest CSS analogue is
-  the silent-failure class, and it is exactly what #4.1 is: a construct that fails quietly and reads
-  as handled.
-- **#3 (dead guards):** no runtime guards in CSS. Nearest analogue — `.advanced-settings-section` is
-  guarded by a class toggle whose `display: none` default is arguably the guard; covered in #4.1.
-- **#6, #12, #13, #8:** indirection, TypeScript, React, and module-load side effects have no CSS
-  equivalent in this codebase. Skipped with reason, per the guide's instruction to state skips.
-
----
-
-## False positives — the calibration the guide demands
-
-Guide checklist #7 warns that a report with zero false positives is itself a warning sign, and #8
-warns against findings arriving with confident, airtight prose. Three items initially looked like
-findings and did not survive verification. All three are recorded so the next round does not
-re-derive them:
-
-1. **`integrity-report.css` "orphan"** — looks orphaned (absent from `main.css`), but
-   `IntegrityReport.js:1` imports it by path. **False positive.**
-2. **`critical.css` "orphan"** — looks orphaned, but `index.html:29` loads it as a blocking
-   stylesheet. That is the file's entire purpose. **False positive.**
-3. **`skip-link` / `visually-hidden` "dead selectors"** — appeared in my first sweep, which searched
-   only `src/` and `tests/`. Root `index.html:57-58` uses both. Corrected the count 236 → 233 and
-   removed these from the dead list. **False positive caused by incomplete search scope.**
-
-The `@keyframes slideUp` finding also required a downgrade pass. My first framing was "the wrong
-animation plays on close." Reading `SettingsView.js` showed the element is `display: none` before the
-animation could be observed, so the accurate claim is narrower: **the close animation never plays at
-all.** The severity stayed 🔴 and the root cause is unchanged, but the user-visible symptom is
-feedback loss (a missing animation), not a visibly-wrong animation.
-
-**#7.1 is the inverse calibration, and the more useful one: a finding I had _under_-rated.** I filed it
-as 🟡 "consistency-only" because "`postcss-custom-media` accepts both and the production build
-compiles". Verifying that sentence against the plugin showed the premise was true and the conclusion
-false — only the parenthesised form is resolved, so 22 blocks were shipping as invalid media queries
-that browsers discard. It is now 🔴 and fixed. Two lessons, both worth more than the finding:
-
-- **A build that succeeds is not a build that works.** "The pipeline didn't error" was the whole basis
-  for the original severity, and it says nothing about whether the emitted CSS is _valid_. Only
-  reading the artefact answered the question.
-- **A finding's severity is a claim like any other.** #4.1 had to be narrowed on re-derivation; #7.1
-  had to be widened. Neither direction is privileged — the guide's rule is to re-derive both, and to
-  record the correction in the report rather than silently fixing the number.
-
-Per checklist #7, a round with zero mis-rated findings should be treated as a warning sign, not a
-clean bill of health.
+- **File:** `src/core/cache-invalidator.js:32,33,66` · `src/core/storage.js:69,83,92,101,138,156,162,168,174`
+- **Severity:** 🟡 Medium
+- **Rule #:** 15A, 15B, 7
+- **Snippet:**
+  ```js
+  // cache-invalidator.js — all inside one try/catch whose catch is at L73
+  analyticsCache.invalidate('portfolioSummary');   // L32
+  analyticsCache.invalidate('goalsSummary');        // L33
+  analyticsCache.invalidate('forecast_');           // L66
+  window.dispatchEvent(new CustomEvent('forecast-invalidate', { … }));   // L67-70
+  ```
+- **Mechanism verified against source:** `invalidate` is declared `async` at `AnalyticsCache.js:403`, so
+  it **returns a promise and cannot throw synchronously** — the `try`/`catch` at L26/L73 is structurally
+  incapable of observing its failure. The body `await this._acquireLock()` at L404 before touching
+  anything, so the deletions have not happened by the time L67 dispatches the invalidation event
+  synchronously. This is the guide's own reference example, and the _correct_ pattern is visible **13
+  lines above it in the same function** (L38–55: capture keys with `getMatchingKeys`, then
+  `invalidateSync` + `invalidate(pattern, keys)`).
+- **What I did _not_ verify (stated so the author can finish the job):** the ACCOUNTS branch's
+  `handleForecastInvalidate` listener (`FinancialPlanningView.js:534`) calls `forecastEngine.clearCache()`
+  and then `renderSection(currentSection)` **synchronously**. Whether that re-render actually reads a
+  `'forecast_'`-prefixed key from `analyticsCache` in the same tick — and therefore observes stale data —
+  I did **not** trace. The ordering defect is verified; the stale read is not. Per the guide, a finding
+  whose mechanism cannot be completed is not ready to file as a race, so this is filed as a contract
+  defect, not as a confirmed race.
+- **Verdict:** slop. Written up **once** as a contract problem across all 12 call sites rather than as 12
+  findings (guide, rule #15D). The `storage.js` sites are the same shape: nine synchronous bridge methods
+  (`addInvestment`, `addGoal`, `updateGoalProgress`, …) that invalidate the cache and return before the
+  invalidation completes.
+- **Action:** **flagged for follow-up.** The right fix is the one the codebase already demonstrates at
+  `cache-invalidator.js:38-55` — capture the keys, `invalidateSync` for same-tick visibility, then the
+  async pass — applied once in a helper both files call, rather than hand-editing 12 sites.
 
 ---
 
-## Theme: the round's single structural cause
+## Re-ranks (recorded, not silently corrected)
 
-Four separate findings (#4.1, #9.1, #9.3, #14.1) reduce to one pattern: **several stylesheets each
-assert ownership of the same global class or name, and import order silently decides the winner.**
+The guide requires a re-rank be written down rather than quietly fixed. One, in each direction:
 
-- `slideUp` — `ui.css` vs `mobile.css` → wrong winner, real bug (#4.1)
-- `.card` — `ui.css` vs `webapp-patterns.css` → last one silently wins (#9.1)
-- `.btn` — 3 files, 8 production rules (#9.3)
-- `.sr-only` — 3 files, 3 variants (#4.7)
+- **Narrowed:** #4.3 (mobile-utils listener leaks) was filed 🔴 on the strength of four un-removable
+  listeners and a `destroy()` that `initialize()` explicitly depends on. Re-deriving the call sites showed
+  `initialize()` runs **once per page load**, so the listeners accumulate once and stop. Downgraded to 🟡.
+  Filed as latent, not active.
+- **Not narrowed, and the opposite error was caught:** #4.2 was initially a 🟡 — "a telemetry service can
+  throw on corrupt data" sounds cosmetic. Reading the _call site_ rather than trusting the finding's
+  framing turned it into the round's worst defect: `AddView.js:83` runs **before** the `try` at `:86` that
+  saves the transaction, so the user loses the expense and the failure repeats on every retry. Severity
+  raised 🟡 → 🔴 **because the mechanism, on re-reading, turned out to be worse than first written** —
+  not because the original prose was confident. A finding whose stated mechanism does not survive contact
+  with the code must be re-scoped before it is filed; this one did not survive, and re-scoping it is what
+  produced the finding.
 
-`main.css` is an ordered `@import` list with no layering discipline, so "which file owns `.btn`" has
-no answer other than "whichever line of `main.css` is last." The audit's most useful output is
-therefore not any single finding but this: **the fix for #4.1 is a rename, but the durable fix is
-establishing one owner per global class.** That refactor is not proposed here — per the guide it
-belongs in its own plan, not in a slop cleanup.
+---
+
+## False positives — downgraded after verification
+
+Recorded because a round with zero false positives is itself a signal of pattern-matching too fast.
+
+1. **"Six analytics services are orphans."** `CategoryUsageService`, `PredictionService`,
+   `ComparisonService` and `FilteringService` all appeared to have **zero** references outside their own
+   files. They are all imported and called by `analytics-engine.js:10-18,29-193`. My first grep excluded
+   `src/core/` paths to find "external" callers, which excluded the very file that uses them. **The
+   service was alive; the grep was wrong.** No finding filed.
+2. **"Every `src/core` export is dead."** A first pass over all 57 exports reported every one as
+   zero-reference. Cause: `rg -o --replace` retained the `file:line:` prefix, so each symbol was searched
+   as the literal string `src/core/foo.js:12:Bar`. Re-ran with `--no-filename`; the real result is
+   **zero** dead exports, which is a genuinely clean result rather than the catastrophe the first pass
+   implied.
+3. **"`accessibleColors` / `chartColors` are dead exports."** Grep found them only in their own file — but
+   they are consumed **internally** by `getChartColors` at `chart-config.js:360-387`. Live. Only their
+   `export` keyword is superfluous, which is not a finding.
+4. **"`accountDeletionService` is unused."** It has exactly one caller, `AccountDeletionSection.js`, plus
+   two tests. Thin, but live. No finding filed.
+
+Two further checks came back clean and are recorded as **evidence, not findings**: there are **no computed
+dynamic imports** in `src/` (rule #4 step 3 — the only non-relative `import()` is the literal `'chart.js'`,
+so a filename grep cannot be defeated by a runtime-built path), and there are **no module-load side
+effects** in `src/core` (rule #8 — no top-level `addEventListener`, no `document.*` at module scope; the
+`MobileUtils` constructor's `this.init()` runs only under an explicit `initialize()` call from `main.js:22`).
 
 ---
 
 ## Traceability — every finding has a destination
 
-| Finding                                  | Rule  | Severity | Destination                                                                           |
-| ---------------------------------------- | ----- | -------- | ------------------------------------------------------------------------------------- |
-| `@keyframes slideUp` collision           | #4.1  | 🔴       | **DONE (Phase 1, 2026-09-26)** — rename + `display` + timer lifecycle; 3 guards added |
-| 233 unreferenced selectors               | #4.2  | 🟡       | **User Review Required** — destructive, needs sign-off                                |
-| 4× `spin` keyframes                      | #4.5  | 🟡       | Phase 2 — keep `loading-indicators.css` copy; verify purge safelist                   |
-| `fadeIn` ×2                              | #4.6  | 🟡       | Phase 2                                                                               |
-| `.sr-only` ×3                            | #4.7  | 🟡       | Phase 2 — keep one, preserve `clip-path`                                              |
-| `.card` ×2                               | #9.1  | 🟡       | Phase 2 — author picks the surviving definition                                       |
-| `.visually-hidden` ×2                    | #9.2  | 🟡       | Deferred — document as load-order-required                                            |
-| `.btn` split ×3                          | #9.3  | 🟡       | Phase 3 — single owner (bundled with the layering work)                               |
-| Phantom z-index tokens                   | #5.1  | ⚪       | Deferred — design decision, explicitly out of scope                                   |
-| Magic z-index literals                   | #5.2  | ⚪       | Deferred — same design task as #5.1                                                   |
-| `critical.css` undefined tokens          | #5.3  | ⚪       | Phase 2 — add fallback at `critical.css:93`                                           |
-| High-contrast raw hex                    | #5.4  | ⚪       | Left as-is (intentional)                                                              |
-| Custom-media spelling split              | #7.1  | 🔴       | **DONE (Phase 2, 2026-09-26)** — re-scoped 🟡→🔴; 22 dead blocks deleted; guard added |
-| 1px breakpoint disagreements             | #7.2  | ⚪       | Phase 2 — unify on one literal                                                        |
-| 5 files over 500 lines                   | #14.1 | 🟡       | **Own follow-up** — explicitly not bundled                                            |
-| 12 tombstone comments                    | #11.1 | ⚪       | Phase 2 — bulk delete                                                                 |
-| Misleading "single source" header        | #11.2 | 🟡       | Phase 2 — resolved by #4.5                                                            |
-| Stale "kept for reuse" header            | #11.3 | 🟡       | **User Review Required** — delete rules or fix comment                                |
-| `integrity-report.css`                   | #4.3  | —        | False positive, closed                                                                |
-| `critical.css` orphan claim              | #4.4  | —        | False positive, closed                                                                |
-| `skip-link`/`visually-hidden` dead claim | —     | —        | False positive (search-scope error), closed                                           |
+| Finding                                      | Severity | Destination                                                   |
+| -------------------------------------------- | -------- | ------------------------------------------------------------- |
+| #4.1 deletion leaves data behind             | 🔴       | Phase 1 - approved by author                                  |
+| #3.1 null-guard masks #4.1                   | 🟡       | Rolled into the 🔒 #4.1 work                                  |
+| #4.2 corrupt value stops transactions saving | 🔴       | Phase 1 — one-line fix + new regression test                  |
+| #4.3 listener leaks                          | 🟡       | Phase 1 — bind once, register and store the same reference    |
+| #15.1 unawaited `invalidate` ×12             | 🟡       | Phase 2 — one shared helper, not 12 edits                     |
+| #7.1 raw `JSON.parse` in presets             | 🟡       | Phase 1 — same fix as #4.2                                    |
+| #2.1 misleading restore log                  | ⚪       | Phase 1 — optional chaining                                   |
+| #2.2 double-logged chart load failure        | ⚪       | Phase 3                                                       |
+| #5.1 dead `\|\|` fallback                    | ⚪       | Phase 1                                                       |
+| #6.1 async pass-throughs                     | 🟡       | Phase 3                                                       |
+| #7.2 unbound `console.warn` ×3               | ⚪       | Phase 3                                                       |
+| #9.1 duplicated insights loop                | 🟡       | Phase 3                                                       |
+| #11.1 Chrome 67 comment                      | ⚪       | Phase 3                                                       |
+| #11.2 fix-narrative comment                  | ⚪       | **Left as-is** — archaeology, rewrite not remove              |
+| #14.1 12 files over 500 lines                | 🟡       | **Own follow-up** — never bundled into a slop pass (rule #14) |
 
-**User Review Required — never auto-remediated:**
+**Phases above are proposed, not executed.** This round was audit-only: no file under `src/` was
+modified. The two probe files (`tests/core/zz-probe-*.test.js`) were created, run, and deleted; the
+working tree contains no changes from this audit.
 
-1. **#4.1** — the JS half of the fix changes user-visible behaviour (the advanced-settings panel will
-   start animating on close). Not a security finding, so no 🔒 restriction applies, but it is a
-   behaviour change a human should approve.
-2. **#4.2** — deleting 233 selectors. Destructive and effectively irreversible (a selector that looks
-   dead may be built dynamically via template literals my grep would miss), and it is exactly the
-   "quarantine before you delete" case from rule #4 step 4. Recommend: move to a scratch branch, run
-   the full suite **and** the production build, then confirm no visual regression by hand.
-3. **#11.3** — delete CSS rules or correct a comment; the author decides which is the truth.
-4. **#7.1** — the fix _reduces_ rendered output (22 blocks deleted rather than repaired). Reached the
-   author as an explicit choice between "remove the dead code" and "activate the blocks via the
-   working paren form", and the answer was removal. Recorded here because it is a deliberate
-   behaviour decision, not an automatic cleanup — see the Phase 2 note in the executive summary.
+**Verification plan when the fixes land**
 
-**No 🔒 security-sensitive findings in this round.** Accessibility-related items (#4.7 `.sr-only`,
-#5.4 high-contrast) touch assistive technology but are not authentication, authorization, ownership,
-or data-deletion concerns, so the 🔒 carve-out does not apply. They are filed as ordinary findings.
-
----
-
-## Verification plan
-
-Per the guide's "From findings to implementation plan" gate, for anything that lands:
-
-- **Prove each regression test fails without its fix** (revert → run → confirm the _right_ failure →
-  restore). For #4.1 the revert must reproduce the missing animation, not a selector mismatch.
-- **A CSS assertion cannot see a `@keyframes` collision** — every file is individually valid, which is
-  why the suite is green today. A guard has to read the **concatenated** stylesheet. The existing
-  `tests/system/css-architecture.test.js` already reads files as strings and checks `main.css` import
-  order, so it is the natural home for a duplicate-`@keyframes`-name test.
-- **Recommended guard:** assert that no `@keyframes` name is defined in more than one file across
-  `src/styles/`. That single test would have caught #4.1, #4.5 and #4.6 at CI time, and prevents the
-  whole class from recurring.
-- **Note the purge interaction (guide rule #5d):** any fix touching `vite.config.js`'s
-  `safelist.keyframes` must be validated with a production build, because `spin` and `float` are
-  referenced from JS and have no surviving CSS rule for PurgeCSS to trace.
-- Run `yarn run lint:css` and `yarn run format:check` **per phase**, not once at the end.
-- Per the guide's testing traps, check `git --no-pager diff --numstat` before believing any
-  `prettier --check` failure — this repo has `core.autocrlf=true` and no `.gitattributes`, so CRLF
-  churn can make untouched files fail formatting.
-
----
+- Run the suites covering every touched file, not only the highest-severity fix.
+- **Prove each regression test fails without its fix** (guide, testing trap #2). For #4.2 the revert must
+  fail with `TypeError: Cannot read properties of null (reading 'push')` — the actual user symptom — not
+  an assertion mismatch. For #4.1 seed the regression with recognisable sentinels so the reverted failure
+  output _shows the retained data_ (e.g. `expected [ { id: 'b1', categoryName: 'Food' } ] to be null`).
+- Regression tests for #4.2 and #7.1 must go in **new** files with a real in-memory `localStorage`
+  installed locally; the shared `tests/setup.js` double is a bare stub and can never express the
+  assertion. Do not modify `setup.js` — it would move the baseline for every other suite.
+- Run lint/format/build once per phase.
+- Re-grep for newly orphaned code after each deletion — #4.1's fix may leave `getUserDataSummary`'s
+  import chain or an `||` fallback unused.
+- Manual QA for #4.1, as a concrete user action: _"Settings → Delete account on an account holding one
+  budget and one investment; the confirmation summary must show 1 and 1, and after deletion a fresh
+  account must have neither."_ This one is a human decision, not a code change.

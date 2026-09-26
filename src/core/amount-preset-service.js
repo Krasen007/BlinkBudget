@@ -7,9 +7,38 @@
  * Stores in localStorage with key amount_presets
  */
 
+import { safeJsonParse } from '../utils/security-utils.js';
+
 const AMOUNT_PRESETS_KEY = 'amount_presets';
 const MAX_PRESETS = 4;
 const PRESETS_CHANGE_EVENT = 'amount-presets-changed';
+
+// A factory, not a shared constant: a shallow spread of a module-level object
+// would hand out the same nested `amounts` reference every call, and
+// recordAmount() increments it in place — permanently corrupting the "empty"
+// default for the rest of the session.
+const createEmptyPresets = () => ({ amounts: {}, presets: [] });
+
+/**
+ * Coerce a parsed presets payload into the shape the service relies on.
+ * safeJsonParse returns null on malformed input, and a stored "null" or a
+ * bare array is equally unusable — every reader below dereferences .amounts
+ * and .presets, so a wrong shape throws instead of degrading.
+ * @param {*} parsed - Raw value returned by safeJsonParse
+ * @returns {{amounts: Object, presets: Array}} Normalised presets data
+ */
+const normalizePresets = parsed => {
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    return createEmptyPresets();
+  }
+  return {
+    amounts:
+      parsed.amounts && typeof parsed.amounts === 'object'
+        ? parsed.amounts
+        : {},
+    presets: Array.isArray(parsed.presets) ? parsed.presets : [],
+  };
+};
 
 /**
  * AmountPresetService
@@ -23,10 +52,11 @@ export const AmountPresetService = {
   _getStoredPresets() {
     try {
       const data = localStorage.getItem(AMOUNT_PRESETS_KEY);
-      return data ? JSON.parse(data) : { amounts: {}, presets: [] };
+      if (!data) return createEmptyPresets();
+      return normalizePresets(safeJsonParse(data));
     } catch (error) {
       console.error('Error reading amount presets:', error);
-      return { amounts: {}, presets: [] };
+      return createEmptyPresets();
     }
   },
 
@@ -142,8 +172,7 @@ export const AmountPresetService = {
    * Clear all presets data
    */
   resetPresets() {
-    const emptyData = { amounts: {}, presets: [] };
-    this._savePresets(emptyData);
+    this._savePresets(createEmptyPresets());
   },
 
   /**

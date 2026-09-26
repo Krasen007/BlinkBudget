@@ -111,7 +111,7 @@ el.style.padding = '10px';
 
 // settings object
 {
-  "dateFormat": "US", // 'US' | 'EU' | 'ISO'
+  "dateFormat": "ISO", // 'US' | 'EU' | 'ISO'
   "theme": "dark"
 }
 ```
@@ -134,6 +134,8 @@ element.innerHTML = userInput; // XSS vulnerability
 
 // Note: If you must use innerHTML, implement an escapeHtml utility first
 // to sanitize the input. However, prefer textContent whenever possible.
+
+**If** removing or deprecating a feature be sure to remove any .style classes
 ```
 
 ## Boundaries

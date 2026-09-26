@@ -129,10 +129,12 @@ class ClickTrackingService {
    */
   loadHistory() {
     try {
-      const stored = localStorage.getItem(
-        STORAGE_KEYS.CLICK_TRACKING || 'blinkbudget_click_tracking'
-      );
-      return stored ? safeJsonParse(stored) : [];
+      const stored = localStorage.getItem(STORAGE_KEYS.CLICK_TRACKING);
+      // safeJsonParse returns null on malformed input, so the guard belongs on
+      // the parse result — guarding the raw string let a truncated value
+      // assign null to this.history and break every later push().
+      const parsed = safeJsonParse(stored);
+      return Array.isArray(parsed) ? parsed : [];
     } catch (error) {
       console.error('Failed to load click tracking history:', error);
       return [];
@@ -145,7 +147,7 @@ class ClickTrackingService {
   saveHistory() {
     try {
       localStorage.setItem(
-        STORAGE_KEYS.CLICK_TRACKING || 'blinkbudget_click_tracking',
+        STORAGE_KEYS.CLICK_TRACKING,
         JSON.stringify(this.history)
       );
     } catch (error) {

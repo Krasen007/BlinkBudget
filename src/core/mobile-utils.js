@@ -62,10 +62,8 @@ export class MobileUtils {
     // Handle visual viewport changes (keyboard appearance/disappearance)
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', updateViewportHeight);
-      window.visualViewport.addEventListener(
-        'scroll',
-        this.handleViewportScroll.bind(this)
-      );
+      const viewportScrollHandler = this.handleViewportScroll;
+      window.visualViewport.addEventListener('scroll', viewportScrollHandler);
 
       this.eventListeners.set('viewport-resize', {
         target: window.visualViewport,
@@ -76,7 +74,7 @@ export class MobileUtils {
       this.eventListeners.set('viewport-scroll', {
         target: window.visualViewport,
         event: 'scroll',
-        handler: this.handleViewportScroll.bind(this),
+        handler: viewportScrollHandler,
       });
     }
 
@@ -123,6 +121,12 @@ export class MobileUtils {
       event: 'orientationchange',
       handler: handleOrientationChange,
     });
+
+    this.eventListeners.set('orientationchange-resize', {
+      target: window,
+      event: 'resize',
+      handler: handleOrientationChange,
+    });
   }
 
   /**
@@ -148,18 +152,26 @@ export class MobileUtils {
     });
 
     // Setup input optimization on focus
-    document.addEventListener('focusin', this.optimizeInput.bind(this));
+    const optimizeInputHandler = this.optimizeInput.bind(this);
+    document.addEventListener('focusin', optimizeInputHandler);
+
+    this.eventListeners.set('focusin-optimize', {
+      target: document,
+      event: 'focusin',
+      handler: optimizeInputHandler,
+    });
   }
 
   /**
    * Setup keyboard navigation (Enter/Tab handling)
    */
   setupKeyboardNavigation() {
-    document.addEventListener('keydown', this.handleKeyDown.bind(this));
+    const keydownHandler = this.handleKeyDown;
+    document.addEventListener('keydown', keydownHandler);
     this.eventListeners.set('keydown', {
       target: document,
       event: 'keydown',
-      handler: this.handleKeyDown.bind(this),
+      handler: keydownHandler,
     });
   }
 
