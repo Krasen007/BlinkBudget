@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { DashboardView } from '../../src/views/DashboardView.js';
 import { TransactionService } from '../../src/core/transaction-service.js';
 import { AuthService } from '../../src/core/auth-service.js';
+import { analyticsCache } from '../../src/core/analytics/AnalyticsCache.js';
 import {
   EMPTY_STATE_SCENARIOS,
   createEnhancedEmptyState,
@@ -21,6 +22,88 @@ vi.mock('../../src/components/Button.js', () => ({
 vi.mock('../../src/components/DashboardStatsCard.js', () => ({
   DashboardStatsCard: () => document.createElement('div'),
 }));
+
+// Regression tests for the auth-switch cache invalidation in handleAuthChange.
+// Planning data is user-specific, so a stale 'financial_planning_preload' entry
+// surviving an auth change is a cross-user data bleed on a shared device.
+//
+// The fix invalidates synchronously (invalidateSync) before renderDashboard(),
+// and hands the async invalidate() the keys captured beforehand — otherwise it
+// re-derives them from the already-emptied in-memory map and would silently skip
+// the persistent layer.
+describe('DashboardView auth-switch cache invalidation', () => {
+  const CACHE_KEY = 'financial_planning_preload';
+
+  const dispatchAuthChange = user => {
+    window.dispatchEvent(
+      new CustomEvent('auth-state-changed', { detail: { user } })
+    );
+  };
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    localStorage.clear();
+    analyticsCache.clearAll();
+    vi.spyOn(TransactionService, 'getAll').mockReturnValue([]);
+    AuthService.user = { displayName: 'Alex' };
+  });
+
+  it('clears the in-memory planning cache synchronously, before render completes', () => {
+    analyticsCache.set(CACHE_KEY, { goals: ['user-A-private-goal'] }, 60000);
+    expect(analyticsCache.get(CACHE_KEY)).not.toBeNull();
+
+    const el = DashboardView();
+
+    // The auth change must have taken effect by the time the handler returns —
+    // i.e. the async invalidate() microtask must not be the only thing standing
+    // between a user switch and the previous user's data.
+    dispatchAuthChange({ displayName: 'Sam' });
+
+    expect(analyticsCache.get(CACHE_KEY)).toBeNull();
+    if (el.cleanup) el.cleanup();
+  });
+
+  it('passes pre-captured keys to the async invalidate so the persistent layer is cleared', async () => {
+    const invalidateSpy = vi.spyOn(analyticsCache, 'invalidate');
+    analyticsCache.set(CACHE_KEY, { goals: ['user-A-private-goal'] }, 60000);
+
+    const el = DashboardView();
+    dispatchAuthChange({ displayName: 'Sam' });
+
+    expect(invalidateSpy).toHaveBeenCalledWith(CACHE_KEY, [CACHE_KEY]);
+
+    // The persistent write is async; flush it and assert the stored entry is gone.
+    await vi.waitFor(() => {
+      const raw = localStorage.getItem('blinkbudget_analytics_analytics_cache');
+      const parsed = raw ? JSON.parse(raw) : null;
+      expect(parsed?.[CACHE_KEY]).toBeUndefined();
+    });
+
+    if (el.cleanup) el.cleanup();
+  });
+
+  it('does not surface an unhandled rejection when cache invalidation fails', async () => {
+    const rejections = [];
+    const onRejection = reason => rejections.push(reason);
+    window.addEventListener('unhandledrejection', onRejection);
+
+    vi.spyOn(analyticsCache, 'invalidate').mockRejectedValue(
+      new Error('simulated cache failure')
+    );
+
+    const el = DashboardView();
+    dispatchAuthChange({ displayName: 'Sam' });
+
+    // Give the rejected promise a chance to surface as an unhandled rejection.
+    await new Promise(resolve => setTimeout(resolve, 0));
+    window.removeEventListener('unhandledrejection', onRejection);
+
+    expect(rejections).toEqual([]);
+    // The view must still have rendered rather than thrown out of the handler.
+    expect(el.querySelector('.view-title')).toBeTruthy();
+    if (el.cleanup) el.cleanup();
+  });
+});
 
 describe('DashboardView First-Run Greeting and Empty State', () => {
   beforeEach(() => {

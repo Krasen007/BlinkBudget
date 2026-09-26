@@ -12,7 +12,6 @@ import { ChartRenderer } from '../components/ChartRenderer.js';
 import { preloadChartJS } from '../core/chart-loader.js';
 import { TimePeriodSelector } from '../components/TimePeriodSelector.js';
 import { TransactionService } from '../core/transaction-service.js';
-import { AccountService } from '../core/Account/account-service.js';
 import { Router } from '../core/router.js';
 import { NavigationState } from '../core/navigation-state.js';
 import {
@@ -1534,43 +1533,6 @@ export const ReportsView = (params = {}) => {
     loadReportData();
   }
 
-  /**
-   * Check data integrity
-   */
-  function checkDataIntegrity() {
-    try {
-      const transactions = TransactionService.getAll();
-      const accounts = AccountService.getAccounts();
-
-      const accountIds = new Set(accounts.map(acc => acc.id));
-      const orphanedTransactions = transactions.filter(
-        t => t.accountId && !accountIds.has(t.accountId)
-      );
-
-      if (orphanedTransactions.length > 0) {
-        console.warn(
-          `Found ${orphanedTransactions.length} transactions with invalid account references`
-        );
-      }
-
-      return {
-        transactionCount: transactions.length,
-        accountCount: accounts.length,
-        orphanedCount: orphanedTransactions.length,
-        isHealthy: orphanedTransactions.length === 0,
-      };
-    } catch (error) {
-      console.error('Data integrity check failed:', error);
-      return {
-        transactionCount: 0,
-        accountCount: 0,
-        orphanedCount: 0,
-        isHealthy: false,
-        error: error.message,
-      };
-    }
-  }
-
   // Cleanup function — clears timeouts, removes event listeners, destroys charts, restores error handlers
   container.cleanup = () => {
     // Clear highlight and scroll timeouts
@@ -1628,9 +1590,6 @@ export const ReportsView = (params = {}) => {
 
   // Expose useful methods
   container.refreshData = refreshData;
-  container.checkDataIntegrity = checkDataIntegrity;
-  container.getCurrentData = () => currentData;
-  container.getCurrentTimePeriod = () => currentTimePeriod;
 
   // Initial data load
   loadReportData();

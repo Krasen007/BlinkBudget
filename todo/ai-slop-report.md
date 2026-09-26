@@ -1,152 +1,57 @@
-# AI Slop Report — `src/views/` (REMAINING WORK)
+# AI Slop Report — `src/views/` (CLOSED)
 
-**Original audit date:** 2026-09-25 · **Phases 1–3 completed:** 2026-09-26
+**Original audit date:** 2026-09-25 · **Phases 1–4 completed:** 2026-09-26
 **Guide:** [`ai-slop-inspection-guide.md`](ai-slop-inspection-guide.md)
 **Original scope:** `src/views/` — 17 `.js` files, 9,252 lines (incl. `src/views/financial-planning/`)
 **Method:** Rule-by-rule sweep with `rg`, then per-finding line re-derivation and a repo-wide
 grep for every "dead" claim.
 
-> **This file now lists only what is still outstanding.** The 17 findings fixed in Phases 1–3 have
-> been removed; they are summarised in [Completed work](#completed-work--phases-13) at the bottom
-> so a future session knows they were addressed and does not re-file them.
-> **All line numbers below were re-derived against the post-Phase-3 tree** — they are current.
+> **This file records a closed audit.** All 20 findings were fixed across Phases 1–4. What follows
+> is what is still outstanding by design, the resolutions, and testing notes for whoever touches
+> this code next.
+> **Line numbers were re-derived against the post-Phase-4 tree** — they are current.
 
 ## Executive summary
 
-**7 findings remain**, down from 23. No user-facing correctness defects are outstanding: the
-report's single headline bug (the unreachable "approximate data" banner) is **fixed and covered by
-a regression test**.
+**No open defects remain.** The report's single headline bug (the unreachable "approximate data"
+banner) is **fixed and covered by a regression test**, and the one 🔒 cross-user data bleed found
+during the audit is **closed and proven by a revert test**.
 
-| Bucket                    | Count | Findings                                                            |
-| ------------------------- | ----- | ------------------------------------------------------------------- |
-| **User Review Required**  | 3     | #2.5 (🔒), #4.2, #6.1 — need a human decision, not an automatic fix |
-| **Own follow-up**         | 1     | #14.1 file bloat — must not be bundled with a cleanup               |
-| **Deferred**              | 1     | #7.2 — deliberately not scheduled                                   |
-| **Confirmed intentional** | 2     | #2.4, #2.6 — re-confirmed correct as written, no change recommended |
-| ~~Done~~                  | 17    | Phases 1–2 (11) + cosmetic batch (6)                                |
+| Bucket                    | Count | Status                                                               |
+| ------------------------- | ----- | -------------------------------------------------------------------- |
+| **User Review Required**  | 0     | #2.5 (🔒), #4.2, #6.1 — all resolved in Phase 4 with author sign-off |
+| **Own follow-up**         | 1     | #14.1 file bloat — deliberately not bundled with a cleanup           |
+| **Deferred**              | 1     | #7.2 — currently equivalent; will drift on first fix                 |
+| **Confirmed intentional** | 2     | #2.4, #2.6 — re-confirmed correct as written, no change recommended  |
+| ~~Done~~                  | 20    | Phases 1–2 (11) + cosmetic (6) + author-reviewed (3)                 |
 
 ### Severity of what remains
 
-There are **no user-facing correctness defects left.** Both 🔴 items that remain are dead code
-rather than broken behaviour: #4.2 is a function nobody calls, and #2.5 is a 🔒 branch that is
-never reached today — which is precisely why it must not be "fixed" on grep evidence alone.
+Nothing user-facing is outstanding. What is left is one structural follow-up (#14.1 file bloat),
+one deliberate deferral (#7.2), and two findings re-confirmed as correct as written (#2.4, #2.6).
 
-| Severity  | Count | Findings                                                                                          |
-| --------- | ----- | ------------------------------------------------------------------------------------------------- |
-| 🔴 High   | 2     | #2.5 (🔒, never auto-remediated), #4.2 (uncalled dead code) — **neither is a user-facing defect** |
-| 🟡 Medium | 2     | #6.1, #7.2, #14.1                                                                                 |
-| ⚪ Low    | 2     | #2.4, #2.6 (both confirmed intentional — no action)                                               |
+**Two findings were resolved differently than their write-ups proposed**, because the code
+contradicted the stated reasoning — see
+[Findings whose stated reasoning was wrong](#findings-whose-stated-reasoning-was-wrong). In short:
+#2.5's `catch` was inert while the real bug was a fire-and-forget async call, and #4.2's "lost"
+diagnostic already existed as a tested, user-reachable service.
 
 ### Suggested next step
 
-The **cosmetic batch is done** (Phase 3). The next decision point is the three **User Review
-Required** items — they need a decision from you before any code moves; they are the only
-findings where acting without confirmation would be wrong. Of those, **#2.5 is the one worth
-thinking about on its merits**: a stale planning cache surviving a user switch is a cross-user
-data bleed, and "we can't prove it's reachable" is not the same as "it can't happen."
+The audit is closed. The one substantive item left is **#14.1** — eight of seventeen view files
+exceed the 500-line convention, `ReportsView.js` (1,598) being the outlier. Per the guide it must
+not be bundled with a cleanup, and the extraction pattern already exists one directory over
+(`insights-takeaways.js` and friends), so `GoalsSection.js` (1,069) is the cheapest place to start.
 
 ---
 
-## User Review Required
+## Resolved — Phases 1–4
 
-Per the guide, these are **never bundled into a numbered phase** and are never auto-remediated.
-They are listed first because they block nothing but are the only items requiring judgement.
-
-#### #2.5 — Empty `catch {}` around a cache invalidation 🔒 🔴 High
-
-- **Rule #:** 2
-- **File:** `src/views/DashboardView.js`
-- **Line(s):** 1248–1252 (inside `handleAuthChange`, which starts at line 1242)
-- **Severity:** 🔴 High 🔒 Security-sensitive
-- **Snippet:**
-
-```js
-try {
-  analyticsCache.invalidate('financial_planning_preload');
-} catch {
-  // ignore cache errors
-}
-```
-
-- **Verdict:** slop
-- **Action:** **flagged for author confirmation** — 🔒, never auto-remediated
-- **Why it is not safely silent:** it looks identical to #2.4 but is not. The block runs inside an
-  **authentication state transition**. If `invalidate` throws, the cache key
-  `financial_planning_preload` survives the user switch, and `preloadFinancialPlanningData`
-  (line 105 defines the key) short-circuits on `if (analyticsCache.get(cacheKey))`, serving the
-  **previous user's** planning data. That is a cross-user data bleed on a shared device, not a
-  missing banner.
-- **Open question for you:** can `analyticsCache.invalidate` actually throw? Its `JSON.parse` of a
-  corrupt persistent entry (`AnalyticsCache.js` `_getFromStorage`) is the likely source. If it
-  cannot throw, the `try/catch` can go. If it can, the fix is a `console.warn` so the condition is
-  diagnosable — **not** a silent swallow, and **not** a removal on grep evidence alone.
-- **Note:** "no code path reaches this branch today" is not authorization for a 🔒 change.
-
-#### #4.2 — `checkDataIntegrity` is exported but never called 🔴 High
-
-- **Rule #:** 4
-- **File:** `src/views/ReportsView.js`
-- **Line(s):** 1552–1584 (definition), 1643 (export onto `container`)
-- **Severity:** 🔴 High
-- **Snippet:**
-
-```js
-  function checkDataIntegrity() {
-    try {
-      const transactions = TransactionService.getAll();
-      const accounts = AccountService.getAccounts();
-      const accountIds = new Set(accounts.map(acc => acc.id));
-      const orphanedTransactions = transactions.filter(
-        t => t.accountId && !accountIds.has(t.accountId)
-      );
-```
-
-- **Verdict:** slop
-- **Action:** **User Review Required** — irreversible deletion of unreplaceable diagnostic logic
-- **Evidence (re-verified 2026-09-26):** repo-wide grep for `checkDataIntegrity` returns only its
-  own definition (line 1552) and its own assignment to `container` (line 1643). Zero callers in
-  `src/`, zero in `tests/`.
-- **Why High despite being pure dead code — because of _what_ it does:** this is an
-  orphaned-transaction detector. `DashboardView.js:461–466` shows the team already knows this class
-  of corruption occurs in practice (dedicated guard + explanatory comment). The detector was
-  written, wired to a public API, and never invoked. The knowledge encoded in it is currently lost.
-- **Also dead in the same block:** `container.getCurrentData` (line 1644) and
-  `container.getCurrentTimePeriod` (line 1645) — zero callers repo-wide.
-  `container.refreshData` (line 1642) is **not** dead: `refreshData()` is called internally for
-  the Ctrl+R shortcut. Only the three above are orphans.
-- **Fix direction — your call:** either wire `checkDataIntegrity()` into a diagnostics path, or
-  delete all three. Do not leave them exported "just in case"; they are the kind of orphan that
-  hides the fact that the underlying problem is unmonitored.
-- **If you delete:** no test references any of the three, so nothing breaks — but re-grep for newly
-  orphaned imports afterwards (rule #4, step 5). `AccountService` is used elsewhere in this file,
-  so that import survives.
-
-#### #6.1 — Debounced no-op registered as a resize listener 🟡 Medium
-
-- **Rule #:** 6, 3
-- **File:** `src/views/FinancialPlanningView.js`
-- **Line(s):** 505–507 (definition), 510 (registration), 610 (removal), 619 (call)
-- **Severity:** 🟡 Medium
-- **Snippet:**
-
-```js
-const updateResponsiveLayout = debounce(() => {
-  // Shared title update etc
-}, TIMING.DEBOUNCE_RESIZE);
-```
-
-- **Verdict:** slop
-- **Action:** **User Review Required** — may be a missing feature, not dead code
-- **Proof of deadness:** the arrow function body is empty apart from a comment (checklist item 2) —
-  it cannot do anything, so no device testing or `git blame` can overturn it. Yet the `debounce`
-  wrapper, the listener registration, the initial call, and the teardown line all exist to invoke
-  an empty function on every resize.
-- **The question:** compare the sibling view — `ReportsView.js` has an `updateResponsiveLayout` of
-  the same name with a real ~49-line body. This one looks like a stub never filled in, kept alive
-  by a comment describing the work that was planned. **Confirm whether responsive behaviour for
-  this view is genuinely complete.** If it is not, the empty body _is_ the bug and this is a
-  feature ticket, not a deletion — deleting it would remove the scaffolding the feature would
-  slot into.
+All findings from this report are now closed. #2.5, #4.2 and #6.1 — the three that were held
+back for author review — were resolved in **Phase 4**; #2.5 carried a 🔒 and was changed only
+after the author confirmed the approach. Their resolutions are in
+[Completed work](#completed-work--phases-14) below, including two places where the original
+findings' stated reasoning turned out to be wrong.
 
 ---
 
@@ -165,11 +70,11 @@ const updateResponsiveLayout = debounce(() => {
   _longer_, because each fix carries an explanatory comment, while the cosmetic batch trimmed a few):
 
 ```
-   1639  src/views/ReportsView.js                     (3.3x the limit)
-   1298  src/views/DashboardView.js                   (2.6x)
+   1598  src/views/ReportsView.js                     (3.2x the limit)
+   1317  src/views/DashboardView.js                   (2.6x)
    1069  src/views/financial-planning/GoalsSection.js (2.1x)
     670  src/views/financial-planning/InvestmentsSection.js
-    619  src/views/FinancialPlanningView.js
+    610  src/views/FinancialPlanningView.js
     603  src/views/LoginView.js
     590  src/views/financial-planning/ForecastsSection.js
     553  src/views/LandingView.js
@@ -184,13 +89,14 @@ const updateResponsiveLayout = debounce(() => {
     108  src/views/financial-planning/insights-takeaways.js
 ```
 
-- **Note:** the convention is `AGENTS.md`'s 500-line guideline. `ReportsView.js` at 1,639 lines is
+- **Note:** the convention is `AGENTS.md`'s 500-line guideline. `ReportsView.js` at 1,598 lines is
   the outlier and was implicated in four of the original audit's High findings (#4.1, #4.2, #10.1,
   #10.2) — a concrete illustration of the guide's claim that bloat correlates with accumulated
-  dead code and complex control flow. **Phases 1–3 flattened the worst control flow in that file
-  (the validate → sanitize → re-validate chain) and the cosmetic batch trimmed 12 more lines, but
-  none of that is a structural fix**; #4.2 will remove roughly 35 lines if you choose deletion.
-  The structural work is still a split, not a trim.
+  dead code and complex control flow. **Phases 1–4 have now cut it from 1,651 to 1,598** — the
+  validate → sanitize → re-validate chain was flattened, the cosmetic batch trimmed comments, and
+  #4.2 removed ~40 lines of dead code. That is a 3% reduction: **still a split, not a trim.**
+  `DashboardView.js` moved the other way (1,298 → 1,317) because the #2.5 fix carries an
+  explanatory comment and a `console.warn`.
 - **The pattern already exists:** `insights-takeaways.js`, `insights-recurring.js` and
   `insights-movers-timeline.js` are each under 240 lines and each carry a header comment explaining
   they were "extracted … to maintain file size constraints." **`GoalsSection.js` (1,069) and
@@ -274,7 +180,7 @@ found no regressions in any of them.
 
 ---
 
-## Completed work — Phases 1–3
+## Completed work — Phases 1–4
 
 Removed from the active backlog. **Do not re-file these.**
 
@@ -330,6 +236,39 @@ Recorded because they were real, and because the same class may exist elsewhere:
 `yarn run check` is green (0 lint errors — the remaining 86 warnings are pre-existing and sit in
 files untouched by the remediation); `yarn run build` succeeds.
 
+### Phase 4 — author-reviewed items (#2.5, #4.2, #6.1)
+
+| #    | Finding                              | Resolution                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ---- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| #2.5 | `catch {}` around a cache invalidate | **The `try/catch` was provably dead, and the real bug was elsewhere.** `AnalyticsCache.invalidate()` is declared `async`, so it never throws synchronously — a `try/catch` around the call catches nothing, and a real failure became an _unhandled rejection_ (worse than the silent swallow it appeared to be). Removed it, and fixed the actual cross-user window: capture keys with `getMatchingKeys()`, clear in-memory **synchronously** with `invalidateSync()`, then pass the captured keys to the async `invalidate()` so the persistent layer is still cleared. `.catch(console.warn)` keeps it diagnosable. The hardcoded key string was hoisted to a module-level `FINANCIAL_PLANNING_CACHE_KEY` so the preload and the invalidation cannot drift. Pattern copied from `cache-invalidator.js:38-55`.                                                                   |
+| #4.2 | `checkDataIntegrity` never called    | **Deleted — but the finding's justification was wrong.** It claimed the diagnostic logic was "lost." It was not: `src/core/data-integrity-service.js` `checkDataConsistency()` already does the same orphaned-`accountId` detection, and does it better (adds a `severity`, iterates transactions once, and goes through `StorageService` rather than the parallel `TransactionService`/`AccountService` path). It is live — run by `performIntegrityCheck()` across 7 checks, surfaced by the "🔍 Data Integrity Check" button in `DataManagementSection.js`, and covered by 5 test files. The orphan was a duplicate. Also deleted `getCurrentData` / `getCurrentTimePeriod`; kept `refreshData` (called internally at line 1518). **Cascade:** removing it orphaned the `AccountService` import, which was removed too (`TransactionService` survives, still used at line 605). |
+| #6.1 | Debounced empty resize listener      | **Deleted in full** at author direction (feature will not be implemented). Removed the `debounce` wrapper, the `resize` registration, the teardown line, and the initial call. **Cascade:** this orphaned _both_ the `debounce` and `TIMING` imports, which were removed — `FinancialPlanningView.js` no longer references either.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+
+### Findings whose stated reasoning was wrong
+
+Recorded because the code contradicts the original write-ups, and the same class of error may
+exist elsewhere:
+
+1. **#2.5 blamed the `catch` for the data bleed.** The `catch` was inert, but the bleed came from
+   `invalidate()` being fire-and-forget: it yields at `_acquireLock()`, so a same-tick read could
+   still observe the previous user's data. Fixing only the `catch` — as the finding suggested —
+   would have left the security issue fully intact while looking resolved.
+2. **#4.2 claimed the logic was "currently lost."** It exists, is tested, and is user-reachable via
+   the Data Integrity Check button. The orphan was a duplicate, not the last copy.
+
+### Tests added
+
+- `tests/views/dashboard-greeting.test.js` — 3 tests for the #2.5 auth-switch invalidation:
+  synchronous in-memory clearing, pre-captured keys reaching the async `invalidate()` (and the
+  persistent entry actually disappearing), and no unhandled rejection when invalidation fails.
+  **Proven by revert** — restoring the single-line pre-fix call fails 2 of the 3 with
+  `AssertionError: expected { goals: [ 'user-A-private-goal' ] } to be null`, i.e. the previous
+  user's data surviving the switch.
+
+**Baseline at the end of Phase 4:** 54 tests pass across `tests/views`, `tests/financial-planning`
+and `tests/system/design-tokens.test.js`; ESLint reports **0 errors and 0 warnings** on all four
+touched files; `prettier --check` is clean; `yarn run build` succeeds.
+
 ### Phase 3 — cosmetic batch
 
 | #    | Finding                              | Resolution                                                                                                                                                                                                                                                                                                                      |
@@ -355,15 +294,15 @@ pre-existing — confirmed identical by stashing); `yarn run build` succeeds.
 
 Every finding has a destination. Nothing is silently dropped.
 
-| Finding                            | Severity | Status                                                               |
-| ---------------------------------- | -------- | -------------------------------------------------------------------- |
-| #2.5 `catch {}` in auth handler    | 🔴 🔒    | **User Review Required** — security-sensitive, never auto-remediated |
-| #4.2 `checkDataIntegrity` orphaned | 🔴       | **User Review Required** — author decides wire-up vs delete          |
-| #6.1 debounced empty function      | 🟡       | **User Review Required** — may be a missing feature                  |
-| #14.1 file bloat                   | 🟡       | **Own follow-up** — never bundled with cleanup                       |
-| #7.2 delete/undo divergence        | 🟡       | **Deferred** — currently equivalent; will drift on first fix         |
-| #2.4, #2.6                         | ⚪       | **Confirmed intentional** — no change recommended                    |
-| #1.1, #1.2, #4.3, #5.2, #5.3, #5.4 | ⚪       | ~~Cosmetic batch~~ — **done in Phase 3**                             |
+| Finding                            | Severity | Status                                                                  |
+| ---------------------------------- | -------- | ----------------------------------------------------------------------- |
+| #2.5 `catch {}` in auth handler    | 🔴 🔒    | **Resolved in Phase 4** — 🔒, changed only after author confirmation    |
+| #4.2 `checkDataIntegrity` orphaned | 🔴       | **Resolved in Phase 4** — deleted; logic already existed in a service   |
+| #6.1 debounced empty function      | 🟡       | **Resolved in Phase 4** — deleted at author direction; not implementing |
+| #14.1 file bloat                   | 🟡       | **Own follow-up** — never bundled with cleanup                          |
+| #7.2 delete/undo divergence        | 🟡       | **Deferred** — currently equivalent; will drift on first fix            |
+| #2.4, #2.6                         | ⚪       | **Confirmed intentional** — no change recommended                       |
+| #1.1, #1.2, #4.3, #5.2, #5.3, #5.4 | ⚪       | ~~Cosmetic batch~~ — **done in Phase 3**                                |
 
 ### Testing notes for whoever picks this up
 
@@ -375,12 +314,16 @@ Every finding has a destination. Nothing is silently dropped.
 4. `tests/views/reports-view.test.js` has 12 file-level `vi.mock`s. If a future change needs to
    test a path those mocks intercept, it needs a new suite — do not delete a mock to make a test
    pass, or you permanently remove the code path from that suite.
-5. **Prove each regression test fails without its fix** before trusting it. Both the Phase 1 and
-   Phase 2 fixes were verified this way.
+5. **Prove each regression test fails without its fix** before trusting it. Phases 1, 2 and 4 were
+   all verified this way.
 6. If a #5.1-style fix ever adds tokens to `tokens.css`, re-run
    `tests/system/design-tokens.test.js` — it is the production-purge guard for exactly that class
    of change.
+7. **`core.autocrlf=true` with no `text=auto` in `.gitattributes` is a live trap.** Prettier is
+   configured `endOfLine: "lf"`, so any `git stash` / checkout round-trip silently rewrites working
+   files to CRLF and `prettier --check` then fails on files nobody touched. Re-run
+   `prettier --write` after any git operation that rewrites the working tree.
 
-_Original report: 24 write-ups / 23 distinct findings across 9 rules. **Remaining: 7** (3 User
-Review Required incl. one 🔒, 1 own follow-up, 1 deferred, 2 confirmed intentional). 17 findings
-were fixed across Phases 1–3, plus 3 further defects discovered during remediation._
+_Original report: 24 write-ups / 23 distinct findings across 9 rules. **Remaining: 0 open**
+(2 own follow-up / deferred / intentional, no defects). 20 findings were fixed across Phases 1–4,
+plus 3 further defects discovered during remediation._

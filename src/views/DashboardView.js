@@ -26,6 +26,10 @@ export { setSelectedStyle };
 import { createNavigationButtons } from '../utils/navigation-helper.js';
 import { BulkEditDialog } from '../components/BulkEditDialog.js';
 
+// Cache key for the pre-loaded financial planning payload. Module-level so the
+// auth-change handler can invalidate exactly the same key the preload writes.
+const FINANCIAL_PLANNING_CACHE_KEY = 'financial_planning_preload';
+
 // Track if we've already preloaded reports in this session
 let hasPreloadedReports = false;
 let hasPreloadedFinancialPlanning = false;
@@ -102,7 +106,7 @@ const preloadFinancialPlanningData = async () => {
   financialPlanningPreloadPromise = (async () => {
     try {
       // Check if already cached
-      const cacheKey = 'financial_planning_preload';
+      const cacheKey = FINANCIAL_PLANNING_CACHE_KEY;
       if (analyticsCache.get(cacheKey)) {
         hasPreloadedFinancialPlanning = true;
         return;
@@ -1245,11 +1249,26 @@ export const DashboardView = (params = {}) => {
     hasScheduledDashboardPreloads = false;
     hasPreloadedFinancialPlanning = false;
     financialPlanningPreloadPromise = null;
-    try {
-      analyticsCache.invalidate('financial_planning_preload');
-    } catch {
-      // ignore cache errors
-    }
+    // Planning data is user-specific, so a stale entry must never survive a user
+    // switch. `invalidate()` is async and yields at its mutex, so on its own it
+    // would leave a window in which a same-tick read still sees the previous
+    // user's data. Clear the in-memory layer synchronously first, then hand the
+    // async call the keys captured beforehand (it otherwise re-derives them from
+    // the now-empty in-memory map and would skip the persistent layer entirely).
+    // Same pattern as cache-invalidator.js. `invalidate()` cannot throw
+    // synchronously, so no try/catch is needed here.
+    const planningCacheKeys = analyticsCache.getMatchingKeys(
+      FINANCIAL_PLANNING_CACHE_KEY
+    );
+    analyticsCache.invalidateSync(FINANCIAL_PLANNING_CACHE_KEY);
+    analyticsCache
+      .invalidate(FINANCIAL_PLANNING_CACHE_KEY, planningCacheKeys)
+      .catch(error => {
+        console.warn(
+          '[Dashboard] Failed to invalidate financial planning cache:',
+          error
+        );
+      });
     renderDashboard();
   };
 

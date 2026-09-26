@@ -18,9 +18,8 @@ import { ChartRenderer } from '../components/ChartRenderer.js';
 import { AuthService } from '../core/auth-service.js';
 import { SyncService } from '../core/sync-service.js';
 
-import { COLORS, SPACING, TIMING, STORAGE_KEYS } from '../utils/constants.js';
+import { COLORS, SPACING, STORAGE_KEYS } from '../utils/constants.js';
 
-import { debounce } from '../utils/touch-utils.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
 
 import { escapeHtml } from '../utils/security-utils.js';
@@ -498,13 +497,7 @@ export const FinancialPlanningView = (params = {}) => {
     }
   }
 
-  const updateResponsiveLayout = debounce(() => {
-    // Shared title update etc
-  }, TIMING.DEBOUNCE_RESIZE);
-
   // Event listeners
-  window.addEventListener('resize', updateResponsiveLayout);
-
   // Handle hash changes to update section when navigating within financial-planning
   const handleHashChange = () => {
     const hash = window.location.hash.slice(1);
@@ -603,7 +596,6 @@ export const FinancialPlanningView = (params = {}) => {
       backgroundRefreshTimeout = null;
     }
 
-    window.removeEventListener('resize', updateResponsiveLayout);
     window.removeEventListener('hashchange', handleHashChange);
     window.removeEventListener('storage-updated', handleStorageUpdate);
     window.removeEventListener('sync-state', handleSyncState);
@@ -612,7 +604,6 @@ export const FinancialPlanningView = (params = {}) => {
   };
 
   // Initialize
-  updateResponsiveLayout();
   loadPlanningData();
 
   return container;
