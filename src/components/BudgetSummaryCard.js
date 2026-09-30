@@ -106,6 +106,17 @@ export const BudgetSummaryCard = (summary, timePeriod = null) => {
   });
   card.appendChild(progressContainer);
 
+  // When a multi-month period is selected the limits above are the user's
+  // monthly budgets scaled to the period — say so, otherwise the total
+  // looks arbitrary compared to the monthly amount they set.
+  if (summary.periodMonths > 1) {
+    const scaleNote = document.createElement('div');
+    scaleNote.textContent = `Monthly budgets scaled to this period (×${summary.periodMonths})`;
+    scaleNote.style.fontSize = FONT_SIZES.SM;
+    scaleNote.style.color = COLORS.TEXT_MUTED;
+    card.appendChild(scaleNote);
+  }
+
   // Details
   const details = document.createElement('div');
   details.style.display = 'grid';

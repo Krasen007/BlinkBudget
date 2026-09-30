@@ -149,9 +149,15 @@ export const CategoryCard = (
       budgetEl.style.background = 'rgba(239, 68, 68, 0.1)';
       budgetEl.style.color = COLORS.ERROR;
       const actual = typeof budget?.actual === 'number' ? budget.actual : 0;
-      const amountLimit =
-        typeof budget?.amountLimit === 'number' ? budget.amountLimit : 0;
-      budgetEl.textContent = `Over budget by ${formatCurrency(actual - amountLimit)}`;
+      // periodLimit is the budget scaled to the selected report period
+      // (equals the monthly amountLimit for single-month periods)
+      const limit =
+        typeof budget?.periodLimit === 'number'
+          ? budget.periodLimit
+          : typeof budget?.amountLimit === 'number'
+            ? budget.amountLimit
+            : 0;
+      budgetEl.textContent = `Over budget by ${formatCurrency(actual - limit)}`;
     } else if (budget.isWarning) {
       budgetEl.style.background = 'rgba(251, 191, 36, 0.1)';
       budgetEl.style.color = COLORS.WARNING;

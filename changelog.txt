@@ -1,5 +1,20 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- **Tags and labels load offline at startup** - On a cold start the tag list
+  stayed empty until Firebase auth resolved (which can stall entirely without
+  network), so a new transaction could not be tagged. Local data is now read
+  synchronously via the last signed-in user id, and an open form refreshes its
+  tag list as soon as categories become available.
+- **Budgets scale with the selected report period** - Selecting a quarter or a
+  year in Reports compared the whole period's expenses against a single
+  month's budget, so everything looked wildly over budget. Monthly budgets are
+  now scaled to the selected period (a quarter gets x3, a year x12), the
+  category cards use the scaled limit, and the summary card notes the scaling.
+
 ## [1.49] - 2026-09-25
 
 A release focused on making the Insights experience more honest and more

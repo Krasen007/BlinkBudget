@@ -268,7 +268,7 @@ const InsightsGenerator = {
             id: `budget_exceeded_${status.categoryName}`,
             type: 'warning',
             category: status.categoryName,
-            message: `You've exceeded your budget for "${status.categoryName}" by ${formatCurrency(Math.abs(status.amountLimit - status.actual))}.`,
+            message: `You've exceeded your budget for "${status.categoryName}" by ${formatCurrency(Math.abs((status.periodLimit ?? status.amountLimit) - status.actual))}.`,
             severity: 'high',
             actionable: true,
             recommendation: `Consider reviewing recent purchases in "${status.categoryName}" to find savings for the rest of the month.`,
