@@ -215,5 +215,9 @@ export const EditView = ({ id }) => {
 
   container.appendChild(form);
 
+  container.cleanup = () => {
+    form.cleanup();
+  };
+
   return container;
 };

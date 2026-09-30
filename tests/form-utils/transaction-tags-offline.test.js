@@ -180,7 +180,7 @@ describe('transaction tag selector — offline cold start', () => {
     ).toHaveLength(1);
   });
 
-  it('stops listening once the form is removed from the DOM', () => {
+  it('stops listening when the selector is destroyed without a category event', () => {
     seedFlagCategories();
 
     const selector = createTransactionTagSelector();
@@ -188,15 +188,21 @@ describe('transaction tag selector — offline cold start', () => {
     attachedRoot.appendChild(selector.container);
     document.body.appendChild(attachedRoot);
 
-    // Event while mounted marks the selector as live...
+    selector.destroy();
+
+    localStorage.setItem(STORAGE_KEYS.CUSTOM_CATEGORIES, JSON.stringify([]));
     window.dispatchEvent(new CustomEvent('categories-updated'));
+    window.dispatchEvent(
+      new CustomEvent('storage-updated', {
+        detail: { key: STORAGE_KEYS.CUSTOM_CATEGORIES },
+      })
+    );
+
     expect(
       selector.container.querySelectorAll('.transaction-tag-option')
     ).toHaveLength(1);
-
-    // ...then the form closes. Further events must be harmless no-ops.
-    attachedRoot.remove();
-    window.dispatchEvent(new CustomEvent('categories-updated'));
     expect(selector.getSelectedTag()).toBeNull();
+
+    attachedRoot.remove();
   });
 });

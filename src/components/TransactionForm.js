@@ -380,6 +380,8 @@ export const TransactionForm = ({
 
   setupFormKeyboardHandling(form, [amountInput, accSelect, noteField]);
 
+  form.cleanup = tagSelector.destroy;
+
   const focusInput = () => {
     amountInput.focus({ preventScroll: true });
     // Click is sometimes needed on iOS to trigger keyboard if focus() is blocked

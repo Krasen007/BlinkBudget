@@ -53,7 +53,7 @@ export const applyExpenseTagToTransactionData = (
 /**
  * @param {Object} [options]
  * @param {string|null} [options.initialTag] - Pre-selected tag (edit mode)
- * @returns {{ container: HTMLElement, getSelectedTag: () => string|null, clear: () => void, setTransactionType: (type: string) => void }}
+ * @returns {{ container: HTMLElement, getSelectedTag: () => string|null, clear: () => void, setTransactionType: (type: string) => void, destroy: () => void }}
  */
 const syncTagOptionStates = (container, selectedTag) => {
   container.querySelectorAll('.transaction-tag-option').forEach(option => {
@@ -169,20 +169,8 @@ export const createTransactionTagSelector = ({ initialTag = null } = {}) => {
   // offline cold start the userId-filtered list is empty until auth resolves,
   // or cloud sync merges categories in later. Re-render so tags become
   // selectable without the user having to reopen the transaction.
-  let wasConnected = false;
   const handleCategoriesChanged = () => {
-    if (container.isConnected) {
-      wasConnected = true;
-    } else if (wasConnected) {
-      // Form was mounted and has since been closed — stop listening to
-      // avoid leaks across re-opens.
-      window.removeEventListener('categories-updated', handleCategoriesChanged);
-      window.removeEventListener('storage-updated', handleStorageUpdated);
-      return;
-    } else {
-      // Form is still under construction / not yet mounted — ignore.
-      return;
-    }
+    if (!container.isConnected) return;
     if (!isTaggableType()) return;
     render();
   };
@@ -192,6 +180,11 @@ export const createTransactionTagSelector = ({ initialTag = null } = {}) => {
   };
   window.addEventListener('categories-updated', handleCategoriesChanged);
   window.addEventListener('storage-updated', handleStorageUpdated);
+
+  const destroy = () => {
+    window.removeEventListener('categories-updated', handleCategoriesChanged);
+    window.removeEventListener('storage-updated', handleStorageUpdated);
+  };
 
   const setTransactionType = type => {
     currentType = type;
@@ -210,5 +203,6 @@ export const createTransactionTagSelector = ({ initialTag = null } = {}) => {
     getSelectedTag: () => selectedTag,
     clear,
     setTransactionType,
+    destroy,
   };
 };

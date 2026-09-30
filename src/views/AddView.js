@@ -124,6 +124,7 @@ export const AddView = ({ accountId, amount } = {}) => {
 
   container.cleanup = () => {
     window.removeEventListener('keydown', handleKeyDown);
+    form.cleanup();
   };
 
   return container;
