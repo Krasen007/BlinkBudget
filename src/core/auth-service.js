@@ -55,6 +55,12 @@ function clearRateLimit(email) {
   rateLimitStore.delete(key);
 }
 
+// localStorage key holding the uid of the last signed-in user. It lets
+// getUserId() resolve synchronously during the Firebase auth warm-up window
+// (which can last seconds, or stall entirely when offline) so local-first
+// reads — e.g. tag/label categories filtered by userId — work immediately.
+const LAST_UID_KEY = 'last_known_uid';
+
 export const AuthService = {
   user: null,
   initialized: false,
@@ -73,6 +79,19 @@ export const AuthService = {
       onAuthStateChanged(auth, async user => {
         // Make user object read-only to prevent manipulation
         this.user = user ? Object.freeze({ ...user }) : null;
+
+        // Persist the uid so local reads keep working while auth is
+        // resolving on the next cold start (notably when offline).
+        try {
+          if (user?.uid) {
+            localStorage.setItem(LAST_UID_KEY, user.uid);
+          } else if (!localStorage.getItem('auth_hint')) {
+            // Signed out for real (no returning-user hint): drop the fallback
+            localStorage.removeItem(LAST_UID_KEY);
+          }
+        } catch (err) {
+          console.warn('[AuthService] Failed to persist last known uid:', err);
+        }
 
         this.initialized = true;
         if (onAuthStateChange) await onAuthStateChange(this.user);
@@ -329,6 +348,7 @@ export const AuthService = {
       console.warn('Logout called in local-only mode');
       this.user = null;
       localStorage.removeItem('auth_hint');
+      localStorage.removeItem(LAST_UID_KEY);
       return;
     }
 
@@ -336,6 +356,7 @@ export const AuthService = {
       await signOut(auth);
       this.user = null;
       localStorage.removeItem('auth_hint');
+      localStorage.removeItem(LAST_UID_KEY);
     } catch (error) {
       console.error('Logout failed', error);
     }
@@ -350,7 +371,18 @@ export const AuthService = {
   },
 
   getUserId() {
-    return this.user ? this.user.uid : null;
+    if (this.user) return this.user.uid;
+
+    // Offline / cold-start fallback: while Firebase auth is still resolving
+    // (or stalled without network), `this.user` is null and every userId-filtered
+    // local read (tag categories, budgets, IDOR checks) would come back empty.
+    // Returning the persisted uid keeps local data usable immediately; it is
+    // cleared on logout and overwritten whenever a different user signs in.
+    try {
+      return localStorage.getItem(LAST_UID_KEY) || null;
+    } catch {
+      return null;
+    }
   },
 
   getUserEmail() {

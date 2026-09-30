@@ -3,7 +3,11 @@
  */
 
 import { CustomCategoryService } from '../../core/custom-category-service.js';
+import { STORAGE_KEYS } from '../../utils/constants.js';
 import { sanitizeInput } from '../security-utils.js';
+
+const CATEGORIES_STORAGE_KEY =
+  STORAGE_KEYS.CUSTOM_CATEGORIES || 'custom_categories';
 
 /**
  * @param {Object} transaction
@@ -94,12 +98,17 @@ const buildTagOption = ({ name, color, selected, onToggle }) => {
 
 export const createTransactionTagSelector = ({ initialTag = null } = {}) => {
   let selectedTag = initialTag || null;
+  // The form defaults to 'expense'; setTransactionType keeps this in sync.
+  let currentType = 'expense';
 
   const container = document.createElement('div');
   container.className = 'transaction-tag-selector';
   container.setAttribute('role', 'group');
   container.setAttribute('aria-label', 'Transaction flags');
   container.hidden = true;
+
+  const isTaggableType = () =>
+    currentType === 'expense' || currentType === 'refund';
 
   const render = () => {
     container.innerHTML = '';
@@ -156,8 +165,37 @@ export const createTransactionTagSelector = ({ initialTag = null } = {}) => {
     render();
   };
 
+  // Live refresh: flag categories can arrive AFTER the form is open — e.g. on
+  // offline cold start the userId-filtered list is empty until auth resolves,
+  // or cloud sync merges categories in later. Re-render so tags become
+  // selectable without the user having to reopen the transaction.
+  let wasConnected = false;
+  const handleCategoriesChanged = () => {
+    if (container.isConnected) {
+      wasConnected = true;
+    } else if (wasConnected) {
+      // Form was mounted and has since been closed — stop listening to
+      // avoid leaks across re-opens.
+      window.removeEventListener('categories-updated', handleCategoriesChanged);
+      window.removeEventListener('storage-updated', handleStorageUpdated);
+      return;
+    } else {
+      // Form is still under construction / not yet mounted — ignore.
+      return;
+    }
+    if (!isTaggableType()) return;
+    render();
+  };
+  const handleStorageUpdated = e => {
+    if (e?.detail?.key && e.detail.key !== CATEGORIES_STORAGE_KEY) return;
+    handleCategoriesChanged();
+  };
+  window.addEventListener('categories-updated', handleCategoriesChanged);
+  window.addEventListener('storage-updated', handleStorageUpdated);
+
   const setTransactionType = type => {
-    if (type !== 'expense' && type !== 'refund') {
+    currentType = type;
+    if (!isTaggableType()) {
       selectedTag = null;
       container.hidden = true;
       return;
