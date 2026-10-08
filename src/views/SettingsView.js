@@ -404,8 +404,8 @@ export const SettingsView = () => {
   releaseNotesLink.style.cssText = `
     display: block;
     text-align: center;
-    margin-top: 12px;
-    color: var(--color-primary, #00d084);
+    margin-top: ${SPACING.MD};
+    color: var(--color-primary);
     text-decoration: none;
     font-size: 0.9rem;
   `;

@@ -216,7 +216,7 @@ export const TransactionForm = ({
   noteField.placeholder =
     getCopyString('transaction.notes') || 'Notes (optional)';
   noteField.value = initialValues.description || '';
-  noteField.style.minHeight = '0px';
+  noteField.style.minHeight = '0';
   noteField.style.resize = 'vertical';
   noteField.classList.add('touch-target-secondary');
 

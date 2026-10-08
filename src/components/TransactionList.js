@@ -87,7 +87,7 @@ export const TransactionList = ({
   const timeText = document.createElement('span');
   timeText.textContent = `${metrics.averageDuration}s avg`;
   timeText.style.fontSize = isMobile ? FONT_SIZES.XS : FONT_SIZES.SM;
-  timeText.style.marginTop = '2px';
+  timeText.style.marginTop = SPACING.XXS;
 
   metricsDisplay.appendChild(clicksText);
   metricsDisplay.appendChild(timeText);

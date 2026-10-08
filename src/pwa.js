@@ -20,6 +20,7 @@ export const hasPendingUpdate = () => pendingUpdate;
 function showUpdateConfirmation(onConfirm) {
   const overlay = document.createElement('div');
   overlay.className = 'update-dialog-overlay';
+  // eslint-disable-next-line local/no-raw-style-values -- overlay renders before tokens.css loads; 20px padding has no matching token and is a load-bearing fallback
   overlay.style.cssText = `
     position: fixed;
     top: 0;
@@ -36,6 +37,7 @@ function showUpdateConfirmation(onConfirm) {
 
   const dialog = document.createElement('div');
   dialog.className = 'update-dialog';
+  // eslint-disable-next-line local/no-raw-style-values -- color/px fallbacks are deliberate; dialog can render before tokens.css loads (see todo/ai-slop-inspection-guide.md §5c)
   dialog.style.cssText = `
     background: var(--color-surface, #1a1a1a);
     border: 1px solid var(--color-border, #333);

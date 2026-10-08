@@ -70,7 +70,7 @@ export const ForecastCard = ({
     rangeSpan.style.fontSize = '0.7rem';
     rangeSpan.style.color = COLORS.TEXT_MUTED;
     rangeSpan.style.fontStyle = 'italic';
-    rangeSpan.style.marginTop = '2px';
+    rangeSpan.style.marginTop = SPACING.XXS;
     card.appendChild(rangeSpan);
   }
 

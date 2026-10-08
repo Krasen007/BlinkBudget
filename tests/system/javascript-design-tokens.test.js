@@ -72,6 +72,17 @@ it('defines every statically referenced member of imported design-token objects'
             },
           },
         },
+        // Register the project's local rules as no-op stubs so that
+        // `eslint-disable-next-line local/...` directives used across src/
+        // resolve here instead of failing with "Definition for rule not
+        // found". They are intentionally NOT enabled in `rules` below, so
+        // they never run — this only teaches the Linter the rule names.
+        local: {
+          rules: {
+            'no-raw-style-values': { create: () => ({}) },
+            'no-empty-catch': { create: () => ({}) },
+          },
+        },
       },
       rules: { 'contract/tokens': 'error' },
     });

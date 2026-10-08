@@ -116,9 +116,9 @@ export const ActionCard = options => {
     progressIndicator.className = 'progress-indicator';
     progressIndicator.style.cssText = `
       width: 40px;
-      height: 4px;
+      height: ${SPACING.XS};
       background: rgba(0, 0, 0, 0.1);
-      border-radius: 2px;
+      border-radius: ${SPACING.XXS};
       overflow: hidden;
       position: relative;
     `;

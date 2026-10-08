@@ -9,6 +9,8 @@
  * the app working when initialization is skipped or fails.
  */
 
+import { FONT_SIZES } from '../utils/constants.js';
+
 export class MobileUtils {
   constructor() {
     this.isInitialized = false;
@@ -430,7 +432,7 @@ export class MobileUtils {
     const fontSize = parseFloat(currentFontSize);
 
     if (fontSize < 16) {
-      inputElement.style.fontSize = '16px';
+      inputElement.style.fontSize = FONT_SIZES.PREVENT_ZOOM;
     }
   }
 
