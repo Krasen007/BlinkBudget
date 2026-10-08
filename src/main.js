@@ -16,6 +16,19 @@ import { showWarningToast } from './utils/toast-notifications.js';
 import MobileUtils from './core/mobile-utils.js';
 import './pwa.js'; // Register PWA service worker
 
+const asyncFontsStylesheet = document.querySelector('[data-async-fonts]');
+if (asyncFontsStylesheet) {
+  const enableFonts = () => {
+    asyncFontsStylesheet.media = 'all';
+  };
+
+  if (asyncFontsStylesheet.sheet) {
+    enableFonts();
+  } else {
+    asyncFontsStylesheet.addEventListener('load', enableFonts, { once: true });
+  }
+}
+
 // Publishes window.mobileUtils. Must run before the first read below
 // (initMobileNav / the onResponsiveChange hook / the auth_hint early nav).
 try {

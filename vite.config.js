@@ -45,6 +45,10 @@ export default defineConfig({
         skipWaiting: true,
         navigateFallback: 'offline.html',
         navigateFallbackAllowlist: [/^(?!\/__).*/],
+        navigateFallbackDenylist: [
+          /^\/privacy-policy\.html(?:\?.*)?$/,
+          /^\/terms-of-service\.html(?:\?.*)?$/,
+        ],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/.*\.firebaseio\.com\/.*/,
