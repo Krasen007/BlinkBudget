@@ -35,6 +35,11 @@ export default defineConfig({
       strategies: 'generateSW',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        // Do NOT precache the legal policy pages for offline use. They are
+        // reference documents that require no offline availability and change
+        // rarely; excluding them keeps the precache lean and avoids serving a
+        // stale policy from cache. They still load normally when online.
+        globIgnores: ['**/privacy-policy.html', '**/terms-of-service.html'],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,

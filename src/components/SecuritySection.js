@@ -3,7 +3,7 @@
  * Displays basic security and privacy information
  */
 
-import { SPACING, FONT_SIZES } from '../utils/constants.js';
+import { SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
 
 export const SecuritySection = () => {
   const section = document.createElement('div');
@@ -19,10 +19,11 @@ export const SecuritySection = () => {
   });
   section.appendChild(title);
 
-  // Basic notice
+  // Basic notice — accurate about what is and is not encrypted. Local data is
+  // NOT encrypted by the app; only cloud-synced data is encrypted in transit.
   const notice = document.createElement('p');
   notice.textContent =
-    'Your data is encrypted and stored locally. You control your information and can export or delete it at any time.';
+    'Your data is stored locally on this device by default. The app does not encrypt locally stored data; data synced to the cloud is encrypted in transit (HTTPS). You control your information and can export or delete it at any time.';
   Object.assign(notice.style, {
     fontSize: FONT_SIZES.SM,
     color: 'var(--color-text-muted)',
@@ -42,12 +43,12 @@ export const SecuritySection = () => {
   `;
 
   const features = [
-    'Encrypted in transit (HTTPS) and protected by Firebase security',
-    'Local-first storage - data stays on your device',
-    'Optional cloud sync with your control',
+    'Local-first storage - data stays on your device by default',
+    'Cloud-synced data is encrypted in transit (HTTPS) and protected by Firebase security',
+    'Optional cloud sync, always under your control',
     'Only anonymous error diagnostics are collected - no cross-site advertising tracking',
     'You can export all your data anytime',
-    'Secure authentication',
+    'Secure authentication with optional sign-in',
   ];
 
   features.forEach(feature => {
@@ -60,6 +61,46 @@ export const SecuritySection = () => {
   });
 
   section.appendChild(featuresList);
+
+  // Legal links — reachable from inside the authenticated app so users (and
+  // Store reviewers) can access the Privacy Policy and Terms of Service without
+  // needing to visit the marketing landing page.
+  const legalLinks = document.createElement('div');
+  legalLinks.className = 'security-legal-links';
+  legalLinks.style.cssText = `
+    display: flex;
+    flex-wrap: wrap;
+    gap: ${SPACING.MD};
+    margin-top: ${SPACING.LG};
+  `;
+
+  const legalLinkData = [
+    { text: 'Privacy Policy', href: '/privacy-policy.html' },
+    { text: 'Terms of Service', href: '/terms-of-service.html' },
+  ];
+
+  legalLinkData.forEach(({ text, href }) => {
+    const link = document.createElement('a');
+    link.textContent = text;
+    link.href = href;
+    link.className = 'btn btn-ghost';
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.setAttribute('aria-label', `${text} (opens in new tab)`);
+    Object.assign(link.style, {
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: TOUCH_TARGETS.MIN_HEIGHT,
+      padding: `${SPACING.SM} ${SPACING.MD}`,
+      fontSize: FONT_SIZES.SM,
+      color: 'var(--color-primary, #00d084)',
+      textDecoration: 'none',
+    });
+    legalLinks.appendChild(link);
+  });
+
+  section.appendChild(legalLinks);
 
   return section;
 };

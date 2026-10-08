@@ -107,15 +107,8 @@
       It seems you've lost your connection. You can still use the app to track
       expenses, and they'll sync once you're back online.
     </p>
-    <button class="btn" onclick="window.location.reload()">
-      Retry Connection
-    </button>
+    <button class="btn" id="retry-btn" type="button">Retry Connection</button>
 
-    <script>
-      // Check if back online
-      window.addEventListener('online', () => {
-        window.location.reload();
-      });
-    </script>
+    <script src="/offline.js"></script>
   </body>
 </html>

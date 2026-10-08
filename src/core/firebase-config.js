@@ -7,6 +7,7 @@ import {
   persistentMultipleTabManager,
 } from 'firebase/firestore';
 import { config } from '../../config/app.config.js';
+import { PrivacyService } from './privacy-service.js';
 
 // Handle Firebase initialization with graceful fallback
 let app = null;
@@ -73,10 +74,23 @@ export const getDb = () => {
   return dbInstance;
 };
 
-// Initialize Analytics conditionally
+// Initialize Analytics only when the user has explicitly opted in.
+// Analytics is disabled by default (PrivacyService's default consent for
+// 'analytics' is false), so this satisfies Store policy 10.5 (Personal
+// Information) — we never auto-collect usage data without consent. Call
+// initializeAnalytics() again after the user grants analytics consent.
 let analytics = null;
 
-if (app) {
+export const initializeAnalytics = () => {
+  if (analytics || !app) {
+    return analytics;
+  }
+  if (!PrivacyService.getConsent('analytics')) {
+    console.info(
+      '[Firebase] Analytics disabled — user has not granted analytics consent.'
+    );
+    return null;
+  }
   isSupported()
     .then(supported => {
       if (supported) {
@@ -86,7 +100,12 @@ if (app) {
     .catch(e => {
       console.warn('Analytics not supported in this environment:', e.message);
     });
-}
+  return analytics;
+};
+
+// Attempt to initialize analytics at startup only if consent was previously
+// granted (e.g. a returning user who already opted in on another device).
+initializeAnalytics();
 
 // Export Firebase instances and status
 export { app, analytics, auth };

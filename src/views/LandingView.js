@@ -495,8 +495,8 @@ const createFooter = () => {
   links.className = 'footer-links';
 
   const linkData = [
-    { text: 'Privacy Policy', href: '/privacy-policy.md' },
-    { text: 'Terms of Service', href: '/terms-of-service.md' },
+    { text: 'Privacy Policy', href: '/privacy-policy.html' },
+    { text: 'Terms of Service', href: '/terms-of-service.html' },
     { text: 'GitHub', href: 'https://github.com/Krasen007/BlinkBudget' },
   ];
 
