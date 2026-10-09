@@ -95,9 +95,13 @@ One comment line **directly** above the offending line. Multi-line justification
 (guide §4). Put the reason after `--` on the same line.
 
 ```js
-// eslint-disable-next-line local/no-raw-style-values -- 6px has no exact token (scale is 4/8/12); snapping would be a design change, not a cleanup
-wrapper.style.gap = '6px';
+// eslint-disable-next-line local/no-raw-style-values -- 6px horizontal padding has no exact token (scale 4/8); snapping would be a design change
+budgetEl.style.padding = '2px 6px';
 ```
+
+(Real live example from `CategoryCard.js` — the author has since ruled that the _GoalsSection
+`6px` gap_ should snap to `4px` instead; see §7. Padding halves with mixed values still get
+reported rather than snapped.)
 
 ### 4b. `tests/system/javascript-design-tokens.test.js` runs its own bare `Linter`
 
@@ -203,15 +207,23 @@ All 12 files from the queue were cleared (§7 has the log). Two reusable pattern
     render in a fully-loaded app) — literals, cssText, and the four unflagged ternary
     siblings for intra-file consistency.
   - `NetworkStatus`: `#fff` → `COLORS.TEXT_MAIN` (flagged line + its `Object.assign` sibling).
-  - Justified disables (8 total, each with one-line `--` reason): `6px` paddings ×3 (GoalsSection
-    precedent), `60px` preset width, `2000px` expand sentinel, `10/20px` glow blurs, and the
-    `3px` blue focus rings in `AccountSection` ×2 — ⚠️ **blue `rgba(59,130,246)` rings are a
-    fossil** (app primary is purple; `--focus-shadow` differs) — aligning them is a design
-    decision left to the author.
+  - Justified disables (6 inline + the `config` block, each with one-line `--` reason): the two
+    mixed `6px` paddings (`CategoryCard` `2px 6px`, `DashboardStatsCard` `6px 8px` — mixed
+    values get reported, not snapped), `60px` preset width, `2000px` expand sentinel, and the
+    `10/20px` glow blurs.
   - `config/app.config.js`: one block disable/enable pair — every `var(--x, fallback)` is
     load-bearing because this UI renders when the asset pipeline itself may be broken (§5c).
   - Verified: `yarn check` green · ESLint **0 messages** · full suite **654/654** ·
     purge-guard test green (all new `var()` refs survive).
 
 **Open question for the author:** does `6px` gap (GoalsSection `createField`) deserve a designed
-token (e.g. a half-step `SPACING.XS_SM`), or should it snap to `4px`? Reported, not decided.
+token (e.g. a half-step `SPACING.XS_SM`), or should it snap to `4px`?
+→ **DECIDED (final session): snap to `4px`** — now `SPACING.XS`, disable removed.
+
+**Blue focus-ring fossil (AccountSection):**
+→ **DECIDED (final session): unified.** All four ring sites now use `var(--focus-shadow)`
+(same `0 0 0 3px` geometry the CSS layer uses for `.input:focus` / `.mobile-form-select:focus`);
+the error branch keeps its red glow but tokenized as
+`color-mix(in srgb, var(--color-error) 10%, transparent)` (the `reports-ui.js` pattern).
+Both `eslint-disable`s deleted as a result. Rendering shift is intentional per author:
+blue 10% → purple 20% on focus.

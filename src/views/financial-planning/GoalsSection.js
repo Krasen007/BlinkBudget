@@ -477,8 +477,7 @@ function createGoalsList(chartRenderer, activeCharts, section) {
             const wrapper = document.createElement('label');
             wrapper.style.display = 'flex';
             wrapper.style.alignItems = 'center';
-            // eslint-disable-next-line local/no-raw-style-values -- 6px has no exact token (scale is 4/8/12); snapping would be a design change, not a cleanup
-            wrapper.style.gap = '6px';
+            wrapper.style.gap = SPACING.XS;
             wrapper.style.fontSize = '0.75rem';
             wrapper.style.color = COLORS.TEXT_MUTED;
             wrapper.style.whiteSpace = 'nowrap';

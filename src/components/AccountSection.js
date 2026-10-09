@@ -130,8 +130,8 @@ export const AccountSection = () => {
           nameInput.style.outline = 'none';
           nameInput.style.boxShadow =
             nameInput.getAttribute('aria-invalid') === 'true'
-              ? '0 0 0 3px rgba(239, 68, 68, 0.1)'
-              : '0 0 0 3px rgba(59, 130, 246, 0.1)';
+              ? 'color-mix(in srgb, var(--color-error) 10%, transparent)'
+              : 'var(--focus-shadow)';
         });
 
         nameInput.addEventListener('blur', () => {
@@ -178,8 +178,7 @@ export const AccountSection = () => {
         typeSelect.addEventListener('focus', () => {
           typeSelect.style.borderColor = 'var(--color-primary)';
           typeSelect.style.outline = 'none';
-          // eslint-disable-next-line local/no-raw-style-values -- 3px blue ring has no exact token (--focus-shadow is purple 20%); aligning is a design decision
-          typeSelect.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+          typeSelect.style.boxShadow = 'var(--focus-shadow)';
         });
 
         typeSelect.addEventListener('blur', () => {
@@ -499,8 +498,8 @@ export const AccountSection = () => {
               nameInput.style.outline = 'none';
               nameInput.style.boxShadow =
                 nameInput.getAttribute('aria-invalid') === 'true'
-                  ? '0 0 0 3px rgba(239, 68, 68, 0.1)'
-                  : '0 0 0 3px rgba(59, 130, 246, 0.1)';
+                  ? 'color-mix(in srgb, var(--color-error) 10%, transparent)'
+                  : 'var(--focus-shadow)';
             });
 
             nameInput.addEventListener('blur', () => {
@@ -569,8 +568,7 @@ export const AccountSection = () => {
             typeSelect.addEventListener('focus', () => {
               typeSelect.style.borderColor = 'var(--color-primary)';
               typeSelect.style.outline = 'none';
-              // eslint-disable-next-line local/no-raw-style-values -- 3px blue ring has no exact token (--focus-shadow is purple 20%); aligning is a design decision
-              typeSelect.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+              typeSelect.style.boxShadow = 'var(--focus-shadow)';
             });
 
             typeSelect.addEventListener('blur', () => {
