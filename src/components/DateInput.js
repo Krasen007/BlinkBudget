@@ -17,15 +17,24 @@ export const DateInput = (options = {}) => {
   container.style.width = DIMENSIONS.DATE_INPUT_WIDTH; // Default width, can be overridden by parent
   container.style.marginRight = SPACING.SM;
 
-  // Label for accessibility and context
+  // Label for accessibility and context — always linked to the input via
+  // `for` so checkers see a valid association. When the parent renders its
+  // own visible label (showLabel: false, e.g. Start/End Date), this one is
+  // visually hidden but stays in the accessibility tree — `display:none`
+  // would remove it entirely and re-trigger "no label" / dangling-`for`.
   const label = document.createElement('label');
+  label.textContent = 'Date';
   label.style.fontSize = FONT_SIZES.XS;
   label.style.color = COLORS.TEXT_MUTED;
   label.style.marginBottom = SPACING.XS;
   label.style.fontWeight = '500';
   label.style.textAlign = 'center';
   label.style.width = '100%';
-  label.style.display = showLabel ? 'block' : 'none';
+  if (showLabel) {
+    label.style.display = 'block';
+  } else {
+    label.className = 'visually-hidden';
+  }
 
   const inputId = `date-input-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 

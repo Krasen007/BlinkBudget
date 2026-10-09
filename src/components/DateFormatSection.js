@@ -118,11 +118,14 @@ export const DateFormatSection = ({
 
     const manualLabel = document.createElement('label');
     manualLabel.textContent = 'Manually select date format:';
+    manualLabel.setAttribute('for', 'date-format-select');
     manualLabel.style.display = 'block';
     manualLabel.style.marginBottom = SPACING.SM;
     manualLabel.style.fontWeight = '500';
 
     const select = document.createElement('select');
+    select.id = 'date-format-select';
+    select.name = 'dateFormat';
     select.className = 'date-format-select';
     Object.assign(select.style, {
       width: '100%',

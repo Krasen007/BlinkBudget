@@ -555,6 +555,7 @@ export const CustomCategoryManager = ({
 
     const typeSelect = document.createElement('select');
     typeSelect.id = 'category-type';
+    typeSelect.name = 'categoryType';
     typeSelect.className = 'input-select';
     typeSelect.style.cssText = `
       padding: var(--spacing-sm);
@@ -593,11 +594,11 @@ export const CustomCategoryManager = ({
 
     const checkboxFlagGroup = document.createElement('label');
     checkboxFlagGroup.className = 'category-flag-toggle';
-    checkboxFlagGroup.setAttribute('for', 'category-show-as-checkbox');
 
     const showAsCheckboxInput = document.createElement('input');
     showAsCheckboxInput.type = 'checkbox';
     showAsCheckboxInput.id = 'category-show-as-checkbox';
+    showAsCheckboxInput.name = 'showAsCheckbox';
     showAsCheckboxInput.className = 'category-flag-toggle__input';
     showAsCheckboxInput.checked = !!category?.showAsCheckbox;
 
@@ -785,6 +786,7 @@ export const CustomCategoryManager = ({
       type === 'textarea' ? 'textarea' : 'input'
     );
     input.id = id;
+    input.name = id;
     input.className = `input-${type}`;
     input.required = required;
     input.setAttribute('aria-label', label);

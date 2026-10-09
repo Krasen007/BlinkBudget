@@ -495,22 +495,30 @@ function createGoalsList(chartRenderer, activeCharts, section) {
           };
 
           const nameFld = document.createElement('input');
+          nameFld.id = `edit-goal-name-${goal.id}`;
+          nameFld.name = 'goalName';
           nameFld.value = goal.name;
           nameFld.setAttribute('aria-label', 'Goal name');
 
           const targetFld = document.createElement('input');
           targetFld.type = 'number';
+          targetFld.id = `edit-goal-target-${goal.id}`;
+          targetFld.name = 'goalTarget';
           targetFld.value = goal.targetAmount;
           targetFld.setAttribute('aria-label', 'Target amount');
 
           const dateFld = document.createElement('input');
           dateFld.type = 'date';
+          dateFld.id = `edit-goal-date-${goal.id}`;
+          dateFld.name = 'goalDate';
           dateFld.setAttribute('aria-label', 'Target date');
           // Use helper to safely parse targetDate
           dateFld.value = safeParseDate(goal.targetDate);
 
           const currentFld = document.createElement('input');
           currentFld.type = 'number';
+          currentFld.id = `edit-goal-current-${goal.id}`;
+          currentFld.name = 'goalCurrent';
           currentFld.value = goal.currentSavings;
           currentFld.setAttribute('aria-label', 'Current savings');
 

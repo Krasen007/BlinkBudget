@@ -59,6 +59,7 @@ export const BudgetForm = ({
 
   const input = document.createElement('input');
   input.id = inputId;
+  input.name = `budgetLimit-${categoryName.replace(/\s+/g, '-').toLowerCase()}`;
   input.type = 'number';
 
   input.value = initialLimit || '';

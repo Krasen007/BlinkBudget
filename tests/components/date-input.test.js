@@ -22,10 +22,12 @@ describe('DateInput Component', () => {
     const dateInput = DateInput();
     container.appendChild(dateInput);
 
-    // Should have a label (currently empty as label text is commented out)
+    // Label carries accessible text and is linked to the input
     const label = dateInput.querySelector('label');
+    const realInput = dateInput.querySelector('input[type="date"]');
     expect(label).toBeTruthy();
-    expect(label.textContent).toBe('');
+    expect(label.textContent).toBe('Date');
+    expect(label.getAttribute('for')).toBe(realInput.id);
     expect(label.style.display).toBe('block');
   });
 
@@ -34,8 +36,12 @@ describe('DateInput Component', () => {
     container.appendChild(dateInput);
 
     const label = dateInput.querySelector('label');
+    const realInput = dateInput.querySelector('input[type="date"]');
     expect(label).toBeTruthy();
-    expect(label.style.display).toBe('none');
+    // Visually hidden (not display:none) so AT + checkers still see it,
+    // and `for` stays linked to the input.
+    expect(label.className).toContain('visually-hidden');
+    expect(label.getAttribute('for')).toBe(realInput.id);
   });
 
   it('should have proper accessibility attributes', () => {

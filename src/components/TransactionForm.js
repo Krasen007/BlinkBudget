@@ -212,6 +212,7 @@ export const TransactionForm = ({
 
   const noteField = document.createElement('textarea');
   noteField.id = 'transaction-note-input';
+  noteField.name = 'transactionNote';
   noteField.className = 'form-input transaction-note-field';
   noteField.placeholder =
     getCopyString('transaction.notes') || 'Notes (optional)';

@@ -206,4 +206,48 @@ describe('CategorySelector - refund visibility (Explore Categories)', () => {
       'No categories available for this period.'
     );
   });
+
+  it('excludes ghost (moved) transactions from Explore Tags', () => {
+    // A transaction moved to another month leaves a ghost copy behind with
+    // the original timestamp + tags. The ghost must not inflate tag cards.
+    const section = CategorySelector(
+      buildData(
+        [{ name: 'Food', amount: 60, transactionCount: 1, percentage: 100 }],
+        [
+          {
+            id: 'e1',
+            type: 'expense',
+            category: 'Food',
+            amount: 60,
+            tags: ['Work'],
+            timestamp: '2026-10-05T10:00:00.000Z',
+          },
+          {
+            id: 'ghost-1',
+            type: 'expense',
+            category: 'Food',
+            amount: 60,
+            tags: ['Work'],
+            timestamp: '2026-09-05T10:00:00.000Z',
+            isGhost: true,
+            movedToDate: '2026-10-05T10:00:00.000Z',
+          },
+        ],
+        {
+          startDate: new Date('2026-09-01T00:00:00.000Z'),
+          endDate: new Date('2026-09-30T23:59:59.999Z'),
+        }
+      ),
+      colorMap,
+      getCategoryColors,
+      onCategoryClick
+    );
+
+    // September has only the ghost: no Explore Tags section at all.
+    const tagHeaders = [...section.querySelectorAll('h3')].map(
+      h => h.textContent
+    );
+    expect(tagHeaders).not.toContain('Explore Tags');
+    expect(cardsIn(section)).not.toContain('Work');
+  });
 });

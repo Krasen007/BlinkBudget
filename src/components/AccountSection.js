@@ -87,6 +87,7 @@ export const AccountSection = () => {
         // Name input
         const nameLabel = document.createElement('label');
         nameLabel.textContent = 'Account Name:';
+        nameLabel.setAttribute('for', 'add-account-name');
         nameLabel.style.cssText = `
           display: block;
           margin-bottom: var(--spacing-xs);
@@ -96,6 +97,8 @@ export const AccountSection = () => {
 
         const nameInput = document.createElement('input');
         nameInput.type = 'text';
+        nameInput.id = 'add-account-name';
+        nameInput.name = 'accountName';
         nameInput.placeholder = 'e.g., Checking, Cash, Credit Card';
         nameInput.style.cssText = `
           width: 100%;
@@ -152,6 +155,7 @@ export const AccountSection = () => {
         // Account type selection
         const typeLabel = document.createElement('label');
         typeLabel.textContent = 'Account Type:';
+        typeLabel.setAttribute('for', 'add-account-type');
         typeLabel.style.cssText = `
           display: block;
           margin-bottom: var(--spacing-xs);
@@ -160,6 +164,8 @@ export const AccountSection = () => {
         `;
 
         const typeSelect = document.createElement('select');
+        typeSelect.id = 'add-account-type';
+        typeSelect.name = 'accountType';
         typeSelect.style.cssText = `
           width: 100%;
           padding: var(--spacing-md);
@@ -455,6 +461,7 @@ export const AccountSection = () => {
             // Name input
             const nameLabel = document.createElement('label');
             nameLabel.textContent = 'Account Name:';
+            nameLabel.setAttribute('for', 'edit-account-name');
             nameLabel.style.cssText = `
               display: block;
               margin-bottom: var(--spacing-xs);
@@ -464,6 +471,8 @@ export const AccountSection = () => {
 
             const nameInput = document.createElement('input');
             nameInput.type = 'text';
+            nameInput.id = 'edit-account-name';
+            nameInput.name = 'accountName';
             nameInput.value = account.name;
             nameInput.style.cssText = `
               width: 100%;
@@ -520,6 +529,7 @@ export const AccountSection = () => {
             // Account type selection
             const typeLabel = document.createElement('label');
             typeLabel.textContent = 'Account Type:';
+            typeLabel.setAttribute('for', 'edit-account-type');
             typeLabel.style.cssText = `
               display: block;
               margin-bottom: var(--spacing-xs);
@@ -528,6 +538,8 @@ export const AccountSection = () => {
             `;
 
             const typeSelect = document.createElement('select');
+            typeSelect.id = 'edit-account-type';
+            typeSelect.name = 'accountType';
             typeSelect.style.cssText = `
               width: 100%;
               padding: var(--spacing-md);

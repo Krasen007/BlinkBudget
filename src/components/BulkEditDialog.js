@@ -45,10 +45,11 @@ export const BulkEditDialog = ({ selectedIds, onClose }) => {
     return l;
   };
 
-  const mkSelect = (placeholder, id) => {
+  const mkSelect = (placeholder, id, name) => {
     const s = document.createElement('select');
     s.className = 'mobile-form-select';
     s.id = id;
+    s.name = name || id;
     const opt = document.createElement('option');
     opt.value = '';
     opt.textContent = placeholder;
@@ -91,6 +92,7 @@ export const BulkEditDialog = ({ selectedIds, onClose }) => {
   const dateInput = document.createElement('input');
   dateInput.type = 'date';
   dateInput.id = 'bulk-date';
+  dateInput.name = 'bulkDate';
   dateInput.className = 'mobile-form-input date-input-field';
   dateInput.value = '';
   dateInput.setAttribute('aria-label', 'Change date of selected transactions');

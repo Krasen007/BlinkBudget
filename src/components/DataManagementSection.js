@@ -74,7 +74,13 @@ export const DataManagementSection = () => {
     });
 
     const input = dateComp.querySelector('input[type="date"]'); // Get internal input for value access
-    if (input) input.id = id; // Set ID for tracking
+    if (input) {
+      input.id = id; // Set ID for tracking
+      // DateInput's internal label still points at its generated id — sync it
+      // so its `for` matches, otherwise checkers flag a dangling reference.
+      const internalLabel = dateComp.querySelector('label');
+      if (internalLabel) internalLabel.setAttribute('for', id);
+    }
 
     const lbl = document.createElement('label');
     lbl.textContent = labelText;

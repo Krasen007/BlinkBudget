@@ -220,13 +220,13 @@ export const SettingsView = () => {
 
   const presetsToggleGroup = document.createElement('label');
   presetsToggleGroup.className = `category-flag-toggle ${isPresetsEnabled ? 'category-flag-toggle--on' : ''}`;
-  presetsToggleGroup.setAttribute('for', 'settings-show-quick-presets');
   presetsToggleGroup.style.width = '100%';
   presetsToggleGroup.style.boxSizing = 'border-box';
 
   const presetsCheckboxInput = document.createElement('input');
   presetsCheckboxInput.type = 'checkbox';
   presetsCheckboxInput.id = 'settings-show-quick-presets';
+  presetsCheckboxInput.name = 'showQuickPresets';
   presetsCheckboxInput.className = 'category-flag-toggle__input';
   presetsCheckboxInput.checked = isPresetsEnabled;
 

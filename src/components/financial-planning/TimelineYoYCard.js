@@ -283,6 +283,8 @@ export const TimelineYoYCard = ({
   // Grain selector — MONTH (this month) by default like the other insights cards
   // Grain toggle — compact variant of the global .view-select
   const grainSelect = document.createElement('select');
+  grainSelect.id = 'insights-timeline-grain';
+  grainSelect.name = 'timelineGrain';
   grainSelect.className = 'insights-select view-select';
   grainSelect.setAttribute('aria-label', 'Select timeline granularity');
   grainSelect.innerHTML = `

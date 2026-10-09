@@ -151,6 +151,8 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
   // Grain Selector — Month (this month) is the default
   // Grain toggle — compact variant of the global .view-select
   const grainSelect = document.createElement('select');
+  grainSelect.id = 'insights-trend-grain';
+  grainSelect.name = 'trendGrain';
   grainSelect.className = 'insights-select view-select';
   grainSelect.setAttribute('aria-label', 'Select trend grouping grain');
   grainSelect.innerHTML = `
