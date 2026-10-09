@@ -33,7 +33,10 @@ vi.mock('../../src/components/Button.js', () => ({
 
 vi.mock('../../src/core/Account/account-service.js', () => ({
   AccountService: {
-    getAccounts: () => [{ id: 'acc-1', name: 'Main Account' }],
+    getAccounts: () => [
+      { id: 'acc-1', name: 'Main Account' },
+      { id: 'acc-2', name: 'Savings' },
+    ],
   },
 }));
 
@@ -137,5 +140,32 @@ describe('BulkEditDialog', () => {
     );
     applyBtn.click();
     expect(markHighlightMock).not.toHaveBeenCalled();
+  });
+
+  it('reports the newly applied account through onClose so the dashboard can follow the move', () => {
+    const onClose = vi.fn();
+    dialog = BulkEditDialog({
+      selectedIds: new Set(['tx-1', 'tx-2']),
+      onClose,
+    });
+    document.getElementById('bulk-account').value = 'acc-2';
+    const applyBtn = [...document.querySelectorAll('button')].find(
+      b => b.textContent === 'Apply Changes'
+    );
+    applyBtn.click();
+    expect(onClose).toHaveBeenCalledWith('acc-2');
+  });
+
+  it('reports null through onClose when the account is left unchanged', () => {
+    const onClose = vi.fn();
+    dialog = BulkEditDialog({
+      selectedIds: new Set(['tx-1', 'tx-2']),
+      onClose,
+    });
+    const applyBtn = [...document.querySelectorAll('button')].find(
+      b => b.textContent === 'Apply Changes'
+    );
+    applyBtn.click();
+    expect(onClose).toHaveBeenCalledWith(null);
   });
 });

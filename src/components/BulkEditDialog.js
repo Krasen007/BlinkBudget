@@ -145,13 +145,18 @@ export const BulkEditDialog = ({ selectedIds, onClose }) => {
       const newTag = tagSelect.value || null;
       const newDate = dateInput.value || null;
       const updatedIds = [];
+      // Tracks the account the transactions were moved to (if any) so the
+      // dashboard can follow them to their new wallet after the dialog closes.
+      let appliedAccountId = null;
 
       selectedIds.forEach(id => {
         const tx = TransactionService.get(id);
         if (!tx) return;
         const updates = {};
-        if (newAccount && tx.accountId !== newAccount)
+        if (newAccount && tx.accountId !== newAccount) {
           updates.accountId = newAccount;
+          appliedAccountId = newAccount;
+        }
         if (newCategory && tx.category !== newCategory)
           updates.category = newCategory;
         if (newTag !== null) updates.tags = newTag ? [newTag] : [];
@@ -174,7 +179,7 @@ export const BulkEditDialog = ({ selectedIds, onClose }) => {
         markTransactionForHighlight(updatedIds.join(','));
       }
 
-      close();
+      close(appliedAccountId);
     },
   });
   applyBtn.style.flex = '1';
@@ -183,12 +188,12 @@ export const BulkEditDialog = ({ selectedIds, onClose }) => {
   card.appendChild(btnGroup);
   overlay.appendChild(card);
 
-  function close() {
+  function close(appliedAccountId = null) {
     document.body.removeEventListener('keydown', onKey);
     if (document.body.contains(overlay)) {
       document.body.removeChild(overlay);
     }
-    if (typeof onClose === 'function') onClose();
+    if (typeof onClose === 'function') onClose(appliedAccountId);
   }
 
   function onKey(e) {

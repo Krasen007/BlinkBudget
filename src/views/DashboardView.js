@@ -353,7 +353,22 @@ export const DashboardView = (params = {}) => {
     if (selectedTransactionIds.size === 0) return;
     BulkEditDialog({
       selectedIds: selectedTransactionIds,
-      onClose: () => exitSelectionMode(),
+      onClose: appliedAccountId => {
+        // If the bulk edit moved the selected transactions to a different
+        // wallet, follow them there so the dashboard switches to the newly
+        // selected account instead of losing the moved transactions.
+        if (appliedAccountId && appliedAccountId !== currentAccountFilter) {
+          currentAccountFilter = appliedAccountId;
+          sessionStorage.setItem(
+            STORAGE_KEYS.DASHBOARD_FILTER,
+            currentAccountFilter
+          );
+          if (accountSelect) {
+            accountSelect.value = currentAccountFilter;
+          }
+        }
+        exitSelectionMode();
+      },
     });
   };
 
