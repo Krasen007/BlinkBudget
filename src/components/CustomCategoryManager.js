@@ -8,6 +8,7 @@ import { CustomCategoryService } from '../core/custom-category-service.js';
 import { ButtonComponent } from './Button.js';
 import { Router } from '../core/router.js';
 import { showErrorToast } from '../utils/toast-notifications.js';
+import { COLORS } from '../utils/constants.js';
 
 export const CustomCategoryManager = ({
   onCategoryChange,
@@ -18,7 +19,7 @@ export const CustomCategoryManager = ({
   container.className = 'custom-category-manager';
   container.style.cssText = `
     background: var(--color-surface);
-    border: 1px solid var(--color-border);
+    border: 1px solid ${COLORS.BORDER};
     border-radius: var(--radius-lg);
     padding: var(--spacing-lg);
     width: 100%;
@@ -201,7 +202,7 @@ export const CustomCategoryManager = ({
       flex-direction: column;
       gap: var(--spacing-sm);
       padding: var(--spacing-md);
-      border: 1px solid var(--color-border);
+      border: 1px solid ${COLORS.BORDER};
       border-radius: var(--radius-md);
       background: var(--color-background);
       transition: all var(--transition-fast);
@@ -447,7 +448,7 @@ export const CustomCategoryManager = ({
     button.setAttribute('aria-label', `${text} category`);
     button.style.cssText = `
       padding: var(--spacing-xs) var(--spacing-sm);
-      border: 1px solid var(--color-border);
+      border: 1px solid ${COLORS.BORDER};
       border-radius: var(--radius-sm);
       background: var(--color-surface);
       color: var(--color-text-main);
@@ -499,7 +500,7 @@ export const CustomCategoryManager = ({
     modal.setAttribute('aria-labelledby', 'category-form-title');
     modal.style.cssText = `
       background: var(--color-surface);
-      border: 1px solid var(--color-border);
+      border: 1px solid ${COLORS.BORDER};
       border-radius: var(--radius-lg);
       padding: var(--spacing-lg);
       width: 90%;
@@ -557,7 +558,7 @@ export const CustomCategoryManager = ({
     typeSelect.className = 'input-select';
     typeSelect.style.cssText = `
       padding: var(--spacing-sm);
-      border: 1px solid var(--color-border);
+      border: 1px solid ${COLORS.BORDER};
       border-radius: var(--radius-md);
       background: var(--color-background);
       color: var(--color-text-main);
@@ -789,7 +790,7 @@ export const CustomCategoryManager = ({
     input.setAttribute('aria-label', label);
     input.style.cssText = `
       padding: var(--spacing-sm);
-      border: 1px solid var(--color-border);
+      border: 1px solid ${COLORS.BORDER};
       border-radius: var(--radius-md);
       background: var(--color-background);
       color: var(--color-text-main);

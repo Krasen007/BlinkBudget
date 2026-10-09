@@ -76,6 +76,7 @@ To enable cloud features, create a .env file with your Firebase credentials.
   // In development, show a clear error
   if (import.meta.env.DEV) {
     if (typeof document !== 'undefined' && document.body) {
+      /* eslint-disable local/no-raw-style-values -- config-error UI renders when the CSS pipeline itself may be broken; every var() fallback here is load-bearing */
       const errorDiv = document.createElement('div');
       errorDiv.className = 'config-error-container';
       errorDiv.style.cssText = `
@@ -156,6 +157,8 @@ To enable cloud features, create a .env file with your Firebase credentials.
         color: var(--color-text-muted, #b4b4b4);
         margin: 0;
       `;
+
+      /* eslint-enable local/no-raw-style-values */
 
       errorCard.appendChild(icon);
       errorCard.appendChild(heading);

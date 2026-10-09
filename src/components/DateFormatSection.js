@@ -4,7 +4,12 @@
  */
 
 import { SettingsService } from '../core/settings-service.js';
-import { SPACING, FONT_SIZES, DATE_FORMATS } from '../utils/constants.js';
+import {
+  SPACING,
+  COLORS,
+  FONT_SIZES,
+  DATE_FORMATS,
+} from '../utils/constants.js';
 import { showErrorToast } from '../utils/toast-notifications.js';
 
 // Auto-detect date format from device locale
@@ -109,7 +114,7 @@ export const DateFormatSection = ({
     const manualSection = document.createElement('div');
     manualSection.style.marginTop = SPACING.MD;
     manualSection.style.paddingTop = SPACING.MD;
-    manualSection.style.borderTop = '1px solid var(--color-border)';
+    manualSection.style.borderTop = `1px solid ${COLORS.BORDER}`;
 
     const manualLabel = document.createElement('label');
     manualLabel.textContent = 'Manually select date format:';

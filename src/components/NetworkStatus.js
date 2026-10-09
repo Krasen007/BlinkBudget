@@ -1,4 +1,4 @@
-import { SPACING } from '../utils/constants.js';
+import { COLORS, SPACING } from '../utils/constants.js';
 
 /**
  * NetworkStatus - A subtle indicator showing offline/online status
@@ -19,7 +19,7 @@ export const NetworkStatus = () => {
     left: '50%',
     transform: 'translateX(-50%) translateY(150%)',
     backgroundColor: 'transparent',
-    color: '#fff',
+    color: COLORS.TEXT_MAIN,
     padding: `${SPACING.XS} ${SPACING.MD}`,
     borderRadius: '8px',
     fontSize: '0.8rem',
@@ -40,11 +40,12 @@ export const NetworkStatus = () => {
   const icon = document.createElement('span');
   icon.textContent = '📡';
   icon.style.fontSize = '1rem';
-  icon.style.filter = 'drop-shadow(0 0 8px rgba(255, 159, 67, 0.5))';
+  icon.style.filter = `drop-shadow(0 0 ${SPACING.SM} rgba(255, 159, 67, 0.5))`;
 
   const text = document.createElement('span');
   text.textContent = 'Offline';
-  text.style.color = '#fff';
+  text.style.color = COLORS.TEXT_MAIN;
+  // eslint-disable-next-line local/no-raw-style-values -- glow blur radii (10/20px) have no exact token; snapping changes the glow
   text.style.textShadow = `
         0 0 10px rgba(255, 159, 67, 0.8),
         0 0 20px rgba(255, 159, 67, 0.4)

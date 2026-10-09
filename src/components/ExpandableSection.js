@@ -4,6 +4,7 @@
  */
 
 import { getCopyString } from '../utils/copy-strings.js';
+import { COLORS } from '../utils/constants.js';
 
 export const ExpandableSection = ({
   title,
@@ -49,7 +50,7 @@ export const ExpandableSection = ({
   toggle.style.justifyContent = 'space-between';
   toggle.style.padding = 'var(--spacing-md) var(--spacing-lg)';
   toggle.style.backgroundColor = 'var(--color-surface)';
-  toggle.style.border = '1px solid var(--color-border)';
+  toggle.style.border = `1px solid ${COLORS.BORDER}`;
   toggle.style.borderRadius = 'var(--radius-lg)';
   toggle.style.color = 'var(--color-text-main)';
   toggle.style.fontSize = 'var(--font-size-base)';
@@ -60,12 +61,12 @@ export const ExpandableSection = ({
   toggle.style.textAlign = 'left';
   toggle.style.transition =
     'background-color var(--transition-fast), border-color var(--transition-fast)';
-  toggle.style.outline = '2px solid Highlight';
+  toggle.style.outline = 'var(--focus-width) solid Highlight';
 
   toggle.addEventListener('focus', () => {
     toggle.style.boxShadow = 'var(--focus-shadow-strong)';
     toggle.style.borderColor = 'var(--focus-color)';
-    toggle.style.outline = '2px solid Highlight';
+    toggle.style.outline = 'var(--focus-width) solid Highlight';
   });
   toggle.addEventListener('blur', () => {
     toggle.style.boxShadow = 'none';
@@ -133,6 +134,7 @@ export const ExpandableSection = ({
     );
     arrow.style.transform = expanded ? 'rotate(180deg)' : 'rotate(0deg)';
     if (expanded) {
+      // eslint-disable-next-line local/no-raw-style-values -- expansion animation sentinel; no 2000px token by design
       contentContainer.style.maxHeight = '2000px';
       contentContainer.style.opacity = '1';
       contentContainer.style.padding = 'var(--spacing-md) 0';

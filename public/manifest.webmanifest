@@ -7,6 +7,7 @@
   "background_color": "#0a0a0c",
   "theme_color": "#0a0a0c",
   "lang": "en",
+  "dir": "ltr",
   "scope": "/",
   "id": "/",
   "orientation": "portrait",

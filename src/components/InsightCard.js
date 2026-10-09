@@ -66,8 +66,8 @@ export const InsightCard = (insight, _index) => {
     severityIndicator.style.position = 'absolute';
     severityIndicator.style.top = SPACING.SM;
     severityIndicator.style.right = SPACING.SM;
-    severityIndicator.style.width = '8px';
-    severityIndicator.style.height = '8px';
+    severityIndicator.style.width = SPACING.SM;
+    severityIndicator.style.height = SPACING.SM;
     severityIndicator.style.borderRadius = '50%';
     severityIndicator.style.background = COLORS.ERROR;
     card.appendChild(severityIndicator);

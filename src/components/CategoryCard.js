@@ -49,7 +49,7 @@ export const CategoryCard = (
 
   card.addEventListener('mouseenter', () => {
     card.style.transform = 'translateY(-2px)';
-    card.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+    card.style.boxShadow = `0 ${SPACING.XS} ${SPACING.MD} rgba(0, 0, 0, 0.1)`;
   });
 
   card.addEventListener('mouseleave', () => {
@@ -142,6 +142,7 @@ export const CategoryCard = (
     budgetEl.style.fontSize = '0.75rem';
     budgetEl.style.marginTop = SPACING.XS;
     budgetEl.style.textAlign = 'center';
+    // eslint-disable-next-line local/no-raw-style-values -- 6px horizontal padding has no exact token (scale 4/8); snapping would be a design change
     budgetEl.style.padding = '2px 6px';
     budgetEl.style.borderRadius = 'var(--radius-sm)';
 

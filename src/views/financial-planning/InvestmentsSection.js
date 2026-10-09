@@ -219,7 +219,7 @@ function createInvestmentsList() {
         const left = document.createElement('div');
         left.style.display = 'flex';
         left.style.flexDirection = 'column';
-        left.style.gap = '4px';
+        left.style.gap = SPACING.XS;
 
         const title = document.createElement('div');
         title.style.fontWeight = '600';
@@ -303,7 +303,7 @@ function createInvestmentsList() {
           const symbolWrapper = document.createElement('div');
           symbolWrapper.style.display = 'flex';
           symbolWrapper.style.flexDirection = 'column';
-          symbolWrapper.style.gap = '2px';
+          symbolWrapper.style.gap = SPACING.XXS;
           const symbolLabel = document.createElement('label');
           symbolLabel.textContent = 'Symbol';
           symbolLabel.style.cssText = labelStyle;
@@ -321,7 +321,7 @@ function createInvestmentsList() {
           const nameWrapper = document.createElement('div');
           nameWrapper.style.display = 'flex';
           nameWrapper.style.flexDirection = 'column';
-          nameWrapper.style.gap = '2px';
+          nameWrapper.style.gap = SPACING.XXS;
           const nameLabel = document.createElement('label');
           nameLabel.textContent = 'Name';
           nameLabel.style.cssText = labelStyle;
@@ -339,7 +339,7 @@ function createInvestmentsList() {
           const sharesWrapper = document.createElement('div');
           sharesWrapper.style.display = 'flex';
           sharesWrapper.style.flexDirection = 'column';
-          sharesWrapper.style.gap = '2px';
+          sharesWrapper.style.gap = SPACING.XXS;
           const sharesLabel = document.createElement('label');
           sharesLabel.textContent = 'Shares';
           sharesLabel.style.cssText = labelStyle;
@@ -358,7 +358,7 @@ function createInvestmentsList() {
           const purchasePriceWrapper = document.createElement('div');
           purchasePriceWrapper.style.display = 'flex';
           purchasePriceWrapper.style.flexDirection = 'column';
-          purchasePriceWrapper.style.gap = '2px';
+          purchasePriceWrapper.style.gap = SPACING.XXS;
           const purchasePriceLabel = document.createElement('label');
           purchasePriceLabel.textContent = 'Purchase Price';
           purchasePriceLabel.style.cssText = labelStyle;
@@ -380,7 +380,7 @@ function createInvestmentsList() {
           const currentPriceWrapper = document.createElement('div');
           currentPriceWrapper.style.display = 'flex';
           currentPriceWrapper.style.flexDirection = 'column';
-          currentPriceWrapper.style.gap = '2px';
+          currentPriceWrapper.style.gap = SPACING.XXS;
           const currentPriceLabel = document.createElement('label');
           currentPriceLabel.textContent = 'Current Price';
           currentPriceLabel.style.cssText = labelStyle;
@@ -399,7 +399,7 @@ function createInvestmentsList() {
           const dateWrapper = document.createElement('div');
           dateWrapper.style.display = 'flex';
           dateWrapper.style.flexDirection = 'column';
-          dateWrapper.style.gap = '2px';
+          dateWrapper.style.gap = SPACING.XXS;
           const dateLabel = document.createElement('label');
           dateLabel.textContent = 'Purchase Date';
           dateLabel.style.cssText = labelStyle;
@@ -418,7 +418,7 @@ function createInvestmentsList() {
           const notesWrapper = document.createElement('div');
           notesWrapper.style.display = 'flex';
           notesWrapper.style.flexDirection = 'column';
-          notesWrapper.style.gap = '2px';
+          notesWrapper.style.gap = SPACING.XXS;
           const notesLabel = document.createElement('label');
           notesLabel.textContent = 'Notes';
           notesLabel.style.cssText = labelStyle;

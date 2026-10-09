@@ -4,7 +4,12 @@
  */
 
 import { ButtonComponent } from './Button.js';
-import { SPACING, TOUCH_TARGETS, FONT_SIZES } from '../utils/constants.js';
+import {
+  SPACING,
+  TOUCH_TARGETS,
+  FONT_SIZES,
+  COLORS,
+} from '../utils/constants.js';
 import { AuthService } from '../core/auth-service.js';
 import { loadMobileAlert } from '../utils/mobile-alert.js';
 
@@ -40,8 +45,8 @@ export const AccountDeletionSection = () => {
   // Warning box
   const warningBox = document.createElement('div');
   warningBox.style.backgroundColor = 'rgba(220, 38, 38, 0.1)';
-  warningBox.style.border = '1px solid var(--color-error)';
-  warningBox.style.borderRadius = '8px';
+  warningBox.style.border = `1px solid ${COLORS.ERROR}`;
+  warningBox.style.borderRadius = 'var(--radius-md)';
   warningBox.style.padding = SPACING.MD;
   warningBox.style.marginBottom = SPACING.MD;
 
@@ -68,7 +73,7 @@ export const AccountDeletionSection = () => {
   // Data summary (loaded dynamically)
   const dataSummaryBox = document.createElement('div');
   dataSummaryBox.style.backgroundColor = 'var(--color-surface-hover)';
-  dataSummaryBox.style.borderRadius = '8px';
+  dataSummaryBox.style.borderRadius = 'var(--radius-md)';
   dataSummaryBox.style.padding = SPACING.MD;
   dataSummaryBox.style.marginBottom = SPACING.MD;
   dataSummaryBox.style.display = 'none'; // Hidden initially

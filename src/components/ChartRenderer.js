@@ -822,7 +822,7 @@ export class ChartRenderer {
     // Enhanced focus/blur handlers
     const focusHandler = () => {
       canvas.style.outline = 'none';
-      canvas.style.outlineOffset = '0px';
+      canvas.style.outlineOffset = '0';
       this.focusSegment(chart, currentIndex);
 
       // Announce chart entry

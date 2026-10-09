@@ -366,8 +366,8 @@ function createEmergencyFundCard(assessment) {
   const statusBadge = document.createElement('span');
   statusBadge.textContent =
     assessment.status.charAt(0).toUpperCase() + assessment.status.slice(1);
-  statusBadge.style.padding = '4px 12px';
-  statusBadge.style.borderRadius = '20px';
+  statusBadge.style.padding = `${SPACING.XS} ${SPACING.MD}`;
+  statusBadge.style.borderRadius = 'var(--radius-full)';
   statusBadge.style.fontSize = '0.75rem';
   statusBadge.style.fontWeight = '600';
   statusBadge.style.backgroundColor =
@@ -423,7 +423,7 @@ function createEmergencyFundCard(assessment) {
     const detailLabel = document.createElement('div');
     detailLabel.style.fontSize = '0.75rem';
     detailLabel.style.color = COLORS.TEXT_MUTED;
-    detailLabel.style.marginBottom = '4px';
+    detailLabel.style.marginBottom = SPACING.XS;
     detailLabel.textContent = item.label;
     const detailValue = document.createElement('div');
     detailValue.style.fontWeight = '600';
@@ -446,7 +446,7 @@ function createEmergencyFundCard(assessment) {
   const recommendationLabel = document.createElement('div');
   recommendationLabel.style.fontSize = '0.75rem';
   recommendationLabel.style.color = COLORS.TEXT_MUTED;
-  recommendationLabel.style.marginBottom = '4px';
+  recommendationLabel.style.marginBottom = SPACING.XS;
   recommendationLabel.style.fontWeight = '500';
   recommendationLabel.textContent = 'Recommendation';
   const recommendationText = document.createElement('div');

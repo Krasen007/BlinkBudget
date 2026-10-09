@@ -12,6 +12,9 @@ import {
   CURRENCY_SYMBOL,
 } from '../utils/constants.js';
 
+// Month-nav geometry: the arrow width and the content clearance it needs must match
+const MONTH_NAV_SIZE = '30px';
+
 export const DashboardStatsCard = ({
   label,
   value,
@@ -86,8 +89,8 @@ export const DashboardStatsCard = ({
     trendContainer.style.cssText = `
       display: flex;
       align-items: center;
-      gap: 4px;
-      margin-top: 4px;
+      gap: ${SPACING.XS};
+      margin-top: ${SPACING.XS};
       font-size: 0.75rem;
       font-weight: 500;
     `;
@@ -138,7 +141,7 @@ export const DashboardStatsCard = ({
   if (showProgressBar && progressPercentage !== null) {
     const progressContainer = document.createElement('div');
     progressContainer.style.cssText = `
-      margin-top: 8px;
+      margin-top: ${SPACING.SM};
       width: 100%;
     `;
 
@@ -195,16 +198,17 @@ export const DashboardStatsCard = ({
     resetBtn.className = 'reset-filters-btn';
     resetBtn.textContent = '↺';
     resetBtn.style.position = 'absolute';
-    resetBtn.style.right = '8px';
-    resetBtn.style.top = '8px';
+    resetBtn.style.right = SPACING.SM;
+    resetBtn.style.top = SPACING.SM;
     resetBtn.style.background = 'none';
     resetBtn.style.border = 'none';
     resetBtn.style.cursor = 'pointer';
+    // eslint-disable-next-line local/no-raw-style-values -- 6px has no exact token (scale 4/8); snapping would be a design change
     resetBtn.style.padding = '6px 8px';
-    resetBtn.style.fontSize = '16px';
+    resetBtn.style.fontSize = FONT_SIZES.BASE;
     resetBtn.style.color = COLORS.TEXT_MUTED || 'var(--color-text-muted)';
     resetBtn.style.transition = 'all 0.2s';
-    resetBtn.style.borderRadius = '4px';
+    resetBtn.style.borderRadius = SPACING.XS;
     resetBtn.style.zIndex = '2';
     resetBtn.title = 'Reset all filters to show total amount';
     resetBtn.setAttribute('aria-label', 'Reset all filters');
@@ -233,8 +237,8 @@ export const DashboardStatsCard = ({
   // Add anchored month navigation controls if enabled
   if (showMonthNavigation) {
     // Add padding to value to prevent overlap with arrows
-    val.style.paddingLeft = '30px';
-    val.style.paddingRight = '30px';
+    val.style.paddingLeft = MONTH_NAV_SIZE;
+    val.style.paddingRight = MONTH_NAV_SIZE;
 
     // Left arrow button - covers entire left side
     const prevBtn = document.createElement('button');
@@ -243,12 +247,12 @@ export const DashboardStatsCard = ({
     prevBtn.style.position = 'absolute';
     prevBtn.style.left = '0';
     prevBtn.style.top = '0';
-    prevBtn.style.width = '30px';
+    prevBtn.style.width = MONTH_NAV_SIZE;
     prevBtn.style.height = '100%';
     prevBtn.style.background = 'none';
     prevBtn.style.border = 'none';
     prevBtn.style.cursor = 'pointer';
-    prevBtn.style.fontSize = '16px';
+    prevBtn.style.fontSize = FONT_SIZES.BASE;
     prevBtn.style.color = COLORS.TEXT_MUTED || 'var(--color-text-muted)';
     prevBtn.style.transition = 'all 0.2s';
     prevBtn.style.zIndex = '1';
@@ -266,12 +270,12 @@ export const DashboardStatsCard = ({
     nextBtn.style.position = 'absolute';
     nextBtn.style.right = '0';
     nextBtn.style.top = '0';
-    nextBtn.style.width = '30px';
+    nextBtn.style.width = MONTH_NAV_SIZE;
     nextBtn.style.height = '100%';
     nextBtn.style.background = 'none';
     nextBtn.style.border = 'none';
     nextBtn.style.cursor = 'pointer';
-    nextBtn.style.fontSize = '16px';
+    nextBtn.style.fontSize = FONT_SIZES.BASE;
     nextBtn.style.color = COLORS.TEXT_MUTED || 'var(--color-text-muted)';
     nextBtn.style.transition = 'all 0.2s';
     nextBtn.style.zIndex = '1';

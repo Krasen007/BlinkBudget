@@ -421,7 +421,7 @@ function createGoalsList(chartRenderer, activeCharts, section) {
         progHeader.style.display = 'flex';
         progHeader.style.justifyContent = 'space-between';
         progHeader.style.fontSize = '0.8rem';
-        progHeader.style.marginBottom = '4px';
+        progHeader.style.marginBottom = SPACING.XS;
 
         const progLabel = document.createElement('span');
         progLabel.textContent = 'Progress';
@@ -477,6 +477,7 @@ function createGoalsList(chartRenderer, activeCharts, section) {
             const wrapper = document.createElement('label');
             wrapper.style.display = 'flex';
             wrapper.style.alignItems = 'center';
+            // eslint-disable-next-line local/no-raw-style-values -- 6px has no exact token (scale is 4/8/12); snapping would be a design change, not a cleanup
             wrapper.style.gap = '6px';
             wrapper.style.fontSize = '0.75rem';
             wrapper.style.color = COLORS.TEXT_MUTED;
@@ -976,7 +977,7 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
         recDesc.textContent = rec.description;
         recDesc.style.fontSize = '0.85rem';
         recDesc.style.color = COLORS.TEXT_MUTED;
-        recDesc.style.marginTop = '2px';
+        recDesc.style.marginTop = SPACING.XXS;
         content.appendChild(recDesc);
 
         const createBtn = document.createElement('button');

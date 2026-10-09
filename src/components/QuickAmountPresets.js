@@ -11,7 +11,7 @@
 import { AmountPresetService } from '../core/amount-preset-service.js';
 import { TransactionService } from '../core/transaction-service.js';
 import { getCopyString } from '../utils/copy-strings.js';
-import { CURRENCY_SYMBOL } from '../utils/constants.js';
+import { CURRENCY_SYMBOL, COLORS, SPACING } from '../utils/constants.js';
 
 export const QuickAmountPresets = ({ onPresetSelect }) => {
   const container = document.createElement('div');
@@ -47,14 +47,15 @@ export const QuickAmountPresets = ({ onPresetSelect }) => {
       button.setAttribute('data-amount', amount);
       button.setAttribute('tabindex', '0');
 
+      // eslint-disable-next-line local/no-raw-style-values -- 60px amount-button width has no token (touch min is 44px); shrinking changes the preset layout
       button.style.minWidth = '60px';
-      button.style.minHeight = '44px';
+      button.style.minHeight = 'var(--touch-target-min)';
       button.style.padding = 'var(--spacing-sm) var(--spacing-md)';
       button.style.fontSize = 'var(--font-size-base)';
       button.style.fontWeight = '600';
       button.style.color = 'var(--color-primary)';
       button.style.backgroundColor = 'var(--color-surface)';
-      button.style.border = '1px solid var(--color-border)';
+      button.style.border = `1px solid ${COLORS.BORDER}`;
       button.style.borderRadius = 'var(--radius-md)';
       button.style.cursor = 'pointer';
       button.style.transition = 'all var(--transition-fast)';
@@ -141,13 +142,13 @@ export const QuickAmountPresets = ({ onPresetSelect }) => {
       counterBadge.style.fontSize = '0.55rem';
       counterBadge.style.fontWeight = 'normal';
       counterBadge.style.color = 'var(--color-text-muted)';
-      counterBadge.style.padding = '0 2px';
+      counterBadge.style.padding = `0 ${SPACING.XXS}`;
       counterBadge.style.lineHeight = '1';
       counterBadge.style.position = 'absolute';
-      counterBadge.style.bottom = '2px';
-      counterBadge.style.right = '2px';
+      counterBadge.style.bottom = SPACING.XXS;
+      counterBadge.style.right = SPACING.XXS;
       counterBadge.style.transform = 'translateY(-50%)';
-      counterBadge.style.textShadow = '0 1px 2px rgba(0, 0, 0, 0.25)';
+      counterBadge.style.textShadow = `0 1px ${SPACING.XXS} rgba(0, 0, 0, 0.25)`;
       counterBadge.style.textTransform = 'uppercase';
 
       button.appendChild(counterBadge);
@@ -164,14 +165,14 @@ export const QuickAmountPresets = ({ onPresetSelect }) => {
     resetBtn.setAttribute('title', 'Reset amount presets');
     resetBtn.setAttribute('tabindex', '0');
 
-    resetBtn.style.minWidth = '44px';
-    resetBtn.style.minHeight = '44px';
+    resetBtn.style.minWidth = 'var(--touch-target-min)';
+    resetBtn.style.minHeight = 'var(--touch-target-min)';
     resetBtn.style.padding = 'var(--spacing-sm)';
     resetBtn.style.fontSize = '1.2rem';
     resetBtn.style.fontWeight = 'normal';
     resetBtn.style.color = 'var(--color-text-muted)';
     resetBtn.style.backgroundColor = 'transparent';
-    resetBtn.style.border = '1px dashed var(--color-border)';
+    resetBtn.style.border = `1px dashed ${COLORS.BORDER}`;
     resetBtn.style.borderRadius = 'var(--radius-md)';
     resetBtn.style.cursor = 'pointer';
     resetBtn.style.transition = 'all var(--transition-fast)';

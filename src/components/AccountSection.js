@@ -63,14 +63,14 @@ export const AccountSection = () => {
         card.tabIndex = -1;
         card.style.cssText = `
           background: var(--color-surface);
-          border: 1px solid var(--color-border);
+          border: 1px solid ${COLORS.BORDER};
           padding: var(--spacing-lg);
           border-radius: var(--radius-lg);
           max-width: var(--modal-max-width);
           width: 90%;
           max-height: 80vh;
           overflow-y: auto;
-          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+          box-shadow: var(--shadow-xl), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         `;
 
         const titleEl = document.createElement('h3');
@@ -101,7 +101,7 @@ export const AccountSection = () => {
           width: 100%;
           padding: var(--spacing-md);
           margin-bottom: var(--spacing-xs);
-          border: 1px solid var(--color-border);
+          border: 1px solid ${COLORS.BORDER};
           border-radius: var(--radius-md);
           font-size: var(--font-size-base);
           background: var(--color-background);
@@ -113,7 +113,7 @@ export const AccountSection = () => {
         const errorText = document.createElement('span');
         errorText.style.cssText = `
           display: block;
-          color: var(--color-error, #ef4444);
+          color: ${COLORS.ERROR};
           font-size: var(--font-size-sm);
           margin-bottom: var(--spacing-md);
           min-height: 20px;
@@ -125,7 +125,7 @@ export const AccountSection = () => {
         nameInput.addEventListener('focus', () => {
           nameInput.style.borderColor =
             nameInput.getAttribute('aria-invalid') === 'true'
-              ? 'var(--color-error, #ef4444)'
+              ? COLORS.ERROR
               : 'var(--color-primary)';
           nameInput.style.outline = 'none';
           nameInput.style.boxShadow =
@@ -137,7 +137,7 @@ export const AccountSection = () => {
         nameInput.addEventListener('blur', () => {
           nameInput.style.borderColor =
             nameInput.getAttribute('aria-invalid') === 'true'
-              ? 'var(--color-error, #ef4444)'
+              ? COLORS.ERROR
               : 'var(--color-border)';
           nameInput.style.boxShadow = 'none';
         });
@@ -164,7 +164,7 @@ export const AccountSection = () => {
           width: 100%;
           padding: var(--spacing-md);
           margin-bottom: var(--spacing-lg);
-          border: 1px solid var(--color-border);
+          border: 1px solid ${COLORS.BORDER};
           border-radius: var(--radius-md);
           font-size: var(--font-size-base);
           background: var(--color-background);
@@ -178,6 +178,7 @@ export const AccountSection = () => {
         typeSelect.addEventListener('focus', () => {
           typeSelect.style.borderColor = 'var(--color-primary)';
           typeSelect.style.outline = 'none';
+          // eslint-disable-next-line local/no-raw-style-values -- 3px blue ring has no exact token (--focus-shadow is purple 20%); aligning is a design decision
           typeSelect.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
         });
 
@@ -226,7 +227,7 @@ export const AccountSection = () => {
 
             if (!accountName) {
               nameInput.setAttribute('aria-invalid', 'true');
-              nameInput.style.borderColor = 'var(--color-error, #ef4444)';
+              nameInput.style.borderColor = COLORS.ERROR;
               errorText.textContent = 'Account name is required';
               errorText.style.opacity = '1';
               nameInput.focus();
@@ -431,14 +432,14 @@ export const AccountSection = () => {
             card.tabIndex = -1;
             card.style.cssText = `
               background: var(--color-surface);
-              border: 1px solid var(--color-border);
+              border: 1px solid ${COLORS.BORDER};
               padding: var(--spacing-lg);
               border-radius: var(--radius-lg);
               max-width: var(--modal-max-width);
               width: 90%;
               max-height: 80vh;
               overflow-y: auto;
-              box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+              box-shadow: var(--shadow-xl), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             `;
 
             const titleEl = document.createElement('h3');
@@ -469,7 +470,7 @@ export const AccountSection = () => {
               width: 100%;
               padding: var(--spacing-md);
               margin-bottom: var(--spacing-xs);
-              border: 1px solid var(--color-border);
+              border: 1px solid ${COLORS.BORDER};
               border-radius: var(--radius-md);
               font-size: var(--font-size-base);
               background: var(--color-background);
@@ -481,7 +482,7 @@ export const AccountSection = () => {
             const errorText = document.createElement('span');
             errorText.style.cssText = `
               display: block;
-              color: var(--color-error, #ef4444);
+              color: ${COLORS.ERROR};
               font-size: var(--font-size-sm);
               margin-bottom: var(--spacing-md);
               min-height: 20px;
@@ -493,7 +494,7 @@ export const AccountSection = () => {
             nameInput.addEventListener('focus', () => {
               nameInput.style.borderColor =
                 nameInput.getAttribute('aria-invalid') === 'true'
-                  ? 'var(--color-error, #ef4444)'
+                  ? COLORS.ERROR
                   : 'var(--color-primary)';
               nameInput.style.outline = 'none';
               nameInput.style.boxShadow =
@@ -505,7 +506,7 @@ export const AccountSection = () => {
             nameInput.addEventListener('blur', () => {
               nameInput.style.borderColor =
                 nameInput.getAttribute('aria-invalid') === 'true'
-                  ? 'var(--color-error, #ef4444)'
+                  ? COLORS.ERROR
                   : 'var(--color-border)';
               nameInput.style.boxShadow = 'none';
             });
@@ -532,7 +533,7 @@ export const AccountSection = () => {
               width: 100%;
               padding: var(--spacing-md);
               margin-bottom: var(--spacing-lg);
-              border: 1px solid var(--color-border);
+              border: 1px solid ${COLORS.BORDER};
               border-radius: var(--radius-md);
               font-size: var(--font-size-base);
               background: var(--color-background);
@@ -568,6 +569,7 @@ export const AccountSection = () => {
             typeSelect.addEventListener('focus', () => {
               typeSelect.style.borderColor = 'var(--color-primary)';
               typeSelect.style.outline = 'none';
+              // eslint-disable-next-line local/no-raw-style-values -- 3px blue ring has no exact token (--focus-shadow is purple 20%); aligning is a design decision
               typeSelect.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
             });
 
@@ -597,7 +599,7 @@ export const AccountSection = () => {
 
                 if (!accountName) {
                   nameInput.setAttribute('aria-invalid', 'true');
-                  nameInput.style.borderColor = 'var(--color-error, #ef4444)';
+                  nameInput.style.borderColor = COLORS.ERROR;
                   errorText.textContent = 'Account name is required';
                   errorText.style.opacity = '1';
                   nameInput.focus();
