@@ -14,7 +14,15 @@ import {
   CURRENCY_SYMBOL,
   SPACING,
   STORAGE_KEYS,
+  getAccountTypeLabel,
 } from '../utils/constants.js';
+import {
+  buildAccountTypeFilter,
+  getAccountTypeFromFilter,
+  isAccountFilterValid,
+  resolveAccountIdsForFilter,
+  resolvePreferredAccountId,
+} from '../utils/account-filter-utils.js';
 import { getAnalyticsEngine } from '../core/analytics/AnalyticsInstance.js';
 import { AnomalyService } from '../core/analytics/AnomalyService.js';
 import { getCurrentMonthPeriod } from '../utils/reports-utils.js';
@@ -231,19 +239,34 @@ export const DashboardView = (params = {}) => {
     }
   }
 
-  // Helper: Normalize stale/deleted account filter back to 'all'
+  // Helper: Normalize stale/deleted account filter back to 'all'.
+  // Also covers account-type filters ('type:cash') whose type no longer has
+  // any account, so the shown filter and the shown amount stay in sync.
   const normalizeStaleAccountFilterImpl = (accounts, selectElement) => {
-    const accountExists = accounts.some(a => a.id === currentAccountFilter);
-
-    if (currentAccountFilter !== 'all' && !accountExists) {
-      currentAccountFilter = 'all';
-      sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, 'all');
-      if (selectElement) {
-        selectElement.value = 'all';
+    if (currentAccountFilter !== 'all') {
+      const isValid = isAccountFilterValid(currentAccountFilter, accounts);
+      if (!isValid) {
+        currentAccountFilter = 'all';
+        sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, 'all');
+        if (selectElement) {
+          selectElement.value = 'all';
+        }
+        return true;
       }
-      return true;
     }
     return false;
+  };
+
+  // Reflect an account-type filter (set from Reports → Explore Accounts) in the
+  // account dropdown, which otherwise only lists individual accounts.
+  const appendAccountTypeOption = () => {
+    const accountType = getAccountTypeFromFilter(currentAccountFilter);
+    if (!accountType) return;
+
+    const opt = document.createElement('option');
+    opt.value = currentAccountFilter;
+    opt.textContent = `${getAccountTypeLabel(accountType)} — all accounts`;
+    accountSelect.appendChild(opt);
   };
 
   // Multi-select state
@@ -447,9 +470,18 @@ export const DashboardView = (params = {}) => {
       sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
     }
 
-    // Always reset account filter to "all" when navigating from Reports
-    currentAccountFilter = 'all';
-    sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, 'all');
+    // Account filter from Reports (Explore Accounts). When the user drilled in
+    // from a category/tag card there is none, so reset to "all" as before.
+    if (dashboardFilter.accountType) {
+      currentAccountFilter = buildAccountTypeFilter(
+        dashboardFilter.accountType
+      );
+    } else if (dashboardFilter.accountId) {
+      currentAccountFilter = dashboardFilter.accountId;
+    } else {
+      currentAccountFilter = 'all';
+    }
+    sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, currentAccountFilter);
 
     // Clear the navigation state after applying
     NavigationState.clearDashboardFilter();
@@ -498,6 +530,9 @@ export const DashboardView = (params = {}) => {
     accountSelect.appendChild(opt);
   });
 
+  // Account-type filters get their own option so the dropdown can display them
+  appendAccountTypeOption();
+
   // Explicitly synchronize the select with the filter used to compute the
   // balance so the visible account name always matches the displayed amount.
   accountSelect.value = currentAccountFilter;
@@ -528,6 +563,9 @@ export const DashboardView = (params = {}) => {
     // This ensures currentAccountFilter is set to 'all' if the current account was deleted
     normalizeStaleAccountFilterImpl(accounts, accountSelect);
 
+    // Account-type filters get their own option so the dropdown can display them
+    appendAccountTypeOption();
+
     // Use the normalized currentAccountFilter (not the old saved value)
     accountSelect.value = currentAccountFilter;
   };
@@ -547,15 +585,23 @@ export const DashboardView = (params = {}) => {
     const allTransactions = TransactionService.getAll();
     const currentAccounts = AccountService.getAccounts();
 
+    // Resolve the account filter once per render: null means "every account",
+    // otherwise it is the set of accounts selected by the filter (which can be
+    // a single account or an account type from Reports → Explore Accounts).
+    const filterAccountIds = resolveAccountIdsForFilter(
+      currentAccountFilter,
+      currentAccounts
+    );
+    const matchesAccountFilter = t =>
+      !filterAccountIds ||
+      (t.accountId != null && filterAccountIds.has(t.accountId)) ||
+      (t.toAccountId != null && filterAccountIds.has(t.toAccountId));
+
     // Apply filters (Account, Quick Date, Quick Month, Quick Category, Type)
     const transactions = allTransactions
       .filter(t => {
-        // Account Filter
-        if (
-          currentAccountFilter !== 'all' &&
-          t.accountId !== currentAccountFilter &&
-          t.toAccountId !== currentAccountFilter
-        ) {
+        // Account Filter (single account or account type)
+        if (!matchesAccountFilter(t)) {
           return false;
         }
 
@@ -633,13 +679,13 @@ export const DashboardView = (params = {}) => {
     let allTimeExpense = 0;
 
     validTransactionsForStats.forEach(t => {
-      if (currentAccountFilter === 'all') {
+      if (!filterAccountIds) {
         if (t.type === 'income') allTimeIncome += t.amount;
         if (t.type === 'expense') allTimeExpense += t.amount;
         if (t.type === 'refund') allTimeExpense -= t.amount;
       } else {
-        const isSource = t.accountId === currentAccountFilter;
-        const isDest = t.toAccountId === currentAccountFilter;
+        const isSource = filterAccountIds.has(t.accountId);
+        const isDest = filterAccountIds.has(t.toAccountId);
 
         if (t.type === 'income' && isSource) allTimeIncome += t.amount;
         if (t.type === 'expense' && isSource) allTimeExpense += t.amount;
@@ -661,25 +707,17 @@ export const DashboardView = (params = {}) => {
       let filteredExpense = 0;
 
       validTransactionsForStats.forEach(t => {
-        const isSource =
-          currentAccountFilter === 'all' ||
-          t.accountId === currentAccountFilter;
+        const isSource = !filterAccountIds || filterAccountIds.has(t.accountId);
 
         if (t.type === 'income' && isSource) filteredIncome += t.amount;
         if (t.type === 'expense' && isSource) filteredExpense += t.amount;
         if (t.type === 'refund' && isSource) filteredExpense -= t.amount;
 
         if (t.type === 'transfer') {
-          if (
-            t.accountId === currentAccountFilter ||
-            currentAccountFilter === 'all'
-          ) {
+          if (!filterAccountIds || filterAccountIds.has(t.accountId)) {
             filteredExpense += t.amount;
           }
-          if (
-            t.toAccountId === currentAccountFilter ||
-            currentAccountFilter === 'all'
-          ) {
+          if (!filterAccountIds || filterAccountIds.has(t.toAccountId)) {
             filteredIncome += t.amount;
           }
         }
@@ -739,11 +777,11 @@ export const DashboardView = (params = {}) => {
     let totalExpense = 0;
 
     periodTransactions.forEach(t => {
-      if (currentAccountFilter === 'all') {
+      if (!filterAccountIds) {
         if (t.type === 'expense') totalExpense += t.amount;
         if (t.type === 'refund') totalExpense -= t.amount;
       } else {
-        const isSource = t.accountId === currentAccountFilter;
+        const isSource = filterAccountIds.has(t.accountId);
 
         if (t.type === 'expense' && isSource) totalExpense += t.amount;
         if (t.type === 'refund' && isSource) totalExpense -= t.amount;
@@ -785,8 +823,8 @@ export const DashboardView = (params = {}) => {
           sessionStorage.removeItem('dashboard_date_range_filter');
           NavigationState.clearDashboardTypeFilter();
 
-          // Reset account select
-          accountSelect.value = 'all';
+          // Reset account select (rebuild drops a synthetic type option too)
+          refreshAccountOptions();
 
           renderDashboard();
         },
@@ -828,10 +866,15 @@ export const DashboardView = (params = {}) => {
         container: quickAmountPresetsContainer,
         destroy: destroyQuickPresets,
       } = createQuickAmountPresets(amount => {
-        const params =
-          currentAccountFilter !== 'all'
-            ? { accountId: currentAccountFilter, amount: amount.toString() }
-            : { amount: amount.toString() };
+        // A single-account filter (or the first account of a filtered type)
+        // pre-selects that account in the add form.
+        const preferredAccountId = resolvePreferredAccountId(
+          currentAccountFilter,
+          currentAccounts
+        );
+        const params = preferredAccountId
+          ? { accountId: preferredAccountId, amount: amount.toString() }
+          : { amount: amount.toString() };
         Router.navigate('add-expense', params);
       });
 
@@ -852,10 +895,13 @@ export const DashboardView = (params = {}) => {
     const addBtn = ButtonComponent({
       text: '+ Add Transaction',
       onClick: () => {
-        const params =
-          currentAccountFilter !== 'all'
-            ? { accountId: currentAccountFilter }
-            : {};
+        const preferredAccountId = resolvePreferredAccountId(
+          currentAccountFilter,
+          currentAccounts
+        );
+        const params = preferredAccountId
+          ? { accountId: preferredAccountId }
+          : {};
         Router.navigate('add-expense', params);
       },
       variant: 'primary',
@@ -881,13 +927,18 @@ export const DashboardView = (params = {}) => {
       content.appendChild(fallbackBtn);
     }
 
+    // An account-type filter can only come from Reports → Explore Accounts
+    const activeAccountTypeFilter =
+      getAccountTypeFromFilter(currentAccountFilter);
+
     // Add clear filter button if filter is active from Reports
     if (
       (currentCategoryFilter && currentCategoryFilter !== 'all') ||
       currentTagFilter ||
       currentTypeFilter ||
       currentMonthFilter ||
-      currentDateRangeFilter
+      currentDateRangeFilter ||
+      activeAccountTypeFilter
     ) {
       const clearFilterButton = ButtonComponent({
         text: 'Clear Filter',
@@ -905,6 +956,15 @@ export const DashboardView = (params = {}) => {
           currentTypeFilter = null;
           NavigationState.clearDashboardTypeFilter();
           currentDashboardFilter = null;
+
+          // Drop an account-type filter too: unlike a manually picked account
+          // it belongs to the reports filter set. The account dropdown is
+          // rebuilt so its synthetic type option disappears.
+          if (activeAccountTypeFilter) {
+            currentAccountFilter = 'all';
+            sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_FILTER);
+            refreshAccountOptions();
+          }
 
           // Update title and re-render
           updateTitle();
@@ -969,16 +1029,21 @@ export const DashboardView = (params = {}) => {
         currentDateRangeFilter &&
         !currentTypeFilter &&
         !currentCategoryFilter &&
-        !currentTagFilter
+        !currentTagFilter &&
+        !activeAccountTypeFilter
       ) {
         filterMessage = `Currently filtered by period: ${periodLabel}`;
       } else if (
         currentMonthFilter &&
         !currentTypeFilter &&
         !currentCategoryFilter &&
-        !currentTagFilter
+        !currentTagFilter &&
+        !activeAccountTypeFilter
       ) {
         filterMessage = `Currently filtered by: ${monthLabel}`;
+      } else if (activeAccountTypeFilter) {
+        const pLabel = periodLabel ? ` (${periodLabel})` : '';
+        filterMessage = `Currently filtered by account: ${getAccountTypeLabel(activeAccountTypeFilter)}${pLabel}`;
       } else if (currentCategoryFilter && currentCategoryFilter !== 'all') {
         filterMessage = `Currently filtered by: ${currentCategoryFilter}${periodLabel ? ` (${periodLabel})` : ''}`;
       } else if (currentTagFilter) {
@@ -1111,7 +1176,8 @@ export const DashboardView = (params = {}) => {
         sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_TAG_FILTER);
         sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
         NavigationState.clearDashboardTypeFilter();
-        accountSelect.value = 'all';
+        // Rebuild the account options so a synthetic type option is dropped too
+        refreshAccountOptions();
         renderDashboard();
       },
     });

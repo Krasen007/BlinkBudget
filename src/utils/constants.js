@@ -284,6 +284,24 @@ export const getAccountTypeLabel = type => {
   return ACCOUNT_TYPE_LABELS[type] || 'Other';
 };
 
+// Accent colors for the account-type cards in Reports (Explore Accounts).
+// Distinct per type so the cards read as different wallets at a glance.
+export const ACCOUNT_TYPE_COLORS = {
+  checking: '#3B82F6', // blue
+  bank: '#6366F1', // indigo
+  credit: '#EF4444', // red
+  'credit card': '#EF4444', // red (alias for backwards compatibility)
+  savings: '#22C55E', // green
+  investment: '#8B5CF6', // violet
+  cash: '#F59E0B', // amber
+  other: '#94A3B8', // slate
+};
+
+// Helper function to get the accent color for an account type
+export const getAccountTypeColor = type => {
+  return ACCOUNT_TYPE_COLORS[type] || ACCOUNT_TYPE_COLORS.other;
+};
+
 // Transaction types
 export const TRANSACTION_TYPES = {
   EXPENSE: 'expense',

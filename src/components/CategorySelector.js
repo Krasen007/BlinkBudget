@@ -5,7 +5,9 @@
 
 import { COLORS, SPACING } from '../utils/constants.js';
 import { CategoryCard } from './CategoryCard.js';
+import { AccountTypeCard } from './AccountTypeCard.js';
 import { CustomCategoryService } from '../core/custom-category-service.js';
+import { buildAccountTypeBreakdown } from '../utils/account-breakdown-utils.js';
 
 /**
  * Create interactive category selector
@@ -15,6 +17,9 @@ import { CustomCategoryService } from '../core/custom-category-service.js';
  * @param {Function} onCategoryClick - Selection callback
  * @param {Object} frequencyData - Optional frequency analysis data
  * @param {Object} budgetStatus - Optional budget status information
+ * @param {Object} options - Optional account exploration
+ * @param {Array} options.accounts - Accounts list (enables Explore Accounts)
+ * @param {Function} options.onAccountTypeClick - Account type selection callback
  * @returns {HTMLElement}
  */
 export const CategorySelector = (
@@ -23,8 +28,11 @@ export const CategorySelector = (
   getCategoryColors,
   onCategoryClick,
   frequencyData = null,
-  budgetStatus = null
+  budgetStatus = null,
+  options = {}
 ) => {
+  const { accounts = [], onAccountTypeClick = null } = options;
+
   const section = document.createElement('div');
   section.className = 'category-selector-section';
   section.style.background = COLORS.SURFACE;
@@ -197,6 +205,55 @@ export const CategorySelector = (
     });
 
     section.appendChild(tagGrid);
+  }
+
+  // --- Explore Accounts ---
+  // One card per account type (Cash, Checking Account, ...) so the period can
+  // be sliced by wallet type. Clicking a card opens the dashboard filtered to
+  // every transaction of that account type.
+  if (accounts.length > 0 && typeof onAccountTypeClick === 'function') {
+    const accountBreakdown = buildAccountTypeBreakdown({
+      transactions: currentData.transactions,
+      timePeriod: currentData.timePeriod,
+      accounts,
+    });
+
+    if (accountBreakdown.length > 0) {
+      const accountDivider = document.createElement('hr');
+      accountDivider.style.border = 'none';
+      accountDivider.style.borderTop = `1px solid ${COLORS.BORDER}`;
+      accountDivider.style.margin = `${SPACING.LG} 0`;
+      section.appendChild(accountDivider);
+
+      const accountTitle = document.createElement('h3');
+      accountTitle.textContent = 'Explore Accounts';
+      accountTitle.style.margin = `0 0 ${SPACING.XS} 0`;
+      accountTitle.style.color = COLORS.TEXT_MAIN;
+      section.appendChild(accountTitle);
+
+      const accountDescription = document.createElement('p');
+      accountDescription.textContent =
+        'Analyze spending by account type. Click on any account type to view all of its transactions.';
+      accountDescription.style.margin = `0 0 ${SPACING.XS} 0`;
+      accountDescription.style.color = COLORS.TEXT_MUTED;
+      section.appendChild(accountDescription);
+
+      const accountGrid = document.createElement('div');
+      accountGrid.className = 'category-grid account-grid';
+      accountGrid.style.display = 'grid';
+      accountGrid.style.gridTemplateColumns =
+        'repeat(auto-fill, minmax(250px, 1fr))';
+      accountGrid.style.gap = SPACING.MD;
+      accountGrid.style.marginTop = SPACING.MD;
+
+      accountBreakdown.forEach(accountType => {
+        accountGrid.appendChild(
+          AccountTypeCard(accountType, onAccountTypeClick)
+        );
+      });
+
+      section.appendChild(accountGrid);
+    }
   }
 
   return section;

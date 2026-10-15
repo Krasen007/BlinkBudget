@@ -67,6 +67,7 @@ import {
   getCategoryColors,
 } from '../utils/reports-charts.js';
 import { CategorySelector } from '../components/CategorySelector.js';
+import { AccountService } from '../core/Account/account-service.js';
 import { InsightsSection } from '../components/BudgetInsightsSection.js';
 import { BudgetSummaryCard } from '../components/BudgetSummaryCard.js';
 import { BudgetPlanner } from '../core/budget-planner.js';
@@ -428,6 +429,26 @@ export const ReportsView = (params = {}) => {
     }
 
     NavigationState.saveDashboardFilter(filterData);
+
+    // Navigate to dashboard
+    Router.navigate('dashboard');
+  }
+
+  /**
+   * Handle account type card click - navigate to dashboard filtered to every
+   * account of that type (e.g. all Cash accounts).
+   */
+  function handleAccountTypeCardClick(accountType) {
+    // Defensive guard - return early if the entry is incomplete
+    if (!accountType || !accountType.type) {
+      return;
+    }
+
+    NavigationState.saveDashboardFilter({
+      accountType: accountType.type,
+      timePeriod: currentTimePeriod,
+      source: 'reports',
+    });
 
     // Navigate to dashboard
     Router.navigate('dashboard');
@@ -1133,7 +1154,11 @@ export const ReportsView = (params = {}) => {
         categories => getCategoryColors(categories, categoryColorMap),
         handleCategoryCardClick,
         frequencyData.categories,
-        budgetStatusMap
+        budgetStatusMap,
+        {
+          accounts: AccountService.getAccounts(),
+          onAccountTypeClick: handleAccountTypeCardClick,
+        }
       );
       section.appendChild(categorySelectorSection);
       // Hide skeleton loader when content is loaded

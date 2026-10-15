@@ -287,7 +287,8 @@ export const NavigationState = {
 
   /**
    * Save dashboard filter state from Reports view
-   * @param {Object} filterData - Filter data with category, timePeriod, and source
+   * @param {Object} filterData - Filter data with category/tag/accountType,
+   *   timePeriod and source
    */
   saveDashboardFilter(filterData) {
     try {
@@ -296,7 +297,9 @@ export const NavigationState = {
         return;
       }
 
-      // Validate that either category or tag field exists and is valid
+      // Validate that at least one supported filter field exists and is valid.
+      // Reports can hand over a category, a tag, an account type (Explore
+      // Accounts) or a single account id.
       const hasCategory =
         filterData.category &&
         typeof filterData.category === 'string' &&
@@ -305,10 +308,18 @@ export const NavigationState = {
         filterData.tag &&
         typeof filterData.tag === 'string' &&
         filterData.tag.trim() !== '';
+      const hasAccountType =
+        filterData.accountType &&
+        typeof filterData.accountType === 'string' &&
+        filterData.accountType.trim() !== '';
+      const hasAccountId =
+        filterData.accountId &&
+        typeof filterData.accountId === 'string' &&
+        filterData.accountId.trim() !== '';
 
-      if (!hasCategory && !hasTag) {
+      if (!hasCategory && !hasTag && !hasAccountType && !hasAccountId) {
         console.warn(
-          '[NavigationState] Invalid or missing category or tag field in filterData'
+          '[NavigationState] Invalid or missing category, tag or account field in filterData'
         );
         return;
       }
@@ -349,7 +360,13 @@ export const NavigationState = {
       const filterData = safeJsonParse(savedData);
 
       // Validate saved data
-      if (!filterData || (!filterData.category && !filterData.tag)) {
+      if (
+        !filterData ||
+        (!filterData.category &&
+          !filterData.tag &&
+          !filterData.accountType &&
+          !filterData.accountId)
+      ) {
         console.warn('[NavigationState] Invalid saved dashboard filter data');
         return null;
       }
