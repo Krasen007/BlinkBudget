@@ -37,7 +37,10 @@ export const AccountTypeCard = (accountType, onClick = () => {}) => {
   name.style.textAlign = 'center';
   card.appendChild(name);
 
-  const isNetCredit = accountType.amount <= 0;
+  // A negative net means refunds outweighed spending. Zero just means the type
+  // had no spending this period (e.g. income/transfers only) — that is not a
+  // refund, so it keeps the default styling.
+  const isNetCredit = accountType.amount < 0;
 
   const amount = document.createElement('div');
   amount.className = 'category-amount';

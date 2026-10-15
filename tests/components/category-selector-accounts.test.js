@@ -166,4 +166,25 @@ describe('CategorySelector - Explore Accounts', () => {
 
     expect(section.querySelectorAll('[data-account-type]')).toHaveLength(0);
   });
+
+  it('does not label an income-only account type as a net refund', () => {
+    const section = render({
+      transactions: [
+        {
+          id: 't1',
+          type: 'income',
+          category: 'Salary',
+          amount: 500,
+          accountId: 'acc-cash',
+          timestamp: '2026-09-05T10:00:00.000Z',
+        },
+      ],
+      onAccountTypeClick: vi.fn(),
+    });
+
+    const card = section.querySelector('[data-account-type="cash"]');
+    expect(card).not.toBeNull();
+    expect(card.textContent).not.toContain('Net Refund');
+    expect(card.textContent).toContain('1 transaction');
+  });
 });
