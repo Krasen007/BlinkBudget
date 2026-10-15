@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Explore Accounts in Reports** - Below Explore Categories and Explore Tags,
+  Reports now shows one card per account type (Cash, Checking Account, Savings,
+  ...) with how much was spent from those accounts during the selected period.
+  Tapping a card opens the dashboard filtered to every transaction of that
+  account type, so "all cash spending" is one tap away.
+
 ### Fixed
 
 - **Tags and labels load offline at startup** - On a cold start the tag list

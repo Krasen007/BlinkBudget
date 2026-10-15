@@ -145,7 +145,6 @@ vi.mock('../../src/utils/reports-utils.js', () => ({
   }),
 }));
 
-
 describe('DashboardView account type filter', () => {
   let container;
 

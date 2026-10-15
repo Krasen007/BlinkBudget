@@ -57,7 +57,10 @@ vi.mock('../../src/core/transaction-service.js', () => ({
 
 vi.mock('../../src/core/Account/account-service.js', () => ({
   AccountService: {
-    getAccounts: vi.fn(() => []),
+    getAccounts: vi.fn(() => [
+      { id: 'acc-checking', name: 'Main Checking', type: 'checking' },
+      { id: 'acc-cash', name: 'Wallet', type: 'cash' },
+    ]),
   },
 }));
 
@@ -72,6 +75,7 @@ vi.mock('../../src/core/navigation-state.js', () => ({
     restoreTimePeriod: vi.fn(() => null),
     restoreReportsCategoryFilter: vi.fn(() => null),
     clearReportsCategoryFilter: vi.fn(),
+    saveDashboardFilter: vi.fn(),
   },
 }));
 
@@ -156,7 +160,7 @@ vi.mock('../../src/utils/reports-charts.js', () => ({
 }));
 
 vi.mock('../../src/components/CategorySelector.js', () => ({
-  CategorySelector: () => document.createElement('div'),
+  CategorySelector: vi.fn(() => document.createElement('div')),
 }));
 
 vi.mock('../../src/components/BudgetInsightsSection.js', () => ({
@@ -176,6 +180,9 @@ vi.mock('../../src/core/budget-planner.js', () => ({
 
 import { ReportsView } from '../../src/views/ReportsView.js';
 import { TimePeriodSelector } from '../../src/components/TimePeriodSelector.js';
+import { CategorySelector } from '../../src/components/CategorySelector.js';
+import { NavigationState } from '../../src/core/navigation-state.js';
+import { Router } from '../../src/core/router.js';
 
 describe('ReportsView skeleton loading', () => {
   beforeEach(() => {
@@ -237,5 +244,51 @@ describe('ReportsView skeleton loading', () => {
     expect(startDate.getDate()).toBe(14);
 
     window.location.hash = initialHash;
+  });
+
+  it('wires Explore Accounts to the dashboard account-type filter', async () => {
+    const view = ReportsView();
+    document.body.appendChild(view);
+
+    await Promise.resolve();
+    await Promise.resolve();
+    vi.advanceTimersByTime(500);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    const calls = vi.mocked(CategorySelector).mock.calls;
+    expect(calls.length).toBeGreaterThan(0);
+
+    // 7th argument carries the account exploration options
+    const options = calls.at(-1)[6];
+    expect(options.accounts).toEqual([
+      { id: 'acc-checking', name: 'Main Checking', type: 'checking' },
+      { id: 'acc-cash', name: 'Wallet', type: 'cash' },
+    ]);
+    expect(typeof options.onAccountTypeClick).toBe('function');
+
+    options.onAccountTypeClick({ type: 'cash' });
+
+    expect(NavigationState.saveDashboardFilter).toHaveBeenCalledWith(
+      expect.objectContaining({ accountType: 'cash', source: 'reports' })
+    );
+    expect(Router.navigate).toHaveBeenCalledWith('dashboard');
+  });
+
+  it('ignores an account card that has no type', async () => {
+    const view = ReportsView();
+    document.body.appendChild(view);
+
+    await Promise.resolve();
+    await Promise.resolve();
+    vi.advanceTimersByTime(500);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    const options = vi.mocked(CategorySelector).mock.calls.at(-1)[6];
+    options.onAccountTypeClick({});
+
+    expect(NavigationState.saveDashboardFilter).not.toHaveBeenCalled();
+    expect(Router.navigate).not.toHaveBeenCalledWith('dashboard');
   });
 });

@@ -106,7 +106,11 @@ describe('buildAccountTypeBreakdown', () => {
   it('ignores transactions outside the period and ghost copies', () => {
     const breakdown = buildAccountTypeBreakdown({
       transactions: [
-        tx({ id: 'outside', accountId: 'acc-cash-1', timestamp: '2026-10-02T10:00:00.000Z' }),
+        tx({
+          id: 'outside',
+          accountId: 'acc-cash-1',
+          timestamp: '2026-10-02T10:00:00.000Z',
+        }),
         tx({
           id: 'ghost',
           accountId: 'acc-cash-1',

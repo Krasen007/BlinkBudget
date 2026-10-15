@@ -56,9 +56,9 @@ describe('resolveAccountIdsForFilter', () => {
   });
 
   it('resolves every account of a type', () => {
-    expect([...resolveAccountIdsForFilter('type:cash', ACCOUNTS)].sort()).toEqual(
-      ['acc-cash-1', 'acc-cash-2']
-    );
+    expect(
+      [...resolveAccountIdsForFilter('type:cash', ACCOUNTS)].sort()
+    ).toEqual(['acc-cash-1', 'acc-cash-2']);
   });
 
   it('resolves the legacy credit card type alias', () => {
@@ -88,7 +88,10 @@ describe('isAccountFilterValid', () => {
 describe('transactionMatchesAccountFilter', () => {
   const cashTransaction = { accountId: 'acc-cash-1', toAccountId: null };
   const checkingTransaction = { accountId: 'acc-checking', toAccountId: null };
-  const transferIntoCash = { accountId: 'acc-checking', toAccountId: 'acc-cash-2' };
+  const transferIntoCash = {
+    accountId: 'acc-checking',
+    toAccountId: 'acc-cash-2',
+  };
 
   it('matches every transaction when the filter is all', () => {
     expect(

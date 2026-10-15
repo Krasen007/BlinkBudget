@@ -40,7 +40,11 @@ const buildData = (transactions = []) => ({
   insights: [],
 });
 
-const render = ({ transactions = [], accounts = ACCOUNTS, onAccountTypeClick } = {}) =>
+const render = ({
+  transactions = [],
+  accounts = ACCOUNTS,
+  onAccountTypeClick,
+} = {}) =>
   CategorySelector(
     buildData(transactions),
     colorMap,
@@ -72,7 +76,9 @@ describe('CategorySelector - Explore Accounts', () => {
       onAccountTypeClick: vi.fn(),
     });
 
-    const headings = [...section.querySelectorAll('h3')].map(h => h.textContent);
+    const headings = [...section.querySelectorAll('h3')].map(
+      h => h.textContent
+    );
     expect(headings).toEqual([
       'Explore Categories',
       'Explore Tags',
@@ -136,7 +142,9 @@ describe('CategorySelector - Explore Accounts', () => {
       vi.fn()
     );
 
-    const headings = [...section.querySelectorAll('h3')].map(h => h.textContent);
+    const headings = [...section.querySelectorAll('h3')].map(
+      h => h.textContent
+    );
     expect(headings).not.toContain('Explore Accounts');
     expect(section.querySelectorAll('[data-account-type]')).toHaveLength(0);
   });
