@@ -13,6 +13,7 @@ vi.mock('../../src/core/auth-service.js', () => ({
 vi.mock('../../src/core/sync-service.js', () => ({
   SyncService: {
     queueSync: vi.fn(),
+    pushToCloudSafe: vi.fn(),
   },
 }));
 
@@ -28,9 +29,45 @@ import {
 } from '../../src/utils/reports-charts.js';
 import { STORAGE_KEYS } from '../../src/utils/constants.js';
 
+// tests/setup.js replaces localStorage with no-op vi.fn() mocks, so seeds
+// would be silently discarded and CustomCategoryService.getAll() would run
+// its system-category migration on an empty store. Install a working
+// in-memory implementation (same pattern as
+// tests/core/data-integrity-categories.test.js).
+class LocalStorageMock {
+  constructor() {
+    this.store = {};
+  }
+
+  clear() {
+    this.store = {};
+  }
+
+  getItem(key) {
+    return this.store[key] || null;
+  }
+
+  setItem(key, value) {
+    this.store[key] = String(value);
+  }
+
+  removeItem(key) {
+    delete this.store[key];
+  }
+
+  get length() {
+    return Object.keys(this.store).length;
+  }
+
+  key(index) {
+    const keys = Object.keys(this.store);
+    return keys[index] || null;
+  }
+}
+
 describe('getColorForCategory / getCategoryColors', () => {
   beforeEach(() => {
-    localStorage.clear();
+    global.localStorage = new LocalStorageMock();
     // Skip migration so getAll reads exactly what we seed
     localStorage.setItem('categories_initialized_user-1', '1');
   });

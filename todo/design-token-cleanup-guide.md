@@ -4,9 +4,10 @@ How to clear `local/no-raw-style-values` warnings safely.
 Companion to [ai-slop-inspection-guide.md](ai-slop-inspection-guide.md) §5 (this guide is the
 _operational_ playbook; that one is the philosophy).
 
-**Status (2026-01-10):** 🎉 **ALL `local/no-raw-style-values` warnings resolved — 86 → 0.**
-The queue in §6 is closed; §7 has the full session history. Run `yarn lint` to confirm the
-count stays at zero as new code lands.
+**Status (2026-10-17):** ✅ Queue closed — `src/` stays at **0 warnings**. This guide is kept as
+the living playbook for when new warnings appear; run `yarn lint` to check the count as new code
+lands. (The one-time 86 → 0 cleanup and its session history are in git —
+`todo/design-token-cleanup-guide.md` @ `371c1df`.)
 
 ---
 
@@ -100,7 +101,8 @@ budgetEl.style.padding = '2px 6px';
 ```
 
 (Real live example from `CategoryCard.js` — the author has since ruled that the _GoalsSection
-`6px` gap_ should snap to `4px` instead; see §7. Padding halves with mixed values still get
+`6px` gap_ should snap to `4px` instead; that one is now `SPACING.XS` with no disable. Padding
+halves with mixed values still get
 reported rather than snapped.)
 
 ### 4b. `tests/system/javascript-design-tokens.test.js` runs its own bare `Linter`
@@ -172,58 +174,21 @@ color: var(--color-primary);        // was var(--color-primary, #00d084)  ← he
 
 ---
 
-## 6. Remaining queue — ✅ CLOSED (0 warnings, final session)
+## 6. Closing a new warning
 
-All 12 files from the queue were cleared (§7 has the log). Two reusable patterns if
-`yarn lint` ever surfaces new warnings of this type:
+Every warning falls into one of two buckets:
 
-- **Repeated magic dimension with no token** → module-scope named constant
-  (`MONTH_NAV_SIZE = '30px'` in `DashboardStatsCard.js`, used 4× so arrow width and content
-  clearance can never drift apart). The ai-slop guide sanctions named constants for this case.
-- **Cohesive block of deliberate fallbacks** → one
-  `/* eslint-disable local/no-raw-style-values -- reason */` … `/* eslint-enable ... */` pair
-  around the whole block instead of N inline directives (used once, in `config/app.config.js`).
+- **Exact token exists** → convert it (§5 patterns). Done.
+- **No token exists** → one-line justified disable (§4a) + report it as "no token exists".
+  Never invent a token in a cleanup pass; never snap to a _nearby_ token — both are design
+  decisions the author makes.
 
----
+Two named-constant precedents exist if the same magic dimension keeps recurring
+(`MONTH_NAV_SIZE` in `DashboardStatsCard.js` — used 4× so arrow width and content clearance
+can't drift apart). Reuse that approach before proposing a new token.
 
-## 7. Completed history (sessions before 2026-10-10)
+After any batch: run `yarn lint` (must stay at 0) and the two guard tests:
 
-- `TransactionForm.js` `0px`→`0` · `TransactionList.js`/`ForecastCard.js` → `SPACING.XXS` ·
-  `ActionCard.js` cssText → `SPACING.XS`/`XXS` · `mobile-utils.js` → `FONT_SIZES.PREVENT_ZOOM`
-  (+ import added) · `pwa.js` overlay+dialog → justified disables (early-render, §5c) ·
-  `SettingsView.js` → `SPACING.MD` + dropped dead `#00d084` fallback
-- `GoalsSection.js` → `SPACING.XS`/`XXS` + one justified disable (`6px` gap) ·
-  `InsightCard.js` → `SPACING.SM` ×2 · `DateFormatSection.js` → `${COLORS.BORDER}` (+ `COLORS` import)
-- Fixed the latent `javascript-design-tokens.test.js` plugin gap (§4b)
-- **Final batch — 72 warnings across 12 files, cleared in one session:**
-  - Exact-token conversions: `SPACING.*` for every `2/4/8/12px` gap, padding, margin;
-    `COLORS.BORDER`/`COLORS.ERROR` template borders everywhere (`${}` also un-gates cssText
-    blocks legitimately); `FONT_SIZES.BASE` for `16px` button fonts; `var(--radius-md)` for
-    `8px` radii; `var(--touch-target-min)` for `44px`; `var(--focus-width)` for `2px`
-    outlines; `var(--shadow-xl)` for the dialog's first shadow layer; `var(--radius-full)`
-    for the pill badge (`20px` on a ~22px badge clamps to the same pill — render-identical);
-    `0px` → `'0'` (`ChartRenderer`); composed shadows from `SPACING` tokens (`CategoryCard`).
-  - `AccountSection`: dropped ~8 dead `#ef4444`/`--color-error` fallbacks (dialogs only
-    render in a fully-loaded app) — literals, cssText, and the four unflagged ternary
-    siblings for intra-file consistency.
-  - `NetworkStatus`: `#fff` → `COLORS.TEXT_MAIN` (flagged line + its `Object.assign` sibling).
-  - Justified disables (6 inline + the `config` block, each with one-line `--` reason): the two
-    mixed `6px` paddings (`CategoryCard` `2px 6px`, `DashboardStatsCard` `6px 8px` — mixed
-    values get reported, not snapped), `60px` preset width, `2000px` expand sentinel, and the
-    `10/20px` glow blurs.
-  - `config/app.config.js`: one block disable/enable pair — every `var(--x, fallback)` is
-    load-bearing because this UI renders when the asset pipeline itself may be broken (§5c).
-  - Verified: `yarn check` green · ESLint **0 messages** · full suite **654/654** ·
-    purge-guard test green (all new `var()` refs survive).
-
-**Open question for the author:** does `6px` gap (GoalsSection `createField`) deserve a designed
-token (e.g. a half-step `SPACING.XS_SM`), or should it snap to `4px`?
-→ **DECIDED (final session): snap to `4px`** — now `SPACING.XS`, disable removed.
-
-**Blue focus-ring fossil (AccountSection):**
-→ **DECIDED (final session): unified.** All four ring sites now use `var(--focus-shadow)`
-(same `0 0 0 3px` geometry the CSS layer uses for `.input:focus` / `.mobile-form-select:focus`);
-the error branch keeps its red glow but tokenized as
-`color-mix(in srgb, var(--color-error) 10%, transparent)` (the `reports-ui.js` pattern).
-Both `eslint-disable`s deleted as a result. Rendering shift is intentional per author:
-blue 10% → purple 20% on focus.
+```powershell
+npx vitest run tests/system/javascript-design-tokens.test.js tests/system/design-tokens.test.js
+```
