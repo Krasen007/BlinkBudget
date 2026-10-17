@@ -50,8 +50,34 @@ const localRules = {
       schema: [],
     },
     create(context) {
-      const rawStyleValue =
-        /(?:^|\s)(?:-?\d+(?:\.\d+)?px\b)|#[\da-fA-F]{3,8}\b/;
+      const rawStyleValue = /-?\d+(?:\.\d+)?px\b|#[\da-fA-F]{3,8}\b/;
+
+      const isStyleObject = node =>
+        node.type === 'MemberExpression' &&
+        !node.computed &&
+        node.property.name === 'style';
+
+      const readValue = node => {
+        if (node.type === 'Literal') {
+          return typeof node.value === 'string' ? node.value : null;
+        }
+        if (node.type === 'TemplateLiteral' && node.expressions.length === 0) {
+          return node.quasis[0].value.cooked;
+        }
+        return null;
+      };
+
+      const reportIfRaw = valueNode => {
+        const value = readValue(valueNode);
+
+        if (typeof value === 'string' && rawStyleValue.test(value)) {
+          context.report({
+            node: valueNode,
+            message:
+              'Use a design token or CSS variable instead of raw hex or px values in .style assignments.',
+          });
+        }
+      };
 
       return {
         AssignmentExpression(node) {
@@ -59,27 +85,29 @@ const localRules = {
 
           if (
             left.type !== 'MemberExpression' ||
-            left.object.type !== 'MemberExpression' ||
-            left.object.computed ||
-            left.object.property.name !== 'style'
+            !isStyleObject(left.object)
           ) {
             return;
           }
 
-          const value =
-            node.right.type === 'Literal'
-              ? node.right.value
-              : node.right.type === 'TemplateLiteral' &&
-                  node.right.expressions.length === 0
-                ? node.right.quasis[0].value.cooked
-                : null;
+          reportIfRaw(node.right);
+        },
+        CallExpression(node) {
+          const callee = node.callee;
 
-          if (typeof value === 'string' && rawStyleValue.test(value)) {
-            context.report({
-              node: node.right,
-              message:
-                'Use a design token or CSS variable instead of raw hex or px values in .style assignments.',
-            });
+          if (
+            callee.type !== 'MemberExpression' ||
+            callee.computed ||
+            callee.property.name !== 'setProperty' ||
+            !isStyleObject(callee.object)
+          ) {
+            return;
+          }
+
+          const valueNode = node.arguments[1];
+
+          if (valueNode) {
+            reportIfRaw(valueNode);
           }
         },
       };
@@ -93,11 +121,6 @@ export default [
       'dist/**',
       'node_modules/**',
       'coverage/**',
-      '*.config.js',
-      'vite.config.js',
-      'postcss.config.js',
-      'vite.config.lightning.js',
-      'functions/**',
       '.claude/**',
       '.gemini/**',
       '.opencode/**',
@@ -197,7 +220,7 @@ export default [
     },
   },
   {
-    files: ['**/*.config.js', 'scripts/**/*.js', '.stylelintrc.js'],
+    files: ['**/*.config.js', 'scripts/**/*.js', '**/*.cjs'],
     languageOptions: {
       globals: {
         process: 'readonly',

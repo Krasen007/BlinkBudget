@@ -40,7 +40,6 @@
     "esbuild": "^0.28.0",
     "eslint": "^10.5.0",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.6",
     "eslint-plugin-unused-imports": "^4.4.1",
     "jsdom": "^29.1.1",
     "postcss": "^8.5.22",
@@ -83,5 +82,5 @@
     "bracketSameLine": false,
     "proseWrap": "preserve"
   },
-  "packageManager": "yarn@4.17.1"
+  "packageManager": "yarn@4.18.1"
 }

@@ -347,8 +347,7 @@ export const CategorySelector = (
       )
         ? CATEGORY_COLORS[group.name]
         : null;
-      const color =
-        customColor || predefinedColor || COLORS.INCOME_COLOR;
+      const color = customColor || predefinedColor || COLORS.INCOME_COLOR;
       incomeColorMap.set(group.name, color);
     });
 
