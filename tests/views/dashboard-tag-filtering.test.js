@@ -184,6 +184,7 @@ describe('DashboardView tag (label) filtering', () => {
     global.localStorage = originalLocalStorage;
     global.sessionStorage = originalSessionStorage;
     vi.clearAllMocks();
+    vi.unstubAllEnvs();
     vi.useRealTimers();
   });
 
@@ -293,5 +294,72 @@ describe('DashboardView tag (label) filtering', () => {
         global.sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER)
       ).getMonth()
     ).toBe(4);
+  });
+
+  it('keeps a UTC quick-date transaction when deriving its month filter', () => {
+    vi.stubEnv('TZ', 'America/Los_Angeles');
+    const juneFirstTransaction = {
+      id: 'june-first',
+      amount: 15,
+      category: 'Food',
+      type: 'expense',
+      accountId: 'main',
+      tags: [],
+      timestamp: '2026-06-01T00:00:00.000Z',
+    };
+    global.localStorage.setItem(
+      STORAGE_KEYS.TRANSACTIONS,
+      JSON.stringify([juneFirstTransaction])
+    );
+    global.sessionStorage.setItem(
+      STORAGE_KEYS.DASHBOARD_DATE_FILTER,
+      '2026-06-01'
+    );
+
+    container = DashboardView();
+    expect(getRenderedTransactionIds(container)).toEqual(['june-first']);
+
+    container
+      .querySelector('.transaction-item-category')
+      .dispatchEvent(new Event('click', { bubbles: true }));
+
+    expect(getRenderedTransactionIds(container)).toEqual(['june-first']);
+    expect(
+      global.sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER)
+    ).toBe('2026-06-01T00:00:00.000Z');
+  });
+
+  it('uses the UTC calendar month for a UTC-midnight Reports period', () => {
+    vi.stubEnv('TZ', 'America/Los_Angeles');
+    global.localStorage.setItem(
+      STORAGE_KEYS.TRANSACTIONS,
+      JSON.stringify([
+        {
+          id: 'june-first',
+          amount: 15,
+          category: 'Food',
+          type: 'expense',
+          accountId: 'main',
+          tags: [],
+          timestamp: '2026-06-01T00:00:00.000Z',
+        },
+      ])
+    );
+    NavigationState.saveDashboardFilter({
+      category: 'Food',
+      source: 'reports',
+      timePeriod: {
+        type: 'monthly',
+        startDate: '2026-06-01T00:00:00.000Z',
+        endDate: '2026-06-30T23:59:59.999Z',
+      },
+    });
+
+    container = DashboardView();
+
+    expect(getRenderedTransactionIds(container)).toEqual(['june-first']);
+    expect(
+      global.sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER)
+    ).toBe('2026-06-01T00:00:00.000Z');
   });
 });

@@ -44,6 +44,30 @@ let hasPreloadedFinancialPlanning = false;
 let hasScheduledDashboardPreloads = false;
 let financialPlanningPreloadPromise = null;
 
+const getCalendarMonth = dateValue => {
+  const date = dateValue instanceof Date ? dateValue : new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return null;
+
+  const isUtcMidnight =
+    date.getUTCHours() === 0 &&
+    date.getUTCMinutes() === 0 &&
+    date.getUTCSeconds() === 0 &&
+    date.getUTCMilliseconds() === 0;
+
+  return {
+    year: isUtcMidnight ? date.getUTCFullYear() : date.getFullYear(),
+    month: isUtcMidnight ? date.getUTCMonth() : date.getMonth(),
+  };
+};
+
+const createMonthFilter = (year, month) =>
+  new Date(Date.UTC(year, month, 1)).toISOString();
+
+const normalizeMonthFilter = value => {
+  const month = getCalendarMonth(value);
+  return month ? createMonthFilter(month.year, month.month) : null;
+};
+
 // Preload reports data in background when user is on dashboard
 const preloadReportsData = () => {
   // Skip if already preloaded in this session - check first to avoid expensive operations
@@ -217,8 +241,26 @@ export const DashboardView = (params = {}) => {
     sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER) || null;
   let currentTagFilter =
     sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_TAG_FILTER) || null;
-  let currentMonthFilter =
-    sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER) || null;
+  const savedMonthFilter = sessionStorage.getItem(
+    STORAGE_KEYS.DASHBOARD_MONTH_FILTER
+  );
+  let currentMonthFilter = savedMonthFilter
+    ? normalizeMonthFilter(savedMonthFilter)
+    : null;
+  if (
+    savedMonthFilter &&
+    currentMonthFilter &&
+    currentMonthFilter !== savedMonthFilter
+  ) {
+    sessionStorage.setItem(
+      STORAGE_KEYS.DASHBOARD_MONTH_FILTER,
+      currentMonthFilter
+    );
+  } else if (savedMonthFilter) {
+    if (!currentMonthFilter) {
+      sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
+    }
+  }
   let currentTypeFilter = NavigationState.restoreDashboardTypeFilter() || null;
 
   let currentDateRangeFilter = null;
@@ -468,16 +510,26 @@ export const DashboardView = (params = {}) => {
       const isMonthly = period.type === 'monthly';
 
       if (isCategoryOrTagDrill && isMonthly && period.startDate) {
-        const monthStart = new Date(period.startDate);
-        const monthIso = new Date(
-          monthStart.getFullYear(),
-          monthStart.getMonth(),
-          1
-        ).toISOString();
-        currentMonthFilter = monthIso;
-        sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER, monthIso);
-        currentDateRangeFilter = null;
-        sessionStorage.removeItem('dashboard_date_range_filter');
+        const month = getCalendarMonth(period.startDate);
+        if (month) {
+          const monthIso = createMonthFilter(month.year, month.month);
+          currentMonthFilter = monthIso;
+          sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER, monthIso);
+          currentDateRangeFilter = null;
+          sessionStorage.removeItem('dashboard_date_range_filter');
+        } else {
+          console.warn(
+            '[DashboardView] Reports period has an invalid start date:',
+            period.startDate
+          );
+          currentDateRangeFilter = period;
+          sessionStorage.setItem(
+            'dashboard_date_range_filter',
+            JSON.stringify(period)
+          );
+          currentMonthFilter = null;
+          sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
+        }
       } else {
         currentDateRangeFilter = period;
         sessionStorage.setItem(
@@ -656,10 +708,11 @@ export const DashboardView = (params = {}) => {
         } else if (currentMonthFilter) {
           // Quick Month Filter (from clicking arrows in category bar)
           const tDate = new Date(t.timestamp);
-          const filterDate = new Date(currentMonthFilter);
+          const filterDate = getCalendarMonth(currentMonthFilter);
           if (
-            tDate.getMonth() !== filterDate.getMonth() ||
-            tDate.getFullYear() !== filterDate.getFullYear()
+            !filterDate ||
+            tDate.getUTCMonth() !== filterDate.month ||
+            tDate.getUTCFullYear() !== filterDate.year
           ) {
             return false;
           }
@@ -762,9 +815,9 @@ export const DashboardView = (params = {}) => {
     } else {
       let filterMonth, filterYear;
       if (currentMonthFilter) {
-        const filterDate = new Date(currentMonthFilter);
-        filterMonth = filterDate.getMonth();
-        filterYear = filterDate.getFullYear();
+        const filterDate = getCalendarMonth(currentMonthFilter);
+        filterMonth = filterDate?.month;
+        filterYear = filterDate?.year;
       } else {
         const now = new Date();
         filterMonth = now.getMonth();
@@ -788,8 +841,8 @@ export const DashboardView = (params = {}) => {
       periodTransactions = validTransactionsForStats.filter(t => {
         const transactionDate = new Date(t.timestamp);
         return (
-          transactionDate.getMonth() === filterMonth &&
-          transactionDate.getFullYear() === filterYear
+          transactionDate.getUTCMonth() === filterMonth &&
+          transactionDate.getUTCFullYear() === filterYear
         );
       });
     }
@@ -1016,15 +1069,12 @@ export const DashboardView = (params = {}) => {
           };
           NavigationState.saveTimePeriod(timePeriod);
         } else if (currentMonthFilter) {
-          const monthDate = new Date(currentMonthFilter);
-          const startDate = new Date(
-            monthDate.getFullYear(),
-            monthDate.getMonth(),
-            1
-          );
+          const month = getCalendarMonth(currentMonthFilter);
+          const startDate = month ? new Date(month.year, month.month, 1) : null;
+          if (!startDate) return;
           const endDate = new Date(
-            monthDate.getFullYear(),
-            monthDate.getMonth() + 1,
+            month.year,
+            month.month + 1,
             0,
             23,
             59,
@@ -1065,7 +1115,10 @@ export const DashboardView = (params = {}) => {
       // Determine filter message based on active filters
       let filterMessage;
       const monthDate = currentMonthFilter
-        ? new Date(currentMonthFilter)
+        ? (() => {
+            const month = getCalendarMonth(currentMonthFilter);
+            return month ? new Date(month.year, month.month, 1) : null;
+          })()
         : null;
       const monthLabel = monthDate
         ? monthDate.toLocaleString('en-US', { month: 'long', year: 'numeric' })
@@ -1193,18 +1246,17 @@ export const DashboardView = (params = {}) => {
             !currentDateRangeFilter &&
             (currentDateFilter || !currentMonthFilter)
           ) {
-            let monthContext = new Date();
+            let month;
             if (currentDateFilter) {
-              const [year, month, day] = currentDateFilter
+              const [year, monthNumber] = currentDateFilter
                 .split('-')
                 .map(Number);
-              monthContext = new Date(year, month - 1, day);
+              month = { year, month: monthNumber - 1 };
+            } else {
+              const now = new Date();
+              month = { year: now.getFullYear(), month: now.getMonth() };
             }
-            const monthIso = new Date(
-              monthContext.getFullYear(),
-              monthContext.getMonth(),
-              1
-            ).toISOString();
+            const monthIso = createMonthFilter(month.year, month.month);
             currentMonthFilter = monthIso;
             sessionStorage.setItem(
               STORAGE_KEYS.DASHBOARD_MONTH_FILTER,

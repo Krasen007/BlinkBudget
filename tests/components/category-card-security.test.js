@@ -40,4 +40,19 @@ describe('CategoryCard keyed data lookups', () => {
 
     expect(card.textContent).toContain('80% used');
   });
+
+  it('skips null frequency entries without failing to render the card', () => {
+    const frequencyData = Object.create(null);
+    frequencyData.Food = null;
+
+    const card = CategoryCard(
+      { name: 'Food', amount: 10 },
+      0,
+      new Map(),
+      () => {},
+      frequencyData
+    );
+
+    expect(card.textContent).toContain('Food');
+  });
 });

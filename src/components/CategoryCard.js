@@ -123,7 +123,11 @@ export const CategoryCard = (
   card.appendChild(freq);
 
   // Add frequency if available
-  if (frequencyData && Object.hasOwn(frequencyData, category.name)) {
+  if (
+    frequencyData &&
+    Object.hasOwn(frequencyData, category.name) &&
+    frequencyData[category.name] != null
+  ) {
     const frequency = frequencyData[category.name];
     if (
       frequency.averageVisitsPerWeek !== undefined &&
