@@ -123,7 +123,7 @@ export const CategoryCard = (
   card.appendChild(freq);
 
   // Add frequency if available
-  if (frequencyData && frequencyData[category.name]) {
+  if (frequencyData && Object.hasOwn(frequencyData, category.name)) {
     const frequency = frequencyData[category.name];
     if (
       frequency.averageVisitsPerWeek !== undefined &&
@@ -139,7 +139,7 @@ export const CategoryCard = (
   }
 
   // Budget status display
-  if (budgetStatus && budgetStatus[category.name]) {
+  if (budgetStatus && Object.hasOwn(budgetStatus, category.name)) {
     const budget = budgetStatus[category.name];
     const budgetEl = document.createElement('div');
     budgetEl.style.fontSize = '0.75rem';

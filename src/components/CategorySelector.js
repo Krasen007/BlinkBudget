@@ -130,30 +130,31 @@ export const CategorySelector = (
   );
 
   // 3. Aggregate tagged transactions
-  const tagBreakdown = {};
+  const tagBreakdown = new Map();
   periodTransactions.forEach(t => {
     if (t.tags && Array.isArray(t.tags)) {
       t.tags.forEach(tag => {
         if (!tag) return;
-        if (!tagBreakdown[tag]) {
-          tagBreakdown[tag] = {
+        if (!tagBreakdown.has(tag)) {
+          tagBreakdown.set(tag, {
             name: tag,
             amount: 0,
             transactionCount: 0,
             isTag: true, // Mark it as tag for click handler
-          };
+          });
         }
+        const tagData = tagBreakdown.get(tag);
         if (t.type === 'expense') {
-          tagBreakdown[tag].amount += t.amount;
+          tagData.amount += t.amount;
         } else if (t.type === 'refund') {
-          tagBreakdown[tag].amount -= t.amount;
+          tagData.amount -= t.amount;
         }
-        tagBreakdown[tag].transactionCount += 1;
+        tagData.transactionCount += 1;
       });
     }
   });
 
-  const visibleTags = Object.values(tagBreakdown).map(tag => {
+  const visibleTags = [...tagBreakdown.values()].map(tag => {
     return {
       ...tag,
       percentage:

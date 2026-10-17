@@ -1,5 +1,3 @@
-/* global require, process, module */
-
 /**
  * Environment Variable Validation Script
  *

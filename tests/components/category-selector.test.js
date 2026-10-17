@@ -193,6 +193,30 @@ describe('CategorySelector - refund visibility (Explore Categories)', () => {
     expect(cards).toContain('Gadget');
   });
 
+  it('renders a tag named __proto__ without losing it to object prototype keys', () => {
+    const section = CategorySelector(
+      buildData(
+        [{ name: 'Food', amount: 10, transactionCount: 1, percentage: 100 }],
+        [
+          {
+            id: 'e1',
+            type: 'expense',
+            category: 'Food',
+            amount: 10,
+            tags: ['__proto__'],
+            timestamp: '2026-09-05T10:00:00.000Z',
+          },
+        ],
+        period
+      ),
+      colorMap,
+      getCategoryColors,
+      onCategoryClick
+    );
+
+    expect(cardsIn(section)).toContain('__proto__');
+  });
+
   it('shows empty state only when there are no categories at all', () => {
     const section = CategorySelector(
       buildData([], [], period),

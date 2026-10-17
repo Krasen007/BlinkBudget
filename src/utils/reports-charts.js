@@ -6,7 +6,6 @@
 
 import { COLORS, SPACING, DIMENSIONS, CATEGORY_COLORS } from './constants.js';
 import { getChartColors } from '../core/chart-config.js';
-import { escapeHtml } from './security-utils.js';
 import { formatCurrency } from './financial-planning-helpers.js';
 import { Router } from '../core/router.js';
 import { NavigationState } from '../core/navigation-state.js';
@@ -92,6 +91,15 @@ function computeCategoryPercentages(chart, datasetIndex, dataIndex) {
   };
 }
 
+function setCategoryDetailsMessage(container, text, fontSize = '0.9em') {
+  const message = document.createElement('div');
+  message.style.textAlign = 'center';
+  message.style.color = 'var(--color-text-muted)';
+  message.style.fontSize = fontSize;
+  message.textContent = text;
+  container.replaceChildren(message);
+}
+
 /**
  * Create tooltip configuration for category charts
  */
@@ -110,13 +118,10 @@ function createCategoryTooltipConfig(detailsContainer) {
           detailsContainer._updateDefaultText();
         } else {
           const actionText = window.innerWidth < 768 ? 'Tap' : 'Hover';
-          // deepcode ignore DOMXSS: actionText is a static string and escapeHtml() sanitizes any dynamic content
-          // snyk:disable-next-line javascript/DomBasedXss
-          detailsContainer.innerHTML = `
-                      <div style="text-align: center; color: var(--color-text-muted); font-size: 0.9em;">
-                          ${escapeHtml(actionText)} on a category slice to see details
-                      </div>
-                  `;
+          setCategoryDetailsMessage(
+            detailsContainer,
+            `${actionText} on a category slice to see details`
+          );
         }
         return;
       }
@@ -139,28 +144,58 @@ function createCategoryTooltipConfig(detailsContainer) {
 
         const formattedValue = formatCurrency(value);
 
-        // When categories are disabled via the legend the chart redraws
-        // without them, so show the original percentage next to the
-        // recalculated (visible-only) percentage. Only plain numeric
-        // strings reach the markup, each escaped through escapeHtml().
-        const percentageCell = hasHiddenCategories
-          ? `<span style="opacity: 0.7;" title="Original percentage (all categories)">${escapeHtml(originalPercentage)}%</span><span aria-hidden="true" style="margin: 0 4px;">→</span><span style="font-weight: 600; color: var(--color-primary);" title="Percentage of visible categories">${escapeHtml(visiblePercentage)}%</span>`
-          : `${escapeHtml(originalPercentage)}%`;
+        const detailsRow = document.createElement('div');
+        detailsRow.style.display = 'flex';
+        detailsRow.style.justifyContent = 'space-between';
+        detailsRow.style.alignItems = 'center';
 
-        // Create structured HTML for the details container
-        // Security: All dynamic values are escaped using escapeHtml()
-        // deepcode ignore DOMXSS: All dynamic values (label, formattedValue, percentage) are escaped using escapeHtml()
-        // snyk:disable-next-line javascript/DomBasedXss
-        detailsContainer.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-weight: 600; color: var(--color-text-main);">${escapeHtml(label)}</span>
-                            <span style="font-weight: bold; color: var(--color-primary);">${escapeHtml(formattedValue)}</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; font-size: 0.85em; color: var(--color-text-muted);">
-                            <span>Percentage</span>
-                            <span>${percentageCell}</span>
-                        </div>
-                    `;
+        const categoryLabel = document.createElement('span');
+        categoryLabel.style.fontWeight = '600';
+        categoryLabel.style.color = 'var(--color-text-main)';
+        categoryLabel.textContent = label;
+
+        const categoryValue = document.createElement('span');
+        categoryValue.style.fontWeight = 'bold';
+        categoryValue.style.color = 'var(--color-primary)';
+        categoryValue.textContent = formattedValue;
+
+        detailsRow.append(categoryLabel, categoryValue);
+
+        const percentageRow = document.createElement('div');
+        percentageRow.style.display = 'flex';
+        percentageRow.style.justifyContent = 'space-between';
+        percentageRow.style.alignItems = 'center';
+        percentageRow.style.marginTop = '4px';
+        percentageRow.style.fontSize = '0.85em';
+        percentageRow.style.color = 'var(--color-text-muted)';
+
+        const percentageLabel = document.createElement('span');
+        percentageLabel.textContent = 'Percentage';
+        const percentageValue = document.createElement('span');
+
+        if (hasHiddenCategories) {
+          const originalValue = document.createElement('span');
+          originalValue.title = 'Original percentage (all categories)';
+          originalValue.style.opacity = '0.7';
+          originalValue.textContent = `${originalPercentage}%`;
+
+          const separator = document.createElement('span');
+          separator.setAttribute('aria-hidden', 'true');
+          separator.style.margin = '0 4px';
+          separator.textContent = '→';
+
+          const visibleValue = document.createElement('span');
+          visibleValue.title = 'Percentage of visible categories';
+          visibleValue.style.fontWeight = '600';
+          visibleValue.style.color = 'var(--color-primary)';
+          visibleValue.textContent = `${visiblePercentage}%`;
+          percentageValue.append(originalValue, separator, visibleValue);
+        } else {
+          percentageValue.textContent = `${originalPercentage}%`;
+        }
+
+        percentageRow.append(percentageLabel, percentageValue);
+        detailsContainer.replaceChildren(detailsRow, percentageRow);
       }
     },
     callbacks: {
@@ -357,14 +392,10 @@ export async function createCategoryBreakdownChart(
 
   // Add default instruction text
   const initialAction = window.innerWidth < 768 ? 'Tap' : 'Hover';
-  // Security: initialAction is a static string, not user input
-  // deepcode ignore DOMXSS: initialAction is a static string and escapeHtml() sanitizes any dynamic content
-  // snyk:disable-next-line javascript/DomBasedXss
-  detailsContainer.innerHTML = `
-        <div style="text-align: center; color: var(--color-text-muted); font-size: 0.9em;">
-            ${escapeHtml(initialAction)} on a category slice to see details
-        </div>
-    `;
+  setCategoryDetailsMessage(
+    detailsContainer,
+    `${initialAction} on a category slice to see details`
+  );
 
   // Get consistent colors for all categories
   const categoryColors = getCategoryColors(sortedCategories, categoryColorMap);
@@ -445,12 +476,41 @@ export async function createCategoryBreakdownChart(
       item.style.opacity = isVis ? '1' : '0.4';
       item.style.textDecoration = isVis ? 'none' : 'line-through';
 
-      const percentageText =
-        hiddenCount > 0 && isVis
-          ? `<span style="opacity: 0.7;" title="Original percentage">${escapeHtml(originalPercentage)}%</span><span aria-hidden="true" style="margin: 0 4px;">→</span><span style="font-weight: 600; color: var(--color-primary);" title="Recalculated percentage">${escapeHtml(visiblePercentage)}%</span>`
-          : `${escapeHtml(originalPercentage)}%`;
+      const categoryLabel = document.createElement('span');
+      categoryLabel.style.color = 'var(--color-text-main)';
+      categoryLabel.style.fontWeight = '500';
+      categoryLabel.textContent = labels[index];
 
-      textEl.innerHTML = `<span style="color: var(--color-text-main); font-weight: 500;">${escapeHtml(labels[index])}</span> <span style="color: var(--color-text-muted); opacity: 0.8;">${percentageText}</span>`;
+      const percentageLabel = document.createElement('span');
+      percentageLabel.style.color = 'var(--color-text-muted)';
+      percentageLabel.style.opacity = '0.8';
+
+      if (hiddenCount > 0 && isVis) {
+        const originalValue = document.createElement('span');
+        originalValue.title = 'Original percentage';
+        originalValue.style.opacity = '0.7';
+        originalValue.textContent = `${originalPercentage}%`;
+
+        const separator = document.createElement('span');
+        separator.setAttribute('aria-hidden', 'true');
+        separator.style.margin = '0 4px';
+        separator.textContent = '→';
+
+        const visibleValue = document.createElement('span');
+        visibleValue.title = 'Recalculated percentage';
+        visibleValue.style.fontWeight = '600';
+        visibleValue.style.color = 'var(--color-primary)';
+        visibleValue.textContent = `${visiblePercentage}%`;
+        percentageLabel.append(originalValue, separator, visibleValue);
+      } else {
+        percentageLabel.textContent = `${originalPercentage}%`;
+      }
+
+      textEl.replaceChildren(
+        categoryLabel,
+        document.createTextNode(' '),
+        percentageLabel
+      );
     });
 
     // Update total spent container
@@ -468,18 +528,32 @@ export async function createCategoryBreakdownChart(
 
     if (detailsContainer && !detailsContainer._isHovered) {
       if (hiddenCount > 0) {
-        detailsContainer.innerHTML = `
-          <div style="text-align: center; color: var(--color-text-muted); font-size: 0.85em;">
-            ${hiddenCount} category excluded. Recalculated visible total: <strong style="color: var(--color-primary);">${escapeHtml(formatCurrency(visibleTotal))}</strong>. Click category in legend or chart to toggle.
-          </div>
-        `;
+        const message = document.createElement('div');
+        message.style.textAlign = 'center';
+        message.style.color = 'var(--color-text-muted)';
+        message.style.fontSize = '0.85em';
+        message.append(
+          document.createTextNode(
+            `${hiddenCount} category excluded. Recalculated visible total: `
+          )
+        );
+
+        const visibleTotalValue = document.createElement('strong');
+        visibleTotalValue.style.color = 'var(--color-primary)';
+        visibleTotalValue.textContent = formatCurrency(visibleTotal);
+        message.append(
+          visibleTotalValue,
+          document.createTextNode(
+            '. Click category in legend or chart to toggle.'
+          )
+        );
+        detailsContainer.replaceChildren(message);
       } else {
         const actionText = window.innerWidth < 768 ? 'Tap' : 'Hover';
-        detailsContainer.innerHTML = `
-          <div style="text-align: center; color: var(--color-text-muted); font-size: 0.9em;">
-            ${escapeHtml(actionText)} on a category slice to see details
-          </div>
-        `;
+        setCategoryDetailsMessage(
+          detailsContainer,
+          `${actionText} on a category slice to see details`
+        );
       }
     }
   };
@@ -519,10 +593,16 @@ export async function createCategoryBreakdownChart(
     colorBox.style.backgroundColor = datasets.backgroundColor[i];
 
     const text = document.createElement('span');
-    // Security: All dynamic values are escaped using escapeHtml()
-    // deepcode ignore DOMXSS: All dynamic values (label, percentage) are escaped using escapeHtml()
-    // snyk:disable-next-line javascript/DomBasedXss
-    text.innerHTML = `<span style="color: var(--color-text-main); font-weight: 500;">${escapeHtml(label)}</span> <span style="color: var(--color-text-muted); opacity: 0.8;">${escapeHtml(String(percentage))}%</span>`;
+    const labelText = document.createElement('span');
+    labelText.style.color = 'var(--color-text-main)';
+    labelText.style.fontWeight = '500';
+    labelText.textContent = label;
+
+    const percentageText = document.createElement('span');
+    percentageText.style.color = 'var(--color-text-muted)';
+    percentageText.style.opacity = '0.8';
+    percentageText.textContent = `${percentage}%`;
+    text.append(labelText, document.createTextNode(' '), percentageText);
 
     item.appendChild(colorBox);
     item.appendChild(text);

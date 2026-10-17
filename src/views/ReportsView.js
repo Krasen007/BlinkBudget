@@ -1147,7 +1147,7 @@ export const ReportsView = (params = {}) => {
       );
 
       // Create budget status map for easy lookup
-      const budgetStatusMap = {};
+      const budgetStatusMap = Object.create(null);
       if (budgetStatus && Array.isArray(budgetStatus)) {
         budgetStatus.forEach(budget => {
           budgetStatusMap[budget.categoryName] = budget;

@@ -83,10 +83,7 @@ const localRules = {
         AssignmentExpression(node) {
           const left = node.left;
 
-          if (
-            left.type !== 'MemberExpression' ||
-            !isStyleObject(left.object)
-          ) {
+          if (left.type !== 'MemberExpression' || !isStyleObject(left.object)) {
             return;
           }
 

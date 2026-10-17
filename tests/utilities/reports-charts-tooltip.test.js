@@ -36,7 +36,7 @@ function createFakeChart(data) {
   };
 }
 
-async function buildFixture() {
+async function buildFixture(categories = CATEGORIES) {
   let capturedOptions = null;
 
   const chartRenderer = {
@@ -48,7 +48,7 @@ async function buildFixture() {
 
   const currentData = {
     categoryBreakdown: {
-      categories: CATEGORIES.map(category => ({ ...category })),
+      categories: categories.map(category => ({ ...category })),
     },
     incomeVsExpenses: { totalIncome: 1000, totalExpenses: 200 },
     transactions: [],
@@ -86,6 +86,25 @@ function createHoverContext(chart, dataIndex = 0) {
 }
 
 describe('category breakdown tooltip percentages', () => {
+  it('renders stored category labels as text in the legend and tooltip', async () => {
+    const unsafeLabel = '<img src=x onerror=alert(1)>';
+    const { section, tooltipConfig, detailsContainer, chart } =
+      await buildFixture([
+        { name: unsafeLabel, amount: 150 },
+        { name: 'Other', amount: 50 },
+      ]);
+
+    expect(section.querySelector('.legend-item').textContent).toContain(
+      unsafeLabel
+    );
+    expect(section.querySelector('img')).toBeNull();
+
+    tooltipConfig.external(createHoverContext(chart, 0));
+
+    expect(detailsContainer.textContent).toContain(unsafeLabel);
+    expect(detailsContainer.querySelector('img')).toBeNull();
+  });
+
   it('shows only the original percentage when no categories are disabled', async () => {
     const { tooltipConfig, detailsContainer, chart } = await buildFixture();
 
