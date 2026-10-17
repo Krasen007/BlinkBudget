@@ -3,11 +3,12 @@
  * Provides a grid of category cards for selection with frequency analysis.
  */
 
-import { COLORS, SPACING } from '../utils/constants.js';
+import { COLORS, SPACING, CATEGORY_COLORS } from '../utils/constants.js';
 import { CategoryCard } from './CategoryCard.js';
 import { AccountTypeCard } from './AccountTypeCard.js';
 import { CustomCategoryService } from '../core/custom-category-service.js';
 import { buildAccountTypeBreakdown } from '../utils/account-breakdown-utils.js';
+import { NavigationState } from '../core/navigation-state.js';
 
 /**
  * Create interactive category selector
@@ -17,9 +18,10 @@ import { buildAccountTypeBreakdown } from '../utils/account-breakdown-utils.js';
  * @param {Function} onCategoryClick - Selection callback
  * @param {Object} frequencyData - Optional frequency analysis data
  * @param {Object} budgetStatus - Optional budget status information
- * @param {Object} options - Optional account exploration
+ * @param {Object} options - Optional account and income exploration
  * @param {Array} options.accounts - Accounts list (enables Explore Accounts)
  * @param {Function} options.onAccountTypeClick - Account type selection callback
+ * @param {Function} options.onIncomeGroupClick - Income group selection callback
  * @returns {HTMLElement}
  */
 export const CategorySelector = (
@@ -31,7 +33,11 @@ export const CategorySelector = (
   budgetStatus = null,
   options = {}
 ) => {
-  const { accounts = [], onAccountTypeClick = null } = options;
+  const {
+    accounts = [],
+    onAccountTypeClick = null,
+    onIncomeGroupClick = null,
+  } = options;
 
   const section = document.createElement('div');
   section.className = 'category-selector-section';
@@ -254,6 +260,112 @@ export const CategorySelector = (
 
       section.appendChild(accountGrid);
     }
+  }
+
+  // --- Explore Income Groups ---
+  // One card per income category/group for the selected period.
+  // Clicking an income group opens the dashboard filtered to that income category.
+  const incomeTransactions = periodTransactions.filter(
+    t => t.type === 'income'
+  );
+
+  const incomeBreakdown = {};
+  let totalIncomeForPeriod = 0;
+
+  incomeTransactions.forEach(t => {
+    const categoryName = t.category || 'Other';
+    const amount = Math.abs(t.amount || 0);
+    totalIncomeForPeriod += amount;
+
+    if (!incomeBreakdown[categoryName]) {
+      incomeBreakdown[categoryName] = {
+        name: categoryName,
+        amount: 0,
+        transactionCount: 0,
+        isIncome: true,
+      };
+    }
+    incomeBreakdown[categoryName].amount += amount;
+    incomeBreakdown[categoryName].transactionCount += 1;
+  });
+
+  const visibleIncomeGroups = Object.values(incomeBreakdown)
+    .map(group => ({
+      ...group,
+      percentage:
+        totalIncomeForPeriod > 0
+          ? (group.amount / totalIncomeForPeriod) * 100
+          : 0,
+    }))
+    .sort((a, b) => b.amount - a.amount);
+
+  if (visibleIncomeGroups.length > 0) {
+    const incomeDivider = document.createElement('hr');
+    incomeDivider.style.border = 'none';
+    incomeDivider.style.borderTop = `1px solid ${COLORS.BORDER}`;
+    incomeDivider.style.margin = `${SPACING.LG} 0`;
+    section.appendChild(incomeDivider);
+
+    const incomeTitle = document.createElement('h3');
+    incomeTitle.textContent = 'Explore Income Groups';
+    incomeTitle.style.margin = `0 0 ${SPACING.XS} 0`;
+    incomeTitle.style.color = COLORS.TEXT_MAIN;
+    section.appendChild(incomeTitle);
+
+    const incomeDescription = document.createElement('p');
+    incomeDescription.textContent =
+      'Analyze income by category. Click on any income group to view its transactions.';
+    incomeDescription.style.margin = `0 0 ${SPACING.XS} 0`;
+    incomeDescription.style.color = COLORS.TEXT_MUTED;
+    section.appendChild(incomeDescription);
+
+    const incomeGrid = document.createElement('div');
+    incomeGrid.className = 'category-grid income-grid';
+    incomeGrid.style.display = 'grid';
+    incomeGrid.style.gridTemplateColumns =
+      'repeat(auto-fill, minmax(250px, 1fr))';
+    incomeGrid.style.gap = SPACING.MD;
+    incomeGrid.style.marginTop = SPACING.MD;
+
+    const customIncomeCats =
+      typeof CustomCategoryService.getByType === 'function'
+        ? CustomCategoryService.getByType('income')
+        : [];
+    const customIncomeColorMap = new Map(
+      customIncomeCats.map(cat => [cat.name, cat.color])
+    );
+
+    const incomeColorMap = new Map();
+    visibleIncomeGroups.forEach(group => {
+      const color =
+        CATEGORY_COLORS[group.name] ||
+        customIncomeColorMap.get(group.name) ||
+        COLORS.INCOME_COLOR;
+      incomeColorMap.set(group.name, color);
+    });
+
+    const handleIncomeClick =
+      typeof onIncomeGroupClick === 'function'
+        ? onIncomeGroupClick
+        : item => {
+            NavigationState.saveDashboardTypeFilter('income');
+            onCategoryClick(item);
+          };
+
+    visibleIncomeGroups.forEach((group, index) => {
+      const card = CategoryCard(
+        group,
+        index,
+        incomeColorMap,
+        handleIncomeClick,
+        null,
+        [],
+        null
+      );
+      incomeGrid.appendChild(card);
+    });
+
+    section.appendChild(incomeGrid);
   }
 
   return section;

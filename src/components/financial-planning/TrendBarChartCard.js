@@ -12,7 +12,12 @@
  *     with anomaly flags for statistically unusual expenses in tooltips
  */
 
-import { formatMetricNumber } from '../../utils/financial-planning-helpers.js';
+import {
+  formatCurrency,
+  formatMetricNumber,
+} from '../../utils/financial-planning-helpers.js';
+import { escapeHtml } from '../../utils/security-utils.js';
+import { SPACING } from '../../utils/constants.js';
 import { showChartFallback } from '../ChartRenderer.js';
 import {
   INSIGHTS_CHART_COLORS,
@@ -169,6 +174,19 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
   header.appendChild(actions);
   card.appendChild(header);
 
+  // Simple averages bar
+  const averagesBar = document.createElement('div');
+  averagesBar.className = 'trend-averages-bar';
+  averagesBar.style.display = 'none';
+  averagesBar.style.flexWrap = 'wrap';
+  averagesBar.style.gap = SPACING.MD;
+  averagesBar.style.alignItems = 'center';
+  averagesBar.style.padding = `${SPACING.XS} ${SPACING.SM}`;
+  averagesBar.style.marginBottom = SPACING.XS;
+  averagesBar.style.fontSize = '0.8125rem';
+  averagesBar.style.color = 'var(--color-text-muted)';
+  card.appendChild(averagesBar);
+
   // Chart Wrapper — fills the card and never exceeds the app width
   const chartWrapper = document.createElement('div');
   chartWrapper.className = 'insights-chart-area';
@@ -199,11 +217,33 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
     if (!chartRenderer) return;
 
     if (labels.length === 0) {
+      averagesBar.style.display = 'none';
+      averagesBar.replaceChildren();
       setEmptyState(true);
       return;
     }
 
     setEmptyState(false);
+
+    // Render simple average information across displayed periods
+    const avgIncome = income.reduce((s, v) => s + v, 0) / labels.length;
+    const avgExpense = expense.reduce((s, v) => s + v, 0) / labels.length;
+    const avgNet = net.reduce((s, v) => s + v, 0) / labels.length;
+    const grainSuffix = currentGrain === 'month' ? '/mo' : '/yr';
+
+    averagesBar.style.display = 'flex';
+    averagesBar.innerHTML = `
+      <span class="trend-avg-label" style="font-weight: 500; color: var(--color-text-muted);">Average (${escapeHtml(labels.length.toString())} ${escapeHtml(currentGrain)}s):</span>
+      <span class="trend-avg-income" style="color: ${INSIGHTS_CHART_COLORS.income}; font-weight: 500;">
+        Income: +${escapeHtml(formatCurrency(avgIncome))}${escapeHtml(grainSuffix)}
+      </span>
+      <span class="trend-avg-expense" style="color: ${INSIGHTS_CHART_COLORS.expense}; font-weight: 500;">
+        Expense: -${escapeHtml(formatCurrency(avgExpense))}${escapeHtml(grainSuffix)}
+      </span>
+      <span class="trend-avg-net" style="color: ${avgNet >= 0 ? INSIGHTS_CHART_COLORS.income : INSIGHTS_CHART_COLORS.expense}; font-weight: 600;">
+        Net: ${avgNet >= 0 ? '+' : '-'}${escapeHtml(formatCurrency(Math.abs(avgNet)))}${escapeHtml(grainSuffix)}
+      </span>
+    `;
 
     const chartData = {
       labels,

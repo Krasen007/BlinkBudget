@@ -149,6 +149,25 @@ describe('GoalsSection', () => {
     expect(placeholder).toBeTruthy();
   });
 
+  it('should show Total Goals as 0 by default and no demo chart when there are 0 goals', async () => {
+    mockStorageService.getGoals.mockReturnValue([]);
+
+    const section = await GoalsSection(mockChartRenderer, mockActiveCharts);
+
+    // Summary card should show Total Goals: 0
+    const summaryCard = section.querySelector('.goals-summary-card');
+    expect(summaryCard).toBeTruthy();
+    expect(summaryCard.textContent).toContain('Total Goals');
+    expect(summaryCard.textContent).toContain('0');
+
+    // No demo chart should be rendered
+    const chartSection = section.querySelector(
+      '[data-chart-type="goal-progress"]'
+    );
+    expect(chartSection).toBeNull();
+    expect(mockChartRenderer.createBarChart).not.toHaveBeenCalled();
+  });
+
   it('should create a goal and remove the no-goals placeholder when starting from empty state', async () => {
     mockStorageService.getGoals.mockReturnValue([]);
 

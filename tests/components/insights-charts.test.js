@@ -214,6 +214,59 @@ describe('Insights Charts Components', () => {
       card.cleanup();
     });
 
+    it('renders simple average information in TrendBarChartCard', () => {
+      const mockRenderer = {
+        createMixedChart: vi.fn().mockResolvedValue({}),
+        destroyChart: vi.fn(),
+      };
+
+      const transactions = [
+        {
+          id: 'tx-1',
+          amount: 2000,
+          category: 'Заплата',
+          type: 'income',
+          timestamp: '2026-03-15T10:00:00.000Z',
+        },
+        {
+          id: 'tx-2',
+          amount: 800,
+          category: 'Храна',
+          type: 'expense',
+          timestamp: '2026-03-16T10:00:00.000Z',
+        },
+        {
+          id: 'tx-3',
+          amount: 3000,
+          category: 'Заплата',
+          type: 'income',
+          timestamp: '2026-04-15T10:00:00.000Z',
+        },
+        {
+          id: 'tx-4',
+          amount: 1200,
+          category: 'Храна',
+          type: 'expense',
+          timestamp: '2026-04-16T10:00:00.000Z',
+        },
+      ];
+
+      const card = TrendBarChartCard({
+        transactions,
+        chartRenderer: mockRenderer,
+      });
+
+      const avgBar = card.element.querySelector('.trend-averages-bar');
+      expect(avgBar).not.toBeNull();
+      expect(avgBar.style.display).not.toBe('none');
+      expect(avgBar.textContent).toContain('Average');
+      expect(avgBar.textContent).toContain('Income: +€2,500.00/mo');
+      expect(avgBar.textContent).toContain('Expense: -€1,000.00/mo');
+      expect(avgBar.textContent).toContain('Net: +€1,500.00/mo');
+
+      card.cleanup();
+    });
+
     it('defaults the trend grain to the current month', () => {
       const mockRenderer = {
         createMixedChart: vi.fn().mockResolvedValue({}),

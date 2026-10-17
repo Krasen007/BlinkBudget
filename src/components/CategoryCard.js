@@ -69,20 +69,21 @@ export const CategoryCard = (
   name.style.textAlign = 'center';
   card.appendChild(name);
 
-  const isNetCredit = category.amount <= 0;
+  const isNetCredit = !category.isIncome && category.amount <= 0;
 
   const amount = document.createElement('div');
   amount.className = 'category-amount';
   amount.textContent = formatCurrency(Math.abs(category.amount));
   amount.style.fontSize = FONT_SIZES.LG;
   amount.style.fontWeight = 'bold';
-  // Green for net refund/credit categories, default text otherwise
-  amount.style.color = isNetCredit ? COLORS.SUCCESS : 'var(--color-text-main)';
+  // Green for net refund/credit categories and income, default text otherwise
+  amount.style.color =
+    category.isIncome || isNetCredit ? COLORS.SUCCESS : 'var(--color-text-main)';
   amount.style.textAlign = 'center';
   card.appendChild(amount);
 
   // Label net-credit categories so the user understands it's a credit balance
-  if (isNetCredit) {
+  if (isNetCredit && !category.isIncome) {
     const creditLabel = document.createElement('div');
     creditLabel.style.fontSize = '0.7rem';
     creditLabel.style.color = COLORS.SUCCESS;
@@ -94,7 +95,7 @@ export const CategoryCard = (
     card.appendChild(creditLabel);
   }
 
-  // Add percentage if available (only meaningful for positive-spending categories)
+  // Add percentage if available (only meaningful for positive-spending categories or income)
   if (
     !isNetCredit &&
     category.percentage !== undefined &&
@@ -102,7 +103,7 @@ export const CategoryCard = (
   ) {
     const percentage = document.createElement('div');
     percentage.className = 'category-percentage';
-    percentage.textContent = `${category.percentage.toFixed(1)}% of expenses`;
+    percentage.textContent = `${category.percentage.toFixed(1)}% of ${category.isIncome ? 'income' : 'expenses'}`;
     percentage.style.fontSize = '0.75rem';
     percentage.style.color = COLORS.TEXT_MUTED;
     percentage.style.textAlign = 'center';

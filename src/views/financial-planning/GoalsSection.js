@@ -183,14 +183,37 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
     try {
       // Refresh goals chart using helper
       const updatedGoals = StorageService.getGoals();
-      await refreshChart({
-        createChartFn: createGoalProgressChart,
-        chartRenderer,
-        data: updatedGoals,
-        section,
-        chartType: 'goal-progress',
-        activeCharts,
-      });
+      const existingChart = section.querySelector(
+        '[data-chart-type="goal-progress"]'
+      );
+      if (existingChart) {
+        await refreshChart({
+          createChartFn: createGoalProgressChart,
+          chartRenderer,
+          data: updatedGoals,
+          section,
+          chartType: 'goal-progress',
+          activeCharts,
+        });
+      } else if (updatedGoals.length > 0) {
+        const { section: newChartSection, chart } =
+          await createGoalProgressChart(chartRenderer, updatedGoals);
+        newChartSection.classList.add('goals-progress-chart');
+        const currentSummary = section.querySelector('.goals-summary-card');
+        if (currentSummary) {
+          section.insertBefore(newChartSection, currentSummary);
+        } else {
+          section.appendChild(newChartSection);
+        }
+        activeCharts.set('goal-progress', chart);
+      }
+
+      // Update summary card
+      const currentSummaryCard = section.querySelector('.goals-summary-card');
+      if (currentSummaryCard) {
+        const newSummaryCard = createGoalsSummaryCard(updatedGoals);
+        currentSummaryCard.replaceWith(newSummaryCard);
+      }
 
       goalForm.style.display = 'none';
       goalName.value = '';
@@ -594,6 +617,13 @@ function createGoalsList(chartRenderer, activeCharts, section) {
                 activeCharts,
               });
 
+              // Update summary card
+              const currentSummary = section.querySelector('.goals-summary-card');
+              if (currentSummary) {
+                const newSummary = createGoalsSummaryCard(updatedGoals);
+                currentSummary.replaceWith(newSummary);
+              }
+
               cleanupEdit();
               refreshGoalsList();
             } catch (err) {
@@ -620,14 +650,43 @@ function createGoalsList(chartRenderer, activeCharts, section) {
 
                 // Refresh chart using helper
                 const updatedGoals = await StorageService.getGoals();
-                await refreshChart({
-                  createChartFn: createGoalProgressChart,
-                  chartRenderer,
-                  data: updatedGoals,
-                  section,
-                  chartType: 'goal-progress',
-                  activeCharts,
-                });
+                const existingChart = section.querySelector(
+                  '[data-chart-type="goal-progress"]'
+                );
+                if (updatedGoals && updatedGoals.length > 0) {
+                  if (existingChart) {
+                    await refreshChart({
+                      createChartFn: createGoalProgressChart,
+                      chartRenderer,
+                      data: updatedGoals,
+                      section,
+                      chartType: 'goal-progress',
+                      activeCharts,
+                    });
+                  } else {
+                    const { section: newChartSection, chart } =
+                      await createGoalProgressChart(chartRenderer, updatedGoals);
+                    newChartSection.classList.add('goals-progress-chart');
+                    const summary = section.querySelector('.goals-summary-card');
+                    if (summary) {
+                      section.insertBefore(newChartSection, summary);
+                    } else {
+                      section.appendChild(newChartSection);
+                    }
+                    activeCharts.set('goal-progress', chart);
+                  }
+                } else if (existingChart) {
+                  existingChart.remove();
+                  activeCharts.delete('goal-progress');
+                }
+
+                // Update summary card
+                const currentSummary =
+                  section.querySelector('.goals-summary-card');
+                if (currentSummary) {
+                  const newSummary = createGoalsSummaryCard(updatedGoals);
+                  currentSummary.replaceWith(newSummary);
+                }
 
                 // Refresh the list
                 await refreshGoalsList();
@@ -770,103 +829,26 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
     goalsFromStorage = [];
   }
 
-  // Compute a projected goal suggestion from income vs expenses
-  let projectedGoal = null;
-  try {
-    const allTx = StorageService.getAll() || [];
-    const income = allTx.filter(t => t.type === 'income' && !t.isGhost);
-    const expenses = allTx.filter(
-      t => (t.type === 'expense' || t.type === 'refund') && !t.isGhost
-    );
-    const totalIncome = income.reduce((s, t) => s + Math.abs(t.amount || 0), 0);
-    const totalExpenses = expenses.reduce(
-      (s, t) => s + Math.abs(t.amount || 0),
-      0
-    );
-    const monthlySavings = Math.max(
-      0,
-      (totalIncome - totalExpenses) /
-        Math.max(
-          1,
-          new Set(
-            allTx
-              .filter(t => !t.isGhost)
-              .map(t => {
-                const d = new Date(t.timestamp);
-                return `${d.getFullYear()}-${d.getMonth()}`;
-              })
-          ).size
-        )
-    );
-    const projectedAmount = Math.round(monthlySavings * 12);
-    if (projectedAmount > 0) {
-      projectedGoal = {
-        title: 'Projected Savings Goal',
-        description: `At your current rate, you could save ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(projectedAmount)} in 12 months.`,
-        targetAmount: projectedAmount,
-        monthlySavings: Math.round(monthlySavings),
-      };
+  const goalsToRender =
+    Array.isArray(goalsFromStorage) ? goalsFromStorage : [];
+  const hasRealGoals = goalsToRender.length > 0;
+
+  // Create goal progress chart only when real goals exist (no demo)
+  if (hasRealGoals) {
+    try {
+      const { section: chartSection, chart } = await createGoalProgressChart(
+        chartRenderer,
+        goalsToRender
+      );
+      chartSection.classList.add('goals-progress-chart');
+      section.appendChild(chartSection);
+      activeCharts.set('goal-progress', chart);
+    } catch (error) {
+      console.error('Error creating goal progress chart:', error);
     }
-  } catch (e) {
-    console.warn('Failed to compute goal projection:', e);
   }
 
-  const sampleGoals = projectedGoal
-    ? [
-        {
-          id: 'projected',
-          name: projectedGoal.title,
-          targetAmount: projectedGoal.targetAmount,
-          currentSavings: 0,
-          targetDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-        },
-      ]
-    : [
-        {
-          id: '1',
-          name: 'Emergency Fund',
-          targetAmount: 10000,
-          currentSavings: 7500,
-          targetDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-        },
-        {
-          id: '2',
-          name: 'House Down Payment',
-          targetAmount: 50000,
-          currentSavings: 15000,
-          targetDate: new Date(Date.now() + 3 * 365 * 24 * 60 * 60 * 1000),
-        },
-        {
-          id: '3',
-          name: 'Vacation Fund',
-          targetAmount: 5000,
-          currentSavings: 2000,
-          targetDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000),
-        },
-      ];
-
-  const hasRealGoals =
-    Array.isArray(goalsFromStorage) && goalsFromStorage.length > 0;
-  const goalsToRender = hasRealGoals ? goalsFromStorage : sampleGoals;
-
-  // Create goal progress chart
-  try {
-    const { section: chartSection, chart } = await createGoalProgressChart(
-      chartRenderer,
-      goalsToRender,
-      hasRealGoals ? {} : { title: 'Sample Goals (Demo)' }
-    );
-    chartSection.classList.add('goals-progress-chart'); // Add class for tests
-    if (!hasRealGoals) {
-      chartSection.style.opacity = '0.9';
-    }
-    section.appendChild(chartSection);
-    activeCharts.set('goal-progress', chart);
-  } catch (error) {
-    console.error('Error creating goal progress chart:', error);
-  }
-
-  // Add summary card with aggregate metrics
+  // Add summary card with aggregate metrics (Total Goals is 0 by default when no goals exist)
   const summaryCard = createGoalsSummaryCard(goalsToRender);
   section.appendChild(summaryCard);
 
@@ -916,7 +898,14 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
   const strong = document.createElement('strong');
   strong.textContent = 'Recommendation:';
 
-  if (behindSchedule.length > 0) {
+  if (!hasRealGoals) {
+    p.style.color = COLORS.TEXT_MUTED;
+    const recommendationText = document.createTextNode(
+      ' Set your first goal above to track your savings pace.'
+    );
+    p.appendChild(strong);
+    p.appendChild(recommendationText);
+  } else if (behindSchedule.length > 0) {
     p.style.color = COLORS.ERROR;
     const recommendationText = document.createTextNode(
       ` You have ${behindSchedule.length.toString()} goals that may need more aggressive savings to stay on track.`
@@ -1010,14 +999,34 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
 
             // Refresh the section
             const updatedGoals = StorageService.getGoals();
-            await refreshChart({
-              createChartFn: createGoalProgressChart,
-              chartRenderer,
-              data: updatedGoals,
-              section,
-              chartType: 'goal-progress',
-              activeCharts,
-            });
+            const existingChart = section.querySelector(
+              '[data-chart-type="goal-progress"]'
+            );
+            if (existingChart) {
+              await refreshChart({
+                createChartFn: createGoalProgressChart,
+                chartRenderer,
+                data: updatedGoals,
+                section,
+                chartType: 'goal-progress',
+                activeCharts,
+              });
+            } else if (updatedGoals.length > 0) {
+              const { section: newChartSection, chart } =
+                await createGoalProgressChart(chartRenderer, updatedGoals);
+              newChartSection.classList.add('goals-progress-chart');
+              const currentSummary =
+                section.querySelector('.goals-summary-card') || summaryCard;
+              if (currentSummary && currentSummary.parentNode) {
+                currentSummary.parentNode.insertBefore(
+                  newChartSection,
+                  currentSummary
+                );
+              } else {
+                section.appendChild(newChartSection);
+              }
+              activeCharts.set('goal-progress', chart);
+            }
             await refreshGoalsList();
 
             // Update summary card

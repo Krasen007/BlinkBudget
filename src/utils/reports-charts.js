@@ -104,19 +104,25 @@ function createCategoryTooltipConfig(detailsContainer) {
 
       // Handle opacity = 0 (tooltip hidden/mouseout)
       if (tooltip.opacity === 0) {
-        const actionText = window.innerWidth < 768 ? 'Tap' : 'Hover';
-        // deepcode ignore DOMXSS: actionText is a static string and escapeHtml() sanitizes any dynamic content
-        // snyk:disable-next-line javascript/DomBasedXss
-        detailsContainer.innerHTML = `
-                    <div style="text-align: center; color: var(--color-text-muted); font-size: 0.9em;">
-                        ${escapeHtml(actionText)} on a category slice to see details
-                    </div>
-                `;
+        detailsContainer._isHovered = false;
+        if (typeof detailsContainer._updateDefaultText === 'function') {
+          detailsContainer._updateDefaultText();
+        } else {
+          const actionText = window.innerWidth < 768 ? 'Tap' : 'Hover';
+          // deepcode ignore DOMXSS: actionText is a static string and escapeHtml() sanitizes any dynamic content
+          // snyk:disable-next-line javascript/DomBasedXss
+          detailsContainer.innerHTML = `
+                      <div style="text-align: center; color: var(--color-text-muted); font-size: 0.9em;">
+                          ${escapeHtml(actionText)} on a category slice to see details
+                      </div>
+                  `;
+        }
         return;
       }
 
       // Show details in fixed container
       if (tooltip.body && tooltip.body.length > 0) {
+        detailsContainer._isHovered = true;
         // Parse the label and value from the data
         const dataPoint =
           context.chart.data.datasets[tooltip.dataPoints[0].datasetIndex];
@@ -408,6 +414,81 @@ export async function createCategoryBreakdownChart(
   const labels = chartData.labels;
   const datasets = chartData.datasets[0];
   const total = datasets.data.reduce((a, b) => a + b, 0);
+  const legendItemRecords = [];
+
+  const updateRecalculatedView = () => {
+    let visibleTotal = 0;
+    let hiddenCount = 0;
+
+    datasets.data.forEach((val, idx) => {
+      const isVis =
+        typeof currentChart.getDataVisibility !== 'function' ||
+        currentChart.getDataVisibility(idx);
+      if (isVis) {
+        visibleTotal += Number(val) || 0;
+      } else {
+        hiddenCount += 1;
+      }
+    });
+
+    legendItemRecords.forEach(({ item, textEl, index }) => {
+      const isVis =
+        typeof currentChart.getDataVisibility !== 'function' ||
+        currentChart.getDataVisibility(index);
+      const val = Number(datasets.data[index]) || 0;
+      const originalPercentage =
+        total > 0 ? ((val / total) * 100).toFixed(1) : '0.0';
+      const visiblePercentage =
+        visibleTotal > 0 ? ((val / visibleTotal) * 100).toFixed(1) : '0.0';
+
+      item.style.opacity = isVis ? '1' : '0.4';
+      item.style.textDecoration = isVis ? 'none' : 'line-through';
+
+      const percentageText =
+        hiddenCount > 0 && isVis
+          ? `<span style="opacity: 0.7;" title="Original percentage">${escapeHtml(originalPercentage)}%</span><span aria-hidden="true" style="margin: 0 4px;">→</span><span style="font-weight: 600; color: var(--color-primary);" title="Recalculated percentage">${escapeHtml(visiblePercentage)}%</span>`
+          : `${escapeHtml(originalPercentage)}%`;
+
+      textEl.innerHTML = `<span style="color: var(--color-text-main); font-weight: 500;">${escapeHtml(labels[index])}</span> <span style="color: var(--color-text-muted); opacity: 0.8;">${percentageText}</span>`;
+    });
+
+    // Update total spent container
+    const totalSpentValueEl = totalSpentContainer.querySelector('div:last-child');
+    if (totalSpentValueEl) {
+      if (hiddenCount > 0) {
+        totalSpentValueEl.textContent = formatCurrency(visibleTotal);
+        totalSpentContainer.title = `Showing visible: ${formatCurrency(visibleTotal)} (Total: ${formatCurrency(totalSpent)})`;
+      } else {
+        totalSpentValueEl.textContent = formatCurrency(totalSpent);
+        totalSpentContainer.title = 'Click to filter dashboard to this period (includes refunds)';
+      }
+    }
+
+    if (detailsContainer && !detailsContainer._isHovered) {
+      if (hiddenCount > 0) {
+        detailsContainer.innerHTML = `
+          <div style="text-align: center; color: var(--color-text-muted); font-size: 0.85em;">
+            ${hiddenCount} category excluded. Recalculated visible total: <strong style="color: var(--color-primary);">${escapeHtml(formatCurrency(visibleTotal))}</strong>. Click category in legend or chart to toggle.
+          </div>
+        `;
+      } else {
+        const actionText = window.innerWidth < 768 ? 'Tap' : 'Hover';
+        detailsContainer.innerHTML = `
+          <div style="text-align: center; color: var(--color-text-muted); font-size: 0.9em;">
+            ${escapeHtml(actionText)} on a category slice to see details
+          </div>
+        `;
+      }
+    }
+  };
+
+  detailsContainer._updateDefaultText = updateRecalculatedView;
+
+  const toggleCategoryVisibility = index => {
+    currentChart.toggleDataVisibility(index);
+    currentChart.update();
+    updateRecalculatedView();
+  };
 
   labels.forEach((label, i) => {
     const value = datasets.data[i];
@@ -445,11 +526,7 @@ export async function createCategoryBreakdownChart(
     item.appendChild(text);
 
     const toggleVisibility = () => {
-      const isVisible = currentChart.getDataVisibility(i);
-      currentChart.toggleDataVisibility(i);
-      currentChart.update();
-      item.style.opacity = isVisible ? '0.4' : '1';
-      item.style.textDecoration = isVisible ? 'line-through' : 'none';
+      toggleCategoryVisibility(i);
     };
 
     item.addEventListener('click', toggleVisibility);
@@ -460,6 +537,7 @@ export async function createCategoryBreakdownChart(
       }
     });
 
+    legendItemRecords.push({ item, textEl: text, index: i });
     legendContainer.appendChild(item);
   });
 
@@ -467,9 +545,13 @@ export async function createCategoryBreakdownChart(
   section.appendChild(legendContainer);
   section.appendChild(detailsContainer);
 
-  // Add click handler for category selection
+  // Add click handler for category selection: toggle category visibility to recalculate chart
   canvas.addEventListener('chartSegmentClick', event => {
     const clickData = event.detail;
+    const catIndex = labels.indexOf(clickData.label);
+    if (catIndex !== -1) {
+      toggleCategoryVisibility(catIndex);
+    }
     if (onCategoryClick) {
       onCategoryClick(clickData.label, clickData.value, clickData.percentage);
     }

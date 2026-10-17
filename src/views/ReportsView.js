@@ -428,6 +428,10 @@ export const ReportsView = (params = {}) => {
       filterData.category = category.name;
     }
 
+    if (category.isIncome) {
+      NavigationState.saveDashboardTypeFilter('income');
+    }
+
     NavigationState.saveDashboardFilter(filterData);
 
     // Navigate to dashboard

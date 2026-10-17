@@ -169,4 +169,31 @@ describe('category breakdown tooltip percentages', () => {
 
     expect(line).toBe('Food & Drink: €50.00 (25.0%)');
   });
+
+  it('recalculates legend percentages and updates total spent when a category is toggled', async () => {
+    const { section } = await buildFixture();
+
+    const legendItems = section.querySelectorAll('.legend-item');
+    expect(legendItems[1].textContent).toContain('Food & Drink 25.0%');
+
+    // Click "Rent" to disable it
+    legendItems[0].click();
+
+    // Food & Drink should now show recalculated percentage 25.0% → 100.0%
+    expect(legendItems[1].textContent).toContain('25.0%');
+    expect(legendItems[1].textContent).toContain('100.0%');
+    expect(legendItems[1].textContent).toContain('→');
+    expect(legendItems[0].style.textDecoration).toBe('line-through');
+
+    // Total spent stat updates to visible total (€50.00)
+    const totalSpentEl = section.querySelector('[aria-label*="Filter dashboard to the selected period"] div:last-child');
+    expect(totalSpentEl.textContent).toBe('€50.00');
+
+    // Click "Rent" again to re-enable
+    legendItems[0].click();
+    expect(legendItems[1].textContent).toContain('25.0%');
+    expect(legendItems[1].textContent).not.toContain('→');
+    expect(legendItems[0].style.textDecoration).toBe('none');
+    expect(totalSpentEl.textContent).toBe('€200.00');
+  });
 });

@@ -229,6 +229,7 @@ export default [
         vi: 'readonly',
         global: 'readonly',
         process: 'readonly',
+        CSS: 'readonly',
       },
     },
     rules: {
