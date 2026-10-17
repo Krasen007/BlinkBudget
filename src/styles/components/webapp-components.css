@@ -146,3 +146,32 @@
 }
 
 /* Budget Recommendations Section */
+
+/* CustomCategoryManager drag-to-reorder
+   (state classes are toggled from CustomCategoryManager.js; the handle's
+   layout lives here to match its 24px arrow-button siblings) */
+.category-card--dragging {
+  opacity: 0.5;
+}
+
+.category-card--drop-target {
+  outline: 2px dashed var(--color-primary);
+  outline-offset: 2px;
+}
+
+.category-drag-handle {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  cursor: grab;
+  user-select: none;
+}
+
+.category-drag-handle:active {
+  cursor: grabbing;
+}

@@ -9,6 +9,7 @@ import { ButtonComponent } from './Button.js';
 import { Router } from '../core/router.js';
 import { showErrorToast } from '../utils/toast-notifications.js';
 import { COLORS } from '../utils/constants.js';
+import { buildReorderFromDrop } from '../utils/drag-reorder-utils.js';
 
 export const CustomCategoryManager = ({
   onCategoryChange,
@@ -37,6 +38,10 @@ export const CustomCategoryManager = ({
   // Current state
   let currentType = initialType;
   let categories = [];
+
+  // Drag-to-reorder state (one drag at a time; the ↑/↓ buttons remain the
+  // accessible + touch path since native drag events never fire from touch)
+  let draggedCategoryId = null;
 
   // Header
   const header = document.createElement('div');
@@ -262,13 +267,45 @@ export const CustomCategoryManager = ({
     leftHeader.appendChild(colorIndicator);
     leftHeader.appendChild(name);
 
-    // Right side: reorder buttons
+    // Right side: drag handle + reorder buttons
     const reorderButtons = document.createElement('div');
     reorderButtons.style.cssText = `
       display: flex;
       gap: var(--spacing-xs);
       flex-shrink: 0;
     `;
+
+    // Drag handle — initiates HTML5 drag-to-reorder. Decorative only: the
+    // ↑/↓ buttons below stay for keyboard and touch users, since native
+    // drag events never fire from touch input. Layout lives in the
+    // .category-drag-handle class (webapp-components.css).
+    const dragHandle = document.createElement('div');
+    dragHandle.className = 'category-drag-handle';
+    dragHandle.textContent = '⠿';
+    dragHandle.title = 'Drag to reorder';
+    dragHandle.draggable = true;
+
+    dragHandle.addEventListener('dragstart', e => {
+      e.stopPropagation();
+      draggedCategoryId = category.id;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', category.id);
+      try {
+        // Drag the whole card as the ghost, not the tiny handle
+        e.dataTransfer.setDragImage(card, 24, 24);
+      } catch {
+        // Some browsers lack setDragImage; drag still works without it
+      }
+      card.classList.add('category-card--dragging');
+    });
+
+    dragHandle.addEventListener('dragend', () => {
+      draggedCategoryId = null;
+      card.classList.remove('category-card--dragging');
+      clearDropTargets();
+    });
+
+    reorderButtons.appendChild(dragHandle);
 
     // Up button
     const upButton = document.createElement('button');
@@ -425,6 +462,31 @@ export const CustomCategoryManager = ({
           showCategoryForm(category);
         }
       }
+    });
+
+    // Drop target: while another card is dragged over this one, highlight it
+    card.addEventListener('dragover', e => {
+      if (!draggedCategoryId || draggedCategoryId === category.id) return;
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = 'move';
+      card.classList.add('category-card--drop-target');
+    });
+
+    card.addEventListener('dragleave', e => {
+      // Ignore leaves into child elements of the same card
+      if (e.relatedTarget && card.contains(e.relatedTarget)) return;
+      card.classList.remove('category-card--drop-target');
+    });
+
+    card.addEventListener('drop', e => {
+      if (!draggedCategoryId || draggedCategoryId === category.id) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const draggedId = draggedCategoryId;
+      draggedCategoryId = null;
+      card.classList.remove('category-card--drop-target');
+      dropCategoryOn(draggedId, category.id);
     });
 
     // Hover effects
@@ -882,6 +944,40 @@ export const CustomCategoryManager = ({
     } catch (error) {
       console.error('Error moving category:', error);
       showErrorToast('Error moving category. Please try again.');
+    }
+  }
+
+  /**
+   * Remove drop-target highlights from every card (used on dragend/drop so
+   * no stale dashed outline survives an interrupted drag).
+   */
+  function clearDropTargets() {
+    categoriesList
+      .querySelectorAll('.category-card--drop-target')
+      .forEach(el => el.classList.remove('category-card--drop-target'));
+  }
+
+  /**
+   * Move `draggedId` to the slot occupied by `targetId` in the visible list
+   * and persist via CustomCategoryService.reorder. Dragging forward lands
+   * after the target, backward before it (see drag-reorder-utils).
+   */
+  function dropCategoryOn(draggedId, targetId) {
+    try {
+      const visibleIds = categories.map(c => c.id);
+      const newOrder = buildReorderFromDrop(visibleIds, draggedId, targetId);
+      if (!newOrder) return;
+
+      const success = CustomCategoryService.reorder(newOrder);
+      if (success) {
+        renderCategories();
+        onCategoryChange && onCategoryChange();
+      } else {
+        console.warn('reorder returned false for newOrder', newOrder);
+      }
+    } catch (error) {
+      console.error('Error reordering category via drag:', error);
+      showErrorToast('Error reordering category. Please try again.');
     }
   }
 

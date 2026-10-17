@@ -42,7 +42,7 @@ possible implementation that needs to be verified first:
 
 `€` (Euro), `$` (Dollar), `£` (Pound), `¥` (Yen), `₽` (Ruble), `лв` (Lev), `₹` (Rupee), `₩` (Won), `Fr` (Franc), `kr` (Krone)
 
-[ ] src/core/custom-category-service.js:22-94 — manual reorder, it should be possible to use drag to reorder, not just the arrows.
+[x] src/core/custom-category-service.js:22-94 — manual reorder, it should be possible to use drag to reorder, not just the arrows. DONE: drag handle added in CustomCategoryManager (HTML5 DnD, persists via CustomCategoryService.reorder); arrows remain for touch/keyboard.
 
 in financial-planning?section=insights remove the section with Top Inflation Drivers its information is shown below in the chart.
 also remove monthly bars and just keep the trend line, optimize the UI, remove the average button as its just that one and always on.
