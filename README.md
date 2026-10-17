@@ -159,6 +159,7 @@ BlinkBudget includes a comprehensive financial planning suite with 6 specialized
 - **Overspending Alerts** - Notifications when approaching limits | src/core/budget-service.js:getByCategory() | src/views/financial-planning/BudgetsSection.js:alerts
 - **Budget Performance Reports** - Historical budget adherence analysis | src/core/budget-service.js:getAll() | src/views/financial-planning/BudgetsSection.js:performance reports
 - **Automatic Budget Suggestions** - After logging 30+ transactions, BlinkBudget suggests category budgets based on your actual spending history. Accept, adjust, or dismiss each suggestion | src/components/BudgetSuggestion.js:BudgetSuggestion() | src/core/budget-planner.js:suggestBudgets() | src/views/financial-planning/BudgetsSection.js:budget suggestions integration
+- **Budgets scale with the report period** - Monthly budgets automatically scale to the selected report period (×3 for a quarter, ×12 for a year), so category cards and the summary card always show realistic limits instead of comparing a whole period against a single month | src/core/budget-service.js:getByCategory() | src/views/financial-planning/BudgetsSection.js:BudgetsSection()
 
 ### User Experience & UI
 
