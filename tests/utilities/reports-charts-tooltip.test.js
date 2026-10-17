@@ -186,7 +186,9 @@ describe('category breakdown tooltip percentages', () => {
     expect(legendItems[0].style.textDecoration).toBe('line-through');
 
     // Total spent stat updates to visible total (€50.00)
-    const totalSpentEl = section.querySelector('[aria-label*="Filter dashboard to the selected period"] div:last-child');
+    const totalSpentEl = section.querySelector(
+      '[aria-label*="Filter dashboard to the selected period"] div:last-child'
+    );
     expect(totalSpentEl.textContent).toBe('€50.00');
 
     // Click "Rent" again to re-enable

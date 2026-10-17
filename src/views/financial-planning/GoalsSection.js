@@ -618,7 +618,9 @@ function createGoalsList(chartRenderer, activeCharts, section) {
               });
 
               // Update summary card
-              const currentSummary = section.querySelector('.goals-summary-card');
+              const currentSummary = section.querySelector(
+                '.goals-summary-card'
+              );
               if (currentSummary) {
                 const newSummary = createGoalsSummaryCard(updatedGoals);
                 currentSummary.replaceWith(newSummary);
@@ -665,9 +667,14 @@ function createGoalsList(chartRenderer, activeCharts, section) {
                     });
                   } else {
                     const { section: newChartSection, chart } =
-                      await createGoalProgressChart(chartRenderer, updatedGoals);
+                      await createGoalProgressChart(
+                        chartRenderer,
+                        updatedGoals
+                      );
                     newChartSection.classList.add('goals-progress-chart');
-                    const summary = section.querySelector('.goals-summary-card');
+                    const summary = section.querySelector(
+                      '.goals-summary-card'
+                    );
                     if (summary) {
                       section.insertBefore(newChartSection, summary);
                     } else {
@@ -681,8 +688,9 @@ function createGoalsList(chartRenderer, activeCharts, section) {
                 }
 
                 // Update summary card
-                const currentSummary =
-                  section.querySelector('.goals-summary-card');
+                const currentSummary = section.querySelector(
+                  '.goals-summary-card'
+                );
                 if (currentSummary) {
                   const newSummary = createGoalsSummaryCard(updatedGoals);
                   currentSummary.replaceWith(newSummary);
@@ -829,8 +837,7 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
     goalsFromStorage = [];
   }
 
-  const goalsToRender =
-    Array.isArray(goalsFromStorage) ? goalsFromStorage : [];
+  const goalsToRender = Array.isArray(goalsFromStorage) ? goalsFromStorage : [];
   const hasRealGoals = goalsToRender.length > 0;
 
   // Create goal progress chart only when real goals exist (no demo)

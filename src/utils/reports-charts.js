@@ -453,14 +453,16 @@ export async function createCategoryBreakdownChart(
     });
 
     // Update total spent container
-    const totalSpentValueEl = totalSpentContainer.querySelector('div:last-child');
+    const totalSpentValueEl =
+      totalSpentContainer.querySelector('div:last-child');
     if (totalSpentValueEl) {
       if (hiddenCount > 0) {
         totalSpentValueEl.textContent = formatCurrency(visibleTotal);
         totalSpentContainer.title = `Showing visible: ${formatCurrency(visibleTotal)} (Total: ${formatCurrency(totalSpent)})`;
       } else {
         totalSpentValueEl.textContent = formatCurrency(totalSpent);
-        totalSpentContainer.title = 'Click to filter dashboard to this period (includes refunds)';
+        totalSpentContainer.title =
+          'Click to filter dashboard to this period (includes refunds)';
       }
     }
 

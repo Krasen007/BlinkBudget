@@ -78,7 +78,9 @@ export const CategoryCard = (
   amount.style.fontWeight = 'bold';
   // Green for net refund/credit categories and income, default text otherwise
   amount.style.color =
-    category.isIncome || isNetCredit ? COLORS.SUCCESS : 'var(--color-text-main)';
+    category.isIncome || isNetCredit
+      ? COLORS.SUCCESS
+      : 'var(--color-text-main)';
   amount.style.textAlign = 'center';
   card.appendChild(amount);
 
