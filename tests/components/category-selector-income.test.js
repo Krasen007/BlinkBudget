@@ -146,4 +146,57 @@ describe('CategorySelector - Explore Income Groups', () => {
     expect(saveTypeSpy).toHaveBeenCalledWith('income');
     saveTypeSpy.mockRestore();
   });
+
+  it('treats prototype property names as income category names', () => {
+    const section = CategorySelector(
+      buildData([
+        {
+          type: 'income',
+          category: '__proto__',
+          amount: 100,
+          date: '2026-09-05T10:00:00.000Z',
+        },
+        {
+          type: 'income',
+          category: 'constructor',
+          amount: 200,
+          date: '2026-09-06T10:00:00.000Z',
+        },
+      ]),
+      colorMap,
+      getCategoryColors,
+      vi.fn()
+    );
+    const cards = section.querySelectorAll('.income-grid .category-card');
+
+    expect(cards).toHaveLength(2);
+    expect(cards[0].textContent).toContain('constructor');
+    expect(cards[1].textContent).toContain('__proto__');
+  });
+
+  it('uses Other as the click category for income transactions without a category', () => {
+    const onCategoryClick = vi.fn();
+    const section = CategorySelector(
+      buildData([
+        {
+          type: 'income',
+          amount: 125,
+          date: '2026-09-05T10:00:00.000Z',
+        },
+      ]),
+      colorMap,
+      getCategoryColors,
+      onCategoryClick
+    );
+
+    section.querySelector('.income-grid .category-card').click();
+
+    expect(onCategoryClick).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Other',
+        amount: 125,
+        isIncome: true,
+      })
+    );
+  });
 });

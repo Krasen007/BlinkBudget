@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { DashboardView } from '../../src/views/DashboardView.js';
+import { NavigationState } from '../../src/core/navigation-state.js';
 import { STORAGE_KEYS } from '../../src/utils/constants.js';
 
 /**
@@ -217,5 +218,40 @@ describe('DashboardView tag (label) filtering', () => {
 
     expect(getRenderedTransactionIds(container)).toHaveLength(3);
     expect(getActiveFilterChipText(container)).toBeNull();
+  });
+
+  it('matches uncategorized income when the category filter is Other', () => {
+    const incomeTransactions = [
+      {
+        id: 'income-uncategorized',
+        amount: 100,
+        type: 'income',
+        accountId: 'main',
+        timestamp: '2026-06-08T00:00:00.000Z',
+      },
+      {
+        id: 'income-salary',
+        amount: 200,
+        type: 'income',
+        category: 'Salary',
+        accountId: 'main',
+        timestamp: '2026-06-08T00:00:00.000Z',
+      },
+    ];
+    global.localStorage.setItem(
+      STORAGE_KEYS.TRANSACTIONS,
+      JSON.stringify(incomeTransactions)
+    );
+    NavigationState.saveDashboardFilter({
+      category: 'Other',
+      source: 'reports',
+    });
+    NavigationState.saveDashboardTypeFilter('income');
+
+    container = DashboardView();
+
+    expect(getRenderedTransactionIds(container)).toEqual([
+      'income-uncategorized',
+    ]);
   });
 });

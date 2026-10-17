@@ -430,6 +430,8 @@ export const ReportsView = (params = {}) => {
 
     if (category.isIncome) {
       NavigationState.saveDashboardTypeFilter('income');
+    } else {
+      NavigationState.clearDashboardTypeFilter();
     }
 
     NavigationState.saveDashboardFilter(filterData);

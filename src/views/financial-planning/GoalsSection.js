@@ -30,7 +30,12 @@ import { showErrorToast } from '../../utils/toast-notifications.js';
 /**
  * Create goal form controls
  */
-function createGoalFormControls(chartRenderer, activeCharts, section) {
+function createGoalFormControls(
+  chartRenderer,
+  activeCharts,
+  section,
+  updateGoalInsights
+) {
   const goalControls = document.createElement('div');
   goalControls.style.display = 'flex';
   goalControls.style.gap = SPACING.SM;
@@ -214,6 +219,7 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
         const newSummaryCard = createGoalsSummaryCard(updatedGoals);
         currentSummaryCard.replaceWith(newSummaryCard);
       }
+      updateGoalInsights(updatedGoals);
 
       goalForm.style.display = 'none';
       goalName.value = '';
@@ -270,7 +276,12 @@ function createGoalFormControls(chartRenderer, activeCharts, section) {
 /**
  * Create goals list with CRUD operations
  */
-function createGoalsList(chartRenderer, activeCharts, section) {
+function createGoalsList(
+  chartRenderer,
+  activeCharts,
+  section,
+  updateGoalInsights
+) {
   const goalsList = document.createElement('div');
   goalsList.className = 'goal-list';
   goalsList.style.marginTop = SPACING.MD;
@@ -625,6 +636,7 @@ function createGoalsList(chartRenderer, activeCharts, section) {
                 const newSummary = createGoalsSummaryCard(updatedGoals);
                 currentSummary.replaceWith(newSummary);
               }
+              updateGoalInsights(updatedGoals);
 
               cleanupEdit();
               refreshGoalsList();
@@ -651,7 +663,7 @@ function createGoalsList(chartRenderer, activeCharts, section) {
                 await StorageService.deleteGoal(goal.id);
 
                 // Refresh chart using helper
-                const updatedGoals = await StorageService.getGoals();
+                const updatedGoals = (await StorageService.getGoals()) || [];
                 const existingChart = section.querySelector(
                   '[data-chart-type="goal-progress"]'
                 );
@@ -683,6 +695,11 @@ function createGoalsList(chartRenderer, activeCharts, section) {
                     activeCharts.set('goal-progress', chart);
                   }
                 } else if (existingChart) {
+                  const existingChartInstance =
+                    activeCharts.get('goal-progress');
+                  if (existingChartInstance) {
+                    existingChartInstance.destroy();
+                  }
                   existingChart.remove();
                   activeCharts.delete('goal-progress');
                 }
@@ -695,6 +712,7 @@ function createGoalsList(chartRenderer, activeCharts, section) {
                   const newSummary = createGoalsSummaryCard(updatedGoals);
                   currentSummary.replaceWith(newSummary);
                 }
+                updateGoalInsights(updatedGoals);
 
                 // Refresh the list
                 await refreshGoalsList();
@@ -840,6 +858,60 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
   const goalsToRender = Array.isArray(goalsFromStorage) ? goalsFromStorage : [];
   const hasRealGoals = goalsToRender.length > 0;
 
+  const insights = document.createElement('div');
+  insights.className = 'goal-insights';
+  insights.style.marginTop = SPACING.MD;
+  insights.style.padding = SPACING.MD;
+  insights.style.background = COLORS.SURFACE;
+  insights.style.borderRadius = 'var(--radius-md)';
+  insights.style.border = `1px solid ${COLORS.BORDER}`;
+
+  const h4 = document.createElement('h4');
+  h4.textContent = 'Goal Insights';
+  h4.style.marginTop = '0';
+
+  const p = document.createElement('p');
+  p.style.fontSize = '0.9rem';
+
+  const updateGoalInsights = goals => {
+    const currentGoals = Array.isArray(goals) ? goals : [];
+    const behindSchedule = currentGoals.filter(g => {
+      const progress =
+        g.targetAmount > 0 ? (g.currentSavings / g.targetAmount) * 100 : 0;
+      const targetDate = new Date(g.targetDate);
+      return (
+        progress < 20 &&
+        targetDate < new Date(Date.now() + 180 * 24 * 60 * 60 * 1000)
+      );
+    });
+    const strong = document.createElement('strong');
+    strong.textContent = 'Recommendation:';
+
+    p.replaceChildren(strong);
+    if (currentGoals.length === 0) {
+      p.style.color = COLORS.TEXT_MUTED;
+      p.appendChild(
+        document.createTextNode(
+          ' Set your first goal above to track your savings pace.'
+        )
+      );
+    } else if (behindSchedule.length > 0) {
+      p.style.color = COLORS.ERROR;
+      p.appendChild(
+        document.createTextNode(
+          ` You have ${behindSchedule.length.toString()} goals that may need more aggressive savings to stay on track.`
+        )
+      );
+    } else {
+      p.style.color = COLORS.SUCCESS;
+      p.appendChild(
+        document.createTextNode(
+          ' Your goals look well-paced. Keep up the consistent saving!'
+        )
+      );
+    }
+  };
+
   // Create goal progress chart only when real goals exist (no demo)
   if (hasRealGoals) {
     try {
@@ -863,7 +935,8 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
   const goalControls = createGoalFormControls(
     chartRenderer,
     activeCharts,
-    section
+    section,
+    updateGoalInsights
   );
   section.appendChild(goalControls);
 
@@ -871,63 +944,12 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
   const { goalsList, refreshGoalsList } = createGoalsList(
     chartRenderer,
     activeCharts,
-    section
+    section,
+    updateGoalInsights
   );
   section.appendChild(goalsList);
 
-  // Add insights
-  const insights = document.createElement('div');
-  insights.className = 'goal-insights';
-  insights.style.marginTop = SPACING.MD;
-  insights.style.padding = SPACING.MD;
-  insights.style.background = COLORS.SURFACE;
-  insights.style.borderRadius = 'var(--radius-md)';
-  insights.style.border = `1px solid ${COLORS.BORDER}`;
-
-  const behindSchedule = goalsToRender.filter(g => {
-    const progress =
-      g.targetAmount > 0 ? (g.currentSavings / g.targetAmount) * 100 : 0;
-    const targetDate = new Date(g.targetDate);
-    return (
-      progress < 20 &&
-      targetDate < new Date(Date.now() + 180 * 24 * 60 * 60 * 1000)
-    );
-  });
-
-  // Build Goal Insights section using DOM creation (avoiding innerHTML)
-  const h4 = document.createElement('h4');
-  h4.textContent = 'Goal Insights';
-  h4.style.marginTop = '0';
-
-  const p = document.createElement('p');
-  p.style.fontSize = '0.9rem';
-
-  const strong = document.createElement('strong');
-  strong.textContent = 'Recommendation:';
-
-  if (!hasRealGoals) {
-    p.style.color = COLORS.TEXT_MUTED;
-    const recommendationText = document.createTextNode(
-      ' Set your first goal above to track your savings pace.'
-    );
-    p.appendChild(strong);
-    p.appendChild(recommendationText);
-  } else if (behindSchedule.length > 0) {
-    p.style.color = COLORS.ERROR;
-    const recommendationText = document.createTextNode(
-      ` You have ${behindSchedule.length.toString()} goals that may need more aggressive savings to stay on track.`
-    );
-    p.appendChild(strong);
-    p.appendChild(recommendationText);
-  } else {
-    p.style.color = COLORS.SUCCESS;
-    const recommendationText = document.createTextNode(
-      ' Your goals look well-paced. Keep up the consistent saving!'
-    );
-    p.appendChild(strong);
-    p.appendChild(recommendationText);
-  }
-
+  updateGoalInsights(goalsToRender);
   insights.appendChild(h4);
   insights.appendChild(p);
   section.appendChild(insights);
@@ -1048,6 +1070,7 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
             } else {
               section.replaceChild(newSummaryCard, currentSummary);
             }
+            updateGoalInsights(updatedGoals);
 
             if (emptyPlaceholder && section.contains(emptyPlaceholder)) {
               emptyPlaceholder.remove();

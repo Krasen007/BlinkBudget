@@ -456,11 +456,10 @@ export async function createCategoryBreakdownChart(
     const totalSpentValueEl =
       totalSpentContainer.querySelector('div:last-child');
     if (totalSpentValueEl) {
+      totalSpentValueEl.textContent = formatCurrency(totalSpent);
       if (hiddenCount > 0) {
-        totalSpentValueEl.textContent = formatCurrency(visibleTotal);
         totalSpentContainer.title = `Showing visible: ${formatCurrency(visibleTotal)} (Total: ${formatCurrency(totalSpent)})`;
       } else {
-        totalSpentValueEl.textContent = formatCurrency(totalSpent);
         totalSpentContainer.title =
           'Click to filter dashboard to this period (includes refunds)';
       }

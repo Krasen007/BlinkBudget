@@ -1,94 +1,30 @@
-# Changelog
-
-## [Unreleased]
-
-### Added
-
-- **Explore Accounts in Reports** - Below Explore Categories and Explore Tags,
-  Reports now shows one card per account type (Cash, Checking Account, Savings,
-  ...) with how much was spent from those accounts during the selected period.
-  Tapping a card opens the dashboard filtered to every transaction of that
-  account type, so "all cash spending" is one tap away.
-
-### Fixed
-
-- **Tags and labels load offline at startup** - On a cold start the tag list
-  stayed empty until Firebase auth resolved (which can stall entirely without
-  network), so a new transaction could not be tagged. Local data is now read
-  synchronously via the last signed-in user id, and an open form refreshes its
-  tag list as soon as categories become available.
-- **Budgets scale with the selected report period** - Selecting a quarter or a
-  year in Reports compared the whole period's expenses against a single
-  month's budget, so everything looked wildly over budget. Monthly budgets are
-  now scaled to the selected period (a quarter gets x3, a year x12), the
-  category cards use the scaled limit, and the summary card notes the scaling.
-
-## [1.49] - 2026-09-25
-
-A release focused on making the Insights experience more honest and more
-useful, plus a batch of correctness fixes around refunds, accounts, and
-error reporting.
-
-### Added
-
-- **Savings Rate on the Trend chart** - A new amber dashed line tracks your savings
-  rate on its own percentage axis, so you can see whether the money you keep
-  actually grows month over month.
-- **Unusual spending flags in chart tooltips** - Hovering a month or a day now
-  tells you how many outlier expenses it contained, instead of a percentage that
-  made no sense for a time series.
-- **Recurring & Subscriptions card** - BlinkBudget spots fixed-price, regular
-  spending (rent, subscriptions, memberships) and lists each one with its
-  cadence, amount, and the next expected date.
-- **Key Takeaways strip** - The three most relevant insights for the month you
-  are browsing, ranked by severity, so you do not have to read every card.
-- **Today tab arrows in Reports** - The Today period now has the same
-  left/right navigation as This Month, Last Month, This Quarter and This Year,
-  letting you step back to Yesterday and beyond.
-- **Both percentages in category tooltips** - When you hide categories in a
-  chart, the tooltip shows the original share and the recalculated share, so the
-  remaining numbers still add up to something meaningful.
-- **Data Integrity Report in Settings** - A quick, readable summary of what the
-  app found when it last checked your stored data.
-- **Honest export feedback** - If a backup was only partially assembled, the
-  dialog now says so and names what is missing, instead of claiming success.
-- **Tags on the Add Transaction form** - Pick a tag while logging, without
-  having to open an existing transaction first.
-
-### Fixed
-
-- **Refunds now appear in Reports** - They were saved correctly but then hidden
-  from the report charts, so refund-heavy months looked emptier than they were.
-- **Editing an account no longer wipes it** - Saving an account used to reset its
-  balance and creation date. Both are now preserved, with a regression test.
-- **Tags render offline** - Transaction labels disappeared without an internet
-  connection; they now come from local data.
-- **Charts fail visibly** - If a chart cannot be built, you get a readable
-  fallback message instead of a blank card.
-- **Account list failures are recoverable** - A rendering error now shows an
-  inline alert with a Retry button rather than an empty list, and Retry never
-  re-saves your data behind your back.
-- **Error dialogs always reach you** - If the dialog bundle fails to load, a
-  fallback still shows the message instead of failing silently.
-- **Restore failures are logged** - A failed restore now leaves a real trace in
-  the console alongside the alert you already saw.
-- **Chart memory leak closed** - Charts are now destroyed when you switch
-  financial-planning sections, so long sessions no longer accumulate dead
-  charts.
-
-### Changed
-
-- **Trend chart is easier to read** - Income (green) and expenses (red) are
-  drawn as one centered column per period instead of two side-by-side bars.
-- **Removed duplicate Insights surfaces** - The repeated KPI summary bar and the
-  overlapping Daily Expenses section are gone, leaving one clear view.
-- **Clearer naming** - The Reports section is now "Spending Insights", so the app
-  no longer has two different screens called "Financial Insights".
-- **Fully English charts** - All chart titles and labels are English, with
-  consistent currency formatting shared across the app.
-- **Top Movers show real movement** - Signed month-over-month deltas (green for
-  spending less, red for spending more) with a tooltip explaining the change.
-- **Cleanup under the hood** - ESLint was updated to a flat config, unused
-  subsystems and duplicate helpers were removed, and date normalization was
-  consolidated so a restored backup behaves exactly like a fresh load.
-
+67c6b1c lin fix
+9e7c704 Spending by Category % recalculation — Restored in reports-charts.js. Legend and chart-slice toggles hide a category, then updateRecalculatedView refreshes legend percentages (original% → visible%), Total Spent, and the details text.
+d9bac40 fix(reports): keep a zero-spend account type from reading as Net Refund
+6e9518a docs+test(reports): document Explore Accounts and cover the Reports wiring
+6e23c7d feat(reports): add Explore Accounts section with account-type filtering
+dc5d180 All 4 nameless fields in the financial planning flow now have `id` + `name` (12/12 targeted tests pass; exit-1 is the pwsh wrapper).
+f6c56e1 fix __Bug:__ When selecting multiple transactions and bulk-changing their account, the dashboard stayed on the previously selected account filter. The moved transactions would vanish (if filtering by the old account) or the dashboard never followed them to the new account.
+189b9bc fix tokens
+9a937aa fix prettier warnings
+8b588f4 lint fixes
+2b75951 Fix async fonts and legal page fallback
+704bdc0 fix PWA, CSP, Offline functionality
+7a97a76 update manifest app size
+ca73340 fix dark mode for TWA
+b0769c4 Fix transaction tag listener teardown
+1cd1413 Fix reports budgets across longer periods
+3a39dc5 Fix tags/labels not loading on offline cold start
+fba72a0 Validated fixes applied
+ea9fe22 ## Phase 3 — complete ✅
+a371131 ## Phase 2 — complete ✅ (#15.1)
+43024ad ## Phase 1 — complete ✅ __605/605 tests passing__ across 88 files (baseline was 574/574 in 83 — __+31 new tests, zero regressions__)
+43791cf Phase 2 is complete. __1,894 lines removed, 171 added, 574/574 tests passing.__
+2da469c The failing test is fixed
+8a4bda7 fix __invalid__ queries
+4141bd9 Finding __#4.1__ — the `@keyframes slideUp` collisio
+e7ce557 update guide
+cd41eb6 resolved and the audit is closed
+294725f Fixed all __6 cosmetic findings__
+d1f0efa Phase 2 is complete.
+a0c36e2 ## Phase 1 complete All six Phase 1 findings from `todo/ai-slop-report.md` are implemented

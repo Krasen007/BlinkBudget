@@ -76,6 +76,8 @@ vi.mock('../../src/core/navigation-state.js', () => ({
     restoreReportsCategoryFilter: vi.fn(() => null),
     clearReportsCategoryFilter: vi.fn(),
     saveDashboardFilter: vi.fn(),
+    saveDashboardTypeFilter: vi.fn(),
+    clearDashboardTypeFilter: vi.fn(),
   },
 }));
 
@@ -290,5 +292,31 @@ describe('ReportsView skeleton loading', () => {
 
     expect(NavigationState.saveDashboardFilter).not.toHaveBeenCalled();
     expect(Router.navigate).not.toHaveBeenCalledWith('dashboard');
+  });
+
+  it('clears the dashboard type filter for non-income category cards', async () => {
+    const view = ReportsView();
+    document.body.appendChild(view);
+
+    await Promise.resolve();
+    await Promise.resolve();
+    vi.advanceTimersByTime(500);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    const onCategoryCardClick = vi
+      .mocked(CategorySelector)
+      .mock.calls.at(-1)[3];
+    onCategoryCardClick({ name: 'Food', isIncome: false });
+
+    expect(NavigationState.clearDashboardTypeFilter).toHaveBeenCalledTimes(1);
+    expect(NavigationState.saveDashboardTypeFilter).not.toHaveBeenCalled();
+
+    onCategoryCardClick({ name: 'Salary', isIncome: true });
+
+    expect(NavigationState.saveDashboardTypeFilter).toHaveBeenCalledWith(
+      'income'
+    );
+    expect(NavigationState.clearDashboardTypeFilter).toHaveBeenCalledTimes(1);
   });
 });

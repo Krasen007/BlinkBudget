@@ -269,7 +269,7 @@ export const CategorySelector = (
     t => t.type === 'income'
   );
 
-  const incomeBreakdown = {};
+  const incomeBreakdown = new Map();
   let totalIncomeForPeriod = 0;
 
   incomeTransactions.forEach(t => {
@@ -277,19 +277,21 @@ export const CategorySelector = (
     const amount = Math.abs(t.amount || 0);
     totalIncomeForPeriod += amount;
 
-    if (!incomeBreakdown[categoryName]) {
-      incomeBreakdown[categoryName] = {
+    let group = incomeBreakdown.get(categoryName);
+    if (!group) {
+      group = {
         name: categoryName,
         amount: 0,
         transactionCount: 0,
         isIncome: true,
       };
+      incomeBreakdown.set(categoryName, group);
     }
-    incomeBreakdown[categoryName].amount += amount;
-    incomeBreakdown[categoryName].transactionCount += 1;
+    group.amount += amount;
+    group.transactionCount += 1;
   });
 
-  const visibleIncomeGroups = Object.values(incomeBreakdown)
+  const visibleIncomeGroups = [...incomeBreakdown.values()]
     .map(group => ({
       ...group,
       percentage:
@@ -337,8 +339,14 @@ export const CategorySelector = (
 
     const incomeColorMap = new Map();
     visibleIncomeGroups.forEach(group => {
+      const categoryColor = Object.prototype.hasOwnProperty.call(
+        CATEGORY_COLORS,
+        group.name
+      )
+        ? CATEGORY_COLORS[group.name]
+        : null;
       const color =
-        CATEGORY_COLORS[group.name] ||
+        categoryColor ||
         customIncomeColorMap.get(group.name) ||
         COLORS.INCOME_COLOR;
       incomeColorMap.set(group.name, color);
@@ -348,8 +356,9 @@ export const CategorySelector = (
       typeof onIncomeGroupClick === 'function'
         ? onIncomeGroupClick
         : item => {
+            const categoryName = item.name || 'Other';
             NavigationState.saveDashboardTypeFilter('income');
-            onCategoryClick(item);
+            onCategoryClick({ ...item, name: categoryName });
           };
 
     visibleIncomeGroups.forEach((group, index) => {

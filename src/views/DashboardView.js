@@ -613,7 +613,7 @@ export const DashboardView = (params = {}) => {
 
         // Quick Category Filter (from clicking category in list)
         if (currentCategoryFilter) {
-          if (t.category !== currentCategoryFilter) return false;
+          if ((t.category || 'Other') !== currentCategoryFilter) return false;
         }
 
         // Tag / label filter

@@ -185,11 +185,17 @@ describe('category breakdown tooltip percentages', () => {
     expect(legendItems[1].textContent).toContain('→');
     expect(legendItems[0].style.textDecoration).toBe('line-through');
 
-    // Total spent stat updates to visible total (€50.00)
+    // The stat stays on the net total; the visible slice total is separate.
     const totalSpentEl = section.querySelector(
       '[aria-label*="Filter dashboard to the selected period"] div:last-child'
     );
-    expect(totalSpentEl.textContent).toBe('€50.00');
+    expect(totalSpentEl.textContent).toBe('€200.00');
+    expect(totalSpentEl.parentElement.title).toContain(
+      'Showing visible: €50.00'
+    );
+    expect(
+      section.querySelector('.chart-mobile-details').textContent
+    ).toContain('Recalculated visible total: €50.00');
 
     // Click "Rent" again to re-enable
     legendItems[0].click();
