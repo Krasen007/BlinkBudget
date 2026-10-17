@@ -331,6 +331,11 @@ describe('Insights Charts Components', () => {
       expect(expenseDataset.data[0]).toBe(-400);
       expect(chartOptions.scales.x.stacked).toBe(true);
       expect(chartOptions.scales.y.stacked).toBe(true);
+      // Diverging zero and 0% savings stay in the vertical middle
+      expect(chartOptions.scales.y.min).toBe(-1000);
+      expect(chartOptions.scales.y.max).toBe(1000);
+      expect(chartOptions.scales.rate.min).toBe(-100);
+      expect(chartOptions.scales.rate.max).toBe(100);
 
       card.cleanup();
     });

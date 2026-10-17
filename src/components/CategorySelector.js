@@ -339,16 +339,16 @@ export const CategorySelector = (
 
     const incomeColorMap = new Map();
     visibleIncomeGroups.forEach(group => {
-      const categoryColor = Object.prototype.hasOwnProperty.call(
+      // Prefer Category Management colors so edits match expense cards/charts
+      const customColor = customIncomeColorMap.get(group.name);
+      const predefinedColor = Object.prototype.hasOwnProperty.call(
         CATEGORY_COLORS,
         group.name
       )
         ? CATEGORY_COLORS[group.name]
         : null;
       const color =
-        categoryColor ||
-        customIncomeColorMap.get(group.name) ||
-        COLORS.INCOME_COLOR;
+        customColor || predefinedColor || COLORS.INCOME_COLOR;
       incomeColorMap.set(group.name, color);
     });
 

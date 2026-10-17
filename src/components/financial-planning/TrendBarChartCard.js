@@ -245,6 +245,14 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
       </span>
     `;
 
+    // Keep the diverging zero line (and 0% savings) in the vertical middle
+    // of the chart by forcing both axes to be symmetric around zero.
+    const maxMoney = Math.max(1, ...income, ...expense);
+    const maxRateAbs = Math.max(
+      100,
+      ...rate.filter(v => v != null).map(v => Math.abs(v))
+    );
+
     const chartData = {
       labels,
       datasets: [
@@ -330,11 +338,17 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
           y: {
             ...baseScales.y,
             stacked: true,
+            min: -maxMoney,
+            max: maxMoney,
+            beginAtZero: false,
           },
-          // Secondary axis for the savings-rate line (percent)
+          // Secondary axis for the savings-rate line (percent).
+          // Symmetric around 0% so the line sits on the same mid-chart
+          // zero line as the diverging bars.
           rate: {
             position: 'right',
-            beginAtZero: true,
+            min: -maxRateAbs,
+            max: maxRateAbs,
             grid: {
               drawOnChartArea: false,
             },

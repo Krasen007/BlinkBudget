@@ -457,17 +457,36 @@ export const DashboardView = (params = {}) => {
       sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER);
     }
 
-    // Apply time period filter if available
+    // Apply time period filter if available.
+    // Category/tag drills from a monthly Reports period become a month filter
+    // so the Spent-card arrows stay available (same UX as date filtering).
     if (dashboardFilter.timePeriod) {
-      currentDateRangeFilter = dashboardFilter.timePeriod;
-      sessionStorage.setItem(
-        'dashboard_date_range_filter',
-        JSON.stringify(dashboardFilter.timePeriod)
+      const period = dashboardFilter.timePeriod;
+      const isCategoryOrTagDrill = !!(
+        dashboardFilter.category || dashboardFilter.tag
       );
+      const isMonthly = period.type === 'monthly';
 
-      // Clear month filter since we have a custom date range filter
-      currentMonthFilter = null;
-      sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
+      if (isCategoryOrTagDrill && isMonthly && period.startDate) {
+        const monthStart = new Date(period.startDate);
+        const monthIso = new Date(
+          Date.UTC(monthStart.getFullYear(), monthStart.getMonth(), 1)
+        ).toISOString();
+        currentMonthFilter = monthIso;
+        sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER, monthIso);
+        currentDateRangeFilter = null;
+        sessionStorage.removeItem('dashboard_date_range_filter');
+      } else {
+        currentDateRangeFilter = period;
+        sessionStorage.setItem(
+          'dashboard_date_range_filter',
+          JSON.stringify(period)
+        );
+
+        // Clear month filter since we have a custom date range filter
+        currentMonthFilter = null;
+        sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
+      }
     }
 
     // Account filter from Reports (Explore Accounts). When the user drilled in
@@ -835,7 +854,12 @@ export const DashboardView = (params = {}) => {
         label: spentLabel,
         value: totalExpense,
         color: COLORS.ERROR,
-        showMonthNavigation: !currentDateRangeFilter,
+        // Keep month arrows available when drilling into a category/tag even
+        // if a Reports date-range is still active — clicking an arrow converts
+        // to month navigation (see onMonthChange).
+        showMonthNavigation:
+          !currentDateRangeFilter ||
+          !!(currentCategoryFilter || currentTagFilter),
         currentMonthFilter,
         onMonthChange: monthDate => {
           currentMonthFilter = monthDate;
@@ -1133,13 +1157,23 @@ export const DashboardView = (params = {}) => {
             STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER,
             newCategory
           );
+          // Preserve month context (same as date filter) so arrows keep working.
+          // If none is set yet, pin to the current month so category views are
+          // month-scoped rather than jumping to all-time.
+          if (!currentMonthFilter && !currentDateRangeFilter) {
+            const now = new Date();
+            const monthIso = new Date(
+              Date.UTC(now.getFullYear(), now.getMonth(), 1)
+            ).toISOString();
+            currentMonthFilter = monthIso;
+            sessionStorage.setItem(
+              STORAGE_KEYS.DASHBOARD_MONTH_FILTER,
+              monthIso
+            );
+          }
         } else {
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER);
         }
-
-        // Clear month filter when category changes
-        currentMonthFilter = null;
-        sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
 
         renderDashboard();
       },

@@ -245,6 +245,25 @@ describe('DashboardView account type filter', () => {
     expect(optionValues.some(value => value.startsWith('type:'))).toBe(false);
   });
 
+  it('keeps month arrows when drilling into a category from a monthly Reports period', () => {
+    dashboardFilter = {
+      category: 'Food',
+      source: 'reports',
+      timePeriod: {
+        type: 'monthly',
+        startDate: new Date('2026-06-01T00:00:00.000Z'),
+        endDate: new Date('2026-06-30T23:59:59.999Z'),
+        label: 'This Month',
+      },
+    };
+    render();
+
+    // Spent card is the second stats card and must keep month navigation
+    const spentCard = statCards[1];
+    expect(spentCard.showMonthNavigation).toBe(true);
+    expect(spentCard.currentMonthFilter).toBeTruthy();
+  });
+
   it('restores a plain account-id filter from the session', () => {
     global.sessionStorage.setItem('dashboard_filter', 'acc-checking');
     render();

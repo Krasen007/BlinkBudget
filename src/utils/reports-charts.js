@@ -10,6 +10,7 @@ import { escapeHtml } from './security-utils.js';
 import { formatCurrency } from './financial-planning-helpers.js';
 import { Router } from '../core/router.js';
 import { NavigationState } from '../core/navigation-state.js';
+import { CustomCategoryService } from '../core/custom-category-service.js';
 
 // Resolve CSS custom properties to computed color strings usable by Canvas/Chart.js
 function resolveCssVarColor(varName, alpha) {
@@ -747,18 +748,30 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
 }
 
 /**
- * Get a deterministic color for a category
- * Checks predefined colors first, then falls back to a consistent hash-based color
+ * Get a deterministic color for a category.
+ * Prefers the color saved in Category Management, then predefined defaults,
+ * then a stable hash-based palette color.
  */
 export function getColorForCategory(categoryName) {
   if (!categoryName) return COLORS.TEXT_MUTED;
 
-  // 1. Check predefined colors
+  // 1. User-managed color from Category Management (source of truth)
+  try {
+    const customCategories = CustomCategoryService.getAll();
+    const custom = customCategories.find(c => c.name === categoryName);
+    if (custom?.color) {
+      return custom.color;
+    }
+  } catch {
+    // Fall through if categories are unavailable during early init/tests
+  }
+
+  // 2. Check predefined colors
   if (CATEGORY_COLORS[categoryName]) {
     return CATEGORY_COLORS[categoryName];
   }
 
-  // 2. Fallback: Deterministic hash to select from strict palette
+  // 3. Fallback: Deterministic hash to select from strict palette
   const totalColors = 12; // Use standard size palette
   const colors = getChartColors(totalColors);
 
@@ -773,7 +786,9 @@ export function getColorForCategory(categoryName) {
 }
 
 /**
- * Get consistent colors for categories across all charts and UI elements
+ * Get consistent colors for categories across all charts and UI elements.
+ * Always refreshes from the current source of truth so Category Management
+ * color edits show up immediately in Reports.
  */
 export function getCategoryColors(categories, categoryColorMap) {
   // Ensure categories is an array
@@ -782,11 +797,10 @@ export function getCategoryColors(categories, categoryColorMap) {
     return [];
   }
 
-  // Update map with colors for all categories
+  // Always refresh — cached map entries would otherwise keep stale colors
+  // after a Category Management edit within the same ReportsView session.
   categories.forEach(category => {
-    if (!categoryColorMap.has(category.name)) {
-      categoryColorMap.set(category.name, getColorForCategory(category.name));
-    }
+    categoryColorMap.set(category.name, getColorForCategory(category.name));
   });
 
   return categories.map(category => categoryColorMap.get(category.name));

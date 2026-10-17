@@ -21,5 +21,5 @@ org.gradle.jvmargs=-Xmx1024m -Xms512m
 
 #18171F
 
-270 / 300 credits remaining
-Expires August 19, 2026
+178.7 / 300 credits remaining
+Expires October 19, 2026
