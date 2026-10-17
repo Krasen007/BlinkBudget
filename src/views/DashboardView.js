@@ -470,7 +470,9 @@ export const DashboardView = (params = {}) => {
       if (isCategoryOrTagDrill && isMonthly && period.startDate) {
         const monthStart = new Date(period.startDate);
         const monthIso = new Date(
-          Date.UTC(monthStart.getFullYear(), monthStart.getMonth(), 1)
+          monthStart.getFullYear(),
+          monthStart.getMonth(),
+          1
         ).toISOString();
         currentMonthFilter = monthIso;
         sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER, monthIso);
@@ -1013,6 +1015,31 @@ export const DashboardView = (params = {}) => {
             endDate: ensureDate(currentDateRangeFilter.endDate),
           };
           NavigationState.saveTimePeriod(timePeriod);
+        } else if (currentMonthFilter) {
+          const monthDate = new Date(currentMonthFilter);
+          const startDate = new Date(
+            monthDate.getFullYear(),
+            monthDate.getMonth(),
+            1
+          );
+          const endDate = new Date(
+            monthDate.getFullYear(),
+            monthDate.getMonth() + 1,
+            0,
+            23,
+            59,
+            59,
+            999
+          );
+          NavigationState.saveTimePeriod({
+            type: 'monthly',
+            startDate,
+            endDate,
+            label: startDate.toLocaleString('en-US', {
+              month: 'long',
+              year: 'numeric',
+            }),
+          });
         } else if (
           currentDashboardFilter &&
           currentDashboardFilter.timePeriod
@@ -1045,9 +1072,11 @@ export const DashboardView = (params = {}) => {
         : '';
       const periodLabel = currentDateRangeFilter
         ? currentDateRangeFilter.label || 'selected period'
-        : currentDashboardFilter && currentDashboardFilter.timePeriod
-          ? currentDashboardFilter.timePeriod.label || 'selected period'
-          : null;
+        : currentMonthFilter
+          ? monthLabel
+          : currentDashboardFilter && currentDashboardFilter.timePeriod
+            ? currentDashboardFilter.timePeriod.label || 'selected period'
+            : null;
 
       if (
         currentDateRangeFilter &&
@@ -1160,10 +1189,21 @@ export const DashboardView = (params = {}) => {
           // Preserve month context (same as date filter) so arrows keep working.
           // If none is set yet, pin to the current month so category views are
           // month-scoped rather than jumping to all-time.
-          if (!currentMonthFilter && !currentDateRangeFilter) {
-            const now = new Date();
+          if (
+            !currentDateRangeFilter &&
+            (currentDateFilter || !currentMonthFilter)
+          ) {
+            let monthContext = new Date();
+            if (currentDateFilter) {
+              const [year, month, day] = currentDateFilter
+                .split('-')
+                .map(Number);
+              monthContext = new Date(year, month - 1, day);
+            }
             const monthIso = new Date(
-              Date.UTC(now.getFullYear(), now.getMonth(), 1)
+              monthContext.getFullYear(),
+              monthContext.getMonth(),
+              1
             ).toISOString();
             currentMonthFilter = monthIso;
             sessionStorage.setItem(

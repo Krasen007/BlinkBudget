@@ -179,7 +179,8 @@ color: var(--color-primary);        // was var(--color-primary, #00d084)  ← he
 Every warning falls into one of two buckets:
 
 - **Exact token exists** → convert it (§5 patterns). Done.
-- **No token exists** → one-line justified disable (§4a) + report it as "no token exists".
+- **No token exists** → first convert unitless-able values such as `'0px'` to `'0'`;
+  then use a one-line justified disable (§4a) + report it as "no token exists".
   Never invent a token in a cleanup pass; never snap to a _nearby_ token — both are design
   decisions the author makes.
 

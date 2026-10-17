@@ -247,7 +247,10 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
 
     // Keep the diverging zero line (and 0% savings) in the vertical middle
     // of the chart by forcing both axes to be symmetric around zero.
-    const maxMoney = Math.max(1, ...income, ...expense);
+    const maxMoney = Math.max(
+      1,
+      ...[...income, ...expense, ...net].map(Math.abs)
+    );
     const maxRateAbs = Math.max(
       100,
       ...rate.filter(v => v != null).map(v => Math.abs(v))

@@ -5,6 +5,7 @@
 // longer exists.
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { DashboardView } from '../../src/views/DashboardView.js';
+import { NavigationState } from '../../src/core/navigation-state.js';
 
 const accounts = [
   {
@@ -114,6 +115,8 @@ vi.mock('../../src/core/navigation-state.js', () => ({
     restoreDashboardTimePeriod: () => null,
     clearDashboardFilter: vi.fn(),
     clearDashboardTypeFilter: vi.fn(),
+    saveTimePeriod: vi.fn(),
+    saveReportsCategoryFilter: vi.fn(),
   },
 }));
 
@@ -262,6 +265,65 @@ describe('DashboardView account type filter', () => {
     const spentCard = statCards[1];
     expect(spentCard.showMonthNavigation).toBe(true);
     expect(spentCard.currentMonthFilter).toBeTruthy();
+  });
+
+  it('keeps Reports monthly filtering aligned west of UTC', () => {
+    const originalTimeZone = process.env.TZ;
+    process.env.TZ = 'America/Los_Angeles';
+    try {
+      dashboardFilter = {
+        category: 'Food',
+        source: 'reports',
+        timePeriod: {
+          type: 'monthly',
+          startDate: new Date(2026, 5, 1),
+          endDate: new Date(2026, 5, 30, 23, 59, 59, 999),
+          label: 'June 2026',
+        },
+      };
+      render();
+
+      const rows = container.querySelectorAll(
+        '.dashboard-transactions-list li'
+      );
+      expect(rows).toHaveLength(2);
+      expect(new Date(statCards[1].currentMonthFilter).getMonth()).toBe(5);
+    } finally {
+      if (originalTimeZone === undefined) {
+        delete process.env.TZ;
+      } else {
+        process.env.TZ = originalTimeZone;
+      }
+    }
+  });
+
+  it('returns to Reports with the month selected by dashboard navigation', () => {
+    dashboardFilter = {
+      category: 'Food',
+      source: 'reports',
+      timePeriod: {
+        type: 'monthly',
+        startDate: new Date('2026-06-01T00:00:00.000Z'),
+        endDate: new Date('2026-06-30T23:59:59.999Z'),
+        label: 'June 2026',
+      },
+    };
+    render();
+
+    statCards[statCards.length - 1].onMonthChange(
+      new Date(2026, 6, 1).toISOString()
+    );
+
+    const filterStatus = container.querySelector('.reports-filter-status');
+    expect(filterStatus.textContent).toContain('July 2026');
+    filterStatus.dispatchEvent(new Event('click', { bubbles: true }));
+
+    expect(NavigationState.saveTimePeriod).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'monthly',
+        label: expect.stringContaining('July 2026'),
+      })
+    );
   });
 
   it('restores a plain account-id filter from the session', () => {

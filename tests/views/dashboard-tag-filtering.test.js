@@ -254,4 +254,44 @@ describe('DashboardView tag (label) filtering', () => {
       'income-uncategorized',
     ]);
   });
+
+  it('keeps the selected quick date when applying a category filter', () => {
+    const transactionsWithMayPurchase = [
+      ...TRANSACTIONS,
+      {
+        id: 'may-food',
+        amount: 15,
+        category: 'Food',
+        type: 'expense',
+        accountId: 'main',
+        tags: [],
+        timestamp: '2026-05-20T12:00:00.000Z',
+      },
+    ];
+    global.localStorage.setItem(
+      STORAGE_KEYS.TRANSACTIONS,
+      JSON.stringify(transactionsWithMayPurchase)
+    );
+    global.sessionStorage.setItem(
+      STORAGE_KEYS.DASHBOARD_DATE_FILTER,
+      '2026-05-20'
+    );
+
+    container = DashboardView();
+
+    expect(getRenderedTransactionIds(container)).toEqual(['may-food']);
+    container
+      .querySelector('.transaction-item-category')
+      .dispatchEvent(new Event('click', { bubbles: true }));
+
+    expect(getRenderedTransactionIds(container)).toEqual(['may-food']);
+    expect(
+      global.sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_DATE_FILTER)
+    ).toBe('2026-05-20');
+    expect(
+      new Date(
+        global.sessionStorage.getItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER)
+      ).getMonth()
+    ).toBe(4);
+  });
 });
