@@ -576,6 +576,20 @@ export const SyncService = {
     // For items without id, use cloud-authoritative approach (only include cloud items)
     const cloudNoId = (cloudArray || []).filter(i => i && !i.id);
     merged.push(...cloudNoId);
+
+    // Categories are a globally-ordered list: the cloud's array order is the
+    // authoritative sequence. Re-rank sortOrder so every device converges on
+    // the same ordering and per-item Last-Write-Wins cannot leave stale or
+    // duplicate sortOrder values that would scramble the order on read
+    // (getAll() sorts by sortOrder).
+    if (key === STORAGE_KEYS.CUSTOM_CATEGORIES) {
+      merged.forEach((cat, index) => {
+        if (cat && cat.sortOrder !== index) {
+          cat.sortOrder = index;
+        }
+      });
+    }
+
     return merged;
   },
 
