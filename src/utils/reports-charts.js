@@ -165,7 +165,7 @@ function createCategoryTooltipConfig(detailsContainer) {
         percentageRow.style.display = 'flex';
         percentageRow.style.justifyContent = 'space-between';
         percentageRow.style.alignItems = 'center';
-        percentageRow.style.marginTop = '4px';
+        percentageRow.style.marginTop = SPACING.XS;
         percentageRow.style.fontSize = '0.85em';
         percentageRow.style.color = 'var(--color-text-muted)';
 
@@ -181,7 +181,7 @@ function createCategoryTooltipConfig(detailsContainer) {
 
           const separator = document.createElement('span');
           separator.setAttribute('aria-hidden', 'true');
-          separator.style.margin = '0 4px';
+          separator.style.margin = `0 ${SPACING.XS}`;
           separator.textContent = '→';
 
           const visibleValue = document.createElement('span');
@@ -493,7 +493,7 @@ export async function createCategoryBreakdownChart(
 
         const separator = document.createElement('span');
         separator.setAttribute('aria-hidden', 'true');
-        separator.style.margin = '0 4px';
+        separator.style.margin = `0 ${SPACING.XS}`;
         separator.textContent = '→';
 
         const visibleValue = document.createElement('span');
@@ -675,6 +675,7 @@ export async function createIncomeExpenseChart(chartRenderer, currentData) {
   const detailsContent = document.createElement('div');
   detailsContent.style.display = 'grid';
   detailsContent.style.gridTemplateColumns =
+    // eslint-disable-next-line local/no-raw-style-values -- 150px grid minmax has no design token; snapping would be a design change
     'repeat(auto-fit, minmax(150px, 1fr))';
   detailsContent.style.gap = SPACING.XS;
   detailsContent.style.textAlign = 'center';

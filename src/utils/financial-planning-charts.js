@@ -422,6 +422,7 @@ function createBalanceSummary(balanceProjections) {
   const container = document.createElement('div');
   container.className = 'balance-summary';
   container.style.display = 'grid';
+  // eslint-disable-next-line local/no-raw-style-values -- 150px grid minmax has no design token; snapping would be a design change
   container.style.gridTemplateColumns = 'repeat(auto-fit, minmax(150px, 1fr))';
   container.style.gap = SPACING.MD;
   container.style.padding = SPACING.MD;

@@ -1002,6 +1002,7 @@ export const TimePeriodSelector = (options = {}) => {
     customRangeContainer.style.display = 'flex';
 
     customRangeContainer.style.opacity = '0';
+    // eslint-disable-next-line local/no-raw-style-values -- -10px translate has no design token; snapping would be a design change
     customRangeContainer.style.transform = 'translateY(-10px)';
 
     setTimeout(() => {
@@ -1017,6 +1018,7 @@ export const TimePeriodSelector = (options = {}) => {
   function hideCustomRangeSelector() {
     customRangeContainer.style.transition = 'all 0.3s ease';
     customRangeContainer.style.opacity = '0';
+    // eslint-disable-next-line local/no-raw-style-values -- -10px translate has no design token; snapping would be a design change
     customRangeContainer.style.transform = 'translateY(-10px)';
 
     setTimeout(() => {

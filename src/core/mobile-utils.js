@@ -368,8 +368,8 @@ export class MobileUtils {
       '--visual-viewport-width',
       `${this.visualViewport?.width || viewportWidth}px`
     );
-    root.style.setProperty('--visual-viewport-offset-top', '0px');
-    root.style.setProperty('--keyboard-height', '0px');
+    root.style.setProperty('--visual-viewport-offset-top', '0');
+    root.style.setProperty('--keyboard-height', '0');
 
     // Update keyboard-related properties
     if (this.keyboardState.visible) {

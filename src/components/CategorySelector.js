@@ -65,6 +65,7 @@ export const CategorySelector = (
   categoryGrid.className = 'category-grid';
   categoryGrid.style.display = 'grid';
   categoryGrid.style.gridTemplateColumns =
+    // eslint-disable-next-line local/no-raw-style-values -- 250px grid minmax has no design token; snapping would be a design change
     'repeat(auto-fill, minmax(250px, 1fr))';
   categoryGrid.style.gap = SPACING.MD;
   categoryGrid.style.marginTop = SPACING.MD;
@@ -187,6 +188,7 @@ export const CategorySelector = (
     const tagGrid = document.createElement('div');
     tagGrid.className = 'category-grid'; // Use same class for layout consistency
     tagGrid.style.display = 'grid';
+    // eslint-disable-next-line local/no-raw-style-values -- 250px grid minmax has no design token; snapping would be a design change
     tagGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(250px, 1fr))';
     tagGrid.style.gap = SPACING.MD;
     tagGrid.style.marginTop = SPACING.MD;
@@ -249,6 +251,7 @@ export const CategorySelector = (
       accountGrid.className = 'category-grid account-grid';
       accountGrid.style.display = 'grid';
       accountGrid.style.gridTemplateColumns =
+        // eslint-disable-next-line local/no-raw-style-values -- 250px grid minmax has no design token; snapping would be a design change
         'repeat(auto-fill, minmax(250px, 1fr))';
       accountGrid.style.gap = SPACING.MD;
       accountGrid.style.marginTop = SPACING.MD;
@@ -326,6 +329,7 @@ export const CategorySelector = (
     incomeGrid.className = 'category-grid income-grid';
     incomeGrid.style.display = 'grid';
     incomeGrid.style.gridTemplateColumns =
+      // eslint-disable-next-line local/no-raw-style-values -- 250px grid minmax has no design token; snapping would be a design change
       'repeat(auto-fill, minmax(250px, 1fr))';
     incomeGrid.style.gap = SPACING.MD;
     incomeGrid.style.marginTop = SPACING.MD;

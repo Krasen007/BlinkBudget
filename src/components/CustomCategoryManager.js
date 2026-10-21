@@ -120,6 +120,7 @@ export const CustomCategoryManager = ({
     'aria-labelledby',
     'expense-button' // Start with expense button as active
   );
+  // eslint-disable-next-line local/no-raw-style-values -- 250px grid minmax has no design token; snapping would be a design change
   categoriesList.style.cssText = `
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -492,7 +493,7 @@ export const CustomCategoryManager = ({
     // Hover effects
     card.addEventListener('mouseenter', () => {
       card.style.backgroundColor = 'var(--color-surface-hover)';
-      card.style.transform = 'translateY(-1px)';
+      card.style.transform = 'var(--hover-lift)';
     });
 
     card.addEventListener('mouseleave', () => {

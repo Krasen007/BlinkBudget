@@ -48,6 +48,7 @@ export const CategoryCard = (
   card.style.setProperty('--category-color', categoryColor);
 
   card.addEventListener('mouseenter', () => {
+    // eslint-disable-next-line local/no-raw-style-values -- -2px lift has no design token; snapping to --hover-lift (-1px) would be a design change
     card.style.transform = 'translateY(-2px)';
     card.style.boxShadow = `0 ${SPACING.XS} ${SPACING.MD} rgba(0, 0, 0, 0.1)`;
   });

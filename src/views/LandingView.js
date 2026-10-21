@@ -20,6 +20,7 @@ const initScrollReveal = (container, observers) => {
 
   sections.forEach(section => {
     section.style.opacity = '0';
+    // eslint-disable-next-line local/no-raw-style-values -- 20px translate has no design token; snapping would be a design change
     section.style.transform = 'translateY(20px)';
     section.style.transition = `opacity var(--duration-slow) var(--ease-out), transform var(--duration-slow) var(--ease-out)`;
   });
