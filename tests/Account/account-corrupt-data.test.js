@@ -49,6 +49,8 @@ describe('Phase A1: corrupt accounts recovery', () => {
   beforeEach(() => {
     store.clear();
     installStorage();
+    TransactionService.clear();
+    AccountService.clear();
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
@@ -118,5 +120,113 @@ describe('Phase A1: corrupt accounts recovery', () => {
 
     expect(added.accountId).toBe('main');
     expect(AccountService.getAccounts()).toHaveLength(1);
+  });
+
+  it('account reads return copies and account writes read current storage', () => {
+    const initialAccounts = [
+      { id: 'a', name: 'Cash', type: 'cash', isDefault: true },
+      { id: 'b', name: 'Card', type: 'card', isDefault: false },
+    ];
+    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(initialAccounts));
+
+    const accounts = AccountService.getAccounts();
+    accounts[0].name = 'Mutated';
+    accounts.push({ id: 'caller-only' });
+    expect(AccountService.getAccounts()).toEqual(initialAccounts);
+
+    const currentAccounts = [
+      ...initialAccounts,
+      { id: 'external', name: 'External', type: 'cash', isDefault: false },
+    ];
+    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(currentAccounts));
+    AccountService.saveAccount({
+      id: 'new',
+      name: 'New account',
+      type: 'bank',
+      isDefault: false,
+    });
+
+    expect(
+      JSON.parse(localStorage.getItem(ACCOUNTS_KEY)).map(a => a.id)
+    ).toEqual(['a', 'b', 'external', 'new']);
+  });
+
+  it('account deletion preserves accounts added after the read cache was filled', () => {
+    const cachedAccounts = [
+      { id: 'a', name: 'Cash', type: 'cash', isDefault: true },
+      { id: 'b', name: 'Card', type: 'card', isDefault: false },
+    ];
+    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(cachedAccounts));
+    AccountService.getAccounts();
+
+    localStorage.setItem(
+      ACCOUNTS_KEY,
+      JSON.stringify([
+        ...cachedAccounts,
+        { id: 'external', name: 'External', type: 'bank', isDefault: false },
+      ])
+    );
+    expect(AccountService.deleteAccount('b')).toBe(true);
+    expect(
+      JSON.parse(localStorage.getItem(ACCOUNTS_KEY)).map(a => a.id)
+    ).toEqual(['a', 'external']);
+  });
+
+  it('transaction reads return copies and add reads current storage', () => {
+    const initialTransactions = [
+      {
+        id: 'original',
+        amount: 10,
+        type: 'expense',
+        accountId: 'main',
+        tags: ['original-tag'],
+      },
+    ];
+    localStorage.setItem(
+      ACCOUNTS_KEY,
+      JSON.stringify([
+        {
+          id: 'main',
+          name: 'Cash',
+          type: 'cash',
+          isDefault: true,
+        },
+      ])
+    );
+    localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(initialTransactions));
+
+    const transactions = TransactionService.getAll();
+    transactions[0].amount = 999;
+    transactions[0].tags[0] = 'mutated-tag';
+    transactions.push({ id: 'caller-only' });
+
+    const currentTransactions = [
+      ...initialTransactions,
+      {
+        id: 'external',
+        amount: 20,
+        type: 'expense',
+        accountId: 'main',
+      },
+    ];
+    localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(currentTransactions));
+
+    TransactionService.add({
+      amount: 30,
+      type: 'income',
+      accountId: 'main',
+    });
+
+    const persistedTransactions = JSON.parse(
+      localStorage.getItem(TRANSACTIONS_KEY)
+    );
+    expect(persistedTransactions.map(transaction => transaction.id)).toEqual(
+      expect.arrayContaining(['original', 'external'])
+    );
+    expect(persistedTransactions.find(t => t.id === 'original')).toMatchObject({
+      amount: 10,
+      tags: ['original-tag'],
+    });
+    expect(persistedTransactions).toHaveLength(3);
   });
 });

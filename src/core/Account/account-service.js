@@ -11,15 +11,35 @@ import { safeJsonParse } from '../../utils/security-utils.js';
 
 const ACCOUNTS_KEY = STORAGE_KEYS.ACCOUNTS;
 
+// Cache for repeated reads within the same render cycle
+let accountsCache = null;
+let accountsCacheTimestamp = 0;
+const ACCOUNTS_CACHE_TTL_MS = 200;
+
 export const AccountService = {
   /**
    * Get all accounts
    * @returns {Array} List of accounts
    */
   getAccounts() {
+    return this._loadAccounts().map(account => ({ ...account }));
+  },
+
+  _loadAccounts(bypassCache = false) {
+    const now = Date.now();
+    if (
+      !bypassCache &&
+      accountsCache &&
+      now - accountsCacheTimestamp < ACCOUNTS_CACHE_TTL_MS
+    ) {
+      return accountsCache;
+    }
+
     const data = localStorage.getItem(ACCOUNTS_KEY);
     if (!data) {
-      return this._seedDefaultAccount();
+      accountsCache = this._seedDefaultAccount();
+      accountsCacheTimestamp = Date.now();
+      return accountsCache;
     }
 
     try {
@@ -35,12 +55,18 @@ export const AccountService = {
       // Cleaning can legitimately empty the list (all duplicates); never
       // hand an empty array upward — downstream `.id` reads would throw.
       if (cleaned.length === 0) {
-        return this._seedDefaultAccount();
+        accountsCache = this._seedDefaultAccount();
+        accountsCacheTimestamp = Date.now();
+        return accountsCache;
       }
+      accountsCache = cleaned;
+      accountsCacheTimestamp = Date.now();
       return cleaned;
     } catch (error) {
       console.error('[AccountService] Failed to parse accounts data:', error);
-      return this._seedDefaultAccount();
+      accountsCache = this._seedDefaultAccount();
+      accountsCacheTimestamp = Date.now();
+      return accountsCache;
     }
   },
 
@@ -90,7 +116,7 @@ export const AccountService = {
     }
 
     console.log('[AccountService] Saving account:', account.name, account.id);
-    const accounts = this.getAccounts();
+    const accounts = this._loadAccounts(true).map(account => ({ ...account }));
     const index = accounts.findIndex(a => a.id === account.id);
     const isUpdate = index !== -1;
 
@@ -125,7 +151,7 @@ export const AccountService = {
    */
   deleteAccount(id) {
     console.log('[AccountService] Deleting account:', id);
-    let accounts = this.getAccounts();
+    let accounts = this._loadAccounts(true).map(account => ({ ...account }));
 
     // Prevent deleting the last account
     if (accounts.length <= 1) return false;
@@ -209,6 +235,10 @@ export const AccountService = {
    * Private helper to persist accounts
    */
   _persist(accounts, sync = true) {
+    // Invalidate read cache since data changed on disk
+    accountsCache = null;
+    accountsCacheTimestamp = 0;
+
     localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
     if (sync) {
       SyncService.pushToCloudSafe(ACCOUNTS_KEY, accounts);
@@ -220,6 +250,8 @@ export const AccountService = {
    */
   clear() {
     console.log('[AccountService] Clearing all accounts');
+    accountsCache = null;
+    accountsCacheTimestamp = 0;
     localStorage.removeItem(ACCOUNTS_KEY);
   },
 

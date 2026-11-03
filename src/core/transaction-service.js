@@ -15,12 +15,37 @@ import { getAnalyticsEngine } from './analytics/AnalyticsInstance.js';
 
 const TRANSACTIONS_KEY = STORAGE_KEYS.TRANSACTIONS;
 
+// Simple cache so repeated reads within the same render cycle don't hit
+// localStorage again. Invalidated on any write operation (add/_persist/clear).
+let transactionsCache = null;
+let cacheTimestamp = 0;
+const CACHE_TTL_MS = 10;
+
+const cloneTransactions = transactions =>
+  transactions.map(transaction => ({
+    ...transaction,
+    ...(Array.isArray(transaction.tags) ? { tags: [...transaction.tags] } : {}),
+  }));
+
 export const TransactionService = {
   /**
    * Get all transactions
    * @returns {Array} List of transactions
    */
   getAll() {
+    return this._loadTransactions();
+  },
+
+  _loadTransactions(bypassCache = false) {
+    const now = Date.now();
+    if (
+      !bypassCache &&
+      transactionsCache &&
+      now - cacheTimestamp < CACHE_TTL_MS
+    ) {
+      return cloneTransactions(transactionsCache);
+    }
+
     const data = localStorage.getItem(TRANSACTIONS_KEY);
     let transactions = data ? safeJsonParse(data) : [];
 
@@ -40,7 +65,9 @@ export const TransactionService = {
       this._persist(transactions, true); // Push migration changes to cloud
     }
 
-    return transactions;
+    transactionsCache = cloneTransactions(transactions);
+    cacheTimestamp = Date.now();
+    return cloneTransactions(transactions);
   },
 
   /**
@@ -65,7 +92,7 @@ export const TransactionService = {
    * @returns {Object} Added transaction
    */
   add(transaction) {
-    const transactions = this.getAll();
+    const transactions = this._loadTransactions(true);
 
     if (!transaction.accountId) {
       transaction.accountId = AccountService.getDefaultAccount().id;
@@ -134,7 +161,7 @@ export const TransactionService = {
    * @returns {Object|null} Updated transaction
    */
   update(id, updates) {
-    const transactions = this.getAll();
+    const transactions = this._loadTransactions(true);
     const index = transactions.findIndex(t => t.id === id);
     if (index === -1) return null;
 
@@ -171,12 +198,23 @@ export const TransactionService = {
    *   nothing was removed.
    */
   remove(id) {
-    const transaction = this.get(id);
+    const transactions = this._loadTransactions(true);
+    const transaction = transactions.find(t => t.id === id);
     if (!transaction) return null;
 
-    const transactions = this.getAll();
+    const currentUserId = AuthService.getUserId();
+    if (
+      transaction.userId &&
+      currentUserId &&
+      transaction.userId !== currentUserId
+    ) {
+      console.warn(
+        `[TransactionService] Ownership mismatch for transaction ${id}`
+      );
+      return null;
+    }
+
     const index = transactions.findIndex(t => t.id === id);
-    if (index === -1) return null;
 
     const removed = [{ transaction: transactions[index], index }];
 
@@ -213,7 +251,7 @@ export const TransactionService = {
       return false;
     }
 
-    const transactions = this.getAll();
+    const transactions = this._loadTransactions(true);
     const existingIds = new Set(transactions.map(t => t.id));
 
     const restorable = removedEntries
@@ -307,7 +345,7 @@ export const TransactionService = {
   removeTagFromAllTransactions(tagName) {
     if (!tagName) return;
 
-    const transactions = this.getAll();
+    const transactions = this._loadTransactions(true);
     let changed = false;
 
     const updated = transactions.map(t => {
@@ -338,7 +376,7 @@ export const TransactionService = {
   renameTagOnAllTransactions(oldName, newName) {
     if (!oldName || !newName || oldName === newName) return;
 
-    const transactions = this.getAll();
+    const transactions = this._loadTransactions(true);
     let changed = false;
 
     const updated = transactions.map(t => {
@@ -361,7 +399,7 @@ export const TransactionService = {
    * Clear all transactions
    */
   clear() {
-    const transactions = this.getAll();
+    const transactions = this._loadTransactions(true);
     const transactionCount = transactions.length;
 
     this._persist([]);
@@ -373,6 +411,10 @@ export const TransactionService = {
    * Private helper to persist transactions
    */
   _persist(transactions, sync = true) {
+    // Invalidate read cache since data changed on disk
+    transactionsCache = null;
+    cacheTimestamp = 0;
+
     localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(transactions));
     if (sync) {
       // Mark that a local write is pending BEFORE the async push so that any

@@ -1,54 +1,46 @@
----
-name: blinkbudget-agent
-description: Full-stack developer for BlinkBudget expense tracking app
----
+# BlinkBudget
 
-You are a full-stack developer for BlinkBudget, an extremely fast budget money tracking app.
+Extremely fast personal expense tracker. Core promise: log a purchase in **3 clicks or fewer**.
 
-## Persona
+**Design test for any new feature:** does it make the user more likely to log their next expense in 3 clicks? If yes, build it. If no, don't. If maybe, find a way to make it yes.
 
-- You specialize in building fast, lightweight web applications using vanilla JavaScript and modern CSS
-- You understand the 3-click interaction principle and optimize every feature for speed
-- Your output: Clean, performant code that adheres to zero-dependency principles while delivering beautiful user experiences
+**Scope guard:** BlinkBudget is for individuals who want to understand their spending in seconds. Do not add collaboration, tax prep, multi-entity tracking, or brokerage-grade portfolio features. The existing savings goals and investments features stay; they are intentionally simple.
 
-## Project knowledge
+## Stack
 
-- **Project Name**: BlinkBudget
-- **High-level Goal**: To help users track their expenses quickly and easily, requiring a maximum of 3 clicks to log purchases.
-- **"Secret Sauce"**: BlinkBudget's core promise is to transform the chore of expense tracking into a swift, almost unconscious habit, achieving a logged entry in a mere three clicks from purchase. It aims to be an "Extremely fast budget money tracking app" that provides beautiful, actionable insights for smarter financial decisions.
-- **Anti-Goal**: BlinkBudget is NOT a collaboration tool, NOT a full investment portfolio manager, NOT a tax preparation tool, and NOT for complex multi-entity financial tracking. We are for individuals who want to understand their spending in seconds, not minutes. Note: the existing savings goals and investments features stay — they are intentionally simple, useful tools for end users. The anti-goal is a guard against adding _new_ complexity (e.g. brokerage-grade portfolio management), not a mandate to remove them.
+- Vanilla JavaScript (ES6+ modules), Vite, PostCSS, Vitest
+- Netlify (hosting), Firebase (auth + database)
+- **Zero runtime frontend dependencies.** No React/Vue/other frameworks. Build/test tooling is fine.
+- Local first: `localStorage` is the app's working store; signed-in users sync data with Firebase in the background, and the app remains usable offline.
+- State: standard DOM events (`addEventListener` / `dispatchEvent`); custom window events include `amount-presets-changed`, `anomaly-dismissed`, `auth-state-changed`, `backup-operation`, `categories-updated`, `chartSegmentClick`, `connection-change`, `date-format-changed`, `forecast-invalidate`, `keyboardchange`, `mobile:orientationchange`, `storage-updated`, `sync-conflict`, `sync-conflict-resolution`, `sync-error`, `sync-state`, and `toast`.
+- Routing: custom hash-based router in `src/router/`
 
-- **Tech Stack:** Vanilla JavaScript (ES6+ Modules), Vite, PostCSS, Netlify, Firebase
-- **File Structure:**
-  - `src/core/` – Core services and utilities (StorageService, etc.)
-  - `src/components/` – Reusable UI components (functional components returning DOM elements)
-  - `src/views/` – Page-level components
-  - `src/styles/` – CSS files with PostCSS
-  - `src/utils/` – Utility functions
-  - `src/router/` – Custom hash-based router
-  - `src/main.js` – Application entry point
-  - `src/pwa.js` – Progressive Web App setup
+## Layout
 
-## Tools you can use
+- `src/core/` services and utilities (StorageService, etc.)
+- `src/components/` reusable UI, functional components returning DOM elements
+- `src/views/` page-level components
+- `src/styles/` CSS (PostCSS)
+- `src/utils/` utility functions
+- `src/router/` router
+- `src/main.js` entry point; `src/pwa.js` PWA/service worker setup
+- Product requirements: `docs/prd.md`. Read it before changing user-facing flows.
 
-- **Dev Server:** `yarn run dev` (starts Vite at http://localhost:3000)
-- **Build:** `yarn run build` (production build to /dist)
-- **Test:** `yarn test` (runs Vitest) please use targeted tests not the whole suite.
-- **Fix:** `yarn run fix` (auto-fixes all JS, CSS, and formatting issues)
+## Commands
 
-## Commands you can use
+Dev environment is Windows (PowerShell). Prefer your built-in file read/search/edit tools over shelling out. If you must use the shell, use PowerShell (`Get-Content`, `-replace`), not `cat`/`sed`.
 
-When developing locally, use Windows CMD/PowerShell commands (NOT Linux/Unix tools):
+- `yarn run dev` start Vite at http://localhost:3000
+- `yarn run build` production build to `/dist`
+- `yarn test <path>` run a targeted test, e.g. `yarn test src/core/StorageService.test.js`. Do not run the whole suite.
+- `yarn run fix` auto-fix JS, CSS, and formatting
+- `yarn run check` run before every commit (lint, CSS lint, formatting check, and docs validation)
 
-- Use `Get-Content` instead of `cat`
-- Use `-replace` or `ForEach-Object` instead of `sed`
+## Code standards
 
-## Standards
-
-### Component structure (functional components)
+Components are functions that return a DOM element, not classes:
 
 ```javascript
-// ✅ Good - functional component returning DOM element
 export const MyComponent = ({ label, onClick }) => {
   const el = document.createElement('button');
   el.className = 'btn';
@@ -56,106 +48,33 @@ export const MyComponent = ({ label, onClick }) => {
   el.onclick = onClick;
   return el;
 };
-
-// ❌ Bad - not following the pattern
-class MyComponent {
-  render() {
-    /* ... */
-  }
-}
 ```
 
-### Styling
+- Style with CSS classes and CSS variables. No inline styles for static values.
+- Untrusted input goes in with `textContent`, never `innerHTML`. If `innerHTML` is unavoidable, escape first with an `escapeHtml` utility.
+- Keep files under 500 lines.
+- When removing or deprecating a feature, also delete its now-unused CSS classes and .js files.
 
-```javascript
-// ✅ Good - use CSS classes with CSS variables
-el.className = 'btn btn-primary';
+## Performance
 
-// ❌ Bad - inline styles for static values
-el.style.color = '#ff0000';
-el.style.padding = '10px';
-```
+- Prefer CSS transitions over `requestAnimationFrame`.
+- Animate with `transform` and `opacity` only.
+- Throttle scroll handlers to 16ms.
+- Batch DOM reads and writes to avoid layout thrashing.
 
-### Data model (localStorage)
+## Data model
 
-```javascript
-// transactions array
-{
-  id: 'uuid-v4',
-  amount: 15.5,
-  category: 'Food & Drink',
-  type: 'expense', // 'expense' | 'income' | 'transfer' | 'refund'
-  accountId: 'acc-1',
-  toAccountId: null, // if transfer
-  timestamp: '2026-02-21T10:00:00.000Z',
-  note: 'Lunch',
-  tags: ['Work'], // optional; at most one expense flag name
-}
+Persisted in localStorage. Authoritative documented shapes: [src/core/types.js](src/core/types.js)
 
-// custom categories (flag categories use showAsCheckbox: true, expense only)
-{
-  id: 'uuid-v4',
-  name: 'Work',
-  type: 'expense',
-  color: '#3B82F6',
-  showAsCheckbox: true,
-}
-
-// accounts array
-{
-  id: 'acc-1',
-  name: 'Main Checking',
-  type: 'checking',
-  isDefault: true,
-}
-
-// settings object
-{
-  "dateFormat": "ISO", // 'US' | 'EU' | 'ISO'
-  "theme": "dark"
-}
-```
-
-### Performance rules
-
-- Use CSS transitions over requestAnimationFrame
-- Throttle scroll events to 60fps (16ms)
-- Hardware-accelerate animations with CSS transforms and opacity
-- Eliminate layout thrashing with proper DOM batching
-
-### Security
-
-```javascript
-// ✅ Good - use textContent for untrusted user input (automatically escapes HTML)
-element.textContent = userInput;
-
-// ❌ Bad - render unsanitized input with innerHTML
-element.innerHTML = userInput; // XSS vulnerability
-
-// Note: If you must use innerHTML, implement an escapeHtml utility first
-// to sanitize the input. However, prefer textContent whenever possible.
-
-**If** removing or deprecating a feature be sure to remove any .style classes
-```
+- **Transaction:** `id`, `amount`, `category`, `type` (`expense` | `income` | `transfer` | `refund`), `accountId`, `toAccountId` (transfers only), `timestamp` (ISO), `note`, `tags` (optional, at most one expense flag name)
+- **Category:** `id`, `name`, `type`, `color`, `showAsCheckbox` (flag categories; expense only)
+- **Account:** `id`, `name`, `type`, `isDefault`
+- **Settings:** `dateFormat` (`US` | `EU` | `ISO`), `theme`
 
 ## Boundaries
 
-- ✅ **Always do:** Write functional components returning DOM elements, use vanilla CSS with PostCSS, follow 3-click interaction principle, keep files under 500 lines, sanitize all user input, run `yarn run check` before commits
-- ⚠️ **Ask first:** Adding new dependencies (zero-dependency principle), modifying Firebase configuration, changing the core routing system, significant data model changes
-- 🚫 **Never do:** Use React/Vue/heavy frameworks, hardcode secrets or API keys, render unsanitized user input to DOM, use Linux/Unix terminal commands on Windows, modify node_modules/ or vendor/
+**Always:** functional components, vanilla CSS via PostCSS, sanitize user input, honor the 3-click principle.
 
-## The One Theory
+**Ask first:** adding dependencies, changing Firebase configuration, changing the core router, significant data model changes.
 
-**"Your 3-click habit builds a financial model that works for you."**
-
-Every transaction logged in 3 clicks feeds a personal financial engine that gets smarter over time. The advanced layer exists not as a separate dashboard, but as the _reason the 3-click habit compounds_ — each tap makes forecasts more accurate, budgets more relevant, and insights more personal.
-
-**Design principle:** Before adding any new feature, ask: _"Does this make the user more likely to log their next expense in 3 clicks?"_ If yes, build it. If no, don't. If maybe, find a way to make it yes.
-
-## Additional context
-
-- **Design Principles:** Zero Dependencies (no React/Vue), Instant Interaction (3-click max workflow), Local First (data in browser)
-- **State Management:** Standard DOM Events (addEventListener/dispatchEvent)
-- **Routing:** Custom Hash-based Router
-- **Deployment:** Netlify + Firebase for Auth and Database
-- **Documentation:** See `docs/prd.md` for product requirements
+**Never:** use React/Vue/heavy frameworks, hardcode secrets or API keys, render unsanitized input, edit `node_modules/` or `vendor/`.
