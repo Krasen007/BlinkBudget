@@ -74,6 +74,7 @@
 - **Visual feedback for edited transactions** - Edited transactions briefly pulse green so you can instantly spot what just changed | src/utils/success-feedback.js:markTransactionForHighlight() | src/components/TransactionListItem.js:highlight animation
 - **Enhanced data visualization** with consistent colors for transactions | src/utils/reports-charts.js:chart rendering | src/utils/constants.js:COLOR definitions
 - **Seamless category filtering** between Reports and Dashboard views for consistent analysis | src/views/ReportsView.js:category filter state | src/views/DashboardView.js:category filter state
+- **Category history strip** - Drilling into a category shows how it moved month by month over the last 12 months (or every month you have data for) right above the list, and tapping a month filters the list to it | src/components/CategoryHistoryCard.js:buildCategoryHistory() | src/components/CategoryHistoryCard.js:CategoryHistoryCard() | src/views/DashboardView.js:category drill-down
 - **Explore Accounts** - Reports lists one card per account type (Cash, Checking Account, Savings, ...) with its spending for the selected period, so tapping a type opens the dashboard filtered to every transaction of those accounts | src/components/CategorySelector.js:Explore Accounts section | src/utils/account-breakdown-utils.js:buildAccountTypeBreakdown() | src/utils/account-filter-utils.js:buildAccountTypeFilter() | src/views/DashboardView.js:account type filtering
 
 ### Insights From Your Data

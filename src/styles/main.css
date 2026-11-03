@@ -10,6 +10,7 @@
 @import './components/ui.css';
 @import './components/forms-dialogs.css';
 @import './components/reports.css';
+@import './components/category-history.css';
 @import './components/inflation-trends.css';
 @import './components/insights-charts.css';
 @import './components/webapp-components.css';

@@ -1,0 +1,140 @@
+/* Category history strip
+ *
+ * Month-by-month bars for the category the dashboard is drilled into. Sits
+ * directly above the transaction list, so it stays quiet: one card, one row of
+ * bars, no axes or legends to read.
+ */
+
+.category-history-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.category-history-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 0;
+}
+
+.category-history-title {
+  margin: 0;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text-main);
+  overflow-wrap: anywhere;
+}
+
+.category-history-subtitle {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.category-history-bars {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--spacing-xs);
+  align-items: end;
+}
+
+.category-history-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: transform var(--transition-fast) var(--ease-out);
+}
+
+.category-history-bar:disabled {
+  cursor: default;
+}
+
+.category-history-bar:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.category-history-bar-track {
+  display: flex;
+  align-items: flex-end;
+  height: 3.5rem;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-hover);
+}
+
+.category-history-bar-fill {
+  width: 100%;
+  height: var(--bar-height, 0%);
+  min-height: 2px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: var(--color-primary);
+  transition:
+    height var(--transition-normal) var(--ease-out),
+    background-color var(--transition-fast) var(--ease-out);
+}
+
+.category-history-bar:hover .category-history-bar-fill {
+  background: var(--color-primary-dark);
+}
+
+.category-history-bar.is-negative .category-history-bar-fill {
+  background: var(--color-success);
+}
+
+.category-history-bar.is-empty .category-history-bar-fill {
+  background: transparent;
+}
+
+.category-history-bar.is-active .category-history-bar-track {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+.category-history-bar.is-active .category-history-bar-fill {
+  background: var(--color-primary-dark);
+}
+
+.category-history-bar-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.category-history-bar.is-active .category-history-bar-label {
+  font-weight: 600;
+  color: var(--color-text-main);
+}
+
+.category-history-hint {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+@media (width <= 480px) {
+  .category-history-bar-track {
+    height: 3rem;
+  }
+
+  .category-history-bar-label {
+    font-size: 0.625rem;
+  }
+
+  /* Twelve bars leave ~18px per label on a phone, so the year suffix would
+     clip instead of helping. The aria-label still carries the full date. */
+  .category-history-bar-year {
+    display: none;
+  }
+}

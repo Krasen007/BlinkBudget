@@ -7,6 +7,39 @@ import { TRANSACTION_TYPES } from '../../utils/constants.js';
 import { FilteringService } from './FilteringService.js';
 import { formatCurrency } from '../../utils/financial-planning-helpers.js';
 
+// Spending-spike sensitivity *inside* a category: mean + 1.5σ. Looser than the
+// 3σ used for the per-row ⚠️ highlights because an insight card asks the user
+// to look at a category, while a row badge claims one specific purchase is odd.
+const SPIKE_THRESHOLD_MULTIPLIER = 1.5;
+
+// A category needs this many expenses before it has a "normal range" to deviate
+// from. Below it, a purchase would only be compared against itself.
+const MIN_SPIKE_SAMPLE_SIZE = 5;
+
+// Longest transaction note repeated inside an insight message.
+const MAX_NOTE_LENGTH = 40;
+
+/**
+ * Label a transaction inside an insight message: the note the user typed when
+ * there is one, otherwise the category it was logged under.
+ * @param {Object} transaction - Transaction
+ * @returns {string} Label such as `Lunch (Храна)` or `Храна`
+ */
+const describeTransaction = transaction => {
+  const category = transaction.category || 'Uncategorized';
+  const rawNote =
+    typeof transaction.description === 'string'
+      ? transaction.description.trim()
+      : '';
+  if (!rawNote) return category;
+
+  const note =
+    rawNote.length > MAX_NOTE_LENGTH
+      ? `${rawNote.slice(0, MAX_NOTE_LENGTH).trimEnd()}…`
+      : rawNote;
+  return `${note} (${category})`;
+};
+
 export class AnomalyService {
   /**
    * Detect spending anomalies and unusual patterns
@@ -43,22 +76,40 @@ export class AnomalyService {
   }
 
   /**
-   * Detect spending spikes using statistical analysis
+   * Detect spending spikes using statistical analysis.
+   *
+   * Every transaction is compared only against the other transactions of its
+   * own category. A cross-category baseline makes ordinary purchases look
+   * anomalous — a €15.83 lunch is not "unusually large" because the same month
+   * also contains €1.65 bus tickets — and a category that holds a single
+   * purchase has no baseline at all, so it would report the nonsense
+   * "100.0% of category spending". Per-category statistics is also the basis
+   * `detectUnusualTransactions` uses for the dashboard highlights and chart
+   * markers, so the text insight and the ⚠️ flags can no longer disagree.
+   *
    * @param {Array} expenseTransactions - Expense transactions
    * @param {Array} allTransactions - All transactions in the period (used to net out refunds)
    * @returns {Array} Spike detection insights
    */
   static detectSpendingSpikes(expenseTransactions, allTransactions = []) {
     const insights = [];
-    const amounts = expenseTransactions.map(t => Math.abs(t.amount || 0));
+    const expenses = (expenseTransactions || []).filter(
+      t => t.type === TRANSACTION_TYPES.EXPENSE && !t.isGhost
+    );
 
-    if (amounts.length < 5) {
-      return insights;
+    if (expenses.length < MIN_SPIKE_SAMPLE_SIZE) {
+      return insights; // Need sufficient data for anomaly detection
     }
+
+    const periodTransactions = (
+      Array.isArray(allTransactions) && allTransactions.length > 0
+        ? allTransactions
+        : expenses
+    ).filter(t => !t.isGhost);
 
     // Build a map of refund amounts per category so we can net them out
     const refundsByCategory = Object.create(null);
-    allTransactions
+    periodTransactions
       .filter(t => t.type === TRANSACTION_TYPES.REFUND)
       .forEach(t => {
         const cat = t.category || 'Uncategorized';
@@ -66,138 +117,126 @@ export class AnomalyService {
           (refundsByCategory[cat] || 0) + Math.abs(t.amount || 0);
       });
 
-    const mean =
-      amounts.reduce((sum, amount) => sum + amount, 0) / amounts.length;
-    const variance =
-      amounts.reduce((sum, amount) => sum + Math.pow(amount - mean, 2), 0) /
-      amounts.length;
-    const standardDeviation = Math.sqrt(variance);
-
-    const spikeThreshold = mean + 1.5 * standardDeviation;
-    const spikes = expenseTransactions.filter(
-      t => Math.abs(t.amount || 0) > spikeThreshold
-    );
-
-    if (spikes.length > 0) {
-      // Group spikes by category so we can apply per-category refund netting
-      const categorySpikes = Object.create(null);
-      spikes.forEach(t => {
-        const cat = t.category || 'Uncategorized';
-        if (!categorySpikes[cat]) categorySpikes[cat] = [];
-        categorySpikes[cat].push(t);
+    // Detect outliers category by category (ghost-free expenses only), so each
+    // purchase is judged against the normal range of its own category.
+    const effectiveCategorySpikes = Object.create(null);
+    for (const category of new Set(
+      expenses.map(t => t.category || 'Uncategorized')
+    )) {
+      const catSpikes = this.detectUnusualTransactions(periodTransactions, {
+        category,
+        multiplier: SPIKE_THRESHOLD_MULTIPLIER,
+        minTransactions: MIN_SPIKE_SAMPLE_SIZE,
       });
+      if (catSpikes.length === 0) continue;
 
-      // Filter out categories where refunds fully offset the spike amount
-      const effectiveCategorySpikes = Object.create(null);
-      for (const [category, catSpikes] of Object.entries(categorySpikes)) {
-        const catSpikeAmount = catSpikes.reduce(
-          (sum, t) => sum + Math.abs(t.amount || 0),
-          0
-        );
-        const refundAmount = refundsByCategory[category] || 0;
-        const netSpikeAmount = catSpikeAmount - refundAmount;
-
-        // Only flag if the net amount after refunds still exceeds the threshold
-        if (netSpikeAmount > spikeThreshold) {
-          effectiveCategorySpikes[category] = {
-            spikes: catSpikes,
-            netAmount: netSpikeAmount,
-          };
-        }
-      }
-
-      if (Object.keys(effectiveCategorySpikes).length === 0) {
-        return insights; // All spikes were offset by refunds
-      }
-
-      // Rebuild a flat list of effective spikes for the global summary
-      const effectiveSpikes = Object.values(effectiveCategorySpikes).flatMap(
-        v => v.spikes
-      );
-
-      const totalSpikeAmount = effectiveSpikes.reduce(
+      const catSpikeAmount = catSpikes.reduce(
         (sum, t) => sum + Math.abs(t.amount || 0),
         0
       );
-      const totalAmount = amounts.reduce((sum, amount) => sum + amount, 0);
-      const spikePercentage = (totalSpikeAmount / totalAmount) * 100;
+      const refundAmount = refundsByCategory[category] || 0;
+      const netAmount = catSpikeAmount - refundAmount;
+      const threshold = catSpikes[0].unusualSpending.threshold;
 
-      // Add category-specific spike insights
-      for (const [category, { spikes: catSpikes, netAmount }] of Object.entries(
-        effectiveCategorySpikes
-      )) {
-        const categoryTransactions = (
-          allTransactions || expenseTransactions
-        ).filter(t => (t.category || 'Uncategorized') === category);
-        const catTotalAmount = categoryTransactions.reduce((sum, t) => {
+      // Only flag if the net amount after refunds still exceeds the category
+      // threshold and there is spending left to talk about.
+      if (netAmount <= 0 || netAmount <= threshold) continue;
+
+      effectiveCategorySpikes[category] = { spikes: catSpikes, netAmount };
+    }
+
+    if (Object.keys(effectiveCategorySpikes).length === 0) {
+      return insights;
+    }
+
+    // Rebuild a flat list of effective spikes for the global summary
+    const effectiveSpikes = Object.values(effectiveCategorySpikes).flatMap(
+      v => v.spikes
+    );
+
+    const totalSpikeAmount = effectiveSpikes.reduce(
+      (sum, t) => sum + Math.abs(t.amount || 0),
+      0
+    );
+    const totalAmount = expenses.reduce(
+      (sum, t) => sum + Math.abs(t.amount || 0),
+      0
+    );
+    const spikePercentage =
+      totalAmount > 0 ? (totalSpikeAmount / totalAmount) * 100 : 0;
+
+    // Add category-specific spike insights
+    for (const [category, { spikes: catSpikes, netAmount }] of Object.entries(
+      effectiveCategorySpikes
+    )) {
+      const catTotalAmount = periodTransactions
+        .filter(t => (t.category || 'Uncategorized') === category)
+        .reduce((sum, t) => {
           const amount = Math.abs(t.amount || 0);
           return sum + (t.type === TRANSACTION_TYPES.REFUND ? -amount : amount);
         }, 0);
-        const catSpikePercentage =
-          catTotalAmount !== 0 ? (netAmount / catTotalAmount) * 100 : 0;
+      const catSpikePercentage =
+        catTotalAmount > 0 ? (netAmount / catTotalAmount) * 100 : 0;
 
-        insights.push({
-          id: `spending_spike_${category.toLowerCase().replace(/\s+/g, '_')}`,
-          type: 'anomaly',
-          category: category,
-          message: `Detected ${catSpikes.length} unusually large transaction${catSpikes.length > 1 ? 's' : ''} in "${category}" totaling ${formatCurrency(netAmount)} (${catSpikePercentage.toFixed(1)}% of category spending).`,
-          severity: catSpikePercentage > 50 ? 'high' : 'medium',
-          actionable: true,
-          recommendation: `Review these large "${category}" purchases to ensure they align with your financial goals.`,
-          metadata: {
-            spikeTransactions: catSpikes.map(t => ({
-              id: t.id,
-              amount: t.amount,
-              category: t.category,
-              description: t.description,
-              date: t.date || t.timestamp,
-            })),
-            threshold: spikeThreshold,
-          },
-        });
-      }
+      insights.push({
+        id: `spending_spike_${category.toLowerCase().replace(/\s+/g, '_')}`,
+        type: 'anomaly',
+        category: category,
+        message: `Detected ${catSpikes.length} unusually large transaction${catSpikes.length > 1 ? 's' : ''} in "${category}" totaling ${formatCurrency(netAmount)} (${catSpikePercentage.toFixed(1)}% of category spending).`,
+        severity: catSpikePercentage > 50 ? 'high' : 'medium',
+        actionable: true,
+        recommendation: `Review these large "${category}" purchases to ensure they align with your financial goals.`,
+        metadata: {
+          spikeTransactions: catSpikes.map(t => ({
+            id: t.id,
+            amount: t.amount,
+            category: t.category,
+            description: t.description,
+            date: t.date || t.timestamp,
+          })),
+          threshold: catSpikes[0].unusualSpending.threshold,
+        },
+      });
+    }
 
-      // Add a global summary insight if there are multiple categories involved
-      if (Object.keys(effectiveCategorySpikes).length > 1) {
-        const MAX_DISPLAY_TRANSACTIONS = 5;
-        const sortedSpikes = [...effectiveSpikes].sort(
-          (a, b) => Math.abs(b.amount || 0) - Math.abs(a.amount || 0)
-        );
-        const displaySpikes = sortedSpikes.slice(0, MAX_DISPLAY_TRANSACTIONS);
-        const transactionDetails = displaySpikes
-          .map(
-            t =>
-              `${t.category || 'Uncategorized'}: ${formatCurrency(Math.abs(t.amount || 0))}`
-          )
-          .join(', ');
+    // Add a global summary insight if there are multiple categories involved
+    if (Object.keys(effectiveCategorySpikes).length > 1) {
+      const MAX_DISPLAY_TRANSACTIONS = 5;
+      const sortedSpikes = [...effectiveSpikes].sort(
+        (a, b) => Math.abs(b.amount || 0) - Math.abs(a.amount || 0)
+      );
+      const displaySpikes = sortedSpikes.slice(0, MAX_DISPLAY_TRANSACTIONS);
+      const transactionDetails = displaySpikes
+        .map(
+          t =>
+            `${describeTransaction(t)}: ${formatCurrency(Math.abs(t.amount || 0))}`
+        )
+        .join(', ');
 
-        const remainingCount =
-          effectiveSpikes.length - MAX_DISPLAY_TRANSACTIONS;
-        const detailsText =
-          remainingCount > 0
-            ? `${transactionDetails}, and ${remainingCount} more...`
-            : transactionDetails;
+      const remainingCount = effectiveSpikes.length - MAX_DISPLAY_TRANSACTIONS;
+      const detailsText =
+        remainingCount > 0
+          ? `${transactionDetails}, and ${remainingCount} more...`
+          : transactionDetails;
 
-        insights.push({
-          id: 'spending_spikes_summary',
-          type: 'anomaly',
-          message: `Detected ${effectiveSpikes.length} unusually large transactions across ${Object.keys(effectiveCategorySpikes).length} categories: ${detailsText}. Total: ${formatCurrency(totalSpikeAmount)} (${spikePercentage.toFixed(1)}% of total spending).`,
-          severity: spikePercentage > 30 ? 'high' : 'medium',
-          actionable: true,
-          recommendation:
-            'Review these large transactions to ensure they align with your budget and financial goals.',
-          metadata: {
-            spikeTransactions: effectiveSpikes.map(t => ({
-              id: t.id,
-              amount: t.amount,
-              category: t.category,
-              description: t.description,
-              date: t.date || t.timestamp,
-            })),
-            threshold: spikeThreshold,
-          },
-        });
-      }
+      insights.push({
+        id: 'spending_spikes_summary',
+        type: 'anomaly',
+        message: `Detected ${effectiveSpikes.length} unusually large transactions across ${Object.keys(effectiveCategorySpikes).length} categories: ${detailsText}. Total: ${formatCurrency(totalSpikeAmount)} (${spikePercentage.toFixed(1)}% of total spending).`,
+        severity: spikePercentage > 30 ? 'high' : 'medium',
+        actionable: true,
+        recommendation:
+          'Review these large transactions to ensure they align with your budget and financial goals.',
+        metadata: {
+          spikeTransactions: effectiveSpikes.map(t => ({
+            id: t.id,
+            amount: t.amount,
+            category: t.category,
+            description: t.description,
+            date: t.date || t.timestamp,
+          })),
+        },
+      });
     }
 
     return insights;
