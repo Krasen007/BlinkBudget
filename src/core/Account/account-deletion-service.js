@@ -5,7 +5,7 @@
 
 import { AuthService } from '../auth-service.js';
 import { TransactionService } from '../transaction-service.js';
-import { auth } from '../firebase-config.js';
+import { getAuthInstance, initializeFirebase } from '../firebase-config.js';
 import { deleteUser } from 'firebase/auth';
 
 export class AccountDeletionService {
@@ -264,13 +264,14 @@ export class AccountDeletionService {
     try {
       const user = AuthService.user;
 
-      if (user && auth) {
+      if (user && getAuthInstance()) {
         console.log(
           '[AccountDeletion] Attempting to delete Firebase user:',
           user.uid
         );
 
         // Check if Firebase is available before attempting deletion
+        initializeFirebase();
         const { firebaseStatus } = await import('../firebase-config.js');
         if (!firebaseStatus.isInitialized || !firebaseStatus.canUseAuth) {
           console.warn(
@@ -282,7 +283,7 @@ export class AccountDeletionService {
           );
         } else {
           // Delete the Firebase user account
-          const currentUser = auth.currentUser;
+          const currentUser = getAuthInstance().currentUser;
 
           // Verify user identity matches
           if (currentUser && currentUser.uid !== user.uid) {

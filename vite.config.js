@@ -39,7 +39,16 @@ export default defineConfig({
         // reference documents that require no offline availability and change
         // rarely; excluding them keeps the precache lean and avoids serving a
         // stale policy from cache. They still load normally when online.
-        globIgnores: ['**/privacy-policy.html', '**/terms-of-service.html'],
+        globIgnores: [
+          '**/privacy-policy.html',
+          '**/terms-of-service.html',
+          // Do NOT precache screenshots — they are large image assets only
+          // needed for store listings, not for offline app functionality.
+          // Excluding them keeps the precache lean and removes bandwidth
+          // competition on first TWA start.
+          '**/screenshots/*.png',
+          'screenshot-*.png',
+        ],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,

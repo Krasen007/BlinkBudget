@@ -1,4 +1,9 @@
-import { auth, firebaseStatus, getDb } from './firebase-config.js';
+import {
+  getAuthInstance,
+  initializeFirebase,
+  firebaseStatus,
+  getDb,
+} from './firebase-config.js';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -12,6 +17,7 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 // Helper function to check if Firebase is available
 const checkFirebaseAvailability = () => {
+  initializeFirebase();
   if (!firebaseStatus.isInitialized || !firebaseStatus.canUseAuth) {
     const error = 'Firebase is not available. Running in local-only mode.';
     console.warn(error);
@@ -76,7 +82,7 @@ export const AuthService = {
     }
 
     return new Promise(resolve => {
-      onAuthStateChanged(auth, async user => {
+      onAuthStateChanged(getAuthInstance(), async user => {
         // Make user object read-only to prevent manipulation
         this.user = user ? Object.freeze({ ...user }) : null;
 
@@ -154,7 +160,7 @@ export const AuthService = {
       }
 
       const userCredential = await signInWithEmailAndPassword(
-        auth,
+        getAuthInstance(),
         email,
         password
       );
@@ -220,7 +226,7 @@ export const AuthService = {
 
     try {
       const userCredential = await createUserWithEmailAndPassword(
-        auth,
+        getAuthInstance(),
         email,
         password
       );
@@ -282,7 +288,7 @@ export const AuthService = {
     }
 
     // Additional safety check for auth instance
-    if (!auth) {
+    if (!getAuthInstance()) {
       const error =
         'Firebase Auth instance is not available. Please refresh the page.';
       console.error('[AuthService] Auth instance is null:', error);
@@ -299,7 +305,7 @@ export const AuthService = {
 
     try {
       const provider = new GoogleAuthProvider();
-      const userCredential = await signInWithPopup(auth, provider);
+      const userCredential = await signInWithPopup(getAuthInstance(), provider);
       // Make user object read-only to prevent manipulation
       this.user = Object.freeze({ ...userCredential.user });
       localStorage.setItem('auth_hint', 'true');
@@ -353,7 +359,7 @@ export const AuthService = {
     }
 
     try {
-      await signOut(auth);
+      await signOut(getAuthInstance());
       this.user = null;
       localStorage.removeItem('auth_hint');
       localStorage.removeItem(LAST_UID_KEY);
@@ -400,7 +406,7 @@ export const AuthService = {
     }
 
     try {
-      await sendPasswordResetEmail(auth, email);
+      await sendPasswordResetEmail(getAuthInstance(), email);
 
       return { error: null };
     } catch (error) {
