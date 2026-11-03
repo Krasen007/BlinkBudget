@@ -55,6 +55,7 @@ export default defineConfig({
         navigateFallback: 'offline.html',
         navigateFallbackAllowlist: [/^(?!\/__).*/],
         navigateFallbackDenylist: [
+          /^\/recovery\.html(?:\?.*)?$/,
           /^\/privacy-policy\.html(?:\?.*)?$/,
           /^\/terms-of-service\.html(?:\?.*)?$/,
         ],

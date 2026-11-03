@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <meta name="referrer" content="no-referrer" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>Offline Data Recovery - BlinkBudget</title>
+    <link rel="stylesheet" href="/recovery.css" />
+    <script type="module" src="/recovery.js"></script>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Standalone local export</p>
+      <h1>BlinkBudget data recovery</h1>
+      <p>
+        This page reads only this browser profile's BlinkBudget data from this
+        website's local storage. It does not load the app or connect to
+        Firebase.
+      </p>
+
+      <section class="warning" aria-labelledby="safety-heading">
+        <h2 id="safety-heading">Before exporting</h2>
+        <ol>
+          <li>Close every other BlinkBudget tab and installed app window.</li>
+          <li>Disconnect this computer from Wi-Fi and Ethernet.</li>
+          <li>Wait until the status below says you are offline.</li>
+        </ol>
+        <p>
+          This page cannot recover data already overwritten in this browser.
+          Check the origin below; local storage is different for each website
+          address and browser profile.
+        </p>
+      </section>
+
+      <section aria-labelledby="status-heading">
+        <h2 id="status-heading">Recovery status</h2>
+        <p id="connection-status" role="status" aria-live="polite">
+          Checking connection...
+        </p>
+        <p><strong>Current origin:</strong> <code id="origin"></code></p>
+        <p id="storage-status" role="status" aria-live="polite">
+          Checking local data...
+        </p>
+        <p>
+          Use only <code>https://blinkbudget.netlify.app</code>. Other origins
+          have separate local storage and cannot see this profile's production
+          data.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Data</th>
+                <th scope="col">Status</th>
+                <th scope="col">Records</th>
+                <th scope="col">Date range</th>
+              </tr>
+            </thead>
+            <tbody id="data-summary"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <button id="export-button" type="button" disabled>
+        Export local data JSON
+      </button>
+      <p id="export-status" role="status" aria-live="polite"></p>
+
+      <p class="privacy-note">
+        The download contains private financial data. Keep it on a trusted
+        device. This page does not upload it anywhere.
+      </p>
+    </main>
+  </body>
+</html>
