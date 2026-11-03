@@ -33,6 +33,7 @@ import { setSelectedStyle } from '../utils/transaction-selection.js';
 export { setSelectedStyle };
 import { createNavigationButtons } from '../utils/navigation-helper.js';
 import { BulkEditDialog } from '../components/BulkEditDialog.js';
+import { CategoryHistoryCard } from '../components/CategoryHistoryCard.js';
 
 // Cache key for the pre-loaded financial planning payload. Module-level so the
 // auth-change handler can invalidate exactly the same key the preload writes.
@@ -1170,6 +1171,46 @@ export const DashboardView = (params = {}) => {
       filterStatus.title = 'Click to return to Reports view';
 
       content.appendChild(filterStatus);
+    }
+
+    // Category history: the list below only covers the active period, so while
+    // the dashboard is drilled into one category (Reports → Explore Categories,
+    // or a category tap in the list) show how it moved month by month.
+    if (currentCategoryFilter && currentCategoryFilter !== 'all') {
+      const categoryHistoryCard = CategoryHistoryCard({
+        category: currentCategoryFilter,
+        // Keep the account scope of the list, but ignore the period filters —
+        // history is the point.
+        transactions: allTransactions.filter(matchesAccountFilter),
+        type: currentTypeFilter === 'income' ? 'income' : 'expense',
+        endDate: currentMonthFilter || new Date(),
+        activeMonth: currentMonthFilter,
+        onMonthSelect: monthIso => {
+          // Tapping the active month clears the filter again.
+          currentMonthFilter =
+            currentMonthFilter === monthIso ? null : monthIso;
+
+          if (currentMonthFilter) {
+            sessionStorage.setItem(
+              STORAGE_KEYS.DASHBOARD_MONTH_FILTER,
+              currentMonthFilter
+            );
+          } else {
+            sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
+          }
+
+          // A month tap supersedes a Reports date range, exactly like the
+          // Spent-card month arrows.
+          currentDateRangeFilter = null;
+          sessionStorage.removeItem('dashboard_date_range_filter');
+
+          renderDashboard();
+        },
+      });
+
+      if (categoryHistoryCard) {
+        content.appendChild(categoryHistoryCard);
+      }
     }
 
     // Recent Transactions
