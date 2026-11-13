@@ -248,7 +248,7 @@ export const CategoryHistoryCard = ({
   const isCategory = Boolean(category) && !tag && !accountType;
   const isTag = Boolean(tag);
   const isAccountType = Boolean(accountType);
-  const label = category || accountType;
+  const label = tag || category || accountType;
   if (!label) return null;
 
   let history;
