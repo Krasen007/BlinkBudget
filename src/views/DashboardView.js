@@ -1173,12 +1173,24 @@ export const DashboardView = (params = {}) => {
       content.appendChild(filterStatus);
     }
 
-    // Category history: the list below only covers the active period, so while
-    // the dashboard is drilled into one category (Reports → Explore Categories,
-    // or a category tap in the list) show how it moved month by month.
-    if (currentCategoryFilter && currentCategoryFilter !== 'all') {
+    // Category/tag history: the list below only covers the active period, so
+    // while the dashboard is drilled into one category or tag (Reports →
+    // Explore Categories / Explore Tags, or a tap in the list) show how it
+    // moved month by month. An active exclude: filter means the user is
+    // ignoring a label, so there is no single label to draw a history for.
+    const historyLabel =
+      currentCategoryFilter && currentCategoryFilter !== 'all'
+        ? currentCategoryFilter
+        : currentTagFilter && !currentTagFilter.startsWith('exclude:')
+          ? currentTagFilter
+          : null;
+
+    if (historyLabel) {
       const categoryHistoryCard = CategoryHistoryCard({
-        category: currentCategoryFilter,
+        category: historyLabel,
+        tag: currentTagFilter && !currentTagFilter.startsWith('exclude:')
+          ? currentTagFilter
+          : null,
         // Keep the account scope of the list, but ignore the period filters —
         // history is the point.
         transactions: allTransactions.filter(matchesAccountFilter),

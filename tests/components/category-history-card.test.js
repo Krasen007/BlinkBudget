@@ -141,6 +141,45 @@ describe('buildCategoryHistory', () => {
     expect(history.total).toBe(0);
   });
 
+  it('buckets transactions carrying a tag instead of matching a category', () => {
+    const transactions = [
+      tx('a', 20, 'Food', '2026-09-10T09:00:00.000Z', { tags: ['Work'] }),
+      tx('b', 10, 'Food', '2026-09-20T09:00:00.000Z', { tags: ['Work'] }),
+      tx('c', 30, 'Food', '2026-10-05T09:00:00.000Z', { tags: ['Work'] }),
+      tx('d', 99, 'Food', '2026-11-03T09:00:00.000Z', { tags: ['Personal'] }),
+      tx('e', 50, 'Coffee', '2026-11-04T09:00:00.000Z', { tags: ['Work'] }),
+    ];
+
+    const history = buildCategoryHistory(transactions, 'Work', {
+      endDate: END_NOV_2026,
+      tag: 'Work',
+    });
+
+    expect(history.months.map(m => m.key)).toEqual([
+      '2026-09',
+      '2026-10',
+      '2026-11',
+    ]);
+    expect(history.months.map(m => m.amount)).toEqual([30, 30, 50]);
+    expect(history.months.map(m => m.count)).toEqual([2, 1, 1]);
+    expect(history.total).toBeCloseTo(110, 2);
+    expect(history.monthsWithData).toBe(3);
+  });
+
+  it('returns no history when no transaction carries the tag', () => {
+    const transactions = [
+      tx('a', 20, 'Food', '2026-09-10T09:00:00.000Z', { tags: ['Work'] }),
+    ];
+
+    const history = buildCategoryHistory(transactions, 'Travel', {
+      endDate: END_NOV_2026,
+      tag: 'Travel',
+    });
+
+    expect(history.monthsWithData).toBe(0);
+    expect(history.total).toBe(0);
+  });
+
   describe('CategoryHistoryCard', () => {
     const transactions = [
       tx('a', 20, 'Coffee', '2026-09-10T09:00:00.000Z'),
@@ -285,6 +324,46 @@ describe('buildCategoryHistory', () => {
       expect(
         card.querySelector('.category-history-bars').getAttribute('aria-label')
       ).toBe('Income by month for Coffee');
+    });
+
+    it('renders a tag history strip titled with the tag', () => {
+      const transactions = [
+        tx('a', 20, 'Food', '2026-09-10T09:00:00.000Z', { tags: ['Work'] }),
+        tx('b', 40, 'Food', '2026-10-10T09:00:00.000Z', { tags: ['Work'] }),
+        tx('c', 10, 'Coffee', '2026-11-10T09:00:00.000Z', { tags: ['Work'] }),
+        tx('d', 99, 'Food', '2026-11-11T09:00:00.000Z', { tags: ['Personal'] }),
+      ];
+
+      const card = CategoryHistoryCard({
+        tag: 'Work',
+        transactions,
+        endDate: END_NOV_2026,
+        onMonthSelect: vi.fn(),
+      });
+
+      expect(card.querySelector('.category-history-title').textContent).toBe(
+        'Tag: Work'
+      );
+      expect(card.dataset.tag).toBe('Work');
+      expect(
+        card.querySelector('.category-history-bars').getAttribute('aria-label')
+      ).toBe('Spending by month for tag Work');
+      expect(
+        [...card.querySelectorAll('.category-history-bar')].map(
+          bar => bar.dataset.month
+        )
+      ).toEqual(['2026-09', '2026-10', '2026-11']);
+    });
+
+    it('returns null for a tag with no history', () => {
+      expect(
+        CategoryHistoryCard({
+          tag: 'Travel',
+          transactions: [tx('a', 20, 'Food', '2026-09-10T09:00:00.000Z', { tags: ['Work'] })],
+          endDate: END_NOV_2026,
+          onMonthSelect: vi.fn(),
+        })
+      ).toBeNull();
     });
   });
 });

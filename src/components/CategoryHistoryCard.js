@@ -57,13 +57,20 @@ export const buildCategoryHistory = (transactions, category, options = {}) => {
     endDate = new Date(),
     months = MAX_HISTORY_MONTHS,
     type = TRANSACTION_TYPES.EXPENSE,
+    // When set, bucket transactions carrying this tag instead of matching the
+    // category name. `category` then serves as the display label.
+    tag = null,
   } = options;
   const isIncome = type === TRANSACTION_TYPES.INCOME;
   const totals = new Map(); // 'YYYY-MM' -> { amount, count }
 
   for (const transaction of Array.isArray(transactions) ? transactions : []) {
     if (!transaction || transaction.isGhost) continue;
-    if ((transaction.category || 'Uncategorized') !== category) continue;
+    if (tag) {
+      if (!transaction.tags || !transaction.tags.includes(tag)) continue;
+    } else if ((transaction.category || 'Uncategorized') !== category) {
+      continue;
+    }
 
     const isIncluded = isIncome
       ? transaction.type === TRANSACTION_TYPES.INCOME
@@ -146,17 +153,20 @@ export const buildCategoryHistory = (transactions, category, options = {}) => {
  */
 export const CategoryHistoryCard = ({
   category,
+  tag,
   transactions = [],
   type = TRANSACTION_TYPES.EXPENSE,
   endDate,
   activeMonth = null,
   onMonthSelect = null,
 } = {}) => {
-  if (!category) return null;
+  const label = tag || category;
+  if (!label) return null;
 
-  const history = buildCategoryHistory(transactions, category, {
+  const history = buildCategoryHistory(transactions, label, {
     endDate,
     type,
+    tag,
   });
   if (history.monthsWithData === 0) return null;
 
@@ -164,18 +174,20 @@ export const CategoryHistoryCard = ({
   const activeKey = activeMonth ? String(activeMonth).slice(0, 7) : null;
   const isIncome = type === TRANSACTION_TYPES.INCOME;
   const monthCount = history.months.length;
+  const isTagHistory = Boolean(tag);
 
   const card = document.createElement('section');
   card.className = 'card category-history-card';
-  card.dataset.category = category;
-  card.setAttribute('aria-label', `${category} history`);
+  card.dataset.category = label;
+  if (isTagHistory) card.dataset.tag = label;
+  card.setAttribute('aria-label', `${label} history`);
 
   const header = document.createElement('div');
   header.className = 'category-history-header';
 
   const title = document.createElement('h3');
   title.className = 'category-history-title';
-  title.textContent = category;
+  title.textContent = isTagHistory ? `Tag: ${label}` : label;
   header.appendChild(title);
 
   const subtitle = document.createElement('p');
@@ -194,7 +206,7 @@ export const CategoryHistoryCard = ({
   bars.setAttribute('role', 'group');
   bars.setAttribute(
     'aria-label',
-    `${isIncome ? 'Income' : 'Spending'} by month for ${category}`
+    `${isIncome ? 'Income' : 'Spending'} by month for ${isTagHistory ? `tag ${label}` : label}`
   );
 
   history.months.forEach(bucket => {
