@@ -141,6 +141,90 @@ export const buildCategoryHistory = (transactions, category, options = {}) => {
 };
 
 /**
+ * Bucket transactions by calendar month for a single account type.
+ * `transactions` must already be scoped to the account type (the caller's
+ * job — the dashboard filters by `buildAccountTypeFilter`), so this folds the
+ * transactions into month buckets without a further dimension check.
+ */
+export const buildAccountTypeHistory = (transactions, options = {}) => {
+  const {
+    endDate = new Date(),
+    months = MAX_HISTORY_MONTHS,
+    type = TRANSACTION_TYPES.EXPENSE,
+  } = options;
+  const totals = new Map(); // 'YYYY-MM' -> { amount, count }
+
+  for (const transaction of Array.isArray(transactions) ? transactions : []) {
+    if (!transaction || transaction.isGhost) continue;
+
+    const isIncluded = type === TRANSACTION_TYPES.INCOME
+      ? transaction.type === TRANSACTION_TYPES.INCOME
+      : transaction.type === TRANSACTION_TYPES.EXPENSE ||
+        transaction.type === TRANSACTION_TYPES.REFUND;
+    if (!isIncluded) continue;
+
+    const date = new Date(transaction.timestamp || transaction.date);
+    if (Number.isNaN(date.getTime())) continue;
+
+    const key = monthKeyOf(date);
+    const entry = totals.get(key) || { amount: 0, count: 0 };
+    const amount = Math.abs(Number(transaction.amount) || 0);
+    entry.amount +=
+      transaction.type === TRANSACTION_TYPES.REFUND ? -amount : amount;
+    entry.count += 1;
+    totals.set(key, entry);
+  }
+
+  // Anchor the window on the month being viewed (the Spent-card arrows and a
+  // Reports drill can both point at an older month), defaulting to this month.
+  const parsedEnd = endDate instanceof Date ? endDate : new Date(endDate);
+  const anchor = Number.isNaN(parsedEnd.getTime()) ? new Date() : parsedEnd;
+  const anchorYear = anchor.getUTCFullYear();
+  const anchorMonth = anchor.getUTCMonth();
+
+  const buckets = [];
+  for (let offset = months - 1; offset >= 0; offset -= 1) {
+    const date = new Date(Date.UTC(anchorYear, anchorMonth - offset, 1));
+    const year = date.getUTCFullYear();
+    const monthIndex = date.getUTCMonth();
+    const key = monthKey(year, monthIndex);
+    const entry = totals.get(key);
+    buckets.push({
+      key,
+      year,
+      monthIndex,
+      label: `${MONTH_LABELS[monthIndex]} ${year}`,
+      shortLabel: MONTH_LABELS[monthIndex].slice(0, 3),
+      iso: monthIso(year, monthIndex),
+      amount: entry ? entry.amount : 0,
+      count: entry ? entry.count : 0,
+    });
+  }
+
+  // Drop leading months the user had no activity in, so a three-month-old
+  // account shows three bars instead of nine empty ones. Gaps *inside* the
+  // range stay, because a month you skipped is the interesting part.
+  const firstWithData = buckets.findIndex(bucket => bucket.count > 0);
+  const visible = firstWithData > 0 ? buckets.slice(firstWithData) : buckets;
+
+  const monthsWithData = visible.filter(bucket => bucket.count > 0).length;
+  const total = visible.reduce((sum, bucket) => sum + bucket.amount, 0);
+  const maxAmount = visible.reduce(
+    (max, bucket) => Math.max(max, Math.max(0, bucket.amount)),
+    0
+  );
+
+  return {
+    type,
+    months: visible,
+    monthsWithData,
+    total,
+    average: monthsWithData > 0 ? total / monthsWithData : 0,
+    maxAmount,
+  };
+};
+
+/**
  * Create the category history strip.
  * @param {Object} options - Component options
  * @param {string} options.category - Category the dashboard is filtered by
@@ -154,32 +238,42 @@ export const buildCategoryHistory = (transactions, category, options = {}) => {
 export const CategoryHistoryCard = ({
   category,
   tag,
+  accountType,
   transactions = [],
   type = TRANSACTION_TYPES.EXPENSE,
   endDate,
   activeMonth = null,
   onMonthSelect = null,
 } = {}) => {
-  const label = tag || category;
+  const isCategory = Boolean(category) && !tag && !accountType;
+  const isTag = Boolean(tag);
+  const isAccountType = Boolean(accountType);
+  const label = category || accountType;
   if (!label) return null;
 
-  const history = buildCategoryHistory(transactions, label, {
-    endDate,
-    type,
-    tag,
-  });
+  let history;
+  if (isCategory || isTag) {
+    history = buildCategoryHistory(transactions, label, {
+      endDate,
+      type,
+      tag: isTag ? label : null,
+    });
+  } else if (isAccountType) {
+    history = buildAccountTypeHistory(transactions, { endDate, type });
+  }
   if (history.monthsWithData === 0) return null;
 
   const isInteractive = typeof onMonthSelect === 'function';
   const activeKey = activeMonth ? String(activeMonth).slice(0, 7) : null;
   const isIncome = type === TRANSACTION_TYPES.INCOME;
   const monthCount = history.months.length;
-  const isTagHistory = Boolean(tag);
+  const isTagHistory = isTag;
 
   const card = document.createElement('section');
   card.className = 'card category-history-card';
-  card.dataset.category = label;
-  if (isTagHistory) card.dataset.tag = label;
+  card.dataset.category = isCategory ? label : undefined;
+  card.dataset.tag = isTag ? label : undefined;
+  card.dataset.accountType = isAccountType ? label : undefined;
   card.setAttribute('aria-label', `${label} history`);
 
   const header = document.createElement('div');
@@ -206,7 +300,7 @@ export const CategoryHistoryCard = ({
   bars.setAttribute('role', 'group');
   bars.setAttribute(
     'aria-label',
-    `${isIncome ? 'Income' : 'Spending'} by month for ${isTagHistory ? `tag ${label}` : label}`
+    `${isIncome ? 'Income' : 'Spending'} by month for ${isTagHistory ? `tag ${label}` : isAccountType ? `type ${label}` : label}`
   );
 
   history.months.forEach(bucket => {

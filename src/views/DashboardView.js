@@ -505,9 +505,11 @@ export const DashboardView = (params = {}) => {
     // so the Spent-card arrows stay available (same UX as date filtering).
     if (dashboardFilter.timePeriod) {
       const period = dashboardFilter.timePeriod;
-      const isCategoryOrTagDrill = !!(
-        dashboardFilter.category || dashboardFilter.tag
-      );
+      const isCategoryOrTagDrill =
+        !!dashboardFilter.category ||
+        !!dashboardFilter.tag ||
+        (typeof dashboardFilter.accountType === 'string' &&
+          dashboardFilter.accountType.trim() !== '');
       const isMonthly = period.type === 'monthly';
 
       if (isCategoryOrTagDrill && isMonthly && period.startDate) {
@@ -1173,27 +1175,35 @@ export const DashboardView = (params = {}) => {
       content.appendChild(filterStatus);
     }
 
-    // Category/tag history: the list below only covers the active period, so
-    // while the dashboard is drilled into one category or tag (Reports →
-    // Explore Categories / Explore Tags, or a tap in the list) show how it
-    // moved month by month. An active exclude: filter means the user is
-    // ignoring a label, so there is no single label to draw a history for.
-    const historyLabel =
-      currentCategoryFilter && currentCategoryFilter !== 'all'
-        ? currentCategoryFilter
-        : currentTagFilter && !currentTagFilter.startsWith('exclude:')
-          ? currentTagFilter
-          : null;
+    // Category/tag/account-type history: the list below only covers the active
+    // period, so while the dashboard is drilled into one of those dimensions
+    // (Reports -> Explore Categories / Explore Tags / Explore Accounts, or a
+    // tap in the list) show how it moved month by month. An active exclude:
+    // filter means the user is ignoring a label, so there is no single label
+    // to draw a history for.
+    // Category/tag/account-type history: the list below only covers the active
+    // period, so while the dashboard is drilled into one of those dimensions
+    // (Reports -> Explore Categories / Explore Tags / Explore Accounts, or a
+    // tap in the list) show how it moved month by month. An active exclude:
+    // filter means the user is ignoring a label, so there is no single label
+    // to draw a history for.
+    const isAccountTypeFilter =
+      currentAccountFilter && typeof currentAccountFilter === 'string' &&
+      currentAccountFilter.startsWith('type:');
 
-    if (historyLabel) {
-      const categoryHistoryCard = CategoryHistoryCard({
-        category: historyLabel,
-        tag: currentTagFilter && !currentTagFilter.startsWith('exclude:')
-          ? currentTagFilter
-          : null,
-        // Keep the account scope of the list, but ignore the period filters —
-        // history is the point.
-        transactions: allTransactions.filter(matchesAccountFilter),
+    // Category/tag/account-type structure the dashboard draws a monthly
+    // spending history strip for.
+    const hasDrill =
+      (currentCategoryFilter && currentCategoryFilter !== 'all') ||
+      (currentTagFilter && !currentTagFilter.startsWith('exclude:')) ||
+      isAccountTypeFilter;
+
+    const historyTransactions = allTransactions.filter(matchesAccountFilter);
+
+    let categoryHistoryCard = null;
+    if (hasDrill) {
+      const dimension = {
+        transactions: historyTransactions,
         type: currentTypeFilter === 'income' ? 'income' : 'expense',
         endDate: currentMonthFilter || new Date(),
         activeMonth: currentMonthFilter,
@@ -1218,11 +1228,30 @@ export const DashboardView = (params = {}) => {
 
           renderDashboard();
         },
-      });
+      };
 
-      if (categoryHistoryCard) {
-        content.appendChild(categoryHistoryCard);
+      if (currentCategoryFilter && currentCategoryFilter !== 'all') {
+        categoryHistoryCard = CategoryHistoryCard({
+          ...dimension,
+          category: currentCategoryFilter,
+        });
+      } else if (currentTagFilter && !currentTagFilter.startsWith('exclude:')) {
+        categoryHistoryCard = CategoryHistoryCard({
+          ...dimension,
+          category: currentTagFilter,
+          tag: currentTagFilter,
+        });
+      } else if (isAccountTypeFilter) {
+        const accountType = getAccountTypeFromFilter(currentAccountFilter);
+        categoryHistoryCard = CategoryHistoryCard({
+          ...dimension,
+          accountType: getAccountTypeLabel(accountType),
+        });
       }
+    }
+
+    if (categoryHistoryCard) {
+      content.appendChild(categoryHistoryCard);
     }
 
     // Recent Transactions
