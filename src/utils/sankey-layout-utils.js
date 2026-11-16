@@ -245,14 +245,14 @@ export function computeSankeyLayout({
   outflows = [],
   totalFlow = 0,
   width = 680,
-  minHeight = 480,
+  minHeight = 320,
 }) {
   const padTop = 32;
   const padBot = 32;
   const padX = 18;
 
   // Single unified flow scale height (conserved across left, center, and right)
-  const centerH = 280;
+  const centerH = 240;
   const centerW = 12;
   const centerX = Math.round(width * 0.44);
 

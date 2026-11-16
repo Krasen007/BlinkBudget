@@ -2,7 +2,7 @@
  * CashFlowSankeyCard Component Tests
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { CashFlowSankeyCard } from '../../src/components/financial-planning/CashFlowSankeyCard.js';
 
 describe('CashFlowSankeyCard', () => {
@@ -79,6 +79,42 @@ describe('CashFlowSankeyCard', () => {
     expect(empty.textContent).toContain('No income or expense data found');
 
     cleanup();
+  });
+
+  it('resizes the diagram to its container without adding horizontal overflow', () => {
+    const observers = [];
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback) {
+          this.callback = callback;
+          this.disconnected = false;
+          observers.push(this);
+        }
+
+        observe() {}
+
+        disconnect() {
+          this.disconnected = true;
+        }
+      }
+    );
+
+    try {
+      const { element, cleanup } = CashFlowSankeyCard({
+        transactions: buildTransactions(),
+      });
+
+      observers[0].callback([{ contentRect: { width: 420 } }]);
+
+      const svg = element.querySelector('svg.sankey-svg');
+      expect(svg.getAttribute('viewBox')).toMatch(/^0 0 420 /);
+
+      cleanup();
+      expect(observers[0].disconnected).toBe(true);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it('renders tooltip category names as text and exposes keyboard node details', () => {

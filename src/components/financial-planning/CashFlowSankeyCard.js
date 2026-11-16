@@ -118,6 +118,8 @@ export const CashFlowSankeyCard = ({
   chartWrapper.appendChild(tooltip);
   card.appendChild(chartWrapper);
 
+  let renderedWidth = 0;
+
   function updateNavLabels(referenceDate) {
     if (!sharedMonthState) return;
     const prevMonth = new Date(
@@ -137,7 +139,10 @@ export const CashFlowSankeyCard = ({
     nextBtn.disabled = !(Number(sharedMonthState.offset) < 0);
   }
 
-  function render() {
+  function render(availableWidth = chartScroll.clientWidth) {
+    const chartWidth = Math.min(680, Math.max(1, availableWidth || 680));
+    renderedWidth = chartWidth;
+
     const monthOffset =
       currentGrain === SANKEY_GRAINS.MONTH
         ? Number(sharedMonthState?.offset) || 0
@@ -178,8 +183,7 @@ export const CashFlowSankeyCard = ({
       inflows: flowData.inflows,
       outflows: flowData.outflows,
       totalFlow: flowData.totalFlow,
-      width: 680,
-      minHeight: 360,
+      width: chartWidth,
     });
 
     chartScroll.innerHTML = '';
@@ -312,12 +316,23 @@ export const CashFlowSankeyCard = ({
   nextBtn.addEventListener('click', handleNext);
   grainSelect.addEventListener('change', handleGrainChange);
 
+  const ResizeObserverConstructor = globalThis.ResizeObserver;
+  const resizeObserver =
+    typeof ResizeObserverConstructor === 'function'
+      ? new ResizeObserverConstructor(([entry]) => {
+          const width = Math.min(680, Math.floor(entry.contentRect.width));
+          if (width > 0 && width !== renderedWidth) render(width);
+        })
+      : null;
+  resizeObserver?.observe(chartWrapper);
+
   render();
 
   function cleanup() {
     prevBtn.removeEventListener('click', handlePrev);
     nextBtn.removeEventListener('click', handleNext);
     grainSelect.removeEventListener('change', handleGrainChange);
+    resizeObserver?.disconnect();
   }
 
   return {
