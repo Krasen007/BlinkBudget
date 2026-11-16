@@ -157,10 +157,11 @@ export const buildAccountTypeHistory = (transactions, options = {}) => {
   for (const transaction of Array.isArray(transactions) ? transactions : []) {
     if (!transaction || transaction.isGhost) continue;
 
-    const isIncluded = type === TRANSACTION_TYPES.INCOME
-      ? transaction.type === TRANSACTION_TYPES.INCOME
-      : transaction.type === TRANSACTION_TYPES.EXPENSE ||
-        transaction.type === TRANSACTION_TYPES.REFUND;
+    const isIncluded =
+      type === TRANSACTION_TYPES.INCOME
+        ? transaction.type === TRANSACTION_TYPES.INCOME
+        : transaction.type === TRANSACTION_TYPES.EXPENSE ||
+          transaction.type === TRANSACTION_TYPES.REFUND;
     if (!isIncluded) continue;
 
     const date = new Date(transaction.timestamp || transaction.date);

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import { DashboardView } from '../../src/views/DashboardView.js';
 import { NavigationState } from '../../src/core/navigation-state.js';
 import { STORAGE_KEYS } from '../../src/utils/constants.js';
@@ -19,22 +19,6 @@ vi.mock('../../src/core/analytics/AnalyticsInstance.js', () => ({
     calculateCostOfLiving: () => ({}),
   }),
 }));
-
-const createMemoryStorage = () => {
-  const store = new Map();
-  return {
-    getItem: key => (store.has(key) ? store.get(key) : null),
-    setItem: (key, value) => {
-      store.set(key, String(value));
-    },
-    removeItem: key => {
-      store.delete(key);
-    },
-    clear: () => {
-      store.clear();
-    },
-  };
-};
 
 const getRenderedTransactionIds = container =>
   Array.from(container.querySelectorAll('.transaction-list-item')).map(
@@ -67,8 +51,14 @@ const drillIntoTag = (transactions, tag, monthPeriod) => {
       store.clear();
     },
   };
-  global.localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(transactions));
-  global.localStorage.setItem(STORAGE_KEYS.CUSTOM_CATEGORIES, JSON.stringify([]));
+  global.localStorage.setItem(
+    STORAGE_KEYS.TRANSACTIONS,
+    JSON.stringify(transactions)
+  );
+  global.localStorage.setItem(
+    STORAGE_KEYS.CUSTOM_CATEGORIES,
+    JSON.stringify([])
+  );
   global.localStorage.setItem('categories_initialized_user-1', 'true');
 
   NavigationState.saveDashboardFilter({
@@ -89,11 +79,51 @@ describe('DashboardView tag -> spending graph', () => {
 
   it('shows a spending graph above the list when drilled into a tag from Reports', () => {
     const transactions = [
-      { id: 'mar-work', amount: 10, category: 'Food', type: 'expense', accountId: 'main', tags: ['Work'], timestamp: '2026-03-10T09:00:00.000Z' },
-      { id: 'apr-work', amount: 20, category: 'Leisure', type: 'expense', accountId: 'main', tags: ['Work'], timestamp: '2026-04-10T09:00:00.000Z' },
-      { id: 'may-work', amount: 30, category: 'Bill', type: 'expense', accountId: 'main', tags: ['Work'], timestamp: '2026-05-10T09:00:00.000Z' },
-      { id: 'jun-work', amount: 15, category: 'Food', type: 'expense', accountId: 'main', tags: ['Work'], timestamp: '2026-06-10T09:00:00.000Z' },
-      { id: 'jun-other', amount: 99, category: 'Food', type: 'expense', accountId: 'main', tags: ['Personal'], timestamp: '2026-06-11T09:00:00.000Z' },
+      {
+        id: 'mar-work',
+        amount: 10,
+        category: 'Food',
+        type: 'expense',
+        accountId: 'main',
+        tags: ['Work'],
+        timestamp: '2026-03-10T09:00:00.000Z',
+      },
+      {
+        id: 'apr-work',
+        amount: 20,
+        category: 'Leisure',
+        type: 'expense',
+        accountId: 'main',
+        tags: ['Work'],
+        timestamp: '2026-04-10T09:00:00.000Z',
+      },
+      {
+        id: 'may-work',
+        amount: 30,
+        category: 'Bill',
+        type: 'expense',
+        accountId: 'main',
+        tags: ['Work'],
+        timestamp: '2026-05-10T09:00:00.000Z',
+      },
+      {
+        id: 'jun-work',
+        amount: 15,
+        category: 'Food',
+        type: 'expense',
+        accountId: 'main',
+        tags: ['Work'],
+        timestamp: '2026-06-10T09:00:00.000Z',
+      },
+      {
+        id: 'jun-other',
+        amount: 99,
+        category: 'Food',
+        type: 'expense',
+        accountId: 'main',
+        tags: ['Personal'],
+        timestamp: '2026-06-11T09:00:00.000Z',
+      },
     ];
     const period = {
       type: 'monthly',
@@ -106,7 +136,9 @@ describe('DashboardView tag -> spending graph', () => {
 
     const card = container.querySelector('.category-history-card');
     expect(card).not.toBeNull();
-    expect(card.querySelector('.category-history-title').textContent).toBe('Tag: Work');
+    expect(card.querySelector('.category-history-title').textContent).toBe(
+      'Tag: Work'
+    );
     const bars = [...card.querySelectorAll('.category-history-bar')];
     expect(bars.map(bar => bar.dataset.month)).toEqual([
       '2026-03',
@@ -114,7 +146,11 @@ describe('DashboardView tag -> spending graph', () => {
       '2026-05',
       '2026-06',
     ]);
-    expect(bars.find(bar => bar.dataset.month === '2026-06').getAttribute('aria-pressed')).toBe('true');
+    expect(
+      bars
+        .find(bar => bar.dataset.month === '2026-06')
+        .getAttribute('aria-pressed')
+    ).toBe('true');
 
     // List below covers the active period (June) filtered by the tag.
     expect(getRenderedTransactionIds(container)).toEqual(['jun-work']);
@@ -122,8 +158,24 @@ describe('DashboardView tag -> spending graph', () => {
 
   it('does not show the spending graph when the tag filter is an exclude', () => {
     const transactions = [
-      { id: 'jun-work', amount: 15, category: 'Food', type: 'expense', accountId: 'main', tags: ['Work'], timestamp: '2026-06-10T09:00:00.000Z' },
-      { id: 'jun-other', amount: 99, category: 'Food', type: 'expense', accountId: 'main', tags: ['Personal'], timestamp: '2026-06-11T09:00:00.000Z' },
+      {
+        id: 'jun-work',
+        amount: 15,
+        category: 'Food',
+        type: 'expense',
+        accountId: 'main',
+        tags: ['Work'],
+        timestamp: '2026-06-10T09:00:00.000Z',
+      },
+      {
+        id: 'jun-other',
+        amount: 99,
+        category: 'Food',
+        type: 'expense',
+        accountId: 'main',
+        tags: ['Personal'],
+        timestamp: '2026-06-11T09:00:00.000Z',
+      },
     ];
     const period = {
       type: 'monthly',

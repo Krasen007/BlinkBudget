@@ -1,0 +1,146 @@
+/**
+ * Cash Flow Sankey Component Styles
+ *
+ * Financial Planning → Insights → Cash Flow Sankey diagram.
+ */
+
+.cash-flow-sankey-card {
+  position: relative;
+  overflow: visible;
+}
+
+.sankey-chart-wrapper {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.sankey-chart-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.sankey-svg {
+  display: block;
+  width: 100%;
+  min-width: 520px;
+  max-width: 100%;
+  height: auto;
+  user-select: none;
+}
+
+.sankey-ribbon {
+  fill-opacity: 0.22;
+  cursor: pointer;
+  transition: fill-opacity var(--transition-fast);
+}
+
+.sankey-ribbon:hover,
+.sankey-ribbon.is-highlighted {
+  fill-opacity: 0.65;
+}
+
+.sankey-ribbon.is-dimmed {
+  fill-opacity: 0.06;
+}
+
+.sankey-node {
+  cursor: pointer;
+}
+
+.sankey-node-bar {
+  transition: filter var(--transition-fast);
+}
+
+.sankey-node:hover .sankey-node-bar,
+.sankey-node:focus-visible .sankey-node-bar {
+  filter: brightness(1.25);
+}
+
+.sankey-label-name {
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-weight: 600;
+  fill: var(--color-text-main);
+  paint-order: stroke fill;
+  stroke: var(--color-surface);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.sankey-label-amount {
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--color-text-muted);
+  paint-order: stroke fill;
+  stroke: var(--color-surface);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.sankey-center-name {
+  font-family: var(--font-heading);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  fill: var(--color-text-main);
+  paint-order: stroke fill;
+  stroke: var(--color-surface);
+  stroke-width: 3.5px;
+  stroke-linejoin: round;
+}
+
+.sankey-center-amount {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  fill: var(--color-text-muted);
+  paint-order: stroke fill;
+  stroke: var(--color-surface);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.sankey-tooltip {
+  position: absolute;
+  z-index: 10;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  line-height: 1.3;
+  color: var(--color-text-main);
+  pointer-events: none;
+  background: var(--color-surface-hover);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 40%);
+  opacity: 0;
+  transform: translate(-50%, -125%);
+  transition: opacity var(--transition-fast);
+  white-space: nowrap;
+}
+
+.sankey-tooltip.is-visible {
+  opacity: 1;
+}
+
+.sankey-tooltip-title {
+  margin-bottom: 2px;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.sankey-tooltip-value {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.sankey-tooltip-percent {
+  margin-left: 4px;
+  font-size: 10.5px;
+  color: var(--color-text-muted);
+}

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import { DashboardView } from '../../src/views/DashboardView.js';
 import { NavigationState } from '../../src/core/navigation-state.js';
 import { STORAGE_KEYS } from '../../src/utils/constants.js';
@@ -22,22 +22,6 @@ vi.mock('../../src/core/analytics/AnalyticsInstance.js', () => ({
     calculateCostOfLiving: () => ({}),
   }),
 }));
-
-const createMemoryStorage = () => {
-  const store = new Map();
-  return {
-    getItem: key => (store.has(key) ? store.get(key) : null),
-    setItem: (key, value) => {
-      store.set(key, String(value));
-    },
-    removeItem: key => {
-      store.delete(key);
-    },
-    clear: () => {
-      store.clear();
-    },
-  };
-};
 
 const drillIntoAccountType = (transactions, accounts, accountType, period) => {
   const store = new Map();
@@ -65,7 +49,10 @@ const drillIntoAccountType = (transactions, accounts, accountType, period) => {
       store.clear();
     },
   };
-  global.localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(transactions));
+  global.localStorage.setItem(
+    STORAGE_KEYS.TRANSACTIONS,
+    JSON.stringify(transactions)
+  );
   global.localStorage.setItem(STORAGE_KEYS.ACCOUNTS, JSON.stringify(accounts));
   global.localStorage.setItem('categories_initialized_user-1', 'true');
 
@@ -92,12 +79,54 @@ describe('DashboardView Explore Accounts drill', () => {
       { id: 'acc-3', name: 'Offshore', type: 'savings', isDefault: false },
     ];
     const transactions = [
-      { id: 'mar-1', amount: 10, category: 'Food', type: 'expense', accountId: 'acc-1', timestamp: '2026-03-10T09:00:00.000Z' },
-      { id: 'apr-1', amount: 20, category: 'Leisure', type: 'expense', accountId: 'acc-1', timestamp: '2026-04-10T09:00:00.000Z' },
-      { id: 'may-1', amount: 30, category: 'Bill', type: 'expense', accountId: 'acc-2', timestamp: '2026-05-10T09:00:00.000Z' },
-      { id: 'jun-1', amount: 15, category: 'Food', type: 'expense', accountId: 'acc-1', timestamp: '2026-06-10T09:00:00.000Z' },
-      { id: 'jun-2', amount: 99, category: 'Food', type: 'expense', accountId: 'acc-2', timestamp: '2026-06-12T09:00:00.000Z' },
-      { id: 'jun-3', amount: 50, category: 'Food', type: 'expense', accountId: 'acc-3', timestamp: '2026-06-11T09:00:00.000Z' },
+      {
+        id: 'mar-1',
+        amount: 10,
+        category: 'Food',
+        type: 'expense',
+        accountId: 'acc-1',
+        timestamp: '2026-03-10T09:00:00.000Z',
+      },
+      {
+        id: 'apr-1',
+        amount: 20,
+        category: 'Leisure',
+        type: 'expense',
+        accountId: 'acc-1',
+        timestamp: '2026-04-10T09:00:00.000Z',
+      },
+      {
+        id: 'may-1',
+        amount: 30,
+        category: 'Bill',
+        type: 'expense',
+        accountId: 'acc-2',
+        timestamp: '2026-05-10T09:00:00.000Z',
+      },
+      {
+        id: 'jun-1',
+        amount: 15,
+        category: 'Food',
+        type: 'expense',
+        accountId: 'acc-1',
+        timestamp: '2026-06-10T09:00:00.000Z',
+      },
+      {
+        id: 'jun-2',
+        amount: 99,
+        category: 'Food',
+        type: 'expense',
+        accountId: 'acc-2',
+        timestamp: '2026-06-12T09:00:00.000Z',
+      },
+      {
+        id: 'jun-3',
+        amount: 50,
+        category: 'Food',
+        type: 'expense',
+        accountId: 'acc-3',
+        timestamp: '2026-06-11T09:00:00.000Z',
+      },
     ];
     const period = {
       type: 'monthly',
@@ -126,7 +155,9 @@ describe('DashboardView Explore Accounts drill', () => {
       '2026-06',
     ]);
     expect(
-      bars.find(bar => bar.dataset.month === '2026-06').getAttribute('aria-pressed')
+      bars
+        .find(bar => bar.dataset.month === '2026-06')
+        .getAttribute('aria-pressed')
     ).toBe('true');
 
     // The list below covers only the active period (June) and is filtered to
@@ -143,7 +174,14 @@ describe('DashboardView Explore Accounts drill', () => {
       { id: 'acc-1', name: 'Main Checking', type: 'checking', isDefault: true },
     ];
     const transactions = [
-      { id: 'jun-1', amount: 15, category: 'Food', type: 'expense', accountId: 'acc-1', timestamp: '2026-06-10T09:00:00.000Z' },
+      {
+        id: 'jun-1',
+        amount: 15,
+        category: 'Food',
+        type: 'expense',
+        accountId: 'acc-1',
+        timestamp: '2026-06-10T09:00:00.000Z',
+      },
     ];
     const period = {
       type: 'monthly',
@@ -152,7 +190,12 @@ describe('DashboardView Explore Accounts drill', () => {
       label: 'June 2026',
     };
 
-    const container = drillIntoAccountType(transactions, accounts, 'other', period);
+    const container = drillIntoAccountType(
+      transactions,
+      accounts,
+      'other',
+      period
+    );
 
     expect(container.querySelector('.category-history-card')).toBeNull();
   });

@@ -13,6 +13,7 @@
 @import './components/category-history.css';
 @import './components/inflation-trends.css';
 @import './components/insights-charts.css';
+@import './components/insights-sankey.css';
 @import './components/webapp-components.css';
 @import './components/enhanced-button.css';
 @import './components/enhanced-input.css';

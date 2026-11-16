@@ -4,6 +4,7 @@
  * Displays financial insights:
  * - Key Takeaways (top textual insights for the selected month)
  * - Trend Diverging Bar Chart (Income vs Expense with Net line)
+ * - Cash Flow Sankey (Inflow sources → Cash Flow → Expenses & Surplus)
  * - Timeline YoY cumulative spending comparison
  * - Top Movers (biggest month-over-month spending changes)
  * - Personal Inflation Trends
@@ -20,6 +21,7 @@ import { InflationTrends } from '../../components/InflationTrends.js';
 import { createNetBalanceChart } from '../../components/NetBalanceChart.js';
 import { ProgressiveEmptyState } from '../../components/ProgressiveEmptyState.js';
 import { TrendBarChartCard } from '../../components/financial-planning/TrendBarChartCard.js';
+import { CashFlowSankeyCard } from '../../components/financial-planning/CashFlowSankeyCard.js';
 import { TimelineYoYCard } from '../../components/financial-planning/TimelineYoYCard.js';
 import { createTopMoversSection } from './insights-movers-timeline.js';
 import { createTakeawaysSection } from './insights-takeaways.js';
@@ -48,7 +50,7 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
 
   section.appendChild(
     createUsageNote(
-      'Key takeaways, spending trends, month-over-month movers, personal inflation, recurring charges, and net balance — everything you need to spot patterns and plan the month ahead.'
+      'Key takeaways, spending trends, cash flow distribution, month-over-month movers, personal inflation, recurring charges, and net balance — everything you need to spot patterns and plan the month ahead.'
     )
   );
 
@@ -95,6 +97,12 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
     chartRenderer,
   });
   chartsGrid.appendChild(trendCard.element);
+
+  const sankeyCard = CashFlowSankeyCard({
+    transactions,
+    sharedMonthState,
+  });
+  chartsGrid.appendChild(sankeyCard.element);
 
   const timelineYoYCard = TimelineYoYCard({
     transactions,
@@ -148,6 +156,7 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
     takeaways.render();
     renderTopMovers();
     timelineYoYCard.render();
+    sankeyCard.render();
     if (inflationTrendsComponent.render) {
       inflationTrendsComponent.render();
     }
@@ -162,6 +171,7 @@ export const InsightsSection = (planningData, chartRenderer, activeCharts) => {
       netBalanceEntry = null;
     }
     if (trendCard.cleanup) trendCard.cleanup();
+    if (sankeyCard.cleanup) sankeyCard.cleanup();
     if (timelineYoYCard.cleanup) timelineYoYCard.cleanup();
     if (inflationTrendsComponent.cleanup) {
       inflationTrendsComponent.cleanup();

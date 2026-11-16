@@ -90,6 +90,7 @@ describe('InsightsSection', () => {
     expect(
       element.querySelector('.trend-bar-card .insights-chart-area')
     ).not.toBeNull();
+    expect(element.querySelector('.cash-flow-sankey-card')).not.toBeNull();
     expect(
       element.querySelector('.timeline-yoy-card .timeline-subtitle')
     ).not.toBeNull();
@@ -115,6 +116,9 @@ describe('InsightsSection', () => {
 
     expect(
       element.querySelector('.trend-bar-card .insights-select').value
+    ).toBe('month');
+    expect(
+      element.querySelector('.cash-flow-sankey-card .insights-select').value
     ).toBe('month');
     expect(
       element.querySelector('.timeline-yoy-card .insights-select').value

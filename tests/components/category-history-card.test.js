@@ -359,7 +359,9 @@ describe('buildCategoryHistory', () => {
       expect(
         CategoryHistoryCard({
           tag: 'Travel',
-          transactions: [tx('a', 20, 'Food', '2026-09-10T09:00:00.000Z', { tags: ['Work'] })],
+          transactions: [
+            tx('a', 20, 'Food', '2026-09-10T09:00:00.000Z', { tags: ['Work'] }),
+          ],
           endDate: END_NOV_2026,
           onMonthSelect: vi.fn(),
         })

@@ -1188,7 +1188,8 @@ export const DashboardView = (params = {}) => {
     // filter means the user is ignoring a label, so there is no single label
     // to draw a history for.
     const isAccountTypeFilter =
-      currentAccountFilter && typeof currentAccountFilter === 'string' &&
+      currentAccountFilter &&
+      typeof currentAccountFilter === 'string' &&
       currentAccountFilter.startsWith('type:');
 
     // Category/tag/account-type structure the dashboard draws a monthly
