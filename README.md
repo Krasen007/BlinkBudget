@@ -34,7 +34,17 @@
 ### Transaction Management
 
 - **Multiple transaction types**: Support for Expenses, Income, Transfers, and Refunds, with enhanced validation and error reporting. Typing `-` in the amount field automatically switches to Refund | src/utils/form-utils/type-toggle.js:createTypeToggleGroup() | src/utils/form-utils/validation.js:validateAmount() | src/utils/form-utils/validation.js:validateCategory()
-- **Undo for Deleted Transactions**: Accidentally deleted a transaction? An undo toast appears at the bottom of the screen, giving you a chance to restore it. Works for both single and bulk deletions | src/utils/transaction-undo.js:notifyTransactionDeleted() | src/utils/toast-notifications.js:showUndoToast() | src/views/EditView.js:delete with undo | src/views/DashboardView.js:bulk delete with undo
+- **Undo for Deleted Transactions**: Accidentally deleted a transaction? An undo toast appears at the bottom of the screen, giving you a chance to restore it. Works for both single and bulk deletions | src/utils/transaction-undo.js:notifyTransactionDeleted() | src/utils/toast-notifications.js:showUndoToast() | src/views/EditView.js:delete with undo | src/views/DashboardView.js:bulk delete with und
+- **Spending spike insights**: Each purchase is now judged against its own category (mean + 1.5σ, minimum 5 expenses), so a €15.83 lunch isn't marked "unusually large" just because the month also has €1.65 bus tickets. Single-purchase categories no longer report "100.0% of category spending."
+- **Category drill-downs**: Clicking a category opens a history strip showing 12-month spending trends. Tapping a month re-filters the transaction list using the same state as the Spent-card arrows. Account filter is honored while period filters are deliberately bypassed.
+
+### Insights & Drill-downs
+
+- **Sankey chart**: Responsive and consistent with other Insights charts. Nodes are keyboard-focusable, labeled with category and percentage, and tooltips appear positioned from their bounds.
+- **Drill-down spending graph**: Month-by-month history strip appears when drilling into tags from Reports or account types from Explore Accounts.
+- **Category reorder**: Custom category sorting now correctly syncs to the cloud. Sort order (0, 1, 2…) plus updatedAt are written on each category and sent to Firestore.
+- **Dashboard performance**: Transaction bars are DOM buttons scaled by CSS custom properties instead of Chart.js canvas, so the dashboard loads instantly without waiting on the lazy chart chunk.
+- **Data recovery**: Page to read BlinkBudget data from this browser's local storage without loading the app or connecting to Firebase
 - **Optional transaction descriptions**: Add notes to transactions or leave them blank, as you prefer | src/components/TransactionForm.js:noteField creation | src/utils/form-utils/submission.js:prepareTransactionData()
 - **Custom Category Management**: Create, edit, and manage your own expense categories for personalized tracking | src/components/CustomCategoryManager.js:CustomCategoryManager() | src/core/custom-category-service.js:CustomCategoryService
 - **Category Reordering**: Organize your expense categories in a way that works best for you. Reordering now respects filtered views — arrow-move reorders only the currently visible categories and persists that order, including syncing your custom order to the cloud via Firestore. Previously it reordered across all categories (including hidden types), so moves inside a filtered view often had no visible effect | src/core/custom-category-service.js:reorder() | src/components/CustomCategoryManager.js:arrow-move handlers
