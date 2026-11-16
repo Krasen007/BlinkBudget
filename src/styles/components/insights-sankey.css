@@ -32,18 +32,18 @@
 }
 
 .sankey-ribbon {
-  fill-opacity: 0.22;
+  fill-opacity: 0.65;
   cursor: pointer;
   transition: fill-opacity var(--transition-fast);
 }
 
 .sankey-ribbon:hover,
 .sankey-ribbon.is-highlighted {
-  fill-opacity: 0.65;
+  fill-opacity: 1;
 }
 
 .sankey-ribbon.is-dimmed {
-  fill-opacity: 0.06;
+  fill-opacity: 0.6;
 }
 
 .sankey-node {
@@ -64,10 +64,6 @@
   font-size: 11.5px;
   font-weight: 600;
   fill: var(--color-text-main);
-  paint-order: stroke fill;
-  stroke: var(--color-surface);
-  stroke-width: 3px;
-  stroke-linejoin: round;
 }
 
 .sankey-label-amount {
@@ -75,10 +71,6 @@
   font-size: 10.5px;
   font-variant-numeric: tabular-nums;
   fill: var(--color-text-muted);
-  paint-order: stroke fill;
-  stroke: var(--color-surface);
-  stroke-width: 3px;
-  stroke-linejoin: round;
 }
 
 .sankey-center-name {
@@ -88,10 +80,6 @@
   letter-spacing: 0.02em;
   text-transform: uppercase;
   fill: var(--color-text-main);
-  paint-order: stroke fill;
-  stroke: var(--color-surface);
-  stroke-width: 3.5px;
-  stroke-linejoin: round;
 }
 
 .sankey-center-amount {
@@ -100,10 +88,6 @@
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   fill: var(--color-text-muted);
-  paint-order: stroke fill;
-  stroke: var(--color-surface);
-  stroke-width: 3px;
-  stroke-linejoin: round;
 }
 
 .sankey-tooltip {

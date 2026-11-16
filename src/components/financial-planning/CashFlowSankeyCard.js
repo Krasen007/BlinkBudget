@@ -179,6 +179,7 @@ export const CashFlowSankeyCard = ({
       outflows: flowData.outflows,
       totalFlow: flowData.totalFlow,
       width: 680,
+      minHeight: 360,
     });
 
     chartScroll.innerHTML = '';
