@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { DashboardView } from '../../src/views/DashboardView.js';
 import { NavigationState } from '../../src/core/navigation-state.js';
+import { TransactionService } from '../../src/core/transaction-service.js';
 import { STORAGE_KEYS } from '../../src/utils/constants.js';
 
 /**
@@ -173,6 +174,10 @@ describe('DashboardView tag (label) filtering', () => {
       JSON.stringify(FLAG_CATEGORIES)
     );
     global.localStorage.setItem('categories_initialized_user-1', 'true');
+
+    // Ensure the real TransactionService does not serve a stale read-cache from
+    // a previous test while fake timers keep Date.now() frozen.
+    TransactionService.clearCache();
 
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-06-08T12:00:00.000Z'));

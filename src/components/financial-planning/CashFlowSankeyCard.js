@@ -250,13 +250,21 @@ export const CashFlowSankeyCard = ({
   }
 
   function showTooltip(e, name, amount, percent) {
-    tooltip.innerHTML = `
-      <div class="sankey-tooltip-title">${name}</div>
-      <div>
-        <span class="sankey-tooltip-value">${formatCurrency(amount)}</span>
-        <span class="sankey-tooltip-percent">(${percent.toFixed(1)}%)</span>
-      </div>
-    `;
+    const title = document.createElement('div');
+    title.className = 'sankey-tooltip-title';
+    title.textContent = name;
+
+    const details = document.createElement('div');
+    const value = document.createElement('span');
+    value.className = 'sankey-tooltip-value';
+    value.textContent = formatCurrency(amount);
+    const percentage = document.createElement('span');
+    percentage.className = 'sankey-tooltip-percent';
+    percentage.textContent = `(${percent.toFixed(1)}%)`;
+    details.appendChild(value);
+    details.appendChild(percentage);
+
+    tooltip.replaceChildren(title, details);
     tooltip.classList.add('is-visible');
     moveTooltip(e);
   }

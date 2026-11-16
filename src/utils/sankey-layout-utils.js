@@ -30,24 +30,34 @@ export function allocateHeights(amounts = [], totalH = 0, minH = 2.5) {
   const n = amounts.length;
 
   if (n * minH <= totalH) {
-    const under = heights.map(h => h < minH);
-    const countUnder = under.filter(Boolean).length;
-    if (countUnder > 0) {
-      let deficit = 0;
-      heights = heights.map((h, i) => {
-        if (under[i]) {
-          deficit += minH - h;
-          return minH;
-        }
-        return h;
-      });
-      const overSum = heights.reduce((s, h, i) => s + (under[i] ? 0 : h), 0);
-      if (overSum > 0) {
-        heights = heights.map((h, i) => {
-          if (under[i]) return h;
-          return Math.max(minH, h - (h / overSum) * deficit);
-        });
+    let deficit = 0;
+    const donors = [];
+    heights = heights.map((height, i) => {
+      if (height < minH) {
+        deficit += minH - height;
+        return minH;
       }
+      if (height > minH) donors.push(i);
+      return height;
+    });
+
+    while (deficit > 1e-9 && donors.length > 0) {
+      const donorTotal = donors.reduce((sum, i) => sum + heights[i], 0);
+      let redistributed = 0;
+      const remainingDonors = [];
+
+      for (const i of donors) {
+        const available = heights[i] - minH;
+        const share = (deficit * heights[i]) / donorTotal;
+        const reduction = Math.min(available, share);
+        heights[i] -= reduction;
+        redistributed += reduction;
+        if (heights[i] > minH + 1e-9) remainingDonors.push(i);
+      }
+
+      if (redistributed <= 1e-9) break;
+      deficit -= redistributed;
+      donors.splice(0, donors.length, ...remainingDonors);
     }
   }
 
@@ -101,16 +111,16 @@ export function aggregateCashFlowData(transactions = [], options = {}) {
   if (grain === SANKEY_GRAINS.MONTH) {
     const yr = referenceDate.getFullYear();
     const mo = referenceDate.getMonth();
-    start = new Date(yr, mo, 1);
-    end = new Date(yr, mo + 1, 1);
+    start = new Date(Date.UTC(yr, mo, 1));
+    end = new Date(Date.UTC(yr, mo + 1, 1));
     periodLabel = referenceDate.toLocaleDateString('en-US', {
       month: 'long',
       year: 'numeric',
     });
   } else if (grain === SANKEY_GRAINS.YEAR) {
     const yr = referenceDate.getFullYear();
-    start = new Date(yr, 0, 1);
-    end = new Date(yr + 1, 0, 1);
+    start = new Date(Date.UTC(yr, 0, 1));
+    end = new Date(Date.UTC(yr + 1, 0, 1));
     periodLabel = String(yr);
   }
 
@@ -138,7 +148,12 @@ export function aggregateCashFlowData(transactions = [], options = {}) {
   });
 
   for (const [cat, amt] of expenseMap.entries()) {
-    if (amt <= 0) expenseMap.delete(cat);
+    if (amt < 0) {
+      incomeMap.set(cat, (incomeMap.get(cat) || 0) - amt);
+      expenseMap.delete(cat);
+    } else if (amt === 0) {
+      expenseMap.delete(cat);
+    }
   }
 
   const rawIncomes = Array.from(incomeMap.entries())

@@ -2,7 +2,7 @@
  * Sankey Layout Utils Tests
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   allocateHeights,
   createRibbonPath,
@@ -29,6 +29,12 @@ describe('sankey-layout-utils', () => {
       expect(heights[1]).toBe(5);
       expect(heights[0]).toBe(95);
       expect(heights[0] + heights[1]).toBe(100);
+    });
+
+    it('redistributes a donor share when another donor is already at minH', () => {
+      const heights = allocateHeights([1, 10, 89], 100, 10);
+      expect(heights).toEqual([10, 10, 80]);
+      expect(heights.reduce((sum, height) => sum + height, 0)).toBe(100);
     });
   });
 
@@ -134,6 +140,64 @@ describe('sankey-layout-utils', () => {
       const res = aggregateCashFlowData(txs, { grain: SANKEY_GRAINS.MONTH });
       const shopping = res.outflows.find(o => o.name === 'Shopping');
       expect(shopping.amount).toBe(150);
+    });
+
+    it('represents a refund-only category as an inflow in its transaction period', () => {
+      const txs = [
+        {
+          amount: 50,
+          type: 'refund',
+          category: 'Shopping',
+          timestamp: thisMonth.toISOString(),
+        },
+      ];
+
+      const res = aggregateCashFlowData(txs, { grain: SANKEY_GRAINS.MONTH });
+      expect(res.hasData).toBe(true);
+      expect(res.totalIncome).toBe(50);
+      expect(res.totalExpense).toBe(0);
+      expect(res.inflows).toContainEqual(
+        expect.objectContaining({ name: 'Shopping', amount: 50 })
+      );
+    });
+
+    it('filters date-only calendar dates using UTC month boundaries', () => {
+      vi.stubEnv('TZ', 'America/Los_Angeles');
+      try {
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        const firstOfMonth = new Date(Date.UTC(year, month, 1));
+        const previousMonthEnd = new Date(firstOfMonth.getTime() - 1);
+        const dateOnly = firstOfMonth.toISOString().slice(0, 10);
+
+        const res = aggregateCashFlowData(
+          [
+            {
+              amount: 10,
+              type: 'income',
+              category: 'Boundary date',
+              date: dateOnly,
+            },
+            {
+              amount: 20,
+              type: 'income',
+              category: 'Previous month',
+              timestamp: previousMonthEnd.toISOString(),
+            },
+          ],
+          { grain: SANKEY_GRAINS.MONTH }
+        );
+
+        expect(res.totalIncome).toBe(10);
+        expect(res.inflows.map(inflow => inflow.name)).toContain(
+          'Boundary date'
+        );
+        expect(res.inflows.map(inflow => inflow.name)).not.toContain(
+          'Previous month'
+        );
+      } finally {
+        vi.unstubAllEnvs();
+      }
     });
 
     it('groups long tail of expenses into Other when more than 10', () => {

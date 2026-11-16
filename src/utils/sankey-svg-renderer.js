@@ -67,7 +67,13 @@ export function renderSankeySvg({
   const nodesGroup = createSvg('g', { class: 'sankey-nodes' });
 
   const addNode = (node, id, name, amount, percent) => {
-    const g = createSvg('g', { class: 'sankey-node', 'data-node-id': id });
+    const g = createSvg('g', {
+      class: 'sankey-node',
+      'data-node-id': id,
+      tabindex: '0',
+      role: 'img',
+      'aria-label': `${name}, ${percent.toFixed(1)}% of cash flow`,
+    });
     const rx = Math.min(3, Math.max(1, node.height / 2));
     g.appendChild(
       createSvg('rect', {
@@ -85,6 +91,20 @@ export function renderSankeySvg({
     );
     g.addEventListener('mousemove', onMouseMove);
     g.addEventListener('mouseleave', onLeaveNode);
+    g.addEventListener('focus', () => {
+      const bounds = g.getBoundingClientRect();
+      onHoverNode(
+        {
+          clientX: bounds.left + bounds.width / 2,
+          clientY: bounds.top + bounds.height / 2,
+        },
+        id,
+        name,
+        amount,
+        percent
+      );
+    });
+    g.addEventListener('blur', onLeaveNode);
     nodesGroup.appendChild(g);
   };
 

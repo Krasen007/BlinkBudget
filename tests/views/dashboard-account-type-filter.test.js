@@ -287,7 +287,7 @@ describe('DashboardView account type filter', () => {
         '.dashboard-transactions-list li'
       );
       expect(rows).toHaveLength(2);
-      expect(new Date(statCards[1].currentMonthFilter).getMonth()).toBe(5);
+      expect(new Date(statCards[1].currentMonthFilter).getUTCMonth()).toBe(5);
     } finally {
       if (originalTimeZone === undefined) {
         delete process.env.TZ;

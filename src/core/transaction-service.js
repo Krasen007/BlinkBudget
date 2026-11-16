@@ -36,6 +36,16 @@ export const TransactionService = {
     return this._loadTransactions();
   },
 
+  /**
+   * Drop the in-memory read cache so the next getAll() re-reads localStorage.
+   * Useful when tests (or other code) mutate localStorage outside of this
+   * service and the cached snapshot would otherwise go stale.
+   */
+  clearCache() {
+    transactionsCache = null;
+    cacheTimestamp = 0;
+  },
+
   _loadTransactions(bypassCache = false) {
     const now = Date.now();
     if (

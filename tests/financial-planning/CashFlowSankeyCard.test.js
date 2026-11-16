@@ -81,6 +81,53 @@ describe('CashFlowSankeyCard', () => {
     cleanup();
   });
 
+  it('renders tooltip category names as text and exposes keyboard node details', () => {
+    const category = '<img src=x onerror=alert(1)>';
+    const { element, cleanup } = CashFlowSankeyCard({
+      transactions: [
+        {
+          amount: 100,
+          category: 'Salary',
+          type: 'income',
+          timestamp: new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            2
+          ).toISOString(),
+        },
+        {
+          amount: 25,
+          category,
+          type: 'expense',
+          timestamp: new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            3
+          ).toISOString(),
+        },
+      ],
+    });
+
+    const node = [...element.querySelectorAll('.sankey-node')].find(candidate =>
+      candidate.getAttribute('aria-label')?.startsWith(category)
+    );
+    expect(node.getAttribute('tabindex')).toBe('0');
+    expect(node.getAttribute('aria-label')).toContain('% of cash flow');
+
+    node.dispatchEvent(new Event('focus'));
+
+    const tooltip = element.querySelector('.sankey-tooltip');
+    expect(tooltip.classList.contains('is-visible')).toBe(true);
+    expect(tooltip.querySelector('.sankey-tooltip-title').textContent).toBe(
+      category
+    );
+    expect(tooltip.querySelector('img')).toBeNull();
+
+    node.dispatchEvent(new Event('blur'));
+    expect(tooltip.classList.contains('is-visible')).toBe(false);
+    cleanup();
+  });
+
   it('synchronizes with sharedMonthState navigation', () => {
     const sharedMonthState = {
       offset: 0,
