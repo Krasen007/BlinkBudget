@@ -105,4 +105,16 @@ describe('InvestmentTracker', () => {
 
     expect(tracker.removeInvestmentById('does-not-exist')).toBe(false);
   });
+
+  it('removeInvestment removes every lot for the symbol', () => {
+    tracker.addInvestment('AAA', 1, 10, new Date('2024-01-01'));
+    tracker.addInvestment('AAA', 2, 20, new Date('2024-02-01'));
+    tracker.addInvestment('BBB', 1, 30, new Date('2024-03-01'));
+
+    expect(tracker.removeInvestment('AAA')).toBe(true);
+    const remaining = tracker.getAllInvestments();
+    expect(remaining.length).toBe(1);
+    expect(remaining[0].symbol).toBe('BBB');
+    expect(tracker.removeInvestment('AAA')).toBe(false);
+  });
 });

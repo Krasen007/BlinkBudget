@@ -117,8 +117,9 @@ describe('InvestmentsSection', () => {
     expect(section.id).toBe('investments');
   });
 
-  it('should display placeholder when no investments exist', async () => {
+  it('should display a compact empty state when no investments exist', async () => {
     StorageService.getInvestments.mockReturnValue([]);
+    StorageService.getHoldingsGrouped.mockReturnValue([]);
     StorageService.calculatePortfolioSummary.mockReturnValue({
       totalValue: 0,
       investmentCount: 0,
@@ -136,8 +137,9 @@ describe('InvestmentsSection', () => {
       mockActiveCharts
     );
 
-    const placeholder = section.querySelector('.placeholder');
-    expect(placeholder).toBeTruthy();
+    const emptyState = section.querySelector('.empty-state');
+    expect(emptyState).toBeTruthy();
+    expect(section.querySelector('.placeholder')).toBeNull();
   });
 
   it('groups investments by symbol and shows average cost with individual purchases', async () => {
@@ -256,6 +258,51 @@ describe('InvestmentsSection', () => {
     expect(summary?.textContent.match(/TEST/g)?.length).toBe(1);
   });
 
+  it('shows a name field when adding an investment and a holding-level delete button', async () => {
+    StorageService.getHoldingsGrouped.mockReturnValue([
+      {
+        symbol: 'TEST',
+        name: 'Test Fund',
+        totalShares: 10,
+        totalInvested: 2,
+        averageCost: 0.2,
+        currentPrice: 5000,
+        currentValue: 50000,
+        totalGainLoss: 49998,
+        totalGainLossPercentage: 2499900,
+        lots: [
+          {
+            id: 'lot-1',
+            symbol: 'TEST',
+            name: 'Test Fund',
+            purchaseDate: new Date('2026-11-20'),
+            shares: 10,
+            purchasePrice: 0.2,
+            currentPrice: 5000,
+            lotValue: 50000,
+            lotGainLoss: 49998,
+          },
+        ],
+      },
+    ]);
+
+    const section = await InvestmentsSection(
+      mockChartRenderer,
+      mockActiveCharts
+    );
+
+    const addBtn = section.querySelector('.add-investment-btn');
+    addBtn.click();
+
+    const nameInput = section.querySelector('#inv-name');
+    expect(nameInput).toBeTruthy();
+    expect(nameInput.placeholder).toMatch(/name/i);
+
+    const deleteHolding = section.querySelector('.investment-delete-holding');
+    expect(deleteHolding).toBeTruthy();
+    expect(deleteHolding.textContent).toBe('Delete');
+  });
+
   it('opens the add form with today as the default date and does not hide on a second Add click', async () => {
     StorageService.getHoldingsGrouped.mockReturnValue([]);
 
@@ -271,9 +318,21 @@ describe('InvestmentsSection', () => {
     expect(addBtn).toBeTruthy();
     expect(form.style.display).toBe('none');
 
+    const saveBtn = section.querySelector('.btn-save');
+    const cancelBtn = section.querySelector('.btn-cancel-investment');
+    const actionRow = section.querySelector('.investment-form-actions');
+
+    expect(saveBtn.style.display).toBe('none');
+    expect(cancelBtn.style.display).toBe('none');
+    expect(addBtn.style.display).not.toBe('none');
+
     addBtn.click();
     expect(form.style.display).toBe('flex');
-    expect(addBtn.hidden).toBe(true);
+    expect(addBtn.style.display).toBe('none');
+    expect(saveBtn.style.display).not.toBe('none');
+    expect(cancelBtn.style.display).not.toBe('none');
+    expect(actionRow.contains(saveBtn)).toBe(true);
+    expect(actionRow.contains(cancelBtn)).toBe(true);
 
     const today = new Date();
     const expected = `${today.getFullYear()}-${String(
@@ -285,11 +344,10 @@ describe('InvestmentsSection', () => {
     addBtn.click();
     expect(form.style.display).toBe('flex');
 
-    const cancelBtn = Array.from(form.querySelectorAll('button')).find(
-      btn => btn.textContent === 'Cancel'
-    );
     cancelBtn.click();
     expect(form.style.display).toBe('none');
-    expect(addBtn.hidden).toBe(false);
+    expect(addBtn.style.display).not.toBe('none');
+    expect(saveBtn.style.display).toBe('none');
+    expect(cancelBtn.style.display).toBe('none');
   });
 });

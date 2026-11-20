@@ -9,7 +9,6 @@ import { COLORS, SPACING, CURRENCY_SYMBOL } from '../../utils/constants.js';
 import {
   createUsageNote,
   createSectionContainer,
-  createPlaceholder,
 } from '../../utils/financial-planning-helpers.js';
 import { createEnhancedEmptyState } from '../../utils/enhanced-empty-states.js';
 import { ProgressiveEmptyState } from '../../components/ProgressiveEmptyState.js';
@@ -30,26 +29,53 @@ function todayLocalDate() {
  */
 function createInvestmentFormControls(onSaved) {
   const controls = document.createElement('div');
+  controls.className = 'investment-form-controls';
   controls.style.display = 'flex';
-  controls.style.gap = SPACING.SM;
-  controls.style.alignItems = 'center';
-  controls.style.flexWrap = 'wrap';
-  controls.style.marginTop = SPACING.MD;
+  controls.style.flexDirection = 'column';
+  // Gap only appears when the form is open (hidden children are not flex items)
+  controls.style.gap = SPACING.MD;
+  controls.style.margin = '0';
+
+  // Top action row: Add Investment XOR Save + Cancel
+  const actionRow = document.createElement('div');
+  actionRow.className = 'investment-form-actions';
+  actionRow.style.display = 'flex';
+  actionRow.style.gap = SPACING.SM;
+  actionRow.style.alignItems = 'center';
+  actionRow.style.flexWrap = 'wrap';
+  actionRow.style.margin = '0';
 
   const addInvBtn = document.createElement('button');
   addInvBtn.textContent = 'Add Investment';
   addInvBtn.className = 'btn btn-primary add-investment-btn';
   addInvBtn.type = 'button';
 
+  const saveInvBtn = document.createElement('button');
+  saveInvBtn.textContent = 'Save Investment';
+  saveInvBtn.className = 'btn btn-primary btn-save';
+  saveInvBtn.type = 'button';
+  saveInvBtn.disabled = true;
+  // Use display (not hidden) — .btn { display: inline-flex } overrides [hidden]
+  saveInvBtn.style.display = 'none';
+
+  const cancelInvBtn = document.createElement('button');
+  cancelInvBtn.textContent = 'Cancel';
+  cancelInvBtn.className = 'btn btn-ghost btn-cancel-investment';
+  cancelInvBtn.type = 'button';
+  cancelInvBtn.style.display = 'none';
+
+  actionRow.appendChild(addInvBtn);
+  actionRow.appendChild(saveInvBtn);
+  actionRow.appendChild(cancelInvBtn);
+
   const invForm = document.createElement('div');
   invForm.className = 'investment-form';
   invForm.style.display = 'none';
   invForm.style.gap = SPACING.SM;
-  invForm.style.marginTop = SPACING.SM;
   invForm.style.flexWrap = 'wrap';
   invForm.style.width = '100%';
 
-  // Simple fields: symbol, shares, purchase price, current price, date, notes
+  // Simple fields: symbol, name, shares, purchase price, current price, date, notes
   const fields = [
     {
       id: 'inv-symbol',
@@ -57,6 +83,13 @@ function createInvestmentFormControls(onSaved) {
       type: 'text',
       placeholder: 'Symbol (e.g. AAPL)',
       required: true,
+    },
+    {
+      id: 'inv-name',
+      name: 'name',
+      type: 'text',
+      placeholder: 'Name (optional)',
+      required: false,
     },
     {
       id: 'inv-shares',
@@ -111,20 +144,6 @@ function createInvestmentFormControls(onSaved) {
   notesInput.setAttribute('aria-label', 'Notes');
   invForm.appendChild(notesInput);
 
-  const saveInvBtn = document.createElement('button');
-  saveInvBtn.textContent = 'Save Investment';
-  saveInvBtn.className = 'btn btn-primary btn-save';
-  saveInvBtn.type = 'button';
-  saveInvBtn.disabled = true;
-
-  const cancelInvBtn = document.createElement('button');
-  cancelInvBtn.textContent = 'Cancel';
-  cancelInvBtn.className = 'btn btn-ghost';
-  cancelInvBtn.type = 'button';
-
-  invForm.appendChild(saveInvBtn);
-  invForm.appendChild(cancelInvBtn);
-
   function resetFormFields() {
     Object.values(inputs).forEach(i => (i.value = ''));
     notesInput.value = '';
@@ -133,7 +152,9 @@ function createInvestmentFormControls(onSaved) {
 
   function closeForm() {
     invForm.style.display = 'none';
-    addInvBtn.hidden = false;
+    addInvBtn.style.display = '';
+    saveInvBtn.style.display = 'none';
+    cancelInvBtn.style.display = 'none';
     resetFormFields();
   }
 
@@ -145,7 +166,9 @@ function createInvestmentFormControls(onSaved) {
       return;
     }
     invForm.style.display = 'flex';
-    addInvBtn.hidden = true;
+    addInvBtn.style.display = 'none';
+    saveInvBtn.style.display = '';
+    cancelInvBtn.style.display = '';
     inputs.purchaseDate.value = todayLocalDate();
     validate();
     inputs.symbol.focus();
@@ -174,6 +197,7 @@ function createInvestmentFormControls(onSaved) {
   saveInvBtn.addEventListener('click', async () => {
     if (!validate()) return;
     const symbol = inputs.symbol.value.trim().toUpperCase();
+    const name = (inputs.name?.value || '').trim() || symbol;
     const shares = Number(inputs.shares.value);
     const purchasePrice = Number(inputs.purchasePrice.value);
     const currentPrice =
@@ -191,7 +215,7 @@ function createInvestmentFormControls(onSaved) {
         purchasePrice,
         purchaseDate,
         {
-          name: symbol,
+          name,
           currentPrice,
           notes,
         }
@@ -207,27 +231,23 @@ function createInvestmentFormControls(onSaved) {
     }
   });
 
-  controls.appendChild(addInvBtn);
+  controls.appendChild(actionRow);
   controls.appendChild(invForm);
   return { controls };
 }
 
 /**
  * Create investments list with CRUD operations
- */
-
-/**
- * Create investments list with CRUD operations
  *
  * Investments are grouped by symbol into holdings. Multiple purchases of
  * the same symbol (e.g. BTC bought at 55000, 54500 and 66000) roll up into
- * one holding showing the average cost per share, while the individual
- * purchases remain visible underneath each holding.
+ * one holding showing the average cost per share, with each purchase listed
+ * underneath.
  */
 function createInvestmentsList() {
   const investmentsList = document.createElement('div');
   investmentsList.className = 'investment-list';
-  investmentsList.style.marginTop = SPACING.MD;
+  investmentsList.style.margin = '0';
 
   const formatShares = shares => {
     const s = Number(shares) || 0;
@@ -242,17 +262,25 @@ function createInvestmentsList() {
       holdings = StorageService.getHoldingsGrouped() || [];
 
       if (!holdings.length) {
-        const empty = createEnhancedEmptyState('no-data', { showTips: false });
+        const empty = createEnhancedEmptyState('no-data', {
+          showTips: false,
+          compact: true,
+        });
+        // Keep the empty state compact so it does not leave a large blank band
+        // under the Add Investment button.
+        empty.style.minHeight = '0';
+        empty.style.padding = SPACING.LG;
         investmentsList.appendChild(empty);
         return;
       }
 
       const ul = document.createElement('ul');
+      ul.className = 'investment-holdings';
       ul.style.listStyle = 'none';
       ul.style.padding = '0';
       ul.style.margin = '0';
       ul.style.display = 'grid';
-      ul.style.gap = SPACING.SM;
+      ul.style.gap = SPACING.XL;
 
       holdings.forEach(holding => {
         const quotePrice =
@@ -280,29 +308,32 @@ function createInvestmentsList() {
         summary.style.display = 'flex';
         summary.style.alignItems = 'center';
         summary.style.justifyContent = 'space-between';
-        summary.style.padding = SPACING.MD;
-        summary.style.cursor = 'pointer';
+        summary.style.gap = SPACING.SM;
+        summary.style.padding = `${SPACING.SM} ${SPACING.MD}`;
         summary.style.borderBottom = `1px solid ${COLORS.BORDER}`;
 
         const summaryLeft = document.createElement('div');
         summaryLeft.style.display = 'flex';
         summaryLeft.style.flexDirection = 'column';
         summaryLeft.style.gap = SPACING.XXS;
+        summaryLeft.style.minWidth = '0';
 
         const symbolRow = document.createElement('div');
         symbolRow.style.display = 'flex';
         symbolRow.style.alignItems = 'center';
         symbolRow.style.gap = SPACING.SM;
+        symbolRow.style.flexWrap = 'wrap';
 
         const symbolEl = document.createElement('strong');
         symbolEl.textContent = holding.symbol;
+        symbolEl.style.fontSize = '0.95rem';
         symbolRow.appendChild(symbolEl);
 
         const lotsBadge = document.createElement('span');
         lotsBadge.textContent = `${holding.lots.length} purchase${
           holding.lots.length !== 1 ? 's' : ''
         }`;
-        lotsBadge.style.fontSize = '0.75rem';
+        lotsBadge.style.fontSize = '0.7rem';
         lotsBadge.style.color = COLORS.TEXT_MUTED;
         lotsBadge.style.background = 'rgba(0,0,0,0.06)';
         lotsBadge.style.padding = `${SPACING.XXS} ${SPACING.SM}`;
@@ -315,12 +346,13 @@ function createInvestmentsList() {
         const displayName = (holding.name || '').trim();
         if (
           displayName &&
-          displayName.toUpperCase() !== String(holding.symbol || '').toUpperCase()
+          displayName.toUpperCase() !==
+            String(holding.symbol || '').toUpperCase()
         ) {
           const nameEl = document.createElement('div');
           nameEl.className = 'investment-holding-name';
           nameEl.textContent = displayName;
-          nameEl.style.fontSize = '0.85rem';
+          nameEl.style.fontSize = '0.75rem';
           nameEl.style.color = COLORS.TEXT_MUTED;
           summaryLeft.appendChild(nameEl);
         }
@@ -330,17 +362,18 @@ function createInvestmentsList() {
         summaryCenter.style.flexDirection = 'column';
         summaryCenter.style.gap = SPACING.XXS;
         summaryCenter.style.flex = '1';
-        summaryCenter.style.margin = `0 ${SPACING.MD}`;
+        summaryCenter.style.minWidth = '0';
 
         const costLine = document.createElement('div');
         costLine.textContent = `${formatShares(
           holding.totalShares
         )} shares @ ${CURRENCY_SYMBOL}${holding.averageCost.toFixed(2)} average cost`;
         costLine.style.fontWeight = '600';
+        costLine.style.fontSize = '0.85rem';
 
         const valueLine = document.createElement('div');
         valueLine.textContent = `Current value: ${CURRENCY_SYMBOL}${totalValue.toFixed(2)}`;
-        valueLine.style.fontSize = '0.9rem';
+        valueLine.style.fontSize = '0.75rem';
         valueLine.style.color = COLORS.TEXT_MUTED;
 
         summaryCenter.appendChild(costLine);
@@ -350,30 +383,78 @@ function createInvestmentsList() {
         summaryRight.style.display = 'flex';
         summaryRight.style.alignItems = 'center';
         summaryRight.style.gap = SPACING.SM;
+        summaryRight.style.flexShrink = '0';
 
         const gainEl = document.createElement('strong');
         gainEl.textContent = `${sign}${CURRENCY_SYMBOL}${Math.abs(gainLoss).toFixed(2)} (${sign}${gainPct.toFixed(1)}%)`;
         gainEl.style.color = gainLoss >= 0 ? COLORS.SUCCESS : COLORS.ERROR;
+        gainEl.style.fontSize = '0.85rem';
+        gainEl.style.whiteSpace = 'nowrap';
         summaryRight.appendChild(gainEl);
 
-        const chevron = document.createElement('span');
-        chevron.textContent = '▾';
-        chevron.style.fontSize = '0.8rem';
-        chevron.style.color = COLORS.TEXT_MUTED;
-        summaryRight.appendChild(chevron);
+        const deleteHoldingBtn = document.createElement('button');
+        deleteHoldingBtn.textContent = 'Delete';
+        deleteHoldingBtn.className =
+          'btn btn-ghost btn-small investment-lot-btn investment-delete-holding';
+        deleteHoldingBtn.type = 'button';
+        deleteHoldingBtn.title = `Delete all ${holding.symbol} purchases`;
+        deleteHoldingBtn.setAttribute(
+          'aria-label',
+          `Delete all ${holding.symbol} purchases`
+        );
+        deleteHoldingBtn.style.color = COLORS.ERROR;
+        deleteHoldingBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          const purchaseCount = holding.lots.length;
+          import('../../components/ConfirmDialog.js')
+            .then(({ ConfirmDialog }) => {
+              ConfirmDialog({
+                title: 'Delete Investment',
+                message: `Remove all ${purchaseCount} purchase${
+                  purchaseCount !== 1 ? 's' : ''
+                } of ${holding.symbol}${
+                  displayName &&
+                  displayName.toUpperCase() !==
+                    String(holding.symbol || '').toUpperCase()
+                    ? ` (${displayName})`
+                    : ''
+                }?`,
+                confirmText: 'Delete',
+                variant: 'danger',
+                onConfirm: async () => {
+                  try {
+                    const { StorageService } =
+                      await import('../../core/storage.js');
+                    StorageService.removeInvestment(holding.symbol);
+                    refreshInvestmentsList();
+                  } catch (err) {
+                    console.error('Failed to remove investment', err);
+                    showErrorToast(
+                      'Failed to remove investment. Please try again.'
+                    );
+                  }
+                },
+              });
+            })
+            .catch(err =>
+              console.error('Failed to load confirmation dialog:', err)
+            );
+        });
+        summaryRight.appendChild(deleteHoldingBtn);
 
         summary.appendChild(summaryLeft);
         summary.appendChild(summaryCenter);
         summary.appendChild(summaryRight);
 
-        // ---- Individual purchases (lots) underneath the holding ----
+        // ---- Individual purchases (lots) always visible under the holding ----
         const lotsContainer = document.createElement('div');
         lotsContainer.className = 'investment-lots';
         lotsContainer.style.display = 'grid';
         lotsContainer.style.gap = '0';
+        lotsContainer.style.overflowX = 'auto';
 
         const lotGridColumns =
-          'minmax(7rem, 1.4fr) minmax(3.5rem, 0.7fr) minmax(4.5rem, 0.9fr) minmax(4.5rem, 0.9fr) minmax(4.5rem, 0.9fr) minmax(5rem, 1fr) minmax(8.5rem, auto)';
+          'minmax(5.5rem, 1.2fr) minmax(2.75rem, 0.6fr) minmax(3.75rem, 0.8fr) minmax(3.75rem, 0.8fr) minmax(3.75rem, 0.8fr) minmax(4.25rem, 0.9fr) minmax(5.75rem, auto)';
         const lotAlignments = [
           'left',
           'right',
@@ -388,15 +469,15 @@ function createInvestmentsList() {
         lotsHeader.className = 'investment-lot-header';
         lotsHeader.style.display = 'grid';
         lotsHeader.style.gridTemplateColumns = lotGridColumns;
-        lotsHeader.style.gap = SPACING.SM;
+        lotsHeader.style.gap = SPACING.XS;
         lotsHeader.style.alignItems = 'center';
         lotsHeader.style.padding = `${SPACING.XS} ${SPACING.MD}`;
         lotsHeader.style.background = 'rgba(0,0,0,0.04)';
-        lotsHeader.style.fontSize = '0.75rem';
+        lotsHeader.style.fontSize = '0.65rem';
         lotsHeader.style.fontWeight = '600';
         lotsHeader.style.color = COLORS.TEXT_MUTED;
         lotsHeader.style.textTransform = 'uppercase';
-        lotsHeader.style.letterSpacing = '0.05em';
+        lotsHeader.style.letterSpacing = '0.04em';
         lotsHeader.style.borderBottom = `1px solid ${COLORS.BORDER}`;
         [
           'Date',
@@ -435,10 +516,11 @@ function createInvestmentsList() {
           row.className = 'investment-lot';
           row.style.display = 'grid';
           row.style.gridTemplateColumns = lotGridColumns;
-          row.style.gap = SPACING.SM;
+          row.style.gap = SPACING.XS;
           row.style.alignItems = 'center';
-          row.style.padding = `${SPACING.SM} ${SPACING.MD}`;
+          row.style.padding = `${SPACING.XS} ${SPACING.MD}`;
           row.style.borderBottom = `1px solid ${COLORS.BORDER}`;
+          row.style.minHeight = '2.25rem';
 
           const dateCell = document.createElement('div');
           dateCell.style.textAlign = 'left';
@@ -446,7 +528,7 @@ function createInvestmentsList() {
 
           const dateText = document.createElement('div');
           dateText.textContent = lotDate;
-          dateText.style.fontSize = '0.85rem';
+          dateText.style.fontSize = '0.75rem';
           dateText.style.color = COLORS.TEXT_MUTED;
           dateCell.appendChild(dateText);
 
@@ -455,37 +537,38 @@ function createInvestmentsList() {
             notesText.className = 'investment-lot-notes';
             notesText.textContent = lotNotes;
             notesText.title = lotNotes;
-            notesText.style.fontSize = '0.75rem';
+            notesText.style.fontSize = '0.7rem';
             notesText.style.color = COLORS.TEXT_MUTED;
             notesText.style.fontStyle = 'italic';
-            notesText.style.marginTop = '2px';
+            notesText.style.marginTop = '1px';
             notesText.style.overflow = 'hidden';
             notesText.style.textOverflow = 'ellipsis';
             notesText.style.whiteSpace = 'nowrap';
             dateCell.appendChild(notesText);
           }
 
+          const cellFont = '0.8rem';
           const sharesCell = document.createElement('div');
           sharesCell.textContent = formatShares(lotShares);
-          sharesCell.style.fontSize = '0.9rem';
+          sharesCell.style.fontSize = cellFont;
           sharesCell.style.textAlign = 'right';
           sharesCell.style.fontVariantNumeric = 'tabular-nums';
 
           const priceCell = document.createElement('div');
           priceCell.textContent = `${CURRENCY_SYMBOL}${lotPrice.toFixed(2)}`;
-          priceCell.style.fontSize = '0.9rem';
+          priceCell.style.fontSize = cellFont;
           priceCell.style.textAlign = 'right';
           priceCell.style.fontVariantNumeric = 'tabular-nums';
 
           const totalCell = document.createElement('div');
           totalCell.textContent = `${CURRENCY_SYMBOL}${lotTotal.toFixed(2)}`;
-          totalCell.style.fontSize = '0.9rem';
+          totalCell.style.fontSize = cellFont;
           totalCell.style.textAlign = 'right';
           totalCell.style.fontVariantNumeric = 'tabular-nums';
 
           const currentCell = document.createElement('div');
           currentCell.textContent = `${CURRENCY_SYMBOL}${lotCurrentValue.toFixed(2)}`;
-          currentCell.style.fontSize = '0.9rem';
+          currentCell.style.fontSize = cellFont;
           currentCell.style.textAlign = 'right';
           currentCell.style.fontVariantNumeric = 'tabular-nums';
 
@@ -494,29 +577,27 @@ function createInvestmentsList() {
             lotGain
           ).toFixed(2)}`;
           gainCell.style.color = lotGain >= 0 ? COLORS.SUCCESS : COLORS.ERROR;
-          gainCell.style.fontSize = '0.9rem';
+          gainCell.style.fontSize = cellFont;
           gainCell.style.textAlign = 'right';
           gainCell.style.fontVariantNumeric = 'tabular-nums';
 
           const actions = document.createElement('div');
+          actions.className = 'investment-lot-actions';
           actions.style.display = 'flex';
-          actions.style.gap = SPACING.XS;
+          actions.style.gap = SPACING.XXS;
           actions.style.justifyContent = 'flex-end';
+          actions.style.alignItems = 'center';
           actions.style.flexWrap = 'nowrap';
 
           const editBtn = document.createElement('button');
           editBtn.textContent = 'Edit';
-          editBtn.className = 'btn btn-ghost';
+          editBtn.className = 'btn btn-ghost btn-small investment-lot-btn';
           editBtn.type = 'button';
-          editBtn.style.fontSize = '0.85rem';
-          editBtn.style.padding = `${SPACING.XXS} ${SPACING.SM}`;
 
           const delBtn = document.createElement('button');
           delBtn.textContent = 'Delete';
-          delBtn.className = 'btn btn-ghost';
+          delBtn.className = 'btn btn-ghost btn-small investment-lot-btn';
           delBtn.type = 'button';
-          delBtn.style.fontSize = '0.85rem';
-          delBtn.style.padding = `${SPACING.XXS} ${SPACING.SM}`;
           delBtn.style.color = COLORS.ERROR;
 
           actions.appendChild(editBtn);
@@ -580,12 +661,6 @@ function createInvestmentsList() {
           });
 
           lotsContainer.appendChild(row);
-        });
-
-        summary.addEventListener('click', () => {
-          const expanded = lotsContainer.style.display !== 'none';
-          lotsContainer.style.display = expanded ? 'none' : 'grid';
-          chevron.textContent = expanded ? '▸' : '▾';
         });
 
         group.appendChild(summary);
@@ -804,7 +879,7 @@ export const InvestmentsSection = async (_chartRenderer, _activeCharts) => {
 
   section.appendChild(
     createUsageNote(
-      'Track manual investments here. Multiple purchases of the same symbol roll up into one holding showing the average cost per share — expand a holding to see its individual purchases. Edits sync to cloud; deletions remove from cloud.'
+      'Track manual investments here. Multiple purchases of the same symbol roll up into one holding showing the average cost per share, with each purchase listed underneath. Edits sync to cloud; deletions remove from cloud.'
     )
   );
 
@@ -824,13 +899,21 @@ export const InvestmentsSection = async (_chartRenderer, _activeCharts) => {
     // Non-critical — silently fail
   }
 
-  // Investments list first so the form can refresh it after save
+  // Keep button, form, and holdings in one tight stack so opening the form
+  // does not change a large empty gap above the list.
+  const workArea = document.createElement('div');
+  workArea.className = 'investments-work-area';
+  workArea.style.display = 'flex';
+  workArea.style.flexDirection = 'column';
+  workArea.style.gap = SPACING.MD;
+
   const { investmentsList, refreshInvestmentsList } = createInvestmentsList();
   investmentsList.className = 'investment-list';
 
   const { controls } = createInvestmentFormControls(refreshInvestmentsList);
-  section.appendChild(controls);
-  section.appendChild(investmentsList);
+  workArea.appendChild(controls);
+  workArea.appendChild(investmentsList);
+  section.appendChild(workArea);
 
   // Initial population of the list
   await refreshInvestmentsList();
@@ -853,7 +936,7 @@ export const InvestmentsSection = async (_chartRenderer, _activeCharts) => {
   stats.className = 'portfolio-stats';
   stats.style.display = 'flex';
   stats.style.gap = SPACING.MD;
-  stats.style.marginBottom = SPACING.MD;
+  stats.style.margin = '0';
   stats.style.flexWrap = 'wrap';
 
   if (portfolioSummaryFailed) {
@@ -866,7 +949,7 @@ export const InvestmentsSection = async (_chartRenderer, _activeCharts) => {
       'Portfolio totals are unavailable. Your holdings are unaffected — try refreshing to see the summary.';
     summaryError.style.color = COLORS.ERROR;
     stats.appendChild(summaryError);
-    section.insertBefore(stats, controls);
+    section.insertBefore(stats, workArea);
   } else {
     const totalVal = document.createElement('div');
     totalVal.className = 'total-portfolio-value';
@@ -884,16 +967,9 @@ export const InvestmentsSection = async (_chartRenderer, _activeCharts) => {
 
     stats.appendChild(totalVal);
     stats.appendChild(gainLoss);
-    section.insertBefore(stats, controls);
-
-    if (totalValue === 0) {
-      const placeholder = createPlaceholder(
-        'No Investments Yet',
-        'Start tracking your portfolio by adding your first investment holdings.',
-        '💰'
-      );
-      section.appendChild(placeholder);
-    }
+    section.insertBefore(stats, workArea);
+    // Empty portfolio messaging lives in the list (compact empty state) —
+    // do not also append a large placeholder below.
   }
 
   return section;

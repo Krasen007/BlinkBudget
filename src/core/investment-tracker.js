@@ -111,20 +111,24 @@ export class InvestmentTracker {
   }
 
   /**
-   * Remove an investment from the portfolio
+   * Remove an entire holding from the portfolio (all lots for the symbol)
    * @param {string} symbol - Investment symbol to remove
-   * @returns {boolean} True if removed, false if not found
+   * @returns {boolean} True if any lots were removed, false if not found
    */
   removeInvestment(symbol) {
     try {
-      const index = this.investments.findIndex(
-        inv => inv.symbol === symbol.toUpperCase()
+      if (!symbol || typeof symbol !== 'string') {
+        return false;
+      }
+      const target = symbol.toUpperCase().trim();
+      const before = this.investments.length;
+      this.investments = this.investments.filter(
+        inv => inv.symbol !== target
       );
-      if (index === -1) {
+      if (this.investments.length === before) {
         return false;
       }
 
-      this.investments.splice(index, 1);
       this._saveInvestments();
       return true;
     } catch (error) {
