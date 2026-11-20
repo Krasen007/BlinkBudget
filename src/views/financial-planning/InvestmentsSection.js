@@ -15,10 +15,20 @@ import { createEnhancedEmptyState } from '../../utils/enhanced-empty-states.js';
 import { ProgressiveEmptyState } from '../../components/ProgressiveEmptyState.js';
 import { showErrorToast } from '../../utils/toast-notifications.js';
 
+/** Local calendar date as YYYY-MM-DD for <input type="date"> */
+function todayLocalDate() {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 /**
  * Create investment form controls
+ * @param {Function} [onSaved] - Called after a successful save
  */
-function createInvestmentFormControls() {
+function createInvestmentFormControls(onSaved) {
   const controls = document.createElement('div');
   controls.style.display = 'flex';
   controls.style.gap = SPACING.SM;
@@ -29,6 +39,7 @@ function createInvestmentFormControls() {
   const addInvBtn = document.createElement('button');
   addInvBtn.textContent = 'Add Investment';
   addInvBtn.className = 'btn btn-primary add-investment-btn';
+  addInvBtn.type = 'button';
 
   const invForm = document.createElement('div');
   invForm.className = 'investment-form';
@@ -36,6 +47,7 @@ function createInvestmentFormControls() {
   invForm.style.gap = SPACING.SM;
   invForm.style.marginTop = SPACING.SM;
   invForm.style.flexWrap = 'wrap';
+  invForm.style.width = '100%';
 
   // Simple fields: symbol, shares, purchase price, current price, date, notes
   const fields = [
@@ -81,7 +93,10 @@ function createInvestmentFormControls() {
     input.placeholder = f.placeholder;
     input.step = f.step || '';
     if (f.required) input.required = true;
-    input.setAttribute('aria-label', f.placeholder);
+    input.setAttribute(
+      'aria-label',
+      f.placeholder || (f.name === 'purchaseDate' ? 'Purchase date' : f.name)
+    );
     inputs[f.name] = input;
     invForm.appendChild(input);
   });
@@ -99,21 +114,42 @@ function createInvestmentFormControls() {
   const saveInvBtn = document.createElement('button');
   saveInvBtn.textContent = 'Save Investment';
   saveInvBtn.className = 'btn btn-primary btn-save';
+  saveInvBtn.type = 'button';
   saveInvBtn.disabled = true;
 
   const cancelInvBtn = document.createElement('button');
   cancelInvBtn.textContent = 'Cancel';
   cancelInvBtn.className = 'btn btn-ghost';
-  cancelInvBtn.addEventListener('click', () => {
-    invForm.style.display = 'none';
-    // Reset form
-    Object.values(inputs).forEach(i => (i.value = ''));
-    notesInput.value = '';
-    saveInvBtn.disabled = true;
-  });
+  cancelInvBtn.type = 'button';
 
   invForm.appendChild(saveInvBtn);
   invForm.appendChild(cancelInvBtn);
+
+  function resetFormFields() {
+    Object.values(inputs).forEach(i => (i.value = ''));
+    notesInput.value = '';
+    saveInvBtn.disabled = true;
+  }
+
+  function closeForm() {
+    invForm.style.display = 'none';
+    addInvBtn.hidden = false;
+    resetFormFields();
+  }
+
+  function openForm() {
+    // Only open — never toggle closed. Closing is Cancel or a successful save,
+    // so a second click on Add Investment cannot look like a successful add.
+    if (invForm.style.display !== 'none') {
+      inputs.symbol.focus();
+      return;
+    }
+    invForm.style.display = 'flex';
+    addInvBtn.hidden = true;
+    inputs.purchaseDate.value = todayLocalDate();
+    validate();
+    inputs.symbol.focus();
+  }
 
   // Validation
   function validate() {
@@ -132,9 +168,8 @@ function createInvestmentFormControls() {
     input.addEventListener('change', validate);
   });
 
-  addInvBtn.addEventListener('click', () => {
-    invForm.style.display = invForm.style.display === 'none' ? 'flex' : 'none';
-  });
+  addInvBtn.addEventListener('click', openForm);
+  cancelInvBtn.addEventListener('click', closeForm);
 
   saveInvBtn.addEventListener('click', async () => {
     if (!validate()) return;
@@ -162,10 +197,10 @@ function createInvestmentFormControls() {
         }
       );
 
-      // Reset form
-      Object.values(inputs).forEach(i => (i.value = ''));
-      notesInput.value = '';
-      invForm.style.display = 'none';
+      closeForm();
+      if (typeof onSaved === 'function') {
+        await onSaved();
+      }
     } catch (err) {
       console.error('Failed to save investment', err);
       showErrorToast('Failed to save investment. Please try again.');
@@ -274,13 +309,21 @@ function createInvestmentsList() {
         lotsBadge.style.borderRadius = 'var(--radius-md)';
         symbolRow.appendChild(lotsBadge);
 
-        const nameEl = document.createElement('div');
-        nameEl.textContent = holding.name;
-        nameEl.style.fontSize = '0.85rem';
-        nameEl.style.color = COLORS.TEXT_MUTED;
-
         summaryLeft.appendChild(symbolRow);
-        summaryLeft.appendChild(nameEl);
+
+        // Only show a separate name when it differs from the symbol (avoids "TEST" / "TEST")
+        const displayName = (holding.name || '').trim();
+        if (
+          displayName &&
+          displayName.toUpperCase() !== String(holding.symbol || '').toUpperCase()
+        ) {
+          const nameEl = document.createElement('div');
+          nameEl.className = 'investment-holding-name';
+          nameEl.textContent = displayName;
+          nameEl.style.fontSize = '0.85rem';
+          nameEl.style.color = COLORS.TEXT_MUTED;
+          summaryLeft.appendChild(nameEl);
+        }
 
         const summaryCenter = document.createElement('div');
         summaryCenter.style.display = 'flex';
@@ -329,12 +372,24 @@ function createInvestmentsList() {
         lotsContainer.style.display = 'grid';
         lotsContainer.style.gap = '0';
 
+        const lotGridColumns =
+          'minmax(7rem, 1.4fr) minmax(3.5rem, 0.7fr) minmax(4.5rem, 0.9fr) minmax(4.5rem, 0.9fr) minmax(4.5rem, 0.9fr) minmax(5rem, 1fr) minmax(8.5rem, auto)';
+        const lotAlignments = [
+          'left',
+          'right',
+          'right',
+          'right',
+          'right',
+          'right',
+          'right',
+        ];
+
         const lotsHeader = document.createElement('div');
         lotsHeader.className = 'investment-lot-header';
         lotsHeader.style.display = 'grid';
-        lotsHeader.style.gridTemplateColumns =
-          '1.5fr 1fr 1.2fr 1.3fr 1.3fr 1.2fr 1.5fr';
+        lotsHeader.style.gridTemplateColumns = lotGridColumns;
         lotsHeader.style.gap = SPACING.SM;
+        lotsHeader.style.alignItems = 'center';
         lotsHeader.style.padding = `${SPACING.XS} ${SPACING.MD}`;
         lotsHeader.style.background = 'rgba(0,0,0,0.04)';
         lotsHeader.style.fontSize = '0.75rem';
@@ -348,12 +403,14 @@ function createInvestmentsList() {
           'Shares',
           'Price',
           'Total',
-          'Current value',
+          'Value',
           'Gain/Loss',
           'Actions',
-        ].forEach(label => {
+        ].forEach((label, index) => {
           const cell = document.createElement('div');
           cell.textContent = label;
+          cell.style.textAlign = lotAlignments[index];
+          cell.style.whiteSpace = 'nowrap';
           lotsHeader.appendChild(cell);
         });
         lotsContainer.appendChild(lotsHeader);
@@ -372,37 +429,65 @@ function createInvestmentsList() {
           const lotCurrentValue = Number(lot.lotValue) || 0;
           const lotGain = Number(lot.lotGainLoss) || 0;
           const lotSign = lotGain >= 0 ? '+' : '';
+          const lotNotes = (lot.notes || '').trim();
 
           const row = document.createElement('div');
           row.className = 'investment-lot';
           row.style.display = 'grid';
-          row.style.gridTemplateColumns =
-            '1.5fr 1fr 1.2fr 1.3fr 1.3fr 1.2fr 1.5fr';
+          row.style.gridTemplateColumns = lotGridColumns;
           row.style.gap = SPACING.SM;
           row.style.alignItems = 'center';
           row.style.padding = `${SPACING.SM} ${SPACING.MD}`;
           row.style.borderBottom = `1px solid ${COLORS.BORDER}`;
 
           const dateCell = document.createElement('div');
-          dateCell.textContent = lotDate;
-          dateCell.style.fontSize = '0.85rem';
-          dateCell.style.color = COLORS.TEXT_MUTED;
+          dateCell.style.textAlign = 'left';
+          dateCell.style.minWidth = '0';
+
+          const dateText = document.createElement('div');
+          dateText.textContent = lotDate;
+          dateText.style.fontSize = '0.85rem';
+          dateText.style.color = COLORS.TEXT_MUTED;
+          dateCell.appendChild(dateText);
+
+          if (lotNotes) {
+            const notesText = document.createElement('div');
+            notesText.className = 'investment-lot-notes';
+            notesText.textContent = lotNotes;
+            notesText.title = lotNotes;
+            notesText.style.fontSize = '0.75rem';
+            notesText.style.color = COLORS.TEXT_MUTED;
+            notesText.style.fontStyle = 'italic';
+            notesText.style.marginTop = '2px';
+            notesText.style.overflow = 'hidden';
+            notesText.style.textOverflow = 'ellipsis';
+            notesText.style.whiteSpace = 'nowrap';
+            dateCell.appendChild(notesText);
+          }
 
           const sharesCell = document.createElement('div');
           sharesCell.textContent = formatShares(lotShares);
           sharesCell.style.fontSize = '0.9rem';
+          sharesCell.style.textAlign = 'right';
+          sharesCell.style.fontVariantNumeric = 'tabular-nums';
 
           const priceCell = document.createElement('div');
           priceCell.textContent = `${CURRENCY_SYMBOL}${lotPrice.toFixed(2)}`;
           priceCell.style.fontSize = '0.9rem';
+          priceCell.style.textAlign = 'right';
+          priceCell.style.fontVariantNumeric = 'tabular-nums';
 
           const totalCell = document.createElement('div');
           totalCell.textContent = `${CURRENCY_SYMBOL}${lotTotal.toFixed(2)}`;
           totalCell.style.fontSize = '0.9rem';
+          totalCell.style.textAlign = 'right';
+          totalCell.style.fontVariantNumeric = 'tabular-nums';
 
           const currentCell = document.createElement('div');
           currentCell.textContent = `${CURRENCY_SYMBOL}${lotCurrentValue.toFixed(2)}`;
           currentCell.style.fontSize = '0.9rem';
+          currentCell.style.textAlign = 'right';
+          currentCell.style.fontVariantNumeric = 'tabular-nums';
 
           const gainCell = document.createElement('strong');
           gainCell.textContent = `${lotSign}${CURRENCY_SYMBOL}${Math.abs(
@@ -410,20 +495,26 @@ function createInvestmentsList() {
           ).toFixed(2)}`;
           gainCell.style.color = lotGain >= 0 ? COLORS.SUCCESS : COLORS.ERROR;
           gainCell.style.fontSize = '0.9rem';
+          gainCell.style.textAlign = 'right';
+          gainCell.style.fontVariantNumeric = 'tabular-nums';
 
           const actions = document.createElement('div');
           actions.style.display = 'flex';
           actions.style.gap = SPACING.XS;
+          actions.style.justifyContent = 'flex-end';
+          actions.style.flexWrap = 'nowrap';
 
           const editBtn = document.createElement('button');
           editBtn.textContent = 'Edit';
           editBtn.className = 'btn btn-ghost';
+          editBtn.type = 'button';
           editBtn.style.fontSize = '0.85rem';
           editBtn.style.padding = `${SPACING.XXS} ${SPACING.SM}`;
 
           const delBtn = document.createElement('button');
           delBtn.textContent = 'Delete';
           delBtn.className = 'btn btn-ghost';
+          delBtn.type = 'button';
           delBtn.style.fontSize = '0.85rem';
           delBtn.style.padding = `${SPACING.XXS} ${SPACING.SM}`;
           delBtn.style.color = COLORS.ERROR;
@@ -607,9 +698,16 @@ function createInvestmentsList() {
       (() => {
         const i = document.createElement('input');
         i.type = 'date';
-        i.value = lot.purchaseDate
-          ? new Date(lot.purchaseDate).toISOString().split('T')[0]
-          : '';
+        if (lot.purchaseDate) {
+          const d = new Date(lot.purchaseDate);
+          if (!Number.isNaN(d.getTime())) {
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            i.value = `${yyyy}-${mm}-${dd}`;
+          }
+        }
+        if (!i.value) i.value = todayLocalDate();
         i.style.cssText = inputStyle;
         return i;
       })()
@@ -726,13 +824,12 @@ export const InvestmentsSection = async (_chartRenderer, _activeCharts) => {
     // Non-critical — silently fail
   }
 
-  // Add investment controls
-  const { controls } = createInvestmentFormControls();
-  section.appendChild(controls);
-
-  // Add investments list
+  // Investments list first so the form can refresh it after save
   const { investmentsList, refreshInvestmentsList } = createInvestmentsList();
   investmentsList.className = 'investment-list';
+
+  const { controls } = createInvestmentFormControls(refreshInvestmentsList);
+  section.appendChild(controls);
   section.appendChild(investmentsList);
 
   // Initial population of the list

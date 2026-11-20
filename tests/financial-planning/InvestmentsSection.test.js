@@ -163,6 +163,7 @@ describe('InvestmentsSection', () => {
             currentPrice: 55000,
             lotValue: 55000,
             lotGainLoss: 0,
+            notes: 'First buy',
           },
           {
             id: 'lot-2',
@@ -197,6 +198,7 @@ describe('InvestmentsSection', () => {
 
     // Holding summary shows the average cost across the DCA purchases
     expect(section.textContent).toContain('BTC');
+    expect(section.textContent).toContain('Bitcoin');
     expect(section.textContent).toContain('3 purchases');
     expect(section.textContent).toContain('€58500.00'); // average cost
     expect(section.textContent).toContain('€175500.00'); // current value
@@ -206,5 +208,88 @@ describe('InvestmentsSection', () => {
     expect(section.textContent).toContain('€54500.00');
     expect(section.textContent).toContain('€66000.00');
     expect(section.querySelectorAll('.investment-lot').length).toBe(3);
+    expect(section.querySelector('.investment-lot-notes')?.textContent).toBe(
+      'First buy'
+    );
+  });
+
+  it('does not repeat the holding name when it matches the symbol', async () => {
+    StorageService.getHoldingsGrouped.mockReturnValue([
+      {
+        symbol: 'TEST',
+        name: 'TEST',
+        totalShares: 10,
+        totalInvested: 2,
+        averageCost: 0.2,
+        currentPrice: 5000,
+        currentValue: 50000,
+        totalGainLoss: 49998,
+        totalGainLossPercentage: 2499900,
+        lots: [
+          {
+            id: 'lot-1',
+            symbol: 'TEST',
+            name: 'TEST',
+            purchaseDate: new Date('2026-11-20'),
+            shares: 10,
+            purchasePrice: 0.2,
+            currentPrice: 5000,
+            lotValue: 50000,
+            lotGainLoss: 49998,
+            notes: 'Broker fee waived',
+          },
+        ],
+      },
+    ]);
+
+    const section = await InvestmentsSection(
+      mockChartRenderer,
+      mockActiveCharts
+    );
+
+    expect(section.querySelector('.investment-holding-name')).toBeNull();
+    expect(section.querySelector('.investment-lot-notes')?.textContent).toBe(
+      'Broker fee waived'
+    );
+    // Symbol still shown once in the summary
+    const summary = section.querySelector('.investment-summary');
+    expect(summary?.textContent.match(/TEST/g)?.length).toBe(1);
+  });
+
+  it('opens the add form with today as the default date and does not hide on a second Add click', async () => {
+    StorageService.getHoldingsGrouped.mockReturnValue([]);
+
+    const section = await InvestmentsSection(
+      mockChartRenderer,
+      mockActiveCharts
+    );
+
+    const addBtn = section.querySelector('.add-investment-btn');
+    const form = section.querySelector('.investment-form');
+    const dateInput = section.querySelector('#inv-date');
+
+    expect(addBtn).toBeTruthy();
+    expect(form.style.display).toBe('none');
+
+    addBtn.click();
+    expect(form.style.display).toBe('flex');
+    expect(addBtn.hidden).toBe(true);
+
+    const today = new Date();
+    const expected = `${today.getFullYear()}-${String(
+      today.getMonth() + 1
+    ).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    expect(dateInput.value).toBe(expected);
+
+    // Second click must not close the form (that looked like a successful save)
+    addBtn.click();
+    expect(form.style.display).toBe('flex');
+
+    const cancelBtn = Array.from(form.querySelectorAll('button')).find(
+      btn => btn.textContent === 'Cancel'
+    );
+    cancelBtn.click();
+    expect(form.style.display).toBe('none');
+    expect(addBtn.hidden).toBe(false);
   });
 });
