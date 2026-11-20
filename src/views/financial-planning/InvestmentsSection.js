@@ -75,7 +75,7 @@ function createInvestmentFormControls(onSaved) {
   invForm.style.flexWrap = 'wrap';
   invForm.style.width = '100%';
 
-  // Simple fields: symbol, name, shares, purchase price, current price, date, notes
+  // Simple fields: symbol, shares, purchase price, date, notes
   const fields = [
     {
       id: 'inv-symbol',
@@ -85,19 +85,12 @@ function createInvestmentFormControls(onSaved) {
       required: true,
     },
     {
-      id: 'inv-name',
-      name: 'name',
-      type: 'text',
-      placeholder: 'Name (optional)',
-      required: false,
-    },
-    {
       id: 'inv-shares',
       name: 'shares',
       type: 'number',
       placeholder: 'Shares',
       required: true,
-      step: '0.0001',
+      step: 'any',
     },
     {
       id: 'inv-price',
@@ -105,13 +98,6 @@ function createInvestmentFormControls(onSaved) {
       type: 'number',
       placeholder: 'Purchase Price',
       required: true,
-      step: '0.01',
-    },
-    {
-      id: 'inv-current',
-      name: 'currentPrice',
-      type: 'number',
-      placeholder: 'Current Price (optional)',
       step: '0.01',
     },
     { id: 'inv-date', name: 'purchaseDate', type: 'date', required: true },
@@ -158,10 +144,10 @@ function createInvestmentFormControls(onSaved) {
     resetFormFields();
   }
 
-  function openForm() {
+  function openForm(symbol = '') {
     // Only open — never toggle closed. Closing is Cancel or a successful save,
     // so a second click on Add Investment cannot look like a successful add.
-    if (invForm.style.display !== 'none') {
+    if (invForm.style.display !== 'none' && !symbol) {
       inputs.symbol.focus();
       return;
     }
@@ -169,9 +155,19 @@ function createInvestmentFormControls(onSaved) {
     addInvBtn.style.display = 'none';
     saveInvBtn.style.display = '';
     cancelInvBtn.style.display = '';
+    if (symbol) {
+      inputs.symbol.value = symbol;
+    }
     inputs.purchaseDate.value = todayLocalDate();
     validate();
-    inputs.symbol.focus();
+    if (symbol) {
+      inputs.shares.focus();
+    } else {
+      inputs.symbol.focus();
+    }
+    if (typeof controls.scrollIntoView === 'function') {
+      controls.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
   }
 
   // Validation
@@ -179,9 +175,8 @@ function createInvestmentFormControls(onSaved) {
     const symbol = inputs.symbol.value.trim().toUpperCase();
     const shares = Number(inputs.shares.value) || 0;
     const price = Number(inputs.purchasePrice.value) || 0;
-    const current = Number(inputs.currentPrice.value) || 0;
     const date = inputs.purchaseDate.value;
-    const valid = symbol && shares > 0 && price > 0 && current >= 0 && date;
+    const valid = symbol && shares > 0 && price > 0 && date;
     saveInvBtn.disabled = !valid;
     return valid;
   }
@@ -191,19 +186,16 @@ function createInvestmentFormControls(onSaved) {
     input.addEventListener('change', validate);
   });
 
-  addInvBtn.addEventListener('click', openForm);
+  addInvBtn.addEventListener('click', () => openForm());
   cancelInvBtn.addEventListener('click', closeForm);
 
   saveInvBtn.addEventListener('click', async () => {
     if (!validate()) return;
     const symbol = inputs.symbol.value.trim().toUpperCase();
-    const name = (inputs.name?.value || '').trim() || symbol;
+    const name = symbol;
     const shares = Number(inputs.shares.value);
     const purchasePrice = Number(inputs.purchasePrice.value);
-    const currentPrice =
-      inputs.currentPrice.value !== ''
-        ? Number(inputs.currentPrice.value)
-        : purchasePrice;
+    const currentPrice = purchasePrice;
     const purchaseDate = new Date(inputs.purchaseDate.value);
     const notes = notesInput.value.trim();
 
@@ -233,7 +225,7 @@ function createInvestmentFormControls(onSaved) {
 
   controls.appendChild(actionRow);
   controls.appendChild(invForm);
-  return { controls };
+  return { controls, openAddForm: openForm };
 }
 
 /**
@@ -244,14 +236,17 @@ function createInvestmentFormControls(onSaved) {
  * one holding showing the average cost per share, with each purchase listed
  * underneath.
  */
-function createInvestmentsList() {
+function createInvestmentsList(onAddHolding) {
   const investmentsList = document.createElement('div');
   investmentsList.className = 'investment-list';
   investmentsList.style.margin = '0';
 
   const formatShares = shares => {
     const s = Number(shares) || 0;
-    return Number.isInteger(s) ? s : s.toFixed(4);
+    return Number(s.toPrecision(14)).toLocaleString('en-US', {
+      maximumFractionDigits: 20,
+      useGrouping: false,
+    });
   };
 
   async function refreshInvestmentsList() {
@@ -283,16 +278,6 @@ function createInvestmentsList() {
       ul.style.gap = SPACING.XL;
 
       holdings.forEach(holding => {
-        const quotePrice =
-          holding.currentPrice > 0 ? holding.currentPrice : holding.averageCost;
-        const totalValue = holding.totalShares * quotePrice;
-        const gainLoss = totalValue - holding.totalInvested;
-        const gainPct =
-          holding.totalInvested > 0
-            ? (gainLoss / holding.totalInvested) * 100
-            : 0;
-        const sign = gainLoss >= 0 ? '+' : '';
-
         const group = document.createElement('li');
         group.className = 'investment-group';
         group.style.background = COLORS.SURFACE;
@@ -372,7 +357,7 @@ function createInvestmentsList() {
         costLine.style.fontSize = '0.85rem';
 
         const valueLine = document.createElement('div');
-        valueLine.textContent = `Current value: ${CURRENCY_SYMBOL}${totalValue.toFixed(2)}`;
+        valueLine.textContent = `Total: ${CURRENCY_SYMBOL}${holding.totalInvested.toFixed(2)}`;
         valueLine.style.fontSize = '0.75rem';
         valueLine.style.color = COLORS.TEXT_MUTED;
 
@@ -385,12 +370,23 @@ function createInvestmentsList() {
         summaryRight.style.gap = SPACING.SM;
         summaryRight.style.flexShrink = '0';
 
-        const gainEl = document.createElement('strong');
-        gainEl.textContent = `${sign}${CURRENCY_SYMBOL}${Math.abs(gainLoss).toFixed(2)} (${sign}${gainPct.toFixed(1)}%)`;
-        gainEl.style.color = gainLoss >= 0 ? COLORS.SUCCESS : COLORS.ERROR;
-        gainEl.style.fontSize = '0.85rem';
-        gainEl.style.whiteSpace = 'nowrap';
-        summaryRight.appendChild(gainEl);
+        const addHoldingBtn = document.createElement('button');
+        addHoldingBtn.textContent = 'Add';
+        addHoldingBtn.className =
+          'btn btn-ghost btn-small investment-lot-btn investment-add-lot';
+        addHoldingBtn.type = 'button';
+        addHoldingBtn.title = `Add ${holding.symbol} purchase`;
+        addHoldingBtn.setAttribute(
+          'aria-label',
+          `Add ${holding.symbol} purchase`
+        );
+        addHoldingBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          if (typeof onAddHolding === 'function') {
+            onAddHolding(holding.symbol);
+          }
+        });
+        summaryRight.appendChild(addHoldingBtn);
 
         const deleteHoldingBtn = document.createElement('button');
         deleteHoldingBtn.textContent = 'Delete';
@@ -454,16 +450,8 @@ function createInvestmentsList() {
         lotsContainer.style.overflowX = 'auto';
 
         const lotGridColumns =
-          'minmax(5.5rem, 1.2fr) minmax(2.75rem, 0.6fr) minmax(3.75rem, 0.8fr) minmax(3.75rem, 0.8fr) minmax(3.75rem, 0.8fr) minmax(4.25rem, 0.9fr) minmax(5.75rem, auto)';
-        const lotAlignments = [
-          'left',
-          'right',
-          'right',
-          'right',
-          'right',
-          'right',
-          'right',
-        ];
+          'minmax(6rem, 1.2fr) minmax(3.5rem, 0.8fr) minmax(4rem, 0.9fr) minmax(4.5rem, 1fr) minmax(5.75rem, auto)';
+        const lotAlignments = ['left', 'right', 'right', 'right', 'right'];
 
         const lotsHeader = document.createElement('div');
         lotsHeader.className = 'investment-lot-header';
@@ -479,21 +467,15 @@ function createInvestmentsList() {
         lotsHeader.style.textTransform = 'uppercase';
         lotsHeader.style.letterSpacing = '0.04em';
         lotsHeader.style.borderBottom = `1px solid ${COLORS.BORDER}`;
-        [
-          'Date',
-          'Shares',
-          'Price',
-          'Total',
-          'Value',
-          'Gain/Loss',
-          'Actions',
-        ].forEach((label, index) => {
-          const cell = document.createElement('div');
-          cell.textContent = label;
-          cell.style.textAlign = lotAlignments[index];
-          cell.style.whiteSpace = 'nowrap';
-          lotsHeader.appendChild(cell);
-        });
+        ['Date', 'Shares', 'Price', 'Total', 'Actions'].forEach(
+          (label, index) => {
+            const cell = document.createElement('div');
+            cell.textContent = label;
+            cell.style.textAlign = lotAlignments[index];
+            cell.style.whiteSpace = 'nowrap';
+            lotsHeader.appendChild(cell);
+          }
+        );
         lotsContainer.appendChild(lotsHeader);
 
         holding.lots.forEach(lot => {
@@ -507,9 +489,6 @@ function createInvestmentsList() {
           const lotShares = Number(lot.shares) || 0;
           const lotPrice = Number(lot.purchasePrice) || 0;
           const lotTotal = lotShares * lotPrice;
-          const lotCurrentValue = Number(lot.lotValue) || 0;
-          const lotGain = Number(lot.lotGainLoss) || 0;
-          const lotSign = lotGain >= 0 ? '+' : '';
           const lotNotes = (lot.notes || '').trim();
 
           const row = document.createElement('div');
@@ -540,7 +519,7 @@ function createInvestmentsList() {
             notesText.style.fontSize = '0.7rem';
             notesText.style.color = COLORS.TEXT_MUTED;
             notesText.style.fontStyle = 'italic';
-            notesText.style.marginTop = '1px';
+            notesText.style.marginTop = SPACING.XXS;
             notesText.style.overflow = 'hidden';
             notesText.style.textOverflow = 'ellipsis';
             notesText.style.whiteSpace = 'nowrap';
@@ -565,21 +544,6 @@ function createInvestmentsList() {
           totalCell.style.fontSize = cellFont;
           totalCell.style.textAlign = 'right';
           totalCell.style.fontVariantNumeric = 'tabular-nums';
-
-          const currentCell = document.createElement('div');
-          currentCell.textContent = `${CURRENCY_SYMBOL}${lotCurrentValue.toFixed(2)}`;
-          currentCell.style.fontSize = cellFont;
-          currentCell.style.textAlign = 'right';
-          currentCell.style.fontVariantNumeric = 'tabular-nums';
-
-          const gainCell = document.createElement('strong');
-          gainCell.textContent = `${lotSign}${CURRENCY_SYMBOL}${Math.abs(
-            lotGain
-          ).toFixed(2)}`;
-          gainCell.style.color = lotGain >= 0 ? COLORS.SUCCESS : COLORS.ERROR;
-          gainCell.style.fontSize = cellFont;
-          gainCell.style.textAlign = 'right';
-          gainCell.style.fontVariantNumeric = 'tabular-nums';
 
           const actions = document.createElement('div');
           actions.className = 'investment-lot-actions';
@@ -607,8 +571,6 @@ function createInvestmentsList() {
           row.appendChild(sharesCell);
           row.appendChild(priceCell);
           row.appendChild(totalCell);
-          row.appendChild(currentCell);
-          row.appendChild(gainCell);
           row.appendChild(actions);
 
           // Edit this purchase lot
@@ -721,24 +683,13 @@ function createInvestmentsList() {
         return i;
       })()
     );
-    const nameFld = field(
-      'Name',
-      (() => {
-        const i = document.createElement('input');
-        i.type = 'text';
-        i.value = lot.name || lot.symbol;
-        i.placeholder = 'Optional';
-        i.style.cssText = inputStyle;
-        return i;
-      })()
-    );
     const sharesFld = field(
       'Shares',
       (() => {
         const i = document.createElement('input');
         i.type = 'number';
         i.value = lot.shares;
-        i.step = '0.0001';
+        i.step = 'any';
         i.placeholder = 'Number of shares';
         i.style.cssText = inputStyle;
         return i;
@@ -752,18 +703,6 @@ function createInvestmentsList() {
         i.value = lot.purchasePrice;
         i.step = '0.01';
         i.placeholder = 'Price per share';
-        i.style.cssText = inputStyle;
-        return i;
-      })()
-    );
-    const currentFld = field(
-      'Current Price',
-      (() => {
-        const i = document.createElement('input');
-        i.type = 'number';
-        i.value = lot.currentPrice ?? lot.purchasePrice;
-        i.step = '0.01';
-        i.placeholder = 'Optional';
         i.style.cssText = inputStyle;
         return i;
       })()
@@ -838,13 +777,10 @@ function createInvestmentsList() {
         const { StorageService } = await import('../../core/storage.js');
         StorageService.updateInvestment(lot.id, {
           symbol: newSymbol,
-          name: nameFld.value.trim() || newSymbol,
+          name: newSymbol,
           shares: Number(sharesFld.value) || 0,
           purchasePrice: Number(priceFld.value) || 0,
-          currentPrice:
-            currentFld.value !== ''
-              ? Number(currentFld.value)
-              : Number(priceFld.value) || 0,
+          currentPrice: Number(priceFld.value) || 0,
           purchaseDate: dateFld.value
             ? new Date(dateFld.value)
             : lot.purchaseDate,
@@ -907,10 +843,20 @@ export const InvestmentsSection = async (_chartRenderer, _activeCharts) => {
   workArea.style.flexDirection = 'column';
   workArea.style.gap = SPACING.MD;
 
-  const { investmentsList, refreshInvestmentsList } = createInvestmentsList();
+  let onAddHoldingCallback = null;
+  const { investmentsList, refreshInvestmentsList } = createInvestmentsList(
+    symbol => {
+      if (typeof onAddHoldingCallback === 'function') {
+        onAddHoldingCallback(symbol);
+      }
+    }
+  );
   investmentsList.className = 'investment-list';
 
-  const { controls } = createInvestmentFormControls(refreshInvestmentsList);
+  const { controls, openAddForm } = createInvestmentFormControls(
+    refreshInvestmentsList
+  );
+  onAddHoldingCallback = openAddForm;
   workArea.appendChild(controls);
   workArea.appendChild(investmentsList);
   section.appendChild(workArea);
@@ -918,15 +864,13 @@ export const InvestmentsSection = async (_chartRenderer, _activeCharts) => {
   // Initial population of the list
   await refreshInvestmentsList();
 
-  // Add total portfolio value and gain/loss
+  // Add total portfolio value
   let totalValue = 0;
-  let totalGainLoss = 0;
   let portfolioSummaryFailed = false;
   try {
     const { StorageService } = await import('../../core/storage.js');
     const summary = StorageService.calculatePortfolioSummary();
     totalValue = summary.totalValue || 0;
-    totalGainLoss = summary.gainsLosses?.totalGainLoss || 0;
   } catch (err) {
     console.error('Error fetching portfolio summary:', err);
     portfolioSummaryFailed = true;
@@ -959,14 +903,7 @@ export const InvestmentsSection = async (_chartRenderer, _activeCharts) => {
     valueSpan.textContent = `${CURRENCY_SYMBOL}${totalValue.toFixed(2)}`;
     totalVal.appendChild(valueSpan);
 
-    const gainLoss = document.createElement('div');
-    gainLoss.className = 'total-gain-loss';
-    const sign = totalGainLoss >= 0 ? '+' : '';
-    gainLoss.textContent = `Gain/Loss: ${sign}${CURRENCY_SYMBOL}${Math.abs(totalGainLoss).toFixed(2)}`;
-    gainLoss.style.color = totalGainLoss >= 0 ? COLORS.SUCCESS : COLORS.ERROR;
-
     stats.appendChild(totalVal);
-    stats.appendChild(gainLoss);
     section.insertBefore(stats, workArea);
     // Empty portfolio messaging lives in the list (compact empty state) —
     // do not also append a large placeholder below.

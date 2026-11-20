@@ -61,7 +61,7 @@ export class InvestmentTracker {
         id: generateId(),
         symbol: symbol.toUpperCase().trim(),
         name,
-        shares: Math.round(shares * 10000) / 10000, // Round to 4 decimal places
+        shares: Number(shares),
         purchasePrice: Math.round(purchasePrice * 100) / 100, // Round to 2 decimal places
         currentPrice: Math.round(currentPrice * 100) / 100, // Round to 2 decimal places
         purchaseDate: new Date(purchaseDate),
@@ -122,9 +122,7 @@ export class InvestmentTracker {
       }
       const target = symbol.toUpperCase().trim();
       const before = this.investments.length;
-      this.investments = this.investments.filter(
-        inv => inv.symbol !== target
-      );
+      this.investments = this.investments.filter(inv => inv.symbol !== target);
       if (this.investments.length === before) {
         return false;
       }
@@ -267,7 +265,7 @@ export class InvestmentTracker {
       return {
         symbol: holding.symbol,
         name: holding.name,
-        totalShares: Math.round(holding.totalShares * 10000) / 10000,
+        totalShares: Number(holding.totalShares.toPrecision(14)),
         totalInvested: Math.round(holding.totalInvested * 100) / 100,
         averageCost: Math.round(averageCost * 100) / 100,
         currentPrice: Math.round(currentPrice * 100) / 100,

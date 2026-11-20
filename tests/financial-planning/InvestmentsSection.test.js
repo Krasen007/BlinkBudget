@@ -258,29 +258,29 @@ describe('InvestmentsSection', () => {
     expect(summary?.textContent.match(/TEST/g)?.length).toBe(1);
   });
 
-  it('shows a name field when adding an investment and a holding-level delete button', async () => {
+  it('does not show name or current price fields, and shows holding-level add and delete buttons', async () => {
     StorageService.getHoldingsGrouped.mockReturnValue([
       {
         symbol: 'TEST',
-        name: 'Test Fund',
-        totalShares: 10,
+        name: 'TEST',
+        totalShares: 10.12345678,
         totalInvested: 2,
         averageCost: 0.2,
-        currentPrice: 5000,
-        currentValue: 50000,
-        totalGainLoss: 49998,
-        totalGainLossPercentage: 2499900,
+        currentPrice: 0.2,
+        currentValue: 2,
+        totalGainLoss: 0,
+        totalGainLossPercentage: 0,
         lots: [
           {
             id: 'lot-1',
             symbol: 'TEST',
-            name: 'Test Fund',
+            name: 'TEST',
             purchaseDate: new Date('2026-11-20'),
-            shares: 10,
+            shares: 10.12345678,
             purchasePrice: 0.2,
-            currentPrice: 5000,
-            lotValue: 50000,
-            lotGainLoss: 49998,
+            currentPrice: 0.2,
+            lotValue: 2,
+            lotGainLoss: 0,
           },
         ],
       },
@@ -294,13 +294,29 @@ describe('InvestmentsSection', () => {
     const addBtn = section.querySelector('.add-investment-btn');
     addBtn.click();
 
-    const nameInput = section.querySelector('#inv-name');
-    expect(nameInput).toBeTruthy();
-    expect(nameInput.placeholder).toMatch(/name/i);
+    // Name and Current Price fields removed
+    expect(section.querySelector('#inv-name')).toBeNull();
+    expect(section.querySelector('#inv-current')).toBeNull();
+
+    // Gain/Loss elements removed
+    expect(section.querySelector('.total-gain-loss')).toBeNull();
+
+    // Holding-level buttons
+    const addHolding = section.querySelector('.investment-add-lot');
+    expect(addHolding).toBeTruthy();
+    expect(addHolding.textContent).toBe('Add');
 
     const deleteHolding = section.querySelector('.investment-delete-holding');
     expect(deleteHolding).toBeTruthy();
     expect(deleteHolding.textContent).toBe('Delete');
+
+    // Shares display shows all decimal places without rounding
+    expect(section.textContent).toContain('10.12345678');
+
+    // Clicking holding-level Add button pre-fills the symbol in the add form
+    addHolding.click();
+    const symbolInput = section.querySelector('#inv-symbol');
+    expect(symbolInput.value).toBe('TEST');
   });
 
   it('opens the add form with today as the default date and does not hide on a second Add click', async () => {

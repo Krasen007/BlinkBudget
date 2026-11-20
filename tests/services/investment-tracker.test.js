@@ -117,4 +117,18 @@ describe('InvestmentTracker', () => {
     expect(remaining[0].symbol).toBe('BBB');
     expect(tracker.removeInvestment('AAA')).toBe(false);
   });
+
+  it('preserves all decimal places for shares without rounding', () => {
+    const inv = tracker.addInvestment(
+      'ETH',
+      0.12345678,
+      3000,
+      new Date('2024-01-01')
+    );
+    expect(inv.shares).toBe(0.12345678);
+
+    const holdings = tracker.getHoldingsGrouped();
+    const eth = holdings.find(h => h.symbol === 'ETH');
+    expect(eth.totalShares).toBe(0.12345678);
+  });
 });
