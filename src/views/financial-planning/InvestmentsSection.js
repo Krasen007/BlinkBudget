@@ -13,6 +13,7 @@ import {
 import { createEnhancedEmptyState } from '../../utils/enhanced-empty-states.js';
 import { ProgressiveEmptyState } from '../../components/ProgressiveEmptyState.js';
 import { showErrorToast } from '../../utils/toast-notifications.js';
+import { StorageService } from '../../core/storage.js';
 
 /** Local calendar date as YYYY-MM-DD for <input type="date"> */
 function todayLocalDate() {
@@ -124,6 +125,7 @@ function createInvestmentFormControls(onSaved) {
     {
       id: 'inv-symbol',
       name: 'symbol',
+      label: 'Symbol',
       type: 'text',
       placeholder: 'Symbol (e.g. AAPL)',
       required: true,
@@ -131,6 +133,7 @@ function createInvestmentFormControls(onSaved) {
     {
       id: 'inv-shares',
       name: 'shares',
+      label: 'Shares',
       type: 'number',
       placeholder: 'Shares',
       required: true,
@@ -139,30 +142,65 @@ function createInvestmentFormControls(onSaved) {
     {
       id: 'inv-price',
       name: 'purchasePrice',
+      label: 'Purchase Price',
       type: 'number',
       placeholder: 'Purchase Price',
       required: true,
       step: '0.01',
     },
-    { id: 'inv-date', name: 'purchaseDate', type: 'date', required: true },
+    {
+      id: 'inv-date',
+      name: 'purchaseDate',
+      label: 'Purchase Date',
+      type: 'date',
+      required: true,
+    },
   ];
 
   const inputs = {};
   fields.forEach(f => {
+    const fieldWrapper = document.createElement('div');
+    fieldWrapper.className = 'investment-form-field';
+    fieldWrapper.style.display = 'flex';
+    fieldWrapper.style.flexDirection = 'column';
+    fieldWrapper.style.gap = SPACING.XXS;
+    fieldWrapper.style.flex = '1 1 9rem';
+
+    const label = document.createElement('label');
+    label.setAttribute('for', f.id);
+    label.textContent = f.label;
+    label.style.fontSize = 'var(--font-size-xs)';
+    label.style.fontWeight = '500';
+    label.style.color = COLORS.TEXT_MUTED;
+
     const input = document.createElement('input');
     input.id = f.id;
     input.name = f.name;
     input.type = f.type;
-    input.placeholder = f.placeholder;
+    input.placeholder = f.placeholder || '';
     input.step = f.step || '';
     if (f.required) input.required = true;
-    input.setAttribute(
-      'aria-label',
-      f.placeholder || (f.name === 'purchaseDate' ? 'Purchase date' : f.name)
-    );
+    input.setAttribute('aria-label', f.label);
     inputs[f.name] = input;
-    invForm.appendChild(input);
+
+    fieldWrapper.appendChild(label);
+    fieldWrapper.appendChild(input);
+    invForm.appendChild(fieldWrapper);
   });
+
+  const notesWrapper = document.createElement('div');
+  notesWrapper.className = 'investment-form-field';
+  notesWrapper.style.display = 'flex';
+  notesWrapper.style.flexDirection = 'column';
+  notesWrapper.style.gap = SPACING.XXS;
+  notesWrapper.style.width = '100%';
+
+  const notesLabel = document.createElement('label');
+  notesLabel.setAttribute('for', 'inv-notes');
+  notesLabel.textContent = 'Notes (optional)';
+  notesLabel.style.fontSize = 'var(--font-size-xs)';
+  notesLabel.style.fontWeight = '500';
+  notesLabel.style.color = COLORS.TEXT_MUTED;
 
   const notesInput = document.createElement('textarea');
   notesInput.id = 'inv-notes';
@@ -171,8 +209,11 @@ function createInvestmentFormControls(onSaved) {
   notesInput.rows = 2;
   notesInput.style.width = '100%';
   notesInput.style.resize = 'vertical';
-  notesInput.setAttribute('aria-label', 'Notes');
-  invForm.appendChild(notesInput);
+  notesInput.setAttribute('aria-label', 'Notes (optional)');
+
+  notesWrapper.appendChild(notesLabel);
+  notesWrapper.appendChild(notesInput);
+  invForm.appendChild(notesWrapper);
 
   function resetFormFields() {
     Object.values(inputs).forEach(i => (i.value = ''));
@@ -244,7 +285,6 @@ function createInvestmentFormControls(onSaved) {
     const notes = notesInput.value.trim();
 
     try {
-      const { StorageService } = await import('../../core/storage.js');
       StorageService.addInvestment(
         symbol,
         shares,
@@ -297,7 +337,6 @@ function createInvestmentsList(onAddHolding) {
     investmentsList.innerHTML = '';
     let holdings;
     try {
-      const { StorageService } = await import('../../core/storage.js');
       holdings = StorageService.getHoldingsGrouped() || [];
 
       if (!holdings.length) {
@@ -387,6 +426,7 @@ function createInvestmentsList(onAddHolding) {
         }
 
         const summaryCenter = document.createElement('div');
+        summaryCenter.className = 'investment-summary-center';
         summaryCenter.style.display = 'flex';
         summaryCenter.style.flexDirection = 'column';
         summaryCenter.style.gap = SPACING.XXS;
@@ -394,13 +434,16 @@ function createInvestmentsList(onAddHolding) {
         summaryCenter.style.minWidth = '0';
 
         const costLine = document.createElement('div');
+        costLine.className = 'investment-summary-cost';
         costLine.textContent = `${formatShares(
           holding.totalShares
         )} shares @ ${CURRENCY_SYMBOL}${holding.averageCost.toFixed(2)} average cost`;
         costLine.style.fontWeight = '600';
         costLine.style.fontSize = '0.85rem';
+        costLine.style.overflowWrap = 'anywhere';
 
         const valueLine = document.createElement('div');
+        valueLine.className = 'investment-summary-total';
         valueLine.textContent = `Total: ${CURRENCY_SYMBOL}${holding.totalInvested.toFixed(2)}`;
         valueLine.style.fontSize = '0.75rem';
         valueLine.style.color = COLORS.TEXT_MUTED;
@@ -463,8 +506,6 @@ function createInvestmentsList(onAddHolding) {
                 variant: 'danger',
                 onConfirm: async () => {
                   try {
-                    const { StorageService } =
-                      await import('../../core/storage.js');
                     StorageService.removeInvestment(holding.symbol);
                     refreshInvestmentsList();
                   } catch (err) {
@@ -498,15 +539,12 @@ function createInvestmentsList(onAddHolding) {
         lotsContainer.style.gap = '0';
         lotsContainer.style.overflowX = 'auto';
 
-        const lotGridColumns =
-          'minmax(6rem, 1.2fr) minmax(3.5rem, 0.8fr) minmax(4rem, 0.9fr) minmax(4.5rem, 1fr) minmax(5.75rem, auto)';
         const lotAlignments = ['left', 'right', 'right', 'right', 'right'];
 
         const lotsHeader = document.createElement('div');
         lotsHeader.className = 'investment-lot-header';
         lotsHeader.setAttribute('role', 'row');
         lotsHeader.style.display = 'grid';
-        lotsHeader.style.gridTemplateColumns = lotGridColumns;
         lotsHeader.style.gap = SPACING.XS;
         lotsHeader.style.alignItems = 'center';
         lotsHeader.style.padding = `${SPACING.XS} ${SPACING.MD}`;
@@ -542,7 +580,6 @@ function createInvestmentsList(onAddHolding) {
           row.className = 'investment-lot';
           row.setAttribute('role', 'row');
           row.style.display = 'grid';
-          row.style.gridTemplateColumns = lotGridColumns;
           row.style.gap = SPACING.XS;
           row.style.alignItems = 'center';
           row.style.padding = `${SPACING.XS} ${SPACING.MD}`;
@@ -550,11 +587,18 @@ function createInvestmentsList(onAddHolding) {
           row.style.minHeight = '2.25rem';
 
           const dateCell = document.createElement('div');
+          dateCell.className = 'investment-lot-date';
           dateCell.setAttribute('role', 'cell');
+          dateCell.setAttribute('data-label', 'Date');
           dateCell.style.textAlign = 'left';
           dateCell.style.minWidth = '0';
 
-          const dateText = document.createElement('div');
+          const dateLabel = document.createElement('span');
+          dateLabel.className = 'investment-lot-cell-label';
+          dateLabel.textContent = 'Date: ';
+          dateCell.appendChild(dateLabel);
+
+          const dateText = document.createElement('span');
           dateText.textContent = lotDate;
           dateText.style.fontSize = '0.75rem';
           dateText.style.color = COLORS.TEXT_MUTED;
@@ -577,34 +621,77 @@ function createInvestmentsList(onAddHolding) {
 
           const cellFont = '0.8rem';
           const sharesCell = document.createElement('div');
+          sharesCell.className = 'investment-lot-shares';
           sharesCell.setAttribute('role', 'cell');
-          sharesCell.textContent = formatShares(lotShares);
+          sharesCell.setAttribute('data-label', 'Shares');
           sharesCell.style.fontSize = cellFont;
           sharesCell.style.textAlign = 'right';
           sharesCell.style.fontVariantNumeric = 'tabular-nums';
+          sharesCell.style.whiteSpace = 'nowrap';
+
+          const sharesLabel = document.createElement('span');
+          sharesLabel.className = 'investment-lot-cell-label';
+          sharesLabel.textContent = 'Shares: ';
+          sharesCell.appendChild(sharesLabel);
+
+          const sharesValue = document.createElement('span');
+          sharesValue.className = 'investment-lot-cell-value';
+          sharesValue.textContent = formatShares(lotShares);
+          sharesCell.appendChild(sharesValue);
 
           const priceCell = document.createElement('div');
+          priceCell.className = 'investment-lot-price';
           priceCell.setAttribute('role', 'cell');
-          priceCell.textContent = `${CURRENCY_SYMBOL}${lotPrice.toFixed(2)}`;
+          priceCell.setAttribute('data-label', 'Price');
           priceCell.style.fontSize = cellFont;
           priceCell.style.textAlign = 'right';
           priceCell.style.fontVariantNumeric = 'tabular-nums';
+          priceCell.style.whiteSpace = 'nowrap';
+
+          const priceLabel = document.createElement('span');
+          priceLabel.className = 'investment-lot-cell-label';
+          priceLabel.textContent = 'Price: ';
+          priceCell.appendChild(priceLabel);
+
+          const priceValue = document.createElement('span');
+          priceValue.className = 'investment-lot-cell-value';
+          priceValue.textContent = `${CURRENCY_SYMBOL}${lotPrice.toFixed(2)}`;
+          priceCell.appendChild(priceValue);
 
           const totalCell = document.createElement('div');
+          totalCell.className = 'investment-lot-total';
           totalCell.setAttribute('role', 'cell');
-          totalCell.textContent = `${CURRENCY_SYMBOL}${lotTotal.toFixed(2)}`;
+          totalCell.setAttribute('data-label', 'Total');
           totalCell.style.fontSize = cellFont;
           totalCell.style.textAlign = 'right';
           totalCell.style.fontVariantNumeric = 'tabular-nums';
+          totalCell.style.whiteSpace = 'nowrap';
+
+          const totalLabel = document.createElement('span');
+          totalLabel.className = 'investment-lot-cell-label';
+          totalLabel.textContent = 'Total: ';
+          totalCell.appendChild(totalLabel);
+
+          const totalValue = document.createElement('span');
+          totalValue.className = 'investment-lot-cell-value';
+          totalValue.textContent = `${CURRENCY_SYMBOL}${lotTotal.toFixed(2)}`;
+          totalCell.appendChild(totalValue);
 
           const actions = document.createElement('div');
           actions.className = 'investment-lot-actions';
           actions.setAttribute('role', 'cell');
+          actions.setAttribute('data-label', 'Actions');
           actions.style.display = 'flex';
           actions.style.gap = SPACING.XXS;
           actions.style.justifyContent = 'flex-end';
           actions.style.alignItems = 'center';
           actions.style.flexWrap = 'nowrap';
+
+          const actionsLabel = document.createElement('span');
+          actionsLabel.className =
+            'investment-lot-cell-label investment-lot-actions-label';
+          actionsLabel.textContent = 'Actions';
+          actions.appendChild(actionsLabel);
 
           const editBtn = document.createElement('button');
           editBtn.textContent = 'Edit';
@@ -665,8 +752,6 @@ function createInvestmentsList(onAddHolding) {
                   variant: 'danger',
                   onConfirm: async () => {
                     try {
-                      const { StorageService } =
-                        await import('../../core/storage.js');
                       StorageService.removeInvestmentById(lot.id);
                       refreshInvestmentsList();
                     } catch (err) {
@@ -718,7 +803,11 @@ function createInvestmentsList(onAddHolding) {
     const labelStyle = `font-size:var(--font-size-xs);font-weight:500;color:${COLORS.TEXT_MUTED};margin-bottom:2px;`;
     const fieldPrefix = `edit-lot-${String(lot.id || 'investment').replace(/[^a-zA-Z0-9_-]+/g, '-')}-`;
 
-    const field = (labelText, input) => {
+    const field = (labelText, input, idSuffix) => {
+      const fieldId =
+        fieldPrefix +
+        (idSuffix || labelText.toLowerCase().replace(/\s+/g, '-'));
+      input.id = fieldId;
       const wrapper = document.createElement('div');
       wrapper.style.display = 'flex';
       wrapper.style.flexDirection = 'column';
@@ -726,7 +815,7 @@ function createInvestmentsList(onAddHolding) {
       const label = document.createElement('label');
       label.textContent = labelText;
       label.style.cssText = labelStyle;
-      label.setAttribute('for', fieldPrefix + labelText.toLowerCase());
+      label.setAttribute('for', fieldId);
       wrapper.appendChild(label);
       wrapper.appendChild(input);
       form.appendChild(wrapper);
@@ -829,7 +918,6 @@ function createInvestmentsList(onAddHolding) {
         return;
       }
       try {
-        const { StorageService } = await import('../../core/storage.js');
         StorageService.updateInvestment(lot.id, {
           symbol: newSymbol,
           name: newSymbol,
@@ -874,8 +962,7 @@ export const InvestmentsSection = async (_chartRenderer, _activeCharts) => {
 
   // Progressive unlock message — connects advanced features to the core logging habit
   try {
-    const { StorageService: SS } = await import('../../core/storage.js');
-    const txCount = (SS.getAll() || []).length;
+    const txCount = (StorageService.getAll() || []).length;
     const unlockCard = ProgressiveEmptyState({
       section: 'investments',
       transactionCount: txCount,
@@ -921,7 +1008,6 @@ export const InvestmentsSection = async (_chartRenderer, _activeCharts) => {
   let totalValue = 0;
   let portfolioSummaryFailed = false;
   try {
-    const { StorageService } = await import('../../core/storage.js');
     const summary = StorageService.calculatePortfolioSummary();
     totalValue = summary.totalValue || 0;
   } catch (err) {
