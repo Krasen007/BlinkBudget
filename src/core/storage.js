@@ -108,6 +108,18 @@ export const StorageService = {
   getInvestment: function (symbol) {
     return this._investmentTracker.getInvestment(symbol);
   },
+  getHoldingsGrouped: function () {
+    return this._investmentTracker.getHoldingsGrouped();
+  },
+  removeInvestmentById: function (id) {
+    const res = this._investmentTracker.removeInvestmentById(id);
+    analyticsCache.invalidateInBackground('portfolioSummary');
+    this._pushToCloudSafe(
+      STORAGE_KEYS.INVESTMENTS,
+      this._investmentTracker.getAllInvestments()
+    );
+    return res;
+  },
   calculatePortfolioSummary: function () {
     const cached = analyticsCache.get('portfolioSummary');
     if (cached) return cached;

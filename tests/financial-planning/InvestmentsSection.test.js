@@ -39,9 +39,11 @@ vi.mock('../../src/core/storage.js', () => ({
   StorageService: {
     getAll: vi.fn(() => []),
     getInvestments: vi.fn(() => []),
+    getHoldingsGrouped: vi.fn(() => []),
     addInvestment: vi.fn(),
     updateInvestment: vi.fn(),
     removeInvestment: vi.fn(),
+    removeInvestmentById: vi.fn(),
     calculatePortfolioSummary: vi.fn(() => ({
       totalValue: 0,
       investmentCount: 0,
@@ -136,5 +138,73 @@ describe('InvestmentsSection', () => {
 
     const placeholder = section.querySelector('.placeholder');
     expect(placeholder).toBeTruthy();
+  });
+
+  it('groups investments by symbol and shows average cost with individual purchases', async () => {
+    StorageService.getHoldingsGrouped.mockReturnValue([
+      {
+        symbol: 'BTC',
+        name: 'Bitcoin',
+        totalShares: 3,
+        totalInvested: 175500,
+        averageCost: 58500,
+        currentPrice: 58500,
+        currentValue: 175500,
+        totalGainLoss: 0,
+        totalGainLossPercentage: 0,
+        lots: [
+          {
+            id: 'lot-1',
+            symbol: 'BTC',
+            name: 'Bitcoin',
+            purchaseDate: new Date('2024-01-10'),
+            shares: 1,
+            purchasePrice: 55000,
+            currentPrice: 55000,
+            lotValue: 55000,
+            lotGainLoss: 0,
+          },
+          {
+            id: 'lot-2',
+            symbol: 'BTC',
+            name: 'Bitcoin',
+            purchaseDate: new Date('2024-02-10'),
+            shares: 1,
+            purchasePrice: 54500,
+            currentPrice: 54500,
+            lotValue: 54500,
+            lotGainLoss: 0,
+          },
+          {
+            id: 'lot-3',
+            symbol: 'BTC',
+            name: 'Bitcoin',
+            purchaseDate: new Date('2024-03-10'),
+            shares: 1,
+            purchasePrice: 66000,
+            currentPrice: 66000,
+            lotValue: 66000,
+            lotGainLoss: 0,
+          },
+        ],
+      },
+    ]);
+
+    const section = await InvestmentsSection(
+      mockChartRenderer,
+      mockActiveCharts
+    );
+
+    // Holding summary shows the average cost across the DCA purchases
+    expect(section.textContent).toContain('BTC');
+    expect(section.textContent).toContain('3 purchases');
+    expect(section.textContent).toContain('€58500.00'); // average cost
+    expect(section.textContent).toContain('€175500.00'); // current value
+
+    // Individual purchases remain visible underneath
+    expect(section.textContent).toContain('€55000.00');
+    expect(section.textContent).toContain('€54500.00');
+    expect(section.textContent).toContain('€66000.00');
+    expect(section.querySelectorAll('.investment-lot').length).toBe(3);
   });
 });

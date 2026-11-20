@@ -190,6 +190,128 @@ export class InvestmentTracker {
   }
 
   /**
+   * Group investments by symbol into holdings, computing aggregate stats
+   * (total shares, average cost per share, current value, gain/loss) along
+   * with the individual purchase lots that make up each holding.
+   *
+   * This is what makes dollar-cost-averaged positions readable: multiple
+   * purchases of the same symbol (e.g. BTC at 55000, 54500, 66000) roll up
+   * into one holding showing the average cost per share, while the
+   * individual purchases remain visible underneath.
+   *
+   * @returns {Array} Array of holding objects:
+   *   { symbol, name, totalShares, totalInvested, averageCost,
+   *     currentPrice, currentValue, totalGainLoss,
+   *     totalGainLossPercentage, lots: [investment, ...] }
+   */
+  getHoldingsGrouped() {
+    const bySymbol = new Map();
+
+    for (const investment of this.investments) {
+      const symbol = investment.symbol;
+      if (!bySymbol.has(symbol)) {
+        bySymbol.set(symbol, {
+          symbol,
+          name: investment.name || symbol,
+          lots: [],
+          totalShares: 0,
+          totalInvested: 0,
+          currentValue: 0,
+        });
+      }
+      const holding = bySymbol.get(symbol);
+      const shares = Number(investment.shares) || 0;
+      const purchasePrice = Number(investment.purchasePrice) || 0;
+      const currentPrice =
+        Number.isFinite(investment.currentPrice) && investment.currentPrice > 0
+          ? investment.currentPrice
+          : purchasePrice;
+
+      holding.lots.push(investment);
+      holding.totalShares += shares;
+      holding.totalInvested += shares * purchasePrice;
+      holding.currentValue += shares * currentPrice;
+    }
+
+    return [...bySymbol.values()].map(holding => {
+      const averageCost =
+        holding.totalShares > 0
+          ? holding.totalInvested / holding.totalShares
+          : 0;
+      const totalGainLoss = holding.currentValue - holding.totalInvested;
+      const totalGainLossPercentage =
+        holding.totalInvested > 0
+          ? (totalGainLoss / holding.totalInvested) * 100
+          : 0;
+
+      // Quote the holding at the current price of its most recently
+      // updated lot.
+      const latestLot = holding.lots
+        .slice()
+        .sort(
+          (a, b) =>
+            new Date(b.updatedAt || b.purchaseDate) -
+            new Date(a.updatedAt || a.purchaseDate)
+        )[0];
+      const currentPrice =
+        latestLot &&
+        Number.isFinite(latestLot.currentPrice) &&
+        latestLot.currentPrice > 0
+          ? latestLot.currentPrice
+          : latestLot.purchasePrice;
+
+      return {
+        symbol: holding.symbol,
+        name: holding.name,
+        totalShares: Math.round(holding.totalShares * 10000) / 10000,
+        totalInvested: Math.round(holding.totalInvested * 100) / 100,
+        averageCost: Math.round(averageCost * 100) / 100,
+        currentPrice: Math.round(currentPrice * 100) / 100,
+        currentValue: Math.round(holding.currentValue * 100) / 100,
+        totalGainLoss: Math.round(totalGainLoss * 100) / 100,
+        totalGainLossPercentage:
+          Math.round(totalGainLossPercentage * 100) / 100,
+        lots: holding.lots.map(lot => {
+          const shares = Number(lot.shares) || 0;
+          const purchasePrice = Number(lot.purchasePrice) || 0;
+          const lotCurrentPrice =
+            Number.isFinite(lot.currentPrice) && lot.currentPrice > 0
+              ? lot.currentPrice
+              : purchasePrice;
+          return {
+            ...lot,
+            lotValue: Math.round(shares * lotCurrentPrice * 100) / 100,
+            lotGainLoss:
+              Math.round((lotCurrentPrice - purchasePrice) * shares * 100) /
+              100,
+          };
+        }),
+      };
+    });
+  }
+
+  /**
+   * Remove a single investment lot by id (keeps sibling lots of the same
+   * symbol intact, unlike removeInvestment(symbol) which removes the whole
+   * holding).
+   * @param {string} id - Investment id
+   * @returns {boolean} True if removed, false if not found
+   */
+  removeInvestmentById(id) {
+    try {
+      const index = this.investments.findIndex(inv => inv.id === id);
+      if (index === -1) return false;
+
+      this.investments.splice(index, 1);
+      this._saveInvestments();
+      return true;
+    } catch (error) {
+      console.error('Error removing investment:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Calculate total portfolio value
    * @param {Array} investments - Optional specific investments array
    * @returns {number} Total portfolio value
