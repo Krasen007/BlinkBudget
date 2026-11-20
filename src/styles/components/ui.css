@@ -136,16 +136,31 @@
   min-height: calc(var(--touch-target-min) * 0.8);
 }
 
-/* Compact row actions inside investment lots table */
-.investment-lot-actions .investment-lot-btn {
+/* Compact row actions inside investment lots table with WCAG touch target compliance */
+.investment-lot-actions .investment-lot-btn,
+.investment-summary .investment-lot-btn {
   margin: 0;
-  min-height: 1.75rem;
+  min-height: 2rem;
   min-width: auto;
-  padding: 0.15rem 0.45rem;
-  font-size: 0.7rem;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
   font-weight: 500;
   line-height: 1.2;
   white-space: nowrap;
+  position: relative;
+}
+
+/* Ensure minimum 44px touch target on pointer devices */
+.investment-lot-actions .investment-lot-btn::after,
+.investment-summary .investment-lot-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+  pointer-events: auto;
 }
 
 .investment-lots {

@@ -364,7 +364,7 @@ function createInvestmentsList(onAddHolding) {
         }`;
         lotsBadge.style.fontSize = '0.7rem';
         lotsBadge.style.color = COLORS.TEXT_MUTED;
-        lotsBadge.style.background = 'rgba(0,0,0,0.06)';
+        lotsBadge.style.background = 'var(--color-surface-hover)';
         lotsBadge.style.padding = `${SPACING.XXS} ${SPACING.SM}`;
         lotsBadge.style.borderRadius = 'var(--radius-md)';
         symbolRow.appendChild(lotsBadge);
@@ -489,6 +489,11 @@ function createInvestmentsList(onAddHolding) {
         // ---- Individual purchases (lots) always visible under the holding ----
         const lotsContainer = document.createElement('div');
         lotsContainer.className = 'investment-lots';
+        lotsContainer.setAttribute('role', 'table');
+        lotsContainer.setAttribute(
+          'aria-label',
+          `${holding.symbol} purchase history`
+        );
         lotsContainer.style.display = 'grid';
         lotsContainer.style.gap = '0';
         lotsContainer.style.overflowX = 'auto';
@@ -499,12 +504,13 @@ function createInvestmentsList(onAddHolding) {
 
         const lotsHeader = document.createElement('div');
         lotsHeader.className = 'investment-lot-header';
+        lotsHeader.setAttribute('role', 'row');
         lotsHeader.style.display = 'grid';
         lotsHeader.style.gridTemplateColumns = lotGridColumns;
         lotsHeader.style.gap = SPACING.XS;
         lotsHeader.style.alignItems = 'center';
         lotsHeader.style.padding = `${SPACING.XS} ${SPACING.MD}`;
-        lotsHeader.style.background = 'rgba(0,0,0,0.04)';
+        lotsHeader.style.background = 'var(--color-surface-hover)';
         lotsHeader.style.fontSize = '0.65rem';
         lotsHeader.style.fontWeight = '600';
         lotsHeader.style.color = COLORS.TEXT_MUTED;
@@ -515,6 +521,7 @@ function createInvestmentsList(onAddHolding) {
           (label, index) => {
             const cell = document.createElement('div');
             cell.textContent = label;
+            cell.setAttribute('role', 'columnheader');
             cell.style.textAlign = lotAlignments[index];
             cell.style.whiteSpace = 'nowrap';
             lotsHeader.appendChild(cell);
@@ -533,6 +540,7 @@ function createInvestmentsList(onAddHolding) {
 
           const row = document.createElement('div');
           row.className = 'investment-lot';
+          row.setAttribute('role', 'row');
           row.style.display = 'grid';
           row.style.gridTemplateColumns = lotGridColumns;
           row.style.gap = SPACING.XS;
@@ -542,6 +550,7 @@ function createInvestmentsList(onAddHolding) {
           row.style.minHeight = '2.25rem';
 
           const dateCell = document.createElement('div');
+          dateCell.setAttribute('role', 'cell');
           dateCell.style.textAlign = 'left';
           dateCell.style.minWidth = '0';
 
@@ -568,18 +577,21 @@ function createInvestmentsList(onAddHolding) {
 
           const cellFont = '0.8rem';
           const sharesCell = document.createElement('div');
+          sharesCell.setAttribute('role', 'cell');
           sharesCell.textContent = formatShares(lotShares);
           sharesCell.style.fontSize = cellFont;
           sharesCell.style.textAlign = 'right';
           sharesCell.style.fontVariantNumeric = 'tabular-nums';
 
           const priceCell = document.createElement('div');
+          priceCell.setAttribute('role', 'cell');
           priceCell.textContent = `${CURRENCY_SYMBOL}${lotPrice.toFixed(2)}`;
           priceCell.style.fontSize = cellFont;
           priceCell.style.textAlign = 'right';
           priceCell.style.fontVariantNumeric = 'tabular-nums';
 
           const totalCell = document.createElement('div');
+          totalCell.setAttribute('role', 'cell');
           totalCell.textContent = `${CURRENCY_SYMBOL}${lotTotal.toFixed(2)}`;
           totalCell.style.fontSize = cellFont;
           totalCell.style.textAlign = 'right';
@@ -587,6 +599,7 @@ function createInvestmentsList(onAddHolding) {
 
           const actions = document.createElement('div');
           actions.className = 'investment-lot-actions';
+          actions.setAttribute('role', 'cell');
           actions.style.display = 'flex';
           actions.style.gap = SPACING.XXS;
           actions.style.justifyContent = 'flex-end';
@@ -597,12 +610,20 @@ function createInvestmentsList(onAddHolding) {
           editBtn.textContent = 'Edit';
           editBtn.className = 'btn btn-ghost btn-small investment-lot-btn';
           editBtn.type = 'button';
+          editBtn.setAttribute(
+            'aria-label',
+            `Edit ${lot.symbol} purchase from ${lotDate}`
+          );
 
           const delBtn = document.createElement('button');
           delBtn.textContent = 'Delete';
           delBtn.className = 'btn btn-ghost btn-small investment-lot-btn';
           delBtn.type = 'button';
           delBtn.style.color = COLORS.ERROR;
+          delBtn.setAttribute(
+            'aria-label',
+            `Delete ${lot.symbol} purchase from ${lotDate}`
+          );
 
           actions.appendChild(editBtn);
           actions.appendChild(delBtn);
@@ -690,7 +711,7 @@ function createInvestmentsList(onAddHolding) {
     form.style.flexDirection = 'column';
     form.style.gap = SPACING.SM;
     form.style.padding = `${SPACING.SM} ${SPACING.MD} ${SPACING.MD}`;
-    form.style.background = 'rgba(0,0,0,0.03)';
+    form.style.background = 'var(--color-surface-hover)';
     form.style.borderBottom = `1px solid ${COLORS.BORDER}`;
 
     const inputStyle = `width:100%;padding:${SPACING.SM};border:1px solid ${COLORS.BORDER};border-radius:var(--radius-md);font-size:var(--font-size-sm);background:${COLORS.BACKGROUND};color:var(--color-text-main);box-sizing:border-box;`;
