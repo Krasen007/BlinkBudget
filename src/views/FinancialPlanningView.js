@@ -255,6 +255,8 @@ export const FinancialPlanningView = (params = {}) => {
     await renderSection(sectionId);
   }
 
+  container.setSection = switchSection;
+
   /**
    * Render the content for the selected section
    */
@@ -500,20 +502,6 @@ export const FinancialPlanningView = (params = {}) => {
   }
 
   // Event listeners
-  // Handle hash changes to update section when navigating within financial-planning
-  const handleHashChange = () => {
-    const hash = window.location.hash.slice(1);
-    const [route, paramString] = hash.split('?');
-    if (route === 'financial-planning' && paramString) {
-      const params = new URLSearchParams(paramString);
-      const newSection = params.get('section');
-      if (newSection && newSection !== currentSection) {
-        switchSection(newSection);
-      }
-    }
-  };
-  window.addEventListener('hashchange', handleHashChange);
-
   // Storage update handler
   const handleStorageUpdate = e => {
     if (
@@ -598,7 +586,6 @@ export const FinancialPlanningView = (params = {}) => {
       backgroundRefreshTimeout = null;
     }
 
-    window.removeEventListener('hashchange', handleHashChange);
     window.removeEventListener('storage-updated', handleStorageUpdate);
     window.removeEventListener('sync-state', handleSyncState);
     window.removeEventListener('forecast-invalidate', handleForecastInvalidate);

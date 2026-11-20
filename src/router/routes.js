@@ -84,12 +84,20 @@ export const routes = {
     updateMobileNavigation('reports');
   },
   'financial-planning': async (params = {}) => {
-    const { FinancialPlanningView } = await loadCachedOrImport(
-      'FinancialPlanningView',
-      () => import('../views/FinancialPlanningView.js')
-    );
     NavigationState.setLastActiveView('financial-planning');
-    ViewManager.setView(FinancialPlanningView(params));
+    const currentView = ViewManager.getCurrentView();
+    if (
+      currentView?.classList.contains('view-financial-planning') &&
+      typeof currentView.setSection === 'function'
+    ) {
+      await currentView.setSection(params.section || 'overview');
+    } else {
+      const { FinancialPlanningView } = await loadCachedOrImport(
+        'FinancialPlanningView',
+        () => import('../views/FinancialPlanningView.js')
+      );
+      ViewManager.setView(FinancialPlanningView(params));
+    }
     updateMobileNavigation('financial-planning');
   },
   login: async () => {

@@ -1,9 +1,9 @@
 ## Product Requirements Document: BlinkBudget
 
-### Version 1.22
+### Version 1.52
 
 - **Product Name:** BlinkBudget
-- **Date:** December 9, 2025 (Updated: February 21, 2026)
+- **Date:** December 9, 2025 (Updated: November 21, 2026)
 - **Author:** Gemini, Expert Product Manager, Krasen Ivanov
 
 ---
@@ -33,7 +33,7 @@ Our user, a money-conscious individual, values speed and clarity in managing the
 
 3.  **Action 1: Launch BlinkBudget (Click 1):** ✅ **INSTANT** - The user taps the BlinkBudget app icon. The app launches instantly via PWA caching and Vite's optimized builds, presenting a clean dashboard with prominent "Add Expense" button. The immediate readiness sets the "extremely fast" tone.
 
-4.  **Action 2: Enter Amount & Select Category (Click 2-3):** ✅ **ENHANCED** - The user taps the "Add Expense" button, quickly inputs the coffee's cost ($4.50) in the large, touch-optimized field, then selects "Food & Drink" from curated category chips with time-based suggestions. Smart defaults and haptic feedback minimize cognitive load. The expense is instantly recorded and saved upon category selection.
+4.  **Action 2: Enter Amount & Select Category (Click 2-3):** ✅ **ENHANCED** - The user taps the "Add Expense" button, quickly inputs the coffee's cost ($4.50) in the large, touch-optimized field, then selects "Food & Drink" from curated category chips. Smart defaults and haptic feedback minimize cognitive load. The expense is instantly recorded and saved upon category selection.
 
 5.  **Immediate Outcome:** ✅ **ACHIEVED** - The user closes the app, feeling a sense of control and accomplishment, having spent mere seconds on the task. They can now focus on their day, knowing their financial tracking is up-to-date.
 
@@ -52,7 +52,7 @@ BlinkBudget will focus on core functionality that delivers maximum value with mi
 - **Rapid Expense Entry (3-Click Max)** ✅ **IMPLEMENTED**
   - **Instant Access:** Add expense immediately visible on app launch via main dashboard button
   - **Amount Input:** Large, accessible input field with touch-optimized design and smart defaults
-  - **Category Selection:** Curated category chips with custom category support and time-based suggestions
+  - **Category Selection:** Curated category chips with custom category support, ordered by usage frequency
   - **Quick Confirmation:** Single-tap confirmation with haptic feedback and instant visual response
   - **Constraint:** 3-click workflow achieved with optimized touch targets and smart defaults
 
@@ -95,7 +95,6 @@ The core principle guiding all UI/UX decisions is **speed and simplicity**. Ever
 - **Efficiency for 3-Clicks:** ✅ **IMPLEMENTED**
   - **Large Touch Targets:** All interactive elements meet 44px minimum touch target requirements with CSS custom properties
   - **Smart Defaults:** Current date pre-filled, smart category suggestions, and form auto-completion
-  - **Contextual Suggestions:** Category suggestions based on time patterns and previous entries (partially implemented)
 
 - **Aesthetic Appeal:** ✅ **IMPLEMENTED**
   - **Modern & Polished:** Contemporary dark theme with HSL color system, smooth animations, and premium visual design
