@@ -261,6 +261,13 @@ export class InvestmentTracker {
         latestLot.currentPrice > 0
           ? latestLot.currentPrice
           : latestLot.purchasePrice;
+      const sortedLots = holding.lots
+        .slice()
+        .sort(
+          (a, b) =>
+            new Date(a.purchaseDate).getTime() -
+            new Date(b.purchaseDate).getTime()
+        );
 
       return {
         symbol: holding.symbol,
@@ -273,7 +280,7 @@ export class InvestmentTracker {
         totalGainLoss: Math.round(totalGainLoss * 100) / 100,
         totalGainLossPercentage:
           Math.round(totalGainLossPercentage * 100) / 100,
-        lots: holding.lots.map(lot => {
+        lots: sortedLots.map(lot => {
           const shares = Number(lot.shares) || 0;
           const purchasePrice = Number(lot.purchasePrice) || 0;
           const lotCurrentPrice =

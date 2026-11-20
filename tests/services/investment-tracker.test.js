@@ -139,4 +139,29 @@ describe('InvestmentTracker', () => {
     const [holding] = tracker.getHoldingsGrouped();
     expect(holding.totalShares).toBe(shares);
   });
+
+  it('orders lots by purchase date after a lot date is edited', () => {
+    const februaryLot = tracker.addInvestment(
+      'ETH',
+      1,
+      3000,
+      new Date('2024-02-10')
+    );
+    const marchLot = tracker.addInvestment(
+      'ETH',
+      1,
+      3000,
+      new Date('2024-03-10')
+    );
+
+    tracker.updateInvestment(marchLot.id, {
+      purchaseDate: new Date('2024-01-10'),
+    });
+
+    const [holding] = tracker.getHoldingsGrouped();
+    expect(holding.lots.map(lot => lot.id)).toEqual([
+      marchLot.id,
+      februaryLot.id,
+    ]);
+  });
 });
