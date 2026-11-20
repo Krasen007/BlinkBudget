@@ -131,4 +131,12 @@ describe('InvestmentTracker', () => {
     const eth = holdings.find(h => h.symbol === 'ETH');
     expect(eth.totalShares).toBe(0.12345678);
   });
+
+  it('preserves a single lot quantity with more than 14 significant digits', () => {
+    const shares = Number('0.12345678901234567');
+    tracker.addInvestment('ETH', shares, 3000, new Date('2024-01-01'));
+
+    const [holding] = tracker.getHoldingsGrouped();
+    expect(holding.totalShares).toBe(shares);
+  });
 });

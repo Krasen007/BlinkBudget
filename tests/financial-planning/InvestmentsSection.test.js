@@ -319,6 +319,44 @@ describe('InvestmentsSection', () => {
     expect(symbolInput.value).toBe('TEST');
   });
 
+  it('displays the stored digits for high-precision lot quantities', async () => {
+    const shares = Number('0.12345678901234567');
+    StorageService.getHoldingsGrouped.mockReturnValue([
+      {
+        symbol: 'ETH',
+        name: 'ETH',
+        totalShares: shares,
+        totalInvested: 1,
+        averageCost: 1,
+        currentPrice: 1,
+        currentValue: 1,
+        totalGainLoss: 0,
+        totalGainLossPercentage: 0,
+        lots: [
+          {
+            id: 'lot-1',
+            symbol: 'ETH',
+            purchaseDate: new Date('2024-01-10T00:00:00.000Z'),
+            shares,
+            purchasePrice: 1,
+            currentPrice: 1,
+          },
+        ],
+      },
+    ]);
+
+    const section = await InvestmentsSection(
+      mockChartRenderer,
+      mockActiveCharts
+    );
+    const formattedShares = shares.toLocaleString('en-US', {
+      maximumFractionDigits: 20,
+      useGrouping: false,
+    });
+
+    expect(section.textContent).toContain(formattedShares);
+  });
+
   it('opens the add form with today as the default date and does not hide on a second Add click', async () => {
     StorageService.getHoldingsGrouped.mockReturnValue([]);
 
@@ -365,5 +403,89 @@ describe('InvestmentsSection', () => {
     expect(addBtn.style.display).not.toBe('none');
     expect(saveBtn.style.display).toBe('none');
     expect(cancelBtn.style.display).toBe('none');
+  });
+
+  it('preserves the selected calendar date when adding an investment', async () => {
+    StorageService.getHoldingsGrouped.mockReturnValue([]);
+
+    const section = await InvestmentsSection(
+      mockChartRenderer,
+      mockActiveCharts
+    );
+
+    section.querySelector('.add-investment-btn').click();
+    section.querySelector('#inv-symbol').value = 'ETH';
+    section.querySelector('#inv-shares').value = '1';
+    section.querySelector('#inv-price').value = '3000';
+    const dateInput = section.querySelector('#inv-date');
+    dateInput.value = '2024-01-10';
+    section
+      .querySelectorAll('.investment-form input')
+      .forEach(input => input.dispatchEvent(new dom.window.Event('input')));
+
+    section.querySelector('.btn-save').click();
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    expect(StorageService.addInvestment).toHaveBeenCalledWith(
+      'ETH',
+      1,
+      3000,
+      new Date('2024-01-10T00:00:00.000Z'),
+      expect.any(Object)
+    );
+  });
+
+  it('keeps an existing UTC-midnight lot date unchanged when editing', async () => {
+    const purchaseDate = new Date('2024-01-10T00:00:00.000Z');
+    StorageService.getHoldingsGrouped.mockReturnValue([
+      {
+        symbol: 'ETH',
+        name: 'ETH',
+        totalShares: 1,
+        totalInvested: 3000,
+        averageCost: 3000,
+        currentPrice: 3000,
+        currentValue: 3000,
+        totalGainLoss: 0,
+        totalGainLossPercentage: 0,
+        lots: [
+          {
+            id: 'lot-1',
+            symbol: 'ETH',
+            purchaseDate,
+            shares: 1,
+            purchasePrice: 3000,
+            currentPrice: 3000,
+          },
+        ],
+      },
+    ]);
+
+    const section = await InvestmentsSection(
+      mockChartRenderer,
+      mockActiveCharts
+    );
+
+    expect(section.querySelector('.investment-lot').textContent).toContain(
+      purchaseDate.toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        timeZone: 'UTC',
+      })
+    );
+    section.querySelector('.investment-lot .investment-lot-btn').click();
+    const dateInput = section.querySelector(
+      '.investment-edit-form input[type="date"]'
+    );
+    expect(dateInput.value).toBe('2024-01-10');
+
+    section.querySelector('.investment-edit-form button').click();
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    expect(StorageService.updateInvestment).toHaveBeenCalledWith(
+      'lot-1',
+      expect.objectContaining({ purchaseDate })
+    );
   });
 });

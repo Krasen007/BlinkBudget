@@ -23,6 +23,50 @@ function todayLocalDate() {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+function dateFromInput(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return null;
+
+  const [, yearPart, monthPart, dayPart] = match;
+  const year = Number(yearPart);
+  const month = Number(monthPart);
+  const day = Number(dayPart);
+  const date = new Date(0);
+  date.setUTCHours(0, 0, 0, 0);
+  date.setUTCFullYear(year, month - 1, day);
+
+  if (
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() !== month - 1 ||
+    date.getUTCDate() !== day
+  ) {
+    return null;
+  }
+  return date;
+}
+
+function dateInputValue(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+
+  const yyyy = date.getUTCFullYear();
+  const mm = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(date.getUTCDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function formatPurchaseDate(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+
+  return date.toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+}
+
 /**
  * Create investment form controls
  * @param {Function} [onSaved] - Called after a successful save
@@ -196,7 +240,7 @@ function createInvestmentFormControls(onSaved) {
     const shares = Number(inputs.shares.value);
     const purchasePrice = Number(inputs.purchasePrice.value);
     const currentPrice = purchasePrice;
-    const purchaseDate = new Date(inputs.purchaseDate.value);
+    const purchaseDate = dateFromInput(inputs.purchaseDate.value);
     const notes = notesInput.value.trim();
 
     try {
@@ -243,7 +287,7 @@ function createInvestmentsList(onAddHolding) {
 
   const formatShares = shares => {
     const s = Number(shares) || 0;
-    return Number(s.toPrecision(14)).toLocaleString('en-US', {
+    return s.toLocaleString('en-US', {
       maximumFractionDigits: 20,
       useGrouping: false,
     });
@@ -480,11 +524,7 @@ function createInvestmentsList(onAddHolding) {
 
         holding.lots.forEach(lot => {
           const lotDate = lot.purchaseDate
-            ? new Date(lot.purchaseDate).toLocaleDateString(undefined, {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-              })
+            ? formatPurchaseDate(lot.purchaseDate)
             : '-';
           const lotShares = Number(lot.shares) || 0;
           const lotPrice = Number(lot.purchasePrice) || 0;
@@ -713,13 +753,7 @@ function createInvestmentsList(onAddHolding) {
         const i = document.createElement('input');
         i.type = 'date';
         if (lot.purchaseDate) {
-          const d = new Date(lot.purchaseDate);
-          if (!Number.isNaN(d.getTime())) {
-            const yyyy = d.getFullYear();
-            const mm = String(d.getMonth() + 1).padStart(2, '0');
-            const dd = String(d.getDate()).padStart(2, '0');
-            i.value = `${yyyy}-${mm}-${dd}`;
-          }
+          i.value = dateInputValue(lot.purchaseDate);
         }
         if (!i.value) i.value = todayLocalDate();
         i.style.cssText = inputStyle;
@@ -781,9 +815,7 @@ function createInvestmentsList(onAddHolding) {
           shares: Number(sharesFld.value) || 0,
           purchasePrice: Number(priceFld.value) || 0,
           currentPrice: Number(priceFld.value) || 0,
-          purchaseDate: dateFld.value
-            ? new Date(dateFld.value)
-            : lot.purchaseDate,
+          purchaseDate: dateFromInput(dateFld.value) || lot.purchaseDate,
           notes: notesFld.value.trim(),
         });
         await onSave();

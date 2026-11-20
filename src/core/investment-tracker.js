@@ -265,7 +265,7 @@ export class InvestmentTracker {
       return {
         symbol: holding.symbol,
         name: holding.name,
-        totalShares: Number(holding.totalShares.toPrecision(14)),
+        totalShares: holding.totalShares,
         totalInvested: Math.round(holding.totalInvested * 100) / 100,
         averageCost: Math.round(averageCost * 100) / 100,
         currentPrice: Math.round(currentPrice * 100) / 100,
