@@ -57,6 +57,7 @@ export const AccountDeletionSection = () => {
   warningTitle.style.marginBottom = SPACING.XS;
 
   const warningText = document.createElement('div');
+  // safe-anything:ignore
   warningText.innerHTML = `
     <div style="font-size: ${FONT_SIZES.SM}; line-height: 1.6; color: var(--color-text-secondary);">
       <p style="margin-bottom: ${SPACING.XS};">• All your transactions, accounts, goals, and settings will be permanently deleted</p>
@@ -248,6 +249,7 @@ export const AccountDeletionSection = () => {
 
   // Help text
   const helpText = document.createElement('div');
+  // safe-anything:ignore
   helpText.innerHTML = `
     <div style="margin-top: ${SPACING.MD}; padding-top: ${SPACING.MD}; border-top: 1px solid var(--color-border);">
       <p style="font-size: ${FONT_SIZES.XS}; color: var(--color-text-muted); line-height: 1.5; margin: 0;">

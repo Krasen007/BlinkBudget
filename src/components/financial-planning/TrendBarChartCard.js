@@ -242,6 +242,7 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
     const grainSuffix = currentGrain === 'month' ? '/mo' : '/yr';
 
     averagesBar.style.display = 'flex';
+    // safe-anything:ignore — all dynamic values escaped via escapeHtml()
     averagesBar.innerHTML = `
       <span class="trend-avg-label" style="font-weight: 500; color: var(--color-text-muted);">Average (${escapeHtml(labels.length.toString())} ${escapeHtml(currentGrain)}s):</span>
       <span class="trend-avg-income" style="color: ${INSIGHTS_CHART_COLORS.income}; font-weight: 500;">

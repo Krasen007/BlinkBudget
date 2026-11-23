@@ -150,6 +150,7 @@ export function showErrorState(errorState, customMessage, onRetry) {
     customMessage ||
     'There was an error loading your financial data. Please try again.';
 
+  // safe-anything:ignore — dynamic values escaped via escapeHtml()
   message.innerHTML = `
         <h3 style="margin: 0 0 ${SPACING.XS} 0; color: ${COLORS.ERROR};">${escapeHtml(errorTitle)}</h3>
         <p style="margin: 0; max-width: var(--modal-max-width); line-height: 1.5; color: ${COLORS.TEXT_MUTED};">
@@ -235,6 +236,7 @@ export function showUnsupportedBrowserError(container, missingFeatures) {
   message.style.marginBottom = SPACING.XS;
 
   const featuresList = document.createElement('div');
+  // safe-anything:ignore — dynamic values escaped via escapeHtml()
   featuresList.innerHTML = `
         <strong>Missing features:</strong><br>
         ${missingFeatures.map(f => escapeHtml(f)).join(', ')}
@@ -244,6 +246,7 @@ export function showUnsupportedBrowserError(container, missingFeatures) {
   featuresList.style.marginBottom = SPACING.XS;
 
   const recommendedBrowsers = document.createElement('div');
+  // safe-anything:ignore — static string only
   recommendedBrowsers.innerHTML = `
         <strong>Recommended browsers:</strong><br>
         Chrome 70+, Firefox 65+, Safari 12+, Edge 79+
@@ -273,6 +276,7 @@ export function showBrowserWarning(container, limitedFeatures) {
   warning.style.fontSize = '0.875rem';
   warning.style.color = 'var(--color-warning-dark)';
 
+  // safe-anything:ignore — dynamic values escaped via escapeHtml()
   warning.innerHTML = `
         ⚠️ <strong>Limited Browser Support:</strong> 
         Some advanced features may not work properly. 

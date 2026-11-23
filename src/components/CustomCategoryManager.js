@@ -999,6 +999,7 @@ export const CustomCategoryManager = ({
         padding: var(--spacing-2xl);
         color: var(--color-text-muted);
       `;
+      // safe-anything:ignore
       emptyState.innerHTML = `
         <div style="font-size: var(--font-size-lg); margin-bottom: var(--spacing-sm);">No categories found</div>
         <div>Create your first custom category to get started</div>

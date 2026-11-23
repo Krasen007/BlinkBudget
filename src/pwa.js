@@ -49,7 +49,7 @@ function showUpdateConfirmation(onConfirm) {
   `;
   dialog.setAttribute('role', 'dialog');
   dialog.setAttribute('aria-modal', 'true');
-
+  // safe-anything:ignore
   dialog.innerHTML = `
     <div style="font-size: 48px; margin-bottom: 16px;">🎉</div>
     <h2 style="margin: 0 0 12px 0; font-size: 1.5rem; color: var(--color-text, #fff);">
