@@ -127,4 +127,51 @@ describe('sync merge category order', () => {
     expect(merged.map(c => c.sortOrder)).toEqual([0, 1]);
     expect(new Set(merged.map(c => c.sortOrder)).size).toBe(merged.length);
   });
+
+  it('persists normalized order when newer local categories have stale sortOrder', () => {
+    const local = [
+      {
+        id: 'a',
+        name: 'A (renamed)',
+        type: 'expense',
+        sortOrder: 1,
+        updatedAt: '2026-01-03T00:00:00.000Z',
+      },
+      {
+        id: 'b',
+        name: 'B (renamed)',
+        type: 'expense',
+        sortOrder: 0,
+        updatedAt: '2026-01-03T00:00:00.000Z',
+      },
+    ];
+    const cloud = [
+      {
+        id: 'a',
+        name: 'A',
+        type: 'expense',
+        sortOrder: 0,
+        updatedAt: '2026-01-02T00:00:00.000Z',
+      },
+      {
+        id: 'b',
+        name: 'B',
+        type: 'expense',
+        sortOrder: 1,
+        updatedAt: '2026-01-02T00:00:00.000Z',
+      },
+    ];
+    localStorage.setItem(STORAGE_KEYS.CUSTOM_CATEGORIES, JSON.stringify(local));
+
+    SyncService.mergeLocalWithCloud(STORAGE_KEYS.CUSTOM_CATEGORIES, cloud);
+
+    const merged = JSON.parse(
+      localStorage.getItem(STORAGE_KEYS.CUSTOM_CATEGORIES)
+    );
+    expect(merged.map(category => category.name)).toEqual([
+      'A (renamed)',
+      'B (renamed)',
+    ]);
+    expect(merged.map(category => category.sortOrder)).toEqual([0, 1]);
+  });
 });

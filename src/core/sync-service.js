@@ -585,7 +585,7 @@ export const SyncService = {
     if (key === STORAGE_KEYS.CUSTOM_CATEGORIES) {
       merged.forEach((cat, index) => {
         if (cat && cat.sortOrder !== index) {
-          cat.sortOrder = index;
+          merged[index] = { ...cat, sortOrder: index };
         }
       });
     }
