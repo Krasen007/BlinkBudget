@@ -164,7 +164,14 @@ export const EditView = ({ id }) => {
 
         // Update dashboard filter to show the account used for this transaction
         if (data.accountId) {
-          sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, data.accountId);
+          try {
+            sessionStorage.setItem(
+              STORAGE_KEYS.DASHBOARD_FILTER,
+              data.accountId
+            );
+          } catch (error) {
+            console.warn('Failed to update dashboard filter:', error);
+          }
         }
 
         // Navigate to dashboard immediately

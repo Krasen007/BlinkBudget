@@ -477,6 +477,11 @@ export const FinancialPlanningView = (params = {}) => {
       }
     } catch (error) {
       console.error('Error loading planning data:', error);
+      if (typeof activeSectionCleanup === 'function') {
+        activeSectionCleanup();
+        activeSectionCleanup = null;
+      }
+      cleanupCharts();
       content.replaceChildren(
         createPlaceholder(
           'Unable to Load Financial Data',

@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { EditView } from '../../src/views/EditView.js';
 import { TransactionService } from '../../src/core/transaction-service.js';
+import { Router } from '../../src/core/router.js';
+import { STORAGE_KEYS } from '../../src/utils/constants.js';
 
 // Mock dependency: TransactionForm to capture onSubmit callback
 let capturedOnSubmit = null;
@@ -58,6 +60,7 @@ describe('EditView - Recent Transaction Ghosting Prevention', () => {
     document.body.innerHTML = '';
     // Clear mock storage
     Object.keys(mockTransactions).forEach(key => delete mockTransactions[key]);
+    vi.restoreAllMocks();
     vi.clearAllMocks();
     capturedOnSubmit = null;
   });
@@ -131,6 +134,42 @@ describe('EditView - Recent Transaction Ghosting Prevention', () => {
         ghostId: expect.any(String),
       })
     );
+  });
+
+  it('should navigate after a transaction update when saving the dashboard filter fails', () => {
+    const tx = {
+      id: 'tx-storage-failure',
+      amount: 100,
+      timestamp: '2026-05-26T20:00:00.000Z',
+      createdAt: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
+      accountId: 'account-1',
+    };
+    mockTransactions[tx.id] = tx;
+    vi.spyOn(window.sessionStorage, 'setItem').mockImplementation(key => {
+      if (key === STORAGE_KEYS.DASHBOARD_FILTER) {
+        throw new Error('Storage unavailable');
+      }
+    });
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    EditView({ id: tx.id });
+    capturedOnSubmit({
+      timestamp: '2026-05-27T20:00:00.000Z',
+      amount: tx.amount,
+      accountId: tx.accountId,
+    });
+
+    expect(TransactionService.add).toHaveBeenCalled();
+    expect(TransactionService.update).toHaveBeenCalledWith(
+      tx.id,
+      expect.objectContaining({
+        timestamp: '2026-05-27T20:00:00.000Z',
+        accountId: tx.accountId,
+        ghostId: expect.any(String),
+      })
+    );
+    expect(TransactionService.remove).not.toHaveBeenCalled();
+    expect(Router.navigate).toHaveBeenCalledWith('dashboard');
   });
 
   it('should create a ghost transaction if createdAt is missing (legacy transaction)', () => {

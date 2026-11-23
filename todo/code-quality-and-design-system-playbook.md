@@ -208,7 +208,7 @@ The one class the other rules structurally cannot see, because **the code in que
 ```js
 // Looks handled. Catches nothing.
 try {
-  cache.invalidate("user-data"); // async; returns a promise
+  cache.invalidate('user-data'); // async; returns a promise
 } catch {
   // ignore cache errors
 }
@@ -221,20 +221,20 @@ no-op fixes. Correct shapes, in order of preference:
 
 ```js
 // 1. Handle the rejection where the promise is created
-cache
-  .invalidate(key)
-  .catch((error) => console.warn("invalidate failed", error));
+cache.invalidate(key).catch(error => console.warn('invalidate failed', error));
 
 // 2. Make the caller async and await it, when ordering matters
 await cache.invalidate(key);
 ```
 
-**B) Fire-and-forget calls that should be ordered.** An un-awaited async call _yields before its
-work happens_; every synchronous statement after it runs first. If the async work was supposed to
-clear state the next line reads, that is a race, not a style nit. Real instance: an auth-change
-handler reset flags, called an async `invalidate()` (which awaits a mutex before deleting), then
-immediately re-rendered, so the render saw the **previous user's cached data**. On a shared device
-that is a cross-user data bleed (🔒).
+**B) Fire-and-forget calls that should be ordered.** An async function runs synchronously until its
+first `await`. When it suspends there, control returns to the caller, which continues with its next
+statement. Statements before that suspension point happen before the caller's next statement;
+work after it may happen later. If that later async work was supposed to clear state the next line
+reads, that is a race, not a style nit. Real instance: an auth-change handler reset flags, called an
+async `invalidate()` (which awaits a mutex before deleting), then immediately re-rendered, so the
+render saw the **previous user's cached data**. On a shared device that is a cross-user data bleed
+(🔒).
 
 _Check:_ for each un-awaited async call, ask what the next synchronous statement reads.
 
@@ -761,13 +761,13 @@ compliant, `rg -- '--token:' <css>` to confirm the token exists.
 ### 5.5 Decision workflow (stop at the first match)
 
 ```
-1. Exact-value token exists?              → use it.  EXACT match only.
-2. Value is a bare border width, e.g.
+1. Renders before tokens are loaded?      → keep the literal + one-line justified disable.
+2. Exact-value token exists?              → use it.  EXACT match only.
+3. Value is a bare border width, e.g.
    `1px solid var(--x)`?                  → use the project's border pattern
                                             (`1px solid ${COLORS.BORDER}`), or add a
                                             border-width token in a design pass.
-3. Zero / unitless-able value?            → '0px' → '0'   (min-height, opacity, flex…)
-4. Renders before tokens are loaded?      → keep the literal + one-line justified disable.
+4. Zero / unitless-able value?            → '0px' → '0'   (min-height, opacity, flex…)
 5. No token exists, purely layout?        → one-line justified disable with the reason,
                                             and report it as "no token exists".
 6. The same magic value keeps recurring?  → a named local constant in that module
@@ -789,7 +789,7 @@ line, directly above the statement:
 
 ```js
 // eslint-disable-next-line local/no-raw-style-values -- 6px horizontal padding has no exact token (scale is 4/8); snapping would be a design change
-badge.style.padding = "2px 6px";
+badge.style.padding = '2px 6px';
 ```
 
 **b) A second, bare `Linter` can fail on your directives.** If any test lints source files with its
@@ -836,7 +836,7 @@ bar.style.cssText = `
 `;
 
 // unitless zero
-field.style.minHeight = "0"; // was '0px'
+field.style.minHeight = '0'; // was '0px'
 
 // color fallback removal, where tokens are guaranteed loaded
 // color: var(--color-primary, #00d084)  →  color: var(--color-primary)
@@ -1138,8 +1138,8 @@ Test runners replace an error thrown by a failing mock factory with their own wr
 original on `cause`. Asserting on `error.message` alone fails for the wrong reason. Unwrap first:
 
 ```js
-const errorText = (e) =>
-  [e?.message, e?.cause?.message].filter(Boolean).join(" | ");
+const errorText = e =>
+  [e?.message, e?.cause?.message].filter(Boolean).join(' | ');
 ```
 
 ### 7.5 Line endings: `core.autocrlf` makes `prettier --check` fail on files you never touched
@@ -1203,7 +1203,10 @@ with no consumer whose keyframes a safelist name-match had been keeping alive. W
 that is either a missed regression or a false alarm, reported with equal confidence.
 
 ```bash
-git worktree add ../baseline HEAD && (cd ../baseline && <build>)   # baseline artifact
+# Before editing; keep this shell open or save BASE for the comparison.
+BASE=$(git rev-parse HEAD)
+# After editing, use the saved pre-change reference:
+git worktree add ../baseline "$BASE" && (cd ../baseline && <build>)   # baseline artifact
 <build>                                                            # your artifact
 diff <(rg -o 'your-pattern' ../baseline/<dist>) <(rg -o 'your-pattern' <dist>)
 ```
@@ -1352,7 +1355,7 @@ Use this to kick off a new audit round, including a re-check after a remediation
 | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | All catch blocks / promise catches                       | `rg -n "catch\s*\{\|catch\s*\(\|\.catch\(" <src>`                                                                          |
 | Empty catches                                            | `rg -n -U "catch\s*(\([^)]*\))?\s*\{\s*(//[^\n]*)?\s*\}" <src>`                                                            |
-| `try` around calls that may be `async` (R2-A), read each | `rg -n -P "(?s)try\s*\{[^}]*?\b\w+\([^)]*\)\s*;?\s*\}\s*catch" <src>`                                                      |
+| `try` around calls that may be `async` (R2-A), read each | `rg -n -U -P "(?s)try\s*\{[^}]*?\b\w+\([^)]*\)\s*;?\s*\}\s*catch" <src>`                                                   |
 | Un-awaited async-looking calls (R2-B), heuristic         | `rg -n -P "^\s*(?!await\b\|return\b).*\b(invalidate\|clear\|reset\|load\|save\|set\|delete\|hydrate\|refresh)\w*\(" <src>` |
 | Sync/async twins (R2-C)                                  | `rg -n "Sync\b" <src>`                                                                                                     |
 | Callsites of a symbol (run on the **whole repo**, R5)    | `rg "symbolName"`                                                                                                          |
