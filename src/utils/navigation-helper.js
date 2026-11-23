@@ -49,7 +49,7 @@ export const createNavigationButtons = currentView => {
     const settingsView = views.find(view => view.key === 'settings');
     if (settingsView) {
       const settingsButton = document.createElement('button');
-      settingsButton.innerHTML = settingsView.icon;
+      settingsButton.textContent = settingsView.icon;
       settingsButton.className = 'btn btn-ghost';
       settingsButton.style.fontSize = '1.5rem';
       settingsButton.style.padding = SPACING.XS;
@@ -76,7 +76,7 @@ export const createNavigationButtons = currentView => {
   // Create buttons for all views
   views.forEach(view => {
     const button = document.createElement('button');
-    button.innerHTML = view.icon;
+    button.textContent = view.icon;
     button.className = 'btn btn-ghost';
     button.style.fontSize = '1.5rem';
     button.style.padding = SPACING.XS;

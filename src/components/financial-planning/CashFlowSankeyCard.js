@@ -44,9 +44,13 @@ export const CashFlowSankeyCard = ({
 
   const title = document.createElement('h3');
   title.className = 'insights-card-title';
-  title.innerHTML =
-    '<span class="trend-title-prefix">CASH FLOW </span>' +
-    '<span class="trend-title-income">SANKEY</span>';
+  const prefixSpan = document.createElement('span');
+  prefixSpan.className = 'trend-title-prefix';
+  prefixSpan.textContent = 'CASH FLOW ';
+  const incomeSpan = document.createElement('span');
+  incomeSpan.className = 'trend-title-income';
+  incomeSpan.textContent = 'SANKEY';
+  title.append(prefixSpan, incomeSpan);
 
   const subtitle = document.createElement('p');
   subtitle.className = 'insights-card-subtitle';

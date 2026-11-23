@@ -190,7 +190,7 @@ export const TimePeriodSelector = (options = {}) => {
 
   function createArrow(direction) {
     const arrow = document.createElement('span');
-    arrow.innerHTML = direction === 'left' ? '←' : '→';
+    arrow.textContent = direction === 'left' ? '←' : '→';
     arrow.style.fontSize = '1em';
     arrow.style.position = 'absolute';
     arrow.style[direction === 'left' ? 'left' : 'right'] = '0';

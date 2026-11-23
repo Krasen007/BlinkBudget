@@ -118,10 +118,18 @@ export const FeedbackLink = () => {
     color: var(--color-text-muted);
     text-align: center;
   `;
-  additionalInfo.innerHTML = `
-    You can also <a href="https://github.com/Krasen007/BlinkBudget/issues" target="_blank" style="color: var(--color-primary);">view existing issues</a> 
-    to see if your problem has already been reported.
-  `;
+  const issueLink = document.createElement('a');
+  issueLink.href = 'https://github.com/Krasen007/BlinkBudget/issues';
+  issueLink.target = '_blank';
+  issueLink.style.color = 'var(--color-primary)';
+  issueLink.textContent = 'view existing issues';
+  additionalInfo.textContent = 'You can also ';
+  additionalInfo.appendChild(issueLink);
+  additionalInfo.appendChild(
+    document.createTextNode(
+      ' to see if your problem has already been reported.'
+    )
+  );
 
   guideSection.appendChild(additionalInfo);
   section.appendChild(guideSection);

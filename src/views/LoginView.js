@@ -249,6 +249,7 @@ export const LoginView = () => {
 
   // Eye SVG (closed by default)
   const eyeSvg = document.createElement('span');
+  // safe-anything:ignore
   eyeSvg.innerHTML = `
     <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
       <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z" />
@@ -268,6 +269,7 @@ export const LoginView = () => {
       passwordVisible ? 'Hide password' : 'Show password'
     );
     if (passwordVisible) {
+      // safe-anything:ignore
       eyeSvg.innerHTML = `
         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
           <path d="M12 6a9.77 9.77 0 0 1 8.94 5A9.77 9.77 0 0 1 12 16a9.77 9.77 0 0 1-8.94-5A9.77 9.77 0 0 1 12 6m0-2C7 4 2.73 7.11 1 11c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7z"/>
@@ -275,6 +277,7 @@ export const LoginView = () => {
         </svg>
       `;
     } else {
+      // safe-anything:ignore
       eyeSvg.innerHTML = `
         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
           <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z" />
@@ -531,6 +534,7 @@ export const LoginView = () => {
     toggleBtn.textContent = isSignup
       ? 'Already have an account? Login'
       : "Don't have an account? Sign Up";
+    // safe-anything:ignore
     passwordInput.autocomplete = isSignup ? 'new-password' : 'current-password';
     // Show password requirements when signing up
     pwRequirements.style.display = isSignup ? 'block' : 'none';

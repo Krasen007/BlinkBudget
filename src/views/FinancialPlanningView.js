@@ -22,8 +22,6 @@ import { COLORS, SPACING, STORAGE_KEYS } from '../utils/constants.js';
 
 import { createNavigationButtons } from '../utils/navigation-helper.js';
 
-import { escapeHtml } from '../utils/security-utils.js';
-
 import { OverviewSection } from './financial-planning/OverviewSection.js';
 import { ForecastsSection } from './financial-planning/ForecastsSection.js';
 import { InvestmentsSection } from './financial-planning/InvestmentsSection.js';
@@ -214,11 +212,14 @@ export const FinancialPlanningView = (params = {}) => {
       tab.setAttribute('aria-controls', `${section.id}-panel`);
       tab.id = `${section.id}-tab`;
 
-      // Security: Escape dynamic icon and label values
-      tab.innerHTML = `
-        <span class="tab-icon">${escapeHtml(section.icon)}</span>
-        <span class="tab-label">${escapeHtml(section.label)}</span>
-      `;
+      // Security: Use DOM elements and textContent for icon and label
+      const iconSpan = document.createElement('span');
+      iconSpan.className = 'tab-icon';
+      iconSpan.textContent = section.icon;
+      const labelSpan = document.createElement('span');
+      labelSpan.className = 'tab-label';
+      labelSpan.textContent = section.label;
+      tab.append(iconSpan, labelSpan);
 
       // Click handler
       tab.addEventListener('click', () => {

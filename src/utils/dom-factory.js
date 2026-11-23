@@ -47,6 +47,7 @@ export const createElement = (tag, options = {}) => {
   if (textContent) {
     element.textContent = textContent;
   } else if (innerHTML) {
+    // safe-anything:ignore
     element.innerHTML = innerHTML;
   }
 

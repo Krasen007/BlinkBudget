@@ -141,12 +141,19 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
   titleGroup.className = 'insights-card-title-group';
   const title = document.createElement('h3');
   title.className = 'insights-card-title';
-  title.innerHTML = `
-    <span class="trend-title-prefix">Trend </span>
-    <span class="trend-title-income">Income</span>
-    <span class="trend-title-vs"> vs </span>
-    <span class="trend-title-expense">Expense</span>
-  `;
+  const prefixSpan = document.createElement('span');
+  prefixSpan.className = 'trend-title-prefix';
+  prefixSpan.textContent = 'Trend ';
+  const incomeSpan = document.createElement('span');
+  incomeSpan.className = 'trend-title-income';
+  incomeSpan.textContent = 'Income';
+  const vsSpan = document.createElement('span');
+  vsSpan.className = 'trend-title-vs';
+  vsSpan.textContent = ' vs ';
+  const expenseSpan = document.createElement('span');
+  expenseSpan.className = 'trend-title-expense';
+  expenseSpan.textContent = 'Expense';
+  title.append(prefixSpan, incomeSpan, vsSpan, expenseSpan);
   titleGroup.appendChild(title);
   header.appendChild(titleGroup);
 
@@ -160,10 +167,13 @@ export const TrendBarChartCard = ({ transactions = [], chartRenderer }) => {
   grainSelect.name = 'trendGrain';
   grainSelect.className = 'insights-select view-select';
   grainSelect.setAttribute('aria-label', 'Select trend grouping grain');
-  grainSelect.innerHTML = `
-    <option value="month">Month</option>
-    <option value="year">Year</option>
-  `;
+  const trendOptMonth = document.createElement('option');
+  trendOptMonth.value = 'month';
+  trendOptMonth.textContent = 'Month';
+  const trendOptYear = document.createElement('option');
+  trendOptYear.value = 'year';
+  trendOptYear.textContent = 'Year';
+  grainSelect.append(trendOptMonth, trendOptYear);
   grainSelect.value = currentGrain;
   grainSelect.addEventListener('change', () => {
     currentGrain = grainSelect.value;

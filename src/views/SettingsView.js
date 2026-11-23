@@ -10,7 +10,6 @@ import { DataManagementSection } from '../components/DataManagementSection.js';
 import { GeneralSection } from '../components/GeneralSection.js';
 import { BackupRestoreSection } from '../components/BackupRestoreSection.js';
 import { AccountDeletionSection } from '../components/AccountDeletionSection.js';
-import { escapeHtml } from '../utils/security-utils.js';
 import { SecuritySection } from '../components/SecuritySection.js';
 import { FeedbackLink } from '../components/FeedbackLink.js';
 import {
@@ -342,10 +341,14 @@ export const SettingsView = () => {
     border-bottom: 1px solid var(--color-border, #333);
     margin-bottom: ${SPACING.MD};
   `;
-  versionInfo.innerHTML = `
-    <span style="color: var(--color-text-muted, #888);">Current Version</span>
-    <span style="font-weight: 600; color: var(--color-primary, #00d084);">v${escapeHtml(CURRENT_VERSION)}</span>
-  `;
+  const labelSpan = document.createElement('span');
+  labelSpan.style.color = 'var(--color-text-muted)';
+  labelSpan.textContent = 'Current Version';
+  const verSpan = document.createElement('span');
+  verSpan.style.fontWeight = '600';
+  verSpan.style.color = 'var(--color-primary)';
+  verSpan.textContent = `v${CURRENT_VERSION}`;
+  versionInfo.append(labelSpan, verSpan);
   updatesSection.appendChild(versionInfo);
 
   let isChecking = false;

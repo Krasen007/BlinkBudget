@@ -140,3 +140,5 @@ androidTWA/
 
 # Lode (AI memory) session scraps — never commit
 lode/tmp/
+
+.omo/

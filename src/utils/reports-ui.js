@@ -138,7 +138,7 @@ export function showErrorState(errorState, customMessage, onRetry) {
 
   // Error icon
   const icon = document.createElement('div');
-  icon.innerHTML = '⚠️';
+  icon.textContent = '⚠️';
   icon.style.fontSize = '3rem';
 
   // Error message
@@ -218,7 +218,7 @@ export function showUnsupportedBrowserError(container, missingFeatures) {
   errorContainer.style.background = COLORS.SURFACE;
 
   const icon = document.createElement('div');
-  icon.innerHTML = '🌐';
+  icon.textContent = '🌐';
   icon.style.fontSize = '4rem';
   icon.style.marginBottom = SPACING.XS;
 
@@ -281,7 +281,7 @@ export function showBrowserWarning(container, limitedFeatures) {
 
   // Add close button
   const closeBtn = document.createElement('button');
-  closeBtn.innerHTML = '×';
+  closeBtn.textContent = '×';
   closeBtn.style.float = 'right';
   closeBtn.style.background = 'none';
   closeBtn.style.border = 'none';
@@ -299,7 +299,7 @@ export function showBrowserWarning(container, limitedFeatures) {
  */
 export function showPerformanceWarning(container, processingTime) {
   const closeBtn = dom.button({
-    innerHTML: '×',
+    textContent: '×',
     style: {
       float: 'right',
       background: 'none',
@@ -351,7 +351,7 @@ export function showPerformanceWarning(container, processingTime) {
  */
 export function showChartRenderingWarning(container, failedCharts) {
   const closeBtn = dom.button({
-    innerHTML: '×',
+    textContent: '×',
     style: {
       float: 'right',
       background: 'none',

@@ -1,9 +1,9 @@
 ## Product Requirements Document: BlinkBudget
 
-### Version 1.52
+### Version 1.22
 
 - **Product Name:** BlinkBudget
-- **Date:** December 9, 2025 (Updated: November 21, 2026)
+- **Date:** December 9, 2025 (Updated: February 21, 2026)
 - **Author:** Gemini, Expert Product Manager, Krasen Ivanov
 
 ---

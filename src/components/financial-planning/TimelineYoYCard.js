@@ -287,10 +287,13 @@ export const TimelineYoYCard = ({
   grainSelect.name = 'timelineGrain';
   grainSelect.className = 'insights-select view-select';
   grainSelect.setAttribute('aria-label', 'Select timeline granularity');
-  grainSelect.innerHTML = `
-    <option value="month">Month</option>
-    <option value="year">Year</option>
-  `;
+  const optMonth = document.createElement('option');
+  optMonth.value = 'month';
+  optMonth.textContent = 'Month';
+  const optYear = document.createElement('option');
+  optYear.value = 'year';
+  optYear.textContent = 'Year';
+  grainSelect.append(optMonth, optYear);
   grainSelect.value = currentGrain;
   grainSelect.addEventListener('change', () => {
     currentGrain =

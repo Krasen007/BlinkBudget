@@ -629,10 +629,15 @@ export const CustomCategoryManager = ({
       font-size: var(--font-size-base);
     `;
 
-    typeSelect.innerHTML = `
-      <option value="expense" ${category?.type === 'expense' ? 'selected' : ''}>Expense</option>
-      <option value="income" ${category?.type === 'income' ? 'selected' : ''}>Income</option>
-    `;
+    const optExpense = document.createElement('option');
+    optExpense.value = 'expense';
+    optExpense.textContent = 'Expense';
+    if (category?.type === 'expense') optExpense.selected = true;
+    const optIncome = document.createElement('option');
+    optIncome.value = 'income';
+    optIncome.textContent = 'Income';
+    if (category?.type === 'income') optIncome.selected = true;
+    typeSelect.append(optExpense, optIncome);
 
     typeGroup.appendChild(typeLabel);
     typeGroup.appendChild(typeSelect);
