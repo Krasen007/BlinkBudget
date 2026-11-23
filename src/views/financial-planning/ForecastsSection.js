@@ -537,6 +537,16 @@ export const ForecastsSection = async (
       return balance + (t.type === 'income' ? t.amount : -t.amount);
     }, 0);
 
+    // Create dedicated chart slots in fixed visual order before async charts settle.
+    // This guarantees deterministic DOM ordering regardless of which chart promise resolves first.
+    const comparisonSlot = document.createElement('div');
+    comparisonSlot.className = 'forecast-chart-slot';
+    section.appendChild(comparisonSlot);
+
+    const balanceSlot = document.createElement('div');
+    balanceSlot.className = 'forecast-chart-slot';
+    section.appendChild(balanceSlot);
+
     // Create forecast comparison chart
     createForecastComparisonChart(
       chartRenderer,
@@ -544,7 +554,7 @@ export const ForecastsSection = async (
       expenseForecasts
     )
       .then(({ section: chartSection, chart }) => {
-        section.appendChild(chartSection);
+        comparisonSlot.appendChild(chartSection);
         activeCharts.set('forecast-comparison', chart);
       })
       .catch(error => {
@@ -561,14 +571,14 @@ export const ForecastsSection = async (
     // Create projected balance chart
     createProjectedBalanceChart(chartRenderer, balanceProjections)
       .then(({ section: chartSection, chart }) => {
-        section.appendChild(chartSection);
+        balanceSlot.appendChild(chartSection);
         activeCharts.set('projected-balance', chart);
       })
       .catch(error => {
         console.error('Error creating projected balance chart:', error);
       });
 
-    // Create detailed forecast table with historical data
+    // Create detailed forecast table with historical data (renders after chart slots)
     const historicalData = generateHistoricalData(planningData.transactions, 3);
     const forecastTable = createForecastTable(
       incomeForecasts,

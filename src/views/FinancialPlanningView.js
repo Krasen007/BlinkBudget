@@ -21,6 +21,7 @@ import { SyncService } from '../core/sync-service.js';
 import { COLORS, SPACING, STORAGE_KEYS } from '../utils/constants.js';
 
 import { createNavigationButtons } from '../utils/navigation-helper.js';
+import { createPlaceholder } from '../utils/financial-planning-helpers.js';
 
 import { OverviewSection } from './financial-planning/OverviewSection.js';
 import { ForecastsSection } from './financial-planning/ForecastsSection.js';
@@ -152,7 +153,7 @@ export const FinancialPlanningView = (params = {}) => {
 
     // Back button (always visible)
     const backButton = document.createElement('button');
-    backButton.innerHTML = '← Back';
+    backButton.textContent = '← Back';
     backButton.className = 'view-back-btn';
     backButton.title = 'Back to Dashboard';
 
@@ -476,6 +477,13 @@ export const FinancialPlanningView = (params = {}) => {
       }
     } catch (error) {
       console.error('Error loading planning data:', error);
+      content.replaceChildren(
+        createPlaceholder(
+          'Unable to Load Financial Data',
+          'There was an error loading your financial planning data. Please try refreshing.',
+          '⚠️'
+        )
+      );
     } finally {
       isLoading = false;
     }

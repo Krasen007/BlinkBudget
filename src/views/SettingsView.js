@@ -47,7 +47,7 @@ export const SettingsView = () => {
 
   // Back button
   const backButton = document.createElement('button');
-  backButton.innerHTML = '← Back';
+  backButton.textContent = '← Back';
   backButton.className = 'view-back-btn';
   backButton.title = 'Back to Dashboard';
 
@@ -338,7 +338,7 @@ export const SettingsView = () => {
     align-items: center;
     justify-content: space-between;
     padding: ${SPACING.XS} 0;
-    border-bottom: 1px solid var(--color-border, #333);
+    border-bottom: 1px solid var(--color-border);
     margin-bottom: ${SPACING.MD};
   `;
   const labelSpan = document.createElement('span');

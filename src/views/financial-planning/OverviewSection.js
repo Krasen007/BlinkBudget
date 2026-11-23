@@ -17,6 +17,7 @@ import {
   createSectionContainer,
   createPlaceholder,
   createUsageNote,
+  formatCurrency,
 } from '../../utils/financial-planning-helpers.js';
 import { ProgressiveEmptyState } from '../../components/ProgressiveEmptyState.js';
 
@@ -95,17 +96,17 @@ function assessEmergencyFundAdequacy(monthlyExpenses, emergencyFund) {
       status = 'adequate';
       riskLevel = 'moderate';
       message = `Minimum emergency fund: ${monthsCovered.toFixed(1)} months of expenses covered`;
-      recommendation = `Build emergency fund to €${recommendedAmount.toFixed(2)} (6 months of expenses)`;
+      recommendation = `Build emergency fund to ${formatCurrency(recommendedAmount)} (6 months of expenses)`;
     } else if (monthsCovered > 0) {
       status = 'insufficient';
       riskLevel = 'critical';
       message = `Insufficient emergency fund: Only ${monthsCovered.toFixed(1)} months covered`;
-      recommendation = `Urgent: Build emergency fund to at least €${(monthlyExpenses * 3).toFixed(2)} (3 months minimum)`;
+      recommendation = `Urgent: Build emergency fund to at least ${formatCurrency(monthlyExpenses * 3)} (3 months minimum)`;
     } else {
       status = 'none';
       riskLevel = 'critical';
       message = 'No emergency fund detected';
-      recommendation = `Critical: Start building emergency fund immediately. Target: €${recommendedAmount.toFixed(2)}`;
+      recommendation = `Critical: Start building emergency fund immediately. Target: ${formatCurrency(recommendedAmount)}`;
     }
 
     return {

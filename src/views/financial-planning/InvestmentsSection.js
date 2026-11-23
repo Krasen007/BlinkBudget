@@ -971,8 +971,11 @@ export const InvestmentsSection = async (_chartRenderer, _activeCharts) => {
     if (unlockCard) {
       section.appendChild(unlockCard);
     }
-  } catch {
-    // Non-critical — silently fail
+  } catch (error) {
+    console.warn(
+      '[InvestmentsSection] Progressive unlock check failed:',
+      error
+    );
   }
 
   // Keep button, form, and holdings in one tight stack so opening the form

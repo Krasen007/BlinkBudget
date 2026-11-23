@@ -323,6 +323,7 @@ export const STORAGE_KEYS = {
   DASHBOARD_CATEGORY_FILTER: 'dashboard_category_filter',
   DASHBOARD_TAG_FILTER: 'dashboard_tag_filter',
   DASHBOARD_MONTH_FILTER: 'dashboard_month_filter',
+  DASHBOARD_DATE_RANGE_FILTER: 'dashboard_date_range_filter',
   CLICK_TRACKING: 'blinkbudget_click_tracking',
   BUDGETS: 'blinkbudget_budgets',
 };

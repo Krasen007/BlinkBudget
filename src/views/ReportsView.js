@@ -1285,7 +1285,7 @@ export const ReportsView = (params = {}) => {
         section = document.createElement('div');
         section.className = 'income-expense-section';
         section.id = 'income-expense-section';
-        section.className = 'reports-section-spacer';
+        section.classList.add('reports-section-spacer');
         chartContainer.appendChild(section);
         sectionContainers.incomeExpense = section;
       }

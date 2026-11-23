@@ -30,7 +30,6 @@ import { getCurrentMonthPeriod } from '../utils/reports-utils.js';
 import { getTransactionToHighlight } from '../utils/success-feedback.js';
 
 import { setSelectedStyle } from '../utils/transaction-selection.js';
-export { setSelectedStyle };
 import { createNavigationButtons } from '../utils/navigation-helper.js';
 import { BulkEditDialog } from '../components/BulkEditDialog.js';
 import { CategoryHistoryCard } from '../components/CategoryHistoryCard.js';
@@ -265,7 +264,9 @@ export const DashboardView = (params = {}) => {
   let currentTypeFilter = NavigationState.restoreDashboardTypeFilter() || null;
 
   let currentDateRangeFilter = null;
-  const savedDateRange = sessionStorage.getItem('dashboard_date_range_filter');
+  const savedDateRange = sessionStorage.getItem(
+    STORAGE_KEYS.DASHBOARD_DATE_RANGE_FILTER
+  );
   if (savedDateRange) {
     try {
       const parsed = JSON.parse(savedDateRange);
@@ -519,7 +520,7 @@ export const DashboardView = (params = {}) => {
           currentMonthFilter = monthIso;
           sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER, monthIso);
           currentDateRangeFilter = null;
-          sessionStorage.removeItem('dashboard_date_range_filter');
+          sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_DATE_RANGE_FILTER);
         } else {
           console.warn(
             '[DashboardView] Reports period has an invalid start date:',
@@ -527,7 +528,7 @@ export const DashboardView = (params = {}) => {
           );
           currentDateRangeFilter = period;
           sessionStorage.setItem(
-            'dashboard_date_range_filter',
+            STORAGE_KEYS.DASHBOARD_DATE_RANGE_FILTER,
             JSON.stringify(period)
           );
           currentMonthFilter = null;
@@ -536,7 +537,7 @@ export const DashboardView = (params = {}) => {
       } else {
         currentDateRangeFilter = period;
         sessionStorage.setItem(
-          'dashboard_date_range_filter',
+          STORAGE_KEYS.DASHBOARD_DATE_RANGE_FILTER,
           JSON.stringify(period)
         );
 
@@ -568,7 +569,7 @@ export const DashboardView = (params = {}) => {
   if (timePeriod) {
     currentDateRangeFilter = timePeriod;
     sessionStorage.setItem(
-      'dashboard_date_range_filter',
+      STORAGE_KEYS.DASHBOARD_DATE_RANGE_FILTER,
       JSON.stringify(timePeriod)
     );
 
@@ -897,7 +898,7 @@ export const DashboardView = (params = {}) => {
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_CATEGORY_FILTER);
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_TAG_FILTER);
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
-          sessionStorage.removeItem('dashboard_date_range_filter');
+          sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_DATE_RANGE_FILTER);
           NavigationState.clearDashboardTypeFilter();
 
           // Reset account select (rebuild drops a synthetic type option too)
@@ -933,7 +934,7 @@ export const DashboardView = (params = {}) => {
 
           // Clear date range filter if user shifts to monthly navigation
           currentDateRangeFilter = null;
-          sessionStorage.removeItem('dashboard_date_range_filter');
+          sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_DATE_RANGE_FILTER);
 
           renderDashboard();
         },
@@ -1034,7 +1035,7 @@ export const DashboardView = (params = {}) => {
           currentMonthFilter = null;
           sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_MONTH_FILTER);
           currentDateRangeFilter = null;
-          sessionStorage.removeItem('dashboard_date_range_filter');
+          sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_DATE_RANGE_FILTER);
           currentTypeFilter = null;
           NavigationState.clearDashboardTypeFilter();
           currentDashboardFilter = null;
@@ -1225,7 +1226,7 @@ export const DashboardView = (params = {}) => {
           // A month tap supersedes a Reports date range, exactly like the
           // Spent-card month arrows.
           currentDateRangeFilter = null;
-          sessionStorage.removeItem('dashboard_date_range_filter');
+          sessionStorage.removeItem(STORAGE_KEYS.DASHBOARD_DATE_RANGE_FILTER);
 
           renderDashboard();
         },

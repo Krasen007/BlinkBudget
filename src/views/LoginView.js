@@ -1,11 +1,20 @@
 import { AuthService } from '../core/auth-service.js';
 import { Router } from '../core/router.js';
 import { ButtonComponent } from '../components/Button.js';
-import { COLORS, SPACING, FONT_SIZES } from '../utils/constants.js';
+import { COLORS, SPACING, FONT_SIZES, Z_INDEX } from '../utils/constants.js';
 import {
   validatePasswordStrength,
   validateEmail,
 } from '../utils/security-utils.js';
+
+// Local layout constants for values with no matching design token.
+// Kept module-scoped so related measurements can't drift apart.
+const EYE_BUTTON_SIZE = '28px';
+const PASSWORD_INPUT_PADDING_RIGHT = '40px';
+const REQ_LIST_PADDING_LEFT = '18px';
+const REQ_INDICATOR_SIZE = '10px';
+const SEPARATOR_HEIGHT = '1px';
+const GOOGLE_ICON_SIZE = '18px';
 
 // Password Reset Modal Component
 const createPasswordResetModal = () => {
@@ -21,9 +30,7 @@ const createPasswordResetModal = () => {
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    // No z-index token exists in the stylesheet (--z-index-modal is referenced
-    // elsewhere but never defined), so this literal stays until a real scale lands.
-    zIndex: '1000',
+    zIndex: Z_INDEX.MODAL_OVERLAY,
     padding: SPACING.MD,
   });
 
@@ -234,11 +241,11 @@ export const LoginView = () => {
     background: 'transparent',
     cursor: 'pointer',
     position: 'absolute',
-    right: '12px',
+    right: SPACING.MD,
     top: '50%',
     transform: 'translateY(-50%)',
-    height: '28px',
-    width: '28px',
+    height: EYE_BUTTON_SIZE,
+    width: EYE_BUTTON_SIZE,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -292,7 +299,7 @@ export const LoginView = () => {
 
   // Ensure the input leaves space for the eye icon inside the field
   Object.assign(passwordInput.style, {
-    paddingRight: `40px`,
+    paddingRight: PASSWORD_INPUT_PADDING_RIGHT,
     width: '100%',
     boxSizing: 'border-box',
   });
@@ -308,7 +315,10 @@ export const LoginView = () => {
   });
 
   const reqList = document.createElement('ul');
-  Object.assign(reqList.style, { paddingLeft: '18px', margin: '4px 0 0 0' });
+  Object.assign(reqList.style, {
+    paddingLeft: REQ_LIST_PADDING_LEFT,
+    margin: `${SPACING.XS} 0 0 0`,
+  });
 
   const makeReq = text => {
     const li = document.createElement('li');
@@ -317,10 +327,10 @@ export const LoginView = () => {
     const indicator = document.createElement('span');
     Object.assign(indicator.style, {
       display: 'inline-block',
-      width: '10px',
-      height: '10px',
+      width: REQ_INDICATOR_SIZE,
+      height: REQ_INDICATOR_SIZE,
       borderRadius: '50%',
-      marginRight: '8px',
+      marginRight: SPACING.SM,
       verticalAlign: 'middle',
       background: COLORS.BORDER,
     });
@@ -444,7 +454,7 @@ export const LoginView = () => {
   const line1 = document.createElement('div');
   Object.assign(line1.style, {
     flex: 1,
-    height: '1px',
+    height: SEPARATOR_HEIGHT,
     background: COLORS.BORDER,
   });
   const orText = document.createElement('span');
@@ -452,7 +462,7 @@ export const LoginView = () => {
   const line2 = document.createElement('div');
   Object.assign(line2.style, {
     flex: 1,
-    height: '1px',
+    height: SEPARATOR_HEIGHT,
     background: COLORS.BORDER,
   });
 
@@ -499,8 +509,8 @@ export const LoginView = () => {
   googleIcon.src =
     'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg';
   Object.assign(googleIcon.style, {
-    width: '18px',
-    height: '18px',
+    width: GOOGLE_ICON_SIZE,
+    height: GOOGLE_ICON_SIZE,
     marginRight: SPACING.SM,
   });
   googleBtn.prepend(googleIcon);

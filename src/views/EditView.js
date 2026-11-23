@@ -157,15 +157,15 @@ export const EditView = ({ id }) => {
           }
         }
 
-        // Update dashboard filter to show the account used for this transaction
-        if (data.accountId) {
-          sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, data.accountId);
-        }
-
         TransactionService.update(id, data);
 
         // Mark transaction for highlighting in dashboard
         markTransactionForHighlight(id);
+
+        // Update dashboard filter to show the account used for this transaction
+        if (data.accountId) {
+          sessionStorage.setItem(STORAGE_KEYS.DASHBOARD_FILTER, data.accountId);
+        }
 
         // Navigate to dashboard immediately
         Router.navigate('dashboard');

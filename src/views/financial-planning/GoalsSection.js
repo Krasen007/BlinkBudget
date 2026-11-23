@@ -177,7 +177,6 @@ function createGoalFormControls(
     if (!valid) return;
 
     try {
-      // Import StorageService dynamically
       StorageService.createGoal(name, target, tdate, current, {});
     } catch (err) {
       console.error('Failed to save goal', err);
@@ -291,8 +290,6 @@ function createGoalsList(
     goalsList.innerHTML = '';
     let items;
     try {
-      // Import StorageService dynamically
-
       items = StorageService.getGoals() || [];
 
       if (!items.length) {
