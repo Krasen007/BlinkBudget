@@ -63,17 +63,17 @@ describe('ForecastsSection', () => {
     delete global.window;
   });
 
-  it('labels the forecast as statistical rather than event-based cash flow', async () => {
+  it('describes historical trend forecasts and their limits', async () => {
     const section = await ForecastsSection(null);
 
     expect(section.querySelector('.section-header h2').textContent).toBe(
-      'Statistical Forecasts'
+      'Financial Forecasts'
     );
     expect(section.querySelector('.usage-note').textContent).toContain(
-      'not event-based cash projections'
+      'Scheduled bills and paydays are not included'
     );
     expect(section.querySelector('.usage-note').textContent).toContain(
-      'do not guarantee cash availability'
+      'not a guarantee of available cash'
     );
   });
 });

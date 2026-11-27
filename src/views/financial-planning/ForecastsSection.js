@@ -37,12 +37,12 @@ export const ForecastsSection = async (
 ) => {
   const section = createSectionContainer(
     'forecasts',
-    'Statistical Forecasts',
+    'Financial Forecasts',
     '🔮'
   );
   section.appendChild(
     createUsageNote(
-      'Statistical monthly estimates extrapolate transaction history, with recent months weighted more heavily. They are not event-based cash projections: scheduled bills and paydays are not modeled, and estimates do not guarantee cash availability.'
+      'Forecasts use all available transaction history to predict income and expenses. Recent months are weighted more heavily. Scheduled bills and paydays are not included, so forecasts are not a guarantee of available cash.'
     )
   );
 
@@ -141,7 +141,7 @@ export const ForecastsSection = async (
     };
     const summaryCards = [
       {
-        label: 'Statistical Income Estimate (6mo)',
+        label: 'Forecasted Income (6mo)',
         value: `€${totalIncomeForecasted.toFixed(2)}`,
         color: COLORS.SUCCESS,
         icon: '📈',
@@ -149,7 +149,7 @@ export const ForecastsSection = async (
         range: `Range: €${incomeRange.lower.toFixed(2)} - €${incomeRange.upper.toFixed(2)}`,
       },
       {
-        label: 'Statistical Expense Estimate (6mo)',
+        label: 'Forecasted Expenses (6mo)',
         value: `€${totalExpensesForecasted.toFixed(2)}`,
         color: COLORS.ERROR,
         icon: '📉',
@@ -157,7 +157,7 @@ export const ForecastsSection = async (
         range: `Range: €${expenseRange.lower.toFixed(2)} - €${expenseRange.upper.toFixed(2)}`,
       },
       {
-        label: 'Net Statistical Estimate (6mo)',
+        label: 'Net Forecast (6mo)',
         value: `€${netForecast.toFixed(2)}`,
         color: netForecast >= 0 ? COLORS.SUCCESS : COLORS.ERROR,
         icon: netForecast >= 0 ? '💰' : '⚠️',
@@ -165,7 +165,7 @@ export const ForecastsSection = async (
         range: `Range: €${netRange.lower.toFixed(2)} - €${netRange.upper.toFixed(2)}`,
       },
       {
-        label: 'Statistical Model Confidence',
+        label: 'Forecast Confidence',
         value: `${(avgConfidence * 100).toFixed(0)}%`,
         color:
           avgConfidence > 0.7
@@ -174,7 +174,12 @@ export const ForecastsSection = async (
               ? COLORS.WARNING
               : COLORS.ERROR,
         icon: '🎯',
-        subtitle: 'Model confidence, not certainty',
+        subtitle:
+          avgConfidence > 0.7
+            ? 'High confidence > 0.7'
+            : avgConfidence > 0.4
+              ? 'Moderate confidence > 0.4'
+              : 'Low confidence',
       },
     ];
 
@@ -201,8 +206,7 @@ export const ForecastsSection = async (
     createForecastComparisonChart(
       chartRenderer,
       incomeForecasts,
-      expenseForecasts,
-      { title: 'Statistical Income vs Expense Trend' }
+      expenseForecasts
     )
       .then(({ section: chartSection, chart }) => {
         comparisonSlot.appendChild(chartSection);
@@ -218,9 +222,7 @@ export const ForecastsSection = async (
       expenseForecasts,
       6
     );
-    createProjectedBalanceChart(chartRenderer, balanceProjections, {
-      title: 'Statistical Projected Balance',
-    })
+    createProjectedBalanceChart(chartRenderer, balanceProjections)
       .then(({ section: chartSection, chart }) => {
         balanceSlot.appendChild(chartSection);
         activeCharts.set('projected-balance', chart);

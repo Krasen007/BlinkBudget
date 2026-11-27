@@ -55,16 +55,16 @@ const RISK_LEVEL_STYLES = {
 /**
  * Assess emergency fund adequacy
  * @param {number} monthlyExpenses - Monthly expenses
- * @param {number} netBalanceProxy - Tracked net balance used as a proxy
+ * @param {number} trackedBalance - Current overall tracked balance
  * @returns {Object} Emergency fund assessment
  */
-function estimateEmergencyFundCoverage(monthlyExpenses, netBalanceProxy) {
+function estimateEmergencyFundCoverage(monthlyExpenses, trackedBalance) {
   try {
     if (monthlyExpenses <= 0) {
       return {
         status: 'unknown',
         message:
-          'Unable to estimate coverage: insufficient expense data. This estimate uses tracked net balance, not liquid savings accounts.',
+          'Unable to estimate coverage: insufficient expense data. This estimate uses your current overall balance, not designated liquid savings.',
         recommendation:
           'Track expenses for at least 3 months to get accurate assessment',
         monthsCovered: 0,
@@ -74,41 +74,40 @@ function estimateEmergencyFundCoverage(monthlyExpenses, netBalanceProxy) {
       };
     }
 
-    const monthsCovered = netBalanceProxy / monthlyExpenses;
+    const monthsCovered = trackedBalance / monthlyExpenses;
     const recommendedAmount =
       monthlyExpenses * RISK_THRESHOLDS.emergencyFund.recommended;
-    const shortfall = Math.max(0, recommendedAmount - netBalanceProxy);
+    const shortfall = Math.max(0, recommendedAmount - trackedBalance);
 
     let status, riskLevel, message, recommendation;
 
     if (monthsCovered >= RISK_THRESHOLDS.emergencyFund.optimal) {
       status = 'excellent';
       riskLevel = 'low';
-      message = `Tracked net-balance proxy: ${monthsCovered.toFixed(1)} months of expenses.`;
+      message = `Excellent emergency fund: ${monthsCovered.toFixed(1)} months of expenses covered`;
       recommendation =
-        'The tracked net-balance proxy exceeds the 12-month benchmark.';
+        'Consider investing excess emergency funds for better returns while maintaining liquidity';
     } else if (monthsCovered >= RISK_THRESHOLDS.emergencyFund.recommended) {
       status = 'good';
       riskLevel = 'low';
-      message = `Tracked net-balance proxy: ${monthsCovered.toFixed(1)} months of expenses.`;
+      message = `Good emergency fund: ${monthsCovered.toFixed(1)} months of expenses covered`;
       recommendation =
-        'The tracked net-balance proxy reaches the 6-month benchmark.';
+        'Emergency fund is adequate. Consider building towards 12 months for optimal security';
     } else if (monthsCovered >= RISK_THRESHOLDS.emergencyFund.minimum) {
       status = 'adequate';
       riskLevel = 'moderate';
-      message = `Tracked net-balance proxy: ${monthsCovered.toFixed(1)} months of expenses.`;
-      recommendation = `The tracked net-balance proxy is below the 6-month benchmark of ${formatCurrency(recommendedAmount)}`;
+      message = `Minimum emergency fund: ${monthsCovered.toFixed(1)} months of expenses covered`;
+      recommendation = `Build emergency fund to ${formatCurrency(recommendedAmount)} (6 months of expenses)`;
     } else if (monthsCovered > 0) {
       status = 'insufficient';
       riskLevel = 'critical';
-      message = `Tracked net-balance proxy: ${monthsCovered.toFixed(1)} months of expenses.`;
-      recommendation = `The tracked net-balance proxy is below the 3-month benchmark of ${formatCurrency(monthlyExpenses * 3)}`;
+      message = `Insufficient emergency fund: Only ${monthsCovered.toFixed(1)} months covered`;
+      recommendation = `Urgent: Build emergency fund to at least ${formatCurrency(monthlyExpenses * 3)} (3 months minimum)`;
     } else {
       status = 'none';
       riskLevel = 'critical';
-      message =
-        'No positive tracked net-balance proxy detected. Liquid savings accounts are not assessed.';
-      recommendation = `If this proxy reflects your situation, consider building liquid reserves. A 6-month target is ${formatCurrency(recommendedAmount)}.`;
+      message = 'No emergency fund detected';
+      recommendation = `Critical: Start building emergency fund immediately. Target: ${formatCurrency(recommendedAmount)}`;
     }
 
     return {
@@ -117,7 +116,7 @@ function estimateEmergencyFundCoverage(monthlyExpenses, netBalanceProxy) {
       message,
       recommendation,
       monthsCovered: Math.round(monthsCovered * 10) / 10,
-      currentAmount: netBalanceProxy,
+      currentAmount: trackedBalance,
       targetAmount: recommendedAmount,
       shortfall: Math.round(shortfall * 100) / 100,
       monthlyExpenses,
@@ -151,7 +150,7 @@ export const OverviewSection = planningData => {
 
   section.appendChild(
     createUsageNote(
-      'At-a-glance health summary: current balance, monthly expenses, savings rate and an emergency-fund estimate. The estimate uses tracked net balance as a proxy; it does not identify liquid savings accounts.'
+      'At-a-glance health summary: current balance, monthly expenses, savings rate and an emergency-fund estimate. The estimate uses your overall balance; designated liquid savings accounts are not evaluated separately.'
     )
   );
 
@@ -236,12 +235,11 @@ export const OverviewSection = planningData => {
       ? ((allTimeIncome - allTimeExpense) / effectiveIncome) * 100
       : 0;
 
-  // This remains a net-balance proxy by user choice; it is not an account-level
-  // measure of liquid savings and must not be presented as one.
-  const netBalanceProxy = Math.max(0, currentBalance);
+  // This uses the overall tracked balance; it does not identify liquid savings.
+  const trackedBalance = Math.max(0, currentBalance);
   const emergencyFundAssessment = estimateEmergencyFundCoverage(
     monthlyExpenses,
-    netBalanceProxy
+    trackedBalance
   );
 
   const stats = [
@@ -283,7 +281,7 @@ export const OverviewSection = planningData => {
         'Formula: (Total Income - Total Expenses) ÷ (Total Income - All-time Transfers) × 100. This percentage shows how much of your effective income you are saving.',
     },
     {
-      label: 'Risk Level (proxy)',
+      label: 'Risk Level',
       value:
         emergencyFundAssessment.riskLevel.charAt(0).toUpperCase() +
         emergencyFundAssessment.riskLevel.slice(1),
@@ -305,7 +303,7 @@ export const OverviewSection = planningData => {
               : '❓',
       subtitle: emergencyFundAssessment.message,
       calculationHelp:
-        'Estimate only: tracked net balance divided by average monthly expenses. It does not distinguish liquid savings from investments, debt, or other accounts, so it is not a measure of emergency cash or financial preparedness.',
+        'Estimate only: compares your overall balance with average monthly expenses. It does not evaluate designated savings accounts separately, so it may not represent cash available for emergencies.',
     },
   ];
 
@@ -355,7 +353,7 @@ function createEmergencyFundCard(assessment) {
   icon.style.fontSize = '1.25rem';
 
   const title = document.createElement('h3');
-  title.textContent = 'Emergency Fund Estimate (Net-Balance Proxy)';
+  title.textContent = 'Emergency Fund';
   title.style.margin = '0';
   title.style.fontSize = '0.875rem';
   title.style.fontWeight = '500';
@@ -365,7 +363,8 @@ function createEmergencyFundCard(assessment) {
   titleGroup.appendChild(title);
 
   const statusBadge = document.createElement('span');
-  statusBadge.textContent = `${assessment.status.charAt(0).toUpperCase() + assessment.status.slice(1)} (proxy)`;
+  statusBadge.textContent =
+    assessment.status.charAt(0).toUpperCase() + assessment.status.slice(1);
   statusBadge.style.padding = `${SPACING.XS} ${SPACING.MD}`;
   statusBadge.style.borderRadius = 'var(--radius-full)';
   statusBadge.style.fontSize = '0.75rem';
@@ -398,19 +397,19 @@ function createEmergencyFundCard(assessment) {
 
   const detailItems = [
     {
-      label: 'Current Net-Balance Proxy',
+      label: 'Current Amount',
       value: `€${(assessment.currentAmount || 0).toFixed(2)}`,
     },
     {
-      label: '6-Month Proxy Benchmark',
+      label: 'Target Amount',
       value: `€${(assessment.targetAmount || 0).toFixed(2)}`,
     },
     {
-      label: 'Estimated Months (proxy)',
+      label: 'Months Covered',
       value: (assessment.monthsCovered || 0).toFixed(1),
     },
     {
-      label: 'Proxy Gap',
+      label: 'Shortfall',
       value:
         (assessment.shortfall || 0) > 0
           ? `€${(assessment.shortfall || 0).toFixed(2)}`
