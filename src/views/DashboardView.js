@@ -33,6 +33,7 @@ import { setSelectedStyle } from '../utils/transaction-selection.js';
 import { createNavigationButtons } from '../utils/navigation-helper.js';
 import { BulkEditDialog } from '../components/BulkEditDialog.js';
 import { CategoryHistoryCard } from '../components/CategoryHistoryCard.js';
+import { openConfirmDialog } from '../utils/confirm-dialog-loader.js';
 
 // Cache key for the pre-loaded financial planning payload. Module-level so the
 // auth-change handler can invalidate exactly the same key the preload writes.
@@ -441,30 +442,28 @@ export const DashboardView = (params = {}) => {
 
   const handleBulkDelete = () => {
     if (selectedTransactionIds.size === 0) return;
-    import('../components/ConfirmDialog.js').then(({ ConfirmDialog }) => {
-      ConfirmDialog({
-        title: 'Delete Transactions',
-        message: `Delete ${selectedTransactionIds.size} selected transaction${selectedTransactionIds.size > 1 ? 's' : ''}?`,
-        confirmText: 'Delete',
-        variant: 'danger',
-        onConfirm: () => {
-          const removedEntries = [];
-          selectedTransactionIds.forEach(id => {
-            const removed = TransactionService.remove(id);
-            if (removed) removedEntries.push(...removed);
-          });
-          exitSelectionMode();
-          import('../utils/transaction-undo.js')
-            .then(({ notifyTransactionDeleted }) => {
-              notifyTransactionDeleted(removedEntries, {
-                message: `${removedEntries.length} transaction${removedEntries.length > 1 ? 's' : ''} deleted`,
-              });
-            })
-            .catch(undoErr => {
-              console.error('Failed to load undo module:', undoErr);
+    openConfirmDialog({
+      title: 'Delete Transactions',
+      message: `Delete ${selectedTransactionIds.size} selected transaction${selectedTransactionIds.size > 1 ? 's' : ''}?`,
+      confirmText: 'Delete',
+      variant: 'danger',
+      onConfirm: () => {
+        const removedEntries = [];
+        selectedTransactionIds.forEach(id => {
+          const removed = TransactionService.remove(id);
+          if (removed) removedEntries.push(...removed);
+        });
+        exitSelectionMode();
+        import('../utils/transaction-undo.js')
+          .then(({ notifyTransactionDeleted }) => {
+            notifyTransactionDeleted(removedEntries, {
+              message: `${removedEntries.length} transaction${removedEntries.length > 1 ? 's' : ''} deleted`,
             });
-        },
-      });
+          })
+          .catch(undoErr => {
+            console.error('Failed to load undo module:', undoErr);
+          });
+      },
     });
   };
 

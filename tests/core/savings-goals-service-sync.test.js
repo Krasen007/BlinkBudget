@@ -64,4 +64,39 @@ describe('SavingsGoalsService storage wrappers', () => {
       Promise.resolve(SavingsGoalsService.getSavingsGoals())
     ).resolves.toEqual([{ id: 'g1', name: 'Emergency Fund' }]);
   });
+
+  it('uses the manually maintained balance and excludes unlinked transactions', () => {
+    const progress = SavingsGoalsService.calculateSingleGoalProgress(
+      { id: 'g1', targetAmount: 100, currentSavings: 25 },
+      [{ goalId: 'g1', amount: 40, timestamp: new Date().toISOString() }]
+    );
+
+    expect(progress.currentAmount).toBe(25);
+    expect(progress.percentage).toBe(25);
+    expect(progress.contributingTransactions).toBe(0);
+    expect(progress.monthlySavingRate).toBeNull();
+    expect(progress.fundingModel).toBe('manual');
+    expect(progress.fundingNote).toContain(
+      'not linked to account balances or transactions'
+    );
+  });
+
+  it('does not infer emergency-fund progress from transaction categories', async () => {
+    StorageService.getGoals.mockReturnValueOnce([]);
+    const recommendations = await SavingsGoalsService.getGoalRecommendations([
+      {
+        type: 'expense',
+        category: 'Savings',
+        amount: 100,
+        timestamp: new Date().toISOString(),
+      },
+    ]);
+    const emergencyFund = recommendations.find(
+      recommendation => recommendation.type === 'emergency_fund'
+    );
+
+    expect(emergencyFund.current).toBe(0);
+    expect(emergencyFund.target).toBe(600);
+    expect(emergencyFund.description).toContain('manually tracked goal');
+  });
 });

@@ -13,6 +13,7 @@ import {
 import { createButton } from '../utils/dom-factory.js';
 import { markTransactionForHighlight } from '../utils/success-feedback.js';
 import { showErrorToast } from '../utils/toast-notifications.js';
+import { openConfirmDialog } from '../utils/confirm-dialog-loader.js';
 
 export const EditView = ({ id }) => {
   const container = document.createElement('div');
@@ -200,22 +201,20 @@ export const EditView = ({ id }) => {
       }
     },
     onCancel: () => Router.navigate('dashboard'),
-    onDelete: () => {
-      import('../components/ConfirmDialog.js').then(({ ConfirmDialog }) => {
-        ConfirmDialog({
-          message: 'Are you sure you want to delete this transaction?',
-          onConfirm: () => {
-            const removed = TransactionService.remove(id);
-            Router.navigate('dashboard');
-            import('../utils/transaction-undo.js')
-              .then(({ notifyTransactionDeleted }) => {
-                notifyTransactionDeleted(removed);
-              })
-              .catch(undoErr => {
-                console.error('Failed to load undo module:', undoErr);
-              });
-          },
-        });
+    onDelete: async () => {
+      await openConfirmDialog({
+        message: 'Are you sure you want to delete this transaction?',
+        onConfirm: () => {
+          const removed = TransactionService.remove(id);
+          Router.navigate('dashboard');
+          import('../utils/transaction-undo.js')
+            .then(({ notifyTransactionDeleted }) => {
+              notifyTransactionDeleted(removed);
+            })
+            .catch(undoErr => {
+              console.error('Failed to load undo module:', undoErr);
+            });
+        },
       });
     },
   });

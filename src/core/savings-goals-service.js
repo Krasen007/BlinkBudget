@@ -37,15 +37,15 @@ export class SavingsGoalsService {
   }
 
   /**
-   * Calculate progress for all goals based on transactions
-   * @param {Array} transactions - Transaction array
+   * Calculate progress for all goals using their manually maintained balances.
+   * @param {Array} [_transactions] - Legacy input; transactions are not goal funding
    * @returns {Array} Goals with progress data
    */
-  static async calculateGoalProgress(transactions = []) {
+  static async calculateGoalProgress(_transactions = []) {
     const goals = await this.getSavingsGoals();
 
     return goals.map(goal => {
-      const progress = this.calculateSingleGoalProgress(goal, transactions);
+      const progress = this.calculateSingleGoalProgress(goal, _transactions);
       return {
         ...goal,
         progress,
@@ -56,71 +56,18 @@ export class SavingsGoalsService {
   /**
    * Calculate progress for a single goal
    * @param {Object} goal - Goal object
-   * @param {Array} transactions - Transaction array
+   * @param {Array} [_transactions] - Legacy input; transactions are not goal funding
    * @returns {Object} Progress data
    */
-  static calculateSingleGoalProgress(goal, transactions = []) {
-    // Filter transactions that contribute to this goal
-    // Only include transactions explicitly tied to this goal
-    const relevantTransactions = transactions.filter(t => {
-      // Check if transaction is explicitly linked to this goal
-      return (
-        t.goalId === goal.id || (t.metadata && t.metadata.goalId === goal.id)
-      );
-    });
-
-    const totalSaved = relevantTransactions.reduce((sum, t) => {
-      return sum + (t.amount || 0);
-    }, 0);
+  static calculateSingleGoalProgress(goal, _transactions = []) {
+    // Goal balances are manually maintained. Transaction history is not a
+    // funding source unless a transaction-to-goal workflow is added.
+    const totalSaved = Number(goal.currentSavings || 0);
 
     const percentage =
       goal.targetAmount > 0 ? (totalSaved / goal.targetAmount) * 100 : 0;
     const remaining = Math.max(0, goal.targetAmount - totalSaved);
     const isCompleted = percentage >= 100;
-
-    // Calculate estimated completion date based on recent saving rate
-    const recentTransactions = relevantTransactions.filter(t => {
-      const transactionDate = new Date(t.timestamp);
-      const threeMonthsAgo = new Date();
-      threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-      return transactionDate >= threeMonthsAgo;
-    });
-
-    // Fix monthlySavingRate calculation to use actual time span
-    let monthlySavingRate = 0;
-    if (recentTransactions.length > 0) {
-      const result = recentTransactions.reduce(
-        (acc, t) => {
-          const timestamp = new Date(t.timestamp).getTime();
-          const amount = t.amount || 0;
-
-          return {
-            minTimestamp: Math.min(acc.minTimestamp, timestamp),
-            maxTimestamp: Math.max(acc.maxTimestamp, timestamp),
-            sumAmounts: acc.sumAmounts + amount,
-          };
-        },
-        {
-          minTimestamp: Infinity,
-          maxTimestamp: -Infinity,
-          sumAmounts: 0,
-        }
-      );
-
-      const earliest = new Date(result.minTimestamp);
-      const latest = new Date(result.maxTimestamp);
-      const timespanDays = Math.max(
-        (latest - earliest) / (1000 * 60 * 60 * 24),
-        1
-      );
-      const months = Math.max(timespanDays / 30, 1);
-      monthlySavingRate = result.sumAmounts / months;
-    }
-
-    let estimatedMonthsToComplete = null;
-    if (monthlySavingRate > 0 && !isCompleted) {
-      estimatedMonthsToComplete = Math.ceil(remaining / monthlySavingRate);
-    }
 
     return {
       currentAmount: totalSaved,
@@ -128,9 +75,12 @@ export class SavingsGoalsService {
       percentage: Math.min(percentage, 100),
       remaining,
       isCompleted,
-      monthlySavingRate,
-      estimatedMonthsToComplete,
-      contributingTransactions: relevantTransactions.length,
+      monthlySavingRate: null,
+      estimatedMonthsToComplete: null,
+      fundingModel: 'manual',
+      fundingNote:
+        'Manually maintained; not linked to account balances or transactions.',
+      contributingTransactions: 0,
     };
   }
 
@@ -167,17 +117,17 @@ export class SavingsGoalsService {
 
     // Emergency fund recommendation
     const emergencyFundTarget = monthlyExpenses * 6; // 6 months expenses
-    const currentEmergencyFund = transactions
-      .filter(t => t.category === 'Emergency Fund' || t.category === 'Savings')
-      .reduce((sum, t) => sum + (t.amount || 0), 0);
+    const hasEmergencyFundGoal = this.getSavingsGoals().some(
+      goal => goal.name?.trim().toLowerCase() === 'emergency fund'
+    );
 
-    if (currentEmergencyFund < emergencyFundTarget) {
+    if (emergencyFundTarget > 0 && !hasEmergencyFundGoal) {
       recommendations.push({
         type: 'emergency_fund',
         title: 'Build Emergency Fund',
-        description: `Save ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(emergencyFundTarget - currentEmergencyFund)} to reach 6 months of expenses`,
+        description: `Create a manually tracked goal with a target of ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(emergencyFundTarget)} (6 months of expenses)`,
         target: emergencyFundTarget,
-        current: currentEmergencyFund,
+        current: 0,
         priority: 'high',
         category: 'Emergency Fund',
       });

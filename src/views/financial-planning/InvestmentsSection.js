@@ -13,6 +13,7 @@ import {
 import { createEnhancedEmptyState } from '../../utils/enhanced-empty-states.js';
 import { ProgressiveEmptyState } from '../../components/ProgressiveEmptyState.js';
 import { showErrorToast } from '../../utils/toast-notifications.js';
+import { openConfirmDialog } from '../../utils/confirm-dialog-loader.js';
 import { StorageService } from '../../core/storage.js';
 
 /** Local calendar date as YYYY-MM-DD for <input type="date"> */
@@ -489,37 +490,31 @@ function createInvestmentsList(onAddHolding) {
         deleteHoldingBtn.addEventListener('click', e => {
           e.stopPropagation();
           const purchaseCount = holding.lots.length;
-          import('../../components/ConfirmDialog.js')
-            .then(({ ConfirmDialog }) => {
-              ConfirmDialog({
-                title: 'Delete Investment',
-                message: `Remove all ${purchaseCount} purchase${
-                  purchaseCount !== 1 ? 's' : ''
-                } of ${holding.symbol}${
-                  displayName &&
-                  displayName.toUpperCase() !==
-                    String(holding.symbol || '').toUpperCase()
-                    ? ` (${displayName})`
-                    : ''
-                }?`,
-                confirmText: 'Delete',
-                variant: 'danger',
-                onConfirm: async () => {
-                  try {
-                    StorageService.removeInvestment(holding.symbol);
-                    refreshInvestmentsList();
-                  } catch (err) {
-                    console.error('Failed to remove investment', err);
-                    showErrorToast(
-                      'Failed to remove investment. Please try again.'
-                    );
-                  }
-                },
-              });
-            })
-            .catch(err =>
-              console.error('Failed to load confirmation dialog:', err)
-            );
+          openConfirmDialog({
+            title: 'Delete Investment',
+            message: `Remove all ${purchaseCount} purchase${
+              purchaseCount !== 1 ? 's' : ''
+            } of ${holding.symbol}${
+              displayName &&
+              displayName.toUpperCase() !==
+                String(holding.symbol || '').toUpperCase()
+                ? ` (${displayName})`
+                : ''
+            }?`,
+            confirmText: 'Delete',
+            variant: 'danger',
+            onConfirm: async () => {
+              try {
+                StorageService.removeInvestment(holding.symbol);
+                refreshInvestmentsList();
+              } catch (err) {
+                console.error('Failed to remove investment', err);
+                showErrorToast(
+                  'Failed to remove investment. Please try again.'
+                );
+              }
+            },
+          });
         });
         summaryRight.appendChild(deleteHoldingBtn);
 
@@ -741,31 +736,25 @@ function createInvestmentsList(onAddHolding) {
 
           // Delete this purchase lot
           delBtn.addEventListener('click', async () => {
-            import('../../components/ConfirmDialog.js')
-              .then(({ ConfirmDialog }) => {
-                ConfirmDialog({
-                  title: 'Delete Purchase',
-                  message: `Remove this ${lot.symbol} purchase of ${formatShares(
-                    lotShares
-                  )} shares?`,
-                  confirmText: 'Delete',
-                  variant: 'danger',
-                  onConfirm: async () => {
-                    try {
-                      StorageService.removeInvestmentById(lot.id);
-                      refreshInvestmentsList();
-                    } catch (err) {
-                      console.error('Failed to remove purchase', err);
-                      showErrorToast(
-                        'Failed to remove purchase. Please try again.'
-                      );
-                    }
-                  },
-                });
-              })
-              .catch(err =>
-                console.error('Failed to load confirmation dialog:', err)
-              );
+            openConfirmDialog({
+              title: 'Delete Purchase',
+              message: `Remove this ${lot.symbol} purchase of ${formatShares(
+                lotShares
+              )} shares?`,
+              confirmText: 'Delete',
+              variant: 'danger',
+              onConfirm: async () => {
+                try {
+                  StorageService.removeInvestmentById(lot.id);
+                  refreshInvestmentsList();
+                } catch (err) {
+                  console.error('Failed to remove purchase', err);
+                  showErrorToast(
+                    'Failed to remove purchase. Please try again.'
+                  );
+                }
+              },
+            });
           });
 
           lotsContainer.appendChild(row);

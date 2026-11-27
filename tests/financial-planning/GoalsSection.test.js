@@ -168,6 +168,30 @@ describe('GoalsSection', () => {
     expect(mockChartRenderer.createBarChart).not.toHaveBeenCalled();
   });
 
+  it('discloses that goal progress uses manually maintained balances', async () => {
+    mockStorageService.getGoals.mockReturnValue([
+      {
+        id: 'manual-goal',
+        name: 'Emergency Fund',
+        targetAmount: 1000,
+        currentSavings: 250,
+        targetDate: '2027-06-01',
+      },
+    ]);
+
+    const section = await GoalsSection(mockChartRenderer, mockActiveCharts);
+
+    expect(section.querySelector('.usage-note').textContent).toContain(
+      'manually maintained current balance'
+    );
+    expect(section.querySelector('.goal-funding-note').textContent).toContain(
+      'not linked to account balances or transactions'
+    );
+    expect(section.querySelector('.goals-summary-card').textContent).toContain(
+      'Total Manually Reported'
+    );
+  });
+
   it('should create a goal and remove the no-goals placeholder when starting from empty state', async () => {
     mockStorageService.getGoals.mockReturnValue([]);
 

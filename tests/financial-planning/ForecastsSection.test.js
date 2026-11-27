@@ -5,39 +5,12 @@
  * Verifies income/expense forecasting, chart integration, and prediction table functionality.
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
+import { JSDOM } from 'jsdom';
+import { ForecastsSection } from '../../src/views/financial-planning/ForecastsSection.js';
 
 // Mock dependencies
-vi.mock('../src/utils/constants.js', () => ({
-  COLORS: {
-    PRIMARY: '#007bff',
-    SURFACE: '#f8f9fa',
-    TEXT_MAIN: '#212529',
-    TEXT_MUTED: '#6c757d',
-    SUCCESS: '#28a745',
-    WARNING: '#ffc107',
-    ERROR: '#dc3545',
-    CHART_BLUE: '#007bff',
-    CHART_GREEN: '#28a745',
-    CHART_RED: '#dc3545',
-  },
-  SPACING: {
-    XS: '4px',
-    SM: '8px',
-    MD: '16px',
-    LG: '24px',
-    XL: '32px',
-  },
-  FONT_SIZES: {
-    XS: '0.75rem',
-    SM: '0.875rem',
-    MD: '1rem',
-    LG: '1.25rem',
-    XL: '1.5rem',
-  },
-}));
-
-vi.mock('../src/utils/financial-planning-helpers.js', () => ({
+vi.mock('../../src/utils/financial-planning-helpers.js', () => ({
   createSectionContainer: vi.fn((id, title, icon) => {
     const section = document.createElement('section');
     section.id = id;
@@ -75,9 +48,32 @@ vi.mock('../src/utils/financial-planning-helpers.js', () => ({
   ),
 }));
 
-//TODO: implement tests
 describe('ForecastsSection', () => {
-  it('placeholder test', () => {
-    expect(true).toBe(true);
+  let dom;
+
+  beforeEach(() => {
+    dom = new JSDOM('<!doctype html><html><body></body></html>');
+    global.document = dom.window.document;
+    global.window = dom.window;
+  });
+
+  afterEach(() => {
+    dom.window.close();
+    delete global.document;
+    delete global.window;
+  });
+
+  it('labels the forecast as statistical rather than event-based cash flow', async () => {
+    const section = await ForecastsSection(null);
+
+    expect(section.querySelector('.section-header h2').textContent).toBe(
+      'Statistical Forecasts'
+    );
+    expect(section.querySelector('.usage-note').textContent).toContain(
+      'not event-based cash projections'
+    );
+    expect(section.querySelector('.usage-note').textContent).toContain(
+      'do not guarantee cash availability'
+    );
   });
 });

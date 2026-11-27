@@ -1,17 +1,9 @@
 /**
  * Goals Section - Long-term Planning
  *
- * Extracted from FinancialPlanningView.js for better maintainability.
- * Displays financial goals with CRUD operations and progress tracking.
- *
- * Responsibilities:
- * - Goal progress chart integration
- * - Goal creation and management
- * - Goal editing and deletion
- * - Progress tracking display
+ * Composes goal entry, progress and recommendation modules.
  */
 
-import { createEnhancedEmptyState } from '../../utils/enhanced-empty-states.js';
 import { ProgressiveEmptyState } from '../../components/ProgressiveEmptyState.js';
 import { COLORS, SPACING } from '../../utils/constants.js';
 import { createGoalProgressChart } from '../../utils/financial-planning-charts.js';
@@ -19,842 +11,51 @@ import {
   createSectionContainer,
   createPlaceholder,
   createUsageNote,
-  safeParseDate,
 } from '../../utils/financial-planning-helpers.js';
 import { refreshChart } from '../../utils/chart-refresh-helper.js';
-import { formatDateForDisplay } from '../../utils/date-utils.js';
 import { SavingsGoalsService } from '../../core/savings-goals-service.js';
 import { StorageService } from '../../core/storage.js';
 import { showErrorToast } from '../../utils/toast-notifications.js';
-
-/**
- * Create goal form controls
- */
-function createGoalFormControls(
-  chartRenderer,
-  activeCharts,
-  section,
-  updateGoalInsights
-) {
-  const goalControls = document.createElement('div');
-  goalControls.style.display = 'flex';
-  goalControls.style.gap = SPACING.SM;
-  goalControls.style.alignItems = 'center';
-  goalControls.style.flexWrap = 'wrap';
-  goalControls.style.marginTop = SPACING.MD;
-
-  const addGoalBtn = document.createElement('button');
-  addGoalBtn.textContent = 'Add Goal';
-  addGoalBtn.className = 'btn btn-primary add-goal-btn';
-
-  const goalForm = document.createElement('div');
-  goalForm.className = 'goal-form';
-  goalForm.style.display = 'none';
-  goalForm.style.gap = SPACING.SM;
-  goalForm.style.marginTop = SPACING.SM;
-
-  const goalName = document.createElement('input');
-  goalName.id = 'goal-name';
-  goalName.name = 'goalName';
-  goalName.placeholder = 'Goal name';
-  goalName.setAttribute('aria-label', 'Goal name');
-
-  const goalTarget = document.createElement('input');
-  goalTarget.id = 'goal-target';
-  goalTarget.name = 'goalTarget';
-  goalTarget.type = 'number';
-  goalTarget.placeholder = 'Target amount';
-  goalTarget.setAttribute('aria-label', 'Target amount');
-
-  const goalDate = document.createElement('input');
-  goalDate.id = 'goal-date';
-  goalDate.name = 'goalDate';
-  goalDate.type = 'date';
-  goalDate.setAttribute('aria-label', 'Target date');
-
-  const goalCurrent = document.createElement('input');
-  goalCurrent.id = 'goal-current';
-  goalCurrent.name = 'goalCurrent';
-  goalCurrent.type = 'number';
-  goalCurrent.placeholder = 'Current savings';
-  goalCurrent.setAttribute('aria-label', 'Current savings');
-
-  const saveGoalBtn = document.createElement('button');
-  saveGoalBtn.textContent = 'Save Goal';
-  saveGoalBtn.className = 'btn btn-primary btn-save';
-
-  const cancelGoalBtn = document.createElement('button');
-  cancelGoalBtn.textContent = 'Cancel';
-  cancelGoalBtn.className = 'btn btn-ghost btn-cancel';
-  cancelGoalBtn.addEventListener('click', () => {
-    goalForm.style.display = 'none';
-    goalName.value = '';
-    goalTarget.value = '';
-    goalDate.value = '';
-    goalCurrent.value = '';
-    nameError.style.display = 'none';
-    dateError.style.display = 'none';
-    currentError.style.display = 'none';
-  });
-
-  const nameError = document.createElement('div');
-  nameError.className = 'error';
-  nameError.setAttribute('name', 'name');
-  nameError.style.color = COLORS.ERROR;
-  nameError.style.fontSize = '0.8rem';
-  nameError.style.display = 'none';
-
-  const currentError = document.createElement('div');
-  currentError.className = 'error';
-  currentError.setAttribute('name', 'current');
-  currentError.style.color = COLORS.ERROR;
-  currentError.style.fontSize = '0.8rem';
-  currentError.style.display = 'none';
-
-  const dateError = document.createElement('div');
-  dateError.className = 'error';
-  dateError.setAttribute('name', 'deadline');
-  dateError.style.color = COLORS.ERROR;
-  dateError.style.fontSize = '0.8rem';
-  dateError.style.display = 'none';
-
-  goalForm.appendChild(goalName);
-  goalForm.appendChild(nameError);
-  goalForm.appendChild(goalTarget);
-  goalForm.appendChild(goalDate);
-  goalForm.appendChild(dateError);
-  goalForm.appendChild(goalCurrent);
-  goalForm.appendChild(currentError);
-  goalForm.appendChild(saveGoalBtn);
-  goalForm.appendChild(cancelGoalBtn);
-
-  addGoalBtn.addEventListener('click', () => {
-    goalForm.style.display =
-      goalForm.style.display === 'none' ? 'flex' : 'none';
-    goalForm.style.flexWrap = 'wrap';
-  });
-
-  saveGoalBtn.addEventListener('click', async () => {
-    const name = goalName.value.trim();
-    const target = Number(goalTarget.value) || 0;
-    const tdate = goalDate.value ? new Date(goalDate.value) : null;
-    const current = Number(goalCurrent.value) || 0;
-
-    // Basic validation with improved messages
-    let valid = true;
-    nameError.style.display = 'none';
-    currentError.style.display = 'none';
-    dateError.style.display = 'none';
-
-    if (!name) {
-      nameError.textContent =
-        'Goal name is required (e.g., "Emergency Fund", "Vacation")';
-      nameError.style.display = 'block';
-      valid = false;
-    }
-    if (!(target > 0)) {
-      currentError.textContent = 'Target amount must be greater than 0';
-      currentError.style.display = 'block';
-      valid = false;
-    }
-    if (!tdate || isNaN(tdate.getTime())) {
-      dateError.textContent = 'Please choose a valid target date';
-      dateError.style.display = 'block';
-      valid = false;
-    } else if (tdate < new Date(new Date().setHours(0, 0, 0, 0))) {
-      dateError.textContent = 'Target date must be in the future';
-      dateError.style.display = 'block';
-      valid = false;
-    }
-
-    // Validate current savings
-    if (current < 0) {
-      currentError.textContent = 'Current savings cannot be negative';
-      currentError.style.display = 'block';
-      valid = false;
-    }
-
-    if (!valid) return;
-
-    try {
-      StorageService.createGoal(name, target, tdate, current, {});
-    } catch (err) {
-      console.error('Failed to save goal', err);
-      showErrorToast('Failed to save goal. Please try again.');
-      return;
-    }
-
-    try {
-      // Refresh goals chart using helper
-      const updatedGoals = StorageService.getGoals();
-      const existingChart = section.querySelector(
-        '[data-chart-type="goal-progress"]'
-      );
-      if (existingChart) {
-        await refreshChart({
-          createChartFn: createGoalProgressChart,
-          chartRenderer,
-          data: updatedGoals,
-          section,
-          chartType: 'goal-progress',
-          activeCharts,
-        });
-      } else if (updatedGoals.length > 0) {
-        const { section: newChartSection, chart } =
-          await createGoalProgressChart(chartRenderer, updatedGoals);
-        newChartSection.classList.add('goals-progress-chart');
-        const currentSummary = section.querySelector('.goals-summary-card');
-        if (currentSummary) {
-          section.insertBefore(newChartSection, currentSummary);
-        } else {
-          section.appendChild(newChartSection);
-        }
-        activeCharts.set('goal-progress', chart);
-      }
-
-      // Update summary card
-      const currentSummaryCard = section.querySelector('.goals-summary-card');
-      if (currentSummaryCard) {
-        const newSummaryCard = createGoalsSummaryCard(updatedGoals);
-        currentSummaryCard.replaceWith(newSummaryCard);
-      }
-      updateGoalInsights(updatedGoals);
-
-      goalForm.style.display = 'none';
-      goalName.value = '';
-      goalTarget.value = '';
-      goalDate.value = '';
-      goalCurrent.value = '';
-
-      // Clear any lingering errors
-      nameError.style.display = 'none';
-      currentError.style.display = 'none';
-      dateError.style.display = 'none';
-    } catch (err) {
-      console.error('Failed to refresh goal chart', err);
-      showErrorToast('Goal saved, but the chart could not refresh.');
-    }
-  });
-
-  // Real-time validation on blur
-  goalName.addEventListener('blur', () => {
-    if (!goalName.value.trim()) {
-      nameError.textContent =
-        'Goal name is required (e.g., "Emergency Fund", "Vacation")';
-      nameError.style.display = 'block';
-    } else {
-      nameError.style.display = 'none';
-    }
-  });
-
-  goalTarget.addEventListener('blur', () => {
-    const target = Number(goalTarget.value) || 0;
-    if (!(target > 0)) {
-      currentError.textContent = 'Target amount must be greater than 0';
-      currentError.style.display = 'block';
-    } else {
-      currentError.style.display = 'none';
-      dateError.style.display = 'block';
-    }
-  });
-
-  goalCurrent.addEventListener('blur', () => {
-    const current = Number(goalCurrent.value) || 0;
-    if (current < 0) {
-      currentError.textContent = 'Current savings cannot be negative';
-      currentError.style.display = 'block';
-    }
-  });
-
-  goalControls.appendChild(addGoalBtn);
-  goalControls.appendChild(goalForm);
-
-  return goalControls;
-}
-
-/**
- * Create goals list with CRUD operations
- */
-function createGoalsList(
-  chartRenderer,
-  activeCharts,
-  section,
-  updateGoalInsights
-) {
-  const goalsList = document.createElement('div');
-  goalsList.className = 'goal-list';
-  goalsList.style.marginTop = SPACING.MD;
-
-  async function refreshGoalsList() {
-    // Security: Clearing list content, no user input involved
-    goalsList.innerHTML = '';
-    let items;
-    try {
-      items = StorageService.getGoals() || [];
-
-      if (!items.length) {
-        const empty = createEnhancedEmptyState('no-data', {
-          showTips: false,
-        });
-        goalsList.appendChild(empty);
-        return;
-      }
-
-      const ul = document.createElement('ul');
-      ul.style.listStyle = 'none';
-      ul.style.padding = '0';
-      ul.style.margin = '0';
-      ul.style.display = 'grid';
-      ul.style.gap = SPACING.SM;
-
-      items.forEach(goal => {
-        const progress =
-          goal.targetAmount > 0
-            ? (goal.currentSavings / goal.targetAmount) * 100
-            : 0;
-        const isCompleted = progress >= 100;
-        const targetDate = new Date(goal.targetDate);
-        const isOverdue = !isCompleted && targetDate < new Date();
-
-        const li = document.createElement('li');
-        li.className = `goal-item ${isCompleted ? 'completed' : 'in-progress'} ${isOverdue ? 'overdue' : ''}`;
-        li.style.display = 'flex';
-        li.style.flexDirection = 'column';
-        li.style.gap = SPACING.SM;
-        li.style.padding = SPACING.MD;
-        li.style.background = COLORS.SURFACE;
-        li.style.borderRadius = 'var(--radius-md)';
-        li.style.border = `1px solid ${COLORS.BORDER}`;
-
-        const topRow = document.createElement('div');
-        topRow.style.display = 'flex';
-        topRow.style.justifyContent = 'space-between';
-        topRow.style.alignItems = 'center';
-
-        const left = document.createElement('div');
-        left.style.display = 'flex';
-        left.style.flexDirection = 'column';
-
-        const titleContainer = document.createElement('div');
-        titleContainer.style.display = 'flex';
-        titleContainer.style.alignItems = 'center';
-        titleContainer.style.gap = SPACING.SM;
-
-        const title = document.createElement('div');
-        title.className = 'goal-name';
-        title.textContent = goal.name;
-        title.style.fontWeight = '600';
-        titleContainer.appendChild(title);
-
-        if (isOverdue) {
-          const warningBadge = document.createElement('span');
-          warningBadge.className = 'warning-badge';
-          warningBadge.textContent = 'Overdue';
-          warningBadge.style.background = COLORS.ERROR;
-          // `var(--color-on-error, #fff)` looked tokenised but no stylesheet
-          // declares `--color-on-error`, so the literal always won. Use the
-          // literal honestly, matching the error-surface badge in
-          // FinancialPlanningView.js (COLORS.ERROR background + white text).
-          warningBadge.style.color = 'white';
-          warningBadge.style.fontSize = '0.7rem';
-          warningBadge.style.padding = `${SPACING.XXS} ${SPACING.XS}`;
-          warningBadge.style.borderRadius = 'var(--radius-sm)';
-          titleContainer.appendChild(warningBadge);
-        }
-
-        const meta = document.createElement('div');
-        meta.className = 'goal-meta';
-        meta.style.fontSize = '0.9rem';
-        meta.style.color = COLORS.TEXT_MUTED;
-
-        const currentFormatted = new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'EUR',
-        }).format(goal.currentSavings);
-        const targetFormatted = new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'EUR',
-        }).format(goal.targetAmount);
-
-        // Security: Use safe DOM manipulation instead of innerHTML to prevent XSS
-        meta.textContent = '';
-        const currentSpan = document.createElement('span');
-        currentSpan.className = 'currency-value';
-        currentSpan.textContent = currentFormatted;
-        meta.appendChild(currentSpan);
-        meta.appendChild(document.createTextNode(' of '));
-        const targetSpan = document.createElement('span');
-        targetSpan.className = 'currency-value';
-        targetSpan.textContent = targetFormatted;
-        meta.appendChild(targetSpan);
-        meta.appendChild(
-          document.createTextNode(` by ${formatDateForDisplay(targetDate)}`)
-        );
-
-        left.appendChild(titleContainer);
-        left.appendChild(meta);
-
-        // Calculate time remaining
-        const diffTime = targetDate - new Date();
-        const diffMonths = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 30));
-        if (!isCompleted && diffMonths > 0) {
-          const timeRem = document.createElement('div');
-          timeRem.className = 'time-remaining';
-          timeRem.style.fontSize = '0.8rem';
-          timeRem.style.color = COLORS.PRIMARY;
-          timeRem.textContent = `${diffMonths} months remaining`;
-          left.appendChild(timeRem);
-
-          const needed = (goal.targetAmount - goal.currentSavings) / diffMonths;
-          const monthlyNeeded = document.createElement('div');
-          monthlyNeeded.className = 'monthly-savings-needed';
-          monthlyNeeded.style.fontSize = '0.8rem';
-          monthlyNeeded.style.fontWeight = '500';
-          // Security: Use safe DOM manipulation instead of innerHTML
-          monthlyNeeded.textContent = 'Need ';
-          const neededSpan = document.createElement('span');
-          neededSpan.className = 'currency-value';
-          neededSpan.textContent = new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'EUR',
-          }).format(needed);
-          monthlyNeeded.appendChild(neededSpan);
-          monthlyNeeded.appendChild(document.createTextNode(' / month'));
-          left.appendChild(monthlyNeeded);
-        }
-
-        const actions = document.createElement('div');
-        actions.style.display = 'flex';
-        actions.style.gap = SPACING.SM;
-
-        const editBtn = document.createElement('button');
-        editBtn.textContent = 'Edit';
-        editBtn.className = 'btn btn-ghost edit-goal';
-
-        const delBtn = document.createElement('button');
-        delBtn.textContent = 'Delete';
-        delBtn.className = 'btn btn-ghost delete-goal';
-
-        actions.appendChild(editBtn);
-        actions.appendChild(delBtn);
-
-        topRow.appendChild(left);
-        topRow.appendChild(actions);
-
-        li.appendChild(topRow);
-
-        // Progress bar and percentage
-        const progressContainer = document.createElement('div');
-        progressContainer.style.width = '100%';
-        progressContainer.style.marginTop = SPACING.XS;
-
-        const progHeader = document.createElement('div');
-        progHeader.style.display = 'flex';
-        progHeader.style.justifyContent = 'space-between';
-        progHeader.style.fontSize = '0.8rem';
-        progHeader.style.marginBottom = SPACING.XS;
-
-        const progLabel = document.createElement('span');
-        progLabel.textContent = 'Progress';
-        const progPct = document.createElement('span');
-        progPct.className = 'progress-percentage';
-        progPct.textContent = `${Math.min(100, progress).toFixed(1)}%`;
-
-        progHeader.appendChild(progLabel);
-        progHeader.appendChild(progPct);
-        progressContainer.appendChild(progHeader);
-
-        const progBg = document.createElement('div');
-        progBg.className = 'progress-bar-bg';
-        progBg.style.height = SPACING.SM;
-        progBg.style.background = 'var(--color-border)';
-        progBg.style.borderRadius = 'var(--radius-sm)';
-        progBg.style.overflow = 'hidden';
-
-        const progFill = document.createElement('div');
-        progFill.className = 'progress-bar';
-        progFill.style.height = '100%';
-        progFill.style.width = `${Math.min(100, progress)}%`;
-        progFill.style.background = isCompleted
-          ? COLORS.SUCCESS
-          : isOverdue
-            ? COLORS.ERROR
-            : COLORS.PRIMARY;
-
-        progBg.appendChild(progFill);
-        progressContainer.appendChild(progBg);
-        li.appendChild(progressContainer);
-
-        ul.appendChild(li);
-        // Edit handler
-        editBtn.addEventListener('click', () => {
-          if (li._editing) return;
-          li._editing = true;
-
-          // Hide view mode elements
-          left.style.display = 'none';
-          actions.style.display = 'none';
-
-          const form = document.createElement('div');
-          form.style.display = 'flex';
-          form.style.gap = SPACING.SM;
-          form.style.flexWrap = 'wrap';
-          form.style.width = '100%';
-
-          // Helper to create a compact labeled field: label sits beside the
-          // input and the wrapper carries the sizing so the row keeps its
-          // original horizontal layout.
-          const createField = (labelText, input, sizeStyle) => {
-            const wrapper = document.createElement('label');
-            wrapper.style.display = 'flex';
-            wrapper.style.alignItems = 'center';
-            wrapper.style.gap = SPACING.XS;
-            wrapper.style.fontSize = '0.75rem';
-            wrapper.style.color = COLORS.TEXT_MUTED;
-            wrapper.style.whiteSpace = 'nowrap';
-            Object.assign(wrapper.style, sizeStyle);
-
-            const label = document.createElement('span');
-            label.textContent = labelText;
-
-            input.style.flex = '1';
-            input.style.minWidth = '0';
-
-            wrapper.appendChild(label);
-            wrapper.appendChild(input);
-            return wrapper;
-          };
-
-          const nameFld = document.createElement('input');
-          nameFld.id = `edit-goal-name-${goal.id}`;
-          nameFld.name = 'goalName';
-          nameFld.value = goal.name;
-          nameFld.setAttribute('aria-label', 'Goal name');
-
-          const targetFld = document.createElement('input');
-          targetFld.type = 'number';
-          targetFld.id = `edit-goal-target-${goal.id}`;
-          targetFld.name = 'goalTarget';
-          targetFld.value = goal.targetAmount;
-          targetFld.setAttribute('aria-label', 'Target amount');
-
-          const dateFld = document.createElement('input');
-          dateFld.type = 'date';
-          dateFld.id = `edit-goal-date-${goal.id}`;
-          dateFld.name = 'goalDate';
-          dateFld.setAttribute('aria-label', 'Target date');
-          // Use helper to safely parse targetDate
-          dateFld.value = safeParseDate(goal.targetDate);
-
-          const currentFld = document.createElement('input');
-          currentFld.type = 'number';
-          currentFld.id = `edit-goal-current-${goal.id}`;
-          currentFld.name = 'goalCurrent';
-          currentFld.value = goal.currentSavings;
-          currentFld.setAttribute('aria-label', 'Current savings');
-
-          const saveBtn = document.createElement('button');
-          saveBtn.textContent = 'Save';
-          saveBtn.className = 'btn btn-primary';
-
-          const cancelBtn = document.createElement('button');
-          cancelBtn.textContent = 'Cancel';
-          cancelBtn.className = 'btn btn-ghost';
-
-          form.appendChild(
-            createField('Name', nameFld, {
-              flex: '1 1 160px',
-              minWidth: '160px',
-            })
-          );
-          form.appendChild(
-            createField('Target', targetFld, {
-              flex: '0 0 130px',
-              minWidth: '120px',
-            })
-          );
-          form.appendChild(
-            createField('Date', dateFld, {
-              flex: '0 0 170px',
-              minWidth: '150px',
-            })
-          );
-          form.appendChild(
-            createField('Current', currentFld, {
-              flex: '0 0 130px',
-              minWidth: '120px',
-            })
-          );
-          form.appendChild(saveBtn);
-          form.appendChild(cancelBtn);
-
-          li.appendChild(form);
-
-          const cleanupEdit = () => {
-            li._editing = false;
-            form.remove();
-            left.style.display = 'flex';
-            actions.style.display = 'flex';
-          };
-
-          cancelBtn.addEventListener('click', cleanupEdit);
-
-          saveBtn.addEventListener('click', async () => {
-            try {
-              const updates = {
-                name: nameFld.value.trim(),
-                targetAmount: Number(targetFld.value) || 0,
-                targetDate: dateFld.value
-                  ? new Date(dateFld.value)
-                  : new Date(goal.targetDate),
-                currentSavings: Number(currentFld.value) || 0,
-              };
-
-              // Import StorageService dynamically
-
-              StorageService.updateGoal(goal.id, updates);
-
-              // Refresh chart using helper
-              const updatedGoals = StorageService.getGoals();
-              await refreshChart({
-                createChartFn: createGoalProgressChart,
-                chartRenderer,
-                data: updatedGoals,
-                section,
-                chartType: 'goal-progress',
-                activeCharts,
-              });
-
-              // Update summary card
-              const currentSummary = section.querySelector(
-                '.goals-summary-card'
-              );
-              if (currentSummary) {
-                const newSummary = createGoalsSummaryCard(updatedGoals);
-                currentSummary.replaceWith(newSummary);
-              }
-              updateGoalInsights(updatedGoals);
-
-              cleanupEdit();
-              refreshGoalsList();
-            } catch (err) {
-              console.error('Failed to update goal', err);
-              showErrorToast('Failed to update goal. Please try again.');
-            }
-          });
-        });
-
-        // Delete handler
-        delBtn.addEventListener('click', async () => {
-          // Import ConfirmDialog dynamically
-          const { ConfirmDialog } =
-            await import('../../components/ConfirmDialog.js');
-
-          ConfirmDialog({
-            title: 'Delete Goal',
-            message: `Are you sure you want to delete the goal "${goal.name}"? This action cannot be undone.`,
-            confirmText: 'Delete',
-            variant: 'danger',
-            onConfirm: async () => {
-              try {
-                await StorageService.deleteGoal(goal.id);
-
-                // Refresh chart using helper
-                const updatedGoals = (await StorageService.getGoals()) || [];
-                const existingChart = section.querySelector(
-                  '[data-chart-type="goal-progress"]'
-                );
-                if (updatedGoals && updatedGoals.length > 0) {
-                  if (existingChart) {
-                    await refreshChart({
-                      createChartFn: createGoalProgressChart,
-                      chartRenderer,
-                      data: updatedGoals,
-                      section,
-                      chartType: 'goal-progress',
-                      activeCharts,
-                    });
-                  } else {
-                    const { section: newChartSection, chart } =
-                      await createGoalProgressChart(
-                        chartRenderer,
-                        updatedGoals
-                      );
-                    newChartSection.classList.add('goals-progress-chart');
-                    const summary = section.querySelector(
-                      '.goals-summary-card'
-                    );
-                    if (summary) {
-                      section.insertBefore(newChartSection, summary);
-                    } else {
-                      section.appendChild(newChartSection);
-                    }
-                    activeCharts.set('goal-progress', chart);
-                  }
-                } else if (existingChart) {
-                  const existingChartInstance =
-                    activeCharts.get('goal-progress');
-                  if (existingChartInstance) {
-                    existingChartInstance.destroy();
-                  }
-                  existingChart.remove();
-                  activeCharts.delete('goal-progress');
-                }
-
-                // Update summary card
-                const currentSummary = section.querySelector(
-                  '.goals-summary-card'
-                );
-                if (currentSummary) {
-                  const newSummary = createGoalsSummaryCard(updatedGoals);
-                  currentSummary.replaceWith(newSummary);
-                }
-                updateGoalInsights(updatedGoals);
-
-                // Refresh the list
-                await refreshGoalsList();
-              } catch (err) {
-                console.error('Failed to delete goal', err);
-                showErrorToast('Failed to delete goal. Please try again.');
-              }
-            },
-          });
-        });
-      });
-
-      goalsList.appendChild(ul);
-    } catch (err) {
-      console.warn('Error loading goals for list:', err);
-      const error = createEnhancedEmptyState('error', {
-        onAction: () => location.reload(),
-      });
-      goalsList.appendChild(error);
-    }
-  }
-
-  // Return both the element and a way to populate it
-  return { goalsList, refreshGoalsList };
-}
-
-/**
- * Create summary card with aggregate metrics
- * @param {Array} goals - Array of goal objects
- * @returns {HTMLElement} Summary card element
- */
-function createGoalsSummaryCard(goals) {
-  const card = document.createElement('div');
-  card.className = 'goals-summary-card';
-  card.style.cssText = `
-    background: ${COLORS.SURFACE};
-    border: 1px solid ${COLORS.BORDER};
-    border-radius: var(--radius-md);
-    padding: ${SPACING.MD};
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: ${SPACING.MD};
-    margin-bottom: ${SPACING.MD};
-  `;
-
-  const totalTarget = goals.reduce(
-    (sum, g) => sum + Number(g.targetAmount || 0),
-    0
-  );
-  const totalSaved = goals.reduce(
-    (sum, g) => sum + Number(g.currentSavings || 0),
-    0
-  );
-  const completedGoals = goals.filter(g => {
-    const progress =
-      g.targetAmount > 0 ? (g.currentSavings / g.targetAmount) * 100 : 0;
-    return progress >= 100;
-  }).length;
-  const activeGoals = goals.length - completedGoals;
-  const overallProgress =
-    totalTarget > 0 ? (totalSaved / totalTarget) * 100 : 0;
-
-  const metrics = [
-    { label: 'Total Goals', value: goals.length },
-    { label: 'Active', value: activeGoals },
-    { label: 'Completed', value: completedGoals },
-    {
-      label: 'Total Saved',
-      value: new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'EUR',
-      }).format(totalSaved),
-    },
-    {
-      label: 'Overall Progress',
-      value: `${Math.round(overallProgress)}%`,
-    },
-  ];
-
-  metrics.forEach(metric => {
-    const metricDiv = document.createElement('div');
-    metricDiv.style.textAlign = 'center';
-
-    const value = document.createElement('div');
-    value.textContent = metric.value;
-    value.style.fontSize = '1.5rem';
-    value.style.fontWeight = '600';
-    value.style.color = COLORS.PRIMARY;
-
-    const label = document.createElement('div');
-    label.textContent = metric.label;
-    label.style.fontSize = '0.85rem';
-    label.style.color = COLORS.TEXT_MUTED;
-
-    metricDiv.appendChild(value);
-    metricDiv.appendChild(label);
-    card.appendChild(metricDiv);
-  });
-
-  return card;
-}
+import { createGoalFormControls } from './goals-form.js';
+import { createGoalsList } from './goals-list.js';
+import { createGoalsSummaryCard } from './goals-summary.js';
 
 /**
  * Goals Section Component
  * @param {Object} chartRenderer - Chart renderer service instance
  * @param {Map} activeCharts - Map to track active chart instances
- * @returns {HTMLElement} DOM element containing goals section content
+ * @returns {Promise<HTMLElement>} Goals section element
  */
 export const GoalsSection = async (chartRenderer, activeCharts) => {
   const section = createSectionContainer('goals', 'Financial Goals', '🎯');
   section.className += ' goals-section';
-
   section.appendChild(
     createUsageNote(
-      'Create and track goals (target amount, date, current savings). The planner calculates required monthly savings and progress.'
+      'Create goals with a target amount, date and manually maintained current balance. Progress is not linked to account balances or transactions.'
     )
   );
 
-  // Progressive unlock message — connects advanced features to the core logging habit
   try {
     const txCount = (StorageService.getAll() || []).length;
     const unlockCard = ProgressiveEmptyState({
       section: 'goals',
       transactionCount: txCount,
     });
-    if (unlockCard) {
-      section.appendChild(unlockCard);
-    }
+    if (unlockCard) section.appendChild(unlockCard);
   } catch (error) {
     console.warn('[GoalsSection] Progressive unlock check failed:', error);
   }
 
-  // Load goals from StorageService (Firebase handles offline automatically)
   let goalsFromStorage;
   try {
-    // Import StorageService dynamically
     goalsFromStorage = StorageService.getGoals() || [];
-  } catch (err) {
-    console.warn('Error fetching goals from StorageService:', err);
+  } catch (error) {
+    console.warn('Error fetching goals from StorageService:', error);
     goalsFromStorage = [];
   }
 
   const goalsToRender = Array.isArray(goalsFromStorage) ? goalsFromStorage : [];
   const hasRealGoals = goalsToRender.length > 0;
-
   const insights = document.createElement('div');
   insights.className = 'goal-insights';
   insights.style.marginTop = SPACING.MD;
@@ -863,45 +64,47 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
   insights.style.borderRadius = 'var(--radius-md)';
   insights.style.border = `1px solid ${COLORS.BORDER}`;
 
-  const h4 = document.createElement('h4');
-  h4.textContent = 'Goal Insights';
-  h4.style.marginTop = '0';
+  const heading = document.createElement('h4');
+  heading.textContent = 'Goal Insights';
+  heading.style.marginTop = '0';
 
-  const p = document.createElement('p');
-  p.style.fontSize = '0.9rem';
-
+  const insightText = document.createElement('p');
+  insightText.style.fontSize = '0.9rem';
   const updateGoalInsights = goals => {
     const currentGoals = Array.isArray(goals) ? goals : [];
-    const behindSchedule = currentGoals.filter(g => {
+    const behindSchedule = currentGoals.filter(goal => {
       const progress =
-        g.targetAmount > 0 ? (g.currentSavings / g.targetAmount) * 100 : 0;
-      const targetDate = new Date(g.targetDate);
+        goal.targetAmount > 0
+          ? (goal.currentSavings / goal.targetAmount) * 100
+          : 0;
+      const targetDate = new Date(goal.targetDate);
       return (
         progress < 20 &&
         targetDate < new Date(Date.now() + 180 * 24 * 60 * 60 * 1000)
       );
     });
-    const strong = document.createElement('strong');
-    strong.textContent = 'Recommendation:';
 
-    p.replaceChildren(strong);
+    const recommendation = document.createElement('strong');
+    recommendation.textContent = 'Recommendation:';
+    insightText.replaceChildren(recommendation);
+
     if (currentGoals.length === 0) {
-      p.style.color = COLORS.TEXT_MUTED;
-      p.appendChild(
+      insightText.style.color = COLORS.TEXT_MUTED;
+      insightText.appendChild(
         document.createTextNode(
           ' Set your first goal above to track your savings pace.'
         )
       );
     } else if (behindSchedule.length > 0) {
-      p.style.color = COLORS.ERROR;
-      p.appendChild(
+      insightText.style.color = COLORS.ERROR;
+      insightText.appendChild(
         document.createTextNode(
           ` You have ${behindSchedule.length.toString()} goals that may need more aggressive savings to stay on track.`
         )
       );
     } else {
-      p.style.color = COLORS.SUCCESS;
-      p.appendChild(
+      insightText.style.color = COLORS.SUCCESS;
+      insightText.appendChild(
         document.createTextNode(
           ' Your goals look well-paced. Keep up the consistent saving!'
         )
@@ -909,7 +112,6 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
     }
   };
 
-  // Create goal progress chart only when real goals exist (no demo)
   if (hasRealGoals) {
     try {
       const { section: chartSection, chart } = await createGoalProgressChart(
@@ -924,20 +126,18 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
     }
   }
 
-  // Add summary card with aggregate metrics (Total Goals is 0 by default when no goals exist)
   const summaryCard = createGoalsSummaryCard(goalsToRender);
   section.appendChild(summaryCard);
 
-  // Add goal form controls
-  const goalControls = createGoalFormControls(
-    chartRenderer,
-    activeCharts,
-    section,
-    updateGoalInsights
+  section.appendChild(
+    createGoalFormControls(
+      chartRenderer,
+      activeCharts,
+      section,
+      updateGoalInsights
+    )
   );
-  section.appendChild(goalControls);
 
-  // Add goals list
   const { goalsList, refreshGoalsList } = createGoalsList(
     chartRenderer,
     activeCharts,
@@ -947,11 +147,11 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
   section.appendChild(goalsList);
 
   updateGoalInsights(goalsToRender);
-  insights.appendChild(h4);
-  insights.appendChild(p);
+  insights.appendChild(heading);
+  insights.appendChild(insightText);
   section.appendChild(insights);
 
-  // Add goal recommendations based on spending patterns
+  let emptyPlaceholder = null;
   try {
     const transactions = StorageService.getAll() || [];
     const recommendations =
@@ -966,15 +166,15 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
       recommendationsSection.style.borderRadius = 'var(--radius-md)';
       recommendationsSection.style.border = `1px solid ${COLORS.BORDER}`;
 
-      const recTitle = document.createElement('h4');
-      recTitle.textContent = 'Recommended Goals';
-      recTitle.style.marginTop = '0';
-      recTitle.style.marginBottom = SPACING.SM;
-      recommendationsSection.appendChild(recTitle);
+      const recommendationsTitle = document.createElement('h4');
+      recommendationsTitle.textContent = 'Recommended Goals';
+      recommendationsTitle.style.marginTop = '0';
+      recommendationsTitle.style.marginBottom = SPACING.SM;
+      recommendationsSection.appendChild(recommendationsTitle);
 
-      recommendations.slice(0, 3).forEach(rec => {
-        const recCard = document.createElement('div');
-        recCard.style.cssText = `
+      recommendations.slice(0, 3).forEach(recommendation => {
+        const recommendationCard = document.createElement('div');
+        recommendationCard.style.cssText = `
           background: ${COLORS.SURFACE};
           border: 1px solid ${COLORS.BORDER};
           border-radius: var(--radius-sm);
@@ -989,41 +189,36 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
         const content = document.createElement('div');
         content.style.flex = '1';
 
-        const recTitleText = document.createElement('div');
-        recTitleText.textContent = rec.title;
-        recTitleText.style.fontWeight = '600';
-        recTitleText.style.color = COLORS.TEXT_MAIN;
-        content.appendChild(recTitleText);
+        const title = document.createElement('div');
+        title.textContent = recommendation.title;
+        title.style.fontWeight = '600';
+        title.style.color = COLORS.TEXT_MAIN;
+        content.appendChild(title);
 
-        const recDesc = document.createElement('div');
-        recDesc.textContent = rec.description;
-        recDesc.style.fontSize = '0.85rem';
-        recDesc.style.color = COLORS.TEXT_MUTED;
-        recDesc.style.marginTop = SPACING.XXS;
-        content.appendChild(recDesc);
+        const description = document.createElement('div');
+        description.textContent = recommendation.description;
+        description.style.fontSize = '0.85rem';
+        description.style.color = COLORS.TEXT_MUTED;
+        description.style.marginTop = SPACING.XXS;
+        content.appendChild(description);
 
-        const createBtn = document.createElement('button');
-        createBtn.textContent = 'Create Goal';
-        createBtn.className = 'btn btn-primary';
-        createBtn.style.padding = `${SPACING.XS} ${SPACING.SM}`;
-        createBtn.style.fontSize = '0.85rem';
-
-        createBtn.addEventListener('click', async () => {
+        const createButton = document.createElement('button');
+        createButton.textContent = 'Create Goal';
+        createButton.className = 'btn btn-primary';
+        createButton.style.padding = `${SPACING.XS} ${SPACING.SM}`;
+        createButton.style.fontSize = '0.85rem';
+        createButton.addEventListener('click', async () => {
           try {
             const targetDate = new Date();
-            targetDate.setFullYear(targetDate.getFullYear() + 1); // Default 1 year
-
+            targetDate.setFullYear(targetDate.getFullYear() + 1);
             StorageService.createGoal(
-              rec.title,
-              rec.target || 1000,
+              recommendation.title,
+              recommendation.target || 1000,
               targetDate,
               0,
-              {
-                category: rec.category || 'General',
-              }
+              { category: recommendation.category || 'General' }
             );
 
-            // Refresh the section
             const updatedGoals = StorageService.getGoals();
             const existingChart = section.querySelector(
               '[data-chart-type="goal-progress"]'
@@ -1043,7 +238,7 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
               newChartSection.classList.add('goals-progress-chart');
               const currentSummary =
                 section.querySelector('.goals-summary-card') || summaryCard;
-              if (currentSummary && currentSummary.parentNode) {
+              if (currentSummary?.parentNode) {
                 currentSummary.parentNode.insertBefore(
                   newChartSection,
                   currentSummary
@@ -1053,45 +248,39 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
               }
               activeCharts.set('goal-progress', chart);
             }
-            await refreshGoalsList();
 
-            // Update summary card
+            await refreshGoalsList();
             const currentSummary =
               section.querySelector('.goals-summary-card') || summaryCard;
-            const newSummaryCard = createGoalsSummaryCard(updatedGoals);
-            if (currentSummary && currentSummary.parentNode) {
+            const newSummary = createGoalsSummaryCard(updatedGoals);
+            if (currentSummary?.parentNode) {
               currentSummary.parentNode.replaceChild(
-                newSummaryCard,
+                newSummary,
                 currentSummary
               );
-            } else {
-              section.replaceChild(newSummaryCard, currentSummary);
             }
             updateGoalInsights(updatedGoals);
-
             if (emptyPlaceholder && section.contains(emptyPlaceholder)) {
               emptyPlaceholder.remove();
               emptyPlaceholder = null;
             }
-
-            // Remove this recommendation card now that its goal was created
-            recCard.remove();
-            // Remove the whole recommendations block when no cards are left
-            const hasRemainingCards = [...recommendationsSection.children].some(
-              child => child !== recTitle
-            );
-            if (!hasRemainingCards) {
+            recommendationCard.remove();
+            if (
+              ![...recommendationsSection.children].some(
+                child => child !== recommendationsTitle
+              )
+            ) {
               recommendationsSection.remove();
             }
-          } catch (err) {
-            console.error('Failed to create goal from recommendation:', err);
+          } catch (error) {
+            console.error('Failed to create goal from recommendation:', error);
             showErrorToast('Failed to create goal. Please try again.');
           }
         });
 
-        recCard.appendChild(content);
-        recCard.appendChild(createBtn);
-        recommendationsSection.appendChild(recCard);
+        recommendationCard.appendChild(content);
+        recommendationCard.appendChild(createButton);
+        recommendationsSection.appendChild(recommendationCard);
       });
 
       section.appendChild(recommendationsSection);
@@ -1100,11 +289,8 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
     console.warn('Failed to load goal recommendations:', error);
   }
 
-  // Initial population of the list
   await refreshGoalsList();
 
-  let emptyPlaceholder = null;
-  // Add placeholder only when goals are not managed yet
   if (!hasRealGoals) {
     emptyPlaceholder = createPlaceholder(
       'No Goals Yet',

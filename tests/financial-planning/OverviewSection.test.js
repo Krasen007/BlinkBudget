@@ -116,7 +116,10 @@ describe('OverviewSection', () => {
     expect(section.querySelectorAll('.stats-card')).toHaveLength(4);
     const card = section.querySelector('.card');
     expect(card).not.toBeNull();
-    expect(card.textContent).toContain('Emergency Fund');
+    expect(card.textContent).toContain(
+      'Emergency Fund Estimate (Net-Balance Proxy)'
+    );
     expect(card.textContent).toContain('insufficient expense data');
+    expect(card.textContent).toContain('not liquid savings accounts');
   });
 });

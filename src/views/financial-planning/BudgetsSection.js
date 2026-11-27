@@ -16,6 +16,7 @@ import { BudgetSummaryCard } from '../../components/BudgetSummaryCard.js';
 import { BudgetPlanner } from '../../core/budget-planner.js';
 import { ProgressiveEmptyState } from '../../components/ProgressiveEmptyState.js';
 import { showErrorToast } from '../../utils/toast-notifications.js';
+import { openConfirmDialog } from '../../utils/confirm-dialog-loader.js';
 
 const MIN_TRANSACTIONS_FOR_SUGGESTIONS = 30;
 
@@ -305,10 +306,8 @@ export const BudgetsSection = async planningData => {
           card.appendChild(form);
         });
 
-        deleteBtn.addEventListener('click', async () => {
-          const { ConfirmDialog } =
-            await import('../../components/ConfirmDialog.js');
-          ConfirmDialog({
+        deleteBtn.addEventListener('click', () => {
+          openConfirmDialog({
             title: 'Delete Budget',
             message: `Remove budget for ${cat.name}? You can set a new budget anytime.`,
             confirmText: 'Delete',

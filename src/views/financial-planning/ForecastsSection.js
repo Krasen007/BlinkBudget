@@ -1,14 +1,5 @@
 /**
- * Forecasts Section - Income/Expense Predictions
- *
- * Extracted from FinancialPlanningView.js for better maintainability.
- * Displays financial forecasts with charts and detailed tables.
- *
- * Responsibilities:
- * - Income/expense forecasting display
- * - Forecast summary cards
- * - Chart integration (forecast comparison, projected balance)
- * - Detailed forecast table generation
+ * Statistical monthly forecasts and their chart/table presentation.
  */
 
 import { COLORS, SPACING } from '../../utils/constants.js';
@@ -23,239 +14,19 @@ import {
   createUsageNote,
 } from '../../utils/financial-planning-helpers.js';
 import { ProgressiveEmptyState } from '../../components/ProgressiveEmptyState.js';
-/**
- * Generate historical monthly data from transactions
- */
-function generateHistoricalData(transactions, months = 3) {
-  const monthlyData = [];
-  const now = new Date();
-
-  for (let i = months - 1; i >= 0; i--) {
-    const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const nextMonthDate = new Date(
-      now.getFullYear(),
-      now.getMonth() - i + 1,
-      1
-    );
-
-    const monthTransactions = transactions.filter(t => {
-      if (t.isGhost) return false;
-      const transactionDate = new Date(t.date || t.timestamp);
-      return transactionDate >= monthDate && transactionDate < nextMonthDate;
-    });
-
-    const income = monthTransactions
-      .filter(t => t.type === 'income')
-      .reduce((sum, t) => sum + (t.amount || 0), 0);
-
-    // Compute net expenses: sum all expense amounts, subtract all refund amounts.
-    // Refund-only categories produce a negative net that reduces the total —
-    // identical to MetricsService.calculateCategoryBreakdown after the fix
-    // (no per-category floor; the total is floored at 0 at the end).
-    const categoryTotals = Object.create(null);
-    monthTransactions.forEach(t => {
-      if (t.type === 'expense') {
-        const cat = t.category || 'Uncategorized';
-        categoryTotals[cat] =
-          (categoryTotals[cat] || 0) + Math.abs(t.amount || 0);
-      } else if (t.type === 'refund') {
-        const cat = t.category || 'Uncategorized';
-        categoryTotals[cat] =
-          (categoryTotals[cat] || 0) - Math.abs(t.amount || 0);
-      }
-    });
-    // Sum all net category amounts (can be negative if refunds exceed expenses)
-    const expenses = Object.values(categoryTotals).reduce(
-      (sum, net) => sum + net,
-      0
-    );
-
-    monthlyData.push({
-      period: monthDate,
-      income,
-      expenses,
-    });
-  }
-
-  return { monthlyData };
-}
+import {
+  createForecastTable,
+  generateHistoricalData,
+} from './forecast-table.js';
 
 /**
- * Create a detailed forecast table with historical values for previous months
- */
-function createForecastTable(
-  incomeForecasts,
-  expenseForecasts,
-  historicalData
-) {
-  const container = document.createElement('div');
-  container.className = 'forecast-table-container';
-  container.style.background = COLORS.SURFACE;
-  container.style.border = `1px solid ${COLORS.BORDER}`;
-  container.style.borderRadius = 'var(--radius-lg)';
-  container.style.padding = SPACING.LG;
-
-  const title = document.createElement('h3');
-  title.textContent = 'Monthly Forecast Breakdown';
-  title.style.margin = '0';
-  title.style.marginBottom = SPACING.MD;
-  title.style.fontSize = '1.125rem';
-  title.style.fontWeight = '600';
-  title.style.color = COLORS.TEXT_MAIN;
-
-  const table = document.createElement('div');
-  table.className = 'forecast-table';
-  table.style.display = 'grid';
-  table.style.gridTemplateColumns = '1fr auto auto auto auto';
-  table.style.gap = `${SPACING.SM} ${SPACING.MD}`;
-  table.style.fontSize = '0.875rem';
-
-  // Header row
-  const headers = ['Month', 'Income', 'Expenses', 'Net', 'Type'];
-  headers.forEach(header => {
-    const headerCell = document.createElement('div');
-    headerCell.textContent = header;
-    headerCell.style.fontWeight = '600';
-    headerCell.style.color = COLORS.TEXT_MUTED;
-    headerCell.style.paddingBottom = SPACING.SM;
-    headerCell.style.borderBottom = `1px solid ${COLORS.BORDER}`;
-    table.appendChild(headerCell);
-  });
-
-  // Add historical months first
-  if (historicalData && historicalData.monthlyData) {
-    historicalData.monthlyData.forEach((month, _index) => {
-      // Month
-      const monthCell = document.createElement('div');
-      monthCell.textContent = month.period.toLocaleDateString('en-US', {
-        month: 'short',
-        year: 'numeric',
-      });
-      monthCell.style.paddingTop = SPACING.SM;
-      monthCell.style.fontWeight = '600'; // Bold for historical months
-      table.appendChild(monthCell);
-
-      // Income
-      const incomeCell = document.createElement('div');
-      incomeCell.textContent = `€${month.income.toFixed(2)}`;
-      incomeCell.style.color = COLORS.SUCCESS;
-      incomeCell.style.fontWeight = '500';
-      incomeCell.style.paddingTop = SPACING.SM;
-      incomeCell.style.textAlign = 'right';
-      table.appendChild(incomeCell);
-
-      // Expenses
-      const expenseCell = document.createElement('div');
-      expenseCell.textContent = `€${month.expenses.toFixed(2)}`;
-      expenseCell.style.color = COLORS.ERROR;
-      expenseCell.style.fontWeight = '500';
-      expenseCell.style.paddingTop = SPACING.SM;
-      expenseCell.style.textAlign = 'right';
-      table.appendChild(expenseCell);
-
-      // Net
-      const net = month.income - month.expenses;
-      const netCell = document.createElement('div');
-      netCell.textContent = `€${net.toFixed(2)}`;
-      netCell.style.color = net >= 0 ? COLORS.SUCCESS : COLORS.ERROR;
-      netCell.style.fontWeight = '600';
-      netCell.style.paddingTop = SPACING.SM;
-      netCell.style.textAlign = 'right';
-      table.appendChild(netCell);
-
-      // Historical column (shows "Actual" for historical months)
-      const historicalCell = document.createElement('div');
-      historicalCell.textContent = 'Actual';
-      historicalCell.style.color = COLORS.PRIMARY;
-      historicalCell.style.fontWeight = '600';
-      historicalCell.style.paddingTop = SPACING.SM;
-      historicalCell.style.textAlign = 'right';
-      historicalCell.style.fontSize = '0.875rem';
-      table.appendChild(historicalCell);
-    });
-  }
-
-  // Add forecasted months
-  const maxForecastRows = Math.max(
-    incomeForecasts.length,
-    expenseForecasts.length
-  );
-  for (let i = 0; i < maxForecastRows; i++) {
-    const income = incomeForecasts[i] || {
-      predictedAmount: 0,
-      confidence: 0,
-    };
-    const expense = expenseForecasts[i] || {
-      predictedAmount: 0,
-      confidence: 0,
-    };
-    const net = income.predictedAmount - expense.predictedAmount;
-    // const confidence = Math.min(income.confidence, expense.confidence); // Unused for now
-
-    // Month
-    const monthCell = document.createElement('div');
-    monthCell.textContent = income.period
-      ? income.period.toLocaleDateString('en-US', {
-          month: 'short',
-          year: 'numeric',
-        })
-      : `Month ${i + 1}`;
-    monthCell.style.paddingTop = SPACING.SM;
-    monthCell.style.fontWeight = 'normal'; // Normal weight for forecasted months
-    table.appendChild(monthCell);
-
-    // Income
-    const incomeCell = document.createElement('div');
-    incomeCell.textContent = `€${income.predictedAmount.toFixed(2)}`;
-    incomeCell.style.color = COLORS.SUCCESS;
-    incomeCell.style.fontWeight = '500';
-    incomeCell.style.paddingTop = SPACING.SM;
-    incomeCell.style.textAlign = 'right';
-    table.appendChild(incomeCell);
-
-    // Expenses
-    const expenseCell = document.createElement('div');
-    expenseCell.textContent = `€${expense.predictedAmount.toFixed(2)}`;
-    expenseCell.style.color = COLORS.ERROR;
-    expenseCell.style.fontWeight = '500';
-    expenseCell.style.paddingTop = SPACING.SM;
-    expenseCell.style.textAlign = 'right';
-    table.appendChild(expenseCell);
-
-    // Net
-    const netCell = document.createElement('div');
-    netCell.textContent = `€${net.toFixed(2)}`;
-    netCell.style.color = net >= 0 ? COLORS.SUCCESS : COLORS.ERROR;
-    netCell.style.fontWeight = '600';
-    netCell.style.paddingTop = SPACING.SM;
-    netCell.style.textAlign = 'right';
-    table.appendChild(netCell);
-
-    // Historical column (shows "Forecast" for forecasted months)
-    const historicalCell = document.createElement('div');
-    historicalCell.textContent = 'Forecast';
-    historicalCell.style.color = COLORS.TEXT_MUTED;
-    historicalCell.style.fontWeight = '500';
-    historicalCell.style.paddingTop = SPACING.SM;
-    historicalCell.style.textAlign = 'right';
-    historicalCell.style.fontSize = '0.875rem';
-    table.appendChild(historicalCell);
-  }
-
-  container.appendChild(title);
-  container.appendChild(table);
-
-  return container;
-}
-
-/**
- * Forecasts Section Component
+ * Build the financial planning forecast section.
  * @param {Object} planningData - Financial planning data including transactions
- * @param {Object} forecastEngine - Forecast engine service instance
- * @param {Object} balancePredictor - Balance predictor service instance
+ * @param {Object} forecastEngine - Forecast engine instance
+ * @param {Object} balancePredictor - Balance predictor instance
  * @param {Object} chartRenderer - Chart renderer service instance
- * @param {Map} activeCharts - Map to track active chart instances
- * @returns {Promise<HTMLElement>} Promise resolving to DOM element containing forecasts section content
+ * @param {Map} activeCharts - Active chart instances
+ * @returns {Promise<HTMLElement>} Forecast section
  */
 export const ForecastsSection = async (
   planningData,
@@ -266,13 +37,12 @@ export const ForecastsSection = async (
 ) => {
   const section = createSectionContainer(
     'forecasts',
-    'Financial Forecasts',
+    'Statistical Forecasts',
     '🔮'
   );
-
   section.appendChild(
     createUsageNote(
-      'Forecasts use all available transaction history to predict income and expenses. Recent months are weighted more heavily.'
+      'Statistical monthly estimates extrapolate transaction history, with recent months weighted more heavily. They are not event-based cash projections: scheduled bills and paydays are not modeled, and estimates do not guarantee cash availability.'
     )
   );
 
@@ -282,182 +52,112 @@ export const ForecastsSection = async (
     transactionCount: txCount,
     minTransactions: 90,
   });
-  if (unlockCard) {
-    section.appendChild(unlockCard);
-  }
+  if (unlockCard) section.appendChild(unlockCard);
 
-  if (
-    !planningData ||
-    !planningData.transactions ||
-    planningData.transactions.length === 0
-  ) {
-    const placeholder = createPlaceholder(
-      'No Transaction Data Available',
-      'Your transaction data may be syncing from the cloud. Please refresh the page or check your internet connection.',
-      '🔄'
+  if (!planningData?.transactions?.length) {
+    section.appendChild(
+      createPlaceholder(
+        'No Transaction Data Available',
+        'Your transaction data may be syncing from the cloud. Please refresh the page or check your internet connection.',
+        '🔄'
+      )
     );
-    section.appendChild(placeholder);
 
-    // Add a refresh button
     const refreshBtn = document.createElement('button');
     refreshBtn.textContent = 'Refresh Data';
     refreshBtn.className = 'btn btn-primary';
     refreshBtn.style.marginTop = SPACING.MD;
-    refreshBtn.onclick = () => {
-      window.location.reload();
-    };
+    refreshBtn.onclick = () => window.location.reload();
     section.appendChild(refreshBtn);
     return section;
   }
 
   if (planningData.transactions.length < 3) {
-    const placeholder = createPlaceholder(
-      'Insufficient Data for Forecasting',
-      'Add at least 3 months of transaction history to generate accurate financial forecasts.',
-      '📊'
+    section.appendChild(
+      createPlaceholder(
+        'Insufficient Data for Forecasting',
+        'Add at least 3 months of transaction history to generate accurate financial forecasts.',
+        '📊'
+      )
     );
-    section.appendChild(placeholder);
     return section;
   }
 
   try {
-    // Clear forecast cache to ensure updated filtering is applied
-    if (forecastEngine && typeof forecastEngine.clearCache === 'function') {
+    if (typeof forecastEngine?.clearCache === 'function') {
       forecastEngine.clearCache();
     }
 
-    // Generate forecasts
-    // Connect forecasts to a savings goal when one exists so users can see
-    // whether their projected balance will reach the goal by its target date.
-    const goals = Array.isArray(planningData.goals) ? planningData.goals : [];
-    const isActiveSavingsGoal = goal => {
-      if (
-        !goal ||
-        !Number.isFinite(goal.targetAmount) ||
-        goal.targetAmount <= 0
-      ) {
-        return false;
-      }
-      const currentSavings = Number(goal.currentSavings || 0);
-      return currentSavings < goal.targetAmount;
-    };
-    const activeGoal = goals.find(isActiveSavingsGoal) || null;
-    const forecastOptions = activeGoal
-      ? {
-          goalId: activeGoal.id,
-          goalTarget: {
-            id: activeGoal.id,
-            name: activeGoal.name,
-            targetAmount: activeGoal.targetAmount,
-            targetDate: activeGoal.targetDate,
-          },
-        }
-      : {};
-
     const incomeForecasts = forecastEngine.generateIncomeForecasts(
       planningData.transactions,
-      6,
-      forecastOptions
+      6
     );
     const expenseForecasts = forecastEngine.generateExpenseForecasts(
       planningData.transactions,
       6
     );
 
-    // Create forecast summary cards
-    const summaryGrid = document.createElement('div');
-    summaryGrid.className = 'forecast-summary-grid';
-    summaryGrid.style.display = 'grid';
-    summaryGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
-    summaryGrid.style.gap = SPACING.MD;
-
-    // Calculate totals for next 6 months
     const totalIncomeForecasted = incomeForecasts.reduce(
-      (sum, f) => sum + f.predictedAmount,
+      (sum, forecast) => sum + forecast.predictedAmount,
       0
     );
     const totalExpensesForecasted = expenseForecasts.reduce(
-      (sum, f) => sum + f.predictedAmount,
+      (sum, forecast) => sum + forecast.predictedAmount,
       0
     );
     const netForecast = totalIncomeForecasted - totalExpensesForecasted;
+    const forecastCount = incomeForecasts.length + expenseForecasts.length;
     const avgConfidence =
-      (incomeForecasts.reduce((sum, f) => sum + f.confidence, 0) +
-        expenseForecasts.reduce((sum, f) => sum + f.confidence, 0)) /
-      (incomeForecasts.length + expenseForecasts.length);
+      forecastCount > 0
+        ? (incomeForecasts.reduce(
+            (sum, forecast) => sum + forecast.confidence,
+            0
+          ) +
+            expenseForecasts.reduce(
+              (sum, forecast) => sum + forecast.confidence,
+              0
+            )) /
+          forecastCount
+        : 0;
 
-    // Calculate uncertainty ranges for income and expenses
-    const incomeRange =
-      incomeForecasts.length > 0
-        ? {
-            lower: incomeForecasts.reduce(
-              (sum, f) => sum + (f.lowerBound || 0),
-              0
-            ),
-            upper: incomeForecasts.reduce(
-              (sum, f) => sum + (f.upperBound || 0),
-              0
-            ),
-          }
-        : { lower: 0, upper: 0 };
-
-    const expenseRange =
-      expenseForecasts.length > 0
-        ? {
-            lower: expenseForecasts.reduce(
-              (sum, f) => sum + (f.lowerBound || 0),
-              0
-            ),
-            upper: expenseForecasts.reduce(
-              (sum, f) => sum + (f.upperBound || 0),
-              0
-            ),
-          }
-        : { lower: 0, upper: 0 };
-
+    const sumRange = (forecasts, bound) =>
+      forecasts.reduce((sum, forecast) => sum + (forecast[bound] || 0), 0);
+    const incomeRange = {
+      lower: sumRange(incomeForecasts, 'lowerBound'),
+      upper: sumRange(incomeForecasts, 'upperBound'),
+    };
+    const expenseRange = {
+      lower: sumRange(expenseForecasts, 'lowerBound'),
+      upper: sumRange(expenseForecasts, 'upperBound'),
+    };
     const netRange = {
       lower: incomeRange.lower - expenseRange.upper,
       upper: incomeRange.upper - expenseRange.lower,
     };
 
-    // Determine trend arrows
-    const incomeTrend =
-      incomeForecasts.length > 0 && incomeForecasts[0].trend
-        ? incomeForecasts[0].trend > 0
-          ? '↑'
-          : incomeForecasts[0].trend < 0
-            ? '↓'
-            : '→'
-        : '→';
-
-    const expenseTrend =
-      expenseForecasts.length > 0 && expenseForecasts[0].trend
-        ? expenseForecasts[0].trend > 0
-          ? '↑'
-          : expenseForecasts[0].trend < 0
-            ? '↓'
-            : '→'
-        : '→';
-
+    const trendArrow = forecasts => {
+      const trend = forecasts[0]?.trend || 0;
+      return trend > 0 ? '↑' : trend < 0 ? '↓' : '→';
+    };
     const summaryCards = [
       {
-        label: 'Forecasted Income (6mo)',
+        label: 'Statistical Income Estimate (6mo)',
         value: `€${totalIncomeForecasted.toFixed(2)}`,
         color: COLORS.SUCCESS,
         icon: '📈',
-        subtitle: `Avg: €${(totalIncomeForecasted / 6).toFixed(2)}/month ${incomeTrend}`,
+        subtitle: `Avg: €${(totalIncomeForecasted / 6).toFixed(2)}/month ${trendArrow(incomeForecasts)}`,
         range: `Range: €${incomeRange.lower.toFixed(2)} - €${incomeRange.upper.toFixed(2)}`,
       },
       {
-        label: 'Forecasted Expenses (6mo)',
+        label: 'Statistical Expense Estimate (6mo)',
         value: `€${totalExpensesForecasted.toFixed(2)}`,
         color: COLORS.ERROR,
         icon: '📉',
-        subtitle: `Avg: €${(totalExpensesForecasted / 6).toFixed(2)}/month ${expenseTrend}`,
+        subtitle: `Avg: €${(totalExpensesForecasted / 6).toFixed(2)}/month ${trendArrow(expenseForecasts)}`,
         range: `Range: €${expenseRange.lower.toFixed(2)} - €${expenseRange.upper.toFixed(2)}`,
       },
       {
-        label: 'Net Forecast (6mo)',
+        label: 'Net Statistical Estimate (6mo)',
         value: `€${netForecast.toFixed(2)}`,
         color: netForecast >= 0 ? COLORS.SUCCESS : COLORS.ERROR,
         icon: netForecast >= 0 ? '💰' : '⚠️',
@@ -465,7 +165,7 @@ export const ForecastsSection = async (
         range: `Range: €${netRange.lower.toFixed(2)} - €${netRange.upper.toFixed(2)}`,
       },
       {
-        label: 'Forecast Confidence',
+        label: 'Statistical Model Confidence',
         value: `${(avgConfidence * 100).toFixed(0)}%`,
         color:
           avgConfidence > 0.7
@@ -474,84 +174,35 @@ export const ForecastsSection = async (
               ? COLORS.WARNING
               : COLORS.ERROR,
         icon: '🎯',
-        subtitle:
-          avgConfidence > 0.7
-            ? 'High confidence'
-            : avgConfidence > 0.4
-              ? 'Moderate confidence'
-              : 'Low confidence',
+        subtitle: 'Model confidence, not certainty',
       },
     ];
 
-    summaryCards.forEach(card => {
-      const cardElement = ForecastCard(card);
-      summaryGrid.appendChild(cardElement);
-    });
-
+    const summaryGrid = document.createElement('div');
+    summaryGrid.className = 'forecast-summary-grid';
+    summaryGrid.style.display = 'grid';
+    summaryGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+    summaryGrid.style.gap = SPACING.MD;
+    summaryCards.forEach(card => summaryGrid.appendChild(ForecastCard(card)));
     section.appendChild(summaryGrid);
 
-    // Goal connection card — shows whether projected balance will reach the
-    // active savings goal by its target date.
-    if (activeGoal && incomeForecasts.length > 0) {
-      const goalComparison = incomeForecasts[0].goalComparison;
-      if (goalComparison) {
-        const goalCard = document.createElement('div');
-        goalCard.className = 'forecast-goal-connection';
-        goalCard.style.background = COLORS.SURFACE;
-        goalCard.style.border = `1px solid ${COLORS.BORDER}`;
-        goalCard.style.borderRadius = 'var(--radius-lg)';
-        goalCard.style.padding = SPACING.LG;
-        goalCard.style.marginTop = SPACING.MD;
-
-        const goalTitle = document.createElement('h3');
-        goalTitle.textContent = `🎯 Goal Connection: ${goalComparison.goalName}`;
-        goalTitle.style.margin = '0';
-        goalTitle.style.marginBottom = SPACING.SM;
-        goalTitle.style.fontSize = '1.125rem';
-        goalTitle.style.fontWeight = '600';
-        goalTitle.style.color = COLORS.TEXT_MAIN;
-        goalCard.appendChild(goalTitle);
-
-        const status = document.createElement('div');
-        status.textContent = goalComparison.statusMessage;
-        status.style.fontSize = '0.9rem';
-        status.style.color = goalComparison.isOnTrack
-          ? COLORS.SUCCESS
-          : COLORS.ERROR;
-        status.style.marginBottom = SPACING.SM;
-        goalCard.appendChild(status);
-
-        const meta = document.createElement('div');
-        meta.style.fontSize = '0.85rem';
-        meta.style.color = COLORS.TEXT_MUTED;
-        meta.textContent = `Target: €${goalComparison.targetAmount.toFixed(0)} by ${new Date(goalComparison.targetDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} · Projected: €${goalComparison.projectedBalance.toFixed(0)}`;
-        goalCard.appendChild(meta);
-
-        section.appendChild(goalCard);
-      }
-    }
-
-    // Generate balance projections
-    const currentBalance = planningData.transactions.reduce((balance, t) => {
-      if (t.isGhost) return balance;
-      return balance + (t.type === 'income' ? t.amount : -t.amount);
+    const currentBalance = planningData.transactions.reduce((balance, tx) => {
+      if (tx.isGhost) return balance;
+      return balance + (tx.type === 'income' ? tx.amount : -tx.amount);
     }, 0);
 
-    // Create dedicated chart slots in fixed visual order before async charts settle.
-    // This guarantees deterministic DOM ordering regardless of which chart promise resolves first.
     const comparisonSlot = document.createElement('div');
     comparisonSlot.className = 'forecast-chart-slot';
     section.appendChild(comparisonSlot);
-
     const balanceSlot = document.createElement('div');
     balanceSlot.className = 'forecast-chart-slot';
     section.appendChild(balanceSlot);
 
-    // Create forecast comparison chart
     createForecastComparisonChart(
       chartRenderer,
       incomeForecasts,
-      expenseForecasts
+      expenseForecasts,
+      { title: 'Statistical Income vs Expense Trend' }
     )
       .then(({ section: chartSection, chart }) => {
         comparisonSlot.appendChild(chartSection);
@@ -567,9 +218,9 @@ export const ForecastsSection = async (
       expenseForecasts,
       6
     );
-
-    // Create projected balance chart
-    createProjectedBalanceChart(chartRenderer, balanceProjections)
+    createProjectedBalanceChart(chartRenderer, balanceProjections, {
+      title: 'Statistical Projected Balance',
+    })
       .then(({ section: chartSection, chart }) => {
         balanceSlot.appendChild(chartSection);
         activeCharts.set('projected-balance', chart);
@@ -578,22 +229,19 @@ export const ForecastsSection = async (
         console.error('Error creating projected balance chart:', error);
       });
 
-    // Create detailed forecast table with historical data (renders after chart slots)
     const historicalData = generateHistoricalData(planningData.transactions, 3);
-    const forecastTable = createForecastTable(
-      incomeForecasts,
-      expenseForecasts,
-      historicalData
+    section.appendChild(
+      createForecastTable(incomeForecasts, expenseForecasts, historicalData)
     );
-    section.appendChild(forecastTable);
   } catch (error) {
     console.error('Error rendering forecasts:', error);
-    const errorPlaceholder = createPlaceholder(
-      'Error Generating Forecasts',
-      'There was an error processing your transaction data. Please try refreshing the page.',
-      '⚠️'
+    section.appendChild(
+      createPlaceholder(
+        'Error Generating Forecasts',
+        'There was an error processing your transaction data. Please try refreshing the page.',
+        '⚠️'
+      )
     );
-    section.appendChild(errorPlaceholder);
   }
 
   return section;
