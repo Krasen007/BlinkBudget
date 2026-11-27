@@ -84,25 +84,25 @@ function estimateEmergencyFundCoverage(monthlyExpenses, netBalanceProxy) {
     if (monthsCovered >= RISK_THRESHOLDS.emergencyFund.optimal) {
       status = 'excellent';
       riskLevel = 'low';
-      message = `Tracked net-balance proxy: ${monthsCovered.toFixed(1)} months of expenses. This is not a liquid-savings balance.`;
+      message = `Tracked net-balance proxy: ${monthsCovered.toFixed(1)} months of expenses.`;
       recommendation =
-        'The tracked net-balance proxy exceeds the 12-month benchmark; liquid emergency savings are not verified.';
+        'The tracked net-balance proxy exceeds the 12-month benchmark.';
     } else if (monthsCovered >= RISK_THRESHOLDS.emergencyFund.recommended) {
       status = 'good';
       riskLevel = 'low';
-      message = `Tracked net-balance proxy: ${monthsCovered.toFixed(1)} months of expenses. This is not a liquid-savings balance.`;
+      message = `Tracked net-balance proxy: ${monthsCovered.toFixed(1)} months of expenses.`;
       recommendation =
-        'The tracked net-balance proxy reaches the 6-month benchmark; liquid emergency savings are not verified.';
+        'The tracked net-balance proxy reaches the 6-month benchmark.';
     } else if (monthsCovered >= RISK_THRESHOLDS.emergencyFund.minimum) {
       status = 'adequate';
       riskLevel = 'moderate';
-      message = `Tracked net-balance proxy: ${monthsCovered.toFixed(1)} months of expenses. This is not a liquid-savings balance.`;
-      recommendation = `The tracked net-balance proxy is below the 6-month benchmark of ${formatCurrency(recommendedAmount)}; liquid emergency savings are not verified.`;
+      message = `Tracked net-balance proxy: ${monthsCovered.toFixed(1)} months of expenses.`;
+      recommendation = `The tracked net-balance proxy is below the 6-month benchmark of ${formatCurrency(recommendedAmount)}`;
     } else if (monthsCovered > 0) {
       status = 'insufficient';
       riskLevel = 'critical';
-      message = `Tracked net-balance proxy: ${monthsCovered.toFixed(1)} months of expenses. This is not a liquid-savings balance.`;
-      recommendation = `The tracked net-balance proxy is below the 3-month benchmark of ${formatCurrency(monthlyExpenses * 3)}; this does not establish your actual liquid reserves.`;
+      message = `Tracked net-balance proxy: ${monthsCovered.toFixed(1)} months of expenses.`;
+      recommendation = `The tracked net-balance proxy is below the 3-month benchmark of ${formatCurrency(monthlyExpenses * 3)}`;
     } else {
       status = 'none';
       riskLevel = 'critical';

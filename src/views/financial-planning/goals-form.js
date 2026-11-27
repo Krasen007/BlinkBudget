@@ -1,19 +1,11 @@
 import { COLORS, SPACING } from '../../utils/constants.js';
-import { createGoalProgressChart } from '../../utils/financial-planning-charts.js';
-import { refreshChart } from '../../utils/chart-refresh-helper.js';
 import { StorageService } from '../../core/storage.js';
 import { showErrorToast } from '../../utils/toast-notifications.js';
-import { createGoalsSummaryCard } from './goals-summary.js';
 
 /**
  * Create goal form controls.
  */
-export function createGoalFormControls(
-  chartRenderer,
-  activeCharts,
-  section,
-  updateGoalInsights
-) {
+export function createGoalFormControls(onGoalSaved) {
   const goalControls = document.createElement('div');
   goalControls.style.display = 'flex';
   goalControls.style.gap = SPACING.SM;
@@ -160,50 +152,20 @@ export function createGoalFormControls(
       return;
     }
 
+    goalForm.style.display = 'none';
+    goalName.value = '';
+    goalTarget.value = '';
+    goalDate.value = '';
+    goalCurrent.value = '';
+    nameError.style.display = 'none';
+    currentError.style.display = 'none';
+    dateError.style.display = 'none';
+
     try {
-      const updatedGoals = StorageService.getGoals();
-      const existingChart = section.querySelector(
-        '[data-chart-type="goal-progress"]'
-      );
-      if (existingChart) {
-        await refreshChart({
-          createChartFn: createGoalProgressChart,
-          chartRenderer,
-          data: updatedGoals,
-          section,
-          chartType: 'goal-progress',
-          activeCharts,
-        });
-      } else if (updatedGoals.length > 0) {
-        const { section: newChartSection, chart } =
-          await createGoalProgressChart(chartRenderer, updatedGoals);
-        newChartSection.classList.add('goals-progress-chart');
-        const currentSummary = section.querySelector('.goals-summary-card');
-        if (currentSummary) {
-          section.insertBefore(newChartSection, currentSummary);
-        } else {
-          section.appendChild(newChartSection);
-        }
-        activeCharts.set('goal-progress', chart);
-      }
-
-      const currentSummaryCard = section.querySelector('.goals-summary-card');
-      if (currentSummaryCard) {
-        currentSummaryCard.replaceWith(createGoalsSummaryCard(updatedGoals));
-      }
-      updateGoalInsights(updatedGoals);
-
-      goalForm.style.display = 'none';
-      goalName.value = '';
-      goalTarget.value = '';
-      goalDate.value = '';
-      goalCurrent.value = '';
-      nameError.style.display = 'none';
-      currentError.style.display = 'none';
-      dateError.style.display = 'none';
+      await onGoalSaved();
     } catch (err) {
-      console.error('Failed to refresh goal chart', err);
-      showErrorToast('Goal saved, but the chart could not refresh.');
+      console.error('Goal was saved but the goal view could not refresh', err);
+      showErrorToast('Goal saved, but the goal list could not refresh.');
     }
   });
 

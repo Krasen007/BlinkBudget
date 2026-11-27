@@ -108,9 +108,11 @@ describe('GoalsSection', () => {
     mockStorageService = StorageService;
 
     vi.clearAllMocks();
+    mockStorageService.createGoal.mockReset();
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     // Cleanup globals to prevent test pollution
     if (dom && dom.window) {
       dom.window.close();
@@ -212,6 +214,80 @@ describe('GoalsSection', () => {
       expect(section.querySelector('.placeholder')).toBeFalsy();
     });
 
+    expect(mockStorageService.createGoal).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows controls for a saved goal even if its chart cannot refresh', async () => {
+    const savedGoal = {
+      id: 'new-goal',
+      name: 'Emergency Fund',
+      targetAmount: 1000,
+      currentSavings: 100,
+      targetDate: '2027-06-01',
+    };
+    mockStorageService.getGoals.mockReturnValue([]);
+    mockStorageService.createGoal.mockImplementation(() => {
+      mockStorageService.getGoals.mockReturnValue([savedGoal]);
+    });
+    mockChartRenderer.createBarChart.mockRejectedValue(
+      new Error('Chart unavailable')
+    );
+
+    const section = await GoalsSection(mockChartRenderer, mockActiveCharts);
+    section.querySelector('.add-goal-btn').click();
+    section.querySelector('#goal-name').value = savedGoal.name;
+    section.querySelector('#goal-target').value = String(
+      savedGoal.targetAmount
+    );
+    section.querySelector('#goal-date').value = '2027-06-01';
+    section.querySelector('#goal-current').value = String(
+      savedGoal.currentSavings
+    );
+    section.querySelector('.btn-save').click();
+
+    await vi.waitFor(() => {
+      const goal = section.querySelector('.goal-item');
+      expect(goal).toBeTruthy();
+      expect(goal.querySelector('.edit-goal')).toBeTruthy();
+      expect(goal.querySelector('.delete-goal')).toBeTruthy();
+    });
+
+    expect(section.querySelector('.placeholder')).toBeFalsy();
+    expect(section.querySelector('.goal-form').style.display).toBe('none');
+    expect(section.querySelector('#goal-name').value).toBe('');
+    expect(section.querySelector('#goal-target').value).toBe('');
+    expect(section.querySelector('#goal-date').value).toBe('');
+    expect(section.querySelector('#goal-current').value).toBe('');
+    expect(mockStorageService.createGoal).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the populated form open when goal persistence fails', async () => {
+    const persistError = new Error('Storage unavailable');
+    mockStorageService.createGoal.mockImplementation(() => {
+      throw persistError;
+    });
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const section = await GoalsSection(mockChartRenderer, mockActiveCharts);
+    section.querySelector('.add-goal-btn').click();
+    section.querySelector('#goal-name').value = 'Emergency Fund';
+    section.querySelector('#goal-target').value = '1000';
+    section.querySelector('#goal-date').value = '2027-06-01';
+    section.querySelector('#goal-current').value = '100';
+    section.querySelector('.btn-save').click();
+
+    await vi.waitFor(() => {
+      expect(console.error).toHaveBeenCalledWith(
+        'Failed to save goal',
+        persistError
+      );
+    });
+
+    expect(section.querySelector('.goal-form').style.display).toBe('flex');
+    expect(section.querySelector('#goal-name').value).toBe('Emergency Fund');
+    expect(section.querySelector('#goal-target').value).toBe('1000');
+    expect(section.querySelector('#goal-date').value).toBe('2027-06-01');
+    expect(section.querySelector('#goal-current').value).toBe('100');
     expect(mockStorageService.createGoal).toHaveBeenCalledTimes(1);
   });
 

@@ -129,15 +129,6 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
   const summaryCard = createGoalsSummaryCard(goalsToRender);
   section.appendChild(summaryCard);
 
-  section.appendChild(
-    createGoalFormControls(
-      chartRenderer,
-      activeCharts,
-      section,
-      updateGoalInsights
-    )
-  );
-
   const { goalsList, refreshGoalsList } = createGoalsList(
     chartRenderer,
     activeCharts,
@@ -152,6 +143,63 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
   section.appendChild(insights);
 
   let emptyPlaceholder = null;
+  const refreshAfterGoalSaved = async () => {
+    let updatedGoals;
+    try {
+      updatedGoals = StorageService.getGoals() || [];
+    } catch (error) {
+      console.error('Goal was saved but its list could not be loaded', error);
+      showErrorToast('Goal saved, but the goal list could not refresh.');
+      return;
+    }
+
+    await refreshGoalsList();
+    const currentSummary = section.querySelector('.goals-summary-card');
+    if (currentSummary) {
+      currentSummary.replaceWith(createGoalsSummaryCard(updatedGoals));
+    }
+    updateGoalInsights(updatedGoals);
+    if (emptyPlaceholder && section.contains(emptyPlaceholder)) {
+      emptyPlaceholder.remove();
+      emptyPlaceholder = null;
+    }
+
+    try {
+      const existingChart = section.querySelector(
+        '[data-chart-type="goal-progress"]'
+      );
+      if (existingChart) {
+        await refreshChart({
+          createChartFn: createGoalProgressChart,
+          chartRenderer,
+          data: updatedGoals,
+          section,
+          chartType: 'goal-progress',
+          activeCharts,
+        });
+      } else if (updatedGoals.length > 0) {
+        const { section: newChartSection, chart } =
+          await createGoalProgressChart(chartRenderer, updatedGoals);
+        newChartSection.classList.add('goals-progress-chart');
+        const currentSummaryCard = section.querySelector('.goals-summary-card');
+        if (currentSummaryCard) {
+          section.insertBefore(newChartSection, currentSummaryCard);
+        } else {
+          section.appendChild(newChartSection);
+        }
+        activeCharts.set('goal-progress', chart);
+      }
+    } catch (error) {
+      console.error('Failed to refresh goal chart after saving goal', error);
+      showErrorToast('Goal saved, but the chart could not refresh.');
+    }
+  };
+
+  section.insertBefore(
+    createGoalFormControls(refreshAfterGoalSaved),
+    goalsList
+  );
+
   try {
     const transactions = StorageService.getAll() || [];
     const recommendations =
@@ -219,51 +267,7 @@ export const GoalsSection = async (chartRenderer, activeCharts) => {
               { category: recommendation.category || 'General' }
             );
 
-            const updatedGoals = StorageService.getGoals();
-            const existingChart = section.querySelector(
-              '[data-chart-type="goal-progress"]'
-            );
-            if (existingChart) {
-              await refreshChart({
-                createChartFn: createGoalProgressChart,
-                chartRenderer,
-                data: updatedGoals,
-                section,
-                chartType: 'goal-progress',
-                activeCharts,
-              });
-            } else if (updatedGoals.length > 0) {
-              const { section: newChartSection, chart } =
-                await createGoalProgressChart(chartRenderer, updatedGoals);
-              newChartSection.classList.add('goals-progress-chart');
-              const currentSummary =
-                section.querySelector('.goals-summary-card') || summaryCard;
-              if (currentSummary?.parentNode) {
-                currentSummary.parentNode.insertBefore(
-                  newChartSection,
-                  currentSummary
-                );
-              } else {
-                section.appendChild(newChartSection);
-              }
-              activeCharts.set('goal-progress', chart);
-            }
-
-            await refreshGoalsList();
-            const currentSummary =
-              section.querySelector('.goals-summary-card') || summaryCard;
-            const newSummary = createGoalsSummaryCard(updatedGoals);
-            if (currentSummary?.parentNode) {
-              currentSummary.parentNode.replaceChild(
-                newSummary,
-                currentSummary
-              );
-            }
-            updateGoalInsights(updatedGoals);
-            if (emptyPlaceholder && section.contains(emptyPlaceholder)) {
-              emptyPlaceholder.remove();
-              emptyPlaceholder = null;
-            }
+            await refreshAfterGoalSaved();
             recommendationCard.remove();
             if (
               ![...recommendationsSection.children].some(

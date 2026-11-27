@@ -78,8 +78,8 @@ export const StatsCard = ({
     helpTitle.style.marginBottom = SPACING.XS;
 
     const helpTitleText = document.createElement('span');
-    helpTitleText.textContent = '📊 How calculated?';
-    helpTitleText.style.fontSize = '0.625rem';
+    helpTitleText.textContent = 'How is calculated?';
+    helpTitleText.style.fontSize = '0.825rem';
     helpTitleText.style.fontWeight = '600';
     helpTitleText.style.color = COLORS.TEXT_MUTED;
 
@@ -94,7 +94,7 @@ export const StatsCard = ({
     helpTitle.appendChild(toggleIcon);
 
     const helpDetails = document.createElement('div');
-    helpDetails.style.fontSize = '0.625rem';
+    helpDetails.style.fontSize = '0.825rem';
     helpDetails.style.color = COLORS.TEXT_MUTED;
     helpDetails.style.lineHeight = '1.3';
     helpDetails.textContent = calculationHelp;

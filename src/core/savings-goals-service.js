@@ -117,9 +117,10 @@ export class SavingsGoalsService {
 
     // Emergency fund recommendation
     const emergencyFundTarget = monthlyExpenses * 6; // 6 months expenses
-    const hasEmergencyFundGoal = this.getSavingsGoals().some(
-      goal => goal.name?.trim().toLowerCase() === 'emergency fund'
-    );
+    const hasEmergencyFundGoal = this.getSavingsGoals().some(goal => {
+      const name = goal.name?.trim().toLowerCase();
+      return name === 'emergency fund' || name === 'build emergency fund';
+    });
 
     if (emergencyFundTarget > 0 && !hasEmergencyFundGoal) {
       recommendations.push({

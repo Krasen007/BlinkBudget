@@ -442,14 +442,15 @@ export const DashboardView = (params = {}) => {
 
   const handleBulkDelete = () => {
     if (selectedTransactionIds.size === 0) return;
+    const selectedIds = [...selectedTransactionIds];
     openConfirmDialog({
       title: 'Delete Transactions',
-      message: `Delete ${selectedTransactionIds.size} selected transaction${selectedTransactionIds.size > 1 ? 's' : ''}?`,
+      message: `Delete ${selectedIds.length} selected transaction${selectedIds.length > 1 ? 's' : ''}?`,
       confirmText: 'Delete',
       variant: 'danger',
       onConfirm: () => {
         const removedEntries = [];
-        selectedTransactionIds.forEach(id => {
+        selectedIds.forEach(id => {
           const removed = TransactionService.remove(id);
           if (removed) removedEntries.push(...removed);
         });

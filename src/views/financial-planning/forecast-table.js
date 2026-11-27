@@ -180,7 +180,7 @@ export function createForecastTable(
     table.appendChild(netCell);
 
     const modelCell = document.createElement('div');
-    modelCell.textContent = 'Statistical forecast';
+    modelCell.textContent = 'Forecast';
     modelCell.style.color = COLORS.TEXT_MUTED;
     modelCell.style.fontWeight = '500';
     modelCell.style.paddingTop = SPACING.SM;

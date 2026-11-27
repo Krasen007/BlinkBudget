@@ -99,4 +99,23 @@ describe('SavingsGoalsService storage wrappers', () => {
     expect(emergencyFund.target).toBe(600);
     expect(emergencyFund.description).toContain('manually tracked goal');
   });
+
+  it('does not recommend a duplicate for a generated emergency-fund goal', async () => {
+    StorageService.getGoals.mockReturnValueOnce([
+      { id: 'g1', name: 'Build Emergency Fund' },
+    ]);
+    const recommendations = await SavingsGoalsService.getGoalRecommendations([
+      {
+        type: 'expense',
+        amount: 100,
+        timestamp: new Date().toISOString(),
+      },
+    ]);
+
+    expect(
+      recommendations.some(
+        recommendation => recommendation.type === 'emergency_fund'
+      )
+    ).toBe(false);
+  });
 });
